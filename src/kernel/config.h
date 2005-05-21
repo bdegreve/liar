@@ -1,7 +1,7 @@
 /**	@file
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
- *  LIAR isn't a raytracer
+ *  LiAR isn't a raytracer
  *  Copyright (C) 2004-2005  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
@@ -26,7 +26,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_CONFIG_H
 
 #define LIAR_NAME_BASE liar
-#define LIAR_NAME_FULL "LIAR isn't a raytracer"
+#define LIAR_NAME_FULL "LiAR isn't a raytracer"
 #define LIAR_VERSION_MAJOR 0
 #define LIAR_VERSION_MINOR 0
 #define LIAR_VERSION_REVISION 0

@@ -21,35 +21,33 @@
  *  http://liar.sourceforge.net
  */
 
-#include "samplers_common.h"
-#include "stratifier.h"
-#include "../kernel/sampler.h"
+#include "tracers_common.h"
+
+// keep in alphabetical order please! [Bramz]
+//
+#include "direct_lighting.h"
+
 #include <lass/io/proxy_man.h>
 
-void setDefaultSampler(const liar::kernel::TSamplerPtr& iDefaultSampler)
-{
-    liar::kernel::Sampler::defaultSampler() = iDefaultSampler;
-}
-
-PY_DECLARE_MODULE(samplers)
-PY_MODULE_FUNCTION(samplers, setDefaultSampler)
+PY_DECLARE_MODULE(tracers)
 
 extern "C"
 {
-LIAR_SAMPLERS_DLL void initsamplers(void)
+LIAR_TRACERS_DLL void inittracers(void)
 {
 #ifndef _DEBUG
-	//lass::io::proxyMan()->clog()->remove(&std::clog);
+	lass::io::proxyMan()->clog()->remove(&std::clog);
 #endif
 
-    using namespace liar::samplers;
+    using namespace liar::tracers;
 
-	PY_INJECT_MODULE_EX_AT_RUNTIME(samplers, "liar.samplers", "LiAR sample generators")
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(Stratifier, samplers, "(jittered) stratified sampler")
-        
-    setDefaultSampler(liar::kernel::TSamplerPtr(new Stratifier));
+	PY_INJECT_MODULE_EX_AT_RUNTIME(tracers, "liar.tracers", "LiAR ray tracers")
 
-	PyRun_SimpleString("print 'liar.samplers imported'\n");
+	// keep in alphabetical orderplease! [Bramz]
+	//
+	PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(DirectLighting, tracers, "simple ray tracer")
+
+	PyRun_SimpleString("print 'liar.tracers imported'\n");
 }
 
 }

@@ -45,7 +45,7 @@ LIAR_SCENERY_DLL void initscenery(void)
 
     using namespace liar::scenery;
 
-	PY_INJECT_MODULE_EX_AT_RUNTIME(scenery, "liar.scenery", "LIAR scene objects")
+	PY_INJECT_MODULE_EX_AT_RUNTIME(scenery, "liar.scenery", "LiAR scene objects")
 
 	// keep in alphabetical order please! [Bramz]
 	//

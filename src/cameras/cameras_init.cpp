@@ -1,7 +1,7 @@
 /**	@file
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
- *  LIAR isn't a raytracer
+ *  LiAR isn't a raytracer
  *  Copyright (C) 2004-2005  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
@@ -37,7 +37,7 @@ LIAR_CAMERAS_DLL void initcameras(void)
 
     using namespace liar::cameras;
 
-	PY_INJECT_MODULE_EX_AT_RUNTIME(cameras, "liar.cameras", "LIAR cameras")
+	PY_INJECT_MODULE_EX_AT_RUNTIME(cameras, "liar.cameras", "LiAR cameras")
     PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(PerspectiveCamera, cameras, "plain old perspective photo camera")
 
 	PyRun_SimpleString("print 'liar.cameras imported'\n");

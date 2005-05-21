@@ -1,7 +1,7 @@
 /**	@file
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
- *  LIAR isn't a raytracer
+ *  LiAR isn't a raytracer
  *  Copyright (C) 2004-2005  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
@@ -59,7 +59,7 @@ void LIAR_KERNEL_DLL initkernel(void)
 
     using namespace liar::kernel;
 
-	PY_INJECT_MODULE_EX_AT_RUNTIME(kernel, "liar.kernel", "LIAR isn't a raytracer")
+	PY_INJECT_MODULE_EX_AT_RUNTIME(kernel, "liar.kernel", "LiAR isn't a raytracer")
 
 	// keep in alphabetical order please! [Bramz]
 	//

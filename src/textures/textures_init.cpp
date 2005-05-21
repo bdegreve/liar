@@ -1,7 +1,7 @@
 /**	@file
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
- *  LIAR isn't a raytracer
+ *  LiAR isn't a raytracer
  *  Copyright (C) 2004-2005  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
@@ -43,7 +43,7 @@ LIAR_TEXTURES_DLL void inittextures(void)
 
     using namespace liar::textures;
 
-	PY_INJECT_MODULE_EX_AT_RUNTIME(textures, "liar.textures", "textures for LIAR")
+	PY_INJECT_MODULE_EX_AT_RUNTIME(textures, "liar.textures", "textures for LiAR")
 
 	// keep in alphabetical order please! [Bramz]
 	//

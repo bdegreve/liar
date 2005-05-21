@@ -1,7 +1,7 @@
 /**	@file
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
- *  LIAR isn't a raytracer
+ *  LiAR isn't a raytracer
  *  Copyright (C) 2004-2005  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
@@ -36,7 +36,7 @@ LIAR_SHADERS_DLL void initshaders(void)
 {
 	using namespace liar::shaders;
 
-	PY_INJECT_MODULE_EX_AT_RUNTIME(shaders, "liar.shaders", "surface and volume shaders for LIAR")
+	PY_INJECT_MODULE_EX_AT_RUNTIME(shaders, "liar.shaders", "surface and volume shaders for LiAR")
 
 	// keep in alphabetical order please! [Bramz]
 	//

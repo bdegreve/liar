@@ -17,41 +17,44 @@
  *	You should have received a copy of the GNU General Public License
  *	along with this program; if not, write to the Free Software
  *	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *  http://liar.sourceforge.net
  */
 
-#include "samplers_common.h"
-#include "stratifier.h"
-#include "../kernel/sampler.h"
-#include <lass/io/proxy_man.h>
+/** @class liar::tracers::DirectLighting
+ *  @brief a ray tracer that only uses direct lighting.
+ *  @author Bram de Greve [BdG]
+ */
 
-void setDefaultSampler(const liar::kernel::TSamplerPtr& iDefaultSampler)
+#pragma once
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_TRACERS_DIRECT_LIGHTING_H
+#define LIAR_GUARDIAN_OF_INCLUSION_TRACERS_DIRECT_LIGHTING_H
+
+#include "tracers_common.h"
+#include "../kernel/ray_tracer.h"
+
+namespace liar
 {
-    liar::kernel::Sampler::defaultSampler() = iDefaultSampler;
+namespace tracers
+{
+
+class LIAR_TRACERS_DLL DirectLighting: public kernel::RayTracer
+{
+	PY_HEADER(kernel::RayTracer)
+public:
+
+	DirectLighting();
+    
+private:
+
+	void doPreprocess();
+	void doRequestSamples(const kernel::TSamplerPtr& iSampler);
+    TSpectrum doCastRay(const kernel::DifferentialRay& iPrimaryRay, 
+		const kernel::Sample& iSample) const;
+};
+
 }
 
-PY_DECLARE_MODULE(samplers)
-PY_MODULE_FUNCTION(samplers, setDefaultSampler)
+}
 
-extern "C"
-{
-LIAR_SAMPLERS_DLL void initsamplers(void)
-{
-#ifndef _DEBUG
-	//lass::io::proxyMan()->clog()->remove(&std::clog);
 #endif
-
-    using namespace liar::samplers;
-
-	PY_INJECT_MODULE_EX_AT_RUNTIME(samplers, "liar.samplers", "LiAR sample generators")
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(Stratifier, samplers, "(jittered) stratified sampler")
-        
-    setDefaultSampler(liar::kernel::TSamplerPtr(new Stratifier));
-
-	PyRun_SimpleString("print 'liar.samplers imported'\n");
-}
-
-}
 
 // EOF

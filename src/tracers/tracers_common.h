@@ -17,41 +17,38 @@
  *	You should have received a copy of the GNU General Public License
  *	along with this program; if not, write to the Free Software
  *	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *  http://liar.sourceforge.net
  */
 
-#include "samplers_common.h"
-#include "stratifier.h"
-#include "../kernel/sampler.h"
-#include <lass/io/proxy_man.h>
+/** @namespace liar::tracers
+ *  @brief ray tracer implementations
+ *	@author Bram de Greve (bramz@users.sourceforge.net)
+ */
 
-void setDefaultSampler(const liar::kernel::TSamplerPtr& iDefaultSampler)
-{
-    liar::kernel::Sampler::defaultSampler() = iDefaultSampler;
-}
+#pragma once
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_TRACERS_TRACERS_COMMON_H
+#define LIAR_GUARDIAN_OF_INCLUSION_TRACERS_TRACERS_COMMON_H
 
-PY_DECLARE_MODULE(samplers)
-PY_MODULE_FUNCTION(samplers, setDefaultSampler)
+#include "../kernel/kernel_common.h"
 
-extern "C"
-{
-LIAR_SAMPLERS_DLL void initsamplers(void)
-{
-#ifndef _DEBUG
-	//lass::io::proxyMan()->clog()->remove(&std::clog);
+#if defined(LIAR_TRACERS_BUILD_DLL)
+#   define LIAR_TRACERS_DLL LASS_DLL_EXPORT
+#else
+#   define LIAR_TRACERS_DLL LASS_DLL_IMPORT
+#   if defined(_DEBUG)
+#       pragma comment(lib, "tracers_d.lib")
+#   else
+#       pragma comment(lib, "tracers.lib")
+#   endif
 #endif
 
-    using namespace liar::samplers;
-
-	PY_INJECT_MODULE_EX_AT_RUNTIME(samplers, "liar.samplers", "LiAR sample generators")
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(Stratifier, samplers, "(jittered) stratified sampler")
-        
-    setDefaultSampler(liar::kernel::TSamplerPtr(new Stratifier));
-
-	PyRun_SimpleString("print 'liar.samplers imported'\n");
+namespace liar
+{
+namespace tracers
+{
 }
 
 }
+
+#endif
 
 // EOF

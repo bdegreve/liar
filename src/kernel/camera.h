@@ -1,7 +1,7 @@
 /**	@file
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
- *  LIAR isn't a raytracer
+ *  LiAR isn't a raytracer
  *  Copyright (C) 2004-2005  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
@@ -22,8 +22,10 @@
  */
 
 /** @class liar::kernel::Camera
- *  @brief specifies view of scene
+ *  @brief Abstract base class of render viewports
  *  @author Bram de Greve [BdG]
+ *
+ *  Concrete cameras that to be used by LiAR should derive from this class.
  */
 
 #pragma once

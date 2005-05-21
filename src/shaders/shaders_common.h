@@ -1,7 +1,7 @@
 /**	@file
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
- *  LIAR isn't a raytracer
+ *  LiAR isn't a raytracer
  *  Copyright (C) 2004-2005  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @namespace shaders
+/** @namespace liar::shaders
  *  @brief shader components
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  */

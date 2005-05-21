@@ -1,7 +1,7 @@
 /**	@file
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
- *  LIAR isn't a raytracer
+ *  LiAR isn't a raytracer
  *  Copyright (C) 2004-2005  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
@@ -43,7 +43,7 @@ LIAR_OUTPUT_DLL void initoutput(void)
 
     using namespace liar::output;
 
-	PY_INJECT_MODULE_EX_AT_RUNTIME(output, "liar.output", "LIAR output devices")
+	PY_INJECT_MODULE_EX_AT_RUNTIME(output, "liar.output", "LiAR output devices")
     PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(Image, output, "simple image render target")
 
 	PyRun_SimpleString("print 'liar.output imported'\n");

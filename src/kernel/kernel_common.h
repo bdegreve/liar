@@ -1,7 +1,7 @@
 /**	@file
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
- *  LIAR isn't a raytracer
+ *  LiAR isn't a raytracer
  *  Copyright (C) 2004-2005  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
@@ -22,12 +22,12 @@
  */
 
 /** @namespace liar
- *  @brief LIAR isn't a raytracer
+ *  @brief LiAR isn't a raytracer
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  */
 
 /** @namespace liar::kernel
- *  @brief namespace with core elements of LIAR
+ *  @brief namespace with core elements of LiAR
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  */
 
@@ -71,8 +71,8 @@ const std::string version = LASS_STRINGIFY(LIAR_VERSION_MAJOR) "."
 const std::string authors = LIAR_AUTHORS;
 
 const std::string license =	
-	"LIAR isn't a raytracer"
-    "Copyright (C) 2004 Bram de Greve\n"
+	"LiAR isn't a raytracer"
+    "Copyright (C) 2004-2005 Bram de Greve\n"
 	"\n"
 	"This is free software; you can redistribute it and/or modify\n"
 	"it under the terms of the GNU General Public License as published by\n"
