@@ -29,20 +29,23 @@ namespace output
 
 PY_DECLARE_CLASS(Image);
 PY_CLASS_CONSTRUCTOR_2(Image, std::string, Image::TSize)
-PY_CLASS_CONSTRUCTOR_3(Image, std::string, Image::TSize, TScalar)
 PY_CLASS_MEMBER_R(Image, "size", size)
+PY_CLASS_MEMBER_RW(Image, "rgbSpace", rgbSpace, setRgbSpace)
 PY_CLASS_MEMBER_RW(Image, "gamma", gamma, setGamma)
+PY_CLASS_MEMBER_RW(Image, "exposureTime", exposureTime, setExposureTime)
 
 
 
 // --- public --------------------------------------------------------------------------------------
 
-Image::Image(const std::string& iFilename, const TSize& iSize, TScalar iGamma):
+Image::Image(const std::string& iFilename, const TSize& iSize):
     RenderTarget(&Type),
 	image_(),
     filename_(iFilename),
     size_(iSize),
-    gamma_(iGamma),
+	rgbSpace_(kernel::RgbSpace::defaultSpace()),
+    gamma_(1.f),
+	exposureTime_(-1.f),
     isSaved_(true)
 {
 }
@@ -66,6 +69,13 @@ const Image::TSize& Image::size() const
 
 
 
+const kernel::TRgbSpacePtr& Image::rgbSpace() const
+{
+	return rgbSpace_;
+}
+
+
+
 const TScalar Image::gamma() const
 {
     return gamma_;
@@ -73,9 +83,30 @@ const TScalar Image::gamma() const
 
 
 
+const TScalar Image::exposureTime() const
+{
+    return exposureTime_;
+}
+
+
+
+void Image::setRgbSpace(const kernel::TRgbSpacePtr& iRgbSpace)
+{
+	rgbSpace_ = iRgbSpace;
+}
+
+
+
 void Image::setGamma(TScalar iGamma)
 {
     gamma_ = iGamma;
+}
+
+
+
+void Image::setExposureTime(TScalar iTime)
+{
+    exposureTime_ = iTime;
 }
 
 
@@ -91,7 +122,7 @@ void Image::doBeginRender()
 
 
 
-void Image::doWriteRender(const kernel::Sample& iSample, const TSpectrum& iRadiance)
+void Image::doWriteRender(const kernel::Sample& iSample, const kernel::Spectrum& iRadiance)
 {
     LASS_ASSERT(size_.x > 0 && size_.y > 0);
 
@@ -100,7 +131,16 @@ void Image::doWriteRender(const kernel::Sample& iSample, const TSpectrum& iRadia
     const unsigned i = static_cast<unsigned>(num::floor(position.x * size_.x));
     const unsigned j = static_cast<unsigned>(num::floor(position.y * size_.y));
     LASS_ASSERT(i < size_.x && j < size_.y);
-    image_(j, i) += iRadiance * iSample.weight();
+
+	TVector3D xyz = iRadiance.xyz();
+	xyz *= iSample.weight();
+
+	if (!xyz.isZero())
+	{
+		int a = 5;
+	}
+	
+    image_(j, i) += rgbSpace_->convert(xyz);
 	weights_[j * size_.x + i] += TNumTraits::one;
 
     isSaved_ = false;
@@ -110,14 +150,18 @@ void Image::doWriteRender(const kernel::Sample& iSample, const TSpectrum& iRadia
 
 void Image::doEndRender()
 {
-	for (size_t j = 0; j < size_.y; ++j)
+	for (unsigned j = 0; j < size_.y; ++j)
 	{
-		for (size_t i = 0; i < size_.x; ++i)
+		for (unsigned i = 0; i < size_.x; ++i)
 		{
 			image_(j, i) /= weights_[j * size_.x + i];
 		}
 	}
     image_.filterGamma(gamma_);
+	if (exposureTime_ > 0)
+	{
+		image_.filterExposure(exposureTime_);
+	}
     image_.save(filename_);
     isSaved_ = true;
 }

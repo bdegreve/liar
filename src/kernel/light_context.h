@@ -43,9 +43,12 @@ class LIAR_KERNEL_DLL LightContext
 {
 public:
 
-	LightContext(const TSceneLightPtr& iLight, const TTransformation3D& iLocalToWorld);
+	typedef std::vector<TSceneObjectPtr> TObjectPath;
 
-	const TSceneLightPtr& light() const { return light_; }
+	LightContext(const TObjectPath& iObjectPathToLight);
+
+	const TObjectPath& objectPath() const { return objectPath_; }
+	const TSceneLightPtr light() const { return light_; }
 
 	const int idLightSamples() const { return idLightSamples_; }
 	const int idBsdfSamples() const { return idBsdfSamples_; }
@@ -53,21 +56,17 @@ public:
 
     void requestSamples(const TSamplerPtr& iSampler);
 
-	const TSpectrum sampleRadiance(const TVector2D& iSample, const TPoint3D& iPoint, 
-		TRay3D& oShadowRay, TScalar& oMaxT) const
-	{
-		const TPoint3D localPoint = transform(iPoint, localToWorld_.inverse());
-		TRay3D localRay;
-		const TSpectrum radiance = light_->sampleRadiance(iSample, localPoint, localRay, oMaxT);
-		oShadowRay = TRay3D(iPoint, transform(localRay.direction(), localToWorld_));
-		return radiance;
-	}
+	const Spectrum sampleRadiance(const TVector2D& iSample, const TPoint3D& iPoint, 
+		TTime iTime, TRay3D& oShadowRay, TScalar& oMaxT) const;
 
 private:
 
-	TTransformation3D localToWorld_;
-	TSceneLightPtr light_;
-	int idLightSamples_;
+	mutable TTransformation3D localToWorld_;	/**< concatenated local to world transformation */
+	mutable TTime timeOfTransformation_;		/**< time localToWorld_ was calculated for */
+	TObjectPath objectPath_;					/**< path in object tree to light (light included) */
+	TSceneLightPtr light_;						/**< direct pointer to light */
+	bool hasMotion_;							/**< does light move in time? */
+	int idLightSamples_;			
 	int idBsdfSamples_;
 	int idBsdfComponentSamples_;
 };

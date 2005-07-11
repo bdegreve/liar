@@ -84,9 +84,19 @@ SceneObject::SceneObject(PyTypeObject* iType):
 
 // --- private -------------------------------------------------------------------------------------
 
-void SceneObject::doLocalSpace(TTransformation3D& ioLocalToWorld) const
+void SceneObject::doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const
 {
 	// most objects don't have a local space matrix.
+}
+
+
+
+/** return true if object can change with time.
+ *  By default, objects don't.
+ */
+const bool SceneObject::doHasMotion() const
+{
+	return false;
 }
 
 

@@ -30,8 +30,6 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SPECTRUM_H
 
 #include "kernel_common.h"
-#include "spectrum_format.h"
-#include <lass/num/vector.h>
 
 namespace liar
 {
@@ -47,51 +45,82 @@ public:
 	typedef util::CallTraits<TScalar>::TConstReference TConstReference;
 	typedef util::CallTraits<TScalar>::TReference TReference;
 
-	explicit Spectrum(const TSpectrumFormatPtr& iFormat = defaultFormat());
+	Spectrum();
+	explicit Spectrum(TParam iScalar);
+	explicit Spectrum(const TVector3D& iXYZ);
 
-	const TSpectrumFormatPtr& format() const;
-	void setFormat(const TSpectrumFormatPtr& iFormat);
-	const unsigned numberOfBands() const;
+	Spectrum& operator=(const Spectrum& iOther);
+	Spectrum& operator=(TParam iScalar);
 
-	TParam power(unsigned iBand) const;
-	TReference power(unsigned iBand);
+	TParam operator[](size_t iBand) const;
+	TReference operator[](size_t iBand);
+	const size_t numberOfBands() const { return numberOfBands_; }
+	
+	const TValue averagePower() const;
 	const TValue totalPower() const;
-	
-	TParam alpha() const;
-	TReference alpha();
-	
-	Spectrum& Spectrum::operator+=(TParam iOther);
-	Spectrum& Spectrum::operator-=(TParam iOther);
-	Spectrum& Spectrum::operator*=(TParam iOther);
-	Spectrum& Spectrum::operator/=(TParam iOther);
 
-	Spectrum& Spectrum::operator+=(const Spectrum& iOther);
-	Spectrum& Spectrum::operator-=(const Spectrum& iOther);
-	Spectrum& Spectrum::operator*=(const Spectrum& iOther);
-	Spectrum& Spectrum::operator/=(const Spectrum& iOther);
+	const Spectrum& operator+() const;
+	const Spectrum operator-() const;
+	const Spectrum reciprocal() const;
+	
+	Spectrum& operator+=(TParam iScalar);
+	Spectrum& operator-=(TParam iScalar);
+	Spectrum& operator*=(TParam iScalar);
+	Spectrum& operator/=(TParam iScalar);
+
+	Spectrum& operator+=(const Spectrum& iOther);
+	Spectrum& operator-=(const Spectrum& iOther);
+	Spectrum& operator*=(const Spectrum& iOther);
+	Spectrum& operator/=(const Spectrum& iOther);
+
+	Spectrum& pow(TParam iScalar);
+	Spectrum& pow(const Spectrum& iOther);
 
 	void swap(Spectrum& iOther);
 
-	static Spectrum empty();
-	static TSpectrumFormatPtr& defaultFormat();
+	const bool isScalar() const;
+
+	const TVector3D xyz() const;
 
 private:
 
-	typedef num::Vector<TScalar> TPowers;
-
-	static Spectrum::TPowers Spectrum::convertPowers(const TPowers& iPowersA,
-		const TSpectrumFormatPtr& iFormatA, const TSpectrumFormatPtr& iFormatB);
-
-	TPowers powers_;
-	TValue alpha_;
-	TSpectrumFormatPtr format_;
-
-	static TSpectrumFormatPtr defaultFormat_;
+	enum { numberOfBands_ = 3 };
+	TVector3D xyz_;
 };
 
+PY_SHADOW_CLASS(LIAR_KERNEL_DLL, PySpectrum, Spectrum);
+
+inline const Spectrum operator+(Spectrum::TParam iA, const Spectrum& iB);
+inline const Spectrum operator-(Spectrum::TParam iA, const Spectrum& iB);
+inline const Spectrum operator*(Spectrum::TParam iA, const Spectrum& iB);
+inline const Spectrum operator/(Spectrum::TParam iA, const Spectrum& iB);
+inline const Spectrum pow(Spectrum::TParam iA, const Spectrum& iB);
+
+inline const Spectrum operator+(const Spectrum& iA, Spectrum::TParam iB);
+inline const Spectrum operator-(const Spectrum& iA, Spectrum::TParam iB);
+inline const Spectrum operator*(const Spectrum& iA, Spectrum::TParam iB);
+inline const Spectrum operator/(const Spectrum& iA, Spectrum::TParam iB);
+inline const Spectrum pow(const Spectrum& iA, Spectrum::TParam iB);
+
+inline const Spectrum operator+(const Spectrum& iA, const Spectrum& iB);
+inline const Spectrum operator-(const Spectrum& iA, const Spectrum& iB);
+inline const Spectrum operator*(const Spectrum& iA, const Spectrum& iB);
+inline const Spectrum operator/(const Spectrum& iA, const Spectrum& iB);
+inline const Spectrum pow(const Spectrum& iA, const Spectrum& iB);
+
+Spectrum xyz(const TVector3D& iXYZ);
+Spectrum xyz(TScalar iX, TScalar iY, TScalar iZ);
+
+//Spectrum xyz(const TVector3D& iXYZ, const TSpectrumFormatPtr& iFormat);
+//Spectrum xyz(TScalar iX, TScalar iY, TScalar iZ, const TSpectrumFormatPtr& iFormat);
+
 }
 
 }
+
+PY_SHADOW_CASTERS(liar::kernel::PySpectrum);
+
+#include "spectrum.inl"
 
 #endif
 

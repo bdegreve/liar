@@ -27,9 +27,11 @@
 //
 #include "light_point.h"
 #include "list.h"
+#include "motion_translation.h"
 #include "plane.h"
 #include "sphere.h"
 #include "transformation.h"
+#include "translation.h"
 
 #include <lass/io/proxy_man.h>
 
@@ -45,15 +47,17 @@ LIAR_SCENERY_DLL void initscenery(void)
 
     using namespace liar::scenery;
 
-	PY_INJECT_MODULE_EX_AT_RUNTIME(scenery, "liar.scenery", "LiAR scene objects")
+	PY_INJECT_MODULE_EX(scenery, "liar.scenery", "LiAR scene objects")
 
 	// keep in alphabetical order please! [Bramz]
 	//
-	PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(LightPoint, scenery, "point light")
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(List, scenery, "flat list of child objects")
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(Plane, scenery, "infinite plane")
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(Sphere, scenery, "a nice sphere")
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(Transformation, scenery, "transformation of local space")
+	PY_INJECT_CLASS_IN_MODULE(LightPoint, scenery, "point light")
+    PY_INJECT_CLASS_IN_MODULE(List, scenery, "flat list of child objects")
+	PY_INJECT_CLASS_IN_MODULE(MotionTranslation, scenery, "time-dependent translation")
+    PY_INJECT_CLASS_IN_MODULE(Plane, scenery, "infinite plane")
+    PY_INJECT_CLASS_IN_MODULE(Sphere, scenery, "a nice sphere")
+    PY_INJECT_CLASS_IN_MODULE(Transformation, scenery, "transformation of local space")
+    PY_INJECT_CLASS_IN_MODULE(Translation, scenery, "translation of local space")
 
 	PyRun_SimpleString("print 'liar.scenery imported'\n");
 }

@@ -52,6 +52,7 @@ public:
     Sample();
     
     const TPoint2D& screenCoordinate() const;
+	const TTime time() const;
 
     const TScalar weight() const;
     void setWeight(TScalar iWeight);
@@ -64,6 +65,7 @@ private:
 	friend class Sampler;
 
     TPoint2D screenCoordinate_;
+	TTime time_;
     TScalar weight_;
     std::vector<TScalar> subSequences1D_;
     std::vector<TVector2D> subSequences2D_;

@@ -40,6 +40,7 @@ PY_CLASS_MEMBER_RW(PerspectiveCamera, "direction", direction, setDirection)
 PY_CLASS_MEMBER_RW(PerspectiveCamera, "right", right, setRight)
 PY_CLASS_MEMBER_RW(PerspectiveCamera, "down", down, setDown)
 PY_CLASS_MEMBER_RW(PerspectiveCamera, "sky", sky, setSky)
+PY_CLASS_MEMBER_RW(PerspectiveCamera, "shutterTime", shutterTime, setShutterTime)
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -48,7 +49,8 @@ PerspectiveCamera::PerspectiveCamera():
     position_(0, 0, 0),
     sky_(0, 0, 1),
 	fovAngle_(TNumTraits::pi / 2),
-	aspectRatio_(0.75f)
+	aspectRatio_(0.75f),
+	shutterTime_(0)
 {
     lookAt(TPoint3D(0, 1, 0));
 }
@@ -213,14 +215,28 @@ void PerspectiveCamera::setSky(const TVector3D& iSky)
 
 
 
+const TTimeDelta PerspectiveCamera::shutterTime() const
+{
+    return shutterTime_;
+}
+
+
+
+void PerspectiveCamera::setShutterTime(TTimeDelta iShutterTime)
+{
+    shutterTime_ = iShutterTime;
+}
+
+
+
 // --- protected -----------------------------------------------------------------------------------
 
 
 
 // --- private -------------------------------------------------------------------------------------
    
-kernel::DifferentialRay PerspectiveCamera::doPrimaryRay(kernel::Sample& iSample, 
-                                                         const TVector2D& iScreenSpaceDelta) const
+const kernel::DifferentialRay 
+PerspectiveCamera::doPrimaryRay(kernel::Sample& iSample, const TVector2D& iScreenSpaceDelta) const
 {
     using namespace kernel;
 
@@ -229,6 +245,13 @@ kernel::DifferentialRay PerspectiveCamera::doPrimaryRay(kernel::Sample& iSample,
     return DifferentialRay(TRay3D(position_, dir),
                            TRay3D(position_, dir + iScreenSpaceDelta.x * right_),
                            TRay3D(position_, dir + iScreenSpaceDelta.y * down_));
+}
+
+
+
+const TTimeDelta PerspectiveCamera::doShutterTime() const
+{
+	return shutterTime_;
 }
 
 

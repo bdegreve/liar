@@ -68,6 +68,11 @@ public:
 		tangentV_ = prim::transform(tangentV_, iTransformation);
 	}
 
+	void translate(const TVector3D& iOffset)
+	{
+		point_ += iOffset;
+	}
+
 private:
 
     TPoint3D point_;

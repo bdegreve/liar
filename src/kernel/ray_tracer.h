@@ -54,9 +54,9 @@ public:
 
 	void requestSamples(const TSamplerPtr& iSampler);
 
-    TSpectrum operator()(const DifferentialRay& iPrimaryRay, const Sample& iSample) const 
+    Spectrum castRay(const Sample& iSample, const DifferentialRay& iPrimaryRay) const 
     { 
-        return doCastRay(iPrimaryRay, iSample); 
+        return doCastRay(iSample, iPrimaryRay); 
     }
 
 protected:
@@ -69,7 +69,7 @@ private:
 
     virtual void doPreprocess() = 0;
 	virtual void doRequestSamples(const TSamplerPtr& iSampler) = 0;
-    virtual TSpectrum doCastRay(const DifferentialRay& iPrimaryRay,	const Sample& iSample) const = 0;
+    virtual Spectrum doCastRay(const Sample& iSample, const DifferentialRay& iPrimaryRay) const = 0;
 
     TSceneObjectPtr scene_;
 	TLightContexts lights_;

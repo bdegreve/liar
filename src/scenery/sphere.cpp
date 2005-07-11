@@ -93,7 +93,8 @@ void Sphere::setRadius(TScalar iRadius)
 
 // --- private -------------------------------------------------------------------------------------
 
-void Sphere::doIntersect(const TRay3D& iRay, kernel::Intersection& oResult) const
+void Sphere::doIntersect(const kernel::Sample& iSample, const TRay3D& iRay, 
+						 kernel::Intersection& oResult) const
 {
     TScalar tNear;
     TScalar tFar;
@@ -110,18 +111,18 @@ void Sphere::doIntersect(const TRay3D& iRay, kernel::Intersection& oResult) cons
 
 
 
-const bool Sphere::doIsIntersecting(const TRay3D& iRay, TScalar iMaxT,
-									const SceneObject* iExcludeA, const SceneObject* iExcludeB) const
+const bool Sphere::doIsIntersecting(const kernel::Sample& iSample, const TRay3D& iRay, 
+									TScalar iMaxT) const
 {
     TScalar tNear;
     TScalar tFar;
     prim::Result hit = prim::intersect(iRay, sphere_, tNear, tFar);
-	return (hit != prim::rNone && tNear < iMaxT);
+	return hit != prim::rNone && num::almostLess(tNear, iMaxT, liar::tolerance);
 }
 
 
 
-void Sphere::doLocalContext(const TRay3D& iRay, 
+void Sphere::doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay, 
                             const kernel::Intersection& iIntersection, 
                             kernel::IntersectionContext& oResult) const
 {
@@ -148,7 +149,7 @@ void Sphere::doLocalContext(const TRay3D& iRay,
 
 
 
-const TAabb3D Sphere::doBoundingBox() const
+const TAabb3D Sphere::doBoundingBox(const kernel::TimePeriod& iPeriod) const
 {
     TScalar radius = sphere_.radius();
     TVector3D extent = TVector3D(radius, radius, radius);

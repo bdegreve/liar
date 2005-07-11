@@ -73,10 +73,14 @@ public:
 	const TVector3D& sky() const;
 	void setSky(const TVector3D& iSky);
 
+	const TTimeDelta shutterTime() const;
+	void setShutterTime(TTimeDelta iShutterTime);
+
 private:
 
-    virtual kernel::DifferentialRay doPrimaryRay(kernel::Sample& ioSample,
-        const TVector2D& iScreenSpaceDelta) const;
+    const kernel::DifferentialRay doPrimaryRay(kernel::Sample& ioSample, 
+		const TVector2D& iScreenSpaceDelta) const;
+	const TTimeDelta doShutterTime() const;
 
     void initTransformation();
 
@@ -85,6 +89,7 @@ private:
     TVector3D down_;         /**< j unit */
     TVector3D direction_;    /**< k unit */
     TVector3D sky_;
+	TTimeDelta shutterTime_;
     TScalar fovAngle_;
     TScalar aspectRatio_;
 

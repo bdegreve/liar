@@ -44,8 +44,8 @@ LIAR_SAMPLERS_DLL void initsamplers(void)
 
     using namespace liar::samplers;
 
-	PY_INJECT_MODULE_EX_AT_RUNTIME(samplers, "liar.samplers", "LiAR sample generators")
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(Stratifier, samplers, "(jittered) stratified sampler")
+	PY_INJECT_MODULE_EX(samplers, "liar.samplers", "LiAR sample generators")
+    PY_INJECT_CLASS_IN_MODULE(Stratifier, samplers, "(jittered) stratified sampler")
         
     setDefaultSampler(liar::kernel::TSamplerPtr(new Stratifier));
 

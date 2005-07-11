@@ -30,31 +30,43 @@ namespace textures
 {
 
 PY_DECLARE_CLASS(Constant)
-PY_CLASS_CONSTRUCTOR_1(Constant, Constant::TParam);
-PY_CLASS_MEMBER_RW_DOC(Constant, "value", value, setValue, "value of texture")
+PY_CLASS_CONSTRUCTOR_1(Constant, TScalar);
+PY_CLASS_CONSTRUCTOR_1(Constant, const kernel::Spectrum&);
+//PY_CLASS_CONSTRUCTOR_2(Constant, const std::vector<TScalar>&, const kernel::TSpectrumFormatPtr&);
 
 // --- public --------------------------------------------------------------------------------------
 
-Constant::Constant(TParam iValue):
+Constant::Constant(const kernel::Spectrum& iSpectrum):
+	Texture(&Type),
+	value_(iSpectrum)
+{
+}
+
+
+
+Constant::Constant(TScalar iValue):
 	Texture(&Type),
 	value_(iValue)
 {
 }
 
 
-
-Constant::TParam Constant::value() const
+/*
+Constant::Constant(const std::vector<TScalar>& iPowerDensities):
+	Texture(&Type),
+	value_(iPowerDensities, kernel::SpectrumFormat::defaultFormat())
 {
-	return value_;
 }
 
 
 
-void Constant::setValue(TParam iValue)
+Constant::Constant(const std::vector<TScalar>& iPowerDensities, 
+				   const kernel::TSpectrumFormatPtr& iFormat):
+	Texture(&Type),
+	value_(iPowerDensities, iFormat)
 {
-	value_ = iValue;
 }
-
+*/
 
 
 // --- protected -----------------------------------------------------------------------------------
@@ -63,7 +75,7 @@ void Constant::setValue(TParam iValue)
 
 // --- private -------------------------------------------------------------------------------------
 
-Constant::TValue Constant::doLookUp(const kernel::IntersectionContext& iContext) const
+kernel::Spectrum Constant::doLookUp(const kernel::IntersectionContext& iContext) const
 {
 	return value_;
 }

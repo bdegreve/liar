@@ -26,6 +26,7 @@
 // keep in alphabetical order please! [Bramz]
 //
 #include "lambert.h"
+#include "simple.h"
 
 PY_DECLARE_MODULE(shaders)
 
@@ -36,11 +37,12 @@ LIAR_SHADERS_DLL void initshaders(void)
 {
 	using namespace liar::shaders;
 
-	PY_INJECT_MODULE_EX_AT_RUNTIME(shaders, "liar.shaders", "surface and volume shaders for LiAR")
+	PY_INJECT_MODULE_EX(shaders, "liar.shaders", "surface and volume shaders for LiAR")
 
 	// keep in alphabetical order please! [Bramz]
 	//
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(Lambert, shaders, "perfect lambert shader")
+    PY_INJECT_CLASS_IN_MODULE(Lambert, shaders, "perfect lambert shader")
+    PY_INJECT_CLASS_IN_MODULE(Simple, shaders, "a simple shader")
 
 	PyRun_SimpleString("print 'liar.shaders imported'\n");
 }

@@ -60,12 +60,13 @@ private:
 
     LASS_UTIL_ACCEPT_VISITOR
     
-    void doIntersect(const TRay3D& iRay, kernel::Intersection& oResult) const;
-	const bool doIsIntersecting(const TRay3D& iRay, TScalar iMaxT,
-		const SceneObject* iExcludeA, const SceneObject* iExcludeB) const;
-    void doLocalContext(const TRay3D& iRay, const kernel::Intersection& iIntersection, 
-		kernel::IntersectionContext& oResult) const;
-    const TAabb3D doBoundingBox() const;
+	void doIntersect(const kernel::Sample& iSample, const TRay3D& iRay, 
+		kernel::Intersection& oResult) const;
+	const bool doIsIntersecting(const kernel::Sample& iSample, const TRay3D& iRay, 
+		TScalar iMaxT) const;
+	void doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay, 
+		const kernel::Intersection& iIntersection, kernel::IntersectionContext& oResult) const;
+	const TAabb3D doBoundingBox(const kernel::TimePeriod& iPeriod) const;
 
     TPlane3D plane_;
 };

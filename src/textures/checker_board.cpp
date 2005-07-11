@@ -31,44 +31,28 @@ namespace textures
 
 PY_DECLARE_CLASS(CheckerBoard)
 PY_CLASS_CONSTRUCTOR_2(CheckerBoard, kernel::TTexturePtr, kernel::TTexturePtr);
-PY_CLASS_MEMBER_RW_DOC(CheckerBoard, "textureA", textureA, setTextureA, "first texture")
-PY_CLASS_MEMBER_RW_DOC(CheckerBoard, "textureB", textureB, setTextureB, "second texture")
+PY_CLASS_MEMBER_RW(CheckerBoard, "split", split, setSplit);
 
 // --- public --------------------------------------------------------------------------------------
 
 CheckerBoard::CheckerBoard(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB):
-	Texture(&Type),
-	a_(iA),
-	b_(iB)
+	Mix2(&Type, iA, iB),
+	split_(0.5f, 0.5f)
 {
 }
 
 
 
-const kernel::TTexturePtr& CheckerBoard::textureA() const
+const TVector2D& CheckerBoard::split() const
 {
-	return a_;
+	return split_;
 }
 
 
 
-const kernel::TTexturePtr& CheckerBoard::textureB() const
+void CheckerBoard::setSplit(const TVector2D& iSplit)
 {
-	return b_;
-}
-
-
-
-void CheckerBoard::setTextureA(const kernel::TTexturePtr& iA)
-{
-	a_ = iA;
-}
-
-
-
-void CheckerBoard::setTextureB(const kernel::TTexturePtr& iB)
-{
-	b_ = iB;
+	split_ = iSplit;
 }
 
 
@@ -79,11 +63,11 @@ void CheckerBoard::setTextureB(const kernel::TTexturePtr& iB)
 
 // --- private -------------------------------------------------------------------------------------
 
-CheckerBoard::TValue CheckerBoard::doLookUp(const kernel::IntersectionContext& iContext) const
+kernel::Spectrum CheckerBoard::doLookUp(const kernel::IntersectionContext& iContext) const
 {
 	const TScalar u = num::mod(iContext.u(), TNumTraits::one);
 	const TScalar v = num::mod(iContext.v(), TNumTraits::one);
-	return (u < .5f) == (v < .5f) ? (*a_)(iContext) : (*b_)(iContext);	
+	return (u < split_.x) == (v < split_.y) ? (*textureA())(iContext) : (*textureB())(iContext);	
 }
 
 

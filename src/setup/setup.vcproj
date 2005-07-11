@@ -59,7 +59,8 @@
 				Name="VCPostBuildEventTool"
 				CommandLine="mkdir $(ProjectDir)..\..\dist
 copy $(ProjectDir)dist\liar_d-0.0.win32.exe $(ProjectDir)..\..\dist /Y
-$(ProjectDir)..\..\dist\liar_d-0.0.win32.exe"/>
+$(ProjectDir)..\..\dist\liar_d-0.0.win32.exe
+"/>
 			<Tool 
 				Name="VCPreBuildEventTool"/>
 			<Tool 
@@ -76,6 +77,8 @@ $(ProjectDir)..\..\dist\liar_d-0.0.win32.exe"/>
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool 
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+			<IntelOptions 
+				CompilerName="1"/>
 		</Configuration>
 		<Configuration 
 			Name="Release|Win32"
@@ -120,7 +123,8 @@ $(ProjectDir)..\..\dist\liar_d-0.0.win32.exe"/>
 				Name="VCPostBuildEventTool"
 				CommandLine="mkdir $(ProjectDir)..\..\dist
 copy $(ProjectDir)dist\liar-0.0.win32.exe $(ProjectDir)..\..\dist /Y
-$(ProjectDir)..\..\dist\liar-0.0.win32.exe"/>
+$(ProjectDir)..\..\dist\liar-0.0.win32.exe
+"/>
 			<Tool 
 				Name="VCPreBuildEventTool"/>
 			<Tool 
@@ -137,6 +141,8 @@ $(ProjectDir)..\..\dist\liar-0.0.win32.exe"/>
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool 
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+			<IntelOptions 
+				CompilerName="0"/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -155,7 +161,7 @@ $(ProjectDir)..\..\dist\liar-0.0.win32.exe"/>
 					Name="Debug|Win32">
 					<Tool 
 						Name="VCCustomBuildTool"
-						CommandLine=".\$(InputFileName)
+						CommandLine=".\$(InputFileName) _DEBUG
 "
 						Outputs="foo"/>
 				</FileConfiguration>

@@ -31,23 +31,56 @@ namespace kernel
 
 // --- public --------------------------------------------------------------------------------------
 
-LightContext::LightContext(const TSceneLightPtr& iLight, const TTransformation3D& iLocalToWorld):
-	light_(iLight),
-	localToWorld_(iLocalToWorld),
+LightContext::LightContext(const TObjectPath& iObjectPathToLight):
+	localToWorld_(),
+	timeOfTransformation_(num::NumTraits<TTime>::qNaN),
+	objectPath_(iObjectPathToLight),
+	light_(python::fromPySharedPtrCast<SceneLight>(objectPath_.back().get())),
+	hasMotion_(false),
 	idLightSamples_(-1),
 	idBsdfSamples_(-1),
 	idBsdfComponentSamples_(-1)
 {
+	for (TObjectPath::const_iterator i = objectPath_.begin(); i != objectPath_.end(); ++i)
+	{
+		hasMotion_ |= (*i)->hasMotion();
+	}
 }
 
 
 
 void LightContext::requestSamples(const TSamplerPtr& iSampler)
 {
-	const int n = light_->numberOfRadianceSamples();
+	const int n = light()->numberOfRadianceSamples();
 	idLightSamples_ = iSampler->requestSubSequence2D(n);
 	idBsdfSamples_ = iSampler->requestSubSequence2D(n);
 	idBsdfComponentSamples_ = iSampler->requestSubSequence1D(n);
+}
+
+
+
+const Spectrum LightContext::sampleRadiance(const TVector2D& iSample, 
+											const TPoint3D& iPoint, 
+											TTime iTime,
+											TRay3D& oShadowRay, 
+											TScalar& oMaxT) const
+{
+	if (hasMotion_ && iTime != timeOfTransformation_)
+	{
+		TTransformation3D temp;
+		for (TObjectPath::const_iterator i = objectPath_.begin(); i != objectPath_.end(); ++i)
+		{
+			(*i)->localSpace(iTime, temp);
+		}
+		localToWorld_.swap(temp);
+		timeOfTransformation_ = iTime;
+	}
+
+	const TPoint3D localPoint = transform(iPoint, localToWorld_.inverse());
+	TRay3D localRay;
+	const Spectrum radiance = light()->sampleRadiance(iSample, localPoint, localRay, oMaxT);
+	oShadowRay = TRay3D(iPoint, transform(localRay.direction(), localToWorld_));
+	return radiance;
 }
 
 
@@ -69,8 +102,7 @@ namespace impl
 		const TLightContexts& operator()(const TSceneObjectPtr& iScene)
 		{
 			lights_.clear();
-			savedSpaces_.clear();
-			localToWorld_ = TTransformation3D();
+			objectPath_.clear();
 			iScene->accept(*this);
 			return lights_;
 		}
@@ -78,30 +110,26 @@ namespace impl
 	  
 		void doVisit(SceneObject& iSceneObject)
 		{
-			savedSpaces_.push_back(localToWorld_);
-			iSceneObject.localSpace(localToWorld_);
+			TSceneObjectPtr objectPtr(python::PyPlus_INCREF(&iSceneObject));
+			objectPath_.push_back(objectPtr);
 		}
 		void doVisit(SceneLight& iSceneLight)
 		{
-			savedSpaces_.push_back(localToWorld_);
-			iSceneLight.localSpace(localToWorld_);
-			TSceneLightPtr lightPtr(python::PyPlus_INCREF(&iSceneLight));
-			lights_.push_back(LightContext(lightPtr, localToWorld_));
+			TSceneObjectPtr objectPtr(python::PyPlus_INCREF(&iSceneLight));
+			objectPath_.push_back(objectPtr);
+			lights_.push_back(LightContext(objectPath_));
 		}
 		void doVisitOnExit(SceneObject& iSceneObject)
 		{
-			localToWorld_ = savedSpaces_.back();
-			savedSpaces_.pop_back();
+			objectPath_.pop_back();
 		}
 		void doVisitOnExit(SceneLight& iSceneLight)
 		{
-			localToWorld_ = savedSpaces_.back();
-			savedSpaces_.pop_back();
+			objectPath_.pop_back();
 		}
 
 		TLightContexts lights_;
-		TTransformation3D localToWorld_;
-		std::vector<TTransformation3D> savedSpaces_;
+		LightContext::TObjectPath objectPath_;
 	};
 }
 

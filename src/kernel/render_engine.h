@@ -66,6 +66,8 @@ public:
     void setTarget(const TRenderTargetPtr& iRenderTarget);
     void setTracer(const TRayTracerPtr& iRayTracer);
 
+    void render(TTime iTime, const TBucket& iBucket);
+    void render(TTime iTime);
     void render(const TBucket& iBucket);
     void render();
 

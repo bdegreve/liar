@@ -33,6 +33,7 @@ namespace kernel
 PY_DECLARE_CLASS(Sampler)
 PY_CLASS_MEMBER_RW(Sampler, "resolution", resolution, setResolution)
 PY_CLASS_MEMBER_RW(Sampler, "samplesPerPixel", samplesPerPixel, setSamplesPerPixel)
+PY_CLASS_METHOD(Sampler, seed);
 
 TSamplerPtr Sampler::defaultSampler_;
 
@@ -98,11 +99,13 @@ void Sampler::clearSubSequenceRequests()
 }
 
 
-void Sampler::sample(const TResolution& iPixel, unsigned iSubPixel, Sample& oSample)
+void Sampler::sample(const TResolution& iPixel, unsigned iSubPixel, const TimePeriod& iPeriod, 
+					 Sample& oSample)
 {
 	oSample.sampler_ = this;
 
 	doSampleScreenCoordinate(iPixel, iSubPixel, oSample.screenCoordinate_);
+	doSampleTime(iPixel, iSubPixel, iPeriod, oSample.time_);
 
 	oSample.subSequences1D_.resize(totalSubSequenceSize1D_);
 	const size_t n1D = subSequenceSize1D_.size();

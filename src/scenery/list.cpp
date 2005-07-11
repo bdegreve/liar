@@ -86,7 +86,8 @@ void List::doAccept(util::VisitorBase& ioVisitor)
 
 
 
-void List::doIntersect(const TRay3D& iRay, kernel::Intersection& oResult) const
+void List::doIntersect(const kernel::Sample& iSample, const TRay3D& iRay, 
+					   kernel::Intersection& oResult) const
 {
     kernel::Intersection result = kernel::Intersection::empty();
 	const TChildren::const_iterator end = children_.end();
@@ -94,7 +95,7 @@ void List::doIntersect(const TRay3D& iRay, kernel::Intersection& oResult) const
     {
         TChildren::value_type child = *i;
         kernel::Intersection temp;
-        child->intersect(iRay, temp);
+        child->intersect(iSample, iRay, temp);
         if (!temp.isEmpty())
         {
             if (result.isEmpty() || temp.t() < result.t())
@@ -103,7 +104,7 @@ void List::doIntersect(const TRay3D& iRay, kernel::Intersection& oResult) const
             }
         }
     }
-    if (!result.isEmpty())
+    if (result)
     {
         result.push(this);
     }
@@ -112,13 +113,13 @@ void List::doIntersect(const TRay3D& iRay, kernel::Intersection& oResult) const
 
 
 
-const bool List::doIsIntersecting(const TRay3D& iRay, TScalar iMaxT,
-								  const SceneObject* iExcludeA, const SceneObject* iExcludeB) const
+const bool List::doIsIntersecting(const kernel::Sample& iSample, const TRay3D& iRay, 
+								  TScalar iMaxT) const
 {
 	const TChildren::const_iterator end = children_.end();
     for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
     {
-		if ((*i)->isIntersecting(iRay, iMaxT, iExcludeA, iExcludeB))
+		if ((*i)->isIntersecting(iSample, iRay, iMaxT))
 		{
 			return true;
 		}
@@ -128,23 +129,23 @@ const bool List::doIsIntersecting(const TRay3D& iRay, TScalar iMaxT,
 
 
 
-void List::doLocalContext(const TRay3D& iRay, 
+void List::doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay, 
                           const kernel::Intersection& iIntersection,
                           kernel::IntersectionContext& oResult) const
 {
     kernel::IntersectionDescendor descend(iIntersection);
-    iIntersection.object()->localContext(iRay, iIntersection, oResult);
+    iIntersection.object()->localContext(iSample, iRay, iIntersection, oResult);
 }
 
 
 
-const TAabb3D List::doBoundingBox() const
+const TAabb3D List::doBoundingBox(const kernel::TimePeriod& iPeriod) const
 {
 	TAabb3D result;
 	const TChildren::const_iterator end = children_.end();
     for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
     {
-		result += (*i)->boundingBox();
+		result += (*i)->boundingBox(iPeriod);
 	}
 	return result;
 }

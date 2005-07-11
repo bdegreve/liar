@@ -36,16 +36,16 @@ extern "C"
 LIAR_TRACERS_DLL void inittracers(void)
 {
 #ifndef _DEBUG
-	lass::io::proxyMan()->clog()->remove(&std::clog);
+	//lass::io::proxyMan()->clog()->remove(&std::clog);
 #endif
 
     using namespace liar::tracers;
 
-	PY_INJECT_MODULE_EX_AT_RUNTIME(tracers, "liar.tracers", "LiAR ray tracers")
+	PY_INJECT_MODULE_EX(tracers, "liar.tracers", "LiAR ray tracers")
 
 	// keep in alphabetical orderplease! [Bramz]
 	//
-	PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(DirectLighting, tracers, "simple ray tracer")
+	PY_INJECT_CLASS_IN_MODULE(DirectLighting, tracers, "simple ray tracer")
 
 	PyRun_SimpleString("print 'liar.tracers imported'\n");
 }

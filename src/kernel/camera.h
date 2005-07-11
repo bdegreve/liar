@@ -48,10 +48,12 @@ public:
     
     virtual ~Camera();
 
-    DifferentialRay operator()(Sample& ioSample, const TVector2D& iScreenSpaceDelta) const
+    const DifferentialRay primaryRay(Sample& ioSample, const TVector2D& iScreenSpaceDelta) const
     {
         return doPrimaryRay(ioSample, iScreenSpaceDelta);
     }
+
+	const TTimeDelta shutterTime() const { return doShutterTime(); }
 
 protected:
 
@@ -59,8 +61,9 @@ protected:
 
 private:
 
-    virtual DifferentialRay doPrimaryRay(Sample& ioSample, 
-        const TVector2D& iScreenSpaceDelta) const = 0;
+    virtual const DifferentialRay doPrimaryRay(Sample& ioSample, 
+		const TVector2D& iScreenSpaceDelta) const = 0;
+	virtual const TTimeDelta doShutterTime() const = 0;
 };
 
 typedef python::PyObjectPtr<Camera>::Type TCameraPtr;

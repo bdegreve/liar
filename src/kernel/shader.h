@@ -31,6 +31,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SHADER_H
 
 #include "kernel_common.h"
+#include "spectrum.h"
 
 namespace liar
 {
@@ -53,11 +54,11 @@ public:
 
     virtual ~Shader();
 
-	TSpectrum directLight(const DifferentialRay& iRay, const Intersection& iIntersection, 
-		const IntersectionContext& iContext, const Sample& iSample, const TSceneObjectPtr& iScene,
-		const LightContext& iLight)
+	Spectrum directLight(const Sample& iSample, const DifferentialRay& iRay, 
+		const Intersection& iIntersection, const IntersectionContext& iContext, 
+		const TSceneObjectPtr& iScene, const LightContext& iLight)
 	{
-		return doDirectLight(iRay, iIntersection, iContext, iSample, iScene, iLight);
+		return doDirectLight(iSample, iRay, iIntersection, iContext, iScene, iLight);
 	}
 
 protected:
@@ -66,9 +67,9 @@ protected:
 
 private:
 
-	virtual TSpectrum doDirectLight(const DifferentialRay& iRay, const Intersection& iIntersection, 
-		const IntersectionContext& iContext, const Sample& iSample, const TSceneObjectPtr& iScene,
-		const LightContext& iLight) = 0;
+	virtual Spectrum doDirectLight(const Sample& iSample, const DifferentialRay& iRay, 
+		const Intersection& iIntersection, const IntersectionContext& iContext, 
+		const TSceneObjectPtr& iScene, const LightContext& iLight) = 0;
 };
 
 typedef python::PyObjectPtr<Shader>::Type TShaderPtr;

@@ -55,9 +55,12 @@ private:
     virtual const unsigned doSamplesPerPixel() const;
     virtual void doSetResolution(const TResolution& iResolution);
     virtual void doSetSamplesPerPixel(unsigned iSamplesPerPixel);
+	virtual void doSeed(unsigned iRandomSeed);
 
 	virtual void doSampleScreenCoordinate(const TResolution& iPixel, unsigned iSubPixel, 
 		TPoint2D& oScreenCoordinate);
+	virtual void doSampleTime(const TResolution& iPixel, unsigned iSubPixel, 
+		const kernel::TimePeriod& iPeriod, TTime& oTime);
 	virtual void doSampleSubSequence1D(const TResolution& iPixel, unsigned iSubPixel, 
 		TScalar* oBegin, TScalar* oEnd);
 	virtual void doSampleSubSequence2D(const TResolution& iPixel, unsigned iSubPixel, 
@@ -66,13 +69,17 @@ private:
 	virtual const unsigned doRoundSize1D(unsigned iRequestedSize) const;
 	virtual const unsigned doRoundSize2D(unsigned iRequestedSize) const;
 
+	void shuffleTimeStrata();
+
     TNumberGenerator numberGenerator_;
     TJitterGenerator jitterGenerator_;
 
     TResolution resolution_;
     TVector2D reciprocalResolution_;
-    std::vector<TVector2D> strataOffsets_;
-    TScalar strataSize_;
+	TVector2D screenCoordinateStratumSize_;
+    TScalar timeStratumSize_;
+    std::vector<TVector2D> screenCoordinateStrata_;
+	std::vector<TScalar> timeStrata_;
     unsigned strataPerPixel_;
 	std::vector<size_t> randomStrataSequence_;
 };

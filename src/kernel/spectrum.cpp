@@ -30,197 +30,9 @@ namespace liar
 namespace kernel
 {
 
-TSpectrumFormatPtr Spectrum::defaultFormat_ = TSpectrumFormatPtr(new SpectrumFormat(3));
+PY_DECLARE_CLASS_NAME(PySpectrum, "Spectrum")
 
 // --- public --------------------------------------------------------------------------------------
-
-Spectrum::Spectrum(const TSpectrumFormatPtr& iFormat):
-	powers_(iFormat->numberOfBands()),
-	alpha_(TNumTraits::zero),
-	format_(iFormat)
-{
-}
-
-
-
-const TSpectrumFormatPtr& Spectrum::format() const
-{
-	return format_;
-}
-
-
-
-void Spectrum::setFormat(const TSpectrumFormatPtr& iFormat)
-{
-	powers_ = convertPowers(powers_, format_, iFormat);
-	format_ = iFormat;
-}
-
-
-
-const unsigned Spectrum::numberOfBands() const
-{
-	return format_->numberOfBands();
-}
-
-
-
-Spectrum::TParam Spectrum::power(unsigned iBand) const
-{
-	LASS_ASSERT(iBand < numberOfBands());
-	return powers_[iBand];
-}
-
-
-
-Spectrum::TReference Spectrum::power(unsigned iBand)
-{
-	LASS_ASSERT(iBand < numberOfBands());
-	return powers_[iBand];
-}
-
-
-
-const Spectrum::TValue Spectrum::totalPower() const
-{
-	return powers_.sum();
-}
-
-
-
-Spectrum::TParam Spectrum::alpha() const
-{
-	return alpha_;
-}
-
-
-
-Spectrum::TReference Spectrum::alpha()
-{
-	return alpha_;
-}
-
-
-
-Spectrum& Spectrum::operator+=(TParam iOther)
-{
-	powers_ += iOther;
-	alpha_ += iOther;
-	return *this;
-}
-
-
-
-Spectrum& Spectrum::operator-=(TParam iOther)
-{
-	powers_ -= iOther;
-	alpha_ -= iOther;
-	return *this;
-}
-
-
-
-Spectrum& Spectrum::operator*=(TParam iOther)
-{
-	powers_ *= iOther;
-	alpha_ *= iOther;
-	return *this;
-}
-
-
-
-Spectrum& Spectrum::operator/=(TParam iOther)
-{
-	powers_ /= iOther;
-	alpha_ /= iOther;
-	return *this;
-}
-
-
-
-Spectrum& Spectrum::operator+=(const Spectrum& iOther)
-{
-	if (format_ == iOther.format_)
-	{
-		powers_ += iOther.powers_;
-	}
-	else
-	{
-		powers_ += convertPowers(iOther.powers_, iOther.format_, format_);
-	}
-
-	alpha_ += iOther.alpha_;
-
-	return *this;
-}
-
-
-
-Spectrum& Spectrum::operator-=(const Spectrum& iOther)
-{
-	if (format_ == iOther.format_)
-	{
-		powers_ -= iOther.powers_;
-	}
-	else
-	{
-		powers_ -= convertPowers(iOther.powers_, iOther.format_, format_);
-	}
-
-	alpha_ -= iOther.alpha_;
-
-	return *this;
-}
-
-
-
-Spectrum& Spectrum::operator*=(const Spectrum& iOther)
-{
-	if (format_ == iOther.format_)
-	{
-		powers_ *= iOther.powers_;
-	}
-	else
-	{
-		powers_ *= convertPowers(iOther.powers_, iOther.format_, format_);
-	}
-
-	alpha_ *= iOther.alpha_;
-
-	return *this;
-}
-
-
-
-Spectrum& Spectrum::operator/=(const Spectrum& iOther)
-{
-	if (format_ == iOther.format_)
-	{
-		powers_ /= iOther.powers_;
-	}
-	else
-	{
-		powers_ /= convertPowers(iOther.powers_, iOther.format_, format_);
-	}
-
-	alpha_ /= iOther.alpha_;
-
-	return *this;
-}
-
-
-
-TSpectrumFormatPtr& Spectrum::defaultFormat()
-{
-	return defaultFormat_;
-}
-
-
-
-Spectrum Spectrum::empty()
-{
-	return Spectrum(defaultFormat_);
-}
 
 
 
@@ -230,58 +42,28 @@ Spectrum Spectrum::empty()
 
 // --- private -------------------------------------------------------------------------------------
 
-Spectrum::TPowers Spectrum::convertPowers(const TPowers& iPowersA,
-										  const TSpectrumFormatPtr& iFormatA,										  										  
-										  const TSpectrumFormatPtr& iFormatB)
+
+
+// --- free ----------------------------------------------------------------------------------------
+
+/** Make a spectrum from CIE xyz values using the default spectrum format
+ */
+Spectrum xyz(TScalar iX, TScalar iY, TScalar iZ)
 {
-	const unsigned numBandsA = iFormatA->numberOfBands();
-	const unsigned numBandsB = iFormatB->numberOfBands();
-
-	TPowers powersB(numBandsB);
-
-	TValue begin = std::max(iFormatA->beginFrequency(0), iFormatB->beginFrequency(0));
-	unsigned iA = 0;
-	while (iFormatA->endFrequency(iA) <= begin && iA < numBandsA)
-	{
-		++iA;
-	}
-
-	unsigned iB = 0;
-	while (iFormatB->endFrequency(iB) <= begin && iB < numBandsB)
-	{
-		++iB;
-	}
-
-	TValue endB = iFormatB->endFrequency(iB);
-	while (iA < numBandsA)
-	{
-		const TValue endA = iFormatA->endFrequency(iA);
-		const TValue powerDensityA = iPowersA[iA] / (endA - iFormatA->beginFrequency(iA));
-
-		while (endB <= endA)
-		{
-			powersB[iB] += (endB - begin) * powerDensityA;
-			begin = endB;
-			++iB;
-
-			if (iB == numBandsB)
-			{
-				return powersB;
-			}
-			endB = iFormatB->endFrequency(iB);
-		}
-
-		powersB[iB] += (endA - begin) * powerDensityA;
-		begin = endA;
-		++iA;
-	}
-
-	return powersB;
+	return Spectrum(TVector3D(iX, iY, iZ));
 }
 
 
 
-// --- free ----------------------------------------------------------------------------------------
+/** Make a spectrum from CIE xyz values using the default spectrum format
+ */
+Spectrum xyz(const TVector3D& iXYZ)
+{
+	return Spectrum(iXYZ);
+}
+
+
+
 
 }
 

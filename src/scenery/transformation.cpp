@@ -96,46 +96,50 @@ void Transformation::doAccept(util::VisitorBase& ioVisitor)
 
 
 
-void Transformation::doIntersect(const TRay3D& iRay, 
+void Transformation::doIntersect(const kernel::Sample& iSample, const TRay3D& iRay, 
 								 kernel::Intersection& oResult) const
 {
 	const TRay3D localRay = transform(iRay, localToWorld_.inverse());
-	child_->intersect(localRay, oResult);
+	child_->intersect(iSample, localRay, oResult);
+    if (oResult)
+    {
+        oResult.push(this);
+    }
 }
 
 
 
-const bool Transformation::doIsIntersecting(const TRay3D& iRay, TScalar iMaxT,
-											const SceneObject* iExcludeA, 
-											const SceneObject* iExcludeB) const
+const bool Transformation::doIsIntersecting(const kernel::Sample& iSample, const TRay3D& iRay, 
+											TScalar iMaxT) const
 {
 	const TRay3D localRay = transform(iRay, localToWorld_.inverse());
-	return child_->isIntersecting(localRay, iMaxT);
+	return child_->isIntersecting(iSample, localRay, iMaxT);
 }
 
 
 
-void Transformation::doLocalContext(const TRay3D& iRay, 
+void Transformation::doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay, 
 									const kernel::Intersection& iIntersection, 
 									kernel::IntersectionContext& oResult) const
 {
+    kernel::IntersectionDescendor descend(iIntersection);
 	const TRay3D localRay = transform(iRay, localToWorld_.inverse());
-	child_->localContext(localRay, iIntersection, oResult);
+	child_->localContext(iSample, localRay, iIntersection, oResult);
 	oResult.transform(localToWorld_);
 }
 
 
 
-void Transformation::doLocalSpace(TTransformation3D& ioLocalToWorld) const 
+void Transformation::doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const
 {
 	ioLocalToWorld = concatenate(localToWorld_, ioLocalToWorld);
 }
 
 
 
-const TAabb3D Transformation::doBoundingBox() const
+const TAabb3D Transformation::doBoundingBox(const kernel::TimePeriod& iPeriod) const
 {
-	return transform(child_->boundingBox(), localToWorld_);
+	return transform(child_->boundingBox(iPeriod), localToWorld_);
 }
 
 

@@ -55,37 +55,38 @@ public:
     };
 
 	LightPoint();
-    LightPoint(const TPoint3D& iPosition, const TSpectrum& iPower);
+	LightPoint(const TPoint3D& iPosition, const kernel::Spectrum& iPower);
 
 	const TPoint3D& position() const;
-	const TSpectrum& power() const;
+	const kernel::Spectrum& power() const;
 	const Attenuation& attenuation() const;
 
 	void setPosition(const TPoint3D& iPosition);
-	void setPower(const TSpectrum& iPower);
+	void setPower(const kernel::Spectrum& iPower);
 	void setAttenuation(const Attenuation& iAttenuation);
 
 private:
 
     LASS_UTIL_ACCEPT_VISITOR;
 
-	void doIntersect(const TRay3D& iRay, kernel::Intersection& oResult) const;
-	const bool doIsIntersecting(const TRay3D& iRay, TScalar iMaxT,
-		const SceneObject* iExcludeA, const SceneObject* iExcludeB) const;
-	void doLocalContext(const TRay3D& iRay, const kernel::Intersection& iIntersection, 
-		kernel::IntersectionContext& oResult) const;
-	const TAabb3D doBoundingBox() const;
+	void doIntersect(const kernel::Sample& iSample, const TRay3D& iRay, 
+		kernel::Intersection& oResult) const;
+	const bool doIsIntersecting(const kernel::Sample& iSample, const TRay3D& iRay, 
+		TScalar iMaxT) const;
+	void doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay, 
+		const kernel::Intersection& iIntersection, kernel::IntersectionContext& oResult) const;
+	const TAabb3D doBoundingBox(const kernel::TimePeriod& iPeriod) const;
 
-	const TSpectrum doSampleRadiance(const TVector2D& iSample, const TPoint3D& iDestionation,
+	const kernel::Spectrum doSampleRadiance(const TVector2D& iSample, const TPoint3D& iDestionation,
 		TRay3D& oShadowRay, TScalar& oMaxT) const;
 	const unsigned doNumberOfRadianceSamples() const;
 
     TPoint3D position_;
-	TSpectrum power_;
+	kernel::Spectrum power_;
     Attenuation attenuation_;
 };
 
-PY_SHADOW_CLASS(PyLightPointAttenuation, LightPoint::Attenuation);
+PY_SHADOW_CLASS(LIAR_SCENERY_DLL, PyLightPointAttenuation, LightPoint::Attenuation);
 
 }
 

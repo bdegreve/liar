@@ -28,6 +28,7 @@
 #include "checker_board.h"
 #include "checker_volume.h"
 #include "constant.h"
+#include "mix_2.h"
 #include "uv.h"
 
 PY_DECLARE_MODULE(textures)
@@ -43,14 +44,18 @@ LIAR_TEXTURES_DLL void inittextures(void)
 
     using namespace liar::textures;
 
-	PY_INJECT_MODULE_EX_AT_RUNTIME(textures, "liar.textures", "textures for LiAR")
+	PY_INJECT_MODULE_EX(textures, "liar.textures", "textures for LiAR")
 
+	// some base classes, keep in keep in alphabetical order please! [Bramz]
+	//
+	PY_INJECT_CLASS_IN_MODULE(Mix2, textures, "base class of textures mixing two input textures")
+	
 	// keep in alphabetical order please! [Bramz]
 	//
-	PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(CheckerBoard, textures, "mixes two textures in 2D checkerboard pattern")
-	PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(CheckerVolume, textures, "mixes two textures in 3D checkerboard pattern")
-	PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(Constant, textures, "texture with constant value")
-	PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(Uv, textures, "mixes two textures by the u and v context channels")
+	PY_INJECT_CLASS_IN_MODULE(CheckerBoard, textures, "mixes two textures in 2D checkerboard pattern")
+	PY_INJECT_CLASS_IN_MODULE(CheckerVolume, textures, "mixes two textures in 3D checkerboard pattern")
+	PY_INJECT_CLASS_IN_MODULE(Constant, textures, "texture with constant value")
+	PY_INJECT_CLASS_IN_MODULE(Uv, textures, "mixes two textures by the u and v context channels")
 
 	PyRun_SimpleString("print 'liar.textures imported'\n");
 }

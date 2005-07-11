@@ -31,44 +31,12 @@ namespace textures
 
 PY_DECLARE_CLASS(Uv)
 PY_CLASS_CONSTRUCTOR_2(Uv, kernel::TTexturePtr, kernel::TTexturePtr);
-PY_CLASS_MEMBER_RW_DOC(Uv, "textureA", textureA, setTextureA, "first texture")
-PY_CLASS_MEMBER_RW_DOC(Uv, "textureB", textureB, setTextureB, "second texture")
 
 // --- public --------------------------------------------------------------------------------------
 
 Uv::Uv(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB):
-	Texture(&Type),
-	a_(iA),
-	b_(iB)
+	Mix2(&Type, iA, iB)
 {
-}
-
-
-
-const kernel::TTexturePtr& Uv::textureA() const
-{
-	return a_;
-}
-
-
-
-const kernel::TTexturePtr& Uv::textureB() const
-{
-	return b_;
-}
-
-
-
-void Uv::setTextureA(const kernel::TTexturePtr& iA)
-{
-	a_ = iA;
-}
-
-
-
-void Uv::setTextureB(const kernel::TTexturePtr& iB)
-{
-	b_ = iB;
 }
 
 
@@ -79,11 +47,11 @@ void Uv::setTextureB(const kernel::TTexturePtr& iB)
 
 // --- private -------------------------------------------------------------------------------------
 
-Uv::TValue Uv::doLookUp(const kernel::IntersectionContext& iContext) const
+kernel::Spectrum Uv::doLookUp(const kernel::IntersectionContext& iContext) const
 {
 	const TScalar u = num::mod(iContext.u(), TNumTraits::one);
 	const TScalar v = num::mod(iContext.v(), TNumTraits::one);
-	return u * (*a_)(iContext) + v * (*b_)(iContext);	
+	return u * (*textureA())(iContext) + v * (*textureB())(iContext);	
 }
 
 

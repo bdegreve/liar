@@ -30,31 +30,28 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_CHECKER_VOLUME_H
 
 #include "textures_common.h"
-#include "../kernel/texture.h"
+#include "mix_2.h"
 
 namespace liar
 {
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL CheckerVolume: public kernel::Texture
+class LIAR_TEXTURES_DLL CheckerVolume: public Mix2
 {
-	PY_HEADER(kernel::Texture)
+	PY_HEADER(Mix2)
 public:
 
 	CheckerVolume(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB);
 
-	const kernel::TTexturePtr& textureA() const;
-	const kernel::TTexturePtr& textureB() const;
-	void setTextureA(const kernel::TTexturePtr& iA);
-	void setTextureB(const kernel::TTexturePtr& iB);
+	const TVector3D& split() const;
+	void setSplit(const TVector3D& iSplit);
 
 private:
 
-	TValue doLookUp(const kernel::IntersectionContext& iContext) const;
+	kernel::Spectrum doLookUp(const kernel::IntersectionContext& iContext) const;
 
-	kernel::TTexturePtr a_;
-	kernel::TTexturePtr b_;
+	TVector3D split_;
 };
 
 }

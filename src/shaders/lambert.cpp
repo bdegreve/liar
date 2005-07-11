@@ -31,10 +31,19 @@ namespace shaders
 {
 
 PY_DECLARE_CLASS(Lambert)
+PY_CLASS_CONSTRUCTOR_0(Lambert)
 PY_CLASS_CONSTRUCTOR_1(Lambert, const kernel::TTexturePtr&)
 PY_CLASS_MEMBER_RW_DOC(Lambert, "diffuse", diffuse, setDiffuse, "texture for diffuse component")
 
 // --- public --------------------------------------------------------------------------------------
+
+Lambert::Lambert():
+	kernel::Shader(&Type),
+	diffuse_(kernel::Texture::white())
+{
+}
+
+
 
 Lambert::Lambert(const kernel::TTexturePtr& iDiffuse):
 	kernel::Shader(&Type),
@@ -64,30 +73,32 @@ void Lambert::setDiffuse(const kernel::TTexturePtr& iDiffuse)
 
 // --- private -------------------------------------------------------------------------------------
 
-TSpectrum Lambert::doDirectLight(const kernel::DifferentialRay& iPrimaryRay,
-								 const kernel::Intersection& iIntersection,
-								 const kernel::IntersectionContext& iContext,
-								 const kernel::Sample& iSample,
-								 const kernel::TSceneObjectPtr& iScene,
-								 const kernel::LightContext& iLight)
+kernel::Spectrum Lambert::doDirectLight(const kernel::Sample& iSample,
+										const kernel::DifferentialRay& iPrimaryRay,
+										const kernel::Intersection& iIntersection,
+										const kernel::IntersectionContext& iContext,
+										const kernel::TSceneObjectPtr& iScene,
+										const kernel::LightContext& iLight)
 {
 	// can we move these outside?
-	const TSpectrum diffuse = (*diffuse_)(iContext);
-	const TPoint3D& position = iContext.point();
-	const kernel::SceneObject* const sceneObject = iIntersection.object();
-	const kernel::SceneLight* const sceneLight = iLight.light().get();
-	
-	TSpectrum result;
+	const kernel::Spectrum diffuse = (*diffuse_)(iContext);
+
+	const TPoint3D& intersectionPoint = iContext.point();
+	const TPoint3D shadowStartPoint = intersectionPoint + 
+		(liar::tolerance * intersectionPoint.position().norm()) * iContext.normal(); 
+
+	kernel::Spectrum result;
 	for (kernel::Sample::TSubSequence2D i = iSample.subSequence2D(iLight.idLightSamples()); i; ++i)
 	{
 		TRay3D shadowRay;
 		TScalar maxT;
-		TSpectrum radiance = iLight.sampleRadiance(*i, position, shadowRay, maxT);
+		kernel::Spectrum radiance = iLight.sampleRadiance(
+			*i, shadowStartPoint, iSample.time(), shadowRay, maxT);
 		const TScalar cosTheta = prim::dot(iContext.normal(), shadowRay.direction());
 		if (cosTheta > TNumTraits::zero)
 		{
 			if (iLight.light()->isShadowless() || 
-				!iScene->isIntersecting(shadowRay, maxT, sceneObject, sceneLight))
+				!iScene->isIntersecting(iSample, shadowRay, maxT))
 			{
 				radiance *= cosTheta;
 				radiance *= diffuse;

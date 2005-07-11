@@ -30,45 +30,29 @@ namespace textures
 {
 
 PY_DECLARE_CLASS(CheckerVolume)
-PY_CLASS_CONSTRUCTOR_2(CheckerVolume, kernel::TTexturePtr, kernel::TTexturePtr);
-PY_CLASS_MEMBER_RW_DOC(CheckerVolume, "textureA", textureA, setTextureA, "first texture")
-PY_CLASS_MEMBER_RW_DOC(CheckerVolume, "textureB", textureB, setTextureB, "second texture")
+PY_CLASS_CONSTRUCTOR_2(CheckerVolume, const kernel::TTexturePtr&, const kernel::TTexturePtr&);
+PY_CLASS_MEMBER_RW(CheckerVolume, "split", split, setSplit);
 
 // --- public --------------------------------------------------------------------------------------
 
 CheckerVolume::CheckerVolume(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB):
-	Texture(&Type),
-	a_(iA),
-	b_(iB)
+	Mix2(&Type, iA, iB),
+	split_(0.5f, 0.5f, 0.5f)
 {
 }
 
 
 
-const kernel::TTexturePtr& CheckerVolume::textureA() const
+const TVector3D& CheckerVolume::split() const
 {
-	return a_;
+	return split_;
 }
 
 
 
-const kernel::TTexturePtr& CheckerVolume::textureB() const
+void CheckerVolume::setSplit(const TVector3D& iSplit)
 {
-	return b_;
-}
-
-
-
-void CheckerVolume::setTextureA(const kernel::TTexturePtr& iA)
-{
-	a_ = iA;
-}
-
-
-
-void CheckerVolume::setTextureB(const kernel::TTexturePtr& iB)
-{
-	b_ = iB;
+	split_ = iSplit;
 }
 
 
@@ -79,19 +63,21 @@ void CheckerVolume::setTextureB(const kernel::TTexturePtr& iB)
 
 // --- private -------------------------------------------------------------------------------------
 
-CheckerVolume::TValue CheckerVolume::doLookUp(const kernel::IntersectionContext& iContext) const
+kernel::Spectrum CheckerVolume::doLookUp(const kernel::IntersectionContext& iContext) const
 {
 	const TPoint3D p = iContext.point();
 	const TScalar x = num::mod(p.x, TNumTraits::one);
 	const TScalar y = num::mod(p.y, TNumTraits::one);
 	const TScalar z = num::mod(p.z, TNumTraits::one);
-	if (z < .5f)
+	if (z < split_.z)
 	{
-        return (x < .5f) == (y < .5f) ? (*a_)(iContext) : (*b_)(iContext);
+        return (x < split_.x) == (y < split_.y) ? 
+			(*textureA())(iContext) : (*textureB())(iContext);
 	}
 	else
 	{
-        return (x < .5f) != (y < .5f) ? (*a_)(iContext) : (*b_)(iContext);
+        return (x < split_.x) != (y < split_.y) ? 
+			(*textureA())(iContext) : (*textureB())(iContext);
 	}
 }
 

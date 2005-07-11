@@ -42,16 +42,14 @@ class LIAR_TEXTURES_DLL Constant: public kernel::Texture
 	PY_HEADER(kernel::Texture)
 public:
 
-	Constant(TParam iValue);
-
-	TParam value() const;
-	void setValue(TParam iValue);
+	explicit Constant(const kernel::Spectrum& iValue);
+	explicit Constant(TScalar iScalar);
 
 private:
 
-	TValue doLookUp(const kernel::IntersectionContext& iContext) const;
+	kernel::Spectrum doLookUp(const kernel::IntersectionContext& iContext) const;
 
-	TValue value_;
+	kernel::Spectrum value_;
 };
 
 }

@@ -34,6 +34,9 @@
 #include "ray_tracer.h"
 #include "render_engine.h"
 #include "render_target.h"
+#include "rgb_space.h"
+#include "spectrum.h"
+//#include "spectrum_format.h"
 #include "texture.h"
 
 #include <lass/io/proxy_man.h>
@@ -46,8 +49,48 @@ void license()
 	PyRun_SimpleString( std::string("print \"" + text + "\"\n").c_str());
 }
 
+liar::TScalar tolerance()
+{
+	return liar::tolerance;
+}
+
+void setTolerance(liar::TScalar iTolerance)
+{
+	liar::tolerance = iTolerance;
+}
+
 PY_DECLARE_MODULE(kernel)
 PY_MODULE_FUNCTION(kernel, license)
+PY_MODULE_FUNCTION(kernel, tolerance)
+PY_MODULE_FUNCTION(kernel, setTolerance)
+
+using liar::TScalar;
+using liar::TVector3D;
+using liar::kernel::xyz;
+using liar::kernel::Spectrum;
+using liar::kernel::TSpectrumFormatPtr;
+PY_MODULE_FUNCTION_QUALIFIED_DOC_1(kernel, xyz, Spectrum, const TVector3D&,
+	"xyz({<X>, <Y>, <Z>} | <(X, Y, Z)>} [, <spectrumFormat>]\n"
+	"Create a spectrum from XYZ tristimulus value\n");
+PY_MODULE_FUNCTION_QUALIFIED_3(kernel, xyz, Spectrum, TScalar, TScalar, TScalar)
+//PY_MODULE_FUNCTION_QUALIFIED_2(kernel, xyz, Spectrum, const TVector3D&, const TSpectrumFormatPtr&)
+//PY_MODULE_FUNCTION_QUALIFIED_4(kernel, xyz, Spectrum, TScalar, TScalar, TScalar, const TSpectrumFormatPtr&)
+
+using lass::prim::ColorRGBA;
+using liar::kernel::rgb;
+using liar::kernel::RgbSpace;
+using liar::kernel::TRgbSpacePtr;
+PY_MODULE_FUNCTION_QUALIFIED_DOC_1(kernel, rgb, Spectrum, const ColorRGBA&,
+	"rgb({<R>, <G>, <B>} | <(R, G, B)>} [, <RgbSpace>] [, <SpectrumFormat>]\n"
+	"Create a spectrum from RGB color value\n");
+PY_MODULE_FUNCTION_QUALIFIED_2(kernel, rgb, Spectrum, const ColorRGBA&, const TRgbSpacePtr&)
+PY_MODULE_FUNCTION_QUALIFIED_3(kernel, rgb, Spectrum, TScalar, TScalar, TScalar)
+PY_MODULE_FUNCTION_QUALIFIED_4(kernel, rgb, Spectrum, TScalar, TScalar, TScalar, const TRgbSpacePtr&)
+//PY_MODULE_FUNCTION_QUALIFIED_2(kernel, rgb, Spectrum, const ColorRGBA&, const TSpectrumFormatPtr&)
+//PY_MODULE_FUNCTION_QUALIFIED_3(kernel, rgb, Spectrum, const ColorRGBA&, const TRgbSpacePtr&, const TSpectrumFormatPtr&)
+//PY_MODULE_FUNCTION_QUALIFIED_4(kernel, rgb, Spectrum, TScalar, TScalar, TScalar, const TSpectrumFormatPtr&)
+//PY_MODULE_FUNCTION_QUALIFIED_5(kernel, rgb, Spectrum, TScalar, TScalar, TScalar, const TRgbSpacePtr&, const TSpectrumFormatPtr&)
+
 
 extern "C"
 {
@@ -57,25 +100,33 @@ void LIAR_KERNEL_DLL initkernel(void)
 	lass::io::proxyMan()->clog()->remove(&std::clog);
 #endif
 
+	using namespace liar;
     using namespace liar::kernel;
 
-	PY_INJECT_MODULE_EX_AT_RUNTIME(kernel, "liar.kernel", "LiAR isn't a raytracer")
+	PY_INJECT_MODULE_EX(kernel, "liar.kernel", "LiAR isn't a raytracer")
 
 	// keep in alphabetical order please! [Bramz]
 	//
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(Camera, kernel, "Abstract base class of render viewports")
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(Sampler, kernel, "Abstract base class of samplers")
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(SceneObject, kernel, "Abstract base class of scene objects")
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(Shader, kernel, "Abstract base class of shaders")
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(RayTracer, kernel, "Abstract base class of ray tracers")
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(RenderEngine, kernel, "Render engine")
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(RenderTarget, kernel, "Abstract base class of render targets")
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(Texture, kernel, "Abstract base class of textures")
+    PY_INJECT_CLASS_IN_MODULE(Camera, kernel, "Abstract base class of render viewports")
+    PY_INJECT_CLASS_IN_MODULE(RayTracer, kernel, "Abstract base class of ray tracers")
+    PY_INJECT_CLASS_IN_MODULE(RenderEngine, kernel, "Render engine")
+    PY_INJECT_CLASS_IN_MODULE(RenderTarget, kernel, "Abstract base class of render targets")
+    PY_INJECT_CLASS_IN_MODULE(Sampler, kernel, "Abstract base class of samplers")
+    PY_INJECT_CLASS_IN_MODULE(SceneObject, kernel, "Abstract base class of scene objects")
+    PY_INJECT_CLASS_IN_MODULE(Shader, kernel, "Abstract base class of shaders")
+    //PY_INJECT_CLASS_IN_MODULE(SpectrumFormat, kernel, "Format of a spectrum's colour representation")
+    PY_INJECT_CLASS_IN_MODULE(Texture, kernel, "Abstract base class of textures")
 
 	// must be injected after SceneObject
 	//
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(SceneComposite, kernel, "Abstract base class of invisible scene objects that perform spatial subdivision")
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(SceneLight, kernel, "Abstract base class of scene lights")
+    PY_INJECT_CLASS_IN_MODULE(SceneComposite, kernel, "Abstract base class of invisible scene objects that perform spatial subdivision")
+    PY_INJECT_CLASS_IN_MODULE(SceneLight, kernel, "Abstract base class of scene lights")
+
+	// init rgb spaces
+	//
+	//PY_INJECT_OBJECT_IN_MODULE_EX(TRgbSpacePtr(rgbSpaceIdentity), kernel, "rgbSpaceIdentity");
+	//PY_INJECT_OBJECT_IN_MODULE_EX(TRgbSpacePtr(rgbSpaceCie), kernel, "rgbSpaceCie");
+	//PY_INJECT_OBJECT_IN_MODULE_EX(SpectrumFormat::defaultFormat(), kernel, "formatTripleBand");
 
 	std::ostringstream header;
 	header << liar::name << " v" << liar::version << " ("

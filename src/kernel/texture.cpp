@@ -31,10 +31,34 @@ namespace kernel
 
 PY_DECLARE_CLASS(Texture)
 
+typedef impl::TextureBlack TTextureBlack;
+PY_DECLARE_CLASS_NAME(TTextureBlack, "Black");
+PY_CLASS_INNER_CLASS_NAME(Texture, TTextureBlack, "Black");
+TTexturePtr Texture::black_(new TTextureBlack());
+
+typedef impl::TextureWhite TTextureWhite;
+PY_DECLARE_CLASS_NAME(TTextureWhite, "White");
+PY_CLASS_INNER_CLASS_NAME(Texture, TTextureWhite, "White");
+TTexturePtr Texture::white_(new TTextureWhite);
+
 // --- public --------------------------------------------------------------------------------------
 
 Texture::~Texture()
 {
+}
+
+
+
+const TTexturePtr& Texture::black()
+{
+	return black_;
+}
+
+
+
+const TTexturePtr& Texture::white()
+{
+	return white_;
 }
 
 

@@ -49,6 +49,7 @@
 #define LASS_USE_DLL
 #include <lass/num/num_traits.h>
 #include <lass/num/basic_ops.h>
+#include <lass/num/floating_point_comparison.h>
 #include <lass/prim/vector_2d.h>
 #include <lass/prim/point_2d.h>
 #include <lass/prim/vector_3d.h>
@@ -64,6 +65,36 @@
 
 namespace liar
 {
+
+using namespace lass;
+
+
+
+// typedefs
+
+typedef LIAR_SCALAR TScalar;
+typedef LIAR_TIME TTime;
+typedef LIAR_TIME_DELTA TTimeDelta;
+
+typedef num::NumTraits<TScalar> TNumTraits;
+
+typedef prim::Vector2D<TScalar> TVector2D;
+typedef prim::Point2D<TScalar> TPoint2D;
+typedef prim::Vector3D<TScalar> TVector3D;
+typedef prim::Point3D<TScalar> TPoint3D;
+typedef prim::Ray3D<TScalar> TRay3D;
+typedef prim::Aabb3D<TScalar> TAabb3D;
+typedef prim::Transformation3D<TScalar> TTransformation3D;
+
+
+
+// globals
+
+LIAR_KERNEL_DLL extern TScalar tolerance;
+
+
+
+// constants
 
 const std::string name = LIAR_NAME_FULL;
 const std::string version = LASS_STRINGIFY(LIAR_VERSION_MAJOR) "." 
@@ -90,21 +121,7 @@ const std::string license =
     "\n"
     "http://liar.sourceforge.net \n";
 
-using namespace lass;
 
-
-typedef LIAR_SCALAR TScalar;
-typedef LIAR_SPECTRUM TSpectrum;
-
-typedef num::NumTraits<TScalar> TNumTraits;
-
-typedef prim::Vector2D<TScalar> TVector2D;
-typedef prim::Point2D<TScalar> TPoint2D;
-typedef prim::Vector3D<TScalar> TVector3D;
-typedef prim::Point3D<TScalar> TPoint3D;
-typedef prim::Ray3D<TScalar> TRay3D;
-typedef prim::Aabb3D<TScalar> TAabb3D;
-typedef prim::Transformation3D<TScalar> TTransformation3D;
 
 namespace kernel
 {

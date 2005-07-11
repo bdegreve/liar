@@ -38,7 +38,9 @@ PY_CLASS_MEMBER_RW(RenderEngine, "target", target, setTarget)
 PY_CLASS_MEMBER_RW(RenderEngine, "sampler", sampler, setSampler)
 PY_CLASS_MEMBER_RW(RenderEngine, "scene", scene, setScene)
 PY_CLASS_METHOD_QUALIFIED_0(RenderEngine, render, void)
+PY_CLASS_METHOD_QUALIFIED_1(RenderEngine, render, void, TTime)
 PY_CLASS_METHOD_QUALIFIED_1(RenderEngine, render, void, const RenderEngine::TBucket&)
+PY_CLASS_METHOD_QUALIFIED_2(RenderEngine, render, void, TTime, const RenderEngine::TBucket&)
 
 
 const RenderEngine::TBucket RenderEngine::bucketBound_(
@@ -142,7 +144,7 @@ void RenderEngine::setTracer(const TRayTracerPtr& iRayTracer)
 
 
 
-void RenderEngine::render(const TBucket& iBucket)
+void RenderEngine::render(TTime iShutterOpen, const TBucket& iBucket)
 {
     if (!camera_)
     {
@@ -171,6 +173,7 @@ void RenderEngine::render(const TBucket& iBucket)
     const TResolution resolution = sampler_->resolution();
     const TVector2D pixelSize = TVector2D(resolution).reciprocal();
     const unsigned samplesPerPixel = sampler_->samplesPerPixel();
+	const TimePeriod timePeriod(iShutterOpen, iShutterOpen + camera_->shutterTime());
 
     const TResolution min(num::round(iBucket.min().x * resolution.x), num::round(iBucket.min().y * resolution.y));
     const TResolution max(num::round(iBucket.max().x * resolution.x), num::round(iBucket.max().y * resolution.y));
@@ -186,9 +189,9 @@ void RenderEngine::render(const TBucket& iBucket)
         {
             for (unsigned k = 0; k < samplesPerPixel; ++k)
             {
-                sampler_->sample(i, k, sample);
-                DifferentialRay primaryRay = (*camera_)(sample, pixelSize);
-                TSpectrum radiance = (*rayTracer_)(primaryRay, sample);
+                sampler_->sample(i, k, timePeriod, sample);
+                DifferentialRay primaryRay = camera_->primaryRay(sample, pixelSize);
+                Spectrum radiance = rayTracer_->castRay(sample, primaryRay);
                 renderTarget_->writeRender(sample, radiance);
             }
         }
@@ -199,9 +202,23 @@ void RenderEngine::render(const TBucket& iBucket)
 
 
 
+void RenderEngine::render(TTime iShutterOpen)
+{
+    render(iShutterOpen, bucketBound_);
+}
+
+
+
+void RenderEngine::render(const TBucket& iBucket)
+{
+    render(0, iBucket);
+}
+
+
+
 void RenderEngine::render()
 {
-    render(bucketBound_);
+    render(0, bucketBound_);
 }
 
 

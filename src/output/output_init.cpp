@@ -22,8 +22,12 @@
  */
 
 #include "output_common.h"
-#include "image.h"
 #include <lass/io/proxy_man.h>
+
+// keep in alphabetical order please! [Bramz]
+//
+#include "exposure_filter.h"
+#include "image.h"
 
 #ifdef _DEBUG
 #   define LIAR_OUTPUT_MODULE output_d
@@ -43,8 +47,12 @@ LIAR_OUTPUT_DLL void initoutput(void)
 
     using namespace liar::output;
 
-	PY_INJECT_MODULE_EX_AT_RUNTIME(output, "liar.output", "LiAR output devices")
-    PY_INJECT_CLASS_IN_MODULE_AT_RUNTIME(Image, output, "simple image render target")
+	PY_INJECT_MODULE_EX(output, "liar.output", "LiAR output devices")
+	
+	// keep in alphabetical order please! [Bramz]
+	//
+    PY_INJECT_CLASS_IN_MODULE(ExposureFilter, output, "applies exposure filter to target")
+    PY_INJECT_CLASS_IN_MODULE(Image, output, "simple image render target")
 
 	PyRun_SimpleString("print 'liar.output imported'\n");
 }

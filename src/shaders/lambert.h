@@ -43,6 +43,7 @@ class LIAR_SHADERS_DLL Lambert: public kernel::Shader
     PY_HEADER(Shader)
 public:
 
+	Lambert();
 	Lambert(const kernel::TTexturePtr& iDiffuse);
 
 	const kernel::TTexturePtr& diffuse() const;
@@ -50,8 +51,9 @@ public:
 
 private:
 
-	TSpectrum doDirectLight(const kernel::DifferentialRay& iRay, const kernel::Intersection& iIntersection, 
-		const kernel::IntersectionContext& iContext, const kernel::Sample& iSample, 
+	kernel::Spectrum doDirectLight(
+		const kernel::Sample& iSample, const kernel::DifferentialRay& iRay,
+		const kernel::Intersection& iIntersection, const kernel::IntersectionContext& iContext, 
 		const kernel::TSceneObjectPtr& iScene, const kernel::LightContext& iLight);
 
 	kernel::TTexturePtr diffuse_;

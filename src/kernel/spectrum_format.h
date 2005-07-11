@@ -30,13 +30,17 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SPECTRUM_FORMAT_H
 
 #include "kernel_common.h"
+#include <lass/num/spline_linear.h>
 
 namespace liar
 {
 namespace kernel
 {
 
-class SpectrumFormat: public python::PyObjectPlus
+class SpectrumFormat;
+typedef python::PyObjectPtr<SpectrumFormat>::Type TSpectrumFormatPtr;
+
+class LIAR_KERNEL_DLL SpectrumFormat: public python::PyObjectPlus
 {
 	PY_HEADER(python::PyObjectPlus)
 public:
@@ -46,31 +50,46 @@ public:
 	typedef util::CallTraits<TScalar>::TConstReference TConstReference;
 	typedef util::CallTraits<TScalar>::TReference TReference;
 
-	typedef std::vector<TScalar> TFrequencies;
+	typedef std::vector<TScalar> TWavelengths;
+	typedef std::vector<TVector3D> TXyzWeights;
 
 	SpectrumFormat();
 	SpectrumFormat(unsigned numberOfBands);
-	SpectrumFormat(unsigned numberOfBands, TParam iBeginFrequency, TParam iEndFrequency);
-    SpectrumFormat(const TFrequencies& iBandBoundaries);
+	SpectrumFormat(unsigned numberOfBands, TScalar iBeginWavelength, TScalar iEndWavelength);
+    SpectrumFormat(const TWavelengths& iBandBoundaries);
+    SpectrumFormat(const TWavelengths& iBandBoundaries, const TXyzWeights& iXyzWeights);
 
 	const unsigned numberOfBands() const;
+	const TScalar totalBandWidth() const;
 
-	const TScalar beginFrequency(unsigned iBand) const;
-	const TScalar endFrequency(unsigned iBand) const;
-	const TScalar centerFrequency(unsigned iBand) const;
+	const TScalar beginWavelength(unsigned iBand) const;
+	const TScalar endWavelength(unsigned iBand) const;
+	const TScalar centerWavelength(unsigned iBand) const;
+	const TScalar bandWidth(unsigned iBand) const;
+	const TVector3D xyzWeight(unsigned iBand) const;
+
+	static const TSpectrumFormatPtr& defaultFormat();
+	static void setDefaultFormat(const TSpectrumFormatPtr& iFormat);
 
 private:
 
-	const TFrequencies generateBoundaries(unsigned iNumberOfBands = 3, 
-		TParam iBeginFrequency = 380e-9f, TParam iEndFrequency = 780e-9f);
-	const TFrequencies centresFromBoundaries(const TFrequencies& iFrequencies) const;
-	const bool isValidFrequencySequence(const TFrequencies& iSequence) const;
+	typedef num::SplineLinear<TScalar, TVector3D, num::DataTraitsStaticVector<TVector3D> > TXyzSpline;
 
-	TFrequencies boundaries_;
-	TFrequencies centres_;
+	const TWavelengths generateBoundaries(unsigned iNumberOfBands, 
+		TParam iBeginWavelength, TParam iEndWavelength);
+	const TWavelengths centresFromBoundaries(const TWavelengths& iWavelengths) const;
+	const TXyzWeights xyzWeightsFromBoundaries(const TWavelengths& iWavelengths) const;
+	const bool isValidWavelengthSequence(const TWavelengths& iSequence) const;
+
+	static TXyzSpline loadStandardObserver();
+
+	TWavelengths boundaries_;
+	TWavelengths centres_;
+	TXyzWeights xyzWeights_;
+
+	static TXyzSpline standardObserver_;
+	static TSpectrumFormatPtr defaultFormat_;
 };
-
-typedef python::PyObjectPtr<SpectrumFormat>::Type TSpectrumFormatPtr;
 
 }
 

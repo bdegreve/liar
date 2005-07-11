@@ -36,6 +36,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SAMPLER_H
 
 #include "kernel_common.h"
+#include "time_period.h"
 #include <lass/prim/vector_2d.h>
 
 namespace liar
@@ -59,12 +60,14 @@ public:
     const unsigned samplesPerPixel() const { return doSamplesPerPixel(); }
     void setResolution(const TResolution& iResolution) { doSetResolution(iResolution); }
     void setSamplesPerPixel(unsigned iSamplesPerPixel) { doSetSamplesPerPixel(iSamplesPerPixel); }
+	void seed(unsigned iRandomSeed) { doSeed(iRandomSeed); }
 
     const int requestSubSequence1D(unsigned iRequestedSize);
     const int requestSubSequence2D(unsigned iRequestedSize);
 	void clearSubSequenceRequests();
 
-    void sample(const TResolution& iPixel, unsigned iSubPixel, Sample& oSample);
+    void sample(const TResolution& iPixel, unsigned iSubPixel, const TimePeriod& iPeriod, 
+		Sample& oSample);
 
     static TSamplerPtr& defaultSampler();
 
@@ -82,9 +85,12 @@ private:
     virtual const unsigned doSamplesPerPixel() const = 0;
     virtual void doSetResolution(const TResolution& iResolution) = 0;
     virtual void doSetSamplesPerPixel(unsigned iSamplesPerPixel) = 0;
+	virtual void doSeed(unsigned iRandomSeed) = 0;
     
 	virtual void doSampleScreenCoordinate(const TResolution& iPixel, unsigned iSubPixel, 
 		TPoint2D& oScreenCoordinate) = 0;
+	virtual void doSampleTime(const TResolution& iPixel, unsigned iSubPixel, 
+		const TimePeriod& iPeriod, TTime& oTime) = 0;
 	virtual void doSampleSubSequence1D(const TResolution& iPixel, unsigned iSubPixel, 
 		TScalar* oBegin, TScalar* oEnd) = 0;
 	virtual void doSampleSubSequence2D(const TResolution& iPixel, unsigned iSubPixel, 

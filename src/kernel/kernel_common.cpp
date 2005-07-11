@@ -23,4 +23,11 @@
 
 #include "kernel_common.h"
 
+namespace liar
+{
+
+TScalar tolerance = 100 * TNumTraits::epsilon;
+
+}
+
 // EOF

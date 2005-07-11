@@ -47,8 +47,8 @@ private:
 
 	void doPreprocess();
 	void doRequestSamples(const kernel::TSamplerPtr& iSampler);
-    TSpectrum doCastRay(const kernel::DifferentialRay& iPrimaryRay, 
-		const kernel::Sample& iSample) const;
+	kernel::Spectrum doCastRay(const kernel::Sample& iSample,
+		const kernel::DifferentialRay& iPrimaryRay) const;
 };
 
 }

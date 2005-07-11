@@ -87,7 +87,8 @@ void Plane::setD(TScalar iD)
 
 // --- private -------------------------------------------------------------------------------------
 
-void Plane::doIntersect(const TRay3D& iRay, kernel::Intersection& oResult) const
+void Plane::doIntersect(const kernel::Sample& iSample, const TRay3D& iRay, 
+						kernel::Intersection& oResult) const
 {
     TScalar t;
     prim::Result hit = prim::intersect(plane_, iRay, t);
@@ -103,16 +104,16 @@ void Plane::doIntersect(const TRay3D& iRay, kernel::Intersection& oResult) const
 
 
 
-const bool Plane::doIsIntersecting(const TRay3D& iRay, TScalar iMaxT,
-								   const SceneObject* iExcludeA, const SceneObject* iExcludeB) const
+const bool Plane::doIsIntersecting(const kernel::Sample& iSample, const TRay3D& iRay, 
+								   TScalar iMaxT) const
 {
     TScalar t;
     prim::Result hit = prim::intersect(plane_, iRay, t);
-	return (hit == prim::rOne && t < iMaxT);
+	return hit == prim::rOne && num::almostLess(t, iMaxT, liar::tolerance);
 }
 
 
-void Plane::doLocalContext(const TRay3D& iRay, 
+void Plane::doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay, 
                            const kernel::Intersection& iIntersection, 
                            kernel::IntersectionContext& oResult) const
 {
@@ -131,7 +132,7 @@ void Plane::doLocalContext(const TRay3D& iRay,
 
 
 
-const TAabb3D Plane::doBoundingBox() const
+const TAabb3D Plane::doBoundingBox(const kernel::TimePeriod& iPeriod) const
 {
     const TVector3D normal = plane_.normal();
     TVector3D extent;

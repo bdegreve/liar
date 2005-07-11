@@ -33,7 +33,10 @@
 #define LIAR_AUTHORS "Bram de Greve"
 
 #define LIAR_SCALAR float
-#define LIAR_SPECTRUM ::lass::prim::ColorRGBA
+#define LIAR_TIME double
+#define LIAR_TIME_DELTA double
+
+//#define LIAR_USE_DYNAMIC_SPECTRUM
 
 #endif 
 

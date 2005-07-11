@@ -35,6 +35,7 @@
 
 #include "output_common.h"
 #include "../kernel/render_target.h"
+#include "../kernel/rgb_space.h"
 #include <lass/io/image.h>
 
 namespace liar
@@ -49,26 +50,32 @@ public:
 
 	typedef prim::Vector2D<size_t> TSize;
 
-	Image(const std::string& iFilename, const TSize& iSize, TScalar iGamma = 1);
+	Image(const std::string& iFilename, const TSize& iSize);
     ~Image();
 
 	const TSize& size() const;
+	const kernel::TRgbSpacePtr& rgbSpace() const;
     const TScalar gamma() const;
-    void setGamma(TScalar iGamma);
+	const TScalar exposureTime() const;
+	void setRgbSpace(const kernel::TRgbSpacePtr& iRgbSpace);
+    void setGamma(TScalar iGammaExponent);
+	void setExposureTime(TScalar iTime);
 
 private:
 
 	typedef std::vector<TScalar> TWeights;
 
     virtual void doBeginRender();
-    virtual void doWriteRender(const kernel::Sample& iSample, const TSpectrum& iRadiance);
+	virtual void doWriteRender(const kernel::Sample& iSample, const kernel::Spectrum& iRadiance);
     virtual void doEndRender();
 
     io::Image image_;
 	TWeights weights_;
     const std::string filename_;
     TSize size_;
+	kernel::TRgbSpacePtr rgbSpace_;
     TScalar gamma_;
+	TScalar exposureTime_;
     bool isSaved_;
 };
 

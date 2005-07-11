@@ -33,6 +33,7 @@
 #include "kernel_common.h"
 #include "differential_ray.h"
 #include "sample.h"
+#include "spectrum.h"
 #include <lass/prim/vector_2d.h>
 
 namespace liar
@@ -48,7 +49,7 @@ public:
     virtual ~RenderTarget();
 
     void beginRender() { isRendering_ = true; doBeginRender(); }
-    void writeRender(const Sample& iSample, const TSpectrum& iRadiance) { doWriteRender(iSample, iRadiance); }
+    void writeRender(const Sample& iSample, const Spectrum& iRadiance) { doWriteRender(iSample, iRadiance); }
     void endRender() { isRendering_ = false; doEndRender(); }
     bool isRendering() { return isRendering_; }
 
@@ -59,7 +60,7 @@ protected:
 private:
 
     virtual void doBeginRender() = 0;
-    virtual void doWriteRender(const Sample& iSample, const TSpectrum& iRadiance) = 0;
+    virtual void doWriteRender(const Sample& iSample, const Spectrum& iRadiance) = 0;
     virtual void doEndRender() = 0;
 
     bool isRendering_;

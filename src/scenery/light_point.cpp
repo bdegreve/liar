@@ -38,7 +38,7 @@ PY_CLASS_PUBLIC_MEMBER(PyLightPointAttenuation, quadratic);
 
 PY_DECLARE_CLASS(LightPoint)
 PY_CLASS_CONSTRUCTOR_0(LightPoint)
-PY_CLASS_CONSTRUCTOR_2(LightPoint, const TPoint3D&, const TSpectrum&)
+PY_CLASS_CONSTRUCTOR_2(LightPoint, const TPoint3D&, const kernel::Spectrum&)
 PY_CLASS_MEMBER_RW(LightPoint, "position", position, setPosition)
 PY_CLASS_MEMBER_RW(LightPoint, "power", power, setPower)
 PY_CLASS_MEMBER_RW(LightPoint, "attenuation", attenuation, setAttenuation)
@@ -68,14 +68,14 @@ LightPoint::Attenuation::Attenuation(TScalar iConstant, TScalar iLinear, TScalar
 LightPoint::LightPoint():
     SceneLight(&Type),
 	position_(TPoint3D()),
-	power_(TSpectrum()),
+	power_(kernel::Spectrum()),
     attenuation_()
 {
 }
 
 
 
-LightPoint::LightPoint(const TPoint3D& iPosition, const TSpectrum& iPower):
+LightPoint::LightPoint(const TPoint3D& iPosition, const kernel::Spectrum& iPower):
     SceneLight(&Type),
     position_(iPosition),
 	power_(iPower),
@@ -92,7 +92,7 @@ const TPoint3D& LightPoint::position() const
 
 
 
-const TSpectrum& LightPoint::power() const
+const kernel::Spectrum& LightPoint::power() const
 {
 	return power_;
 }
@@ -113,7 +113,7 @@ void LightPoint::setPosition(const TPoint3D& iPosition)
 
 
 
-void LightPoint::setPower(const TSpectrum& iPower)
+void LightPoint::setPower(const kernel::Spectrum& iPower)
 {
 	power_ = iPower;
 }
@@ -134,23 +134,23 @@ void LightPoint::setAttenuation(const LightPoint::Attenuation& iAttenuation)
 
 // --- private -------------------------------------------------------------------------------------
 
-void LightPoint::doIntersect(const TRay3D& iRAy, kernel::Intersection& oResult) const
+void LightPoint::doIntersect(const kernel::Sample& iSample, const TRay3D& iRAy, 
+							 kernel::Intersection& oResult) const
 {
 	oResult = kernel::Intersection::empty();
 }
 
 
 
-const bool LightPoint::doIsIntersecting(const TRay3D& iRay, TScalar iMaxT,
-										const SceneObject* iExcludeA, 
-										const SceneObject* iExcludeB) const
+const bool LightPoint::doIsIntersecting(const kernel::Sample& iSample, const TRay3D& iRay, 
+										TScalar iMaxT) const
 {
 	return false;
 }
 
 
 
-void LightPoint::doLocalContext(const TRay3D& iRay, 
+void LightPoint::doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay, 
 								const kernel::Intersection& iIntersection, 
 								kernel::IntersectionContext& oResult) const
 {
@@ -159,19 +159,19 @@ void LightPoint::doLocalContext(const TRay3D& iRay,
 
 
 
-const TAabb3D LightPoint::doBoundingBox() const
+const TAabb3D LightPoint::doBoundingBox(const kernel::TimePeriod& iPeriod) const
 {
 	return TAabb3D(position_, position_);
 }
 
 
 
-const TSpectrum LightPoint::doSampleRadiance(const TVector2D& iSample, 
-											 const TPoint3D& iDestination,
-											 TRay3D& oShadowRay,
-											 TScalar& oMaxT) const
+const kernel::Spectrum LightPoint::doSampleRadiance(const TVector2D& iSample, 
+													const TPoint3D& iDestination,
+													TRay3D& oShadowRay,
+													TScalar& oMaxT) const
 {
-	TSpectrum result = power_;
+	kernel::Spectrum result = power_;
     const TScalar squaredDistance = (position_ - iDestination).squaredNorm();
 	const TScalar att = attenuation_.constant + 
 		attenuation_.linear * num::sqrt(squaredDistance) + 

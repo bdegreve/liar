@@ -23,7 +23,7 @@ from distutils.core import setup,Extension
 import os
 import sys
 
-modules = ['kernel', 'cameras', 'output', 'samplers', 'scenery', 'shaders', 'textures']
+modules = ['kernel', 'cameras', 'output', 'samplers', 'scenery', 'shaders', 'textures', 'tracers']
 
 def getRoot(var):
 	root = os.getenv(var)
@@ -40,11 +40,15 @@ systemRoot = getRoot('windir') + 'system32\\'
 if '_DEBUG' in sys.argv:
 	pyDebug = '_d'
 	winDebug = 'd'
+	pdb = ['pdb']
 else:
 	pyDebug = ''
 	winDebug = ''
+	pdb = []
 	
 sys.argv = [sys.argv[0], 'bdist_wininst']
+
+print "HELLO!"
 
 setup(name = 'liar' + pyDebug,
       version = "0.0",
@@ -76,8 +80,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
       packages=['liar'],
       package_dir={'liar': '..'},      
       data_files = [('lib/site-packages/liar',[r'..\..\bin\%s%s.pyd' % (x, pyDebug) for x in modules]),
+                    ('lib/site-packages/liar',[r'..\..\bin\%s%s.%s' % (x, pyDebug, y) for x in modules for y in pdb]),
                     ('lib/site-packages/liar',[r'..\..\doc\gpl.txt']),
                     ('lib/site-packages/liar',[r'%sbin\lass_win32_vc71%s.dll' % (lassRoot, pyDebug)]),
+                    ('lib/site-packages/liar',[r'%sbin\lass_win32_vc71%s.%s' % (lassRoot, pyDebug, y) for y in pdb]),
                     ('lib/site-packages/liar',['%smsvcr71%s.dll' % (systemRoot, winDebug), '%smsvcp71%s.dll' % (systemRoot, winDebug)]),
                     ]
       )

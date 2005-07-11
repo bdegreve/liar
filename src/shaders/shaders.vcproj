@@ -60,7 +60,7 @@
 				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
 				AdditionalOptions="">
 				<IntelOptions 
-					AllOptions="/NOLOGO /DLL /OUT:&quot;D:\bram\visual_studio_projects\liar\src\..\bin/shaders_d.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;D:\bram\visual_studio_projects\liar\src\..\bin\shaders_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;D:\bram\visual_studio_projects\liar\src\..\bin/shaders_d.lib&quot;  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
+					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/shaders_d.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\shaders_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/shaders_d.lib&quot;  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
 					MSOriginalAdditionalOptions=""/>
 			</Tool>
 			<Tool 
@@ -97,10 +97,10 @@
 				Optimization="3"
 				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="TRUE"
+				EnableIntrinsicFunctions="FALSE"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="TRUE"
-				OptimizeForProcessor="0"
+				OptimizeForProcessor="2"
 				PreprocessorDefinitions="LIAR_SHADERS_BUILD_DLL;WIN32;NDEBUG;_USRDLL"
 				RuntimeLibrary="2"
 				DefaultCharIsUnsigned="TRUE"
@@ -118,16 +118,17 @@
 					Optimization="4"
 					GlobalOptimizations="1"
 					InlineFunctionExpansion="2"
-					EnableIntrinsicFunctions="1"
+					EnableIntrinsicFunctions="0"
 					FavorSizeOrSpeed="1"
 					OmitFramePointers="1"
-					OptimizeForProcessor="0"
+					OptimizeForProcessor="2"
+					Parallelization="1"
 					RuntimeLibrary="2"
 					DefaultCharIsUnsigned="1"
 					TreatWChar_tAsBuiltInType="1"
 					ForceConformanceInForLoopScope="1"
 					RuntimeTypeInfo="1"
-					AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /D &quot;LIAR_SHADERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;shaders_common.h&quot; /Fp&quot;Release/shaders.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/vc70.pdb&quot; /FR&quot;Release/&quot; /Gd /TP"
+					AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Ot /Oy /G6 /Qparallel /D &quot;LIAR_SHADERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;shaders_common.h&quot; /Fp&quot;Release/shaders.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/vc70.pdb&quot; /FR&quot;Release/&quot; /Gd /TP"
 					MSOriginalAdditionalOptions=""/>
 			</Tool>
 			<Tool 
@@ -140,7 +141,7 @@
 				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
 				AdditionalOptions="">
 				<IntelOptions 
-					AllOptions="/NOLOGO /DLL /OUT:&quot;D:\bram\visual_studio_projects\liar\src\..\bin/shaders.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /PDB:&quot;D:\bram\visual_studio_projects\liar\src\..\bin\shaders.pdb&quot; /TLBID:1 /IMPLIB:&quot;D:\bram\visual_studio_projects\liar\src\..\bin/shaders.lib&quot;  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
+					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/shaders.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\shaders.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/shaders.lib&quot;  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
 					MSOriginalAdditionalOptions=""/>
 			</Tool>
 			<Tool 
@@ -197,13 +198,16 @@
 						UsePrecompiledHeader="1"
 						AdditionalOptions="">
 						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /D &quot;LIAR_SHADERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;shaders_common.h&quot; /Fp&quot;Release/shaders.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/vc70.pdb&quot; /FR&quot;Release/&quot; /Gd /TP"
+							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Ot /Oy /G6 /Qparallel /D &quot;LIAR_SHADERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;shaders_common.h&quot; /Fp&quot;Release/shaders.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/vc70.pdb&quot; /FR&quot;Release/&quot; /Gd /TP"
 							MSOriginalAdditionalOptions=""/>
 					</Tool>
 				</FileConfiguration>
 			</File>
 			<File 
 				RelativePath=".\shaders_init.cpp">
+			</File>
+			<File 
+				RelativePath=".\simple.cpp">
 			</File>
 		</Filter>
 		<Filter 
@@ -215,6 +219,9 @@
 			</File>
 			<File 
 				RelativePath=".\shaders_common.h">
+			</File>
+			<File 
+				RelativePath=".\simple.h">
 			</File>
 		</Filter>
 	</Files>
