@@ -84,6 +84,7 @@ public:
 		const Intersection& iIntersection, IntersectionContext& oResult) const
     {
         localContext(iSample, iRay.ray(), iIntersection, oResult);
+		oResult.setScreenSpaceDifferentials(iRay);
     }
 
     void localSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const 

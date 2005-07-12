@@ -117,17 +117,20 @@ void Plane::doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay,
                            const kernel::Intersection& iIntersection, 
                            kernel::IntersectionContext& oResult) const
 {
-    oResult.setT(iIntersection.t());
+
     oResult.setPoint(iRay.point(iIntersection.t()));
+    TVector3D dPoint_dU;
+    TVector3D dPoint_dV;
+    plane_.getDirections(dPoint_dU, dPoint_dV);
+    oResult.setDPoint_dU(dPoint_dU);
+    oResult.setDPoint_dV(dPoint_dV);
+
     oResult.setNormal(plane_.normal());
-    TVector3D tangentU;
-    TVector3D tangentV;
-    plane_.getDirections(tangentU, tangentV);
-    oResult.setTangentU(tangentU);
-    oResult.setTangentV(tangentV);
-    TPlane3D::TUV uv = plane_.uv(oResult.point());
-    oResult.setU(uv.x);
-    oResult.setV(uv.y);
+    oResult.setDNormal_dU(TVector3D());
+    oResult.setDNormal_dV(TVector3D());
+
+	oResult.setUv(plane_.uv(oResult.point()));
+    oResult.setT(iIntersection.t());
 }
 
 

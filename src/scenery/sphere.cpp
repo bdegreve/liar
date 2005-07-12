@@ -126,25 +126,66 @@ void Sphere::doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay,
                             const kernel::Intersection& iIntersection, 
                             kernel::IntersectionContext& oResult) const
 {
-    oResult.setT(iIntersection.t());
-    oResult.setPoint(iRay.point(iIntersection.t()));
-    
-    TVector3D normal = oResult.point() - sphere_.center();
-    TVector3D tangentU = TVector3D(-normal.y, normal.x, 0);
-    TVector3D tangentV = cross(normal, tangentU);
-    normal *= invRadius_;
-    tangentU.normalize();
-    tangentV.normalize();
-    oResult.setNormal(normal);
-    oResult.setTangentU(tangentU);
-    oResult.setTangentV(tangentV);
-    
-    LASS_ASSERT(normal.z >= -TNumTraits::one && normal.z <= TNumTraits::one);
-    const TScalar theta = num::acos(normal.z);
+	const TScalar t = iIntersection.t();
+	const TPoint3D point = iRay.point(t);
+    oResult.setT(t);
+    oResult.setPoint(point);
+
+	//         [sin theta * cos phi]
+	// R = r * [sin theta * sin phi]
+	//         [cos theta          ]
+	//
+	const TVector3D R = point - sphere_.center();
+	const TVector3D normal = R * invRadius_;
+	oResult.setNormal(normal);
+
+	// phi = 2pi * u
+	// theta = pi * v
+	//
+	LASS_ASSERT(normal.z >= -TNumTraits::one && normal.z <= TNumTraits::one);
     const TScalar phi = num::atan2(normal.x, normal.y);
-    
-    oResult.setU(theta / TNumTraits::pi);
-    oResult.setV(phi / (2 * TNumTraits::pi));
+    const TScalar theta = num::acos(normal.z);
+	oResult.setUv(phi / (2 * TNumTraits::pi), theta / TNumTraits::pi);
+
+	//                   [sin theta * -sin phi]                   [cos theta * cos phi]
+	// dR_du = r * 2pi * [sin theta * cos phi ]  dR_dv = r * pi * [cos theta * sin phi]
+	//                   [0                   ]                   [-sin theta         ]
+	//
+	const TScalar sinTheta = num::sin(theta);
+	const TScalar cosTheta_sinTheta = normal.z / sinTheta;
+	const TVector3D dPoint_dU = 2 * TNumTraits::pi * TVector3D(-R.y, R.x, 0);
+	const TVector3D dPoint_dV = sphere_.radius() * TNumTraits::pi * TVector3D(
+		cosTheta_sinTheta * normal.x, cosTheta_sinTheta * normal.y, -sinTheta);
+	oResult.setDPoint_dU(dPoint_dU);
+	oResult.setDPoint_dV(dPoint_dV);
+
+	//                          [sin theta * cos phi]
+	// d^2R_dudu = -4r * pi^2 * [sin theta * sin phi]
+	//                          [0                  ]
+	//
+	//                         [sin theta * cos phi]
+	// d^2R_dvdv = -r * pi^2 * [sin theta * sin phi] = -pi^2 * R
+	//                         [cos theta          ]
+	//
+	//                         [cos theta * -sin phi]
+	// d^2R_dudv = 2r * pi^2 * [cos theta * cos phi ]
+	//                         [0                   ]
+	//
+	const TVector3D d2Point_dUdU = 2 * TNumTraits::pi * TVector3D(-dPoint_dU.y, dPoint_dU.x, 0);
+	const TVector3D d2Point_dVdV = -num::sqr(TNumTraits::pi) * R;
+	const TVector3D d2Point_dUdV = 2 * TNumTraits::pi * TVector3D(-dPoint_dV.y, dPoint_dV.x, 0);
+	
+	// Weingarten equations, http://mathworld.wolfram.com/WeingartenEquations.html
+	//
+	const TScalar E = dPoint_dU.squaredNorm();
+	const TScalar F = dot(dPoint_dU, dPoint_dV);
+	const TScalar G = dPoint_dV.squaredNorm(); 
+	const TScalar e = dPoint_dU.squaredNorm();
+	const TScalar f = dot(dPoint_dU, dPoint_dV);
+	const TScalar g = dPoint_dV.squaredNorm();
+	const TScalar invDenominator = num::inv(E * G - num::sqr(F));
+	oResult.setDNormal_dU(invDenominator * ((f * F - e * G) * dPoint_dU + (e * F - f * E) * dPoint_dV));
+	oResult.setDNormal_dV(invDenominator * ((g * F - f * G) * dPoint_dU + (f * F - g * E) * dPoint_dV));
 }
 
 

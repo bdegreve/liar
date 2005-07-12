@@ -42,47 +42,65 @@ class LIAR_KERNEL_DLL IntersectionContext
 {
 public:
 
+	IntersectionContext();
+
     const TPoint3D& point() const { return point_; }
+	const TVector3D& dPoint_dU() const { return dPoint_dU_; }
+	const TVector3D& dPoint_dV() const { return dPoint_dV_; }
+	const TVector3D& dPoint_dI() const { return dPoint_dI_; }
+	const TVector3D& dPoint_dJ() const { return dPoint_dJ_; }
     const TVector3D& normal() const { return normal_; }
-    const TVector3D& tangentU() const { return tangentU_; }
-    const TVector3D& tangentV() const { return tangentV_; }
+	const TVector3D& dNormal_dU() const { return dNormal_dU_; }
+	const TVector3D& dNormal_dV() const { return dNormal_dV_; }
+	const TVector3D& dNormal_dI() const { return dNormal_dI_; }
+	const TVector3D& dNormal_dJ() const { return dNormal_dJ_; }
+	const TPoint2D& uv() const { return uv_; }
+	const TVector2D& dUv_dI() const { return dUv_dI_; }
+	const TVector2D& dUv_dJ() const { return dUv_dI_; }
     const TScalar t() const { return t_; }
-    const TScalar u() const { return u_; }
-    const TScalar v() const { return v_; }
     const TShaderPtr& shader() const { return shader_; }
 
     void setPoint(const TPoint3D& iPoint) { point_ = iPoint; }
+	void setDPoint_dU(const TVector3D& iDPoint_dU) { dPoint_dU_ = iDPoint_dU; }
+	void setDPoint_dV(const TVector3D& iDPoint_dV) { dPoint_dV_ = iDPoint_dV; }
     void setNormal(const TVector3D& iNormal) { normal_ = iNormal; }
-    void setTangentU(const TVector3D& iTangentU) { tangentU_ = iTangentU; }
-    void setTangentV(const TVector3D& iTangentV) { tangentV_ = iTangentV; }
+	void setDNormal_dU(const TVector3D& iDNormal_dU) { dNormal_dU_ = iDNormal_dU; }
+	void setDNormal_dV(const TVector3D& iDNormal_dV) { dNormal_dV_ = iDNormal_dV; }
+	void setUv(const TPoint2D& iUv) { uv_ = iUv; }
+	void setUv(const TScalar iU, const TScalar iV) { uv_.x = iU; uv_.y = iV; }
     void setT(TScalar iT) { t_ = iT; }
-    void setU(TScalar iU) { u_ = iU; }
-    void setV(TScalar iV) { v_ = iV; }
     void setShader(const TShaderPtr& iShader) { shader_ = iShader; }
 
-	void transform(const TTransformation3D& iTransformation)
-	{
-		point_ = prim::transform(point_, iTransformation);
-		normal_ = prim::normalTransform(normal_, iTransformation);
-		tangentU_ = prim::transform(tangentU_, iTransformation);
-		tangentV_ = prim::transform(tangentV_, iTransformation);
-	}
+	void setScreenSpaceDifferentials(const DifferentialRay& iRay);
 
-	void translate(const TVector3D& iOffset)
-	{
-		point_ += iOffset;
-	}
+	void transform(const TTransformation3D& iTransformation);
+	void translate(const TVector3D& iOffset);
 
 private:
 
-    TPoint3D point_;
-    TVector3D normal_;
-    TVector3D tangentU_;
-    TVector3D tangentV_;
-    TScalar t_;
-    TScalar u_;
-    TScalar v_;
-    TShaderPtr shader_;
+	void setScreenSpaceDifferentialsI(const TRay3D& iRay, TVector3D& oDPoint, 
+		TVector3D& oDNormal, TVector2D& oDUv);
+
+    TPoint3D point_;		/**< world space coordinate */
+	TVector3D dPoint_dU_;	/**< partial derivative of point_ to surface coordinate u */
+	TVector3D dPoint_dV_;	/**< partial derivative of point_ to surface coordinate v */
+	TVector3D dPoint_dI_;	/**< partial derivative of point_ to screen space coordinate i */
+	TVector3D dPoint_dJ_;	/**< partial derivative of point_ to screen space coordinate j */
+
+	TVector3D normal_;		/**< normal of surface in world space */
+	TVector3D dNormal_dU_;	/**< partial derivative of normal_ to surface coordinate u */
+	TVector3D dNormal_dV_;	/**< partial derivative of normal_ to surface coordinate v */
+	TVector3D dNormal_dI_;	/**< partial derivative of normal_ to screen space coordinate i */
+	TVector3D dNormal_dJ_;	/**< partial derivative of normal_ to screen space coordinate j */
+
+	TPoint2D uv_;			/**< parametric coordinate of point_ on surface */
+	TVector2D dUv_dI_;		/**< partial derivative of uv_ to screen space coordinate i */
+	TVector2D dUv_dJ_;		/**< partial derivative of uv_ to screen space coordinate j */
+
+	TScalar t_;				/**< parameter of point_ on ray */
+    TShaderPtr shader_;		/**< shader to be used */
+
+	bool hasScreenSpaceDifferentials_;
 };
 
 }

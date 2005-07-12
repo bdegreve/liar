@@ -49,9 +49,9 @@ Uv::Uv(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB):
 
 kernel::Spectrum Uv::doLookUp(const kernel::IntersectionContext& iContext) const
 {
-	const TScalar u = num::mod(iContext.u(), TNumTraits::one);
-	const TScalar v = num::mod(iContext.v(), TNumTraits::one);
-	return u * (*textureA())(iContext) + v * (*textureB())(iContext);	
+	const TScalar u = num::mod(iContext.uv().x, TNumTraits::one);
+	const TScalar v = num::mod(iContext.uv().y, TNumTraits::one);
+	return u * textureA()->lookUp(iContext) + v * textureB()->lookUp(iContext);	
 }
 
 

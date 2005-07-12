@@ -48,7 +48,7 @@ class LIAR_KERNEL_DLL Texture: public python::PyObjectPlus
 public:
 
     virtual ~Texture();
-    Spectrum operator()(const IntersectionContext& iContext) const { return doLookUp(iContext); }
+    Spectrum lookUp(const IntersectionContext& iContext) const { return doLookUp(iContext); }
 
 	static const TTexturePtr& black();
 	static const TTexturePtr& white();

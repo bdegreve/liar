@@ -41,17 +41,17 @@ class LIAR_KERNEL_DLL DifferentialRay
 {
 public:
 
-    DifferentialRay(const TRay3D& iRay, const TRay3D& iDifferentialX, const TRay3D& iDifferentialY);
+    DifferentialRay(const TRay3D& iRay, const TRay3D& iDifferentialI, const TRay3D& iDifferentialJ);
 
-    const TRay3D& ray() const;
-    const TRay3D& differentialX() const;
-    const TRay3D& differentialY() const;
+	const TRay3D& ray() const { return ray_; }
+	const TRay3D& differentialI() const { return differentialI_; }
+	const TRay3D& differentialJ() const { return differentialJ_; }
 
 private:
 
     TRay3D ray_;
-    TRay3D differentialX_;
-    TRay3D differentialY_;
+    TRay3D differentialI_;
+    TRay3D differentialJ_;
 };
 
 }

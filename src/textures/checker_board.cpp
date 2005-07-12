@@ -65,9 +65,9 @@ void CheckerBoard::setSplit(const TVector2D& iSplit)
 
 kernel::Spectrum CheckerBoard::doLookUp(const kernel::IntersectionContext& iContext) const
 {
-	const TScalar u = num::mod(iContext.u(), TNumTraits::one);
-	const TScalar v = num::mod(iContext.v(), TNumTraits::one);
-	return (u < split_.x) == (v < split_.y) ? (*textureA())(iContext) : (*textureB())(iContext);	
+	const TScalar u = num::mod(iContext.uv().x, TNumTraits::one);
+	const TScalar v = num::mod(iContext.uv().y, TNumTraits::one);
+	return ((u < split_.x) == (v < split_.y) ? textureA() : textureB())->lookUp(iContext);	
 }
 
 

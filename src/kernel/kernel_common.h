@@ -82,7 +82,7 @@ typedef prim::Vector2D<TScalar> TVector2D;
 typedef prim::Point2D<TScalar> TPoint2D;
 typedef prim::Vector3D<TScalar> TVector3D;
 typedef prim::Point3D<TScalar> TPoint3D;
-typedef prim::Ray3D<TScalar> TRay3D;
+typedef prim::Ray3D<TScalar, prim::Normalized, prim::Unbounded> TRay3D;
 typedef prim::Aabb3D<TScalar> TAabb3D;
 typedef prim::Transformation3D<TScalar> TTransformation3D;
 
