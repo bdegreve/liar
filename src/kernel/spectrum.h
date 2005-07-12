@@ -78,8 +78,10 @@ public:
 
 	void swap(Spectrum& iOther);
 
-	const bool isScalar() const;
+	const bool operator!() const;
+	operator num::SafeBool() const;
 
+	const bool isScalar() const;
 	const TVector3D xyz() const;
 
 private:

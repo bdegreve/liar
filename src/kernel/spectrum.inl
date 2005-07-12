@@ -213,6 +213,20 @@ inline void Spectrum::swap(Spectrum& iOther)
 
 
 
+inline const bool Spectrum::operator!() const
+{
+	return xyz_.isZero();
+}
+
+
+
+inline Spectrum::operator num::SafeBool() const
+{
+	return xyz_.isZero() ? num::safeFalse : num::safeTrue;
+}
+
+
+
 inline const TVector3D Spectrum::xyz() const
 {
 	return xyz_;

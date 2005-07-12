@@ -34,8 +34,7 @@
 				BrowseInformation="1"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"
-				AdditionalOptions="">
+				DebugInformationFormat="3">
 				<IntelOptions 
 					Optimization="0"
 					OmitFramePointers="0"
@@ -46,8 +45,7 @@
 					TreatWChar_tAsBuiltInType="1"
 					ForceConformanceInForLoopScope="1"
 					RuntimeTypeInfo="1"
-					AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;tracers_common.h&quot; /Fp&quot;Debug/tracers_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/vc70.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"
-					MSOriginalAdditionalOptions=""/>
+					AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;tracers_common.h&quot; /Fp&quot;Debug/tracers_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/vc70.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"/>
 			</Tool>
 			<Tool 
 				Name="VCCustomBuildTool"/>
@@ -59,11 +57,9 @@
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
 				ImportLibrary="$(OutDir)/tracers.lib"
-				TargetMachine="1"
-				AdditionalOptions="">
+				TargetMachine="1">
 				<IntelOptions 
-					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/tracers_d.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\tracers_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/tracers.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
-					MSOriginalAdditionalOptions=""/>
+					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/tracers_d.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\tracers_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/tracers.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"/>
 			</Tool>
 			<Tool 
 				Name="VCMIDLTool"/>
@@ -112,8 +108,7 @@
 				PrecompiledHeaderThrough="tracers_common.h"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"
-				AdditionalOptions="">
+				DebugInformationFormat="3">
 				<IntelOptions 
 					Optimization="4"
 					GlobalOptimizations="1"
@@ -127,8 +122,7 @@
 					TreatWChar_tAsBuiltInType="1"
 					ForceConformanceInForLoopScope="1"
 					RuntimeTypeInfo="1"
-					AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Ot /Oy /G6 /Qparallel /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MT /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;tracers_common.h&quot; /Fp&quot;Release/tracers.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/vc70.pdb&quot; /Gd /TP"
-					MSOriginalAdditionalOptions=""/>
+					AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Ot /Oy /G6 /Qparallel /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MT /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;tracers_common.h&quot; /Fp&quot;Release/tracers.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/vc70.pdb&quot; /Gd /TP"/>
 			</Tool>
 			<Tool 
 				Name="VCCustomBuildTool"/>
@@ -142,11 +136,9 @@
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				ImportLibrary="$(OutDir)/tracers.lib"
-				TargetMachine="1"
-				AdditionalOptions="">
+				TargetMachine="1">
 				<IntelOptions 
-					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/tracers.pyd&quot; /INCREMENTAL:NO /LIBPATH:&quot;..\..\bin&quot; /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\tracers.pdb&quot; /OPT:REF /OPT:ICF /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/tracers.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
-					MSOriginalAdditionalOptions=""/>
+					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/tracers.pyd&quot; /INCREMENTAL:NO /LIBPATH:&quot;..\..\bin&quot; /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\tracers.pdb&quot; /OPT:REF /OPT:ICF /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/tracers.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"/>
 			</Tool>
 			<Tool 
 				Name="VCMIDLTool"/>
@@ -184,13 +176,22 @@
 				<FileConfiguration 
 					Name="Debug|Win32">
 					<Tool 
-						Name="VCCLCompilerTool"
-						AdditionalOptions="">
+						Name="VCCLCompilerTool">
 						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;tracers_common.h&quot; /Fp&quot;Debug/tracers_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/vc70.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"
-							MSOriginalAdditionalOptions=""/>
+							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;tracers_common.h&quot; /Fp&quot;Debug/tracers_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/vc70.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"/>
 					</Tool>
 				</FileConfiguration>
+				<FileConfiguration 
+					Name="Release|Win32">
+					<Tool 
+						Name="VCCLCompilerTool">
+						<IntelOptions 
+							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Ot /Oy /G6 /Qparallel /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MT /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;tracers_common.h&quot; /Fp&quot;Release/tracers.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/vc70.pdb&quot; /Gd /TP"/>
+					</Tool>
+				</FileConfiguration>
+			</File>
+			<File 
+				RelativePath=".\photon_mapper.cpp">
 			</File>
 			<File 
 				RelativePath=".\tracers_common.cpp">
@@ -198,22 +199,18 @@
 					Name="Debug|Win32">
 					<Tool 
 						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-						AdditionalOptions="">
+						UsePrecompiledHeader="1">
 						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;tracers_common.h&quot; /Fp&quot;Debug/tracers_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/vc70.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"
-							MSOriginalAdditionalOptions=""/>
+							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;tracers_common.h&quot; /Fp&quot;Debug/tracers_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/vc70.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"/>
 					</Tool>
 				</FileConfiguration>
 				<FileConfiguration 
 					Name="Release|Win32">
 					<Tool 
 						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-						AdditionalOptions="">
+						UsePrecompiledHeader="1">
 						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Ot /Oy /G6 /Qparallel /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MT /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;tracers_common.h&quot; /Fp&quot;Release/tracers.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/vc70.pdb&quot; /Gd /TP"
-							MSOriginalAdditionalOptions=""/>
+							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Ot /Oy /G6 /Qparallel /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MT /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;tracers_common.h&quot; /Fp&quot;Release/tracers.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/vc70.pdb&quot; /Gd /TP"/>
 					</Tool>
 				</FileConfiguration>
 			</File>
@@ -222,11 +219,17 @@
 				<FileConfiguration 
 					Name="Debug|Win32">
 					<Tool 
-						Name="VCCLCompilerTool"
-						AdditionalOptions="">
+						Name="VCCLCompilerTool">
 						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;tracers_common.h&quot; /Fp&quot;Debug/tracers_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/vc70.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"
-							MSOriginalAdditionalOptions=""/>
+							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;tracers_common.h&quot; /Fp&quot;Debug/tracers_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/vc70.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"/>
+					</Tool>
+				</FileConfiguration>
+				<FileConfiguration 
+					Name="Release|Win32">
+					<Tool 
+						Name="VCCLCompilerTool">
+						<IntelOptions 
+							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Ot /Oy /G6 /Qparallel /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MT /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;tracers_common.h&quot; /Fp&quot;Release/tracers.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/vc70.pdb&quot; /Gd /TP"/>
 					</Tool>
 				</FileConfiguration>
 			</File>
@@ -240,6 +243,9 @@
 			</File>
 			<File 
 				RelativePath=".\light_policies.h">
+			</File>
+			<File 
+				RelativePath=".\photon_mapper.h">
 			</File>
 			<File 
 				RelativePath=".\tracers_common.h">

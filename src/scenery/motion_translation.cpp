@@ -134,7 +134,7 @@ const TAabb3D MotionTranslation::doBoundingBox(const kernel::TimePeriod& iPeriod
 
 inline const TVector3D MotionTranslation::localToWorld(TTime iTime) const
 {
-	return localToWorldStart_ + iTime * speedInWorld_;
+	return localToWorldStart_ + static_cast<TScalar>(iTime) * speedInWorld_;
 }
 
 

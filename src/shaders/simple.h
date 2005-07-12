@@ -56,6 +56,9 @@ public:
 	const kernel::TTexturePtr& specularPower() const;
 	void setSpecularPower(const kernel::TTexturePtr& iSpecularPower);
 
+	const kernel::TTexturePtr& reflective() const;
+	void setReflective(const kernel::TTexturePtr& iReflective);
+
 private:
 
 	kernel::Spectrum doDirectLight(const kernel::Sample& iSample, const kernel::DifferentialRay& iRay,
@@ -65,6 +68,7 @@ private:
 	kernel::TTexturePtr diffuse_;
 	kernel::TTexturePtr specular_;
 	kernel::TTexturePtr specularPower_;
+	kernel::TTexturePtr reflective_;
 };
 
 }

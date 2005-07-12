@@ -44,7 +44,8 @@ Simple::Simple():
 	kernel::Shader(&Type),
 	diffuse_(kernel::Texture::white()),
 	specular_(kernel::Texture::black()),
-	specularPower_(kernel::Texture::white())
+	specularPower_(kernel::Texture::white()),
+	reflective_(kernel::Texture::black())
 {	
 }
 
@@ -54,7 +55,8 @@ Simple::Simple(const kernel::TTexturePtr& iDiffuse):
 	kernel::Shader(&Type),
 	diffuse_(iDiffuse),
 	specular_(kernel::Texture::black()),
-	specularPower_(kernel::Texture::white())
+	specularPower_(kernel::Texture::white()),
+	reflective_(kernel::Texture::black())
 {	
 }
 
@@ -64,7 +66,8 @@ Simple::Simple(const kernel::TTexturePtr& iDiffuse, const kernel::TTexturePtr& i
 	kernel::Shader(&Type),
 	diffuse_(iDiffuse),
 	specular_(iSpecular),
-	specularPower_(kernel::Texture::white())
+	specularPower_(kernel::Texture::white()),
+	reflective_(kernel::Texture::black())
 {	
 }
 
@@ -91,6 +94,13 @@ const kernel::TTexturePtr& Simple::specularPower() const
 
 
 
+const kernel::TTexturePtr& Simple::reflective() const
+{
+	return reflective_;
+}
+
+
+
 void Simple::setDiffuse(const kernel::TTexturePtr& iDiffuse)
 {
 	diffuse_ = iDiffuse;
@@ -112,6 +122,13 @@ void Simple::setSpecularPower(const kernel::TTexturePtr& iSpecularPower)
 
 
 
+void Simple::setReflective(const kernel::TTexturePtr& iReflective)
+{
+	reflective_ = iReflective;
+}
+
+
+
 // --- protected -----------------------------------------------------------------------------------
 
 
@@ -126,9 +143,13 @@ kernel::Spectrum Simple::doDirectLight(const kernel::Sample& iSample,
 									   const kernel::LightContext& iLight)
 {
 	// can we move these outside?
-	const kernel::Spectrum diffuse = (*diffuse_)(iContext);
-	const kernel::Spectrum specular = (*specular_)(iContext);
-	const kernel::Spectrum specularPower = (*specularPower_)(iContext);
+	const kernel::Spectrum diffuse = diffuse_->lookUp(iContext);
+	const kernel::Spectrum specular = specular_->lookUp(iContext);
+	const kernel::Spectrum specularPower = specularPower_->lookUp(iContext);
+	if (!diffuse && !specular)
+	{
+		return kernel::Spectrum();
+	}
 
 	const TPoint3D& intersectionPoint = iContext.point();
 	const TPoint3D shadowStartPoint = intersectionPoint + 

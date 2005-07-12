@@ -81,7 +81,11 @@ kernel::Spectrum Lambert::doDirectLight(const kernel::Sample& iSample,
 										const kernel::LightContext& iLight)
 {
 	// can we move these outside?
-	const kernel::Spectrum diffuse = (*diffuse_)(iContext);
+	const kernel::Spectrum diffuse = diffuse_->lookUp(iContext);
+	if (!diffuse)
+	{
+		return kernel::Spectrum();
+	}
 
 	const TPoint3D& intersectionPoint = iContext.point();
 	const TPoint3D shadowStartPoint = intersectionPoint + 
