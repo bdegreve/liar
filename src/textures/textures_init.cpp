@@ -29,7 +29,9 @@
 #include "checker_volume.h"
 #include "constant.h"
 #include "grid_board.h"
+#include "linear_interpolator.h"
 #include "mix_2.h"
+#include "time.h"
 #include "uv.h"
 
 PY_DECLARE_MODULE(textures)
@@ -57,6 +59,8 @@ LIAR_TEXTURES_DLL void inittextures(void)
 	PY_INJECT_CLASS_IN_MODULE(CheckerVolume, textures, "mixes two textures in 3D checkerboard pattern")
 	PY_INJECT_CLASS_IN_MODULE(Constant, textures, "texture with constant value")
 	PY_INJECT_CLASS_IN_MODULE(GridBoard, textures, "mixes two textures in 2D grid pattern")
+	PY_INJECT_CLASS_IN_MODULE(LinearInterpolator, textures, "interpolates textures using gray value of control texture as parameter")
+	PY_INJECT_CLASS_IN_MODULE(Time, textures, "evaluates to sampled time")
 	PY_INJECT_CLASS_IN_MODULE(Uv, textures, "mixes two textures by the u and v context channels")
 
 	PyRun_SimpleString("print 'liar.textures imported'\n");

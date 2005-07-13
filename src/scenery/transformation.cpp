@@ -99,10 +99,12 @@ void Transformation::doAccept(util::VisitorBase& ioVisitor)
 void Transformation::doIntersect(const kernel::Sample& iSample, const TRay3D& iRay, 
 								 kernel::Intersection& oResult) const
 {
-	const TRay3D localRay = transform(iRay, localToWorld_.inverse());
+	TScalar tScaler = TNumTraits::one;
+	const TRay3D localRay = transform(iRay, localToWorld_.inverse(), tScaler);
 	child_->intersect(iSample, localRay, oResult);
     if (oResult)
     {
+		oResult.t() /= tScaler; // scale t back to original ray
         oResult.push(this);
     }
 }
@@ -112,7 +114,7 @@ void Transformation::doIntersect(const kernel::Sample& iSample, const TRay3D& iR
 const bool Transformation::doIsIntersecting(const kernel::Sample& iSample, const TRay3D& iRay, 
 											TScalar iMaxT) const
 {
-	const TRay3D localRay = transform(iRay, localToWorld_.inverse());
+	const TRay3D localRay = transform(iRay, localToWorld_.inverse(), iMaxT);
 	return child_->isIntersecting(iSample, localRay, iMaxT);
 }
 
@@ -123,8 +125,16 @@ void Transformation::doLocalContext(const kernel::Sample& iSample, const TRay3D&
 									kernel::IntersectionContext& oResult) const
 {
     kernel::IntersectionDescendor descend(iIntersection);
-	const TRay3D localRay = transform(iRay, localToWorld_.inverse());
+
+	TScalar t = oResult.t();
+	const TRay3D localRay = transform(iRay, localToWorld_.inverse(), t);
+	
+	const TScalar tBackup = oResult.t();
+	oResult.setT(t);
+
 	child_->localContext(iSample, localRay, iIntersection, oResult);
+
+	oResult.setT(tBackup);
 	oResult.transform(localToWorld_);
 }
 

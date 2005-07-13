@@ -47,7 +47,8 @@ public:
 
 private:
 
-	kernel::Spectrum doLookUp(const kernel::IntersectionContext& iContext) const;
+	kernel::Spectrum doLookUp(const kernel::Sample& iSample, 
+		const kernel::IntersectionContext& iContext) const;
 
 	kernel::Spectrum value_;
 };

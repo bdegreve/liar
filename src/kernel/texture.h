@@ -32,6 +32,7 @@
 
 #include "kernel_common.h"
 #include "intersection_context.h"
+#include "sample.h"
 #include "spectrum.h"
 
 namespace liar
@@ -48,7 +49,10 @@ class LIAR_KERNEL_DLL Texture: public python::PyObjectPlus
 public:
 
     virtual ~Texture();
-    Spectrum lookUp(const IntersectionContext& iContext) const { return doLookUp(iContext); }
+    Spectrum lookUp(const Sample& iSample, const IntersectionContext& iContext) const 
+	{ 
+		return doLookUp(iSample, iContext); 
+	}
 
 	static const TTexturePtr& black();
 	static const TTexturePtr& white();
@@ -59,7 +63,7 @@ protected:
 
 private:
 
-	virtual Spectrum doLookUp(const IntersectionContext& iContext) const = 0;
+	virtual Spectrum doLookUp(const Sample& iSample, const IntersectionContext& iContext) const = 0;
 
 	static TTexturePtr black_;
 	static TTexturePtr white_;
@@ -75,7 +79,10 @@ namespace impl
 	public:
 		TextureBlack(): Texture(&Type) {}
 	private:
-		Spectrum doLookUp(const IntersectionContext&) const { return Spectrum(TNumTraits::zero); }
+		Spectrum doLookUp(const Sample&, const IntersectionContext&) const 
+		{ 
+			return Spectrum(TNumTraits::zero); 
+		}
 	};
 
 	class LIAR_KERNEL_DLL TextureWhite: public Texture
@@ -84,7 +91,10 @@ namespace impl
 	public:
 		TextureWhite(): Texture(&Type) {}
 	private:
-		Spectrum doLookUp(const IntersectionContext&) const { return Spectrum(TNumTraits::one); }
+		Spectrum doLookUp(const Sample&, const IntersectionContext&) const 
+		{ 
+			return Spectrum(TNumTraits::one); 
+		}
 	};
 }
 

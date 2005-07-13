@@ -143,9 +143,9 @@ kernel::Spectrum Simple::doDirectLight(const kernel::Sample& iSample,
 									   const kernel::LightContext& iLight)
 {
 	// can we move these outside?
-	const kernel::Spectrum diffuse = diffuse_->lookUp(iContext);
-	const kernel::Spectrum specular = specular_->lookUp(iContext);
-	const kernel::Spectrum specularPower = specularPower_->lookUp(iContext);
+	const kernel::Spectrum diffuse = diffuse_->lookUp(iSample, iContext);
+	const kernel::Spectrum specular = specular_->lookUp(iSample, iContext);
+	const kernel::Spectrum specularPower = specularPower_->lookUp(iSample, iContext);
 	if (!diffuse && !specular)
 	{
 		return kernel::Spectrum();

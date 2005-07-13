@@ -110,6 +110,8 @@ inline const Spectrum operator*(const Spectrum& iA, const Spectrum& iB);
 inline const Spectrum operator/(const Spectrum& iA, const Spectrum& iB);
 inline const Spectrum pow(const Spectrum& iA, const Spectrum& iB);
 
+inline const Spectrum blend(const Spectrum& iA, const Spectrum& iB, Spectrum::TParam iFactor);
+
 Spectrum xyz(const TVector3D& iXYZ);
 Spectrum xyz(TScalar iX, TScalar iY, TScalar iZ);
 

@@ -30,6 +30,7 @@ namespace output
 PY_DECLARE_CLASS(Image);
 PY_CLASS_CONSTRUCTOR_2(Image, std::string, Image::TSize)
 PY_CLASS_MEMBER_R(Image, "size", size)
+PY_CLASS_MEMBER_RW(Image, "filename", filename, setFilename)
 PY_CLASS_MEMBER_RW(Image, "rgbSpace", rgbSpace, setRgbSpace)
 PY_CLASS_MEMBER_RW(Image, "gamma", gamma, setGamma)
 PY_CLASS_MEMBER_RW(Image, "exposureTime", exposureTime, setExposureTime)
@@ -62,6 +63,13 @@ Image::~Image()
 
 
 
+const std::string& Image::filename() const
+{
+	return filename_;
+}
+
+
+
 const Image::TSize& Image::size() const
 {
 	return size_;
@@ -86,6 +94,13 @@ const TScalar Image::gamma() const
 const TScalar Image::exposureTime() const
 {
     return exposureTime_;
+}
+
+
+
+void Image::setFilename(const std::string& iFilename)
+{
+	filename_ = iFilename;
 }
 
 
@@ -134,11 +149,6 @@ void Image::doWriteRender(const kernel::Sample& iSample, const kernel::Spectrum&
 
 	TVector3D xyz = iRadiance.xyz();
 	xyz *= iSample.weight();
-
-	if (!xyz.isZero())
-	{
-		int a = 5;
-	}
 	
     image_(j, i) += rgbSpace_->convert(xyz);
 	weights_[j * size_.x + i] += TNumTraits::one;

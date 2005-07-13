@@ -21,28 +21,28 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::textures::Uv
- *  @brief mixes two textures based on the @a u and @a v context values
+/** @class liar::textures::Constant
+ *  @brief evaluates to sampled time
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_UV_H
-#define LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_UV_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_TIME_H
+#define LIAR_GUARDIAN_OF_INCLUSION_TIME_H
 
 #include "textures_common.h"
-#include "mix_2.h"
+#include "../kernel/texture.h"
 
 namespace liar
 {
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL Uv: public Mix2
+class LIAR_TEXTURES_DLL Time: public kernel::Texture
 {
-	PY_HEADER(Mix2)
+	PY_HEADER(kernel::Texture)
 public:
 
-	Uv(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB);
+	Time();
 
 private:
 

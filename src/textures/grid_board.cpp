@@ -63,13 +63,14 @@ void GridBoard::setSplit(const TVector2D& iSplit)
 
 // --- private -------------------------------------------------------------------------------------
 
-kernel::Spectrum GridBoard::doLookUp(const kernel::IntersectionContext& iContext) const
+kernel::Spectrum GridBoard::doLookUp(const kernel::Sample& iSample, 
+									 const kernel::IntersectionContext& iContext) const
 {
 	const TScalar u = num::mod(iContext.uv().x, TNumTraits::one);
 	const TScalar v = num::mod(iContext.uv().y, TNumTraits::one);
 	const bool isA = u < split_.x || v < split_.x || 
 		u > (TNumTraits::one - split_.x) || v > (TNumTraits::one - split_.y);
-	return (isA ? textureA() : textureB())->lookUp(iContext);	
+	return (isA ? textureA() : textureB())->lookUp(iSample, iContext);	
 }
 
 

@@ -75,7 +75,8 @@ Constant::Constant(const std::vector<TScalar>& iPowerDensities,
 
 // --- private -------------------------------------------------------------------------------------
 
-kernel::Spectrum Constant::doLookUp(const kernel::IntersectionContext& iContext) const
+kernel::Spectrum Constant::doLookUp(const kernel::Sample& iSample, 
+									const kernel::IntersectionContext& iContext) const
 {
 	return value_;
 }

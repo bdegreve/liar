@@ -57,7 +57,8 @@ public:
     void push(const SceneObject* iObject);
     const SceneObject* const object() const;
 
-    const TScalar t() const;
+	const TScalar t() const { return t_; }
+	TScalar& t() { return t_; }
     const bool isEmpty() const;
 	const bool operator!() const { return isEmpty(); }
 	operator num::SafeBool() const { return isEmpty() ? num::safeFalse : num::safeTrue; }

@@ -31,6 +31,8 @@ namespace samplers
 
 PY_DECLARE_CLASS(Stratifier);
 PY_CLASS_CONSTRUCTOR_0(Stratifier)
+PY_CLASS_CONSTRUCTOR_1(Stratifier, const Stratifier::TResolution&)
+PY_CLASS_CONSTRUCTOR_2(Stratifier, const Stratifier::TResolution&, unsigned)
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -38,8 +40,25 @@ Stratifier::Stratifier():
     Sampler(&Type),
 	jitterGenerator_(numberGenerator_)
 {
-    setResolution(TResolution(320, 240));
-    setSamplesPerPixel(1);
+	init();
+}
+
+
+
+Stratifier::Stratifier(const TResolution& iResolution):
+    Sampler(&Type),
+	jitterGenerator_(numberGenerator_)
+{
+	init(iResolution);
+}
+
+
+
+Stratifier::Stratifier(const TResolution& iResolution, unsigned iNumberOfSamplesPerPixel):
+    Sampler(&Type),
+	jitterGenerator_(numberGenerator_)
+{
+	init(iResolution, iNumberOfSamplesPerPixel);
 }
 
 
@@ -50,6 +69,14 @@ Stratifier::Stratifier():
 
 
 // --- private -------------------------------------------------------------------------------------
+
+void Stratifier::init(const TResolution& iResolution, unsigned iNumberOfSamplesPerPixel)
+{
+	setResolution(iResolution);
+	setSamplesPerPixel(iNumberOfSamplesPerPixel);
+}
+
+
 
 const Stratifier::TResolution& Stratifier::doResolution() const
 {

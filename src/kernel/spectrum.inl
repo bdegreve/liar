@@ -412,6 +412,20 @@ inline const Spectrum pow(const Spectrum& iA, Spectrum::TParam iB)
 	return result;
 }
 
+
+
+/** @relates liar::kernel::Spectrum
+ *  Blend between to spectra by a factor.
+ *  @return @a iA * ( 1 - @a iFactor ) + @a iB * @a iFactor
+ */
+inline const Spectrum blend(const Spectrum& iA, const Spectrum& iB, Spectrum::TParam iFactor)
+{
+	Spectrum result(iA);
+	result *= (TNumTraits::one - iFactor);
+	result += iFactor * iB;
+	return result;
+}
+
 }
 
 }

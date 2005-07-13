@@ -53,10 +53,13 @@ public:
 	Image(const std::string& iFilename, const TSize& iSize);
     ~Image();
 
+	const std::string& filename() const;
 	const TSize& size() const;
 	const kernel::TRgbSpacePtr& rgbSpace() const;
     const TScalar gamma() const;
 	const TScalar exposureTime() const;
+
+	void setFilename(const std::string& iFilename);
 	void setRgbSpace(const kernel::TRgbSpacePtr& iRgbSpace);
     void setGamma(TScalar iGammaExponent);
 	void setExposureTime(TScalar iTime);
@@ -71,7 +74,7 @@ private:
 
     io::Image image_;
 	TWeights weights_;
-    const std::string filename_;
+    std::string filename_;
     TSize size_;
 	kernel::TRgbSpacePtr rgbSpace_;
     TScalar gamma_;

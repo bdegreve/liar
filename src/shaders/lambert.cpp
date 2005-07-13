@@ -81,7 +81,7 @@ kernel::Spectrum Lambert::doDirectLight(const kernel::Sample& iSample,
 										const kernel::LightContext& iLight)
 {
 	// can we move these outside?
-	const kernel::Spectrum diffuse = diffuse_->lookUp(iContext);
+	const kernel::Spectrum diffuse = diffuse_->lookUp(iSample, iContext);
 	if (!diffuse)
 	{
 		return kernel::Spectrum();

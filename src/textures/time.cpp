@@ -21,77 +21,22 @@
  *  http://liar.sourceforge.net
  */
 
-#include "kernel_common.h"
-#include "intersection.h"
-#include "intersection_context.h"
-#include "scene_object.h"
-#include <lass/stde/extended_iterator.h>
+#include "textures_common.h"
+#include "time.h"
 
 namespace liar
 {
-namespace kernel
+namespace textures
 {
 
-Intersection Intersection::empty_;
-
-
+PY_DECLARE_CLASS(Time)
+PY_CLASS_CONSTRUCTOR_0(Time);
 
 // --- public --------------------------------------------------------------------------------------
 
-Intersection::Intersection():
-    t_(-TNumTraits::one)
+Time::Time():
+	Texture(&Type)
 {
-    currentLevel_ = objectStack_.end();
-}
-
-
-
-Intersection::Intersection(const SceneObject* iObject, TScalar iT):
-    t_(iT)
-{
-    push(iObject);
-}
-
-
-
-void Intersection::push(const SceneObject* iObject)
-{
-    objectStack_.push_back(iObject);
-    currentLevel_ = stde::prior(objectStack_.end()); 
-}
-
-
-
-const SceneObject* const Intersection::object() const
-{
-    return *currentLevel_;
-}
-
-
-
-const bool Intersection::isEmpty() const
-{
-    return t_ <= 0;
-}
-
-
-
-/** return an empty intersection.
- */
-const Intersection& Intersection::empty()
-{
-    return empty_;
-}
-
-
-
-/** swap data with other intersection
- */
-void Intersection::swap(Intersection& iOther)
-{
-    std::swap(objectStack_, iOther.objectStack_);
-    std::swap(currentLevel_, iOther.currentLevel_);
-    std::swap(t_, iOther.t_);
 }
 
 
@@ -102,22 +47,10 @@ void Intersection::swap(Intersection& iOther)
 
 // --- private -------------------------------------------------------------------------------------
 
-/** ascend in object stack
- */
-void Intersection::descend() const
+kernel::Spectrum Time::doLookUp(const kernel::Sample& iSample, 
+								const kernel::IntersectionContext& iContext) const
 {
-    LASS_ASSERT(currentLevel_ != objectStack_.begin());
-    --currentLevel_;
-}
-
-
-
-/** descend in object stack
- */
-void Intersection::ascend() const
-{
-    ++currentLevel_;
-    LASS_ASSERT(currentLevel_ != objectStack_.end());
+	return kernel::Spectrum(iSample.time());
 }
 
 
@@ -129,3 +62,4 @@ void Intersection::ascend() const
 }
 
 // EOF
+

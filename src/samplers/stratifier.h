@@ -45,13 +45,17 @@ class LIAR_SAMPLERS_DLL Stratifier: public kernel::Sampler
 public:
 
     Stratifier();
+    Stratifier(const TResolution& iResolution, unsigned iNumberOfSamplesPerPixel);
+    Stratifier(const TResolution& iResolution);
 
 private:
 
     typedef num::RandomMT19937 TNumberGenerator;
     typedef num::DistributionUniform<TScalar, TNumberGenerator, num::rtRightOpen> TJitterGenerator;
 
-    virtual const TResolution& doResolution() const;
+	void init(const TResolution& iResolution = TResolution(320, 240), unsigned iNumberOfSamples = 1);
+
+	virtual const TResolution& doResolution() const;
     virtual const unsigned doSamplesPerPixel() const;
     virtual void doSetResolution(const TResolution& iResolution);
     virtual void doSetSamplesPerPixel(unsigned iSamplesPerPixel);
