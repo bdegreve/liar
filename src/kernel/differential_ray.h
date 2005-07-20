@@ -22,6 +22,7 @@
  */
 
 /** @class liar::kernel::DifferentialRay
+ *  @brief a bounded ray plus two rays for screen space differentials
  *  @author Bram de Greve [BdG]
  */
 
@@ -30,6 +31,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_DIFFERENTIAL_RAY_H
 
 #include "kernel_common.h"
+#include "bounded_ray.h"
 #include <lass/prim/point_2d.h>
 
 namespace liar
@@ -41,15 +43,20 @@ class LIAR_KERNEL_DLL DifferentialRay
 {
 public:
 
-    DifferentialRay(const TRay3D& iRay, const TRay3D& iDifferentialI, const TRay3D& iDifferentialJ);
+    DifferentialRay(const BoundedRay& iCentralRay, 
+		const TRay3D& iDifferentialI, 
+		const TRay3D& iDifferentialJ);
 
-	const TRay3D& ray() const { return ray_; }
+	const BoundedRay& centralRay() const { return centralRay_; }
 	const TRay3D& differentialI() const { return differentialI_; }
 	const TRay3D& differentialJ() const { return differentialJ_; }
 
+	const TPoint3D& support() const { return centralRay_.support(); }		/**< return support point of central ray */
+	const TVector3D& direction() const { return centralRay_.direction(); }	/**< return diretion of central ray */
+
 private:
 
-    TRay3D ray_;
+    BoundedRay centralRay_;
     TRay3D differentialI_;
     TRay3D differentialJ_;
 };

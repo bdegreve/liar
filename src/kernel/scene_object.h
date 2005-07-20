@@ -57,18 +57,22 @@ public:
 
     virtual ~SceneObject();
 
-    void intersect(const Sample& iSample, const TRay3D& iRay, Intersection& oResult) const 
+    void intersect(const Sample& iSample, const BoundedRay& iRay, Intersection& oResult) const 
 	{ 
-		doIntersect(iSample, iRay, oResult); 
+		doIntersect(iSample, iRay, oResult);
 	}
 	void intersect(const Sample& iSample, const DifferentialRay& iRay, Intersection& oResult) const 
 	{ 
-		doIntersect(iSample, iRay.ray(), oResult); 
+		doIntersect(iSample, iRay.centralRay(), oResult); 
 	}
 	
-	const bool isIntersecting(const Sample& iSample, const TRay3D& iRay, TScalar iMaxT) const 
+	const bool isIntersecting(const Sample& iSample, const BoundedRay& iRay) const 
 	{
-		return doIsIntersecting(iSample, iRay, iMaxT); 
+		return doIsIntersecting(iSample, iRay);
+	}
+	const bool isIntersecting(const Sample& iSample, const DifferentialRay& iRay) const 
+	{
+		return doIsIntersecting(iSample, iRay.centralRay()); 
 	}
 
 	void localContext(const Sample& iSample, const TRay3D& iRay, 
@@ -80,12 +84,22 @@ public:
             oResult.setShader(shader_);
         }
     }
+	void localContext(const Sample& iSample, const BoundedRay& iRay, 
+		const Intersection& iIntersection, IntersectionContext& oResult) const
+    {
+		localContext(iSample, iRay.unboundedRay(), iIntersection, oResult);
+    }
 	void localContext(const Sample& iSample, const DifferentialRay& iRay, 
 		const Intersection& iIntersection, IntersectionContext& oResult) const
     {
-        localContext(iSample, iRay.ray(), iIntersection, oResult);
+		localContext(iSample, iRay.centralRay(), iIntersection, oResult);
 		oResult.setScreenSpaceDifferentials(iRay);
     }
+
+	const bool contains(const Sample& iSample, const TPoint3D& iPoint) const 
+	{ 
+		return doContains(iSample, iPoint); 
+	}
 
     void localSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const 
 	{ 
@@ -110,14 +124,14 @@ private:
     TShaderPtr shader_;
 
     LASS_UTIL_ACCEPT_VISITOR;
-    virtual void doIntersect(const Sample& iSample, const TRay3D& iRay, 
+    virtual void doIntersect(const Sample& iSample, const BoundedRay& iRay, 
 		Intersection& oResult) const = 0;
-	virtual const bool doIsIntersecting(const Sample& iSample, const TRay3D& iRay, 
-		TScalar iMaxT) const = 0;
+	virtual const bool doIsIntersecting(const Sample& iSample, const BoundedRay& iRay) const = 0;
     virtual void doLocalContext(const Sample& iSample, const TRay3D& iRay, 
 		const Intersection& iIntersection, IntersectionContext& oResult) const = 0;
+	virtual const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const = 0;
     virtual const TAabb3D doBoundingBox(const TimePeriod& iPeriod) const = 0;
-    
+
 	virtual void doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const;
 	virtual const bool doHasMotion() const;
 

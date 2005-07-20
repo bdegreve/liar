@@ -59,7 +59,6 @@
 #include <lass/prim/color_rgba.h>
 #include <lass/prim/transformation_3d.h>
 #include <lass/util/pyobject_plus.h>
-#include <lass/prim/pyobject_util.h>
 
 #include "config.h"
 
@@ -100,10 +99,11 @@ const std::string name = LIAR_NAME_FULL;
 const std::string version = LASS_STRINGIFY(LIAR_VERSION_MAJOR) "." 
 	LASS_STRINGIFY(LIAR_VERSION_MINOR) "." LASS_STRINGIFY(LIAR_VERSION_REVISION);
 const std::string authors = LIAR_AUTHORS;
+const std::string website = LIAR_WEBSITE;
 
 const std::string license =	
-	"LiAR isn't a raytracer"
-    "Copyright (C) 2004-2005 Bram de Greve\n"
+	LIAR_NAME_FULL "\n"
+    "Copyright (C) 2004-2005 " LIAR_AUTHORS "\n"
 	"\n"
 	"This is free software; you can redistribute it and/or modify\n"
 	"it under the terms of the GNU General Public License as published by\n"
@@ -119,7 +119,7 @@ const std::string license =
 	"along with this program; if not, write to the Free Software\n"
 	"Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA\n"
     "\n"
-    "http://liar.sourceforge.net \n";
+    LIAR_WEBSITE "\n";
 
 
 

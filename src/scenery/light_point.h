@@ -69,16 +69,16 @@ private:
 
     LASS_UTIL_ACCEPT_VISITOR;
 
-	void doIntersect(const kernel::Sample& iSample, const TRay3D& iRay, 
+	void doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
 		kernel::Intersection& oResult) const;
-	const bool doIsIntersecting(const kernel::Sample& iSample, const TRay3D& iRay, 
-		TScalar iMaxT) const;
+	const bool doIsIntersecting(const kernel::Sample& iSample, const kernel::BoundedRay& iRay) const;
 	void doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay, 
 		const kernel::Intersection& iIntersection, kernel::IntersectionContext& oResult) const;
+	const bool doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const;
 	const TAabb3D doBoundingBox(const kernel::TimePeriod& iPeriod) const;
 
 	const kernel::Spectrum doSampleRadiance(const TVector2D& iSample, const TPoint3D& iDestionation,
-		TRay3D& oShadowRay, TScalar& oMaxT) const;
+		kernel::BoundedRay& oShadowRay) const;
 	const unsigned doNumberOfRadianceSamples() const;
 
     TPoint3D position_;

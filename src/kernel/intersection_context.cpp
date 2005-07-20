@@ -91,6 +91,18 @@ void IntersectionContext::translate(const TVector3D& iOffset)
 
 
 
+void IntersectionContext::flipNormal()
+{
+	normal_ = -normal_;
+	dNormal_dU_ = -dNormal_dU_;
+	dNormal_dV_ = -dNormal_dV_;
+	dNormal_dI_ = -dNormal_dI_;
+	dNormal_dJ_ = -dNormal_dJ_;
+}
+
+
+
+
 // --- protected -----------------------------------------------------------------------------------
 
 // --- private -------------------------------------------------------------------------------------

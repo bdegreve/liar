@@ -50,7 +50,7 @@ Time::Time():
 kernel::Spectrum Time::doLookUp(const kernel::Sample& iSample, 
 								const kernel::IntersectionContext& iContext) const
 {
-	return kernel::Spectrum(iSample.time());
+	return kernel::Spectrum(static_cast<TScalar>(iSample.time()));
 }
 
 

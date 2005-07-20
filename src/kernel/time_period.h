@@ -45,15 +45,36 @@ public:
 
 	const TTime begin() const { return begin_; }
 	const TTime end() const { return end_; }
-	const TTimeDelta duration() const { return end_ - begin_; }
+	const TTime duration() const { return end_ - begin_; }
 
 	const TTime interpolate(TScalar iTau) const { return begin_ + iTau * duration(); }
+
+	TimePeriod& operator+=(TTime iOffset) 
+	{ 
+		begin_ += iOffset; 
+		end_ += iOffset; 
+		return *this; 
+	}
 
 private:
 
 	TTime begin_;
 	TTime end_;
 };
+
+inline TimePeriod operator+(const TimePeriod& iPeriod, TTime iOffset)
+{
+	TimePeriod result(iPeriod);
+	result += iOffset;
+	return result;
+}
+
+inline TimePeriod operator+(TTime iOffset, const TimePeriod& iPeriod)
+{
+	TimePeriod result(iPeriod);
+	result += iOffset;
+	return result;
+}
 
 }
 

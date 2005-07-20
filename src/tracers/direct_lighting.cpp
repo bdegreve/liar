@@ -59,7 +59,7 @@ kernel::Spectrum DirectLighting::doCastRay(const kernel::Sample& iSample,
 										   const kernel::DifferentialRay& iPrimaryRay) const
 {
 	kernel::Intersection intersection;
-	scene()->intersect(iSample, iPrimaryRay.ray(), intersection);
+	scene()->intersect(iSample, iPrimaryRay, intersection);
 	if (!intersection)
 	{
 		return kernel::Spectrum();

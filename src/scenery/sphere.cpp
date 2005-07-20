@@ -93,31 +93,52 @@ void Sphere::setRadius(TScalar iRadius)
 
 // --- private -------------------------------------------------------------------------------------
 
-void Sphere::doIntersect(const kernel::Sample& iSample, const TRay3D& iRay, 
+void Sphere::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
 						 kernel::Intersection& oResult) const
 {
     TScalar tNear;
     TScalar tFar;
-    prim::Result hit = prim::intersect(iRay, sphere_, tNear, tFar);
-    if (hit == prim::rNone)
-    {
-        oResult = kernel::Intersection::empty();
-    }
-    else
-    {
-        oResult = kernel::Intersection(this, tNear);
-    }
+	prim::Result hit = prim::intersect(iRay.unboundedRay(), sphere_, tNear, tFar);
+
+	switch (hit)
+	{
+	case prim::rOne:
+		if (iRay.inRange(tNear))
+		{
+			kernel::SolidEvent event = sphere_.contains(iRay.point(iRay.nearLimit())) ? 
+				kernel::seLeaving : kernel::seEntering;
+			oResult = kernel::Intersection(this, tNear, event);
+			return;
+		}
+		break;
+
+	case prim::rTwo:
+		if (iRay.inRange(tNear))
+		{
+			oResult = kernel::Intersection(this, tNear, kernel::seEntering);
+			return;
+		}
+		else if (iRay.inRange(tFar))
+		{
+			oResult = kernel::Intersection(this, tFar, kernel::seLeaving);
+			return;
+		}
+		break;
+	}
+
+	oResult = kernel::Intersection::empty();
 }
 
 
 
-const bool Sphere::doIsIntersecting(const kernel::Sample& iSample, const TRay3D& iRay, 
-									TScalar iMaxT) const
+const bool Sphere::doIsIntersecting(const kernel::Sample& iSample, 
+									const kernel::BoundedRay& iRay) const
 {
     TScalar tNear;
     TScalar tFar;
-    prim::Result hit = prim::intersect(iRay, sphere_, tNear, tFar);
-	return hit != prim::rNone && num::almostLess(tNear, iMaxT, liar::tolerance);
+    prim::Result hit = prim::intersect(iRay.unboundedRay(), sphere_, tNear, tFar);
+	return (hit != prim::rNone && iRay.inRange(tNear)) ||
+		(hit == prim::rTwo && iRay.inRange(tFar));
 }
 
 
@@ -186,6 +207,13 @@ void Sphere::doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay,
 	const TScalar invDenominator = num::inv(E * G - num::sqr(F));
 	oResult.setDNormal_dU(invDenominator * ((f * F - e * G) * dPoint_dU + (e * F - f * E) * dPoint_dV));
 	oResult.setDNormal_dV(invDenominator * ((g * F - f * G) * dPoint_dU + (f * F - g * E) * dPoint_dV));
+}
+
+
+
+const bool Sphere::doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const
+{
+	return sphere_.contains(iPoint);
 }
 
 

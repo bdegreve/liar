@@ -36,6 +36,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_INTERSECTION_H
 
 #include "kernel_common.h"
+#include "solid_event.h"
 #include <lass/util/non_copyable.h>
 #include <lass/num/safe_bool.h>
 
@@ -52,13 +53,18 @@ class LIAR_KERNEL_DLL Intersection
 public:
 
     Intersection();
-    Intersection(const SceneObject* iObject, TScalar iT);
+    Intersection(const SceneObject* iObject, TScalar iT, SolidEvent iEvent);
 
     void push(const SceneObject* iObject);
     const SceneObject* const object() const;
 
 	const TScalar t() const { return t_; }
-	TScalar& t() { return t_; }
+	void setT(TScalar iT) { t_ = iT; }
+
+	const SolidEvent solidEvent() const { return solidEvent_; }
+	void setSolidEvent(SolidEvent iEvent) { solidEvent_ = iEvent; }
+	void flipSolidEvent() { solidEvent_ = flip(solidEvent_); }
+
     const bool isEmpty() const;
 	const bool operator!() const { return isEmpty(); }
 	operator num::SafeBool() const { return isEmpty() ? num::safeFalse : num::safeTrue; }
@@ -78,6 +84,7 @@ private:
 
     TObjectStack objectStack_;
     TScalar t_;
+	SolidEvent solidEvent_;
     mutable TObjectStack::const_iterator currentLevel_;
 
     static Intersection empty_;

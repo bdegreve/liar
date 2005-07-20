@@ -40,7 +40,8 @@ PY_CLASS_MEMBER_RW(PerspectiveCamera, "direction", direction, setDirection)
 PY_CLASS_MEMBER_RW(PerspectiveCamera, "right", right, setRight)
 PY_CLASS_MEMBER_RW(PerspectiveCamera, "down", down, setDown)
 PY_CLASS_MEMBER_RW(PerspectiveCamera, "sky", sky, setSky)
-PY_CLASS_MEMBER_RW(PerspectiveCamera, "shutterTime", shutterTime, setShutterTime)
+PY_CLASS_MEMBER_RW(PerspectiveCamera, "shutterOpenDelta", shutterOpenDelta, setShutterOpenDelta)
+PY_CLASS_MEMBER_RW(PerspectiveCamera, "shutterCloseDelta", shutterCloseDelta, setShutterCloseDelta)
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -50,7 +51,10 @@ PerspectiveCamera::PerspectiveCamera():
     sky_(0, 0, 1),
 	fovAngle_(TNumTraits::pi / 2),
 	aspectRatio_(0.75f),
-	shutterTime_(0)
+	nearLimit_(TNumTraits::zero),
+	farLimit_(TNumTraits::infinity),
+	shutterOpenDelta_(0),
+	shutterCloseDelta_(0)
 {
     lookAt(TPoint3D(0, 1, 0));
 }
@@ -215,16 +219,58 @@ void PerspectiveCamera::setSky(const TVector3D& iSky)
 
 
 
-const TTimeDelta PerspectiveCamera::shutterTime() const
+const TTime PerspectiveCamera::shutterOpenDelta() const
 {
-    return shutterTime_;
+    return shutterOpenDelta_;
 }
 
 
 
-void PerspectiveCamera::setShutterTime(TTimeDelta iShutterTime)
+const TTime PerspectiveCamera::shutterCloseDelta() const
 {
-    shutterTime_ = iShutterTime;
+    return shutterOpenDelta_;
+}
+
+
+
+void PerspectiveCamera::setShutterOpenDelta(TTimeDelta iShutterOpenDelta)
+{
+    shutterOpenDelta_ = iShutterOpenDelta;
+}
+
+
+
+void PerspectiveCamera::setShutterCloseDelta(TTimeDelta iShutterCloseDelta)
+{
+    shutterCloseDelta_ = iShutterCloseDelta;
+}
+
+
+
+TScalar PerspectiveCamera::nearLimit() const
+{
+	return nearLimit_;
+}
+
+
+
+TScalar PerspectiveCamera::farLimit() const
+{
+	return farLimit_;
+}
+
+
+
+void PerspectiveCamera::setNearLimit(TScalar iDistance)
+{
+	nearLimit_ = iDistance;
+}
+
+
+
+void PerspectiveCamera::setFarLimit(TScalar iDistance)
+{
+	farLimit_ = iDistance;
 }
 
 
@@ -241,17 +287,20 @@ PerspectiveCamera::doPrimaryRay(kernel::Sample& iSample, const TVector2D& iScree
     using namespace kernel;
 
     const TPoint2D& screenCoordinate = iSample.screenCoordinate();
-    TVector3D dir = directionBase_ + screenCoordinate.x * right_ + screenCoordinate.y * down_;
-    return DifferentialRay(TRay3D(position_, dir),
-                           TRay3D(position_, dir + iScreenSpaceDelta.x * right_),
-                           TRay3D(position_, dir + iScreenSpaceDelta.y * down_));
+    const TVector3D dir = directionBase_ + screenCoordinate.x * right_ + screenCoordinate.y * down_;
+	
+	const TRay3D centralRay(position_, dir);
+	const TRay3D differentialI(position_, dir + iScreenSpaceDelta.x * right_);
+	const TRay3D differentialJ(position_, dir + iScreenSpaceDelta.y * down_);
+
+    return DifferentialRay(BoundedRay(centralRay, nearLimit_, farLimit_), differentialI, differentialJ);
 }
 
 
 
-const TTimeDelta PerspectiveCamera::doShutterTime() const
+const kernel::TimePeriod PerspectiveCamera::doShutterDelta() const
 {
-	return shutterTime_;
+	return kernel::TimePeriod(shutterOpenDelta_, shutterCloseDelta_);
 }
 
 

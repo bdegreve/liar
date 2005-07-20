@@ -31,6 +31,7 @@
 #define LIAR_VERSION_MINOR 0
 #define LIAR_VERSION_REVISION 0
 #define LIAR_AUTHORS "Bram de Greve"
+#define LIAR_WEBSITE "http://liar.sourceforge.net"
 
 #define LIAR_SCALAR float
 #define LIAR_TIME double

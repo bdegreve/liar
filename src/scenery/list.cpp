@@ -86,7 +86,7 @@ void List::doAccept(util::VisitorBase& ioVisitor)
 
 
 
-void List::doIntersect(const kernel::Sample& iSample, const TRay3D& iRay, 
+void List::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay,
 					   kernel::Intersection& oResult) const
 {
     kernel::Intersection result = kernel::Intersection::empty();
@@ -113,13 +113,13 @@ void List::doIntersect(const kernel::Sample& iSample, const TRay3D& iRay,
 
 
 
-const bool List::doIsIntersecting(const kernel::Sample& iSample, const TRay3D& iRay, 
-								  TScalar iMaxT) const
+const bool List::doIsIntersecting(const kernel::Sample& iSample, 
+								  const kernel::BoundedRay& iRay) const
 {
 	const TChildren::const_iterator end = children_.end();
     for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
     {
-		if ((*i)->isIntersecting(iSample, iRay, iMaxT))
+		if ((*i)->isIntersecting(iSample, iRay))
 		{
 			return true;
 		}
@@ -135,6 +135,21 @@ void List::doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay,
 {
     kernel::IntersectionDescendor descend(iIntersection);
     iIntersection.object()->localContext(iSample, iRay, iIntersection, oResult);
+}
+
+
+
+const bool List::doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const
+{
+	const TChildren::const_iterator end = children_.end();
+    for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
+    {
+		if ((*i)->contains(iSample, iPoint))
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 

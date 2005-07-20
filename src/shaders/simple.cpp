@@ -158,12 +158,11 @@ kernel::Spectrum Simple::doDirectLight(const kernel::Sample& iSample,
 	kernel::Spectrum result;
 	for (kernel::Sample::TSubSequence2D i = iSample.subSequence2D(iLight.idLightSamples()); i; ++i)
 	{
-		TRay3D shadowRay;
-		TScalar maxT;
+		kernel::BoundedRay shadowRay;
 		kernel::Spectrum radiance = iLight.sampleRadiance(
-			*i, shadowStartPoint, iSample.time(), shadowRay, maxT);
+			*i, shadowStartPoint, iSample.time(), shadowRay);
 		
-		if (iLight.light()->isShadowless() || !iScene->isIntersecting(iSample, shadowRay, maxT))
+		if (iLight.light()->isShadowless() || !iScene->isIntersecting(iSample, shadowRay))
 		{
 			const TScalar cosTheta = prim::dot(iContext.normal(), shadowRay.direction());
 			
@@ -177,7 +176,7 @@ kernel::Spectrum Simple::doDirectLight(const kernel::Sample& iSample,
 			TVector3D r = iContext.normal();
 			r *= 2 * cosTheta;
 			r -= shadowRay.direction();
-			const TScalar cosAlpha = -prim::dot(iPrimaryRay.ray().direction(), r);
+			const TScalar cosAlpha = -prim::dot(iPrimaryRay.direction(), r);
 			if (cosAlpha > TNumTraits::zero)
 			{
 				result += radiance * specular * pow(cosAlpha, specularPower);

@@ -66,12 +66,12 @@ private:
 
     void doAccept(lass::util::VisitorBase& ioVisitor);
 
-	void doIntersect(const kernel::Sample& iSample, const TRay3D& iRay, 
+	void doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
 		kernel::Intersection& oResult) const;
-	const bool doIsIntersecting(const kernel::Sample& iSample, const TRay3D& iRay, 
-		TScalar iMaxT) const;
+	const bool doIsIntersecting(const kernel::Sample& iSample, const kernel::BoundedRay& iRay) const;
 	void doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay, 
 		const kernel::Intersection& iIntersection, kernel::IntersectionContext& oResult) const;
+	const bool doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const;
 	const TAabb3D doBoundingBox(const kernel::TimePeriod& iPeriod) const;
 
     TChildren children_;   

@@ -57,7 +57,7 @@ public:
     void requestSamples(const TSamplerPtr& iSampler);
 
 	const Spectrum sampleRadiance(const TVector2D& iSample, const TPoint3D& iPoint, 
-		TTime iTime, TRay3D& oShadowRay, TScalar& oMaxT) const;
+		TTime iTime, BoundedRay& oShadowRay) const;
 
 private:
 

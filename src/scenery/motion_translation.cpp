@@ -76,10 +76,10 @@ void MotionTranslation::doAccept(util::VisitorBase& ioVisitor)
 
 
 
-void MotionTranslation::doIntersect(const kernel::Sample& iSample, const TRay3D& iRay, 
+void MotionTranslation::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
 							  kernel::Intersection& oResult) const
 {
-	const TRay3D localRay(iRay.support() - localToWorld(iSample.time()), iRay.direction());
+	const kernel::BoundedRay localRay = translate(iRay, -localToWorld(iSample.time()));
 	child_->intersect(iSample, localRay, oResult);
     if (oResult)
     {
@@ -89,11 +89,11 @@ void MotionTranslation::doIntersect(const kernel::Sample& iSample, const TRay3D&
 
 
 
-const bool MotionTranslation::doIsIntersecting(const kernel::Sample& iSample, const TRay3D& iRay, 
-										 TScalar iMaxT) const
+const bool MotionTranslation::doIsIntersecting(const kernel::Sample& iSample, 
+											   const kernel::BoundedRay& iRay) const
 {
-	const TRay3D localRay(iRay.support() - localToWorld(iSample.time()), iRay.direction());
-	return child_->isIntersecting(iSample, localRay, iMaxT);
+	const kernel::BoundedRay localRay = translate(iRay, -localToWorld(iSample.time()));
+	return child_->isIntersecting(iSample, localRay);
 }
 
 
@@ -114,6 +114,14 @@ void MotionTranslation::doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWo
 {
 	ioLocalToWorld = concatenate(
 		TTransformation3D::translation(localToWorld(iTime)), ioLocalToWorld);
+}
+
+
+
+const bool MotionTranslation::doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const
+{
+	const TPoint3D localPoint = iPoint - localToWorld(iSample.time());
+	return child_->contains(iSample, localPoint);
 }
 
 

@@ -21,54 +21,77 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::scenery::Plane
- *  @brief planar object of infinite size
+/** @class liar::scenery::Csg
+ *  @brief Constructive Solid Geometry
+ *
+ *  Can perform all three CSG operations:
+ *	@arg UNION: A + B
+ *	@arg INTERSECTION: A * B
+ *	@arg DIFFERENCE: A - B
+ *
  *  @author Bram de Greve [BdG]
  */
 
 #pragma once
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_SCENERY_PLANE_H
-#define LIAR_GUARDIAN_OF_INCLUSION_SCENERY_PLANE_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_SCENERY_CSG_H
+#define LIAR_GUARDIAN_OF_INCLUSION_SCENERY_CSG_H
 
 #include "scenery_common.h"
 #include "../kernel/scene_object.h"
-
-#include <lass/prim/plane_3d.h>
+#include <lass/util/dictionary.h>
 
 namespace liar
 {
 namespace scenery
 {
 
-class LIAR_SCENERY_DLL Plane: public kernel::SceneObject
+class LIAR_SCENERY_DLL Csg: public kernel::SceneObject
 {
     PY_HEADER(kernel::SceneObject)
 public:
 
-	Plane();
-    Plane(const TVector3D& i_normal, TScalar i_d);
+	Csg(const kernel::TSceneObjectPtr& iA, const kernel::TSceneObjectPtr& iB);
+	Csg(const kernel::TSceneObjectPtr& iA, const kernel::TSceneObjectPtr& iB,
+		const std::string& iOperation);
 
-    const TVector3D& normal() const;
-	void setNormal(const TVector3D& iNormal);
+	const kernel::TSceneObjectPtr& childA() const;
+	const kernel::TSceneObjectPtr& childB() const;
+	const std::string operation() const;
 
-    const TScalar d() const;
-	void setD(TScalar iD);
+	void setChildA(const kernel::TSceneObjectPtr& iChild);	
+	void setChildB(const kernel::TSceneObjectPtr& iChild);
+	void setOperation(const std::string& iOperation);
 
 private:
 
-    typedef prim::Plane3D<TScalar, prim::Combined> TPlane3D;
+	enum Operation
+	{
+		oUnion = 0,
+		oIntersection,
+		oDifference,
+		numOperation
+	};
 
-    LASS_UTIL_ACCEPT_VISITOR
-    
+	typedef util::Dictionary<std::string, Operation> TOperationDictionary;
+
+    void doAccept(lass::util::VisitorBase& ioVisitor);
+
 	void doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
 		kernel::Intersection& oResult) const;
 	const bool doIsIntersecting(const kernel::Sample& iSample, const kernel::BoundedRay& iRay) const;
 	void doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay, 
 		const kernel::Intersection& iIntersection, kernel::IntersectionContext& oResult) const;
+	void doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const;
 	const bool doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const;
 	const TAabb3D doBoundingBox(const kernel::TimePeriod& iPeriod) const;
 
-    TPlane3D plane_;
+	static TOperationDictionary makeOperationDictionary();
+
+    kernel::TSceneObjectPtr childA_;
+    kernel::TSceneObjectPtr childB_;
+	Operation operation_;
+
+	static TOperationDictionary operationDictionary_;
 };
 
 

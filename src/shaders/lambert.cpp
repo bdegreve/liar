@@ -94,15 +94,13 @@ kernel::Spectrum Lambert::doDirectLight(const kernel::Sample& iSample,
 	kernel::Spectrum result;
 	for (kernel::Sample::TSubSequence2D i = iSample.subSequence2D(iLight.idLightSamples()); i; ++i)
 	{
-		TRay3D shadowRay;
-		TScalar maxT;
-		kernel::Spectrum radiance = iLight.sampleRadiance(
-			*i, shadowStartPoint, iSample.time(), shadowRay, maxT);
+		kernel::BoundedRay shadowRay;
+		kernel::Spectrum radiance = iLight.sampleRadiance(*i, shadowStartPoint, iSample.time(), shadowRay);
 		const TScalar cosTheta = prim::dot(iContext.normal(), shadowRay.direction());
 		if (cosTheta > TNumTraits::zero)
 		{
 			if (iLight.light()->isShadowless() || 
-				!iScene->isIntersecting(iSample, shadowRay, maxT))
+				!iScene->isIntersecting(iSample, shadowRay))
 			{
 				radiance *= cosTheta;
 				radiance *= diffuse;

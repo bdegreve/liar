@@ -62,8 +62,7 @@ void LightContext::requestSamples(const TSamplerPtr& iSampler)
 const Spectrum LightContext::sampleRadiance(const TVector2D& iSample, 
 											const TPoint3D& iPoint, 
 											TTime iTime,
-											TRay3D& oShadowRay, 
-											TScalar& oMaxT) const
+											BoundedRay& oShadowRay) const
 {
 	if (hasMotion_ && iTime != timeOfTransformation_)
 	{
@@ -77,9 +76,14 @@ const Spectrum LightContext::sampleRadiance(const TVector2D& iSample,
 	}
 
 	const TPoint3D localPoint = transform(iPoint, localToWorld_.inverse());
-	TRay3D localRay;
-	const Spectrum radiance = light()->sampleRadiance(iSample, localPoint, localRay, oMaxT);
-	oShadowRay = TRay3D(iPoint, transform(localRay.direction(), localToWorld_));
+	BoundedRay localRay;
+	const Spectrum radiance = light()->sampleRadiance(iSample, localPoint, localRay);
+
+	// we must transform back to world space.  But we already do know the starting point, so don't rely
+	// on recalculating that one
+	oShadowRay = transform(localRay, localToWorld_);
+	oShadowRay.support() = iPoint;
+
 	return radiance;
 }
 

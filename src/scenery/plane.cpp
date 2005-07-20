@@ -87,14 +87,14 @@ void Plane::setD(TScalar iD)
 
 // --- private -------------------------------------------------------------------------------------
 
-void Plane::doIntersect(const kernel::Sample& iSample, const TRay3D& iRay, 
+void Plane::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
 						kernel::Intersection& oResult) const
 {
     TScalar t;
-    prim::Result hit = prim::intersect(plane_, iRay, t);
-    if (hit == prim::rOne) 
+    prim::Result hit = prim::intersect(plane_, iRay.unboundedRay(), t);
+	if (hit == prim::rOne && iRay.inRange(t)) 
     {
-        oResult = kernel::Intersection(this, t);
+		oResult = kernel::Intersection(this, t, kernel::seNoEvent);
     }
     else
     {
@@ -104,12 +104,12 @@ void Plane::doIntersect(const kernel::Sample& iSample, const TRay3D& iRay,
 
 
 
-const bool Plane::doIsIntersecting(const kernel::Sample& iSample, const TRay3D& iRay, 
-								   TScalar iMaxT) const
+const bool Plane::doIsIntersecting(const kernel::Sample& iSample, 
+								   const kernel::BoundedRay& iRay) const
 {
     TScalar t;
-    prim::Result hit = prim::intersect(plane_, iRay, t);
-	return hit == prim::rOne && num::almostLess(t, iMaxT, liar::tolerance);
+    prim::Result hit = prim::intersect(plane_, iRay.unboundedRay(), t);
+	return hit == prim::rOne && iRay.inRange(t);
 }
 
 
@@ -131,6 +131,13 @@ void Plane::doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay,
 
 	oResult.setUv(plane_.uv(oResult.point()));
     oResult.setT(iIntersection.t());
+}
+
+
+
+const bool Plane::doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const
+{
+	return false;
 }
 
 

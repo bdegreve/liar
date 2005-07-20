@@ -96,26 +96,26 @@ void Transformation::doAccept(util::VisitorBase& ioVisitor)
 
 
 
-void Transformation::doIntersect(const kernel::Sample& iSample, const TRay3D& iRay, 
+void Transformation::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
 								 kernel::Intersection& oResult) const
 {
 	TScalar tScaler = TNumTraits::one;
-	const TRay3D localRay = transform(iRay, localToWorld_.inverse(), tScaler);
+	const kernel::BoundedRay localRay = transform(iRay, localToWorld_.inverse(), tScaler);
 	child_->intersect(iSample, localRay, oResult);
     if (oResult)
     {
-		oResult.t() /= tScaler; // scale t back to original ray
+		oResult.setT(oResult.t() / tScaler); // scale t back to original ray
         oResult.push(this);
     }
 }
 
 
 
-const bool Transformation::doIsIntersecting(const kernel::Sample& iSample, const TRay3D& iRay, 
-											TScalar iMaxT) const
+const bool Transformation::doIsIntersecting(const kernel::Sample& iSample, 
+											const kernel::BoundedRay& iRay) const
 {
-	const TRay3D localRay = transform(iRay, localToWorld_.inverse(), iMaxT);
-	return child_->isIntersecting(iSample, localRay, iMaxT);
+	const kernel::BoundedRay localRay = transform(iRay, localToWorld_.inverse());
+	return child_->isIntersecting(iSample, localRay);
 }
 
 
@@ -143,6 +143,14 @@ void Transformation::doLocalContext(const kernel::Sample& iSample, const TRay3D&
 void Transformation::doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const
 {
 	ioLocalToWorld = concatenate(localToWorld_, ioLocalToWorld);
+}
+
+
+
+const bool Transformation::doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const
+{
+	const TPoint3D localPoint = transform(iPoint, localToWorld_.inverse());
+	return child_->contains(iSample, localPoint);
 }
 
 

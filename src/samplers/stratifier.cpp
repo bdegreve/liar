@@ -108,7 +108,7 @@ void Stratifier::doSetSamplesPerPixel(unsigned iSamplesPerPixel)
     
     strataPerPixel_ = strataPerAxis * strataPerAxis;
     timeStratumSize_ = TNumTraits::one / strataPerPixel_;
-	screenCoordinateStratumSize_ = TVector2D(1, 1) / strataPerAxis;
+	screenCoordinateStratumSize_ = TVector2D(TNumTraits::one, TNumTraits::one) / strataPerAxis;
     timeStrata_.resize(strataPerPixel_);
     screenCoordinateStrata_.resize(strataPerPixel_);
 

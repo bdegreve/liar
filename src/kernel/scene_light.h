@@ -46,9 +46,9 @@ class LIAR_KERNEL_DLL SceneLight: public SceneObject
 public:
 
 	const Spectrum sampleRadiance(const TVector2D& iSample, const TPoint3D& iDestination, 
-		TRay3D& oShadowRay, TScalar& oMaxT) const 
+		BoundedRay& oShadowRay) const 
 	{ 
-		return doSampleRadiance(iSample, iDestination, oShadowRay, oMaxT);
+		return doSampleRadiance(iSample, iDestination, oShadowRay);
 	}
 
 	const unsigned numberOfRadianceSamples() const 
@@ -68,7 +68,7 @@ private:
 	LASS_UTIL_ACCEPT_VISITOR
 	
 	virtual const Spectrum doSampleRadiance(const TVector2D& iSample, const TPoint3D& iDestination,
-		TRay3D& oShadowRay, TScalar& oMaxT) const = 0;
+		BoundedRay& oShadowRay) const = 0;
 	virtual const unsigned doNumberOfRadianceSamples() const = 0;
 
 	bool isShadowless_;

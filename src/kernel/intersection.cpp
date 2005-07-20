@@ -39,15 +39,17 @@ Intersection Intersection::empty_;
 // --- public --------------------------------------------------------------------------------------
 
 Intersection::Intersection():
-    t_(-TNumTraits::one)
+    t_(-TNumTraits::one),
+	solidEvent_(seNoEvent)
 {
     currentLevel_ = objectStack_.end();
 }
 
 
 
-Intersection::Intersection(const SceneObject* iObject, TScalar iT):
-    t_(iT)
+Intersection::Intersection(const SceneObject* iObject, TScalar iT, SolidEvent iEvent):
+    t_(iT),
+	solidEvent_(iEvent)
 {
     push(iObject);
 }

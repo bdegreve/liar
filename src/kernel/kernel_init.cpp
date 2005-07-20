@@ -133,6 +133,7 @@ void LIAR_KERNEL_DLL initkernel(void)
         << LASS_LIB_PLATFORM "_" LASS_LIB_COMPILER LASS_LIB_DEBUG << ") "
 		<< __DATE__ << " - " << __TIME__ << "\\n"
         << "authors: " << liar::authors << "\\n"
+		<< "website: " << liar::website << "\\n"
 		<< liar::name << " comes with ABSOLUTELY NO WARRANTY.\\n"
 		<< "This is free software, and you are welcome to redistribute it \\n"
         << "under certain conditions.  Call license() for details.\\n";

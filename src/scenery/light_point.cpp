@@ -134,7 +134,7 @@ void LightPoint::setAttenuation(const LightPoint::Attenuation& iAttenuation)
 
 // --- private -------------------------------------------------------------------------------------
 
-void LightPoint::doIntersect(const kernel::Sample& iSample, const TRay3D& iRAy, 
+void LightPoint::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRAy, 
 							 kernel::Intersection& oResult) const
 {
 	oResult = kernel::Intersection::empty();
@@ -142,8 +142,8 @@ void LightPoint::doIntersect(const kernel::Sample& iSample, const TRay3D& iRAy,
 
 
 
-const bool LightPoint::doIsIntersecting(const kernel::Sample& iSample, const TRay3D& iRay, 
-										TScalar iMaxT) const
+const bool LightPoint::doIsIntersecting(const kernel::Sample& iSample, 
+										const kernel::BoundedRay& iRay) const
 {
 	return false;
 }
@@ -159,6 +159,14 @@ void LightPoint::doLocalContext(const kernel::Sample& iSample, const TRay3D& iRa
 
 
 
+const bool LightPoint::doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const
+{
+	return false;
+}
+
+
+
+
 const TAabb3D LightPoint::doBoundingBox(const kernel::TimePeriod& iPeriod) const
 {
 	return TAabb3D(position_, position_);
@@ -168,8 +176,7 @@ const TAabb3D LightPoint::doBoundingBox(const kernel::TimePeriod& iPeriod) const
 
 const kernel::Spectrum LightPoint::doSampleRadiance(const TVector2D& iSample, 
 													const TPoint3D& iDestination,
-													TRay3D& oShadowRay,
-													TScalar& oMaxT) const
+													kernel::BoundedRay& oShadowRay) const
 {
 	kernel::Spectrum result = power_;
     const TScalar squaredDistance = (position_ - iDestination).squaredNorm();
@@ -178,8 +185,7 @@ const kernel::Spectrum LightPoint::doSampleRadiance(const TVector2D& iSample,
 		attenuation_.quadratic * squaredDistance;
 	result /= att;
 
-	oShadowRay = TRay3D(iDestination, position_);
-	oMaxT = prim::distance(iDestination, position_);
+	oShadowRay = kernel::BoundedRay(iDestination, position_, 0, prim::distance(iDestination, position_));
 	return result;
 }
 

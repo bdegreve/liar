@@ -75,6 +75,7 @@ public:
 
 	void transform(const TTransformation3D& iTransformation);
 	void translate(const TVector3D& iOffset);
+	void flipNormal();
 
 private:
 

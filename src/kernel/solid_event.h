@@ -21,53 +21,40 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::Camera
- *  @brief Abstract base class of render viewports
+/** @class liar::kernel::SolidEvent
+ *  @brief enumeration of intersection events that can happen with a solid
  *  @author Bram de Greve [BdG]
- *
- *  Concrete cameras that to be used by LiAR should derive from this class.
  */
 
 #pragma once
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_CAMERA_H
-#define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_CAMERA_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SOLID_EVENT_H
+#define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SOLID_EVENT_H
 
 #include "kernel_common.h"
-#include "differential_ray.h"
-#include "sample.h"
-#include "time_period.h"
 
 namespace liar
 {
 namespace kernel
 {
 
-class LIAR_KERNEL_DLL Camera: public python::PyObjectPlus
+enum SolidEvent
 {
-    PY_HEADER(python::PyObjectPlus)
-public:
-    
-    virtual ~Camera();
-
-    const DifferentialRay primaryRay(Sample& ioSample, const TVector2D& iScreenSpaceDelta) const
-    {
-        return doPrimaryRay(ioSample, iScreenSpaceDelta);
-    }
-
-	const TimePeriod shutterDelta() const { return doShutterDelta(); }
-
-protected:
-
-    Camera(PyTypeObject* iType);
-
-private:
-
-    virtual const DifferentialRay doPrimaryRay(Sample& ioSample, 
-		const TVector2D& iScreenSpaceDelta) const = 0;
-	virtual const TimePeriod doShutterDelta() const = 0;
+	seNoEvent = 0,	/**< neither enters or leaves as solid */
+	seEntering,		/**< enters a solid */
+	seLeaving,		/**< leaves a solid */
+	numSolidEvent	/**< number of solid events */
 };
 
-typedef python::PyObjectPtr<Camera>::Type TCameraPtr;
+
+
+/** Flip event so that entering becomes leaving and vice versa
+ *	@relates SolidEvent
+ */
+inline SolidEvent flip(SolidEvent iEvent)
+{
+	static SolidEvent result[] = { seNoEvent, seLeaving, seEntering };
+	return result[iEvent];
+}
 
 }
 
@@ -76,3 +63,4 @@ typedef python::PyObjectPtr<Camera>::Type TCameraPtr;
 #endif
 
 // EOF
+

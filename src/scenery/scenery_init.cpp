@@ -25,6 +25,7 @@
 
 // keep in alphabetical order please! [Bramz]
 //
+#include "csg.h"
 #include "light_point.h"
 #include "list.h"
 #include "motion_translation.h"
@@ -51,6 +52,7 @@ LIAR_SCENERY_DLL void initscenery(void)
 
 	// keep in alphabetical order please! [Bramz]
 	//
+	PY_INJECT_CLASS_IN_MODULE(Csg, scenery, "Constructive Solid Geometry")
 	PY_INJECT_CLASS_IN_MODULE(LightPoint, scenery, "point light")
     PY_INJECT_CLASS_IN_MODULE(List, scenery, "flat list of child objects")
 	PY_INJECT_CLASS_IN_MODULE(MotionTranslation, scenery, "time-dependent translation")

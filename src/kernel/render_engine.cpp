@@ -144,7 +144,7 @@ void RenderEngine::setTracer(const TRayTracerPtr& iRayTracer)
 
 
 
-void RenderEngine::render(TTime iShutterOpen, const TBucket& iBucket)
+void RenderEngine::render(TTime iFrameTime, const TBucket& iBucket)
 {
     if (!camera_)
     {
@@ -173,7 +173,7 @@ void RenderEngine::render(TTime iShutterOpen, const TBucket& iBucket)
     const TResolution resolution = sampler_->resolution();
     const TVector2D pixelSize = TVector2D(resolution).reciprocal();
     const unsigned samplesPerPixel = sampler_->samplesPerPixel();
-	const TimePeriod timePeriod(iShutterOpen, iShutterOpen + camera_->shutterTime());
+	const TimePeriod timePeriod = iFrameTime + camera_->shutterDelta();
 
     const TResolution min(num::round(iBucket.min().x * resolution.x), num::round(iBucket.min().y * resolution.y));
     const TResolution max(num::round(iBucket.max().x * resolution.x), num::round(iBucket.max().y * resolution.y));

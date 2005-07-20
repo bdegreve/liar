@@ -31,9 +31,10 @@ namespace kernel
 
 // --- public --------------------------------------------------------------------------------------
 
-DifferentialRay::DifferentialRay(const TRay3D& iRay, const TRay3D& iDifferentialI, 
+DifferentialRay::DifferentialRay(const BoundedRay& iCentralRay, 
+								 const TRay3D& iDifferentialI, 
                                  const TRay3D& iDifferentialJ):
-    ray_(iRay),
+    centralRay_(iCentralRay),
     differentialI_(iDifferentialI),
     differentialJ_(iDifferentialJ)
 {
