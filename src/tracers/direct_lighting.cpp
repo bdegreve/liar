@@ -69,7 +69,8 @@ kernel::Spectrum DirectLighting::doCastRay(const kernel::Sample& iSample,
 	intersection.object()->localContext(iSample, iPrimaryRay, intersection, context);
 	kernel::TShaderPtr shader = context.shader();
 
-	kernel::Spectrum result;
+	kernel::Spectrum result = shader->unshaded(iSample, context);
+
 	const kernel::TLightContexts::const_iterator end = lights().end();
 	for (kernel::TLightContexts::const_iterator i = lights().begin(); i != end; ++i)
 	{

@@ -22,7 +22,8 @@
  */
 
 #include "kernel_common.h"
-#include "light_context.h"
+#include "intersection_context.h"
+#include "differential_ray.h"
 #include <lass/num/impl/matrix_solve.h>
 #include <lass/prim/plane_3d.h>
 

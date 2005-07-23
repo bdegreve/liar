@@ -61,7 +61,8 @@ LIAR_SCENERY_DLL void initscenery(void)
     PY_INJECT_CLASS_IN_MODULE(Transformation, scenery, "transformation of local space")
     PY_INJECT_CLASS_IN_MODULE(Translation, scenery, "translation of local space")
 
-	PyRun_SimpleString("print 'liar.scenery imported'\n");
+	PyRun_SimpleString("print 'liar.scenery imported (v" 
+		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");
 }
 
 }

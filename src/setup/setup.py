@@ -38,10 +38,12 @@ lassRoot = getRoot('LASSROOT')
 systemRoot = getRoot('windir') + 'system32\\'
 
 if '_DEBUG' in sys.argv:
+	title = 'liar_d'
 	pyDebug = '_d'
 	winDebug = 'd'
 	pdb = ['pdb']
 else:
+	title = 'liar'
 	pyDebug = ''
 	winDebug = ''
 	pdb = []
@@ -50,8 +52,8 @@ sys.argv = [sys.argv[0], 'bdist_wininst']
 
 print "HELLO!"
 
-setup(name = 'liar' + pyDebug,
-      version = "0.0",
+setup(name = title,
+      version = "0.2.0",
       author = "Bram de Greve",
       author_email = "bramz@sourceforge.net",
       maintainer = "Bram de Greve",

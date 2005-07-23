@@ -1,0 +1,77 @@
+% Copyright (c)  2005  Bram de Greve.
+% 
+% Permission is granted to copy, distribute and/or modify 
+% this document under the terms of the GNU Free Documentation 
+% License, Version 1.2 or any later version published by the 
+% Free Software Foundation; with the Invariant Sections being 
+% the chapter ``Introduction", no Front-Cover Texts, and no 
+% Back-Cover Texts.  A copy of the license is included in the 
+% section entitled "GNU Free Documentation License".
+
+\documentclass[10pt,a4paper,titlepage,english]{report}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\usepackage{fancyhdr}
+
+
+
+
+\newcommand{\Cpp}{C\nolinebreak\hspace{-.05em}\raisebox{.4ex}{\tiny\bf +}\nolinebreak\hspace{-.10em}\raisebox{.4ex}{\tiny\bf +}\ }
+ 
+\newcommand\kw[1]{% keywords
+  \texttt{\spaceskip .5em plus .3em minus .3em
+    \hyphenchar\font=`\-\relax #1}} 
+   
+   
+   
+   
+   
+   
+    
+\title{LiAR isn't A Raytracer\\ \small{the guide, the reference and the manual}}
+\author{Bram de Greve}
+
+\begin{document}
+\maketitle
+
+\setlength\parskip{\medskipamount}
+\setlength\parindent{0pt}
+
+\pagestyle{plain}
+\pagenumbering{roman}
+\setcounter{page}{1}
+
+Copyright (c)  2005  Bram de Greve.
+
+Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free Documentation License, Version 1.2 or any later version published by the Free Software Foundation; with the Invariant Sections being the chapter ``Introduction", no Front-Cover Texts, and no Back-Cover Texts.  A copy of the license is included in the section entitled "GNU Free Documentation License".
+
+\setlength\parskip{0pt}
+\tableofcontents
+\setlength\parskip{\medskipamount}
+
+\clearpage
+\pagestyle{fancy}
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\include{introduction}
+\include{getting_started}
+
+\include{kernel}
+\include{cameras}
+\include{output}
+\include{samplers}
+\include{scenery}
+\include{shaders}
+\include{textures}
+\include{tracers}
+
+\appendix
+
+\include{gfdl}
+\bibliography{liar}
+\bibliographystyle{amsplain}
+
+\end{document}
+
+

@@ -122,7 +122,9 @@ void Translation::doLocalContext(const kernel::Sample& iSample, const TRay3D& iR
 								 const kernel::Intersection& iIntersection, 
 								 kernel::IntersectionContext& oResult) const
 {
-    kernel::IntersectionDescendor descend(iIntersection);
+	kernel::IntersectionDescendor descendor(iIntersection);
+	LASS_ASSERT(iIntersection.object() == child_.get());
+
 	const TRay3D localRay(iRay.support() - localToWorld_, iRay.direction());
 	child_->localContext(iSample, localRay, iIntersection, oResult);
 	oResult.translate(localToWorld_);

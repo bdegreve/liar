@@ -38,6 +38,8 @@ namespace liar
 namespace kernel
 {
 
+class DifferentialRay;
+
 class LIAR_KERNEL_DLL IntersectionContext
 {
 public:
@@ -56,7 +58,7 @@ public:
 	const TVector3D& dNormal_dJ() const { return dNormal_dJ_; }
 	const TPoint2D& uv() const { return uv_; }
 	const TVector2D& dUv_dI() const { return dUv_dI_; }
-	const TVector2D& dUv_dJ() const { return dUv_dI_; }
+	const TVector2D& dUv_dJ() const { return dUv_dJ_; }
     const TScalar t() const { return t_; }
     const TShaderPtr& shader() const { return shader_; }
 

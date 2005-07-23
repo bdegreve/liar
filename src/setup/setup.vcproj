@@ -27,15 +27,13 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="4"
-				AdditionalOptions="">
+				DebugInformationFormat="4">
 				<IntelOptions 
 					Optimization="0"
 					MinimalRebuild="1"
 					BasicRuntimeChecks="3"
 					RuntimeLibrary="5"
-					AllOptions="/c  /ZI /nologo /W3 /Wp64 /Od /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_CONSOLE&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MLd /Fo&quot;Debug/&quot; /Fd&quot;Debug/vc70.pdb&quot; /Gd /TP"
-					MSOriginalAdditionalOptions=""/>
+					AllOptions="/c  /ZI /nologo /W3 /Wp64 /Od /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_CONSOLE&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MLd /Fo&quot;Debug/&quot; /Fd&quot;Debug/vc70.pdb&quot; /Gd /TP"/>
 			</Tool>
 			<Tool 
 				Name="VCCustomBuildTool"/>
@@ -47,11 +45,9 @@
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/setup.pdb"
 				SubSystem="1"
-				TargetMachine="1"
-				AdditionalOptions="">
+				TargetMachine="1">
 				<IntelOptions 
-					AllOptions="/NOLOGO /OUT:&quot;Debug/setup.exe&quot; /INCREMENTAL /DEBUG /PDB:&quot;Debug/setup.pdb&quot; /SUBSYSTEM:CONSOLE /TLBID:1 /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
-					MSOriginalAdditionalOptions=""/>
+					AllOptions="/NOLOGO /OUT:&quot;Debug/setup.exe&quot; /INCREMENTAL /DEBUG /PDB:&quot;Debug/setup.pdb&quot; /SUBSYSTEM:CONSOLE /TLBID:1 /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"/>
 			</Tool>
 			<Tool 
 				Name="VCMIDLTool"/>
@@ -93,12 +89,10 @@ $(ProjectDir)..\..\dist\liar_d-0.0.win32.exe
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"
-				AdditionalOptions="">
+				DebugInformationFormat="3">
 				<IntelOptions 
 					RuntimeLibrary="4"
-					AllOptions="/c  /Zi /nologo /W3 /Wp64 /O2 /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_CONSOLE&quot; /D &quot;_MBCS&quot; /FD /EHsc /ML /Fo&quot;Release/&quot; /Fd&quot;Release/vc70.pdb&quot; /Gd /TP"
-					MSOriginalAdditionalOptions=""/>
+					AllOptions="/c  /Zi /nologo /W3 /Wp64 /O2 /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_CONSOLE&quot; /D &quot;_MBCS&quot; /FD /EHsc /ML /Fo&quot;Release/&quot; /Fd&quot;Release/vc70.pdb&quot; /Gd /TP"/>
 			</Tool>
 			<Tool 
 				Name="VCCustomBuildTool"/>
@@ -111,19 +105,17 @@ $(ProjectDir)..\..\dist\liar_d-0.0.win32.exe
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				TargetMachine="1"
-				AdditionalOptions="">
+				TargetMachine="1">
 				<IntelOptions 
-					AllOptions="/NOLOGO /OUT:&quot;Release/setup.exe&quot; /INCREMENTAL:NO /DEBUG /PDB:&quot;Release/setup.pdb&quot; /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /TLBID:1 /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
-					MSOriginalAdditionalOptions=""/>
+					AllOptions="/NOLOGO /OUT:&quot;Release/setup.exe&quot; /INCREMENTAL:NO /DEBUG /PDB:&quot;Release/setup.pdb&quot; /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /TLBID:1 /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"/>
 			</Tool>
 			<Tool 
 				Name="VCMIDLTool"/>
 			<Tool 
 				Name="VCPostBuildEventTool"
 				CommandLine="mkdir $(ProjectDir)..\..\dist
-copy $(ProjectDir)dist\liar-0.0.win32.exe $(ProjectDir)..\..\dist /Y
-$(ProjectDir)..\..\dist\liar-0.0.win32.exe
+copy $(ProjectDir)dist\liar-0.2.0.win32.exe $(ProjectDir)..\..\dist /Y
+$(ProjectDir)..\..\dist\liar-0.2.0.win32.exe
 "/>
 			<Tool 
 				Name="VCPreBuildEventTool"/>

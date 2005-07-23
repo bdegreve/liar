@@ -27,6 +27,7 @@
 //
 #include "lambert.h"
 #include "simple.h"
+#include "unshaded.h"
 
 PY_DECLARE_MODULE(shaders)
 
@@ -43,8 +44,10 @@ LIAR_SHADERS_DLL void initshaders(void)
 	//
     PY_INJECT_CLASS_IN_MODULE(Lambert, shaders, "perfect lambert shader")
     PY_INJECT_CLASS_IN_MODULE(Simple, shaders, "a simple shader")
+    PY_INJECT_CLASS_IN_MODULE(Unshaded, shaders, "a shader that doesn't shade")
 
-	PyRun_SimpleString("print 'liar.shaders imported'\n");
+	PyRun_SimpleString("print 'liar.shaders imported (v" 
+		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");
 }
 
 }

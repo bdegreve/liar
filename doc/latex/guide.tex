@@ -1,0 +1,107 @@
+\documentclass[10pt,a4paper,titlepage,english]{report}
+
+\begin{document}
+
+\title{LiAR isn't a raytracer\\the guide}
+\author{Bram de Greve}
+%\address{}
+
+%\thanks{}%
+%\subjclass{}%
+%\keywords{}%
+
+%\date{}%
+%\dedicatory{}%
+%\commby{}%
+% ----------------------------------------------------------------
+%\begin{abstract}
+%
+%\end{abstract}
+
+\maketitle
+
+\tableofcontents
+
+% ----------------------------------------------------------------
+\chapter{Introduction}
+
+\section{What is LiAR?}
+
+LiAR is a recursive acronym that stands for \emph{LiAR isn't a raytracer}.  It is an open source and freeware raytracer that is mostly written in C++ as an extension module for Python.  
+It's goals are to be physically correct and to be easily extended.  We'll see about that :)
+
+
+\section{License}
+
+LiAR is release under the GNU General Public License (GPL) which it's \emph{free} software.  You can use it, copy it, modify it and redistribute it again as many times as you like, as long as you respect the terms of the GPL.
+
+\begin{verbatim}
+LiAR isn't a raytracer
+Copyright (C) 2004-2005  Bram de Greve
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+\end{verbatim}
+
+
+% ------------------------------------------------------------------------------
+
+\chapter{Getting Started}
+
+\chapter{Kernel module}
+
+\texttt{kernel} is the core module of LiAR.  It is the glue that binds all other modules to bring LiAR alive.  It contains all common stuff to be used by other modules.  If all goes well, this is the only module that others will depend on.
+
+\chapter{Cameras module}
+
+\texttt{cameras} is the module dealing with the \emph{point of view} part of the render.  It is where you'll find all cameras and related stuff.
+
+\chapter{Output module}
+
+\texttt{output} is the module dealing with the results of the of render, and tries to save it somewhere before it dissapears into the void.  It will define all sorts of output filters and devices.
+
+\chapter{Samplers module}
+
+\texttt{output} is the module that brings the \emph{chance} to LiAR.  If LiAR needs stochastic samples, here it has to be.
+
+\chapter{Scenery module}
+
+\texttt{scenery} is the module that describes the geometry of the scene.  A sphere, a cube, a mesh, a light ...  It are all \texttt{SceneObject}s that reside in this module.  But since transformations and acceleration techniques are treated as special compound objects, here is too where you find them.
+
+\section{Geometry objects}
+
+\section{Compound objects}
+
+\section{Transformation objects}
+
+
+
+\chapter{Shaders module} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Textures module}
+
+\chapter{Tracers module}
+
+
+% ----------------------------------------------------------------
+%\bibliographystyle{amsplain}
+%\bibliography{}
+
+\begin{thebibliography}{99}
+
+\end{thebibliography}
+
+
+\end{document}
+

@@ -31,28 +31,28 @@ namespace textures
 
 PY_DECLARE_CLASS(GridBoard)
 PY_CLASS_CONSTRUCTOR_2(GridBoard, kernel::TTexturePtr, kernel::TTexturePtr);
-PY_CLASS_MEMBER_RW(GridBoard, "split", split, setSplit);
+PY_CLASS_MEMBER_RW(GridBoard, "thickness", thickness, setThickness);
 
 // --- public --------------------------------------------------------------------------------------
 
 GridBoard::GridBoard(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB):
 	Mix2(&Type, iA, iB),
-	split_(0.05f, 0.05f)
+	halfThickness_(0.05f, 0.05f)
 {
 }
 
 
 
-const TVector2D& GridBoard::split() const
+const TVector2D& GridBoard::thickness() const
 {
-	return split_;
+	return 2 * halfThickness_;
 }
 
 
 
-void GridBoard::setSplit(const TVector2D& iSplit)
+void GridBoard::setThickness(const TVector2D& iThickness)
 {
-	split_ = iSplit;
+	halfThickness_ = iThickness / 2;
 }
 
 
@@ -68,8 +68,8 @@ kernel::Spectrum GridBoard::doLookUp(const kernel::Sample& iSample,
 {
 	const TScalar u = num::mod(iContext.uv().x, TNumTraits::one);
 	const TScalar v = num::mod(iContext.uv().y, TNumTraits::one);
-	const bool isA = u < split_.x || v < split_.x || 
-		u > (TNumTraits::one - split_.x) || v > (TNumTraits::one - split_.y);
+	const bool isA = u < halfThickness_.x || v < halfThickness_.x || 
+		u > (TNumTraits::one - halfThickness_.x) || v > (TNumTraits::one - halfThickness_.y);
 	return (isA ? textureA() : textureB())->lookUp(iSample, iContext);	
 }
 

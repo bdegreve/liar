@@ -51,6 +51,9 @@ public:
 
 private:
 
+	kernel::Spectrum doUnshaded(const kernel::Sample& iSample, 
+		 const kernel::IntersectionContext& iContext);
+
 	kernel::Spectrum doDirectLight(
 		const kernel::Sample& iSample, const kernel::DifferentialRay& iRay,
 		const kernel::Intersection& iIntersection, const kernel::IntersectionContext& iContext, 

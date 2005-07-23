@@ -135,6 +135,14 @@ void Simple::setReflective(const kernel::TTexturePtr& iReflective)
 
 // --- private -------------------------------------------------------------------------------------
 
+kernel::Spectrum Simple::doUnshaded(const kernel::Sample& iSample,
+									 const kernel::IntersectionContext& iContext)
+{
+	return kernel::Spectrum();
+}
+
+
+
 kernel::Spectrum Simple::doDirectLight(const kernel::Sample& iSample,
 									   const kernel::DifferentialRay& iPrimaryRay,
 									   const kernel::Intersection& iIntersection,
@@ -186,6 +194,8 @@ kernel::Spectrum Simple::doDirectLight(const kernel::Sample& iSample,
 
 	return result;
 }
+
+
 
 
 // --- free ----------------------------------------------------------------------------------------

@@ -62,6 +62,9 @@
 
 #include "config.h"
 
+#define LIAR_VERSION_FULL LASS_STRINGIFY(LIAR_VERSION_MAJOR) "."\
+	LASS_STRINGIFY(LIAR_VERSION_MINOR) "." LASS_STRINGIFY(LIAR_VERSION_REVISION)
+
 namespace liar
 {
 
@@ -96,8 +99,7 @@ LIAR_KERNEL_DLL extern TScalar tolerance;
 // constants
 
 const std::string name = LIAR_NAME_FULL;
-const std::string version = LASS_STRINGIFY(LIAR_VERSION_MAJOR) "." 
-	LASS_STRINGIFY(LIAR_VERSION_MINOR) "." LASS_STRINGIFY(LIAR_VERSION_REVISION);
+const std::string version = LIAR_VERSION_FULL;
 const std::string authors = LIAR_AUTHORS;
 const std::string website = LIAR_WEBSITE;
 

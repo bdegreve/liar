@@ -48,6 +48,9 @@ public:
     Stratifier(const TResolution& iResolution, unsigned iNumberOfSamplesPerPixel);
     Stratifier(const TResolution& iResolution);
 
+	const bool jittered() const;
+	void setJittered(bool iEnabled);
+
 private:
 
     typedef num::RandomMT19937 TNumberGenerator;
@@ -86,6 +89,7 @@ private:
 	std::vector<TScalar> timeStrata_;
     unsigned strataPerPixel_;
 	std::vector<size_t> randomStrataSequence_;
+	bool isJittered_;
 };
 
 

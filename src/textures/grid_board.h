@@ -44,15 +44,15 @@ public:
 
 	GridBoard(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB);
 
-	const TVector2D& split() const;
-	void setSplit(const TVector2D& iSplit);
+	const TVector2D& thickness() const;
+	void setThickness(const TVector2D& iSplit);
 
 private:
 
 	kernel::Spectrum doLookUp(const kernel::Sample& iSample, 
 		const kernel::IntersectionContext& iContext) const;
 
-	TVector2D split_;
+	TVector2D halfThickness_;
 };
 
 }

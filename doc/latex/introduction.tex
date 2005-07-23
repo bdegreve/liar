@@ -1,0 +1,49 @@
+% Copyright (c)  2005  Bram de Greve.
+% 
+% Permission is granted to copy, distribute and/or modify 
+% this document under the terms of the GNU Free Documentation 
+% License, Version 1.2 or any later version published by the 
+% Free Software Foundation; with the Invariant Sections being 
+% the chapter ``Introduction", no Front-Cover Texts, and no 
+% Back-Cover Texts.  A copy of the license is included in the 
+% section entitled "GNU Free Documentation License".
+
+\chapter{Introduction}
+
+\section{What is LiAR?}
+
+LiAR is a recursive acronym that stands for \emph{LiAR isn't A Raytracer}\footnote{pun intended. Oh, for heaven's sakes! LiAR really \emph{is} a ray tracer.  I just thought it was a pretty neat idea to call it a liar since the goal is to make photorealistic renders of something that doesn't exist after all.  Actually, I had this name before I started coding it.  To be more precise, I started coding this ray tracer because I felt someone had to write a ray tracer with that name.  Whatever.  Enjoy!~:)}.  It is an open source and freeware raytracer that is mostly written in \Cpp  as an extension module for \emph{Python}~\cite{Python}.  It's goals are to be physically correct and to be easily extended.  And while we're at it, we'll try to keep it compatible with the \emph{RenderMan Interface Specification}~\cite{RISpec}.  Well, we'll see about \emph{that}, won't we?~:)
+
+It is mostly based on one article, one book and one specification.  The article is \emph{The ray tracing kernel}~\cite{kirk88ray}, on which the big design of LiAR is mostly based.  Most apparent is the fact that the core module of LiAR is called \kw{kernel}.  It's the one module that stands on its own and by which the others are connect to make one working ray tracer.  The book is \emph{Physically based rendering}~\cite{Pharr2004pbrt} and has an enormous amount of implementation details. It is by far out the best book on the planet on ray tracing.  So obviously, a lot is inspired by it.  Especially the sampling mechanism is directly inspired by this book.  As last, \emph{RenderMan Interface Specification}~\cite{RISpec} helped to get an idea of what was to be implemented.  
+
+Further more, the whole thing is written on top of the Lass library~\cite{Lass}, a \Cpp library which happens to share an author with LiAR.  This is of course an entire coincidence.
+
+\section{The guide, the reference and the manual}
+
+This document is intended for both the user and the developer of LiAR.  It tends to be a reference of what's available.
+
+
+\section{Software license}
+
+LiAR is release under the GNU General Public License (GPL) what means it's \emph{free}\footnote{free as in freedom, not as in beer} software.  You can use it, copy it, modify it and redistribute it again as many times as you like, as long as you respect the terms of the GPL.  More information about the GPL and the full license text can be found the GNU website~\cite{GPL}.
+
+\begin{footnotesize}
+\begin{verbatim}
+LiAR isn't a raytracer
+Copyright (C) 2004-2005  Bram de Greve
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+\end{verbatim}
+\end{footnotesize}

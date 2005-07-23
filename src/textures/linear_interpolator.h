@@ -42,7 +42,7 @@ class LIAR_TEXTURES_DLL LinearInterpolator: public kernel::Texture
 	PY_HEADER(kernel::Texture)
 public:
 
-	typedef std::pair<TTime, kernel::TTexturePtr> TKeyTexture;
+	typedef std::pair<TScalar, kernel::TTexturePtr> TKeyTexture;
 	typedef std::vector<TKeyTexture> TKeyTextures;
 
 	LinearInterpolator();
@@ -55,7 +55,7 @@ public:
 	void setKeys(const TKeyTextures& iKeyTextures);
 	void setControl(const kernel::TTexturePtr& iControlTexture);
 
-	void addKey(const TKeyTexture& iKeyTexture);
+	void addKey(TScalar iKeyValue, const kernel::TTexturePtr& iKeyTexture);
 
 private:
 

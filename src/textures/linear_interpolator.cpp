@@ -99,10 +99,12 @@ void LinearInterpolator::setControl(const kernel::TTexturePtr& iContolTexture)
 
 /** add a key texture to the list
  */
-void LinearInterpolator::addKey(const TKeyTexture& iKeyTexture)
+void LinearInterpolator::addKey(const TScalar iKeyValue, 
+								const kernel::TTexturePtr& iKeyTexture)
 {
-	TKeyTextures::iterator i = std::lower_bound(keys_.begin(), keys_.end(), iKeyTexture, LesserKey());
-	keys_.insert(i, iKeyTexture);
+	TKeyTexture key(iKeyValue, iKeyTexture);
+	TKeyTextures::iterator i = std::lower_bound(keys_.begin(), keys_.end(), key, LesserKey());
+	keys_.insert(i, key);
 }
 
 
@@ -124,11 +126,11 @@ kernel::Spectrum LinearInterpolator::doLookUp(const kernel::Sample& iSample,
 	
 	if (i == keys_.begin())
 	{
-		return i->second->lookUp(iSample, iContext);
+		return keys_.front().second->lookUp(iSample, iContext);
 	}
 	if (i == keys_.end())
 	{
-		return stde::prior(i)->second->lookUp(iSample, iContext);
+		return keys_.back().second->lookUp(iSample, iContext);
 	}
 	
 	TKeyTextures::const_iterator prevI = stde::prior(i);

@@ -28,7 +28,7 @@
 #define LIAR_NAME_BASE liar
 #define LIAR_NAME_FULL "LiAR isn't a raytracer"
 #define LIAR_VERSION_MAJOR 0
-#define LIAR_VERSION_MINOR 0
+#define LIAR_VERSION_MINOR 2
 #define LIAR_VERSION_REVISION 0
 #define LIAR_AUTHORS "Bram de Greve"
 #define LIAR_WEBSITE "http://liar.sourceforge.net"

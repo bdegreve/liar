@@ -54,7 +54,8 @@ LIAR_OUTPUT_DLL void initoutput(void)
     PY_INJECT_CLASS_IN_MODULE(ExposureFilter, output, "applies exposure filter to target")
     PY_INJECT_CLASS_IN_MODULE(Image, output, "simple image render target")
 
-	PyRun_SimpleString("print 'liar.output imported'\n");
+	PyRun_SimpleString("print 'liar.output imported (v" 
+		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");
 }
 
 }

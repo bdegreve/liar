@@ -130,8 +130,7 @@ void LIAR_KERNEL_DLL initkernel(void)
 
 	std::ostringstream header;
 	header << liar::name << " v" << liar::version << " ("
-        << LASS_LIB_PLATFORM "_" LASS_LIB_COMPILER LASS_LIB_DEBUG << ") "
-		<< __DATE__ << " - " << __TIME__ << "\\n"
+        << LASS_LIB_PLATFORM "_" LASS_LIB_COMPILER LASS_LIB_DEBUG << ")\\n"
         << "authors: " << liar::authors << "\\n"
 		<< "website: " << liar::website << "\\n"
 		<< liar::name << " comes with ABSOLUTELY NO WARRANTY.\\n"
@@ -139,7 +138,8 @@ void LIAR_KERNEL_DLL initkernel(void)
         << "under certain conditions.  Call license() for details.\\n";
 		
 	PyRun_SimpleString( std::string("print \"" + header.str() + "\"\n").c_str());
-	PyRun_SimpleString("print 'liar.kernel imported'\n");
+	PyRun_SimpleString("print 'liar.kernel imported (v" 
+		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");
 }
 
 }

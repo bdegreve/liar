@@ -54,6 +54,11 @@ public:
 
     virtual ~Shader();
 
+	Spectrum unshaded(const Sample& iSample, const IntersectionContext& iContext)
+	{
+		return doUnshaded(iSample, iContext);
+	}
+
 	Spectrum directLight(const Sample& iSample, const DifferentialRay& iRay, 
 		const Intersection& iIntersection, const IntersectionContext& iContext, 
 		const TSceneObjectPtr& iScene, const LightContext& iLight)
@@ -66,6 +71,8 @@ protected:
     Shader(PyTypeObject* iType);
 
 private:
+
+	virtual Spectrum doUnshaded(const Sample& iSample, const IntersectionContext& iContext) = 0;
 
 	virtual Spectrum doDirectLight(const Sample& iSample, const DifferentialRay& iRay, 
 		const Intersection& iIntersection, const IntersectionContext& iContext, 

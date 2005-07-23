@@ -33,12 +33,14 @@ PY_DECLARE_CLASS(Stratifier);
 PY_CLASS_CONSTRUCTOR_0(Stratifier)
 PY_CLASS_CONSTRUCTOR_1(Stratifier, const Stratifier::TResolution&)
 PY_CLASS_CONSTRUCTOR_2(Stratifier, const Stratifier::TResolution&, unsigned)
+PY_CLASS_MEMBER_RW(Stratifier, "jittered", jittered, setJittered)
 
 // --- public --------------------------------------------------------------------------------------
 
 Stratifier::Stratifier():
     Sampler(&Type),
-	jitterGenerator_(numberGenerator_)
+	jitterGenerator_(numberGenerator_),
+	isJittered_(true)
 {
 	init();
 }
@@ -47,7 +49,8 @@ Stratifier::Stratifier():
 
 Stratifier::Stratifier(const TResolution& iResolution):
     Sampler(&Type),
-	jitterGenerator_(numberGenerator_)
+	jitterGenerator_(numberGenerator_),
+	isJittered_(true)
 {
 	init(iResolution);
 }
@@ -56,9 +59,24 @@ Stratifier::Stratifier(const TResolution& iResolution):
 
 Stratifier::Stratifier(const TResolution& iResolution, unsigned iNumberOfSamplesPerPixel):
     Sampler(&Type),
-	jitterGenerator_(numberGenerator_)
+	jitterGenerator_(numberGenerator_),
+	isJittered_(true)
 {
 	init(iResolution, iNumberOfSamplesPerPixel);
+}
+
+
+
+const bool Stratifier::jittered() const
+{
+	return isJittered_;
+}
+
+
+
+void Stratifier::setJittered(bool iEnabled)
+{
+	isJittered_ = iEnabled;
 }
 
 
@@ -108,7 +126,8 @@ void Stratifier::doSetSamplesPerPixel(unsigned iSamplesPerPixel)
     
     strataPerPixel_ = strataPerAxis * strataPerAxis;
     timeStratumSize_ = TNumTraits::one / strataPerPixel_;
-	screenCoordinateStratumSize_ = TVector2D(TNumTraits::one, TNumTraits::one) / strataPerAxis;
+	screenCoordinateStratumSize_ = 
+		TVector2D(TNumTraits::one, TNumTraits::one) / static_cast<TScalar>(strataPerAxis);
     timeStrata_.resize(strataPerPixel_);
     screenCoordinateStrata_.resize(strataPerPixel_);
 
@@ -142,8 +161,8 @@ void Stratifier::doSampleScreenCoordinate(const TResolution& iPixel, unsigned iS
     LASS_ASSERT(iSubPixel < strataPerPixel_);
 
 	TVector2D position = screenCoordinateStrata_[iSubPixel];
-	position.x += jitterGenerator_();
-	position.y += jitterGenerator_();
+	position.x += isJittered_ ? jitterGenerator_() : .5f;
+	position.y += isJittered_ ? jitterGenerator_() : .5f;
 	position *= screenCoordinateStratumSize_;
 
 	position += TVector2D(iPixel);
@@ -164,7 +183,7 @@ void Stratifier::doSampleTime(const TResolution& iPixel, unsigned iSubPixel,
 	{
 		shuffleTimeStrata();
 	}
-	const TScalar tau = (timeStrata_[iSubPixel] + jitterGenerator_()) * timeStratumSize_;
+	const TScalar tau = (timeStrata_[iSubPixel] + (isJittered_ ? jitterGenerator_() : 0.5f)) * timeStratumSize_;
 	oTime = iPeriod.interpolate(tau);
 }
 
@@ -175,7 +194,7 @@ void Stratifier::doSampleSubSequence1D(const TResolution& iPixel, unsigned iSubP
 {
 	const ptrdiff_t size = oEnd - oBegin;
 	const TScalar scale = 1.f / size;
-	for (size_t k = 0; k < size; ++k, ++oBegin)
+	for (ptrdiff_t k = 0; k < size; ++k, ++oBegin)
 	{
 		*oBegin = (k + jitterGenerator_()) * scale;
 	}

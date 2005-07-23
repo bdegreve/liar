@@ -124,7 +124,8 @@ void Transformation::doLocalContext(const kernel::Sample& iSample, const TRay3D&
 									const kernel::Intersection& iIntersection, 
 									kernel::IntersectionContext& oResult) const
 {
-    kernel::IntersectionDescendor descend(iIntersection);
+	kernel::IntersectionDescendor descendor(iIntersection);
+	LASS_ASSERT(iIntersection.object() == child_.get());
 
 	TScalar t = oResult.t();
 	const TRay3D localRay = transform(iRay, localToWorld_.inverse(), t);

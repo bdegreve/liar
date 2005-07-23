@@ -40,7 +40,8 @@ LIAR_CAMERAS_DLL void initcameras(void)
 	PY_INJECT_MODULE_EX(cameras, "liar.cameras", "LiAR cameras")
     PY_INJECT_CLASS_IN_MODULE(PerspectiveCamera, cameras, "plain old perspective photo camera")
 
-	PyRun_SimpleString("print 'liar.cameras imported'\n");
+	PyRun_SimpleString("print 'liar.cameras imported (v" 
+		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");
 }
 
 }

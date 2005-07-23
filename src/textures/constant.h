@@ -45,6 +45,9 @@ public:
 	explicit Constant(const kernel::Spectrum& iValue);
 	explicit Constant(TScalar iScalar);
 
+	const kernel::Spectrum& value() const;
+	void setValue(const kernel::Spectrum& iValue);
+
 private:
 
 	kernel::Spectrum doLookUp(const kernel::Sample& iSample, 

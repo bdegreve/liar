@@ -102,6 +102,9 @@ void MotionTranslation::doLocalContext(const kernel::Sample& iSample, const TRay
 									   const kernel::Intersection& iIntersection, 
 									   kernel::IntersectionContext& oResult) const
 {
+	kernel::IntersectionDescendor descendor(iIntersection);
+	LASS_ASSERT(iIntersection.object() == child_.get());
+
 	const TVector3D offset = localToWorld(iSample.time());
 	const TRay3D localRay(iRay.support() - offset, iRay.direction());
 	child_->localContext(iSample, localRay, iIntersection, oResult);

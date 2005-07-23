@@ -21,27 +21,49 @@
  *  http://liar.sourceforge.net
  */
 
-#include "kernel_common.h"
-#include "differential_ray.h"
+#include "shaders_common.h"
+#include "unshaded.h"
+#include "../kernel/ray_tracer.h"
 
 namespace liar
 {
-namespace kernel
+namespace shaders
 {
+
+PY_DECLARE_CLASS(Unshaded)
+PY_CLASS_CONSTRUCTOR_0(Unshaded)
+PY_CLASS_CONSTRUCTOR_1(Unshaded, const kernel::TTexturePtr&)
+PY_CLASS_MEMBER_RW_DOC(Unshaded, "value", value, setValue, "texture")
 
 // --- public --------------------------------------------------------------------------------------
 
-DifferentialRay::DifferentialRay(const BoundedRay& iCentralRay, 
-								 const TRay3D& iDifferentialI, 
-                                 const TRay3D& iDifferentialJ,
-								 unsigned iGeneration):
-    centralRay_(iCentralRay),
-    differentialI_(iDifferentialI),
-    differentialJ_(iDifferentialJ),
-	generation_(iGeneration)
+Unshaded::Unshaded():
+	kernel::Shader(&Type),
+	value_(kernel::Texture::white())
 {
 }
 
+
+
+Unshaded::Unshaded(const kernel::TTexturePtr& iValue):
+	kernel::Shader(&Type),
+	value_(iValue)
+{
+}
+
+
+
+const kernel::TTexturePtr& Unshaded::value() const
+{
+	return value_;
+}
+
+
+
+void Unshaded::setValue(const kernel::TTexturePtr& iValue)
+{
+	value_ = iValue;
+}
 
 
 
@@ -51,6 +73,23 @@ DifferentialRay::DifferentialRay(const BoundedRay& iCentralRay,
 
 // --- private -------------------------------------------------------------------------------------
 
+kernel::Spectrum Unshaded::doUnshaded(const kernel::Sample& iSample,
+									 const kernel::IntersectionContext& iContext)
+{
+	return value_->lookUp(iSample, iContext);
+}
+
+
+
+kernel::Spectrum Unshaded::doDirectLight(const kernel::Sample& iSample,
+										const kernel::DifferentialRay& iPrimaryRay,
+										const kernel::Intersection& iIntersection,
+										const kernel::IntersectionContext& iContext,
+										const kernel::TSceneObjectPtr& iScene,
+										const kernel::LightContext& iLight)
+{
+	return kernel::Spectrum();
+}
 
 
 // --- free ----------------------------------------------------------------------------------------

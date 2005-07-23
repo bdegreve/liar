@@ -1,0 +1,316 @@
+% Copyright (c)  2005  Bram de Greve.
+% 
+% Permission is granted to copy, distribute and/or modify 
+% this document under the terms of the GNU Free Documentation 
+% License, Version 1.2 or any later version published by the 
+% Free Software Foundation; with the Invariant Sections being 
+% the chapter ``Introduction", no Front-Cover Texts, and no 
+% Back-Cover Texts.  A copy of the license is included in the 
+% section entitled "GNU Free Documentation License".
+
+\chapter{Textures module}
+
+The \kw{textures} module defines maps and functions that are used as input for the shaders.  Where shaders define the algorithms by which the appearance of the material is defined, textures provide the data for these algorithms.
+
+In this chapter, there are many references to the so called \emph{intersection context} or \emph{context} for short.  Textures are always queried in some geometrical context.  This context contains geometrical information about the intersection point this texture is looked up for.  The information available is listed in Table~\ref{tab:intersectionContext}.  The texture look up function can use this to compute the desired return value. 
+
+Where appropriate, we'll define a texture using a formula $f\left(\ldots\right)$.  This function evaluates to the return value of the texture look up.  If specific values of the context are needed, this is directly mentioned as the parameters of this function.  For example $f\left(u, v\right)$ is a texture function that will the surface parameters (this probably the case for all 2D textures).  That means you must only use this textures on primitives that have this parameters availabe, or you can wrap the texture with a mapping texture to create the $\left(u, v\right)$ values from the 3D position.  If there are no specific requirements, three dots \ldots are used.  Inside this functions, other textures can be called.  The three dots indicate that the entire context is passed as argument.
+
+\paragraph{C++ guide}
+
+The \emph{context} actually exists of two parts: \kw{Sample} and \kw{IntersectionContext}.  Both of them are passed to the \kw{Texture}'s \kw{lookUp} function (\kw{doLookUp} for the concrete textures).  Most of the items in Table~\ref{tab:intersectionContext} are located \kw{IntersectionContext} but \emph{time} is one example which is a member of \kw{Sample}.
+
+
+\begin{table}
+	\centering
+	\begin{tabularx}{\textwidth}{|l|l|X|}
+		\hline
+		field													& \Cpp					& description \\
+		\hline
+		$\left(x, y, z\right)$				& \kw{point}		& intersection position in local coordinate system \\
+		$\left(n_x, n_y, n_z\right)$	& \kw{normal}		& surface normal in local coordinate system \\
+		$\left(u, v\right)$						& \kw{uv}				& surface parameters where available. \\
+		$t$														& \kw{t}				& parameter of intersection point on the ray.  This is the distance to the ray's origin. \\
+		$\tau$												& \kw{time}			& time \\
+		\hline
+	\end{tabularx}
+	\caption{intersection context}
+	\label{tab:intersectionContext}
+\end{table}
+
+
+\section{Constant textures}
+
+\subsection{Constant}\label{textures.Constant}
+
+The most simple texture of all.  Returns the same value no matter what's the intersection context.
+
+\subsubsection*{constructors}
+\begin{itemize}
+	\item \kw{Constant()} 
+		creates a constant white texture
+	\item \kw{Constant(scalar)} 
+		creates a constant texture with a scalar value.  The scalar value is converted to a uniform spectral value.
+	\item \kw{Constant(spectrum)} 
+		creates a constant texture with a spectral value.
+\end{itemize}
+
+\subsubsection*{members}
+\begin{itemize}
+	\item \kw{value} 
+		get and set the value of the texture.  You can set both scalar or spectral values, but the scalar value will be converted to a spectrum.  Thus you'll always get a spectral value in return
+\end{itemize}
+
+
+
+
+
+\section{2D textures} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\subsection{CheckerBoard}\label{textures.CheckerBoard}
+
+Combines two input textures $A$ and $B$ in a checkerboard pattern.  From the intersection context, the $\left(u, v\right)$ coordinates are remapped to the $\left[0, 1\right) \times \left[0, 1\right)$ interval using the modulus operator.  This interval is split in four regions using the \kw{split} attribute $\left(s_u, s_v\right)$.  $A$ is assigned to the lower-left and upper-right regions, $B$ is assigned to the others.  By default, \kw{split} is $\left(\frac 1 2, \frac 1 2\right)$, splitting the interval in four equal regions.
+
+\begin{equation}
+	f\left(u, v\right) = \left\{
+		\begin{array}{lcl}
+			A\left(\ldots\right) & \Leftrightarrow & 
+				\left(u - \left\lfloor u \right\rfloor < s_u\right) \wedge
+				\left(v - \left\lfloor v \right\rfloor < s_v\right) \\
+			B\left(\ldots\right) & \Leftrightarrow & \textnormal{otherwise}
+		\end{array}
+	\right.
+\end{equation}
+
+\subsubsection*{constructors}
+\begin{itemize}
+	\item \kw{CheckerBoard()} 
+		creates default black and white checkerboard.
+	\item \kw{CheckerBoard(textureA, textureB)} 
+		creates checkerboard with two textures.
+\end{itemize}
+
+\subsubsection*{members}
+\begin{itemize}
+	\item \kw{textureA} 
+		get and set the first texture $A$
+	\item \kw{textureB} 
+		get and set the second texture $B$
+	\item \kw{split} 
+		get and set the split pair $\left(s_u, s_v\right)$
+\end{itemize}
+
+
+
+\subsection{GridBoard}
+
+Combines two input textures $A$ and $B$ in a grid pattern.  From the intersection context, the $\left(u, v\right)$ coordinates are remapped to the $\left[0, 1\right) \times \left[0, 1\right)$ interval using the modulus operator.  This interval is split in two regions using the \kw{thickness} attribute $\left(d_u, d_v\right)$: an inner region $\left[\frac 1 2 d_y, 1-\frac 1 2 d_y\right) \times \left[\frac 1 2 d_y, 1-\frac 1 2 d_y\right)$, and an outer region everywhere else.  $A$ is assigned to the outer regions and $B$ to the inner region.  By default, \kw{thickness} is $\left(\frac 1 {10}, \frac 1 {10}\right)$.
+
+\begin{equation}
+	f\left(u, v\right) = \left\{
+		\begin{array}{lcl}
+			A\left(\ldots\right) & \Leftrightarrow & 
+				\left(u - \left\lfloor u \right\rfloor, v - \left\lfloor v \right\rfloor\right) \notin 
+				\left[\frac 1 2 d_y, 1-\frac 1 2 d_y\right) \times 
+				\left[\frac 1 2 d_y, 1-\frac 1 2 d_y\right)\\
+			B\left(\ldots\right) & \Leftrightarrow & \textnormal{otherwise}
+		\end{array}
+	\right.
+\end{equation}
+
+\subsubsection*{constructors}
+\begin{itemize}
+	\item \kw{GridBoard()} 
+		creates default black and white grid.
+	\item \kw{GridBoard(textureA, textureB)} 
+		creates grid with two textures.
+\end{itemize}
+
+\subsubsection*{members}
+\begin{itemize}
+	\item \kw{textureA} 
+		get and set the first texture $A$
+	\item \kw{textureB} 
+		get and set the second texture $B$
+	\item \kw{thickness} 
+		get and set the grid thickness pair $\left(d_u, d_v\right)$
+\end{itemize}
+
+
+
+\subsection{Image}
+
+The ordinary texture mapping.  From the context, $\left(u, v\right)$ is remapped to $\left[0, 1\right) \times \left[0, 1\right)$ using the modulus operator.  Then the appropriate pixel is looked up in the image and returned.
+
+Obviously, we support anti-aliasing and mipmapping.  There are three modes of anti-aliasing (\emph{none}, \emph{bilinear} and \emph{trilinear}) and three modes of mip-mapping (\emph{none}, \emph{isotropic} and \emph{anisotropic}).  They can be combined orthogonally, which gives us 9 possible modes.  Of course, some of them don't make much sense.  The most obvious one is trilinear anti-aliasig without mip-mapping, what degrades to bilinear anti-aliasing without mip-mapping but at a higher CPU cost.  All modes are passed as strings.  Thus to enable bilinear anti-aliasing, pass the string \emph{bilinear} where appropriate.
+
+Currently, we can't handle much file formats.  Only 24 and 32 bit uncompressed TARGA files are supported through the Lass library (and thus also the RAW Lass format).  This is to be changed, but I wonder how I can do that in the most dynamical way.
+
+\subsubsection*{constructors}
+\begin{itemize}
+	\item \kw{Image(filename)} 
+		loads a file using default anti-aliasing and mip mapping modes.
+	\item \kw{Image(filename, antiAliasing, mipMapping)} 
+		loads a file using specific anti-aliasing and mip-mapping modes.  
+\end{itemize}
+
+\subsubsection*{members}
+\begin{itemize}
+	\item \kw{antiAliasing} 
+		get and set the anti-aliasing mode.  Valid modes are: \emph{none}, \emph{bilinear} and \emph{trilinear}.
+	\item \kw{mipMapping} 
+		get and set the mip-mapping mode.  Valid modes are: \emph{none}, \emph{isotropic} and \emph{anisotropic}.
+\end{itemize}
+
+\subsubsection*{static methods}
+\begin{itemize}
+	\item \kw{setDefaultAntiAliasing} 
+		get and set the default anti-aliasing mode.  This default will be used for all \kw{Image}s that are created here after.
+	\item \kw{setDefaultMipMapping} 
+		get and set the default mip-mapping mode.  This default will be used for all \kw{Image}s that are created here after.
+\end{itemize}
+
+\subsubsection*{static constants}
+\begin{itemize}
+	\item \kw{AA\_NONE} = \emph{none}
+	\item \kw{AA\_BILINEAR} = \emph{bilinear}
+	\item \kw{AA\_TRILINEAR} = \emph{trilinear}
+	\item \kw{MM\_NONE} = \emph{none}
+	\item \kw{MM\_ISOTROPIC} = \emph{isotropic}
+	\item \kw{MM\_ANISOTROPIC} = \emph{anisotropic}
+\end{itemize}
+
+
+
+
+
+\subsection{Uv}
+
+Mixes two input textures $A$ and $B$ using the context's $\left(u, v\right)$ coordinates.  When used with two \kw{Constant}(\ref{textures.Constant}) textures, this is handy to debug $\left(u, v\right)$ mappings.  Before mixing, $\left(u, v\right)$ are remapped to the $\left[0, 1\right) \times \left[0, 1\right)$ interval using the modulus operator.  
+
+\begin{equation}
+	f\left(u, v\right) = 
+		\left(u - \left\lfloor u \right\rfloor\right) A\left(\ldots\right) +
+		\left(v - \left\lfloor v \right\rfloor\right) B\left(\ldots\right)
+\end{equation}
+
+\subsubsection*{constructors}
+\begin{itemize}
+	\item \kw{Uv(textureA, textureB)}:
+		creates \kw{Uv} texture with two input textures.
+\end{itemize}
+
+\subsubsection*{members}
+\begin{itemize}
+	\item \kw{textureA}:
+		get and set the first texture $A$
+	\item \kw{textureB}:
+		get and set the second texture $B$
+\end{itemize}
+
+\section{3D textures} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\subsection{CheckerVolume}
+
+Similar to the CheckerBoard (\ref{textures.CheckerBoard}), but in 3D.  Combines two input textures $A$ and $B$ in a 3D checkerboard pattern.  From the intersection context, the $\left(x, y, z\right)$ coordinates are remapped to the $\left[0, 1\right) \times \left[0, 1\right) \times \left[0, 1\right)$ interval using the modulus operator.  This interval is split in eight regions using the \kw{split} attribute $\left(s_x, s_y, s_z\right)$.  $A$ is assigned to the lower-left-front, lower-right-back, upper-right-front and upper-left-back regions. $B$ is assigned to the others.  By default, \kw{split} is $\left(\frac 1 2, \frac 1 2, \frac 1 2\right)$, splitting the interval in eight equal regions.
+
+\begin{equation}
+	f\left(x, y, z\right) = \left\{
+		\begin{array}{lcl}
+			A\left(\ldots\right) & \Leftrightarrow & 
+				\left[
+					\left(x - \left\lfloor x \right\rfloor < s_x\right) \wedge
+					\left(y - \left\lfloor y \right\rfloor < s_y\right)
+				\right] =
+				\left(z - \left\lfloor z \right\rfloor < s_z\right) \\
+			B\left(\ldots\right) & \Leftrightarrow & \textnormal{otherwise}
+		\end{array}
+	\right.
+\end{equation}
+
+\subsubsection*{constructors}
+\begin{itemize}
+	\item \kw{CheckerVolume()}:
+		creates default black and white checker volume.
+	\item \kw{CheckerVolume(textureA, textureB)}:
+		creates checker volume with two textures.
+\end{itemize}
+
+\subsubsection*{members}
+\begin{itemize}
+	\item \kw{textureA}:
+		get and set the first texture $A$
+	\item \kw{textureB}:
+		get and set the second texture $B$
+	\item \kw{split}:
+		get and set the split triple $\left(s_x, s_y, s_z\right)$
+\end{itemize}
+
+
+
+
+
+\section{Special textures} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{LinearInterpolator}
+
+Performs a linear interpolation between key textures $K_i$, using the scalar value of a control texture $C$.  Each key texture $K_i$ has associated a control value $c_i$ for which the texture will be returned uninterpolated.
+
+Assume $f$ has $N$ key textures $\left(c_i, K_i\right)$ with $c_i \leq c_{i+1}$:
+
+\begin{equation}
+	f\left(\ldots\right) = \left\{
+		\begin{array}{lcl}
+			K_0\left(\ldots\right) & \Leftrightarrow & C\left(\ldots\right) \leq c_0 \\
+			\frac{c_{i+1}-C\left(\ldots\right)}{c_{i+1}-c_i} K_i\left(\ldots\right) +
+			\frac{C\left(\ldots\right)-c_i}{c_{i+1}-c_i} K_{i+1}\left(\ldots\right)
+			 & \Leftrightarrow & c_i < C\left(\ldots\right) \leq c_{i+1} \\
+			K_{N-1}\left(\ldots\right) & \Leftrightarrow & c_{N-1} < C\left(\ldots\right) \\
+		\end{array}
+	\right.
+\end{equation}
+
+
+\subsubsection*{constructors}
+\begin{itemize}
+	\item \kw{LinearInterpolator()}:
+		creates a \kw{LinearInterpolator} without key or control textures
+	\item \kw{LinearInterpolator([($c_0$, $K_0$), ($c_1$, $K_1$), \ldots], $C$)}:
+		creates a \kw{LinearInterpolator} with key textures $\left[\left(c_0, K_0\right), \left(c_1, K_1\right), \ldots\right]$ and control texture $C$.  The constructor will sort the key textures in $c_i$.
+\end{itemize}
+
+
+\subsubsection*{members}
+\begin{itemize}
+	\item \kw{keys}:
+		get and set the list of key textures $\left[\left(c_0, K_0\right), \left(c_1, K_1\right), \ldots\right]$.  When setting, they will be sorted in $c_i$.
+	\item \kw{control}:
+		get and set the control texture $C$.  Remember that only its scalar value will be used.
+\end{itemize}
+
+
+\subsubsection*{methods}
+\begin{itemize}
+	\item \kw{addKey($c$, $K$)}:
+		insert the pair $\left(c, K\right)$ to the list of key textures at position $i$ for which $c_{i-1} < c \leq c_i$.
+\end{itemize}
+
+ 
+\subsection{Time}
+
+Converts the context's time $\tau$ to a texture value.
+
+\begin{equation}
+	f\left(\tau\right) = \tau
+\end{equation}
+
+\subsubsection*{constructors}
+\begin{itemize}
+	\item \kw{Time()}:
+		creates a \kw{Time} texture.
+\end{itemize}
+

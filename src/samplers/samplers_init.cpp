@@ -49,7 +49,8 @@ LIAR_SAMPLERS_DLL void initsamplers(void)
         
     setDefaultSampler(liar::kernel::TSamplerPtr(new Stratifier));
 
-	PyRun_SimpleString("print 'liar.samplers imported'\n");
+	PyRun_SimpleString("print 'liar.samplers imported (v" 
+		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");
 }
 
 }

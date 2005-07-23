@@ -73,6 +73,14 @@ void Lambert::setDiffuse(const kernel::TTexturePtr& iDiffuse)
 
 // --- private -------------------------------------------------------------------------------------
 
+kernel::Spectrum Lambert::doUnshaded(const kernel::Sample& iSample,
+									 const kernel::IntersectionContext& iContext)
+{
+	return kernel::Spectrum();
+}
+
+
+
 kernel::Spectrum Lambert::doDirectLight(const kernel::Sample& iSample,
 										const kernel::DifferentialRay& iPrimaryRay,
 										const kernel::Intersection& iIntersection,

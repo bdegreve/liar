@@ -33,6 +33,7 @@ PY_DECLARE_CLASS(Constant)
 PY_CLASS_CONSTRUCTOR_1(Constant, TScalar);
 PY_CLASS_CONSTRUCTOR_1(Constant, const kernel::Spectrum&);
 //PY_CLASS_CONSTRUCTOR_2(Constant, const std::vector<TScalar>&, const kernel::TSpectrumFormatPtr&);
+PY_CLASS_MEMBER_RW(Constant, "value", value, setValue);
 
 // --- public --------------------------------------------------------------------------------------
 

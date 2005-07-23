@@ -21,13 +21,13 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::shaders::Lambert
- *  @brief a simple plain old raytracing shader
+/** @class liar::shaders::Unshaded
+ *  @brief a shader that simply returns the texture value.
  *  @author Bram de Greve [BdG]
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_SIMPLE_H
-#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_SIMPLE_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_UNSHADED_H
+#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_UNSHADED_H
 
 #include "shaders_common.h"
 #include "../kernel/shader.h"
@@ -38,40 +38,28 @@ namespace liar
 namespace shaders
 {
 
-class LIAR_SHADERS_DLL Simple: public kernel::Shader
+class LIAR_SHADERS_DLL Unshaded: public kernel::Shader
 {
     PY_HEADER(Shader)
 public:
 
-	Simple();
-	Simple(const kernel::TTexturePtr& iDiffuse);
-	Simple(const kernel::TTexturePtr& iDiffuse, const kernel::TTexturePtr& iSpecular); 
+	Unshaded();
+	Unshaded(const kernel::TTexturePtr& iValue);
 
-	const kernel::TTexturePtr& diffuse() const;
-	void setDiffuse(const kernel::TTexturePtr& iDiffuse);
-
-	const kernel::TTexturePtr& specular() const;
-	void setSpecular(const kernel::TTexturePtr& iSpecular);
-
-	const kernel::TTexturePtr& specularPower() const;
-	void setSpecularPower(const kernel::TTexturePtr& iSpecularPower);
-
-	const kernel::TTexturePtr& reflective() const;
-	void setReflective(const kernel::TTexturePtr& iReflective);
+	const kernel::TTexturePtr& value() const;
+	void setValue(const kernel::TTexturePtr& iValue);
 
 private:
 
 	kernel::Spectrum doUnshaded(const kernel::Sample& iSample, 
 		 const kernel::IntersectionContext& iContext);
 
-	kernel::Spectrum doDirectLight(const kernel::Sample& iSample, const kernel::DifferentialRay& iRay,
+	kernel::Spectrum doDirectLight(
+		const kernel::Sample& iSample, const kernel::DifferentialRay& iRay,
 		const kernel::Intersection& iIntersection, const kernel::IntersectionContext& iContext, 
 		const kernel::TSceneObjectPtr& iScene, const kernel::LightContext& iLight);
 
-	kernel::TTexturePtr diffuse_;
-	kernel::TTexturePtr specular_;
-	kernel::TTexturePtr specularPower_;
-	kernel::TTexturePtr reflective_;
+	kernel::TTexturePtr value_;
 };
 
 }

@@ -43,11 +43,12 @@ LIAR_TRACERS_DLL void inittracers(void)
 
 	PY_INJECT_MODULE_EX(tracers, "liar.tracers", "LiAR ray tracers")
 
-	// keep in alphabetical orderplease! [Bramz]
+	// keep in alphabetical order please! [Bramz]
 	//
 	PY_INJECT_CLASS_IN_MODULE(DirectLighting, tracers, "simple ray tracer")
 
-	PyRun_SimpleString("print 'liar.tracers imported'\n");
+	PyRun_SimpleString("print 'liar.tracers imported (v" 
+		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");
 }
 
 }
