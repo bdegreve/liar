@@ -125,7 +125,7 @@ void Csg::doAccept(util::VisitorBase& ioVisitor)
 
 
 void Csg::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
-								kernel::Intersection& oResult) const
+					  kernel::Intersection& oResult) const
 {
 	kernel::Intersection resultA;
 	kernel::Intersection resultB;
@@ -245,7 +245,7 @@ void Csg::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& i
 
 
 const bool Csg::doIsIntersecting(const kernel::Sample& iSample, 
-										   const kernel::BoundedRay& iRay) const
+								 const kernel::BoundedRay& iRay) const
 {
 	kernel::Intersection temp;
 	intersect(iSample, iRay, temp);
@@ -254,7 +254,7 @@ const bool Csg::doIsIntersecting(const kernel::Sample& iSample,
 
 
 
-void Csg::doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay, 
+void Csg::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
 								 const kernel::Intersection& iIntersection, 
 								 kernel::IntersectionContext& oResult) const
 {

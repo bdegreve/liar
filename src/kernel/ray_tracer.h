@@ -35,17 +35,23 @@
 #include "sample.h"
 #include "scene_object.h"
 #include "light_context.h"
+#include "light_sample.h"
+
+#include <lass/stde/iterator_range.h>
 
 namespace liar
 {
 namespace kernel
 {
+class IntersectionContext;
 class Sampler;
 
 class LIAR_KERNEL_DLL RayTracer: public python::PyObjectPlus
 {
     PY_HEADER(python::PyObjectPlus)
 public:
+
+	typedef stde::iterator_range<TLightSamples::const_iterator> TLightRange;
 
     virtual ~RayTracer();
 
@@ -54,10 +60,19 @@ public:
 
 	void requestSamples(const TSamplerPtr& iSampler);
 
+	/** @warning castRay is NOT THREAD SAFE!
+	 */
     Spectrum castRay(const Sample& iSample, const DifferentialRay& iPrimaryRay) const 
     { 
         return doCastRay(iSample, iPrimaryRay); 
     }
+
+	/** @warning sampleLights is NOT THREAD SAFE!
+	 */
+	TLightRange sampleLights(const Sample& iSample, const IntersectionContext& iContext) const
+	{
+		return doSampleLights(iSample, iContext);
+	}
 
 protected:
 
@@ -70,6 +85,7 @@ private:
     virtual void doPreprocess() = 0;
 	virtual void doRequestSamples(const TSamplerPtr& iSampler) = 0;
     virtual Spectrum doCastRay(const Sample& iSample, const DifferentialRay& iPrimaryRay) const = 0;
+	virtual TLightRange doSampleLights(const Sample& iSample, const IntersectionContext& iContext) const = 0;
 
     TSceneObjectPtr scene_;
 	TLightContexts lights_;

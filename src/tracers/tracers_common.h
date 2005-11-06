@@ -45,6 +45,9 @@ namespace liar
 {
 namespace tracers
 {
+
+using namespace kernel;
+
 }
 
 }

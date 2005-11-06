@@ -35,10 +35,6 @@ extern "C"
 {
 LIAR_TRACERS_DLL void inittracers(void)
 {
-#ifndef _DEBUG
-	//lass::io::proxyMan()->clog()->remove(&std::clog);
-#endif
-
     using namespace liar::tracers;
 
 	PY_INJECT_MODULE_EX(tracers, "liar.tracers", "LiAR ray tracers")

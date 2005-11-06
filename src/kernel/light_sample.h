@@ -21,33 +21,39 @@
  *  http://liar.sourceforge.net
  */
 
-/** @namespace liar::shaders
- *  @brief shader components
- *	@author Bram de Greve (bramz@users.sourceforge.net)
+/** @class liar::kernel::LightSample
+ *  @brief a radiance sample from a light shader
+ *  @author Bram de Greve [BdG]
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_SHADERS_COMMON_H
-#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_SHADERS_COMMON_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_LIGHT_SAMPLE_H
+#define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_LIGHT_SAMPLE_H
 
-#include "../kernel/kernel_common.h"
-
-#if defined(LIAR_SHADERS_BUILD_DLL)
-#   define LIAR_SHADERS_DLL LASS_DLL_EXPORT
-#else
-#   define LIAR_SHADERS_DLL LASS_DLL_IMPORT
-#   if defined(_DEBUG)
-#       pragma comment(lib, "shaders_d.lib")
-#   else
-#       pragma comment(lib, "shaders.lib")
-#   endif
-#endif
+#pragma once
+#include "kernel_common.h"
+#include "spectrum.h"
 
 namespace liar
 {
-namespace shaders
+namespace kernel
 {
 
-using namespace kernel;
+class LIAR_KERNEL_DLL LightSample
+{
+public:
+
+	LightSample(const Spectrum& iRadiance, const TVector3D& iDirection);
+
+	const Spectrum& radiance() const { return radiance_; }
+	const TVector3D& direction() const { return direction_; }
+
+private:
+
+	Spectrum radiance_;
+	TVector3D direction_;
+};
+
+typedef std::vector<LightSample> TLightSamples;
 
 }
 

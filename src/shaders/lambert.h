@@ -38,28 +38,28 @@ namespace liar
 namespace shaders
 {
 
-class LIAR_SHADERS_DLL Lambert: public kernel::Shader
+class LIAR_SHADERS_DLL Lambert: public Shader
 {
     PY_HEADER(Shader)
 public:
 
 	Lambert();
-	Lambert(const kernel::TTexturePtr& iDiffuse);
+	Lambert(const TTexturePtr& iDiffuse);
 
-	const kernel::TTexturePtr& diffuse() const;
-	void setDiffuse(const kernel::TTexturePtr& iDiffuse);
+	const TTexturePtr& diffuse() const;
+	void setDiffuse(const TTexturePtr& iDiffuse);
 
 private:
 
-	kernel::Spectrum doUnshaded(const kernel::Sample& iSample, 
-		 const kernel::IntersectionContext& iContext);
+	Spectrum doUnshaded(const Sample& iSample, 
+		 const IntersectionContext& iContext);
 
-	kernel::Spectrum doDirectLight(
-		const kernel::Sample& iSample, const kernel::DifferentialRay& iRay,
-		const kernel::Intersection& iIntersection, const kernel::IntersectionContext& iContext, 
-		const kernel::TSceneObjectPtr& iScene, const kernel::LightContext& iLight);
+	Spectrum doDirectLight(
+		const Sample& iSample, const DifferentialRay& iRay,
+		const Intersection& iIntersection, const IntersectionContext& iContext, 
+		const TSceneObjectPtr& iScene, const LightContext& iLight);
 
-	kernel::TTexturePtr diffuse_;
+	TTexturePtr diffuse_;
 };
 
 }

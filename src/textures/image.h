@@ -32,6 +32,7 @@
 #include "textures_common.h"
 #include "../kernel/texture.h"
 #include <lass/io/image.h>
+#include <lass/prim/xy.h>
 #include <lass/util/dictionary.h>
 
 namespace liar
@@ -45,6 +46,8 @@ class LIAR_TEXTURES_DLL Image: public kernel::Texture
 public:
 
 	explicit Image(const std::string& iFilename);
+	Image(const std::string& iFilename, const std::string& iAntiAliasing, 
+		const std::string& iMipMapping);
 
 	const std::string antiAliasing() const;
 	const std::string mipMapping() const;
@@ -72,7 +75,7 @@ private:
 		mmIsotropic,
 		mmAnisotropic,
 		numAnisotropic
-	};		
+	};
 
 	typedef util::SharedPtr<io::Image> TImagePtr;
 	typedef std::vector<TImagePtr> THorizontalMipMaps;
@@ -83,10 +86,10 @@ private:
 	kernel::Spectrum doLookUp(const kernel::Sample& iSample, 
 		const kernel::IntersectionContext& iContext) const;
 
-	void makeMipMaps(MipMapping iMode);
-	TImagePtr makeMipMap(const TImagePtr iOldImagePtr, bool iRescaleVertical) const;
-	TImagePtr makeMipMapEven(const TImagePtr iOldImagePtr, bool iRescaleVertical) const;
-	TImagePtr makeMipMapOdd(const TImagePtr iOldImagePtr, bool iRescaleVertical) const;
+	void makeMipMaps(MipMapping iMode) const;
+	TImagePtr makeMipMap(const TImagePtr iOldImagePtr, prim::XY iCompressionAxis) const;
+	TImagePtr makeMipMapEven(const TImagePtr iOldImagePtr, prim::XY iCompressionAxis) const;
+	TImagePtr makeMipMapOdd(const TImagePtr iOldImagePtr, prim::XY iCompressionAxis) const;
 
 	void mipMapLevel(TScalar iWidth, size_t iNumLevels, 
 		size_t& oLevel0, size_t& oLevel1, TScalar& oDLevel) const;
@@ -98,12 +101,12 @@ private:
 	static TMipMappingDictionary makeMipMappingDictionary();
 
 	TImagePtr image_;
-	TMipMaps mipMaps_;
-	size_t numLevelsU_;
-	size_t numLevelsV_;
 	AntiAliasing antiAliasing_;
 	MipMapping mipMapping_;
-	MipMapping currentMipMapping_;
+	mutable MipMapping currentMipMapping_;
+	mutable TMipMaps mipMaps_;
+	mutable size_t numLevelsU_;
+	mutable size_t numLevelsV_;
 
 	static TAntiAliasingDictionary antiAliasingDictionary_;
 	static TMipMappingDictionary mipMappingDictionary_;

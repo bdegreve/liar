@@ -43,7 +43,7 @@ GridBoard::GridBoard(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& i
 
 
 
-const TVector2D& GridBoard::thickness() const
+const TVector2D GridBoard::thickness() const
 {
 	return 2 * halfThickness_;
 }

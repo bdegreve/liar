@@ -21,38 +21,32 @@
  *  http://liar.sourceforge.net
  */
 
-/** @namespace liar::shaders
- *  @brief shader components
- *	@author Bram de Greve (bramz@users.sourceforge.net)
- */
-
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_SHADERS_COMMON_H
-#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_SHADERS_COMMON_H
-
-#include "../kernel/kernel_common.h"
-
-#if defined(LIAR_SHADERS_BUILD_DLL)
-#   define LIAR_SHADERS_DLL LASS_DLL_EXPORT
-#else
-#   define LIAR_SHADERS_DLL LASS_DLL_IMPORT
-#   if defined(_DEBUG)
-#       pragma comment(lib, "shaders_d.lib")
-#   else
-#       pragma comment(lib, "shaders.lib")
-#   endif
-#endif
+#include "kernel_common.h"
+#include "light_sample.h"
 
 namespace liar
 {
-namespace shaders
+namespace kernel
 {
 
-using namespace kernel;
+// --- public --------------------------------------------------------------------------------------
+
+LightSample::LightSample(const Spectrum& iRadiance, const TVector3D& iDirection):
+	radiance_(iRadiance),
+	direction_(iDirection)
+{
+}
+
+
+
+// --- protected -----------------------------------------------------------------------------------
+
+// --- private -------------------------------------------------------------------------------------
+
+// --- free ----------------------------------------------------------------------------------------
 
 }
 
 }
-
-#endif
 
 // EOF

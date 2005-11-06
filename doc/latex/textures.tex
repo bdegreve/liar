@@ -47,17 +47,17 @@ The most simple texture of all.  Returns the same value no matter what's the int
 
 \subsubsection*{constructors}
 \begin{itemize}
-	\item \kw{Constant()} 
+	\item \kw{Constant()}: 
 		creates a constant white texture
-	\item \kw{Constant(scalar)} 
+	\item \kw{Constant(scalar)}:
 		creates a constant texture with a scalar value.  The scalar value is converted to a uniform spectral value.
-	\item \kw{Constant(spectrum)} 
+	\item \kw{Constant(spectrum)}: 
 		creates a constant texture with a spectral value.
 \end{itemize}
 
 \subsubsection*{members}
 \begin{itemize}
-	\item \kw{value} 
+	\item \kw{value}: 
 		get and set the value of the texture.  You can set both scalar or spectral values, but the scalar value will be converted to a spectrum.  Thus you'll always get a spectral value in return
 \end{itemize}
 
@@ -86,19 +86,19 @@ Combines two input textures $A$ and $B$ in a checkerboard pattern.  From the int
 
 \subsubsection*{constructors}
 \begin{itemize}
-	\item \kw{CheckerBoard()} 
+	\item \kw{CheckerBoard()}: 
 		creates default black and white checkerboard.
-	\item \kw{CheckerBoard(textureA, textureB)} 
+	\item \kw{CheckerBoard(textureA, textureB)}: 
 		creates checkerboard with two textures.
 \end{itemize}
 
 \subsubsection*{members}
 \begin{itemize}
-	\item \kw{textureA} 
+	\item \kw{textureA}: 
 		get and set the first texture $A$
-	\item \kw{textureB} 
+	\item \kw{textureB}: 
 		get and set the second texture $B$
-	\item \kw{split} 
+	\item \kw{split}: 
 		get and set the split pair $\left(s_u, s_v\right)$
 \end{itemize}
 
@@ -106,15 +106,15 @@ Combines two input textures $A$ and $B$ in a checkerboard pattern.  From the int
 
 \subsection{GridBoard}
 
-Combines two input textures $A$ and $B$ in a grid pattern.  From the intersection context, the $\left(u, v\right)$ coordinates are remapped to the $\left[0, 1\right) \times \left[0, 1\right)$ interval using the modulus operator.  This interval is split in two regions using the \kw{thickness} attribute $\left(d_u, d_v\right)$: an inner region $\left[\frac 1 2 d_y, 1-\frac 1 2 d_y\right) \times \left[\frac 1 2 d_y, 1-\frac 1 2 d_y\right)$, and an outer region everywhere else.  $A$ is assigned to the outer regions and $B$ to the inner region.  By default, \kw{thickness} is $\left(\frac 1 {10}, \frac 1 {10}\right)$.
+Combines two input textures $A$ and $B$ in a grid pattern.  From the intersection context, the $\left(u, v\right)$ coordinates are remapped to the $\left[0, 1\right) \times \left[0, 1\right)$ interval using the modulus operator.  This interval is split in two regions using the \kw{thickness} attribute $\left(d_u, d_v\right)$: an inner region $\left[\frac 1 2 d_x , 1-\frac 1 2 d_x\right) \times \left[\frac 1 2 d_y, 1-\frac 1 2 d_y\right)$, and an outer region everywhere else.  $A$ is assigned to the outer regions and $B$ to the inner region.  By default, \kw{thickness} is $\left(\frac 1 {10}, \frac 1 {10}\right)$.
 
 \begin{equation}
 	f\left(u, v\right) = \left\{
 		\begin{array}{lcl}
 			A\left(\ldots\right) & \Leftrightarrow & 
 				\left(u - \left\lfloor u \right\rfloor, v - \left\lfloor v \right\rfloor\right) \notin 
-				\left[\frac 1 2 d_y, 1-\frac 1 2 d_y\right) \times 
-				\left[\frac 1 2 d_y, 1-\frac 1 2 d_y\right)\\
+				\left[\frac {d_x} 2, 1-\frac {d_x} 2\right) \times 
+				\left[\frac {d_y} 2, 1-\frac {d_y} 2\right)\\
 			B\left(\ldots\right) & \Leftrightarrow & \textnormal{otherwise}
 		\end{array}
 	\right.
@@ -122,19 +122,19 @@ Combines two input textures $A$ and $B$ in a grid pattern.  From the intersectio
 
 \subsubsection*{constructors}
 \begin{itemize}
-	\item \kw{GridBoard()} 
+	\item \kw{GridBoard()}: 
 		creates default black and white grid.
-	\item \kw{GridBoard(textureA, textureB)} 
+	\item \kw{GridBoard(textureA, textureB)}: 
 		creates grid with two textures.
 \end{itemize}
 
 \subsubsection*{members}
 \begin{itemize}
-	\item \kw{textureA} 
+	\item \kw{textureA}: 
 		get and set the first texture $A$
-	\item \kw{textureB} 
+	\item \kw{textureB}: 
 		get and set the second texture $B$
-	\item \kw{thickness} 
+	\item \kw{thickness}: 
 		get and set the grid thickness pair $\left(d_u, d_v\right)$
 \end{itemize}
 
@@ -150,25 +150,25 @@ Currently, we can't handle much file formats.  Only 24 and 32 bit uncompressed T
 
 \subsubsection*{constructors}
 \begin{itemize}
-	\item \kw{Image(filename)} 
+	\item \kw{Image(filename)}: 
 		loads a file using default anti-aliasing and mip mapping modes.
-	\item \kw{Image(filename, antiAliasing, mipMapping)} 
+	\item \kw{Image(filename, antiAliasing, mipMapping)}: 
 		loads a file using specific anti-aliasing and mip-mapping modes.  
 \end{itemize}
 
 \subsubsection*{members}
 \begin{itemize}
-	\item \kw{antiAliasing} 
+	\item \kw{antiAliasing}: 
 		get and set the anti-aliasing mode.  Valid modes are: \emph{none}, \emph{bilinear} and \emph{trilinear}.
-	\item \kw{mipMapping} 
+	\item \kw{mipMapping}: 
 		get and set the mip-mapping mode.  Valid modes are: \emph{none}, \emph{isotropic} and \emph{anisotropic}.
 \end{itemize}
 
 \subsubsection*{static methods}
 \begin{itemize}
-	\item \kw{setDefaultAntiAliasing} 
+	\item \kw{setDefaultAntiAliasing}: 
 		get and set the default anti-aliasing mode.  This default will be used for all \kw{Image}s that are created here after.
-	\item \kw{setDefaultMipMapping} 
+	\item \kw{setDefaultMipMapping}: 
 		get and set the default mip-mapping mode.  This default will be used for all \kw{Image}s that are created here after.
 \end{itemize}
 

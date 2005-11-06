@@ -42,13 +42,40 @@ class LIAR_TRACERS_DLL DirectLighting: public kernel::RayTracer
 public:
 
 	DirectLighting();
+
+	const size_t maxRayGeneration() const;
+	void setMaxRayGeneration(const size_t iRayGeneration);
     
 private:
+	
+	class GenerationIncrementor: public util::NonCopyable
+	{
+	public:
+		GenerationIncrementor(const DirectLighting& iRayTracer): 
+			rayTracer_(iRayTracer)
+		{
+			++rayTracer_.rayGeneration_;
+		}
+		~GenerationIncrementor()
+		{
+			--rayTracer_.rayGeneration_;
+		}
+	private:
+		const DirectLighting& rayTracer_;
+	};			
+	
+	friend class GenerationIncrementor;
 
 	void doPreprocess();
 	void doRequestSamples(const kernel::TSamplerPtr& iSampler);
 	kernel::Spectrum doCastRay(const kernel::Sample& iSample,
 		const kernel::DifferentialRay& iPrimaryRay) const;
+	TLightRange doSampleLights(const kernel::Sample& iSample,
+		const kernel::IntersectionContext& iContext) const;
+
+	mutable TLightSamples lightSamples_;
+	mutable size_t rayGeneration_;
+	size_t maxRayGeneration_;
 };
 
 }

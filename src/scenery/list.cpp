@@ -129,7 +129,7 @@ const bool List::doIsIntersecting(const kernel::Sample& iSample,
 
 
 
-void List::doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay, 
+void List::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
                           const kernel::Intersection& iIntersection,
                           kernel::IntersectionContext& oResult) const
 {

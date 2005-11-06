@@ -34,6 +34,7 @@
 #include "differential_ray.h"
 #include "intersection.h"
 #include "intersection_context.h"
+#include "medium.h"
 #include "sample.h"
 #include "shader.h"
 #include "time_period.h"
@@ -75,7 +76,7 @@ public:
 		return doIsIntersecting(iSample, iRay.centralRay()); 
 	}
 
-	void localContext(const Sample& iSample, const TRay3D& iRay, 
+	void localContext(const Sample& iSample, const BoundedRay& iRay, 
 		const Intersection& iIntersection, IntersectionContext& oResult) const
     {
         doLocalContext(iSample, iRay, iIntersection, oResult);
@@ -83,11 +84,6 @@ public:
         {
             oResult.setShader(shader_);
         }
-    }
-	void localContext(const Sample& iSample, const BoundedRay& iRay, 
-		const Intersection& iIntersection, IntersectionContext& oResult) const
-    {
-		localContext(iSample, iRay.unboundedRay(), iIntersection, oResult);
     }
 	void localContext(const Sample& iSample, const DifferentialRay& iRay, 
 		const Intersection& iIntersection, IntersectionContext& oResult) const
@@ -112,6 +108,9 @@ public:
     const TShaderPtr& shader() const;
     void setShader(const TShaderPtr& iShader);
 
+	const TMediumPtr& interior() const;
+	void setInterior(const TMediumPtr& iMedium);
+
     static const TShaderPtr& defaultShader();
     static void setDefaultShader(const TShaderPtr& i_defaultShader);
 
@@ -122,12 +121,13 @@ protected:
 private:
 
     TShaderPtr shader_;
+	TMediumPtr interior_;
 
     LASS_UTIL_ACCEPT_VISITOR;
     virtual void doIntersect(const Sample& iSample, const BoundedRay& iRay, 
 		Intersection& oResult) const = 0;
 	virtual const bool doIsIntersecting(const Sample& iSample, const BoundedRay& iRay) const = 0;
-    virtual void doLocalContext(const Sample& iSample, const TRay3D& iRay, 
+    virtual void doLocalContext(const Sample& iSample, const BoundedRay& iRay,
 		const Intersection& iIntersection, IntersectionContext& oResult) const = 0;
 	virtual const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const = 0;
     virtual const TAabb3D doBoundingBox(const TimePeriod& iPeriod) const = 0;

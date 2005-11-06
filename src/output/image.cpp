@@ -131,8 +131,8 @@ void Image::setExposureTime(TScalar iTime)
 void Image::doBeginRender()
 {
     image_.reset(size_.y, size_.x);
-	weights_.clear();
-	weights_.resize(size_.x * size_.y, TNumTraits::zero);
+	numberOfSamples_.clear();
+	numberOfSamples_.resize(size_.x * size_.y, 0);
 }
 
 
@@ -145,13 +145,17 @@ void Image::doWriteRender(const kernel::Sample& iSample, const kernel::Spectrum&
     LASS_ASSERT(position.x >= 0 && position.y >= 0 && position.x < 1 && position.y < 1);
     const unsigned i = static_cast<unsigned>(num::floor(position.x * size_.x));
     const unsigned j = static_cast<unsigned>(num::floor(position.y * size_.y));
+	if (i < 0 || i >= size_.x || j < 0 || j >= size_.y)
+	{
+		return;
+	}
     LASS_ASSERT(i < size_.x && j < size_.y);
 
 	TVector3D xyz = iRadiance.xyz();
 	xyz *= iSample.weight();
 	
     image_(j, i) += rgbSpace_->convert(xyz);
-	weights_[j * size_.x + i] += TNumTraits::one;
+	++numberOfSamples_[j * size_.x + i];
 
     isSaved_ = false;
 }
@@ -164,7 +168,8 @@ void Image::doEndRender()
 	{
 		for (unsigned i = 0; i < size_.x; ++i)
 		{
-			image_(j, i) /= weights_[j * size_.x + i];
+			const unsigned nSamples = numberOfSamples_[j * size_.x + i];
+			image_(j, i) /= static_cast<TScalar>(nSamples ? nSamples : 1);
 		}
 	}
     image_.filterGamma(gamma_);

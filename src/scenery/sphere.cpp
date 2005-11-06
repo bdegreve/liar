@@ -96,37 +96,18 @@ void Sphere::setRadius(TScalar iRadius)
 void Sphere::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
 						 kernel::Intersection& oResult) const
 {
-    TScalar tNear;
-    TScalar tFar;
-	prim::Result hit = prim::intersect(iRay.unboundedRay(), sphere_, tNear, tFar);
-
-	switch (hit)
+    TScalar t;
+	const prim::Result hit = prim::intersect(sphere_, iRay.unboundedRay(), t, iRay.nearLimit());
+	if (hit == prim::rOne && iRay.inRange(t))
 	{
-	case prim::rOne:
-		if (iRay.inRange(tNear))
-		{
-			kernel::SolidEvent event = sphere_.contains(iRay.point(iRay.nearLimit())) ? 
-				kernel::seLeaving : kernel::seEntering;
-			oResult = kernel::Intersection(this, tNear, event);
-			return;
-		}
-		break;
-
-	case prim::rTwo:
-		if (iRay.inRange(tNear))
-		{
-			oResult = kernel::Intersection(this, tNear, kernel::seEntering);
-			return;
-		}
-		else if (iRay.inRange(tFar))
-		{
-			oResult = kernel::Intersection(this, tFar, kernel::seLeaving);
-			return;
-		}
-		break;
+		kernel::SolidEvent event = 
+			sphere_.contains(iRay.point(iRay.nearLimit())) ? kernel::seLeaving : kernel::seEntering;
+		oResult = kernel::Intersection(this, t, event);
 	}
-
-	oResult = kernel::Intersection::empty();
+	else
+	{
+		oResult = kernel::Intersection::empty();
+	}
 }
 
 
@@ -134,16 +115,14 @@ void Sphere::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay
 const bool Sphere::doIsIntersecting(const kernel::Sample& iSample, 
 									const kernel::BoundedRay& iRay) const
 {
-    TScalar tNear;
-    TScalar tFar;
-    prim::Result hit = prim::intersect(iRay.unboundedRay(), sphere_, tNear, tFar);
-	return (hit != prim::rNone && iRay.inRange(tNear)) ||
-		(hit == prim::rTwo && iRay.inRange(tFar));
+    TScalar t;
+	const prim::Result hit = prim::intersect(sphere_, iRay.unboundedRay(), t, iRay.nearLimit());
+	return hit == prim::rOne && iRay.inRange(t);
 }
 
 
 
-void Sphere::doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay, 
+void Sphere::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
                             const kernel::Intersection& iIntersection, 
                             kernel::IntersectionContext& oResult) const
 {

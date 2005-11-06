@@ -91,7 +91,7 @@ void Plane::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay&
 						kernel::Intersection& oResult) const
 {
     TScalar t;
-    prim::Result hit = prim::intersect(plane_, iRay.unboundedRay(), t);
+    const prim::Result hit = prim::intersect(plane_, iRay.unboundedRay(), t, iRay.nearLimit());
 	if (hit == prim::rOne && iRay.inRange(t)) 
     {
 		oResult = kernel::Intersection(this, t, kernel::seNoEvent);
@@ -108,16 +108,15 @@ const bool Plane::doIsIntersecting(const kernel::Sample& iSample,
 								   const kernel::BoundedRay& iRay) const
 {
     TScalar t;
-    prim::Result hit = prim::intersect(plane_, iRay.unboundedRay(), t);
+	const prim::Result hit = prim::intersect(plane_, iRay.unboundedRay(), t, iRay.nearLimit());
 	return hit == prim::rOne && iRay.inRange(t);
 }
 
 
-void Plane::doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay, 
+void Plane::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
                            const kernel::Intersection& iIntersection, 
                            kernel::IntersectionContext& oResult) const
 {
-
     oResult.setPoint(iRay.point(iIntersection.t()));
     TVector3D dPoint_dU;
     TVector3D dPoint_dV;

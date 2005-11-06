@@ -98,7 +98,7 @@ const bool MotionTranslation::doIsIntersecting(const kernel::Sample& iSample,
 
 
 
-void MotionTranslation::doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay, 
+void MotionTranslation::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
 									   const kernel::Intersection& iIntersection, 
 									   kernel::IntersectionContext& oResult) const
 {

@@ -70,6 +70,21 @@ Constant::Constant(const std::vector<TScalar>& iPowerDensities,
 */
 
 
+
+const kernel::Spectrum& Constant::value() const
+{
+	return value_;
+}
+
+
+
+void Constant::setValue(const kernel::Spectrum& iValue)
+{
+	value_ = iValue;
+}
+
+
+
 // --- protected -----------------------------------------------------------------------------------
 
 

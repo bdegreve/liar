@@ -195,7 +195,7 @@ kernel::Spectrum Image::doLookUp(const kernel::Sample& iSample,
 /** Make a grid of mip maps.
  *  In case of isotropic mip mapping, we'll only fill one row.
  */
-void Image::makeMipMaps(MipMapping iMode)
+void Image::makeMipMaps(MipMapping iMode) const
 {
 	TMipMaps mipMaps;
 	mipMaps.push_back(THorizontalMipMaps(1, image_));
@@ -254,27 +254,27 @@ void Image::makeMipMaps(MipMapping iMode)
 
 
 
-Image::TImagePtr Image::makeMipMap(const TImagePtr iOldImagePtr, bool iRescaleVertical) const
+Image::TImagePtr Image::makeMipMap(const TImagePtr iOldImagePtr, prim::XY iCompressionAxis) const
 {
-	const unsigned oldSize = iRescaleVertical ? iOldImagePtr->rows() : iOldImagePtr->cols();
+	const unsigned oldSize = (iCompressionAxis == 'x') ? iOldImagePtr->cols() : iOldImagePtr->rows();
 	if ((oldSize & 0x1) == 0)
 	{
-		return makeMipMapEven(iOldImagePtr, iRescaleVertical);
+		return makeMipMapEven(iOldImagePtr, iCompressionAxis);
 	}
 	else
 	{
-		return makeMipMapOdd(iOldImagePtr, iRescaleVertical);
+		return makeMipMapOdd(iOldImagePtr, iCompressionAxis);
 	}
 }
 
 
 
-Image::TImagePtr Image::makeMipMapEven(const TImagePtr iOldImagePtr, bool iRescaleVertical) const
+Image::TImagePtr Image::makeMipMapEven(const TImagePtr iOldImagePtr, prim::XY iCompressionAxis) const
 {
 	const io::Image& oldImage = *iOldImagePtr;
 
-	const unsigned newRows = oldImage.rows() >> (iRescaleVertical ? 1 : 0);
-	const unsigned newCols = oldImage.cols() >> (iRescaleVertical ? 0 : 1);
+	const unsigned newCols = oldImage.cols() >> ((iCompressionAxis == 'x') ? 1 : 0);
+	const unsigned newRows = oldImage.rows() >> ((iCompressionAxis == 'y') ? 1 : 0);
 
 	if (newRows == 0 || newCols == 0)
 	{
@@ -284,7 +284,7 @@ Image::TImagePtr Image::makeMipMapEven(const TImagePtr iOldImagePtr, bool iResca
 	TImagePtr newImagePtr(new io::Image(newRows, newCols));
 	io::Image& newImage = *newImagePtr;
 
-	if (iRescaleVertical)
+	if (iCompressionAxis == 'y')
 	{
 		for (unsigned i = 0; i < newRows; ++i)
 		{
@@ -310,16 +310,18 @@ Image::TImagePtr Image::makeMipMapEven(const TImagePtr iOldImagePtr, bool iResca
 	return newImagePtr;
 }
 
-Image::TImagePtr Image::makeMipMapOdd(const TImagePtr iOldImagePtr, bool iRescaleVertical) const
+Image::TImagePtr Image::makeMipMapOdd(const TImagePtr iOldImagePtr, prim::XY iCompressionAxis) const
 {
 	const io::Image& oldImage = *iOldImagePtr;
+	const bool compressY = iCompressionAxis == 'y';
+
 	const unsigned oldRows = oldImage.rows();
 	const unsigned oldCols = oldImage.cols();
-	const unsigned oldN = iRescaleVertical ? oldRows : oldCols;
+	const unsigned oldN = compressY ? oldRows : oldCols;
 	const unsigned newN = oldN / 2 + 1; // rounding up
 	LASS_ASSERT(2 * newN - 1 == oldN);
-	const unsigned newRows = iRescaleVertical ? newN : oldRows;
-	const unsigned newCols = iRescaleVertical ? oldCols : newN;
+	const unsigned newRows = compressY ? newN : oldRows;
+	const unsigned newCols = compressY ? oldCols : newN;
 
 	if (newRows == 0 || newCols == 0)
 	{
@@ -339,7 +341,7 @@ Image::TImagePtr Image::makeMipMapOdd(const TImagePtr iOldImagePtr, bool iRescal
 		const TScalar w1 = newN * invOldN; 
 		const TScalar w2 = (newN - i - 1) * invOldN;
 
-		if (iRescaleVertical)
+		if (compressY)
 		{
 			for (unsigned j = 0; j < newCols; ++j)
 			{

@@ -32,99 +32,136 @@ namespace shaders
 
 PY_DECLARE_CLASS(Simple)
 PY_CLASS_CONSTRUCTOR_0(Simple)
-PY_CLASS_CONSTRUCTOR_1(Simple, const kernel::TTexturePtr&)
-PY_CLASS_CONSTRUCTOR_2(Simple, const kernel::TTexturePtr&, const kernel::TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_1(Simple, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_2(Simple, const TTexturePtr&, const TTexturePtr&)
 PY_CLASS_MEMBER_RW_DOC(Simple, "diffuse", diffuse, setDiffuse, "texture for diffuse component")
 PY_CLASS_MEMBER_RW_DOC(Simple, "specular", specular, setSpecular, "texture for specular component")
 PY_CLASS_MEMBER_RW_DOC(Simple, "specularPower", specularPower, setSpecularPower, "texture for rollof power of specular component")
+PY_CLASS_MEMBER_RW_DOC(Simple, "reflectance", reflectance, setReflectance, "texture for reflective componont")
+PY_CLASS_MEMBER_RW_DOC(Simple, "transmittance", transmittance, setTransmittance, "texture for transmittance componont")
+PY_CLASS_MEMBER_RW_DOC(Simple, "refractionIndex", refractionIndex, setRefractionIndex, "texture for refraction index")
 
 // --- public --------------------------------------------------------------------------------------
 
 Simple::Simple():
-	kernel::Shader(&Type),
-	diffuse_(kernel::Texture::white()),
-	specular_(kernel::Texture::black()),
-	specularPower_(kernel::Texture::white()),
-	reflective_(kernel::Texture::black())
+	Shader(&Type),
+	diffuse_(Texture::black()),
+	specular_(Texture::black()),
+	specularPower_(Texture::white()),
+	reflectance_(Texture::black()),
+	transmittance_(Texture::black()),
+	refractionIndex_(Texture::white())
 {	
 }
 
 
 
-Simple::Simple(const kernel::TTexturePtr& iDiffuse):
-	kernel::Shader(&Type),
+Simple::Simple(const TTexturePtr& iDiffuse):
+	Shader(&Type),
 	diffuse_(iDiffuse),
-	specular_(kernel::Texture::black()),
-	specularPower_(kernel::Texture::white()),
-	reflective_(kernel::Texture::black())
+	specular_(Texture::black()),
+	specularPower_(Texture::white()),
+	reflectance_(Texture::black()),
+	transmittance_(Texture::black()),
+	refractionIndex_(Texture::white())
 {	
 }
 
 
 
-Simple::Simple(const kernel::TTexturePtr& iDiffuse, const kernel::TTexturePtr& iSpecular):
-	kernel::Shader(&Type),
+Simple::Simple(const TTexturePtr& iDiffuse, const TTexturePtr& iSpecular):
+	Shader(&Type),
 	diffuse_(iDiffuse),
 	specular_(iSpecular),
-	specularPower_(kernel::Texture::white()),
-	reflective_(kernel::Texture::black())
+	specularPower_(Texture::white()),
+	reflectance_(Texture::black()),
+	transmittance_(Texture::black()),
+	refractionIndex_(Texture::white())
 {	
 }
 
 
 
-const kernel::TTexturePtr& Simple::diffuse() const
+const TTexturePtr& Simple::diffuse() const
 {
 	return diffuse_;
 }
 
 
 
-const kernel::TTexturePtr& Simple::specular() const
+const TTexturePtr& Simple::specular() const
 {
 	return specular_;
 }
 
 
 
-const kernel::TTexturePtr& Simple::specularPower() const
+const TTexturePtr& Simple::specularPower() const
 {
 	return specularPower_;
 }
 
 
 
-const kernel::TTexturePtr& Simple::reflective() const
+const TTexturePtr& Simple::reflectance() const
 {
-	return reflective_;
+	return reflectance_;
 }
 
 
 
-void Simple::setDiffuse(const kernel::TTexturePtr& iDiffuse)
+const TTexturePtr& Simple::transmittance() const
+{
+	return transmittance_;
+}
+
+
+
+const TTexturePtr& Simple::refractionIndex() const
+{
+	return refractionIndex_;
+}
+
+
+
+void Simple::setDiffuse(const TTexturePtr& iDiffuse)
 {
 	diffuse_ = iDiffuse;
 }
 
 
 
-void Simple::setSpecular(const kernel::TTexturePtr& iSpecular)
+void Simple::setSpecular(const TTexturePtr& iSpecular)
 {
 	specular_ = iSpecular;
 }
 
 
 
-void Simple::setSpecularPower(const kernel::TTexturePtr& iSpecularPower)
+void Simple::setSpecularPower(const TTexturePtr& iSpecularPower)
 {
 	specularPower_ = iSpecularPower;
 }
 
 
 
-void Simple::setReflective(const kernel::TTexturePtr& iReflective)
+void Simple::setReflectance(const TTexturePtr& iReflectance)
 {
-	reflective_ = iReflective;
+	reflectance_ = iReflectance;
+}
+
+
+
+void Simple::setTransmittance(const TTexturePtr& iTransmittance)
+{
+	transmittance_ = iTransmittance;
+}
+
+
+
+void Simple::setRefractionIndex(const TTexturePtr& iRefractionIndex)
+{
+	refractionIndex_ = iRefractionIndex;
 }
 
 
@@ -135,60 +172,79 @@ void Simple::setReflective(const kernel::TTexturePtr& iReflective)
 
 // --- private -------------------------------------------------------------------------------------
 
-kernel::Spectrum Simple::doUnshaded(const kernel::Sample& iSample,
-									 const kernel::IntersectionContext& iContext)
+Spectrum Simple::doShade(const Sample& iSample,
+						 const DifferentialRay& iPrimaryRay,
+						 const Intersection& iIntersection,
+						 const IntersectionContext& iContext,
+						 const RayTracer& iTracer)
 {
-	return kernel::Spectrum();
-}
-
-
-
-kernel::Spectrum Simple::doDirectLight(const kernel::Sample& iSample,
-									   const kernel::DifferentialRay& iPrimaryRay,
-									   const kernel::Intersection& iIntersection,
-									   const kernel::IntersectionContext& iContext,
-									   const kernel::TSceneObjectPtr& iScene,
-									   const kernel::LightContext& iLight)
-{
-	// can we move these outside?
-	const kernel::Spectrum diffuse = diffuse_->lookUp(iSample, iContext);
-	const kernel::Spectrum specular = specular_->lookUp(iSample, iContext);
-	const kernel::Spectrum specularPower = specularPower_->lookUp(iSample, iContext);
-	if (!diffuse && !specular)
-	{
-		return kernel::Spectrum();
-	}
+	const Spectrum diffuse = diffuse_->lookUp(iSample, iContext);
+	const Spectrum specular = specular_->lookUp(iSample, iContext);
+	const Spectrum specularPower = specularPower_->lookUp(iSample, iContext);
+	const Spectrum reflectance = reflectance_->lookUp(iSample, iContext);
+	const Spectrum transmittance = transmittance_->lookUp(iSample, iContext);
 
 	const TPoint3D& intersectionPoint = iContext.point();
-	const TPoint3D shadowStartPoint = intersectionPoint + 
-		(liar::tolerance * intersectionPoint.position().norm()) * iContext.normal(); 
+	const TVector3D& geoNormal = iContext.normal();
+	const bool isOutside = dot(geoNormal, iPrimaryRay.direction()) < 0;
+	const TVector3D shadeNormal = isOutside ? geoNormal : -geoNormal;
 
-	kernel::Spectrum result;
-	for (kernel::Sample::TSubSequence2D i = iSample.subSequence2D(iLight.idLightSamples()); i; ++i)
+	Spectrum result;
+
+	RayTracer::TLightRange lightSamples = iTracer.sampleLights(iSample, iContext);
+	for (RayTracer::TLightRange::iterator i = lightSamples.begin(); i != lightSamples.end(); ++i)
 	{
-		kernel::BoundedRay shadowRay;
-		kernel::Spectrum radiance = iLight.sampleRadiance(
-			*i, shadowStartPoint, iSample.time(), shadowRay);
+		const TScalar cosTheta = prim::dot(shadeNormal, i->direction());
 		
-		if (iLight.light()->isShadowless() || !iScene->isIntersecting(iSample, shadowRay))
+		// diffuse lighting
+		//
+		if (cosTheta > TNumTraits::zero)
 		{
-			const TScalar cosTheta = prim::dot(iContext.normal(), shadowRay.direction());
-			
-			// diffuse lighting
-			if (cosTheta > TNumTraits::zero)
-			{
-				result += radiance * diffuse * cosTheta;
-			}
+			result += i->radiance() * diffuse * cosTheta;
+		}
 
-			// specular lighting
-			TVector3D r = iContext.normal();
-			r *= 2 * cosTheta;
-			r -= shadowRay.direction();
-			const TScalar cosAlpha = -prim::dot(iPrimaryRay.direction(), r);
-			if (cosAlpha > TNumTraits::zero)
-			{
-				result += radiance * specular * pow(cosAlpha, specularPower);
-			}
+		// specular lighting
+		//
+		TVector3D r = shadeNormal;
+		r *= 2 * cosTheta;
+		r -= i->direction();
+		const TScalar cosAlpha = -prim::dot(iPrimaryRay.direction(), r);
+		if (cosAlpha > TNumTraits::zero)
+		{
+			result += i->radiance() * specular * pow(cosAlpha, specularPower);
+		}
+	}
+
+	if (reflectance)
+	{
+		const TVector3D reflectedDirection = -geoNormal.reflect(iPrimaryRay.direction());
+		const DifferentialRay reflectedRay(
+			BoundedRay(intersectionPoint, reflectedDirection, tolerance, TNumTraits::infinity),
+			TRay3D(intersectionPoint, reflectedDirection),
+			TRay3D(intersectionPoint, reflectedDirection));
+		result += reflectance * iTracer.castRay(iSample, reflectedRay);
+	}
+
+	if (transmittance)
+	{
+		const TScalar refractionIndex = refractionIndex_->lookUp(iSample, iContext).averagePower();
+		const TScalar n = !isOutside ? refractionIndex : num::inv(refractionIndex);
+		const TScalar cosI = -dot(shadeNormal, iPrimaryRay.direction());
+		const TScalar sinT2 = num::sqr(n) * (TNumTraits::one - num::sqr(cosI));
+		if (sinT2 <= TNumTraits::one)
+		{
+			const TScalar cosT = num::sqrt(TNumTraits::one - sinT2);
+			const TVector3D refractedDirection = n * iPrimaryRay.direction() +
+				(n * cosI - cosT) * shadeNormal;
+			const DifferentialRay refractedRay(
+				BoundedRay(intersectionPoint, refractedDirection, tolerance, TNumTraits::infinity),
+				TRay3D(intersectionPoint, refractedDirection),
+				TRay3D(intersectionPoint, refractedDirection));
+			result += transmittance * iTracer.castRay(iSample, refractedRay);
+		}
+		else
+		{
+			result += kernel::Spectrum(TVector3D(1, 0, 1));
 		}
 	}
 

@@ -38,40 +38,47 @@ namespace liar
 namespace shaders
 {
 
-class LIAR_SHADERS_DLL Simple: public kernel::Shader
+class LIAR_SHADERS_DLL Simple: public Shader
 {
     PY_HEADER(Shader)
 public:
 
 	Simple();
-	Simple(const kernel::TTexturePtr& iDiffuse);
-	Simple(const kernel::TTexturePtr& iDiffuse, const kernel::TTexturePtr& iSpecular); 
+	Simple(const TTexturePtr& iDiffuse);
+	Simple(const TTexturePtr& iDiffuse, const TTexturePtr& iSpecular); 
 
-	const kernel::TTexturePtr& diffuse() const;
-	void setDiffuse(const kernel::TTexturePtr& iDiffuse);
+	const TTexturePtr& diffuse() const;
+	void setDiffuse(const TTexturePtr& iDiffuse);
 
-	const kernel::TTexturePtr& specular() const;
-	void setSpecular(const kernel::TTexturePtr& iSpecular);
+	const TTexturePtr& specular() const;
+	void setSpecular(const TTexturePtr& iSpecular);
 
-	const kernel::TTexturePtr& specularPower() const;
-	void setSpecularPower(const kernel::TTexturePtr& iSpecularPower);
+	const TTexturePtr& specularPower() const;
+	void setSpecularPower(const TTexturePtr& iSpecularPower);
 
-	const kernel::TTexturePtr& reflective() const;
-	void setReflective(const kernel::TTexturePtr& iReflective);
+	const TTexturePtr& reflectance() const;
+	void setReflectance(const TTexturePtr& iReflective);
+
+	const TTexturePtr& transmittance() const;
+	void setTransmittance(const TTexturePtr& iTransmittance);
+
+	const TTexturePtr& refractionIndex() const;
+	void setRefractionIndex(const TTexturePtr& iRefractionIndex);
+
+
 
 private:
 
-	kernel::Spectrum doUnshaded(const kernel::Sample& iSample, 
-		 const kernel::IntersectionContext& iContext);
+	Spectrum doShade(const Sample& iSample,	const DifferentialRay& iPrimaryRay, 
+		const Intersection& iIntersection, const IntersectionContext& iContext, 
+		const RayTracer& iTracer);
 
-	kernel::Spectrum doDirectLight(const kernel::Sample& iSample, const kernel::DifferentialRay& iRay,
-		const kernel::Intersection& iIntersection, const kernel::IntersectionContext& iContext, 
-		const kernel::TSceneObjectPtr& iScene, const kernel::LightContext& iLight);
-
-	kernel::TTexturePtr diffuse_;
-	kernel::TTexturePtr specular_;
-	kernel::TTexturePtr specularPower_;
-	kernel::TTexturePtr reflective_;
+	TTexturePtr diffuse_;
+	TTexturePtr specular_;
+	TTexturePtr specularPower_;
+	TTexturePtr reflectance_;
+	TTexturePtr transmittance_;
+	TTexturePtr refractionIndex_;
 };
 
 }

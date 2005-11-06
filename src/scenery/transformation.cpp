@@ -120,7 +120,7 @@ const bool Transformation::doIsIntersecting(const kernel::Sample& iSample,
 
 
 
-void Transformation::doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay, 
+void Transformation::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
 									const kernel::Intersection& iIntersection, 
 									kernel::IntersectionContext& oResult) const
 {
@@ -128,7 +128,7 @@ void Transformation::doLocalContext(const kernel::Sample& iSample, const TRay3D&
 	LASS_ASSERT(iIntersection.object() == child_.get());
 
 	TScalar t = oResult.t();
-	const TRay3D localRay = transform(iRay, localToWorld_.inverse(), t);
+	const TRay3D localRay = ::liar::kernel::transform(iRay, localToWorld_.inverse(), t);
 	
 	const TScalar tBackup = oResult.t();
 	oResult.setT(t);

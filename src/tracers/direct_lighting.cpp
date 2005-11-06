@@ -21,6 +21,7 @@
 
 #include "tracers_common.h"
 #include "direct_lighting.h"
+#include <lass/stde/extended_iterator.h>
 
 namespace liar
 {
@@ -29,14 +30,30 @@ namespace tracers
 
 PY_DECLARE_CLASS(DirectLighting)
 PY_CLASS_CONSTRUCTOR_0(DirectLighting)
+PY_CLASS_MEMBER_RW(DirectLighting, "maxRayGeneration", maxRayGeneration, setMaxRayGeneration)
 
 // --- public --------------------------------------------------------------------------------------
 
 DirectLighting::DirectLighting():
-	RayTracer(&Type)
+	RayTracer(&Type),
+	maxRayGeneration_(32),
+	rayGeneration_(0)
 {
 }
 
+
+
+const size_t DirectLighting::maxRayGeneration() const
+{
+	return maxRayGeneration_;
+}
+
+
+
+void DirectLighting::setMaxRayGeneration(size_t iMaxRayGeneration)
+{
+	maxRayGeneration_ = iMaxRayGeneration;
+}
 
 
 // --- protected -----------------------------------------------------------------------------------
@@ -58,6 +75,12 @@ void DirectLighting::doRequestSamples(const kernel::TSamplerPtr& iSampler)
 kernel::Spectrum DirectLighting::doCastRay(const kernel::Sample& iSample,
 										   const kernel::DifferentialRay& iPrimaryRay) const
 {
+	GenerationIncrementor incrementor(*this);
+	if (rayGeneration_ > maxRayGeneration_)
+	{
+		return kernel::Spectrum();
+	}
+
 	kernel::Intersection intersection;
 	scene()->intersect(iSample, iPrimaryRay, intersection);
 	if (!intersection)
@@ -69,19 +92,37 @@ kernel::Spectrum DirectLighting::doCastRay(const kernel::Sample& iSample,
 	intersection.object()->localContext(iSample, iPrimaryRay, intersection, context);
 	kernel::TShaderPtr shader = context.shader();
 
-	kernel::Spectrum result = shader->unshaded(iSample, context);
-
-	const kernel::TLightContexts::const_iterator end = lights().end();
-	for (kernel::TLightContexts::const_iterator i = lights().begin(); i != end; ++i)
-	{
-		result += shader->directLight(iSample, iPrimaryRay, intersection, context, scene(), *i);
-	}
-
-	//result += shader->secondaryRays(iPrimaryRay, intersection, context, iSample, scene());
-
-	return result;
+	return context.shader()->shade(iSample, iPrimaryRay, intersection, context, *this);
 }
 
+
+
+DirectLighting::TLightRange DirectLighting::doSampleLights(const kernel::Sample& iSample,
+									const kernel::IntersectionContext& iContext) const
+{
+	using namespace kernel;
+
+	//TLightSamples result;
+	stde::overwrite_insert_iterator<TLightSamples> output(lightSamples_);
+
+	const TLightContexts::const_iterator end = lights().end();
+	for (TLightContexts::const_iterator light = lights().begin(); light != end; ++light)
+	{
+		for (Sample::TSubSequence2D lightSample = iSample.subSequence2D(light->idLightSamples()); lightSample; ++lightSample)
+		{
+			BoundedRay shadowRay;
+			Spectrum radiance = light->sampleRadiance(
+				*lightSample, iContext.point(), iContext.t(), shadowRay);
+			if (!scene()->isIntersecting(iSample, shadowRay))
+			{
+				*output++ = LightSample(radiance, shadowRay.direction());
+			}
+		}
+	}
+
+	//oLightSamples.swap(result);
+	return TLightRange(lightSamples_.begin(), output.current());
+}
 
 
 

@@ -38,28 +38,28 @@ namespace liar
 namespace shaders
 {
 
-class LIAR_SHADERS_DLL Unshaded: public kernel::Shader
+class LIAR_SHADERS_DLL Unshaded: public Shader
 {
     PY_HEADER(Shader)
 public:
 
 	Unshaded();
-	Unshaded(const kernel::TTexturePtr& iValue);
+	Unshaded(const TTexturePtr& iValue);
 
-	const kernel::TTexturePtr& value() const;
-	void setValue(const kernel::TTexturePtr& iValue);
+	const TTexturePtr& value() const;
+	void setValue(const TTexturePtr& iValue);
 
 private:
 
-	kernel::Spectrum doUnshaded(const kernel::Sample& iSample, 
-		 const kernel::IntersectionContext& iContext);
+	Spectrum doUnshaded(const Sample& iSample, 
+		 const IntersectionContext& iContext);
 
-	kernel::Spectrum doDirectLight(
-		const kernel::Sample& iSample, const kernel::DifferentialRay& iRay,
-		const kernel::Intersection& iIntersection, const kernel::IntersectionContext& iContext, 
-		const kernel::TSceneObjectPtr& iScene, const kernel::LightContext& iLight);
+	Spectrum doDirectLight(
+		const Sample& iSample, const DifferentialRay& iRay,
+		const Intersection& iIntersection, const IntersectionContext& iContext, 
+		const TSceneObjectPtr& iScene, const LightContext& iLight);
 
-	kernel::TTexturePtr value_;
+	TTexturePtr value_;
 };
 
 }

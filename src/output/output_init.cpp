@@ -29,22 +29,12 @@
 #include "exposure_filter.h"
 #include "image.h"
 
-#ifdef _DEBUG
-#   define LIAR_OUTPUT_MODULE output_d
-#else
-#   define LIAR_OUTPUT_MODULE output
-#endif
-
 PY_DECLARE_MODULE(output)
 
 extern "C"
 {
 LIAR_OUTPUT_DLL void initoutput(void)
 {
-#ifndef _DEBUG
-	//lass::io::proxyMan()->clog()->remove(&std::clog);
-#endif
-
     using namespace liar::output;
 
 	PY_INJECT_MODULE_EX(output, "liar.output", "LiAR output devices")

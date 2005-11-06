@@ -150,7 +150,7 @@ const bool LightPoint::doIsIntersecting(const kernel::Sample& iSample,
 
 
 
-void LightPoint::doLocalContext(const kernel::Sample& iSample, const TRay3D& iRay, 
+void LightPoint::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
 								const kernel::Intersection& iIntersection, 
 								kernel::IntersectionContext& oResult) const
 {
@@ -185,7 +185,7 @@ const kernel::Spectrum LightPoint::doSampleRadiance(const TVector2D& iSample,
 		attenuation_.quadratic * squaredDistance;
 	result /= att;
 
-	oShadowRay = kernel::BoundedRay(iDestination, position_, 0, prim::distance(iDestination, position_));
+	oShadowRay = kernel::BoundedRay(iDestination, position_, tolerance, prim::distance(iDestination, position_));
 	return result;
 }
 

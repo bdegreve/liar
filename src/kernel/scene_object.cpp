@@ -33,6 +33,7 @@ namespace kernel
 
 PY_DECLARE_CLASS(SceneObject)
 PY_CLASS_MEMBER_RW(SceneObject, "shader", shader, setShader)
+PY_CLASS_MEMBER_RW(SceneObject, "interior", interior, setInterior)
 
 TShaderPtr SceneObject::defaultShader_(0);
 
@@ -58,6 +59,20 @@ void SceneObject::setShader(const TShaderPtr& iShader)
 
 
 
+const TMediumPtr& SceneObject::interior() const
+{
+	return interior_;
+}
+
+
+
+void SceneObject::setInterior(const TMediumPtr& iMedium)
+{
+	interior_ = iMedium;
+}
+
+
+
 const TShaderPtr& SceneObject::defaultShader()
 {
     return defaultShader_;
@@ -69,7 +84,6 @@ void SceneObject::setDefaultShader(const TShaderPtr& iDefaultShader)
 {
     defaultShader_ = iDefaultShader;
 }
-
 
 
 // --- protected -----------------------------------------------------------------------------------

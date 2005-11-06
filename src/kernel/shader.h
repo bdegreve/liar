@@ -41,6 +41,7 @@ namespace kernel
 class DifferentialRay;
 class Intersection;
 class IntersectionContext;
+class RayTracer;
 class Sample;
 class SceneObject;
 class LightContext;
@@ -54,16 +55,13 @@ public:
 
     virtual ~Shader();
 
-	Spectrum unshaded(const Sample& iSample, const IntersectionContext& iContext)
-	{
-		return doUnshaded(iSample, iContext);
-	}
+	bool isLight() const { return doIsLight(); }
 
-	Spectrum directLight(const Sample& iSample, const DifferentialRay& iRay, 
+	Spectrum shade(const Sample& iSample, const DifferentialRay& iRay, 
 		const Intersection& iIntersection, const IntersectionContext& iContext, 
-		const TSceneObjectPtr& iScene, const LightContext& iLight)
+		const RayTracer& iTracer)
 	{
-		return doDirectLight(iSample, iRay, iIntersection, iContext, iScene, iLight);
+		return doShade(iSample, iRay, iIntersection, iContext, iTracer);
 	}
 
 protected:
@@ -72,11 +70,11 @@ protected:
 
 private:
 
-	virtual Spectrum doUnshaded(const Sample& iSample, const IntersectionContext& iContext) = 0;
+	virtual bool doIsLight() const;
 
-	virtual Spectrum doDirectLight(const Sample& iSample, const DifferentialRay& iRay, 
+	virtual Spectrum doShade(const Sample& iSample, const DifferentialRay& iRay, 
 		const Intersection& iIntersection, const IntersectionContext& iContext, 
-		const TSceneObjectPtr& iScene, const LightContext& iLight) = 0;
+		const RayTracer& iTracer) = 0;
 };
 
 typedef python::PyObjectPtr<Shader>::Type TShaderPtr;

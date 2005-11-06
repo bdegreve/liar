@@ -39,21 +39,19 @@ namespace liar
 namespace kernel
 {
 
+class IntersectionContext;
+
 class LIAR_KERNEL_DLL DifferentialRay
 {
 public:
 
     DifferentialRay(const BoundedRay& iCentralRay, 
 		const TRay3D& iDifferentialI, 
-		const TRay3D& iDifferentialJ,
-		unsigned iGeneration = 0);
+		const TRay3D& iDifferentialJ);
 
 	const BoundedRay& centralRay() const { return centralRay_; }
 	const TRay3D& differentialI() const { return differentialI_; }
 	const TRay3D& differentialJ() const { return differentialJ_; }
-	const unsigned generation() const { return generation_; }
-
-	void setGeneration(unsigned iGeneration) { generation_ = iGeneration; }
 
 	const TPoint3D& support() const { return centralRay_.support(); }		/**< return support point of central ray */
 	const TVector3D& direction() const { return centralRay_.direction(); }	/**< return diretion of central ray */
@@ -63,7 +61,6 @@ private:
     BoundedRay centralRay_;
     TRay3D differentialI_;
     TRay3D differentialJ_;
-	unsigned generation_;
 };
 
 }

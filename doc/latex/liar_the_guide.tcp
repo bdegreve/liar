@@ -7,6 +7,6 @@ MainFile=liar_the_guide.tex
 UseBibTeX=1
 UseMakeIndex=0
 ActiveProfile=LaTeX => DVI
-ProjectLanguage=
-ProjectDialect=
+ProjectLanguage=en
+ProjectDialect=US
 

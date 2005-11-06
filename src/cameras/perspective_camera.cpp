@@ -228,7 +228,7 @@ const TTime PerspectiveCamera::shutterOpenDelta() const
 
 const TTime PerspectiveCamera::shutterCloseDelta() const
 {
-    return shutterOpenDelta_;
+    return shutterCloseDelta_;
 }
 
 

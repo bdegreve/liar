@@ -42,11 +42,15 @@ class LIAR_KERNEL_DLL BoundedRay
 public:
 
 	BoundedRay();
-    BoundedRay(const TRay3D& iUnboundedRay, const TScalar iNearLimit, const TScalar iFarLimit);
+    BoundedRay(const TRay3D& iUnboundedRay, 
+		const TScalar iNearLimit = liar::TNumTraits::zero, 
+		const TScalar iFarLimit = liar::TNumTraits::infinity);
 	BoundedRay(const TPoint3D& iSupport, const TVector3D& iDirection, 
-		const TScalar iNearLimit, const TScalar iFarLimit);
+		const TScalar iNearLimit = liar::TNumTraits::zero, 
+		const TScalar iFarLimit = liar::TNumTraits::infinity);
 	BoundedRay(const TPoint3D& iSupport, const TPoint3D& iLookAt, 
-		const TScalar iNearLimit, const TScalar iFarLimit);
+		const TScalar iNearLimit = liar::TNumTraits::zero, 
+		const TScalar iFarLimit = liar::TNumTraits::infinity);
 
 	const TRay3D& unboundedRay() const { return unboundedRay_; }
 	const TScalar nearLimit() const { return nearLimit_; }

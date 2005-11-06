@@ -133,7 +133,7 @@ void Stratifier::doSetSamplesPerPixel(unsigned iSamplesPerPixel)
 
 	for (unsigned i = 0; i < strataPerPixel_; ++i)
 	{
-		timeStrata_[i] = i;
+		timeStrata_[i] = static_cast<TScalar>(i);
 	}
 
     for (unsigned j = 0; j < strataPerAxis; ++j)
@@ -247,6 +247,8 @@ void Stratifier::shuffleTimeStrata()
 {
 	typedef num::DistributionUniform<unsigned, TNumberGenerator, num::rtRightOpen> TRandomSelector;
 
+	// shuffle strata in linear time guaranteed.
+	//
 	for (unsigned i = 0; i < strataPerPixel_; ++i)
 	{
 		TRandomSelector selector(numberGenerator_, i, strataPerPixel_);

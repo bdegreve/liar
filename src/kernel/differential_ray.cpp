@@ -33,12 +33,10 @@ namespace kernel
 
 DifferentialRay::DifferentialRay(const BoundedRay& iCentralRay, 
 								 const TRay3D& iDifferentialI, 
-                                 const TRay3D& iDifferentialJ,
-								 unsigned iGeneration):
+                                 const TRay3D& iDifferentialJ):
     centralRay_(iCentralRay),
     differentialI_(iDifferentialI),
-    differentialJ_(iDifferentialJ),
-	generation_(iGeneration)
+    differentialJ_(iDifferentialJ)
 {
 }
 

@@ -44,7 +44,7 @@ public:
 
 	GridBoard(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB);
 
-	const TVector2D& thickness() const;
+	const TVector2D thickness() const;
 	void setThickness(const TVector2D& iSplit);
 
 private:

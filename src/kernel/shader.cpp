@@ -50,6 +50,13 @@ Shader::Shader(PyTypeObject* iType):
 
 // --- private -------------------------------------------------------------------------------------
 
+/** by default, a shader is not a light
+ */
+bool Shader::doIsLight() const
+{
+	return false;
+}
+
 
 
 // --- free ----------------------------------------------------------------------------------------

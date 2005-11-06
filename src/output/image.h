@@ -66,20 +66,19 @@ public:
 
 private:
 
-	typedef std::vector<TScalar> TWeights;
-
     virtual void doBeginRender();
 	virtual void doWriteRender(const kernel::Sample& iSample, const kernel::Spectrum& iRadiance);
     virtual void doEndRender();
 
     io::Image image_;
-	TWeights weights_;
+	std::vector<unsigned> numberOfSamples_;
     std::string filename_;
     TSize size_;
 	kernel::TRgbSpacePtr rgbSpace_;
     TScalar gamma_;
 	TScalar exposureTime_;
-    bool isSaved_;
+	bool isQuiting_;
+	bool isSaved_;
 };
 
 

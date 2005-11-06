@@ -42,10 +42,6 @@ extern "C"
 
 LIAR_TEXTURES_DLL void inittextures(void)
 {
-#ifndef _DEBUG
-	//lass::io::proxyMan()->clog()->remove(&std::clog);
-#endif
-
     using namespace liar::textures;
 
 	PY_INJECT_MODULE_EX(textures, "liar.textures", "textures for LiAR")
