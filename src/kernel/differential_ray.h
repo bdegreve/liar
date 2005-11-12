@@ -45,6 +45,7 @@ class LIAR_KERNEL_DLL DifferentialRay
 {
 public:
 
+	DifferentialRay();
     DifferentialRay(const BoundedRay& iCentralRay, 
 		const TRay3D& iDifferentialI, 
 		const TRay3D& iDifferentialJ);
@@ -56,6 +57,14 @@ public:
 	const TPoint3D& support() const { return centralRay_.support(); }		/**< return support point of central ray */
 	const TVector3D& direction() const { return centralRay_.direction(); }	/**< return diretion of central ray */
 
+	const bool isValid() const { return centralRay_.unboundedRay().isValid(); }
+
+	friend LIAR_KERNEL_DLL DifferentialRay reflect(const IntersectionContext& iContext, 
+										const DifferentialRay& iRay); 
+	friend LIAR_KERNEL_DLL DifferentialRay refract(const IntersectionContext& iContext, 
+										const DifferentialRay& iRay, 
+										TScalar iRelativeRefractionIndex); 
+
 private:
 
     BoundedRay centralRay_;
@@ -63,6 +72,11 @@ private:
     TRay3D differentialJ_;
 };
 
+LIAR_KERNEL_DLL DifferentialRay reflect(const IntersectionContext& iContext, 
+										const DifferentialRay& iRay); 
+LIAR_KERNEL_DLL DifferentialRay refract(const IntersectionContext& iContext,
+										const DifferentialRay& iRay, 
+										TScalar iRefractionIndex1over2); 
 }
 
 }

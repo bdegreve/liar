@@ -187,10 +187,6 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& iBucket)
 		progress(static_cast<double>(i.y) / max.y);
         for (i.x = min.x; i.x < max.x; ++i.x)
         {
-			if (i.x == 171 && i.y == 121)
-			{
-				int a = 5;
-			}
             for (unsigned k = 0; k < samplesPerPixel; ++k)
             {
                 sampler_->sample(i, k, timePeriod, sample);

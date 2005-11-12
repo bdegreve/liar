@@ -31,9 +31,9 @@
 #include "motion_translation.h"
 #include "plane.h"
 #include "sphere.h"
-#//include "transformation.h"
+//#include "transformation.h"
 #include "translation.h"
-#include "triangle.h"
+//#include "triangle.h"
 
 #include <lass/io/proxy_man.h>
 
@@ -61,7 +61,7 @@ LIAR_SCENERY_DLL void initscenery(void)
     PY_INJECT_CLASS_IN_MODULE(Sphere, scenery, "a nice sphere")
     //PY_INJECT_CLASS_IN_MODULE(Transformation, scenery, "transformation of local space")
     PY_INJECT_CLASS_IN_MODULE(Translation, scenery, "translation of local space")
-    PY_INJECT_CLASS_IN_MODULE(Triangle, scenery, "a single triangle")
+    //PY_INJECT_CLASS_IN_MODULE(Triangle, scenery, "a single triangle")
 
 	PyRun_SimpleString("print 'liar.scenery imported (v" 
 		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");

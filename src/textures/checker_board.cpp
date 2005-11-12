@@ -23,6 +23,7 @@
 
 #include "textures_common.h"
 #include "checker_board.h"
+#include <lass/stde/extended_string.h>
 
 namespace liar
 {
@@ -32,6 +33,14 @@ namespace textures
 PY_DECLARE_CLASS(CheckerBoard)
 PY_CLASS_CONSTRUCTOR_2(CheckerBoard, kernel::TTexturePtr, kernel::TTexturePtr);
 PY_CLASS_MEMBER_RW(CheckerBoard, "split", split, setSplit);
+PY_CLASS_MEMBER_RW(CheckerBoard, "antiAliasing", antiAliasing, setAntiAliasing);
+PY_CLASS_STATIC_METHOD(CheckerBoard, setDefaultAntiAliasing);
+PY_CLASS_STATIC_CONST(CheckerBoard, "AA_NONE", "none");
+PY_CLASS_STATIC_CONST(CheckerBoard, "AA_BILINEAR", "bilinear");
+
+CheckerBoard::TAntiAliasingDictionary CheckerBoard::antiAliasingDictionary_ = 
+	CheckerBoard::makeAntiAliasingDictionary();
+CheckerBoard::AntiAliasing CheckerBoard::defaultAntiAliasing_ = CheckerBoard::aaBilinear;
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -57,6 +66,27 @@ void CheckerBoard::setSplit(const TVector2D& iSplit)
 
 
 
+const std::string CheckerBoard::antiAliasing() const
+{
+	return antiAliasingDictionary_.key(antiAliasing_);
+}
+
+
+
+void CheckerBoard::setAntiAliasing(const std::string& iMode)
+{
+	antiAliasing_ = antiAliasingDictionary_[stde::tolower(iMode)];
+}
+
+
+
+void CheckerBoard::setDefaultAntiAliasing(const std::string& iMode)
+{
+	defaultAntiAliasing_ = antiAliasingDictionary_[stde::tolower(iMode)];
+}
+
+
+
 // --- protected -----------------------------------------------------------------------------------
 
 
@@ -66,9 +96,77 @@ void CheckerBoard::setSplit(const TVector2D& iSplit)
 kernel::Spectrum CheckerBoard::doLookUp(const kernel::Sample& iSample, 
 										const kernel::IntersectionContext& iContext) const
 {
-	const TScalar u = num::mod(iContext.uv().x, TNumTraits::one);
-	const TScalar v = num::mod(iContext.uv().y, TNumTraits::one);
-	return ((u < split_.x) == (v < split_.y) ? textureA() : textureB())->lookUp(iSample, iContext);	
+#pragma LASS_FIXME("points need transform too [Bramz]")
+	const TVector2D uv = iContext.uv().position().transform(num::fractional);
+
+	switch (antiAliasing_)
+	{
+	case aaNone:
+		return ((uv.x < split_.x) == (uv.y < split_.y) ? textureA() : textureB())->lookUp(
+			iSample, iContext);
+		
+	case aaBilinear:
+		{
+			const TVector2D dUv = prim::pointwiseMax(
+				iContext.dUv_dI().transform(num::abs), iContext.dUv_dJ().transform(num::abs));
+            const TVector2D uvMin = uv - dUv;
+			const TVector2D uvMax = uv + dUv;
+			const TScalar area = 4 * dUv.x * dUv.y;
+			if (area > 0)
+			{
+				const TScalar areaA = integrate(uvMin, uvMax);
+				const TScalar weightA = num::clamp(areaA / area, TNumTraits::zero, TNumTraits::one);
+                return weightA * textureA()->lookUp(iSample, iContext) +
+					(1 - weightA) * textureB()->lookUp(iSample, iContext);
+			}
+			else
+			{
+				return ((uv.x < split_.x) == (uv.y < split_.y) ? textureA() : textureB())->lookUp(
+					iSample, iContext);
+			}
+		}
+
+	default:
+		LASS_ASSERT_UNREACHABLE;
+	}
+
+	return kernel::Spectrum();
+}
+
+
+
+TScalar CheckerBoard::integrate(const TVector2D& iMin, const TVector2D& iMax) const
+{
+	const TVector2D min0 = iMin.transform(num::floor);
+	const TVector2D max0 = iMax.transform(num::floor);
+	const TVector2D delta0 = max0 - min0;
+	const TVector2D dMin = iMin - min0;
+	const TVector2D dMax = iMax - max0;
+
+	const TVector2D dMinX(std::min(dMin.x, split_.x), std::max(dMin.x - split_.x, TNumTraits::zero));
+	const TVector2D dMinY(std::min(dMin.y, split_.y), std::max(dMin.y - split_.y, TNumTraits::zero));
+	const TVector2D dMaxX(std::min(dMax.x, split_.x), std::max(dMax.x - split_.x, TNumTraits::zero));
+	const TVector2D dMaxY(std::min(dMax.y, split_.y), std::max(dMax.y - split_.y, TNumTraits::zero));
+	const TVector2D oneX(split_.x, TNumTraits::one - split_.x);
+	const TVector2D oneY(split_.y, TNumTraits::one - split_.y);
+
+	TScalar result = (split_.x * split_.y + (1 - split_.x) * (1 - split_.y)) * delta0.x * delta0.y;
+	result += (dot(oneX, dMaxY) - dot(oneX, dMinY)) * delta0.x;
+	result += (dot(dMaxX, oneY) - dot(dMinX, oneY)) * delta0.y;
+	result += dot(dMaxX, dMaxY) - dot(dMaxX, dMinY);
+	result += dot(dMinX, dMinY) - dot(dMinX, dMaxY);
+
+	return result;
+}
+
+
+
+CheckerBoard::TAntiAliasingDictionary CheckerBoard::makeAntiAliasingDictionary()
+{
+	TAntiAliasingDictionary result;
+	result.add("none", aaNone);
+	result.add("bilinear", aaBilinear);
+	return result;
 }
 
 

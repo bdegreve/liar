@@ -60,7 +60,7 @@
 				TargetMachine="1"
 				AdditionalOptions="">
 				<IntelOptions 
-					AllOptions="/NOLOGO /DLL /OUT:&quot;D:\bram\visual_studio_projects\liar\src\..\bin/scenery_d.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;D:\bram\visual_studio_projects\liar\src\..\bin\scenery_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;D:\bram\visual_studio_projects\liar\src\..\bin/scenery.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
+					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/scenery_d.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\scenery_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/scenery.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
 					MSOriginalAdditionalOptions=""/>
 			</Tool>
 			<Tool 
@@ -148,7 +148,7 @@
 				TargetMachine="1"
 				AdditionalOptions="">
 				<IntelOptions 
-					AllOptions="/NOLOGO /DLL /OUT:&quot;D:\bram\visual_studio_projects\liar\src\..\bin/scenery.pyd&quot; /INCREMENTAL:NO /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;D:\bram\visual_studio_projects\liar\src\..\bin\scenery.pdb&quot; /OPT:REF /OPT:ICF /TLBID:1 /IMPLIB:&quot;D:\bram\visual_studio_projects\liar\src\..\bin/scenery.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
+					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/scenery.pyd&quot; /INCREMENTAL:NO /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\scenery.pdb&quot; /OPT:REF /OPT:ICF /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/scenery.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
 					MSOriginalAdditionalOptions=""/>
 			</Tool>
 			<Tool 
@@ -270,9 +270,6 @@
 			</File>
 			<File 
 				RelativePath=".\translation.cpp">
-			</File>
-			<File 
-				RelativePath=".\triangle.cpp">
 			</File>
 		</Filter>
 		<Filter 

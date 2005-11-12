@@ -66,8 +66,8 @@ void GridBoard::setThickness(const TVector2D& iThickness)
 kernel::Spectrum GridBoard::doLookUp(const kernel::Sample& iSample, 
 									 const kernel::IntersectionContext& iContext) const
 {
-	const TScalar u = num::mod(iContext.uv().x, TNumTraits::one);
-	const TScalar v = num::mod(iContext.uv().y, TNumTraits::one);
+	const TScalar u = num::fractional(iContext.uv().x);
+	const TScalar v = num::fractional(iContext.uv().y);
 	const bool isA = u < halfThickness_.x || v < halfThickness_.x || 
 		u > (TNumTraits::one - halfThickness_.x) || v > (TNumTraits::one - halfThickness_.y);
 	return (isA ? textureA() : textureB())->lookUp(iSample, iContext);	

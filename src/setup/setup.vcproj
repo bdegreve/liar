@@ -57,9 +57,9 @@
 				Name="VCMIDLTool"/>
 			<Tool 
 				Name="VCPostBuildEventTool"
-				CommandLine="mkdir $(ProjectDir)..\..\dist
-copy $(ProjectDir)dist\liar_d-0.2.0.win32.exe $(ProjectDir)..\..\dist /Y
-$(ProjectDir)..\..\dist\liar_d-0.2.0.win32.exe
+				CommandLine="mkdir &quot;$(ProjectDir)..\..\dist&quot;
+copy &quot;$(ProjectDir)dist\liar_d-0.2.0.win32.exe&quot; &quot;$(ProjectDir)..\..\dist&quot; /Y
+&quot;$(ProjectDir)..\..\dist\liar_d-0.2.0.win32.exe&quot;
 "/>
 			<Tool 
 				Name="VCPreBuildEventTool"/>
@@ -121,9 +121,9 @@ $(ProjectDir)..\..\dist\liar_d-0.2.0.win32.exe
 				Name="VCMIDLTool"/>
 			<Tool 
 				Name="VCPostBuildEventTool"
-				CommandLine="mkdir $(ProjectDir)..\..\dist
-copy $(ProjectDir)dist\liar-0.2.0.win32.exe $(ProjectDir)..\..\dist /Y
-$(ProjectDir)..\..\dist\liar-0.2.0.win32.exe
+				CommandLine="mkdir &quot;$(ProjectDir)..\..\dist&quot;
+copy &quot;$(ProjectDir)dist\liar-0.2.0.win32.exe&quot; &quot;$(ProjectDir)..\..\dist&quot; /Y
+&quot;$(ProjectDir)..\..\dist\liar-0.2.0.win32.exe&quot;
 "/>
 			<Tool 
 				Name="VCPreBuildEventTool"/>

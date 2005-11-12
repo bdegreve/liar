@@ -55,7 +55,7 @@ Image::Image(const std::string& iFilename):
 	Texture(&Type),
 	antiAliasing_(defaultAntiAliasing_),
 	mipMapping_(defaultMipMapping_),
-	currentMipMapping_(mmNone)
+	currentMipMapping_(mmUninitialized)
 {
 	image_ = TImagePtr(new io::Image(iFilename));
 }
@@ -66,7 +66,7 @@ Image::Image(const std::string& iFilename,
 			 const std::string& iAntiAliasing, 
 			 const std::string& iMipMapping):
 	Texture(&Type),
-	currentMipMapping_(mmNone)
+	currentMipMapping_(mmUninitialized)
 {
 	setAntiAliasing(iAntiAliasing);
 	setMipMapping(iMipMapping);
@@ -98,11 +98,7 @@ void Image::setAntiAliasing(const std::string& iMode)
 
 void Image::setMipMapping(const std::string& iMode)
 {
-	const MipMapping mm = mipMappingDictionary_[stde::tolower(iMode)];
-	if (mm != mipMapping_)
-	{
-		makeMipMaps(mm);
-	}
+	mipMapping_ = mipMappingDictionary_[stde::tolower(iMode)];
 }
 
 
@@ -165,6 +161,7 @@ kernel::Spectrum Image::doLookUp(const kernel::Sample& iSample,
 	{
 	case aaNone:
 		result = nearest(levelU0, levelV0, uv);
+		break;
 		
 	case aaBilinear:
 		result = bilinear(levelU0, levelV0, uv);
@@ -397,8 +394,8 @@ io::Image::TPixel Image::nearest(size_t iLevelU, size_t iLevelV, const TPoint2D&
     const unsigned cols = mipMap.cols();
 	const unsigned rows = mipMap.rows();
 
-	const TScalar x = num::mod(iUv.x, TNumTraits::one) * cols;
-	const TScalar y = num::mod(iUv.y, TNumTraits::one) * rows;
+	const TScalar x = num::fractional(iUv.x) * cols;
+	const TScalar y = num::fractional(iUv.y) * rows;
 	const unsigned i0 = static_cast<unsigned>(num::floor(x));
 	const unsigned j0 = static_cast<unsigned>(num::floor(y));
 

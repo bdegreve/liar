@@ -121,7 +121,7 @@ DirectLighting::TLightRange DirectLighting::doSampleLights(const kernel::Sample&
 	}
 
 	//oLightSamples.swap(result);
-	return TLightRange(lightSamples_.begin(), output.current());
+	return TLightRange(lightSamples_.begin(), output.get());
 }
 
 

@@ -159,33 +159,11 @@ void Sphere::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRa
 	oResult.setDPoint_dU(dPoint_dU);
 	oResult.setDPoint_dV(dPoint_dV);
 
-	//                          [sin theta * cos phi]
-	// d^2R_dudu = -4r * pi^2 * [sin theta * sin phi]
-	//                          [0                  ]
 	//
-	//                         [sin theta * cos phi]
-	// d^2R_dvdv = -r * pi^2 * [sin theta * sin phi] = -pi^2 * R
-	//                         [cos theta          ]
+	// dN/du = d((P-C)/r)/du = (dP/du)/r
 	//
-	//                         [cos theta * -sin phi]
-	// d^2R_dudv = 2r * pi^2 * [cos theta * cos phi ]
-	//                         [0                   ]
-	//
-	const TVector3D d2Point_dUdU = 2 * TNumTraits::pi * TVector3D(-dPoint_dU.y, dPoint_dU.x, 0);
-	const TVector3D d2Point_dVdV = -num::sqr(TNumTraits::pi) * R;
-	const TVector3D d2Point_dUdV = 2 * TNumTraits::pi * TVector3D(-dPoint_dV.y, dPoint_dV.x, 0);
-	
-	// Weingarten equations, http://mathworld.wolfram.com/WeingartenEquations.html
-	//
-	const TScalar E = dPoint_dU.squaredNorm();
-	const TScalar F = dot(dPoint_dU, dPoint_dV);
-	const TScalar G = dPoint_dV.squaredNorm(); 
-	const TScalar e = dPoint_dU.squaredNorm();
-	const TScalar f = dot(dPoint_dU, dPoint_dV);
-	const TScalar g = dPoint_dV.squaredNorm();
-	const TScalar invDenominator = num::inv(E * G - num::sqr(F));
-	oResult.setDNormal_dU(invDenominator * ((f * F - e * G) * dPoint_dU + (e * F - f * E) * dPoint_dV));
-	oResult.setDNormal_dV(invDenominator * ((g * F - f * G) * dPoint_dU + (f * F - g * E) * dPoint_dV));
+	oResult.setDNormal_dU(dPoint_dU * invRadius_);
+	oResult.setDNormal_dV(dPoint_dV * invRadius_);
 }
 
 

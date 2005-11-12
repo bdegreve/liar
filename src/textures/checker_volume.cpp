@@ -66,9 +66,9 @@ void CheckerVolume::setSplit(const TVector3D& iSplit)
 kernel::Spectrum CheckerVolume::doLookUp(const kernel::Sample& iSample, 
 										 const kernel::IntersectionContext& iContext) const
 {
-	const TScalar x = num::mod(iContext.point().x, TNumTraits::one);
-	const TScalar y = num::mod(iContext.point().y, TNumTraits::one);
-	const TScalar z = num::mod(iContext.point().z, TNumTraits::one);
+	const TScalar x = num::fractional(iContext.point().x);
+	const TScalar y = num::fractional(iContext.point().y);
+	const TScalar z = num::fractional(iContext.point().z);
 	if (z < split_.z)
 	{
 		return ((x < split_.x) == (y < split_.y) ? textureA() : textureB())->lookUp(iSample, iContext);	

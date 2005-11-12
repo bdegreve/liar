@@ -74,7 +74,8 @@ private:
 		mmNone = 0,
 		mmIsotropic,
 		mmAnisotropic,
-		numAnisotropic
+		numMipMapping,
+		mmUninitialized = numMipMapping
 	};
 
 	typedef util::SharedPtr<io::Image> TImagePtr;

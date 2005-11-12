@@ -217,29 +217,16 @@ Spectrum Simple::doShade(const Sample& iSample,
 
 	if (reflectance)
 	{
-		const TVector3D reflectedDirection = -geoNormal.reflect(iPrimaryRay.direction());
-		const DifferentialRay reflectedRay(
-			BoundedRay(intersectionPoint, reflectedDirection, tolerance, TNumTraits::infinity),
-			TRay3D(intersectionPoint, reflectedDirection),
-			TRay3D(intersectionPoint, reflectedDirection));
-		result += reflectance * iTracer.castRay(iSample, reflectedRay);
+		result += reflectance * iTracer.castRay(iSample, reflect(iContext, iPrimaryRay));
 	}
 
 	if (transmittance)
 	{
 		const TScalar refractionIndex = refractionIndex_->lookUp(iSample, iContext).averagePower();
-		const TScalar n = !isOutside ? refractionIndex : num::inv(refractionIndex);
-		const TScalar cosI = -dot(shadeNormal, iPrimaryRay.direction());
-		const TScalar sinT2 = num::sqr(n) * (TNumTraits::one - num::sqr(cosI));
-		if (sinT2 <= TNumTraits::one)
+		const TScalar n1overn2 = !isOutside ? refractionIndex : num::inv(refractionIndex);
+		const DifferentialRay refractedRay = refract(iContext, iPrimaryRay, n1overn2);
+		if (refractedRay.isValid())
 		{
-			const TScalar cosT = num::sqrt(TNumTraits::one - sinT2);
-			const TVector3D refractedDirection = n * iPrimaryRay.direction() +
-				(n * cosI - cosT) * shadeNormal;
-			const DifferentialRay refractedRay(
-				BoundedRay(intersectionPoint, refractedDirection, tolerance, TNumTraits::infinity),
-				TRay3D(intersectionPoint, refractedDirection),
-				TRay3D(intersectionPoint, refractedDirection));
 			result += transmittance * iTracer.castRay(iSample, refractedRay);
 		}
 		else

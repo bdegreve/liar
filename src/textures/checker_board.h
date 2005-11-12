@@ -17,8 +17,7 @@
  *	You should have received a copy of the GNU General Public License
  *	along with this program; if not, write to the Free Software
  *	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *  http://liar.sourceforge.net
+ * *  http://liar.sourceforge.net
  */
 
 /** @class liar::textures::CheckerBoard
@@ -31,6 +30,7 @@
 
 #include "textures_common.h"
 #include "mix_2.h"
+#include <lass/util/dictionary.h>
 
 namespace liar
 {
@@ -44,15 +44,36 @@ public:
 
 	CheckerBoard(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB);
 
+	const std::string antiAliasing() const;
+	void setAntiAliasing(const std::string& iMode);
+
 	const TVector2D& split() const;
 	void setSplit(const TVector2D& iSplit);
 
+	static void setDefaultAntiAliasing(const std::string& iMode);
+
 private:
+
+	enum AntiAliasing
+	{
+		aaNone = 0,
+		aaBilinear,
+		numAntiAliasing
+	};
+
+	typedef util::Dictionary<std::string, AntiAliasing> TAntiAliasingDictionary;
 
 	kernel::Spectrum doLookUp(const kernel::Sample& iSample, 
 		const kernel::IntersectionContext& iContext) const;
+	TScalar integrate(const TVector2D& iMin, const TVector2D& iMax) const;
+
+	static TAntiAliasingDictionary makeAntiAliasingDictionary();
 
 	TVector2D split_;
+	AntiAliasing antiAliasing_;
+
+	static TAntiAliasingDictionary antiAliasingDictionary_;
+	static AntiAliasing defaultAntiAliasing_;
 };
 
 }

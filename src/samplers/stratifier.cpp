@@ -23,6 +23,7 @@
 
 #include "samplers_common.h"
 #include "stratifier.h"
+#include <lass/stde/range_algorithm.h>
 
 namespace liar
 {
@@ -181,7 +182,7 @@ void Stratifier::doSampleTime(const TResolution& iPixel, unsigned iSubPixel,
 
 	if (iSubPixel == 0)
 	{
-		shuffleTimeStrata();
+		stde::random_shuffle_r(timeStrata_, numberGenerator_);	
 	}
 	const TScalar tau = (timeStrata_[iSubPixel] + (isJittered_ ? jitterGenerator_() : 0.5f)) * timeStratumSize_;
 	oTime = iPeriod.interpolate(tau);
