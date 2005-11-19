@@ -42,12 +42,12 @@ class LIAR_TEXTURES_DLL Uv: public Mix2
 	PY_HEADER(Mix2)
 public:
 
-	Uv(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB);
+	Uv(const TTexturePtr& iA, const TTexturePtr& iB);
 
 private:
 
-	kernel::Spectrum doLookUp(const kernel::Sample& iSample, 
-		const kernel::IntersectionContext& iContext) const;
+	Spectrum doLookUp(const Sample& iSample, 
+		const IntersectionContext& iContext) const;
 };
 
 }

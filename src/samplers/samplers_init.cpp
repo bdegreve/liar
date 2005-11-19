@@ -28,7 +28,7 @@
 
 void setDefaultSampler(const liar::kernel::TSamplerPtr& iDefaultSampler)
 {
-    liar::kernel::Sampler::defaultSampler() = iDefaultSampler;
+	liar::kernel::Sampler::defaultSampler() = iDefaultSampler;
 }
 
 PY_DECLARE_MODULE(samplers)
@@ -47,7 +47,7 @@ LIAR_SAMPLERS_DLL void initsamplers(void)
 	PY_INJECT_MODULE_EX(samplers, "liar.samplers", "LiAR sample generators")
     PY_INJECT_CLASS_IN_MODULE(Stratifier, samplers, "(jittered) stratified sampler")
         
-    setDefaultSampler(liar::kernel::TSamplerPtr(new Stratifier));
+	setDefaultSampler(liar::kernel::TSamplerPtr(new Stratifier));
 
 	PyRun_SimpleString("print 'liar.samplers imported (v" 
 		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");

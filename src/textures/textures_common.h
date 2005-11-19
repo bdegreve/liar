@@ -46,6 +46,9 @@ namespace liar
 {
 namespace textures
 {
+	
+using namespace liar::kernel;
+
 }
 
 }

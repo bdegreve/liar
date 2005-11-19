@@ -44,22 +44,18 @@ class LIAR_SHADERS_DLL Unshaded: public Shader
 public:
 
 	Unshaded();
-	Unshaded(const TTexturePtr& iValue);
+	Unshaded(const TTexturePtr& iColour);
 
-	const TTexturePtr& value() const;
-	void setValue(const TTexturePtr& iValue);
+	const TTexturePtr& colour() const;
+	void setColour(const TTexturePtr& iColour);
 
 private:
 
-	Spectrum doUnshaded(const Sample& iSample, 
-		 const IntersectionContext& iContext);
-
-	Spectrum doDirectLight(
-		const Sample& iSample, const DifferentialRay& iRay,
+	Spectrum doShade(const Sample& iSample,	const DifferentialRay& iPrimaryRay, 
 		const Intersection& iIntersection, const IntersectionContext& iContext, 
-		const TSceneObjectPtr& iScene, const LightContext& iLight);
+		const RayTracer& iTracer);
 
-	TTexturePtr value_;
+	TTexturePtr colour_;
 };
 
 }

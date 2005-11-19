@@ -38,35 +38,37 @@ namespace liar
 namespace scenery
 {
 
-class LIAR_SCENERY_DLL MotionTranslation: public kernel::SceneObject
+class LIAR_SCENERY_DLL MotionTranslation: public SceneObject
 {
-    PY_HEADER(kernel::SceneObject)
+    PY_HEADER(SceneObject)
 public:
 
-	MotionTranslation(const kernel::TSceneObjectPtr& iChild, 
+	MotionTranslation(const TSceneObjectPtr& iChild, 
 		const TVector3D& iLocalToWorldStart,
 		const TVector3D& iSpeedInWorld);
 
-	const kernel::TSceneObjectPtr& child() const;
-	void setChild(const kernel::TSceneObjectPtr& iChild);
+	const TSceneObjectPtr& child() const;
+	void setChild(const TSceneObjectPtr& iChild);
 
 private:
 
     void doAccept(lass::util::VisitorBase& ioVisitor);
 
-	void doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
-		kernel::Intersection& oResult) const;
-	const bool doIsIntersecting(const kernel::Sample& iSample, const kernel::BoundedRay& iRay) const;
-	void doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
-		const kernel::Intersection& iIntersection, kernel::IntersectionContext& oResult) const;
+	void doPreProcess(const TimePeriod& iPeriod);
+	void doIntersect(const Sample& iSample, const BoundedRay& iRay, 
+		Intersection& oResult) const;
+	const bool doIsIntersecting(const Sample& iSample, const BoundedRay& iRay) const;
+	void doLocalContext(const Sample& iSample, const BoundedRay& iRay,
+		const Intersection& iIntersection, IntersectionContext& oResult) const;
 	void doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const;
-	const bool doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const;
-	const TAabb3D doBoundingBox(const kernel::TimePeriod& iPeriod) const;
+	const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const;
+	const TAabb3D doBoundingBox() const;
 	const bool doHasMotion() const { return true; }
 
 	const TVector3D localToWorld(TTime iTime) const;
 
-    kernel::TSceneObjectPtr child_;
+    TSceneObjectPtr child_;
+	TAabb3D aabb_;
     TVector3D localToWorldStart_;
 	TVector3D speedInWorld_;
 };

@@ -66,39 +66,39 @@ void DirectLighting::doPreprocess()
 
 
 
-void DirectLighting::doRequestSamples(const kernel::TSamplerPtr& iSampler)
+void DirectLighting::doRequestSamples(const TSamplerPtr& iSampler)
 {
 }
 
 
 
-kernel::Spectrum DirectLighting::doCastRay(const kernel::Sample& iSample,
-										   const kernel::DifferentialRay& iPrimaryRay) const
+Spectrum DirectLighting::doCastRay(const Sample& iSample,
+										   const DifferentialRay& iPrimaryRay) const
 {
 	GenerationIncrementor incrementor(*this);
 	if (rayGeneration_ > maxRayGeneration_)
 	{
-		return kernel::Spectrum();
+		return Spectrum();
 	}
 
-	kernel::Intersection intersection;
+	Intersection intersection;
 	scene()->intersect(iSample, iPrimaryRay, intersection);
 	if (!intersection)
 	{
-		return kernel::Spectrum();
+		return Spectrum();
 	}
 
-	kernel::IntersectionContext context;
+	IntersectionContext context;
 	intersection.object()->localContext(iSample, iPrimaryRay, intersection, context);
-	kernel::TShaderPtr shader = context.shader();
+	TShaderPtr shader = context.shader();
 
 	return context.shader()->shade(iSample, iPrimaryRay, intersection, context, *this);
 }
 
 
 
-DirectLighting::TLightRange DirectLighting::doSampleLights(const kernel::Sample& iSample,
-									const kernel::IntersectionContext& iContext) const
+DirectLighting::TLightRange DirectLighting::doSampleLights(const Sample& iSample,
+									const IntersectionContext& iContext) const
 {
 	using namespace kernel;
 

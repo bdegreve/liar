@@ -42,15 +42,15 @@ class LIAR_TEXTURES_DLL GridBoard: public Mix2
 	PY_HEADER(Mix2)
 public:
 
-	GridBoard(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB);
+	GridBoard(const TTexturePtr& iA, const TTexturePtr& iB);
 
 	const TVector2D thickness() const;
 	void setThickness(const TVector2D& iSplit);
 
 private:
 
-	kernel::Spectrum doLookUp(const kernel::Sample& iSample, 
-		const kernel::IntersectionContext& iContext) const;
+	Spectrum doLookUp(const Sample& iSample, 
+		const IntersectionContext& iContext) const;
 
 	TVector2D halfThickness_;
 };

@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::Sample
+/** @class liar::Sample
  *  @brief representation of a single sample that must be rendered
  *  @author Bram de Greve [BdG]
  */
@@ -51,7 +51,8 @@ public:
 
     Sample();
     
-    const TPoint2D& screenCoordinate() const;
+	const TPoint2D& screenCoordinate() const;
+	const TPoint2D& lensCoordinate() const;
 	const TTime time() const;
 
     const TScalar weight() const;
@@ -65,6 +66,7 @@ private:
 	friend class Sampler;
 
     TPoint2D screenCoordinate_;
+	TPoint2D lensCoordinate_;
 	TTime time_;
     TScalar weight_;
     std::vector<TScalar> subSequences1D_;

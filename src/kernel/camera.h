@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::Camera
+/** @class liar::Camera
  *  @brief Abstract base class of render viewports
  *  @author Bram de Greve [BdG]
  *
@@ -49,11 +49,7 @@ public:
     
     virtual ~Camera();
 
-    const DifferentialRay primaryRay(Sample& ioSample, const TVector2D& iScreenSpaceDelta) const
-    {
-        return doPrimaryRay(ioSample, iScreenSpaceDelta);
-    }
-
+    const DifferentialRay primaryRay(const Sample& iSample, const TVector2D& iScreenSpaceDelta) const;
 	const TimePeriod shutterDelta() const { return doShutterDelta(); }
 
 protected:
@@ -62,7 +58,7 @@ protected:
 
 private:
 
-    virtual const DifferentialRay doPrimaryRay(Sample& ioSample, 
+    virtual const BoundedRay doGenerateRay(const Sample& iSample, 
 		const TVector2D& iScreenSpaceDelta) const = 0;
 	virtual const TimePeriod doShutterDelta() const = 0;
 };

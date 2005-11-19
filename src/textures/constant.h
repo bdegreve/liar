@@ -37,23 +37,23 @@ namespace liar
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL Constant: public kernel::Texture
+class LIAR_TEXTURES_DLL Constant: public Texture
 {
-	PY_HEADER(kernel::Texture)
+	PY_HEADER(Texture)
 public:
 
-	explicit Constant(const kernel::Spectrum& iValue);
+	explicit Constant(const Spectrum& iValue);
 	explicit Constant(TScalar iScalar);
 
-	const kernel::Spectrum& value() const;
-	void setValue(const kernel::Spectrum& iValue);
+	const Spectrum& value() const;
+	void setValue(const Spectrum& iValue);
 
 private:
 
-	kernel::Spectrum doLookUp(const kernel::Sample& iSample, 
-		const kernel::IntersectionContext& iContext) const;
+	Spectrum doLookUp(const Sample& iSample, 
+		const IntersectionContext& iContext) const;
 
-	kernel::Spectrum value_;
+	Spectrum value_;
 };
 
 }

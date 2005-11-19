@@ -122,8 +122,8 @@ void Image::setDefaultMipMapping(const std::string& iMode)
 
 // --- private -------------------------------------------------------------------------------------
 
-kernel::Spectrum Image::doLookUp(const kernel::Sample& iSample, 
-								 const kernel::IntersectionContext& iContext) const
+Spectrum Image::doLookUp(const Sample& iSample, 
+								 const IntersectionContext& iContext) const
 {
 	if (mipMapping_ != currentMipMapping_)
 	{
@@ -184,7 +184,7 @@ kernel::Spectrum Image::doLookUp(const kernel::Sample& iSample,
 		LASS_ASSERT_UNREACHABLE;
 	}
 
-	return kernel::Spectrum(TVector3D(result.r, result.g, result.b));
+	return Spectrum(TVector3D(result.r, result.g, result.b));
 }
 
 

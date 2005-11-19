@@ -34,6 +34,7 @@ namespace kernel
 
 Sample::Sample():
     screenCoordinate_(TPoint2D(0, 0)),
+    lensCoordinate_(TPoint2D(0, 0)),
 	time_(0.f),
     weight_(1),
 	sampler_(0)
@@ -47,6 +48,12 @@ const TPoint2D& Sample::screenCoordinate() const
     return screenCoordinate_;
 }
 
+
+
+const TPoint2D& Sample::lensCoordinate() const
+{
+    return lensCoordinate_;
+}
 
 
 const TTime Sample::time() const

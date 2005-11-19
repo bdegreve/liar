@@ -38,12 +38,12 @@ namespace liar
 namespace scenery
 {
 
-class LIAR_SCENERY_DLL List: public kernel::SceneObject
+class LIAR_SCENERY_DLL List: public SceneObject
 {
-    PY_HEADER(kernel::SceneObject)
+    PY_HEADER(SceneObject)
 public:
 
-    typedef std::vector<kernel::TSceneObjectPtr> TChildren;
+    typedef std::vector<TSceneObjectPtr> TChildren;
 
     List();
     List(const TChildren& iChildren); // for python
@@ -54,27 +54,31 @@ public:
         add(iBegin, iEnd);
     }
 
-    void add(const kernel::TSceneObjectPtr& iChild);
+    void add(const TSceneObjectPtr& iChild);
 	void add(const TChildren& iChildren); // for python
 
 	template <typename InputIterator> void add(InputIterator iBegin, InputIterator iEnd)
 	{
-        std::copy(iBegin, iEnd, std::back_inserter(children_));
+        while (iBegin != iEnd)
+		{
+			this->add(*iBegin++);
+		}
 	}
 
 private:
 
     void doAccept(lass::util::VisitorBase& ioVisitor);
 
-	void doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
-		kernel::Intersection& oResult) const;
-	const bool doIsIntersecting(const kernel::Sample& iSample, const kernel::BoundedRay& iRay) const;
-	void doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
-		const kernel::Intersection& iIntersection, kernel::IntersectionContext& oResult) const;
-	const bool doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const;
-	const TAabb3D doBoundingBox(const kernel::TimePeriod& iPeriod) const;
+	void doPreProcess(const TimePeriod& iPeriod);
+	void doIntersect(const Sample& iSample, const BoundedRay& iRay, 
+		Intersection& oResult) const;
+	const bool doIsIntersecting(const Sample& iSample, const BoundedRay& iRay) const;
+	void doLocalContext(const Sample& iSample, const BoundedRay& iRay,
+		const Intersection& iIntersection, IntersectionContext& oResult) const;
+	const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const;
+	const TAabb3D doBoundingBox() const;
 
-    TChildren children_;   
+    TChildren children_;
 };
 
 

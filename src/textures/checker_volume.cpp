@@ -30,12 +30,12 @@ namespace textures
 {
 
 PY_DECLARE_CLASS(CheckerVolume)
-PY_CLASS_CONSTRUCTOR_2(CheckerVolume, const kernel::TTexturePtr&, const kernel::TTexturePtr&);
+PY_CLASS_CONSTRUCTOR_2(CheckerVolume, const TTexturePtr&, const TTexturePtr&);
 PY_CLASS_MEMBER_RW(CheckerVolume, "split", split, setSplit);
 
 // --- public --------------------------------------------------------------------------------------
 
-CheckerVolume::CheckerVolume(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB):
+CheckerVolume::CheckerVolume(const TTexturePtr& iA, const TTexturePtr& iB):
 	Mix2(&Type, iA, iB),
 	split_(0.5f, 0.5f, 0.5f)
 {
@@ -63,8 +63,8 @@ void CheckerVolume::setSplit(const TVector3D& iSplit)
 
 // --- private -------------------------------------------------------------------------------------
 
-kernel::Spectrum CheckerVolume::doLookUp(const kernel::Sample& iSample, 
-										 const kernel::IntersectionContext& iContext) const
+Spectrum CheckerVolume::doLookUp(const Sample& iSample, 
+										 const IntersectionContext& iContext) const
 {
 	const TScalar x = num::fractional(iContext.point().x);
 	const TScalar y = num::fractional(iContext.point().y);

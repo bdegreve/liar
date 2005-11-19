@@ -42,7 +42,7 @@ class LIAR_TEXTURES_DLL CheckerBoard: public Mix2
 	PY_HEADER(Mix2)
 public:
 
-	CheckerBoard(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB);
+	CheckerBoard(const TTexturePtr& iA, const TTexturePtr& iB);
 
 	const std::string antiAliasing() const;
 	void setAntiAliasing(const std::string& iMode);
@@ -63,8 +63,8 @@ private:
 
 	typedef util::Dictionary<std::string, AntiAliasing> TAntiAliasingDictionary;
 
-	kernel::Spectrum doLookUp(const kernel::Sample& iSample, 
-		const kernel::IntersectionContext& iContext) const;
+	Spectrum doLookUp(const Sample& iSample, 
+		const IntersectionContext& iContext) const;
 	TScalar integrate(const TVector2D& iMin, const TVector2D& iMax) const;
 
 	static TAntiAliasingDictionary makeAntiAliasingDictionary();

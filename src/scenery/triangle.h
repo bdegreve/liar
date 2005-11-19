@@ -40,9 +40,9 @@ namespace liar
 namespace scenery
 {
 
-class LIAR_SCENERY_DLL Triangle: public kernel::SceneObject
+class LIAR_SCENERY_DLL Triangle: public SceneObject
 {
-    PY_HEADER(kernel::SceneObject)
+    PY_HEADER(SceneObject)
 public:
 
     Triangle(const TPoint3D& iA, const TPoint3D& iB, const TPoint3D& iC);
@@ -53,13 +53,13 @@ private:
 
     LASS_UTIL_ACCEPT_VISITOR
     
-	void doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
-		kernel::Intersection& oResult) const;
-	const bool doIsIntersecting(const kernel::Sample& iSample, const kernel::BoundedRay& iRay) const;
-	void doLocalContext(const kernel::Sample& iSample, const kernel::BoundedRay& iRay,
-		const kernel::Intersection& iIntersection, kernel::IntersectionContext& oResult) const;
-	const bool doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const;
-	const TAabb3D doBoundingBox(const kernel::TimePeriod& iPeriod) const;
+	void doIntersect(const Sample& iSample, const BoundedRay& iRay, 
+		Intersection& oResult) const;
+	const bool doIsIntersecting(const Sample& iSample, const BoundedRay& iRay) const;
+	void doLocalContext(const Sample& iSample, const BoundedRay& iRay,
+		const Intersection& iIntersection, IntersectionContext& oResult) const;
+	const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const;
+	const TAabb3D doBoundingBox() const;
 
     TTriangle3D triangle_;
 };

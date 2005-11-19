@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::SceneComposite
+/** @class liar::SceneComposite
  *  @brief base class of all compound object (objects that have children)
  *  @author Bram de Greve [BdG]
  */

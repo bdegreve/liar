@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::IntersectionContext
+/** @class liar::IntersectionContext
  *  @brief contains local geometry context of intersection point
  *  @author Bram de Greve [BdG]
  */
@@ -56,6 +56,7 @@ public:
 	const TVector3D& dNormal_dV() const { return dNormal_dV_; }
 	const TVector3D& dNormal_dI() const { return dNormal_dI_; }
 	const TVector3D& dNormal_dJ() const { return dNormal_dJ_; }
+	const TVector3D& geometricNormal() const { return geometricNormal_; }
 	const TPoint2D& uv() const { return uv_; }
 	const TVector2D& dUv_dI() const { return dUv_dI_; }
 	const TVector2D& dUv_dJ() const { return dUv_dJ_; }
@@ -68,6 +69,7 @@ public:
     void setNormal(const TVector3D& iNormal) { normal_ = iNormal; }
 	void setDNormal_dU(const TVector3D& iDNormal_dU) { dNormal_dU_ = iDNormal_dU; }
 	void setDNormal_dV(const TVector3D& iDNormal_dV) { dNormal_dV_ = iDNormal_dV; }
+	void setGeometricNormal(const TVector3D& iNormal) { geometricNormal_ = iNormal; }
 	void setUv(const TPoint2D& iUv) { uv_ = iUv; }
 	void setUv(const TScalar iU, const TScalar iV) { uv_.x = iU; uv_.y = iV; }
     void setT(TScalar iT) { t_ = iT; }
@@ -78,6 +80,7 @@ public:
 	void transform(const TTransformation3D& iTransformation);
 	void translate(const TVector3D& iOffset);
 	void flipNormal();
+	void flipGeometricNormal();
 
 private:
 
@@ -95,6 +98,7 @@ private:
 	TVector3D dNormal_dV_;	/**< partial derivative of normal_ to surface coordinate v */
 	TVector3D dNormal_dI_;	/**< partial derivative of normal_ to screen space coordinate i */
 	TVector3D dNormal_dJ_;	/**< partial derivative of normal_ to screen space coordinate j */
+	TVector3D geometricNormal_;
 
 	TPoint2D uv_;			/**< parametric coordinate of point_ on surface */
 	TVector2D dUv_dI_;		/**< partial derivative of uv_ to screen space coordinate i */

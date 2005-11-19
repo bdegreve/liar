@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::RenderTarget
+/** @class liar::RenderTarget
  *  @brief render target, canvas or film of camera
  *  @author Bram de Greve [BdG]
  */

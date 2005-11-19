@@ -43,9 +43,9 @@ namespace liar
 namespace output
 {
 
-class LIAR_OUTPUT_DLL Image: public kernel::RenderTarget
+class LIAR_OUTPUT_DLL Image: public RenderTarget
 {
-    PY_HEADER(kernel::RenderTarget)
+    PY_HEADER(RenderTarget)
 public:
 
 	typedef prim::Vector2D<size_t> TSize;
@@ -55,26 +55,26 @@ public:
 
 	const std::string& filename() const;
 	const TSize& size() const;
-	const kernel::TRgbSpacePtr& rgbSpace() const;
+	const TRgbSpacePtr& rgbSpace() const;
     const TScalar gamma() const;
 	const TScalar exposureTime() const;
 
 	void setFilename(const std::string& iFilename);
-	void setRgbSpace(const kernel::TRgbSpacePtr& iRgbSpace);
+	void setRgbSpace(const TRgbSpacePtr& iRgbSpace);
     void setGamma(TScalar iGammaExponent);
 	void setExposureTime(TScalar iTime);
 
 private:
 
     virtual void doBeginRender();
-	virtual void doWriteRender(const kernel::Sample& iSample, const kernel::Spectrum& iRadiance);
+	virtual void doWriteRender(const Sample& iSample, const Spectrum& iRadiance);
     virtual void doEndRender();
 
     io::Image image_;
 	std::vector<unsigned> numberOfSamples_;
     std::string filename_;
     TSize size_;
-	kernel::TRgbSpacePtr rgbSpace_;
+	TRgbSpacePtr rgbSpace_;
     TScalar gamma_;
 	TScalar exposureTime_;
 	bool isQuiting_;

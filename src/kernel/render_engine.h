@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::RenderEngine
+/** @class liar::RenderEngine
  *  @brief keeps the ray tracer running
  *  @author Bram de Greve [BdG]
  */
@@ -78,6 +78,7 @@ private:
     TRenderTargetPtr renderTarget_;
     TSamplerPtr sampler_;
     TSceneObjectPtr scene_;
+	bool isDirty_;
 
     static const TBucket bucketBound_;
 };

@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::SolidEvent
+/** @class liar::SolidEvent
  *  @brief enumeration of intersection events that can happen with a solid
  *  @author Bram de Greve [BdG]
  */

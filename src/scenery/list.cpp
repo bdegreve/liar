@@ -32,7 +32,7 @@ namespace scenery
 PY_DECLARE_CLASS(List)
 PY_CLASS_CONSTRUCTOR_0(List)
 PY_CLASS_CONSTRUCTOR_1(List, const List::TChildren&)
-PY_CLASS_METHOD_QUALIFIED_1(List, add, void, const kernel::TSceneObjectPtr&)
+PY_CLASS_METHOD_QUALIFIED_1(List, add, void, const TSceneObjectPtr&)
 PY_CLASS_METHOD_QUALIFIED_1(List, add, void, const List::TChildren&)
 
 
@@ -53,7 +53,7 @@ List::List(const TChildren& iChildren):
 
 
 
-void List::add(const kernel::TSceneObjectPtr& iChild)
+void List::add(const TSceneObjectPtr& iChild)
 {
     children_.push_back(iChild);
 }
@@ -86,19 +86,30 @@ void List::doAccept(util::VisitorBase& ioVisitor)
 
 
 
-void List::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay,
-					   kernel::Intersection& oResult) const
+void List::doPreProcess(const TimePeriod& iPeriod)
 {
-    kernel::Intersection result = kernel::Intersection::empty();
+	const TChildren::const_iterator end = children_.end();
+    for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
+    {
+        (*i)->preProcess(iPeriod);
+    }
+}
+
+
+
+void List::doIntersect(const Sample& iSample, const BoundedRay& iRay,
+					   Intersection& oResult) const
+{
+    Intersection result = Intersection::empty();
 	const TChildren::const_iterator end = children_.end();
     for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
     {
         TChildren::value_type child = *i;
-        kernel::Intersection temp;
+        Intersection temp;
         child->intersect(iSample, iRay, temp);
-        if (!temp.isEmpty())
+        if (temp)
         {
-            if (result.isEmpty() || temp.t() < result.t())
+            if (!result || temp.t() < result.t())
             {
                 result.swap(temp);
             }
@@ -113,8 +124,8 @@ void List::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& 
 
 
 
-const bool List::doIsIntersecting(const kernel::Sample& iSample, 
-								  const kernel::BoundedRay& iRay) const
+const bool List::doIsIntersecting(const Sample& iSample, 
+								  const BoundedRay& iRay) const
 {
 	const TChildren::const_iterator end = children_.end();
     for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
@@ -129,17 +140,17 @@ const bool List::doIsIntersecting(const kernel::Sample& iSample,
 
 
 
-void List::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
-                          const kernel::Intersection& iIntersection,
-                          kernel::IntersectionContext& oResult) const
+void List::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
+                          const Intersection& iIntersection,
+                          IntersectionContext& oResult) const
 {
-    kernel::IntersectionDescendor descend(iIntersection);
+    IntersectionDescendor descend(iIntersection);
     iIntersection.object()->localContext(iSample, iRay, iIntersection, oResult);
 }
 
 
 
-const bool List::doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const
+const bool List::doContains(const Sample& iSample, const TPoint3D& iPoint) const
 {
 	const TChildren::const_iterator end = children_.end();
     for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
@@ -154,13 +165,13 @@ const bool List::doContains(const kernel::Sample& iSample, const TPoint3D& iPoin
 
 
 
-const TAabb3D List::doBoundingBox(const kernel::TimePeriod& iPeriod) const
+const TAabb3D List::doBoundingBox() const
 {
 	TAabb3D result;
 	const TChildren::const_iterator end = children_.end();
     for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
     {
-		result += (*i)->boundingBox(iPeriod);
+		result += (*i)->boundingBox();
 	}
 	return result;
 }

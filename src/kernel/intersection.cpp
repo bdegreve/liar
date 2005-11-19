@@ -40,7 +40,8 @@ Intersection Intersection::empty_;
 
 Intersection::Intersection():
     t_(-TNumTraits::one),
-	solidEvent_(seNoEvent)
+	solidEvent_(seNoEvent),
+	special_(0)
 {
     currentLevel_ = objectStack_.end();
 }
@@ -49,7 +50,8 @@ Intersection::Intersection():
 
 Intersection::Intersection(const SceneObject* iObject, TScalar iT, SolidEvent iEvent):
     t_(iT),
-	solidEvent_(iEvent)
+	solidEvent_(iEvent),
+	special_(0)
 {
     push(iObject);
 }
@@ -93,7 +95,9 @@ void Intersection::swap(Intersection& iOther)
 {
     std::swap(objectStack_, iOther.objectStack_);
     std::swap(currentLevel_, iOther.currentLevel_);
+	std::swap(special_, iOther.special_);
     std::swap(t_, iOther.t_);
+	std::swap(solidEvent_, iOther.solidEvent_);
 }
 
 

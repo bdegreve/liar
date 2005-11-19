@@ -45,6 +45,9 @@ namespace liar
 {
 namespace cameras
 {
+	
+using namespace liar::kernel;
+
 }
 
 }

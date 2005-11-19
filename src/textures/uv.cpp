@@ -30,11 +30,11 @@ namespace textures
 {
 
 PY_DECLARE_CLASS(Uv)
-PY_CLASS_CONSTRUCTOR_2(Uv, kernel::TTexturePtr, kernel::TTexturePtr);
+PY_CLASS_CONSTRUCTOR_2(Uv, TTexturePtr, TTexturePtr);
 
 // --- public --------------------------------------------------------------------------------------
 
-Uv::Uv(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB):
+Uv::Uv(const TTexturePtr& iA, const TTexturePtr& iB):
 	Mix2(&Type, iA, iB)
 {
 }
@@ -47,8 +47,8 @@ Uv::Uv(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB):
 
 // --- private -------------------------------------------------------------------------------------
 
-kernel::Spectrum Uv::doLookUp(const kernel::Sample& iSample, 
-							  const kernel::IntersectionContext& iContext) const
+Spectrum Uv::doLookUp(const Sample& iSample, 
+							  const IntersectionContext& iContext) const
 {
 	const TScalar u = num::mod(iContext.uv().x, TNumTraits::one);
 	const TScalar v = num::mod(iContext.uv().y, TNumTraits::one);

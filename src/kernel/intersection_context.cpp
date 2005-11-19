@@ -45,6 +45,7 @@ IntersectionContext::IntersectionContext():
 	dNormal_dV_(),
 	dNormal_dI_(),
 	dNormal_dJ_(),
+	geometricNormal_(),
 	uv_(),
 	dUv_dI_(),
 	dUv_dJ_(),
@@ -73,6 +74,7 @@ void IntersectionContext::transform(const TTransformation3D& iTransformation)
 	normal_ = prim::normalTransform(normal_, iTransformation);
 	dNormal_dU_ = prim::normalTransform(dNormal_dU_, iTransformation);
 	dNormal_dV_ = prim::normalTransform(dNormal_dV_, iTransformation);
+	geometricNormal_ = prim::normalTransform(geometricNormal_, iTransformation);
 	
 	if (hasScreenSpaceDifferentials_)
 	{
@@ -99,6 +101,13 @@ void IntersectionContext::flipNormal()
 	dNormal_dV_ = -dNormal_dV_;
 	dNormal_dI_ = -dNormal_dI_;
 	dNormal_dJ_ = -dNormal_dJ_;
+}
+
+
+
+void IntersectionContext::flipGeometricNormal()
+{
+	geometricNormal_ = -geometricNormal_;
 }
 
 
@@ -131,7 +140,7 @@ void IntersectionContext::setScreenSpaceDifferentialsI(const TRay3D& iRay_dI,
 
 	TScalar matrix[4] = { dPoint_dU_[a], dPoint_dV_[a], dPoint_dU_[b], dPoint_dV_[b] };
 	TScalar solution[2] = { oDPoint_dI[a], oDPoint_dI[b] };
-	if (!num::impl::cramer2<TScalar>(matrix, solution))
+	if (!num::impl::cramer2<TScalar>(matrix, solution, solution + 2))
 	{
 		oDNormal_dI = TVector3D();
 		oDUv_dI = TVector2D();

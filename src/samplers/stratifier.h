@@ -39,9 +39,9 @@ namespace liar
 namespace samplers
 {
 
-class LIAR_SAMPLERS_DLL Stratifier: public kernel::Sampler
+class LIAR_SAMPLERS_DLL Stratifier: public Sampler
 {
-    PY_HEADER(kernel::Sampler)
+    PY_HEADER(Sampler)
 public:
 
     Stratifier();
@@ -64,10 +64,12 @@ private:
     virtual void doSetSamplesPerPixel(unsigned iSamplesPerPixel);
 	virtual void doSeed(unsigned iRandomSeed);
 
-	virtual void doSampleScreenCoordinate(const TResolution& iPixel, unsigned iSubPixel, 
+	virtual void doSampleScreen(const TResolution& iPixel, unsigned iSubPixel, 
+		TPoint2D& oScreenCoordinate);
+	virtual void doSampleLens(const TResolution& iPixel, unsigned iSubPixel, 
 		TPoint2D& oScreenCoordinate);
 	virtual void doSampleTime(const TResolution& iPixel, unsigned iSubPixel, 
-		const kernel::TimePeriod& iPeriod, TTime& oTime);
+		const TimePeriod& iPeriod, TTime& oTime);
 	virtual void doSampleSubSequence1D(const TResolution& iPixel, unsigned iSubPixel, 
 		TScalar* oBegin, TScalar* oEnd);
 	virtual void doSampleSubSequence2D(const TResolution& iPixel, unsigned iSubPixel, 
@@ -83,9 +85,10 @@ private:
 
     TResolution resolution_;
     TVector2D reciprocalResolution_;
-	TVector2D screenCoordinateStratumSize_;
-    TScalar timeStratumSize_;
-    std::vector<TVector2D> screenCoordinateStrata_;
+	TVector2D stratum2DSize_;
+    TScalar stratum1DSize_;
+    std::vector<TVector2D> screenStrata_;
+    std::vector<TVector2D> lensStrata_;
 	std::vector<TScalar> timeStrata_;
     unsigned strataPerPixel_;
 	std::vector<size_t> randomStrataSequence_;

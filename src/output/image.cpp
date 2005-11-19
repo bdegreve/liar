@@ -44,7 +44,7 @@ Image::Image(const std::string& iFilename, const TSize& iSize):
 	image_(),
     filename_(iFilename),
     size_(iSize),
-	rgbSpace_(kernel::RgbSpace::defaultSpace()),
+	rgbSpace_(RgbSpace::defaultSpace()),
     gamma_(1.f),
 	exposureTime_(-1.f),
     isSaved_(true)
@@ -77,7 +77,7 @@ const Image::TSize& Image::size() const
 
 
 
-const kernel::TRgbSpacePtr& Image::rgbSpace() const
+const TRgbSpacePtr& Image::rgbSpace() const
 {
 	return rgbSpace_;
 }
@@ -105,7 +105,7 @@ void Image::setFilename(const std::string& iFilename)
 
 
 
-void Image::setRgbSpace(const kernel::TRgbSpacePtr& iRgbSpace)
+void Image::setRgbSpace(const TRgbSpacePtr& iRgbSpace)
 {
 	rgbSpace_ = iRgbSpace;
 }
@@ -137,7 +137,7 @@ void Image::doBeginRender()
 
 
 
-void Image::doWriteRender(const kernel::Sample& iSample, const kernel::Spectrum& iRadiance)
+void Image::doWriteRender(const Sample& iSample, const Spectrum& iRadiance)
 {
     LASS_ASSERT(size_.x > 0 && size_.y > 0);
 

@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::RayTracer
+/** @class liar::RayTracer
  *  @brief base class of the actual ray tracer
  *  @author Bram de Greve [BdG]
  */

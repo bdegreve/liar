@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::TimePeriod
+/** @class liar::TimePeriod
  *  @brief a period in time
  *  @author Bram de Greve [BdG]
  */

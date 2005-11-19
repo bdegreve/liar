@@ -37,25 +37,25 @@ namespace liar
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL LinearInterpolator: public kernel::Texture
+class LIAR_TEXTURES_DLL LinearInterpolator: public Texture
 {
-	PY_HEADER(kernel::Texture)
+	PY_HEADER(Texture)
 public:
 
-	typedef std::pair<TScalar, kernel::TTexturePtr> TKeyTexture;
+	typedef std::pair<TScalar, TTexturePtr> TKeyTexture;
 	typedef std::vector<TKeyTexture> TKeyTextures;
 
 	LinearInterpolator();
 	LinearInterpolator(const TKeyTextures& iKeyTextures, 
-		const kernel::TTexturePtr& iControlTexture);
+		const TTexturePtr& iControlTexture);
 
 	const TKeyTextures& keys() const;
-	const kernel::TTexturePtr& control() const;
+	const TTexturePtr& control() const;
 
 	void setKeys(const TKeyTextures& iKeyTextures);
-	void setControl(const kernel::TTexturePtr& iControlTexture);
+	void setControl(const TTexturePtr& iControlTexture);
 
-	void addKey(TScalar iKeyValue, const kernel::TTexturePtr& iKeyTexture);
+	void addKey(TScalar iKeyValue, const TTexturePtr& iKeyTexture);
 
 private:
 
@@ -64,11 +64,11 @@ private:
 		bool operator()(const TKeyTexture& iA, const TKeyTexture& iB) const { return iA.first < iB.first; }
 	};
 
-	kernel::Spectrum doLookUp(const kernel::Sample& iSample, 
-		const kernel::IntersectionContext& iContext) const;
+	Spectrum doLookUp(const Sample& iSample, 
+		const IntersectionContext& iContext) const;
 
 	TKeyTextures keys_;
-	kernel::TTexturePtr control_;
+	TTexturePtr control_;
 };
 
 }

@@ -11,3 +11,75 @@
 \chapter{Shaders module}
 
 \kw{shaders} is the module that is all about defining the appearance of the geometry objects.
+
+\section{surface shaders}
+
+\subsection{Unshaded}\label{shaders.Unshaded}
+
+The most simple shader of all.  It simply returns the texture value
+
+\subsubsection*{constructors}
+\begin{itemize}
+	\item \kw{Unshaded()}: 
+		creates a shader with a constant white texture
+	\item \kw{Unshaded(colour)}:
+		creates a shader with colour texture.
+\end{itemize}
+
+\subsubsection*{members}
+\begin{itemize}
+	\item \kw{colour}: 
+		get and set the colour texture.
+\end{itemize}
+
+
+
+\subsection{Lambert}\label{shaders.Lambert}
+
+Models a perfect Lambertian surface.
+
+\subsubsection*{constructors}
+\begin{itemize}
+	\item \kw{Lambert()}: 
+		creates a shader with a constant white texture
+	\item \kw{Lambert(diffuse)}:
+		creates a shader with a diffuse colour texture.
+\end{itemize}
+
+\subsubsection*{members}
+\begin{itemize}
+	\item \kw{diffuse}: 
+		get and set the diffuse colour texture.
+\end{itemize}
+
+
+
+\subsection{Simple}\label{shaders.Simple}
+
+Models a classical surface material
+
+\subsubsection*{constructors}
+\begin{itemize}
+	\item \kw{Simple()}: 
+		creates a shader with a constant white texture
+	\item \kw{Simple(diffuse)}:
+		creates a shader with a diffuse colour texture.
+	\item \kw{Simple(diffuse, specular)}:
+		creates a shader with a diffuse and specular colour texture.
+\end{itemize}
+
+\subsubsection*{members}
+\begin{itemize}
+	\item \kw{diffuse}: 
+		get and set the diffuse colour texture.
+	\item \kw{specular}: 
+		get and set the diffuse colour texture.
+	\item \kw{specularPower}: 
+		get and set the sharpness texture for the specular lighting.  This texture is evaulated as a scalar.
+	\item \kw{reflectance}: 
+		get and set the reflectance colour texture.
+	\item \kw{transmittance}: 
+		get and set the transmittance colour texture.
+	\item \kw{refractionIndex}: 
+		get and set the texture that gives the relative index of refraction of the interior material with respect to the exterior metarial.  This texture is evaluated as a scalar.
+\end{itemize}

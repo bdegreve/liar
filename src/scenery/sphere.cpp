@@ -93,27 +93,27 @@ void Sphere::setRadius(TScalar iRadius)
 
 // --- private -------------------------------------------------------------------------------------
 
-void Sphere::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
-						 kernel::Intersection& oResult) const
+void Sphere::doIntersect(const Sample& iSample, const BoundedRay& iRay, 
+						 Intersection& oResult) const
 {
     TScalar t;
 	const prim::Result hit = prim::intersect(sphere_, iRay.unboundedRay(), t, iRay.nearLimit());
 	if (hit == prim::rOne && iRay.inRange(t))
 	{
-		kernel::SolidEvent event = 
-			sphere_.contains(iRay.point(iRay.nearLimit())) ? kernel::seLeaving : kernel::seEntering;
-		oResult = kernel::Intersection(this, t, event);
+		SolidEvent event = 
+			sphere_.contains(iRay.point(iRay.nearLimit())) ? seLeaving : seEntering;
+		oResult = Intersection(this, t, event);
 	}
 	else
 	{
-		oResult = kernel::Intersection::empty();
+		oResult = Intersection::empty();
 	}
 }
 
 
 
-const bool Sphere::doIsIntersecting(const kernel::Sample& iSample, 
-									const kernel::BoundedRay& iRay) const
+const bool Sphere::doIsIntersecting(const Sample& iSample, 
+									const BoundedRay& iRay) const
 {
     TScalar t;
 	const prim::Result hit = prim::intersect(sphere_, iRay.unboundedRay(), t, iRay.nearLimit());
@@ -122,9 +122,9 @@ const bool Sphere::doIsIntersecting(const kernel::Sample& iSample,
 
 
 
-void Sphere::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
-                            const kernel::Intersection& iIntersection, 
-                            kernel::IntersectionContext& oResult) const
+void Sphere::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
+                            const Intersection& iIntersection, 
+                            IntersectionContext& oResult) const
 {
 	const TScalar t = iIntersection.t();
 	const TPoint3D point = iRay.point(t);
@@ -138,6 +138,7 @@ void Sphere::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRa
 	const TVector3D R = point - sphere_.center();
 	const TVector3D normal = R * invRadius_;
 	oResult.setNormal(normal);
+	oResult.setGeometricNormal(normal);
 
 	// phi = 2pi * u
 	// theta = pi * v
@@ -168,14 +169,14 @@ void Sphere::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRa
 
 
 
-const bool Sphere::doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const
+const bool Sphere::doContains(const Sample& iSample, const TPoint3D& iPoint) const
 {
 	return sphere_.contains(iPoint);
 }
 
 
 
-const TAabb3D Sphere::doBoundingBox(const kernel::TimePeriod& iPeriod) const
+const TAabb3D Sphere::doBoundingBox() const
 {
     TScalar radius = sphere_.radius();
     TVector3D extent = TVector3D(radius, radius, radius);

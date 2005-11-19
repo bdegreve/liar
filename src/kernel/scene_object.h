@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::SceneObject
+/** @class liar::SceneObject
  *  @brief base class of all objects in a scene representation
  *  @author Bram de Greve [BdG]
  */
@@ -57,6 +57,8 @@ class LIAR_KERNEL_DLL SceneObject: public python::PyObjectPlus, public lass::uti
 public:
 
     virtual ~SceneObject();
+
+	void preProcess(const TimePeriod& iPeriod) { doPreProcess(iPeriod); }
 
     void intersect(const Sample& iSample, const BoundedRay& iRay, Intersection& oResult) const 
 	{ 
@@ -102,7 +104,7 @@ public:
 		doLocalSpace(iTime, ioLocalToWorld); 
 	}
 
-    const TAabb3D boundingBox(const TimePeriod& iPeriod) const { return doBoundingBox(iPeriod); }
+    const TAabb3D boundingBox() const { return doBoundingBox(); }
 	const bool hasMotion() const { return doHasMotion(); }
 
     const TShaderPtr& shader() const;
@@ -124,13 +126,14 @@ private:
 	TMediumPtr interior_;
 
     LASS_UTIL_ACCEPT_VISITOR;
+	virtual void doPreProcess(const TimePeriod& iPeriod);
     virtual void doIntersect(const Sample& iSample, const BoundedRay& iRay, 
 		Intersection& oResult) const = 0;
 	virtual const bool doIsIntersecting(const Sample& iSample, const BoundedRay& iRay) const = 0;
     virtual void doLocalContext(const Sample& iSample, const BoundedRay& iRay,
 		const Intersection& iIntersection, IntersectionContext& oResult) const = 0;
 	virtual const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const = 0;
-    virtual const TAabb3D doBoundingBox(const TimePeriod& iPeriod) const = 0;
+    virtual const TAabb3D doBoundingBox() const = 0;
 
 	virtual void doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const;
 	virtual const bool doHasMotion() const;

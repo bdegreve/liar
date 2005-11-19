@@ -48,6 +48,17 @@ Camera::Camera(PyTypeObject* iType):
 
 
 
+const DifferentialRay Camera::primaryRay(const Sample& iSample, const TVector2D& iScreenSpaceDelta) const
+{
+	const BoundedRay centralRay = doGenerateRay(iSample, TVector2D(0, 0));
+	const TRay3D differentialI = doGenerateRay(iSample, TVector2D(iScreenSpaceDelta.x, 0)).unboundedRay();
+	const TRay3D differentialJ = doGenerateRay(iSample, TVector2D(0, iScreenSpaceDelta.y)).unboundedRay();
+
+	return DifferentialRay(centralRay, differentialI, differentialJ);
+}
+
+
+
 // --- private -------------------------------------------------------------------------------------
 
 

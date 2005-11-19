@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::BoundedRay
+/** @class liar::BoundedRay
  *	@brief a 3D ray associated with a near and far clipping limit
  *  @author Bram de Greve [BdG]
  */

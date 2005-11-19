@@ -21,12 +21,12 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::Intersection
+/** @class liar::Intersection
  *  @brief represents intersection between ray and object
  *  @author Bram de Greve [BdG]
  */
 
-/** @class liar::kernel::IntersectionDescendor
+/** @class liar::IntersectionDescendor
  *  @brief automatic descendor of intersection object stack
  *  @author Bram de Greve [BdG]
  */
@@ -52,6 +52,8 @@ class LIAR_KERNEL_DLL Intersection
 {
 public:
 
+	typedef std::size_t TSpecialField;
+
     Intersection();
     Intersection(const SceneObject* iObject, TScalar iT, SolidEvent iEvent);
 
@@ -65,6 +67,9 @@ public:
 	void setSolidEvent(SolidEvent iEvent) { solidEvent_ = iEvent; }
 	void flipSolidEvent() { solidEvent_ = flip(solidEvent_); }
 
+	const TSpecialField specialField() const { return special_; }
+	void setSpecialField(TSpecialField iSpecial) { special_ = iSpecial; }
+
     const bool isEmpty() const;
 	const bool operator!() const { return isEmpty(); }
 	operator num::SafeBool() const { return isEmpty() ? num::safeFalse : num::safeTrue; }
@@ -77,15 +82,16 @@ private:
 
     friend class IntersectionDescendor;
 
-    typedef std::vector<const SceneObject*> TObjectStack;
+	typedef std::vector<const SceneObject*> TObjectStack;
 
     void descend() const;
     void ascend() const;
 
     TObjectStack objectStack_;
+    mutable TObjectStack::const_iterator currentLevel_;
+	TSpecialField special_;
     TScalar t_;
 	SolidEvent solidEvent_;
-    mutable TObjectStack::const_iterator currentLevel_;
 
     static Intersection empty_;
 };

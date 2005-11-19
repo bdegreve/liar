@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::Sampler
+/** @class liar::Sampler
  *  @brief generates samples to be feed to the ray tracer.
  *  @author Bram de Greve [BdG]
  *
@@ -87,8 +87,10 @@ private:
     virtual void doSetSamplesPerPixel(unsigned iSamplesPerPixel) = 0;
 	virtual void doSeed(unsigned iRandomSeed) = 0;
     
-	virtual void doSampleScreenCoordinate(const TResolution& iPixel, unsigned iSubPixel, 
+	virtual void doSampleScreen(const TResolution& iPixel, unsigned iSubPixel, 
 		TPoint2D& oScreenCoordinate) = 0;
+	virtual void doSampleLens(const TResolution& iPixel, unsigned iSubPixel, 
+		TPoint2D& oLensCoordinate) = 0;
 	virtual void doSampleTime(const TResolution& iPixel, unsigned iSubPixel, 
 		const TimePeriod& iPeriod, TTime& oTime) = 0;
 	virtual void doSampleSubSequence1D(const TResolution& iPixel, unsigned iSubPixel, 

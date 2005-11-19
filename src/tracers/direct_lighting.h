@@ -36,9 +36,9 @@ namespace liar
 namespace tracers
 {
 
-class LIAR_TRACERS_DLL DirectLighting: public kernel::RayTracer
+class LIAR_TRACERS_DLL DirectLighting: public RayTracer
 {
-	PY_HEADER(kernel::RayTracer)
+	PY_HEADER(RayTracer)
 public:
 
 	DirectLighting();
@@ -67,11 +67,11 @@ private:
 	friend class GenerationIncrementor;
 
 	void doPreprocess();
-	void doRequestSamples(const kernel::TSamplerPtr& iSampler);
-	kernel::Spectrum doCastRay(const kernel::Sample& iSample,
-		const kernel::DifferentialRay& iPrimaryRay) const;
-	TLightRange doSampleLights(const kernel::Sample& iSample,
-		const kernel::IntersectionContext& iContext) const;
+	void doRequestSamples(const TSamplerPtr& iSampler);
+	Spectrum doCastRay(const Sample& iSample,
+		const DifferentialRay& iPrimaryRay) const;
+	TLightRange doSampleLights(const Sample& iSample,
+		const IntersectionContext& iContext) const;
 
 	mutable TLightSamples lightSamples_;
 	mutable size_t rayGeneration_;

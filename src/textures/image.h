@@ -40,9 +40,9 @@ namespace liar
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL Image: public kernel::Texture
+class LIAR_TEXTURES_DLL Image: public Texture
 {
-	PY_HEADER(kernel::Texture)
+	PY_HEADER(Texture)
 public:
 
 	explicit Image(const std::string& iFilename);
@@ -84,8 +84,8 @@ private:
 	typedef util::Dictionary<std::string, AntiAliasing> TAntiAliasingDictionary;
 	typedef util::Dictionary<std::string, MipMapping> TMipMappingDictionary;
 
-	kernel::Spectrum doLookUp(const kernel::Sample& iSample, 
-		const kernel::IntersectionContext& iContext) const;
+	Spectrum doLookUp(const Sample& iSample, 
+		const IntersectionContext& iContext) const;
 
 	void makeMipMaps(MipMapping iMode) const;
 	TImagePtr makeMipMap(const TImagePtr iOldImagePtr, prim::XY iCompressionAxis) const;

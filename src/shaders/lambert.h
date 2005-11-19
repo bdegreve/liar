@@ -51,13 +51,9 @@ public:
 
 private:
 
-	Spectrum doUnshaded(const Sample& iSample, 
-		 const IntersectionContext& iContext);
-
-	Spectrum doDirectLight(
-		const Sample& iSample, const DifferentialRay& iRay,
+	Spectrum doShade(const Sample& iSample,	const DifferentialRay& iPrimaryRay, 
 		const Intersection& iIntersection, const IntersectionContext& iContext, 
-		const TSceneObjectPtr& iScene, const LightContext& iLight);
+		const RayTracer& iTracer);
 
 	TTexturePtr diffuse_;
 };

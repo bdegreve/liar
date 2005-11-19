@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::Texture
+/** @class liar::Texture
  *  @brief abstract base class of all textures
  *  @author Bram de Greve [BdG]
  */

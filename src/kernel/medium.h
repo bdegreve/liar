@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::Medium
+/** @class liar::Medium
  *  @brief base class of all media
  *  @author Bram de Greve [BdG]
  */

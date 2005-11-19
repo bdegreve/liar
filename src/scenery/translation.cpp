@@ -30,7 +30,7 @@ namespace scenery
 {
 
 PY_DECLARE_CLASS(Translation)
-PY_CLASS_CONSTRUCTOR_2(Translation, const kernel::TSceneObjectPtr&, const TVector3D&)
+PY_CLASS_CONSTRUCTOR_2(Translation, const TSceneObjectPtr&, const TVector3D&)
 PY_CLASS_MEMBER_RW(Translation, "child", child, setChild)
 PY_CLASS_MEMBER_RW(Translation, "localToWorld", localToWorld, setLocalToWorld)
 PY_CLASS_MEMBER_R(Translation, "worldToLocal", worldToLocal)
@@ -38,7 +38,7 @@ PY_CLASS_MEMBER_R(Translation, "worldToLocal", worldToLocal)
 
 // --- public --------------------------------------------------------------------------------------
 
-Translation::Translation(const kernel::TSceneObjectPtr& iChild, 
+Translation::Translation(const TSceneObjectPtr& iChild, 
 							   const TVector3D& iLocalToWorld):
     SceneObject(&Type),
     child_(iChild),
@@ -48,14 +48,14 @@ Translation::Translation(const kernel::TSceneObjectPtr& iChild,
 
 
 
-const kernel::TSceneObjectPtr& Translation::child() const
+const TSceneObjectPtr& Translation::child() const
 {
 	return child_;
 }
 
 
 
-void Translation::setChild(const kernel::TSceneObjectPtr& iChild)
+void Translation::setChild(const TSceneObjectPtr& iChild)
 {
 	child_ = iChild;
 }
@@ -87,6 +87,13 @@ const TVector3D Translation::worldToLocal() const
 
 // --- private -------------------------------------------------------------------------------------
 
+void Translation::doPreProcess(const TimePeriod& iPeriod)
+{
+	child_->preProcess(iPeriod);
+}
+
+
+
 void Translation::doAccept(util::VisitorBase& ioVisitor)
 {
     doVisit(*this, ioVisitor);
@@ -96,10 +103,10 @@ void Translation::doAccept(util::VisitorBase& ioVisitor)
 
 
 
-void Translation::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
-							  kernel::Intersection& oResult) const
+void Translation::doIntersect(const Sample& iSample, const BoundedRay& iRay, 
+							  Intersection& oResult) const
 {
-	const kernel::BoundedRay localRay = translate(iRay, -localToWorld_);
+	const BoundedRay localRay = translate(iRay, -localToWorld_);
 	child_->intersect(iSample, localRay, oResult);
     if (oResult)
     {
@@ -109,20 +116,20 @@ void Translation::doIntersect(const kernel::Sample& iSample, const kernel::Bound
 
 
 
-const bool Translation::doIsIntersecting(const kernel::Sample& iSample, 
-										 const kernel::BoundedRay& iRay) const
+const bool Translation::doIsIntersecting(const Sample& iSample, 
+										 const BoundedRay& iRay) const
 {
-	const kernel::BoundedRay localRay = translate(iRay, -localToWorld_);
+	const BoundedRay localRay = translate(iRay, -localToWorld_);
 	return child_->isIntersecting(iSample, localRay);
 }
 
 
 
-void Translation::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
-								 const kernel::Intersection& iIntersection, 
-								 kernel::IntersectionContext& oResult) const
+void Translation::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
+								 const Intersection& iIntersection, 
+								 IntersectionContext& oResult) const
 {
-	kernel::IntersectionDescendor descendor(iIntersection);
+	IntersectionDescendor descendor(iIntersection);
 	LASS_ASSERT(iIntersection.object() == child_.get());
 
 	const TRay3D localRay(iRay.support() - localToWorld_, iRay.direction());
@@ -139,7 +146,7 @@ void Translation::doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) c
 
 
 
-const bool Translation::doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const
+const bool Translation::doContains(const Sample& iSample, const TPoint3D& iPoint) const
 {
 	const TPoint3D localPoint = iPoint - localToWorld_;
 	return child_->contains(iSample, localPoint);
@@ -147,9 +154,9 @@ const bool Translation::doContains(const kernel::Sample& iSample, const TPoint3D
 
 
 
-const TAabb3D Translation::doBoundingBox(const kernel::TimePeriod& iPeriod) const
+const TAabb3D Translation::doBoundingBox() const
 {
-	const TAabb3D localBox = child_->boundingBox(iPeriod);
+	const TAabb3D localBox = child_->boundingBox();
 	return TAabb3D(localBox.min() + localToWorld_, localBox.max() + localToWorld_);
 }
 

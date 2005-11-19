@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::LightContext
+/** @class liar::LightContext
  *  @brief unfolded context for a light
  *  @author Bram de Greve [BdG]
  */

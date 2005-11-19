@@ -244,7 +244,7 @@ inline const TVector3D Spectrum::xyz() const
 
 // --- free ----------------------------------------------------------------------------------------
 
-/** @relates liar::kernel::Spectrum
+/** @relates liar::Spectrum
  */
 inline const Spectrum operator+(const Spectrum& iA, const Spectrum& iB)
 {
@@ -255,7 +255,7 @@ inline const Spectrum operator+(const Spectrum& iA, const Spectrum& iB)
 
 
 
-/** @relates liar::kernel::Spectrum
+/** @relates liar::Spectrum
  */
 inline const Spectrum operator-(const Spectrum& iA, const Spectrum& iB)
 {
@@ -266,7 +266,7 @@ inline const Spectrum operator-(const Spectrum& iA, const Spectrum& iB)
 
 
 
-/** @relates liar::kernel::Spectrum
+/** @relates liar::Spectrum
  */
 inline const Spectrum operator*(const Spectrum& iA, const Spectrum& iB)
 {
@@ -277,7 +277,7 @@ inline const Spectrum operator*(const Spectrum& iA, const Spectrum& iB)
 
 
 
-/** @relates liar::kernel::Spectrum
+/** @relates liar::Spectrum
  */
 inline const Spectrum operator/(const Spectrum& iA, const Spectrum& iB)
 {
@@ -288,7 +288,7 @@ inline const Spectrum operator/(const Spectrum& iA, const Spectrum& iB)
 
 
 
-/** @relates liar::kernel::Spectrum
+/** @relates liar::Spectrum
  */
 inline const Spectrum pow(const Spectrum& iA, const Spectrum& iB)
 {
@@ -300,7 +300,7 @@ inline const Spectrum pow(const Spectrum& iA, const Spectrum& iB)
 
 
 
-/** @relates liar::kernel::Spectrum
+/** @relates liar::Spectrum
  */
 inline const Spectrum operator+(Spectrum::TParam iA, const Spectrum& iB)
 {
@@ -312,7 +312,7 @@ inline const Spectrum operator+(Spectrum::TParam iA, const Spectrum& iB)
 
 
 
-/** @relates liar::kernel::Spectrum
+/** @relates liar::Spectrum
  */
 inline const Spectrum operator-(Spectrum::TParam iA, const Spectrum& iB)
 {
@@ -324,7 +324,7 @@ inline const Spectrum operator-(Spectrum::TParam iA, const Spectrum& iB)
 
 
 
-/** @relates liar::kernel::Spectrum
+/** @relates liar::Spectrum
  */
 inline const Spectrum operator*(Spectrum::TParam iA, const Spectrum& iB)
 {
@@ -336,7 +336,7 @@ inline const Spectrum operator*(Spectrum::TParam iA, const Spectrum& iB)
 
 
 
-/** @relates liar::kernel::Spectrum
+/** @relates liar::Spectrum
  */
 inline const Spectrum operator/(Spectrum::TParam iA, const Spectrum& iB)
 {
@@ -348,7 +348,7 @@ inline const Spectrum operator/(Spectrum::TParam iA, const Spectrum& iB)
 
 
 
-/** @relates liar::kernel::Spectrum
+/** @relates liar::Spectrum
  */
 inline const Spectrum pow(Spectrum::TParam iA, const Spectrum& iB)
 {
@@ -359,7 +359,7 @@ inline const Spectrum pow(Spectrum::TParam iA, const Spectrum& iB)
 
 
 
-/** @relates liar::kernel::Spectrum
+/** @relates liar::Spectrum
  */
 inline const Spectrum operator+(const Spectrum& iA, Spectrum::TParam iB)
 {
@@ -370,7 +370,7 @@ inline const Spectrum operator+(const Spectrum& iA, Spectrum::TParam iB)
 
 
 
-/** @relates liar::kernel::Spectrum
+/** @relates liar::Spectrum
  */
 inline const Spectrum operator-(const Spectrum& iA, Spectrum::TParam iB)
 {
@@ -381,7 +381,7 @@ inline const Spectrum operator-(const Spectrum& iA, Spectrum::TParam iB)
 
 
 
-/** @relates liar::kernel::Spectrum
+/** @relates liar::Spectrum
  */
 inline const Spectrum operator*(const Spectrum& iA, Spectrum::TParam iB)
 {
@@ -392,7 +392,7 @@ inline const Spectrum operator*(const Spectrum& iA, Spectrum::TParam iB)
 
 
 
-/** @relates liar::kernel::Spectrum
+/** @relates liar::Spectrum
  */
 inline const Spectrum operator/(const Spectrum& iA, Spectrum::TParam iB)
 {
@@ -403,7 +403,7 @@ inline const Spectrum operator/(const Spectrum& iA, Spectrum::TParam iB)
 
 
 
-/** @relates liar::kernel::Spectrum
+/** @relates liar::Spectrum
  */
 inline const Spectrum pow(const Spectrum& iA, Spectrum::TParam iB)
 {
@@ -414,7 +414,7 @@ inline const Spectrum pow(const Spectrum& iA, Spectrum::TParam iB)
 
 
 
-/** @relates liar::kernel::Spectrum
+/** @relates liar::Spectrum
  *  Blend between to spectra by a factor.
  *  @return @a iA * ( 1 - @a iFactor ) + @a iB * @a iFactor
  */

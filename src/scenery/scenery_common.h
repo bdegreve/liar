@@ -47,7 +47,9 @@ namespace liar
 {
 namespace scenery
 {
-	using namespace kernel;
+
+using namespace kernel;
+
 }
 
 }

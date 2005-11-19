@@ -32,37 +32,37 @@ namespace shaders
 
 PY_DECLARE_CLASS(Unshaded)
 PY_CLASS_CONSTRUCTOR_0(Unshaded)
-PY_CLASS_CONSTRUCTOR_1(Unshaded, const kernel::TTexturePtr&)
-PY_CLASS_MEMBER_RW_DOC(Unshaded, "value", value, setValue, "texture")
+PY_CLASS_CONSTRUCTOR_1(Unshaded, const TTexturePtr&)
+PY_CLASS_MEMBER_RW_DOC(Unshaded, "colour", colour, setColour, "texture")
 
 // --- public --------------------------------------------------------------------------------------
 
 Unshaded::Unshaded():
-	kernel::Shader(&Type),
-	value_(kernel::Texture::white())
+	Shader(&Type),
+	colour_(Texture::white())
 {
 }
 
 
 
-Unshaded::Unshaded(const kernel::TTexturePtr& iValue):
-	kernel::Shader(&Type),
-	value_(iValue)
+Unshaded::Unshaded(const TTexturePtr& iColour):
+	Shader(&Type),
+	colour_(iColour)
 {
 }
 
 
 
-const kernel::TTexturePtr& Unshaded::value() const
+const TTexturePtr& Unshaded::colour() const
 {
-	return value_;
+	return colour_;
 }
 
 
 
-void Unshaded::setValue(const kernel::TTexturePtr& iValue)
+void Unshaded::setColour(const TTexturePtr& iColour)
 {
-	value_ = iValue;
+	colour_ = iColour;
 }
 
 
@@ -73,23 +73,16 @@ void Unshaded::setValue(const kernel::TTexturePtr& iValue)
 
 // --- private -------------------------------------------------------------------------------------
 
-kernel::Spectrum Unshaded::doUnshaded(const kernel::Sample& iSample,
-									 const kernel::IntersectionContext& iContext)
+Spectrum Unshaded::doShade(const Sample& iSample,
+						   const DifferentialRay& iPrimaryRay,
+						   const Intersection& iIntersection,
+						   const IntersectionContext& iContext,
+						   const RayTracer& iTracer)
 {
-	return value_->lookUp(iSample, iContext);
+	return colour_->lookUp(iSample, iContext);
 }
 
 
-
-kernel::Spectrum Unshaded::doDirectLight(const kernel::Sample& iSample,
-										const kernel::DifferentialRay& iPrimaryRay,
-										const kernel::Intersection& iIntersection,
-										const kernel::IntersectionContext& iContext,
-										const kernel::TSceneObjectPtr& iScene,
-										const kernel::LightContext& iLight)
-{
-	return kernel::Spectrum();
-}
 
 
 // --- free ----------------------------------------------------------------------------------------

@@ -98,6 +98,13 @@ SceneObject::SceneObject(PyTypeObject* iType):
 
 // --- private -------------------------------------------------------------------------------------
 
+void SceneObject::doPreProcess(const TimePeriod& iPeriod)
+{
+	// not all objects need this
+}
+
+
+
 void SceneObject::doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const
 {
 	// most objects don't have a local space matrix.

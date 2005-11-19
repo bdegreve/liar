@@ -63,20 +63,27 @@ RgbSpace::RgbSpace(const TVector3D& iRed, const TVector3D& iGreen, const TVector
 	y_(0, 1, 0),
 	z_(0, 0, 1)
 {
-	TScalar matrix[9] =
+	TScalar rgb2xyz[9] =
 	{
 		red_.x, green_.x, blue_.x,
 		red_.y, green_.y, blue_.y,
 		red_.z, green_.z, blue_.z
 	};
+	TScalar xyz2rgb[9] =
+	{
+		1, 0, 0,
+		0, 1, 0,
+		0, 0, 1
+	};
 
-	if (!num::impl::cramer3<TScalar>(matrix, x_))
+	if (!num::impl::cramer3<TScalar>(rgb2xyz, xyz2rgb, xyz2rgb + 9))
 	{
 		LASS_THROW("RGB space forms a singular matrix, cannot invert.");
 	}
 
-	num::impl::cramer3<TScalar>(matrix, y_);
-	num::impl::cramer3<TScalar>(matrix, z_);
+	x_ = prim::ColorRGBA(xyz2rgb[0], xyz2rgb[1], xyz2rgb[2]);
+	y_ = prim::ColorRGBA(xyz2rgb[3], xyz2rgb[4], xyz2rgb[5]);
+	z_ = prim::ColorRGBA(xyz2rgb[6], xyz2rgb[7], xyz2rgb[8]);
 }
 
 

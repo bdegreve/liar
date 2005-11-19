@@ -104,7 +104,8 @@ void Sampler::sample(const TResolution& iPixel, unsigned iSubPixel, const TimePe
 {
 	oSample.sampler_ = this;
 
-	doSampleScreenCoordinate(iPixel, iSubPixel, oSample.screenCoordinate_);
+	doSampleScreen(iPixel, iSubPixel, oSample.screenCoordinate_);
+	doSampleLens(iPixel, iSubPixel, oSample.lensCoordinate_);
 	doSampleTime(iPixel, iSubPixel, iPeriod, oSample.time_);
 
 	oSample.subSequences1D_.resize(totalSubSequenceSize1D_);

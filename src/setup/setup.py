@@ -79,8 +79,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """,
       download_url = "http://liar.sourceforge.net",
-      packages=['liar'],
-      package_dir={'liar': '..'},      
+      packages=['liar', 'liar.tools'],
+	  package_dir={'liar': '..'},      
       data_files = [('lib/site-packages/liar',[r'..\..\bin\%s%s.pyd' % (x, pyDebug) for x in modules]),
                     ('lib/site-packages/liar',[r'..\..\bin\%s%s.%s' % (x, pyDebug, y) for x in modules for y in pdb]),
                     ('lib/site-packages/liar',[r'..\..\doc\gpl.txt']),

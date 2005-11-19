@@ -50,7 +50,8 @@ const RenderEngine::TBucket RenderEngine::bucketBound_(
 // --- public --------------------------------------------------------------------------------------
 
 RenderEngine::RenderEngine():
-    PyObjectPlus(&Type)
+    PyObjectPlus(&Type),
+	isDirty_(false)
 {
 }
 
@@ -110,6 +111,7 @@ const TRayTracerPtr& RenderEngine::tracer() const
 void RenderEngine::setCamera(const TCameraPtr& iCamera)
 {
     camera_ = iCamera;
+	isDirty_ = true;
 }
 
 
@@ -117,15 +119,15 @@ void RenderEngine::setCamera(const TCameraPtr& iCamera)
 void RenderEngine::setSampler(const TSamplerPtr& iSampler)
 {
     sampler_ = iSampler;
-	rayTracer_->requestSamples(sampler_);
+	isDirty_ = true;
 }
 
 
 
 void RenderEngine::setScene(const TSceneObjectPtr& iScene)
 {
-    rayTracer_->setScene(iScene);
-	rayTracer_->requestSamples(sampler_);
+    scene_ = iScene;
+	isDirty_ = true;
 }
 
 
@@ -140,6 +142,7 @@ void RenderEngine::setTarget(const TRenderTargetPtr& iRenderTarget)
 void RenderEngine::setTracer(const TRayTracerPtr& iRayTracer)
 {
     rayTracer_ = iRayTracer;
+	isDirty_ = true;
 }
 
 
@@ -153,6 +156,10 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& iBucket)
     if (!rayTracer_)
     {
         LASS_THROW("can't render - no ray tracer attached to engine.");
+    }
+    if (!scene_)
+    {
+        LASS_THROW("can't render - no scene attached to engine.");
     }
     if (!sampler_)
     {
@@ -178,6 +185,14 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& iBucket)
     const TResolution min(num::round(iBucket.min().x * resolution.x), num::round(iBucket.min().y * resolution.y));
     const TResolution max(num::round(iBucket.max().x * resolution.x), num::round(iBucket.max().y * resolution.y));
 
+	if (isDirty_)
+	{
+		scene_->preProcess(timePeriod);
+		rayTracer_->setScene(scene_);
+		rayTracer_->requestSamples(sampler_);
+		isDirty_ = false;
+	}
+
 	util::ProgressIndicator progress("rendering bucket " + util::stringCast<std::string>(iBucket));
     renderTarget_->beginRender();
 	Sample sample;
@@ -189,6 +204,10 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& iBucket)
         {
             for (unsigned k = 0; k < samplesPerPixel; ++k)
             {
+				if (i == TResolution(82, 87) && k == 0)
+				{
+					int a = 5;
+				}
                 sampler_->sample(i, k, timePeriod, sample);
                 DifferentialRay primaryRay = camera_->primaryRay(sample, pixelSize);
                 Spectrum radiance = rayTracer_->castRay(sample, primaryRay);

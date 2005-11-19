@@ -126,11 +126,12 @@ void Stratifier::doSetSamplesPerPixel(unsigned iSamplesPerPixel)
         num::sqrt(static_cast<TScalar>(iSamplesPerPixel))));
     
     strataPerPixel_ = strataPerAxis * strataPerAxis;
-    timeStratumSize_ = TNumTraits::one / strataPerPixel_;
-	screenCoordinateStratumSize_ = 
+    stratum1DSize_ = TNumTraits::one / strataPerPixel_;
+	stratum2DSize_ = 
 		TVector2D(TNumTraits::one, TNumTraits::one) / static_cast<TScalar>(strataPerAxis);
     timeStrata_.resize(strataPerPixel_);
-    screenCoordinateStrata_.resize(strataPerPixel_);
+    screenStrata_.resize(strataPerPixel_);
+    lensStrata_.resize(strataPerPixel_);
 
 	for (unsigned i = 0; i < strataPerPixel_; ++i)
 	{
@@ -141,7 +142,8 @@ void Stratifier::doSetSamplesPerPixel(unsigned iSamplesPerPixel)
     {
         for (unsigned i = 0; i < strataPerAxis; ++i)
         {
-            screenCoordinateStrata_[j * strataPerAxis + i] = TVector2D(i, j);
+            screenStrata_[j * strataPerAxis + i] = TVector2D(i, j);
+			lensStrata_[j * strataPerAxis + i] = TVector2D(i, j);
         }
     }
 }
@@ -155,16 +157,16 @@ void Stratifier::doSeed(unsigned iRandomSeed)
 
 
 
-void Stratifier::doSampleScreenCoordinate(const TResolution& iPixel, unsigned iSubPixel, 
-										  TPoint2D& oScreenCoordinate)
+void Stratifier::doSampleScreen(const TResolution& iPixel, unsigned iSubPixel, 
+								TPoint2D& oScreenCoordinate)
 {
     LASS_ASSERT(iPixel.x < resolution_.x && iPixel.y < resolution_.y);
     LASS_ASSERT(iSubPixel < strataPerPixel_);
 
-	TVector2D position = screenCoordinateStrata_[iSubPixel];
+	TVector2D position = screenStrata_[iSubPixel];
 	position.x += isJittered_ ? jitterGenerator_() : .5f;
 	position.y += isJittered_ ? jitterGenerator_() : .5f;
-	position *= screenCoordinateStratumSize_;
+	position *= stratum2DSize_;
 
 	position += TVector2D(iPixel);
 	position *= reciprocalResolution_;
@@ -174,8 +176,28 @@ void Stratifier::doSampleScreenCoordinate(const TResolution& iPixel, unsigned iS
 
 
 
+void Stratifier::doSampleLens(const TResolution& iPixel, unsigned iSubPixel, 
+							  TPoint2D& oLensCoordinate)
+{
+    LASS_ASSERT(iPixel.x < resolution_.x && iPixel.y < resolution_.y);
+    LASS_ASSERT(iSubPixel < strataPerPixel_);
+
+	if (iSubPixel == 0)
+	{
+		stde::random_shuffle_r(lensStrata_, numberGenerator_);	
+	}
+	TVector2D position = lensStrata_[iSubPixel];
+	position.x += isJittered_ ? jitterGenerator_() : .5f;
+	position.y += isJittered_ ? jitterGenerator_() : .5f;
+	position *= stratum2DSize_;
+
+	oLensCoordinate = TPoint2D(position);
+}
+
+
+
 void Stratifier::doSampleTime(const TResolution& iPixel, unsigned iSubPixel, 
-							  const kernel::TimePeriod& iPeriod, TTime& oTime)
+							  const TimePeriod& iPeriod, TTime& oTime)
 {
     LASS_ASSERT(iPixel.x < resolution_.x && iPixel.y < resolution_.y);
     LASS_ASSERT(iSubPixel < strataPerPixel_);
@@ -184,7 +206,8 @@ void Stratifier::doSampleTime(const TResolution& iPixel, unsigned iSubPixel,
 	{
 		stde::random_shuffle_r(timeStrata_, numberGenerator_);	
 	}
-	const TScalar tau = (timeStrata_[iSubPixel] + (isJittered_ ? jitterGenerator_() : 0.5f)) * timeStratumSize_;
+	const TScalar tau = 
+		(timeStrata_[iSubPixel] + (isJittered_ ? jitterGenerator_() : 0.5f)) * stratum1DSize_;
 	oTime = iPeriod.interpolate(tau);
 }
 

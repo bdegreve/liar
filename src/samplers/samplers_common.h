@@ -45,6 +45,9 @@ namespace liar
 {
 namespace samplers
 {
+	
+using namespace liar::kernel;
+
 }
 
 }

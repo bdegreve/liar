@@ -46,8 +46,8 @@ namespace liar
 {
 namespace shaders
 {
-
-using namespace kernel;
+	
+using namespace liar::kernel;
 
 }
 

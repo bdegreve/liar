@@ -47,10 +47,10 @@ Time::Time():
 
 // --- private -------------------------------------------------------------------------------------
 
-kernel::Spectrum Time::doLookUp(const kernel::Sample& iSample, 
-								const kernel::IntersectionContext& iContext) const
+Spectrum Time::doLookUp(const Sample& iSample, 
+								const IntersectionContext& iContext) const
 {
-	return kernel::Spectrum(static_cast<TScalar>(iSample.time()));
+	return Spectrum(static_cast<TScalar>(iSample.time()));
 }
 
 

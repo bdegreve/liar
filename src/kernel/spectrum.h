@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::Spectrum
+/** @class liar::Spectrum
  *  @brief respresentation of a colour spectrum.
  *  @author Bram de Greve [BdG]
  */

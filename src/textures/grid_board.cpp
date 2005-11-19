@@ -30,12 +30,12 @@ namespace textures
 {
 
 PY_DECLARE_CLASS(GridBoard)
-PY_CLASS_CONSTRUCTOR_2(GridBoard, kernel::TTexturePtr, kernel::TTexturePtr);
+PY_CLASS_CONSTRUCTOR_2(GridBoard, TTexturePtr, TTexturePtr);
 PY_CLASS_MEMBER_RW(GridBoard, "thickness", thickness, setThickness);
 
 // --- public --------------------------------------------------------------------------------------
 
-GridBoard::GridBoard(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB):
+GridBoard::GridBoard(const TTexturePtr& iA, const TTexturePtr& iB):
 	Mix2(&Type, iA, iB),
 	halfThickness_(0.05f, 0.05f)
 {
@@ -63,8 +63,8 @@ void GridBoard::setThickness(const TVector2D& iThickness)
 
 // --- private -------------------------------------------------------------------------------------
 
-kernel::Spectrum GridBoard::doLookUp(const kernel::Sample& iSample, 
-									 const kernel::IntersectionContext& iContext) const
+Spectrum GridBoard::doLookUp(const Sample& iSample, 
+									 const IntersectionContext& iContext) const
 {
 	const TScalar u = num::fractional(iContext.uv().x);
 	const TScalar v = num::fractional(iContext.uv().y);

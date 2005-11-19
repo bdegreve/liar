@@ -87,25 +87,25 @@ void Plane::setD(TScalar iD)
 
 // --- private -------------------------------------------------------------------------------------
 
-void Plane::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
-						kernel::Intersection& oResult) const
+void Plane::doIntersect(const Sample& iSample, const BoundedRay& iRay, 
+						Intersection& oResult) const
 {
     TScalar t;
     const prim::Result hit = prim::intersect(plane_, iRay.unboundedRay(), t, iRay.nearLimit());
 	if (hit == prim::rOne && iRay.inRange(t)) 
     {
-		oResult = kernel::Intersection(this, t, kernel::seNoEvent);
+		oResult = Intersection(this, t, seNoEvent);
     }
     else
     {
-        oResult = kernel::Intersection::empty();
+        oResult = Intersection::empty();
     }
 }
 
 
 
-const bool Plane::doIsIntersecting(const kernel::Sample& iSample, 
-								   const kernel::BoundedRay& iRay) const
+const bool Plane::doIsIntersecting(const Sample& iSample, 
+								   const BoundedRay& iRay) const
 {
     TScalar t;
 	const prim::Result hit = prim::intersect(plane_, iRay.unboundedRay(), t, iRay.nearLimit());
@@ -113,9 +113,9 @@ const bool Plane::doIsIntersecting(const kernel::Sample& iSample,
 }
 
 
-void Plane::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
-                           const kernel::Intersection& iIntersection, 
-                           kernel::IntersectionContext& oResult) const
+void Plane::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
+                           const Intersection& iIntersection, 
+                           IntersectionContext& oResult) const
 {
     oResult.setPoint(iRay.point(iIntersection.t()));
     TVector3D dPoint_dU;
@@ -125,6 +125,7 @@ void Plane::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay
     oResult.setDPoint_dV(dPoint_dV);
 
     oResult.setNormal(plane_.normal());
+	oResult.setGeometricNormal(oResult.normal());
     oResult.setDNormal_dU(TVector3D());
     oResult.setDNormal_dV(TVector3D());
 
@@ -134,14 +135,14 @@ void Plane::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay
 
 
 
-const bool Plane::doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const
+const bool Plane::doContains(const Sample& iSample, const TPoint3D& iPoint) const
 {
 	return false;
 }
 
 
 
-const TAabb3D Plane::doBoundingBox(const kernel::TimePeriod& iPeriod) const
+const TAabb3D Plane::doBoundingBox() const
 {
     const TVector3D normal = plane_.normal();
     TVector3D extent;

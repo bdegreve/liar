@@ -35,14 +35,14 @@ PY_CLASS_MEMBER_RW_DOC(Mix2, "textureB", textureB, setTextureB, "second texture"
 
 // --- public --------------------------------------------------------------------------------------
 
-void Mix2::setTextureA(const kernel::TTexturePtr& iA)
+void Mix2::setTextureA(const TTexturePtr& iA)
 {
 	a_ = iA;
 }
 
 
 
-void Mix2::setTextureB(const kernel::TTexturePtr& iB)
+void Mix2::setTextureB(const TTexturePtr& iB)
 {
 	b_ = iB;
 }
@@ -51,7 +51,7 @@ void Mix2::setTextureB(const kernel::TTexturePtr& iB)
 
 // --- protected -----------------------------------------------------------------------------------
 
-Mix2::Mix2(PyTypeObject* iType, const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB):
+Mix2::Mix2(PyTypeObject* iType, const TTexturePtr& iA, const TTexturePtr& iB):
 	Texture(iType),
 	a_(iA),
 	b_(iB)

@@ -37,17 +37,17 @@ namespace liar
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL Time: public kernel::Texture
+class LIAR_TEXTURES_DLL Time: public Texture
 {
-	PY_HEADER(kernel::Texture)
+	PY_HEADER(Texture)
 public:
 
 	Time();
 
 private:
 
-	kernel::Spectrum doLookUp(const kernel::Sample& iSample, 
-		const kernel::IntersectionContext& iContext) const;
+	Spectrum doLookUp(const Sample& iSample, 
+		const IntersectionContext& iContext) const;
 };
 
 }

@@ -179,6 +179,9 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File 
+				RelativePath=".\lambert.cpp">
+			</File>
+			<File 
 				RelativePath=".\shaders_common.cpp">
 				<FileConfiguration 
 					Name="Debug|Win32">
@@ -208,6 +211,9 @@
 			</File>
 			<File 
 				RelativePath=".\simple.cpp">
+			</File>
+			<File 
+				RelativePath=".\unshaded.cpp">
 			</File>
 		</Filter>
 		<Filter 

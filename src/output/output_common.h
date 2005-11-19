@@ -47,6 +47,9 @@ namespace liar
 {
 namespace output
 {
+	
+using namespace liar::kernel;
+
 }
 
 }

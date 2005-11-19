@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::DifferentialRay
+/** @class liar::DifferentialRay
  *  @brief a bounded ray plus two rays for screen space differentials
  *  @author Bram de Greve [BdG]
  */

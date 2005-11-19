@@ -39,9 +39,9 @@ namespace liar
 namespace cameras
 {
 
-class LIAR_CAMERAS_DLL PerspectiveCamera: public kernel::Camera
+class LIAR_CAMERAS_DLL PerspectiveCamera: public Camera
 {
-    PY_HEADER(kernel::Camera)
+    PY_HEADER(Camera)
 public:
     
     PerspectiveCamera();
@@ -78,6 +78,11 @@ public:
 	void setShutterOpenDelta(TTime iShutterOpenDelta);
 	void setShutterCloseDelta(TTime iShutterCloseDelta);
 
+	TScalar focalDistance() const;
+	TScalar lensRadius() const;
+	void setFocalDistance(TScalar iDistance);
+	void setLensRadius(TScalar iRadius);
+
 	TScalar nearLimit() const;
 	TScalar farLimit() const;
 	void setNearLimit(TScalar iDistance);
@@ -85,9 +90,9 @@ public:
 
 private:
 
-    const kernel::DifferentialRay doPrimaryRay(kernel::Sample& ioSample, 
+    const BoundedRay doGenerateRay(const Sample& iSample, 
 		const TVector2D& iScreenSpaceDelta) const;
-	const kernel::TimePeriod doShutterDelta() const;
+	const TimePeriod doShutterDelta() const;
 
     void initTransformation();
 
@@ -102,6 +107,8 @@ private:
     TScalar aspectRatio_;
 	TScalar nearLimit_;
 	TScalar farLimit_;
+	TScalar focalDistance_;
+	TScalar lensRadius_;
 
     TVector3D directionBase_;
 };

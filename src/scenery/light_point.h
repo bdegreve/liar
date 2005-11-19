@@ -39,9 +39,9 @@ namespace liar
 namespace scenery
 {
 
-class LIAR_SCENERY_DLL LightPoint: public kernel::SceneLight
+class LIAR_SCENERY_DLL LightPoint: public SceneLight
 {
-    PY_HEADER(kernel::SceneLight)
+    PY_HEADER(SceneLight)
 public:
 
     struct Attenuation
@@ -55,34 +55,34 @@ public:
     };
 
 	LightPoint();
-	LightPoint(const TPoint3D& iPosition, const kernel::Spectrum& iPower);
+	LightPoint(const TPoint3D& iPosition, const Spectrum& iPower);
 
 	const TPoint3D& position() const;
-	const kernel::Spectrum& power() const;
+	const Spectrum& power() const;
 	const Attenuation& attenuation() const;
 
 	void setPosition(const TPoint3D& iPosition);
-	void setPower(const kernel::Spectrum& iPower);
+	void setPower(const Spectrum& iPower);
 	void setAttenuation(const Attenuation& iAttenuation);
 
 private:
 
     LASS_UTIL_ACCEPT_VISITOR;
 
-	void doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
-		kernel::Intersection& oResult) const;
-	const bool doIsIntersecting(const kernel::Sample& iSample, const kernel::BoundedRay& iRay) const;
-	void doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
-		const kernel::Intersection& iIntersection, kernel::IntersectionContext& oResult) const;
-	const bool doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const;
-	const TAabb3D doBoundingBox(const kernel::TimePeriod& iPeriod) const;
+	void doIntersect(const Sample& iSample, const BoundedRay& iRay, 
+		Intersection& oResult) const;
+	const bool doIsIntersecting(const Sample& iSample, const BoundedRay& iRay) const;
+	void doLocalContext(const Sample& iSample, const BoundedRay& iRay,
+		const Intersection& iIntersection, IntersectionContext& oResult) const;
+	const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const;
+	const TAabb3D doBoundingBox() const;
 
-	const kernel::Spectrum doSampleRadiance(const TVector2D& iSample, const TPoint3D& iDestionation,
-		kernel::BoundedRay& oShadowRay) const;
+	const Spectrum doSampleRadiance(const TVector2D& iSample, const TPoint3D& iDestionation,
+		BoundedRay& oShadowRay) const;
 	const unsigned doNumberOfRadianceSamples() const;
 
     TPoint3D position_;
-	kernel::Spectrum power_;
+	Spectrum power_;
     Attenuation attenuation_;
 };
 

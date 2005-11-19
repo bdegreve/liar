@@ -31,7 +31,7 @@ namespace textures
 {
 
 PY_DECLARE_CLASS(CheckerBoard)
-PY_CLASS_CONSTRUCTOR_2(CheckerBoard, kernel::TTexturePtr, kernel::TTexturePtr);
+PY_CLASS_CONSTRUCTOR_2(CheckerBoard, TTexturePtr, TTexturePtr);
 PY_CLASS_MEMBER_RW(CheckerBoard, "split", split, setSplit);
 PY_CLASS_MEMBER_RW(CheckerBoard, "antiAliasing", antiAliasing, setAntiAliasing);
 PY_CLASS_STATIC_METHOD(CheckerBoard, setDefaultAntiAliasing);
@@ -44,9 +44,10 @@ CheckerBoard::AntiAliasing CheckerBoard::defaultAntiAliasing_ = CheckerBoard::aa
 
 // --- public --------------------------------------------------------------------------------------
 
-CheckerBoard::CheckerBoard(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB):
+CheckerBoard::CheckerBoard(const TTexturePtr& iA, const TTexturePtr& iB):
 	Mix2(&Type, iA, iB),
-	split_(0.5f, 0.5f)
+	split_(0.5f, 0.5f),
+	antiAliasing_(defaultAntiAliasing_)
 {
 }
 
@@ -93,8 +94,8 @@ void CheckerBoard::setDefaultAntiAliasing(const std::string& iMode)
 
 // --- private -------------------------------------------------------------------------------------
 
-kernel::Spectrum CheckerBoard::doLookUp(const kernel::Sample& iSample, 
-										const kernel::IntersectionContext& iContext) const
+Spectrum CheckerBoard::doLookUp(const Sample& iSample, 
+										const IntersectionContext& iContext) const
 {
 #pragma LASS_FIXME("points need transform too [Bramz]")
 	const TVector2D uv = iContext.uv().position().transform(num::fractional);
@@ -130,7 +131,7 @@ kernel::Spectrum CheckerBoard::doLookUp(const kernel::Sample& iSample,
 		LASS_ASSERT_UNREACHABLE;
 	}
 
-	return kernel::Spectrum();
+	return Spectrum();
 }
 
 
@@ -143,18 +144,18 @@ TScalar CheckerBoard::integrate(const TVector2D& iMin, const TVector2D& iMax) co
 	const TVector2D dMin = iMin - min0;
 	const TVector2D dMax = iMax - max0;
 
-	const TVector2D dMinX(std::min(dMin.x, split_.x), std::max(dMin.x - split_.x, TNumTraits::zero));
-	const TVector2D dMinY(std::min(dMin.y, split_.y), std::max(dMin.y - split_.y, TNumTraits::zero));
-	const TVector2D dMaxX(std::min(dMax.x, split_.x), std::max(dMax.x - split_.x, TNumTraits::zero));
-	const TVector2D dMaxY(std::min(dMax.y, split_.y), std::max(dMax.y - split_.y, TNumTraits::zero));
-	const TVector2D oneX(split_.x, TNumTraits::one - split_.x);
-	const TVector2D oneY(split_.y, TNumTraits::one - split_.y);
+	const TVector2D dMinU(std::min(dMin.x, split_.x), std::max(dMin.x - split_.x, TNumTraits::zero));
+	const TVector2D dMinV(std::min(dMin.y, split_.y), std::max(dMin.y - split_.y, TNumTraits::zero));
+	const TVector2D dMaxU(std::min(dMax.x, split_.x), std::max(dMax.x - split_.x, TNumTraits::zero));
+	const TVector2D dMaxV(std::min(dMax.y, split_.y), std::max(dMax.y - split_.y, TNumTraits::zero));
+	const TVector2D oneU(split_.x, TNumTraits::one - split_.x);
+	const TVector2D oneV(split_.y, TNumTraits::one - split_.y);
 
 	TScalar result = (split_.x * split_.y + (1 - split_.x) * (1 - split_.y)) * delta0.x * delta0.y;
-	result += (dot(oneX, dMaxY) - dot(oneX, dMinY)) * delta0.x;
-	result += (dot(dMaxX, oneY) - dot(dMinX, oneY)) * delta0.y;
-	result += dot(dMaxX, dMaxY) - dot(dMaxX, dMinY);
-	result += dot(dMinX, dMinY) - dot(dMinX, dMaxY);
+	result += (dot(oneU, dMaxV) - dot(oneU, dMinV)) * delta0.x;
+	result += (dot(dMaxU, oneV) - dot(dMinU, oneV)) * delta0.y;
+	result += dot(dMaxU, dMaxV) - dot(dMaxU, dMinV);
+	result += dot(dMinU, dMinV) - dot(dMinU, dMaxV);
 
 	return result;
 }

@@ -30,7 +30,7 @@ namespace scenery
 {
 
 PY_DECLARE_CLASS(Transformation)
-PY_CLASS_CONSTRUCTOR_2(Transformation, const kernel::TSceneObjectPtr&, const TTransformation3D&)
+PY_CLASS_CONSTRUCTOR_2(Transformation, const TSceneObjectPtr&, const TTransformation3D&)
 PY_CLASS_MEMBER_RW(Transformation, "child", child, setChild)
 PY_CLASS_MEMBER_RW(Transformation, "localToWorld", localToWorld, setLocalToWorld)
 PY_CLASS_MEMBER_R(Transformation, "worldToLocal", worldToLocal)
@@ -38,7 +38,7 @@ PY_CLASS_MEMBER_R(Transformation, "worldToLocal", worldToLocal)
 
 // --- public --------------------------------------------------------------------------------------
 
-Transformation::Transformation(const kernel::TSceneObjectPtr& iChild, 
+Transformation::Transformation(const TSceneObjectPtr& iChild, 
 							   const TTransformation3D& iLocalToWorld):
     SceneObject(&Type),
     child_(iChild),
@@ -48,14 +48,14 @@ Transformation::Transformation(const kernel::TSceneObjectPtr& iChild,
 
 
 
-const kernel::TSceneObjectPtr& Transformation::child() const
+const TSceneObjectPtr& Transformation::child() const
 {
 	return child_;
 }
 
 
 
-void Transformation::setChild(const kernel::TSceneObjectPtr& iChild)
+void Transformation::setChild(const TSceneObjectPtr& iChild)
 {
 	child_ = iChild;
 }
@@ -87,6 +87,13 @@ const TTransformation3D Transformation::worldToLocal() const
 
 // --- private -------------------------------------------------------------------------------------
 
+void Transformation::doPreProcess(const TimePeriod& iPeriod)
+{
+	child_->preProcess(iPeriod);
+}
+
+
+
 void Transformation::doAccept(util::VisitorBase& ioVisitor)
 {
     doVisit(*this, ioVisitor);
@@ -96,11 +103,11 @@ void Transformation::doAccept(util::VisitorBase& ioVisitor)
 
 
 
-void Transformation::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
-								 kernel::Intersection& oResult) const
+void Transformation::doIntersect(const Sample& iSample, const BoundedRay& iRay, 
+								 Intersection& oResult) const
 {
 	TScalar tScaler = TNumTraits::one;
-	const kernel::BoundedRay localRay = transform(iRay, localToWorld_.inverse(), tScaler);
+	const BoundedRay localRay = transform(iRay, localToWorld_.inverse(), tScaler);
 	child_->intersect(iSample, localRay, oResult);
     if (oResult)
     {
@@ -111,24 +118,24 @@ void Transformation::doIntersect(const kernel::Sample& iSample, const kernel::Bo
 
 
 
-const bool Transformation::doIsIntersecting(const kernel::Sample& iSample, 
-											const kernel::BoundedRay& iRay) const
+const bool Transformation::doIsIntersecting(const Sample& iSample, 
+											const BoundedRay& iRay) const
 {
-	const kernel::BoundedRay localRay = transform(iRay, localToWorld_.inverse());
+	const BoundedRay localRay = transform(iRay, localToWorld_.inverse());
 	return child_->isIntersecting(iSample, localRay);
 }
 
 
 
-void Transformation::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
-									const kernel::Intersection& iIntersection, 
-									kernel::IntersectionContext& oResult) const
+void Transformation::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
+									const Intersection& iIntersection, 
+									IntersectionContext& oResult) const
 {
-	kernel::IntersectionDescendor descendor(iIntersection);
+	IntersectionDescendor descendor(iIntersection);
 	LASS_ASSERT(iIntersection.object() == child_.get());
 
 	TScalar t = oResult.t();
-	const TRay3D localRay = ::liar::kernel::transform(iRay, localToWorld_.inverse(), t);
+	const BoundedRay localRay = ::liar::kernel::transform(iRay, localToWorld_.inverse(), t);
 	
 	const TScalar tBackup = oResult.t();
 	oResult.setT(t);
@@ -148,7 +155,7 @@ void Transformation::doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld
 
 
 
-const bool Transformation::doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const
+const bool Transformation::doContains(const Sample& iSample, const TPoint3D& iPoint) const
 {
 	const TPoint3D localPoint = transform(iPoint, localToWorld_.inverse());
 	return child_->contains(iSample, localPoint);
@@ -156,9 +163,9 @@ const bool Transformation::doContains(const kernel::Sample& iSample, const TPoin
 
 
 
-const TAabb3D Transformation::doBoundingBox(const kernel::TimePeriod& iPeriod) const
+const TAabb3D Transformation::doBoundingBox() const
 {
-	return transform(child_->boundingBox(iPeriod), localToWorld_);
+	return transform(child_->boundingBox(), localToWorld_);
 }
 
 

@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::Shader
+/** @class liar::Shader
  *  @brief base class of all shaders
  *  @author Bram de Greve [BdG]
  */

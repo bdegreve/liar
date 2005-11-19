@@ -1,0 +1,40 @@
+# Demonstrates the use module liar.tools.wavefront_obj to load
+# a wavefront OBJ file
+#
+# LiAR isn't a raytracer
+# Copyright (C) 2004-2005  Bram de Greve
+
+mtllib wavefront_obj.mtl
+
+v -1 -1 -1
+v -1 -1 +1
+v -1 +1 -1
+v -1 +1 +1
+v +1 -1 -1
+v +1 -1 +1
+v +1 +1 -1
+v +1 +1 +1
+
+g
+usemtl black
+f 1 5 7 3
+
+g
+usemtl white
+f 2 4 8 6
+
+g 
+usemtl red
+f 5 7 8 6
+
+g
+usemtl yellow
+f 7 3 4 8
+
+g
+usemtl green
+f 5 1 2 6
+
+g
+usemtl blue
+f 1 3 4 2

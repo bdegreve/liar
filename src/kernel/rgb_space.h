@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::RgbSpace
+/** @class liar::RgbSpace
  *  @brief transformation from XYZ tristimulus to RGB and vice versa.
  *  @author Bram de Greve [BdG]
  */

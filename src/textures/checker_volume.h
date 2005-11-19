@@ -42,15 +42,15 @@ class LIAR_TEXTURES_DLL CheckerVolume: public Mix2
 	PY_HEADER(Mix2)
 public:
 
-	CheckerVolume(const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB);
+	CheckerVolume(const TTexturePtr& iA, const TTexturePtr& iB);
 
 	const TVector3D& split() const;
 	void setSplit(const TVector3D& iSplit);
 
 private:
 
-	kernel::Spectrum doLookUp(const kernel::Sample& iSample, 
-		const kernel::IntersectionContext& iContext) const;
+	Spectrum doLookUp(const Sample& iSample, 
+		const IntersectionContext& iContext) const;
 
 	TVector3D split_;
 };

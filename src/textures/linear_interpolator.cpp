@@ -32,7 +32,7 @@ namespace textures
 
 PY_DECLARE_CLASS(LinearInterpolator)
 PY_CLASS_CONSTRUCTOR_0(LinearInterpolator)
-PY_CLASS_CONSTRUCTOR_2(LinearInterpolator, const LinearInterpolator::TKeyTextures&, const kernel::TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_2(LinearInterpolator, const LinearInterpolator::TKeyTextures&, const TTexturePtr&)
 PY_CLASS_MEMBER_RW(LinearInterpolator, "keys", keys, setKeys)
 PY_CLASS_MEMBER_RW(LinearInterpolator, "control", control, setControl)
 PY_CLASS_METHOD(LinearInterpolator, addKey)
@@ -42,15 +42,15 @@ PY_CLASS_METHOD(LinearInterpolator, addKey)
 LinearInterpolator::LinearInterpolator():
 	Texture(&Type),
 	keys_(),
-	control_(kernel::Texture::black())
+	control_(Texture::black())
 {
-	keys_.push_back(TKeyTexture(TNumTraits::zero, kernel::Texture::white()));
+	keys_.push_back(TKeyTexture(TNumTraits::zero, Texture::white()));
 }
 
 
 
 LinearInterpolator::LinearInterpolator(const TKeyTextures& iKeyTextures, 
-									   const kernel::TTexturePtr& iControlTexture):
+									   const TTexturePtr& iControlTexture):
 	Texture(&Type),
 	keys_(),
 	control_(iControlTexture)
@@ -71,7 +71,7 @@ const LinearInterpolator::TKeyTextures& LinearInterpolator::keys() const
 
 /** return control texture
  */
-const kernel::TTexturePtr& LinearInterpolator::control() const
+const TTexturePtr& LinearInterpolator::control() const
 {
 	return control_;
 }
@@ -90,7 +90,7 @@ void LinearInterpolator::setKeys(const TKeyTextures& iKeyTextures)
 
 /** set control texture
  */
-void LinearInterpolator::setControl(const kernel::TTexturePtr& iContolTexture)
+void LinearInterpolator::setControl(const TTexturePtr& iContolTexture)
 {
 	control_ = iContolTexture;
 }
@@ -100,7 +100,7 @@ void LinearInterpolator::setControl(const kernel::TTexturePtr& iContolTexture)
 /** add a key texture to the list
  */
 void LinearInterpolator::addKey(const TScalar iKeyValue, 
-								const kernel::TTexturePtr& iKeyTexture)
+								const TTexturePtr& iKeyTexture)
 {
 	TKeyTexture key(iKeyValue, iKeyTexture);
 	TKeyTextures::iterator i = std::lower_bound(keys_.begin(), keys_.end(), key, LesserKey());
@@ -116,12 +116,12 @@ void LinearInterpolator::addKey(const TScalar iKeyValue,
 
 // --- private -------------------------------------------------------------------------------------
 
-kernel::Spectrum LinearInterpolator::doLookUp(const kernel::Sample& iSample, 
-										const kernel::IntersectionContext& iContext) const
+Spectrum LinearInterpolator::doLookUp(const Sample& iSample, 
+										const IntersectionContext& iContext) const
 {
 	const TScalar controlValue = control_->lookUp(iSample, iContext).averagePower();
 
-	TKeyTexture sentinel(controlValue, kernel::TTexturePtr());
+	TKeyTexture sentinel(controlValue, TTexturePtr());
 	TKeyTextures::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), sentinel, LesserKey());
 	
 	if (i == keys_.begin())
@@ -138,7 +138,7 @@ kernel::Spectrum LinearInterpolator::doLookUp(const kernel::Sample& iSample,
 
 	const TTime blendFactor = (iSample.time() - prevI->first) / (i->first - prevI->first);
 	
-	return kernel::blend(
+	return blend(
 		prevI->second->lookUp(iSample, iContext),
 		i->second->lookUp(iSample, iContext),
 		static_cast<TScalar>(blendFactor));

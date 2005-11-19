@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::SceneLight
+/** @class liar::SceneLight
  *  @brief base class of all light emiting scene objects
  *  @author Bram de Greve [BdG]
  */

@@ -231,7 +231,7 @@ Spectrum Simple::doShade(const Sample& iSample,
 		}
 		else
 		{
-			result += kernel::Spectrum(TVector3D(1, 0, 1));
+			result += Spectrum(TVector3D(1, 0, 1));
 		}
 	}
 

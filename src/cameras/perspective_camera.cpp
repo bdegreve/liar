@@ -40,6 +40,8 @@ PY_CLASS_MEMBER_RW(PerspectiveCamera, "direction", direction, setDirection)
 PY_CLASS_MEMBER_RW(PerspectiveCamera, "right", right, setRight)
 PY_CLASS_MEMBER_RW(PerspectiveCamera, "down", down, setDown)
 PY_CLASS_MEMBER_RW(PerspectiveCamera, "sky", sky, setSky)
+PY_CLASS_MEMBER_RW(PerspectiveCamera, "focalDistance", focalDistance, setFocalDistance)
+PY_CLASS_MEMBER_RW(PerspectiveCamera, "lensRadius", lensRadius, setLensRadius)
 PY_CLASS_MEMBER_RW(PerspectiveCamera, "shutterOpenDelta", shutterOpenDelta, setShutterOpenDelta)
 PY_CLASS_MEMBER_RW(PerspectiveCamera, "shutterCloseDelta", shutterCloseDelta, setShutterCloseDelta)
 
@@ -51,6 +53,8 @@ PerspectiveCamera::PerspectiveCamera():
     sky_(0, 0, 1),
 	fovAngle_(TNumTraits::pi / 2),
 	aspectRatio_(0.75f),
+	focalDistance_(TNumTraits::infinity),
+	lensRadius_(TNumTraits::zero),
 	nearLimit_(TNumTraits::zero),
 	farLimit_(TNumTraits::infinity),
 	shutterOpenDelta_(0),
@@ -96,6 +100,7 @@ void PerspectiveCamera::lookAt(const TPoint3D& iLookAt)
     down_ = prim::cross(direction_, right_);
     setFovAngle(fovAngle_);
     initTransformation();
+	focalDistance_ = prim::distance(position_, iLookAt);
 }
 
 
@@ -247,6 +252,33 @@ void PerspectiveCamera::setShutterCloseDelta(TTimeDelta iShutterCloseDelta)
 
 
 
+TScalar PerspectiveCamera::focalDistance() const
+{
+	return focalDistance_;
+}
+
+
+
+TScalar PerspectiveCamera::lensRadius() const
+{
+	return lensRadius_;
+}
+
+
+
+void PerspectiveCamera::setFocalDistance(TScalar iDistance)
+{
+    focalDistance_ = iDistance;
+}
+
+
+
+void PerspectiveCamera::setLensRadius(TScalar iRadius)
+{
+    lensRadius_ = iRadius;
+}
+
+
 TScalar PerspectiveCamera::nearLimit() const
 {
 	return nearLimit_;
@@ -281,26 +313,96 @@ void PerspectiveCamera::setFarLimit(TScalar iDistance)
 
 // --- private -------------------------------------------------------------------------------------
    
-const kernel::DifferentialRay 
-PerspectiveCamera::doPrimaryRay(kernel::Sample& iSample, const TVector2D& iScreenSpaceDelta) const
+namespace impl
+{
+
+TPoint2D sampleConcentricDisk(const TPoint2D& uv)
+{
+	TScalar r, theta;
+	const TScalar x = 2 * uv.x - 1;
+	const TScalar y = 2 * uv.y - 1;
+	const TScalar pi_4 = TNumTraits::pi / 4;
+
+	if (x > -y) 
+	{
+		if (x > y) 
+		{
+			r = x;
+			theta = pi_4 * (y / x);
+		}
+		else       
+		{
+			r = y;
+			theta = pi_4 * (2 - (x / y));
+		}
+	}
+	else 
+	{
+		if (x < y) 
+		{	
+			r = -x;
+			theta = pi_4 * (4 + (y / x));
+		}
+		else       
+		{
+			r = -y;
+			if (y != 0)
+			{
+                theta = pi_4 * (6 - (x / y));
+			}
+            else
+			{
+                theta = 0;
+			}
+		}
+	}
+
+	return TPoint2D(r * num::cos(theta), r * num::sin(theta));
+}
+
+}
+
+const BoundedRay 
+PerspectiveCamera::doGenerateRay(const Sample& iSample, const TVector2D& iScreenSpaceDelta) const
 {
     using namespace kernel;
 
-    const TPoint2D& screenCoordinate = iSample.screenCoordinate();
-    const TVector3D dir = directionBase_ + screenCoordinate.x * right_ + screenCoordinate.y * down_;
-	
-	const TRay3D centralRay(position_, dir);
-	const TRay3D differentialI(position_, dir + iScreenSpaceDelta.x * right_);
-	const TRay3D differentialJ(position_, dir + iScreenSpaceDelta.y * down_);
+	const TPoint2D& screen = iSample.screenCoordinate() + iScreenSpaceDelta;
+    
+	TVector3D direction = directionBase_ + screen.x * right_ + screen.y * down_;
+	TScalar factor = direction.norm() / direction_.norm();
+	direction.normalize();
 
-    return DifferentialRay(BoundedRay(centralRay, nearLimit_, farLimit_), differentialI, differentialJ);
+	if (lensRadius_ > 0 && focalDistance_ > 0)
+	{
+		const TPoint2D& lens = impl::sampleConcentricDisk(iSample.lensCoordinate());
+		const TPoint3D lensPoint = position_ + direction_.normal() +
+			lensRadius_ * lens.x * right_.normal() +
+			lensRadius_ * lens.y * down_.normal();
+		
+		const TScalar t = focalDistance_ / direction.z;
+		const TPoint3D focusPoint = position_ + t * direction;
+
+		direction = focusPoint - lensPoint;
+		direction.normalize();
+
+		const TScalar factor = num::inv(direction.z);
+		const TPoint3D support = lensPoint - factor * direction;
+		return BoundedRay(support, direction, 
+			std::max(tolerance, factor * nearLimit_), factor * farLimit_);
+	}
+	else
+	{
+		return BoundedRay(position_, direction, 
+			std::max(tolerance, factor * nearLimit_), factor * farLimit_);
+	}
 }
 
 
 
-const kernel::TimePeriod PerspectiveCamera::doShutterDelta() const
+const TimePeriod PerspectiveCamera::doShutterDelta() const
 {
-	return kernel::TimePeriod(shutterOpenDelta_, shutterCloseDelta_);
+	return TimePeriod(shutterOpenDelta_, shutterCloseDelta_);
 }
 
 

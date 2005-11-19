@@ -31,8 +31,8 @@ namespace scenery
 {
 
 PY_DECLARE_CLASS(Csg)
-PY_CLASS_CONSTRUCTOR_2(Csg, const kernel::TSceneObjectPtr&, const kernel::TSceneObjectPtr&)
-PY_CLASS_CONSTRUCTOR_3(Csg, const kernel::TSceneObjectPtr&, const kernel::TSceneObjectPtr&, const std::string&)
+PY_CLASS_CONSTRUCTOR_2(Csg, const TSceneObjectPtr&, const TSceneObjectPtr&)
+PY_CLASS_CONSTRUCTOR_3(Csg, const TSceneObjectPtr&, const TSceneObjectPtr&, const std::string&)
 PY_CLASS_MEMBER_RW(Csg, "childA", childA, setChildA)
 PY_CLASS_MEMBER_RW(Csg, "childB", childB, setChildB)
 PY_CLASS_MEMBER_RW(Csg, "operation", operation, setOperation)
@@ -44,8 +44,8 @@ Csg::TOperationDictionary Csg::operationDictionary_ = Csg::makeOperationDictiona
 
 // --- public --------------------------------------------------------------------------------------
 
-Csg::Csg(const kernel::TSceneObjectPtr& iChildA,
-		 const kernel::TSceneObjectPtr& iChildB):
+Csg::Csg(const TSceneObjectPtr& iChildA,
+		 const TSceneObjectPtr& iChildB):
     SceneObject(&Type),
     childA_(iChildA),
     childB_(iChildB),
@@ -55,8 +55,8 @@ Csg::Csg(const kernel::TSceneObjectPtr& iChildA,
 
 
 
-Csg::Csg(const kernel::TSceneObjectPtr& iChildA,
-		 const kernel::TSceneObjectPtr& iChildB,
+Csg::Csg(const TSceneObjectPtr& iChildA,
+		 const TSceneObjectPtr& iChildB,
 		 const std::string& iOperation):
     SceneObject(&Type),
     childA_(iChildA),
@@ -67,14 +67,14 @@ Csg::Csg(const kernel::TSceneObjectPtr& iChildA,
 
 
 
-const kernel::TSceneObjectPtr& Csg::childA() const
+const TSceneObjectPtr& Csg::childA() const
 {
 	return childA_;
 }
 
 
 
-const kernel::TSceneObjectPtr& Csg::childB() const
+const TSceneObjectPtr& Csg::childB() const
 {
 	return childB_;
 }
@@ -89,14 +89,14 @@ const std::string Csg::operation() const
 
 
 
-void Csg::setChildA(const kernel::TSceneObjectPtr& iChild)
+void Csg::setChildA(const TSceneObjectPtr& iChild)
 {
 	childA_ = iChild;
 }
 
 
 
-void Csg::setChildB(const kernel::TSceneObjectPtr& iChild)
+void Csg::setChildB(const TSceneObjectPtr& iChild)
 {
 	childB_ = iChild;
 }
@@ -124,12 +124,20 @@ void Csg::doAccept(util::VisitorBase& ioVisitor)
 
 
 
-void Csg::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
-					  kernel::Intersection& oResult) const
+void Csg::doPreProcess(const TimePeriod& iPeriod)
 {
-	kernel::Intersection resultA;
-	kernel::Intersection resultB;
-	kernel::Intersection finalResult;
+	childA_->preProcess(iPeriod);
+	childB_->preProcess(iPeriod);
+}
+
+
+
+void Csg::doIntersect(const Sample& iSample, const BoundedRay& iRay, 
+					  Intersection& oResult) const
+{
+	Intersection resultA;
+	Intersection resultB;
+	Intersection finalResult;
 	
 	childA_->intersect(iSample, iRay, resultA);
 	childB_->intersect(iSample, iRay, resultB);
@@ -137,8 +145,8 @@ void Csg::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& i
 	{
 		if (num::almostEqual(resultA.t(), resultB.t(), tolerance))
 		{
-			LASS_META_ASSERT(kernel::seNoEvent == 0 && kernel::seEntering == 1 && 
-				kernel::seLeaving == 2 && kernel::numSolidEvent == 3,
+			LASS_META_ASSERT(seNoEvent == 0 && seEntering == 1 && 
+				seLeaving == 2 && numSolidEvent == 3,
 				SolidEvent_has_different_values_than_assumed);
 			LASS_META_ASSERT(oUnion == 0 && oIntersection == 1 && oDifference == 2 && 
 				numOperation == 3,
@@ -162,18 +170,18 @@ void Csg::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& i
 			{
 			case 0:
 				{
-					kernel::BoundedRay ray(iRay.unboundedRay(), resultA.t(), iRay.farLimit());
+					BoundedRay ray(iRay.unboundedRay(), resultA.t(), iRay.farLimit());
 					childA_->intersect(iSample, ray, resultB);
 					childB_->intersect(iSample, ray, resultB);
 				}
 				break;
 			case 1:
 				finalResult.swap(resultA);
-				finalResult.setSolidEvent(static_cast<kernel::SolidEvent>(event[operation_][i]));
+				finalResult.setSolidEvent(static_cast<SolidEvent>(event[operation_][i]));
 				break;
 			case 2:
 				finalResult.swap(resultB);
-				finalResult.setSolidEvent(static_cast<kernel::SolidEvent>(event[operation_][i]));
+				finalResult.setSolidEvent(static_cast<SolidEvent>(event[operation_][i]));
 				break;
 			default:
 				LASS_ASSERT_UNREACHABLE;
@@ -184,14 +192,14 @@ void Csg::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& i
 			// union: point on A must not be in B
 			// intersection: point on A must be in B
 			// difference: point on A must not be in B
-			const bool insideB = resultB.solidEvent() == kernel::seLeaving;
+			const bool insideB = resultB.solidEvent() == seLeaving;
 			if (insideB == (operation_ == oIntersection))
 			{
 				finalResult.swap(resultA);
 			}
 			else
 			{
-				kernel::BoundedRay ray(iRay.unboundedRay(), resultA.t(), iRay.farLimit());
+				BoundedRay ray(iRay.unboundedRay(), resultA.t(), iRay.farLimit());
 				childA_->intersect(iSample, ray, resultA);
 			}
 		}
@@ -202,14 +210,14 @@ void Csg::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& i
 			// union: point on B must not be in A
 			// intersection: point on B must be in A
 			// difference: point on B must be in A
-			const bool insideA = resultA.solidEvent() == kernel::seLeaving;
+			const bool insideA = resultA.solidEvent() == seLeaving;
 			if (insideA == (operation_ != oUnion))
 			{
 				finalResult.swap(resultB);
 			}
 			else
 			{
-				kernel::BoundedRay ray(iRay.unboundedRay(), resultB.t(), iRay.farLimit());
+				BoundedRay ray(iRay.unboundedRay(), resultB.t(), iRay.farLimit());
 				childB_->intersect(iSample, ray, resultB);
 			}
 		}
@@ -244,21 +252,21 @@ void Csg::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& i
 
 
 
-const bool Csg::doIsIntersecting(const kernel::Sample& iSample, 
-								 const kernel::BoundedRay& iRay) const
+const bool Csg::doIsIntersecting(const Sample& iSample, 
+								 const BoundedRay& iRay) const
 {
-	kernel::Intersection temp;
+	Intersection temp;
 	intersect(iSample, iRay, temp);
 	return temp;
 }
 
 
 
-void Csg::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
-								 const kernel::Intersection& iIntersection, 
-								 kernel::IntersectionContext& oResult) const
+void Csg::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
+								 const Intersection& iIntersection, 
+								 IntersectionContext& oResult) const
 {
-    kernel::IntersectionDescendor descend(iIntersection);
+    IntersectionDescendor descend(iIntersection);
 	if (iIntersection.object() == childA_.get())
 	{
 		childA_->localContext(iSample, iRay, iIntersection, oResult);
@@ -269,7 +277,7 @@ void Csg::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
 		childB_->localContext(iSample, iRay, iIntersection, oResult);
 		if (operation_ == oDifference)
 		{
-			oResult.flipNormal();
+			oResult.flipGeometricNormal();
 		}
 	}
 }
@@ -282,7 +290,7 @@ void Csg::doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const
 
 
 
-const bool Csg::doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const
+const bool Csg::doContains(const Sample& iSample, const TPoint3D& iPoint) const
 {
 	switch (operation_)
 	{
@@ -300,20 +308,20 @@ const bool Csg::doContains(const kernel::Sample& iSample, const TPoint3D& iPoint
 
 
 
-const TAabb3D Csg::doBoundingBox(const kernel::TimePeriod& iPeriod) const
+const TAabb3D Csg::doBoundingBox() const
 {
 	switch (operation_)
 	{
 	case oUnion:
-		return childA_->boundingBox(iPeriod) + childB_->boundingBox(iPeriod);
+		return childA_->boundingBox() + childB_->boundingBox();
 	case oIntersection:
 		{
 			TAabb3D result;
-			prim::intersect(childA_->boundingBox(iPeriod), childB_->boundingBox(iPeriod), result);
+			prim::intersect(childA_->boundingBox(), childB_->boundingBox(), result);
 			return result;
 		}
 	case oDifference:
-		return childA_->boundingBox(iPeriod);
+		return childA_->boundingBox();
 	default:
 		LASS_ASSERT_UNREACHABLE;
 		return TAabb3D();

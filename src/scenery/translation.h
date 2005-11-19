@@ -43,15 +43,15 @@ namespace liar
 namespace scenery
 {
 
-class LIAR_SCENERY_DLL Translation: public kernel::SceneObject
+class LIAR_SCENERY_DLL Translation: public SceneObject
 {
-    PY_HEADER(kernel::SceneObject)
+    PY_HEADER(SceneObject)
 public:
 
-	Translation(const kernel::TSceneObjectPtr& iChild, const TVector3D& iLocalToWorld);
+	Translation(const TSceneObjectPtr& iChild, const TVector3D& iLocalToWorld);
 
-	const kernel::TSceneObjectPtr& child() const;
-	void setChild(const kernel::TSceneObjectPtr& iChild);
+	const TSceneObjectPtr& child() const;
+	void setChild(const TSceneObjectPtr& iChild);
 	
 	const TVector3D& localToWorld() const;
 	void setLocalToWorld(const TVector3D& iLocalToWorld);
@@ -62,16 +62,17 @@ private:
 
     void doAccept(lass::util::VisitorBase& ioVisitor);
 
-	void doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
-		kernel::Intersection& oResult) const;
-	const bool doIsIntersecting(const kernel::Sample& iSample, const kernel::BoundedRay& iRay) const;
-	void doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
-		const kernel::Intersection& iIntersection, kernel::IntersectionContext& oResult) const;
+	void doPreProcess(const TimePeriod& iPeriod);
+	void doIntersect(const Sample& iSample, const BoundedRay& iRay, 
+		Intersection& oResult) const;
+	const bool doIsIntersecting(const Sample& iSample, const BoundedRay& iRay) const;
+	void doLocalContext(const Sample& iSample, const BoundedRay& iRay,
+		const Intersection& iIntersection, IntersectionContext& oResult) const;
 	void doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const;
-	const bool doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const;
-	const TAabb3D doBoundingBox(const kernel::TimePeriod& iPeriod) const;
+	const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const;
+	const TAabb3D doBoundingBox() const;
 
-    kernel::TSceneObjectPtr child_;
+    TSceneObjectPtr child_;
     TVector3D localToWorld_;
 };
 

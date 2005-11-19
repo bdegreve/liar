@@ -183,6 +183,9 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File 
+				RelativePath=".\aabb_tree.cpp">
+			</File>
+			<File 
 				RelativePath=".\csg.cpp">
 			</File>
 			<File 
@@ -269,13 +272,22 @@
 				RelativePath=".\sphere.cpp">
 			</File>
 			<File 
+				RelativePath=".\transformation.cpp">
+			</File>
+			<File 
 				RelativePath=".\translation.cpp">
+			</File>
+			<File 
+				RelativePath=".\triangle_mesh.cpp">
 			</File>
 		</Filter>
 		<Filter 
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			<File 
+				RelativePath=".\aabb_tree.h">
+			</File>
 			<File 
 				RelativePath=".\csg.h">
 			</File>
@@ -305,6 +317,9 @@
 			</File>
 			<File 
 				RelativePath=".\triangle.h">
+			</File>
+			<File 
+				RelativePath=".\triangle_mesh.h">
 			</File>
 		</Filter>
 		<Filter 

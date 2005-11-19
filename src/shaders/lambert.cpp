@@ -32,35 +32,35 @@ namespace shaders
 
 PY_DECLARE_CLASS(Lambert)
 PY_CLASS_CONSTRUCTOR_0(Lambert)
-PY_CLASS_CONSTRUCTOR_1(Lambert, const kernel::TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_1(Lambert, const TTexturePtr&)
 PY_CLASS_MEMBER_RW_DOC(Lambert, "diffuse", diffuse, setDiffuse, "texture for diffuse component")
 
 // --- public --------------------------------------------------------------------------------------
 
 Lambert::Lambert():
-	kernel::Shader(&Type),
-	diffuse_(kernel::Texture::white())
+	Shader(&Type),
+	diffuse_(Texture::white())
 {
 }
 
 
 
-Lambert::Lambert(const kernel::TTexturePtr& iDiffuse):
-	kernel::Shader(&Type),
+Lambert::Lambert(const TTexturePtr& iDiffuse):
+	Shader(&Type),
 	diffuse_(iDiffuse)
 {
 }
 
 
 
-const kernel::TTexturePtr& Lambert::diffuse() const
+const TTexturePtr& Lambert::diffuse() const
 {
 	return diffuse_;
 }
 
 
 
-void Lambert::setDiffuse(const kernel::TTexturePtr& iDiffuse)
+void Lambert::setDiffuse(const TTexturePtr& iDiffuse)
 {
 	diffuse_ = iDiffuse;
 }
@@ -73,49 +73,33 @@ void Lambert::setDiffuse(const kernel::TTexturePtr& iDiffuse)
 
 // --- private -------------------------------------------------------------------------------------
 
-kernel::Spectrum Lambert::doUnshaded(const kernel::Sample& iSample,
-									 const kernel::IntersectionContext& iContext)
+Spectrum Lambert::doShade(const Sample& iSample,
+						  const DifferentialRay& iPrimaryRay,
+						  const Intersection& iIntersection,
+						  const IntersectionContext& iContext,
+						  const RayTracer& iTracer)
 {
-	return kernel::Spectrum();
-}
-
-
-
-kernel::Spectrum Lambert::doDirectLight(const kernel::Sample& iSample,
-										const kernel::DifferentialRay& iPrimaryRay,
-										const kernel::Intersection& iIntersection,
-										const kernel::IntersectionContext& iContext,
-										const kernel::TSceneObjectPtr& iScene,
-										const kernel::LightContext& iLight)
-{
-	// can we move these outside?
-	const kernel::Spectrum diffuse = diffuse_->lookUp(iSample, iContext);
+	const Spectrum diffuse = diffuse_->lookUp(iSample, iContext);
 	if (!diffuse)
 	{
-		return kernel::Spectrum();
+		return Spectrum();
 	}
+	
+	const TVector3D& geoNormal = iContext.normal();
+	const bool isOutside = dot(geoNormal, iPrimaryRay.direction()) < 0;
+	const TVector3D shadeNormal = isOutside ? geoNormal : -geoNormal;
 
-	const TPoint3D& intersectionPoint = iContext.point();
-	const TPoint3D shadowStartPoint = intersectionPoint + 
-		(liar::tolerance * intersectionPoint.position().norm()) * iContext.normal(); 
-
-	kernel::Spectrum result;
-	for (kernel::Sample::TSubSequence2D i = iSample.subSequence2D(iLight.idLightSamples()); i; ++i)
+	Spectrum result;
+	RayTracer::TLightRange lightSamples = iTracer.sampleLights(iSample, iContext);
+	for (RayTracer::TLightRange::iterator i = lightSamples.begin(); i != lightSamples.end(); ++i)
 	{
-		kernel::BoundedRay shadowRay;
-		kernel::Spectrum radiance = iLight.sampleRadiance(*i, shadowStartPoint, iSample.time(), shadowRay);
-		const TScalar cosTheta = prim::dot(iContext.normal(), shadowRay.direction());
+		const TScalar cosTheta = prim::dot(shadeNormal, i->direction());
 		if (cosTheta > TNumTraits::zero)
 		{
-			if (iLight.light()->isShadowless() || 
-				!iScene->isIntersecting(iSample, shadowRay))
-			{
-				radiance *= cosTheta;
-				radiance *= diffuse;
-				result += radiance; 
-			}
+			result += i->radiance() * cosTheta;
 		}
 	}
+	result *= diffuse;
 
 	return result;
 }

@@ -30,12 +30,12 @@ namespace scenery
 {
 
 PY_DECLARE_CLASS(MotionTranslation)
-PY_CLASS_CONSTRUCTOR_3(MotionTranslation, const kernel::TSceneObjectPtr&, const TVector3D&, const TVector3D&)
+PY_CLASS_CONSTRUCTOR_3(MotionTranslation, const TSceneObjectPtr&, const TVector3D&, const TVector3D&)
 PY_CLASS_MEMBER_RW(MotionTranslation, "child", child, setChild)
 
 // --- public --------------------------------------------------------------------------------------
 
-MotionTranslation::MotionTranslation(const kernel::TSceneObjectPtr& iChild, 
+MotionTranslation::MotionTranslation(const TSceneObjectPtr& iChild, 
 									 const TVector3D& iLocalToWorldStart,
 									 const TVector3D& iSpeedInWorld):
     SceneObject(&Type),
@@ -47,14 +47,14 @@ MotionTranslation::MotionTranslation(const kernel::TSceneObjectPtr& iChild,
 
 
 
-const kernel::TSceneObjectPtr& MotionTranslation::child() const
+const TSceneObjectPtr& MotionTranslation::child() const
 {
 	return child_;
 }
 
 
 
-void MotionTranslation::setChild(const kernel::TSceneObjectPtr& iChild)
+void MotionTranslation::setChild(const TSceneObjectPtr& iChild)
 {
 	child_ = iChild;
 }
@@ -67,6 +67,7 @@ void MotionTranslation::setChild(const kernel::TSceneObjectPtr& iChild)
 
 // --- private -------------------------------------------------------------------------------------
 
+
 void MotionTranslation::doAccept(util::VisitorBase& ioVisitor)
 {
     doVisit(*this, ioVisitor);
@@ -76,10 +77,24 @@ void MotionTranslation::doAccept(util::VisitorBase& ioVisitor)
 
 
 
-void MotionTranslation::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
-							  kernel::Intersection& oResult) const
+void MotionTranslation::doPreProcess(const TimePeriod& iPeriod)
 {
-	const kernel::BoundedRay localRay = translate(iRay, -localToWorld(iSample.time()));
+	child_->preProcess(iPeriod);
+
+	const TAabb3D localBox = child_->boundingBox();
+
+	const TVector3D offsetBegin = localToWorld(iPeriod.begin());
+	const TVector3D offsetEnd = localToWorld(iPeriod.end());
+	aabb_ = TAabb3D(localBox.min() + offsetBegin, localBox.max() + offsetBegin);
+	aabb_ += TAabb3D(localBox.min() + offsetEnd, localBox.max() + offsetEnd);
+}
+
+
+
+void MotionTranslation::doIntersect(const Sample& iSample, const BoundedRay& iRay, 
+							  Intersection& oResult) const
+{
+	const BoundedRay localRay = translate(iRay, -localToWorld(iSample.time()));
 	child_->intersect(iSample, localRay, oResult);
     if (oResult)
     {
@@ -89,20 +104,20 @@ void MotionTranslation::doIntersect(const kernel::Sample& iSample, const kernel:
 
 
 
-const bool MotionTranslation::doIsIntersecting(const kernel::Sample& iSample, 
-											   const kernel::BoundedRay& iRay) const
+const bool MotionTranslation::doIsIntersecting(const Sample& iSample, 
+											   const BoundedRay& iRay) const
 {
-	const kernel::BoundedRay localRay = translate(iRay, -localToWorld(iSample.time()));
+	const BoundedRay localRay = translate(iRay, -localToWorld(iSample.time()));
 	return child_->isIntersecting(iSample, localRay);
 }
 
 
 
-void MotionTranslation::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
-									   const kernel::Intersection& iIntersection, 
-									   kernel::IntersectionContext& oResult) const
+void MotionTranslation::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
+									   const Intersection& iIntersection, 
+									   IntersectionContext& oResult) const
 {
-	kernel::IntersectionDescendor descendor(iIntersection);
+	IntersectionDescendor descendor(iIntersection);
 	LASS_ASSERT(iIntersection.object() == child_.get());
 
 	const TVector3D offset = localToWorld(iSample.time());
@@ -121,7 +136,7 @@ void MotionTranslation::doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWo
 
 
 
-const bool MotionTranslation::doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const
+const bool MotionTranslation::doContains(const Sample& iSample, const TPoint3D& iPoint) const
 {
 	const TPoint3D localPoint = iPoint - localToWorld(iSample.time());
 	return child_->contains(iSample, localPoint);
@@ -129,16 +144,9 @@ const bool MotionTranslation::doContains(const kernel::Sample& iSample, const TP
 
 
 
-const TAabb3D MotionTranslation::doBoundingBox(const kernel::TimePeriod& iPeriod) const
+const TAabb3D MotionTranslation::doBoundingBox() const
 {
-	const TAabb3D localBox = child_->boundingBox(iPeriod);
-	
-	const TVector3D offsetBegin = localToWorld(iPeriod.begin());
-	TAabb3D result(localBox.min() + offsetBegin, localBox.max() + offsetBegin);
-
-	const TVector3D offsetEnd = localToWorld(iPeriod.end());
-	result += TAabb3D(localBox.min() + offsetEnd, localBox.max() + offsetEnd);
-	return result;
+	return aabb_;
 }
 
 

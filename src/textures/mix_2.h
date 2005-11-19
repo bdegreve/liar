@@ -37,24 +37,24 @@ namespace liar
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL Mix2: public kernel::Texture
+class LIAR_TEXTURES_DLL Mix2: public Texture
 {
-	PY_HEADER(kernel::Texture)
+	PY_HEADER(Texture)
 public:
 
-	const kernel::TTexturePtr& textureA() const { return a_; }
-	const kernel::TTexturePtr& textureB() const { return b_; }
-	void setTextureA(const kernel::TTexturePtr& iA);
-	void setTextureB(const kernel::TTexturePtr& iB);
+	const TTexturePtr& textureA() const { return a_; }
+	const TTexturePtr& textureB() const { return b_; }
+	void setTextureA(const TTexturePtr& iA);
+	void setTextureB(const TTexturePtr& iB);
 
 protected:
 
-	Mix2(PyTypeObject* iType, const kernel::TTexturePtr& iA, const kernel::TTexturePtr& iB);
+	Mix2(PyTypeObject* iType, const TTexturePtr& iA, const TTexturePtr& iB);
 
 private:
 
-	kernel::TTexturePtr a_;
-	kernel::TTexturePtr b_;
+	TTexturePtr a_;
+	TTexturePtr b_;
 };
 
 }

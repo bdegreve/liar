@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::kernel::LightSample
+/** @class liar::LightSample
  *  @brief a radiance sample from a light shader
  *  @author Bram de Greve [BdG]
  */
