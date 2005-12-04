@@ -71,10 +71,17 @@ void IntersectionContext::transform(const TTransformation3D& iTransformation)
 	point_ = prim::transform(point_, iTransformation);
 	dPoint_dU_ = prim::transform(dPoint_dU_, iTransformation);
 	dPoint_dV_ = prim::transform(dPoint_dV_, iTransformation);
+
 	normal_ = prim::normalTransform(normal_, iTransformation);
 	dNormal_dU_ = prim::normalTransform(dNormal_dU_, iTransformation);
 	dNormal_dV_ = prim::normalTransform(dNormal_dV_, iTransformation);
+	const TScalar rescaleNormal = num::inv(normal_.norm());
+	normal_ *= rescaleNormal;
+	dNormal_dU_ *= rescaleNormal;
+	dNormal_dV_ *= rescaleNormal;
+
 	geometricNormal_ = prim::normalTransform(geometricNormal_, iTransformation);
+	geometricNormal_.normalize();
 	
 	if (hasScreenSpaceDifferentials_)
 	{

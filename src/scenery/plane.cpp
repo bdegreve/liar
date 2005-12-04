@@ -125,9 +125,10 @@ void Plane::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
     oResult.setDPoint_dV(dPoint_dV);
 
     oResult.setNormal(plane_.normal());
-	oResult.setGeometricNormal(oResult.normal());
     oResult.setDNormal_dU(TVector3D());
     oResult.setDNormal_dV(TVector3D());
+	
+	oResult.setGeometricNormal(oResult.normal());
 
 	oResult.setUv(plane_.uv(oResult.point()));
     oResult.setT(iIntersection.t());

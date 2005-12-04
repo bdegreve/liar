@@ -72,6 +72,8 @@ public:
 	void setGeometricNormal(const TVector3D& iNormal) { geometricNormal_ = iNormal; }
 	void setUv(const TPoint2D& iUv) { uv_ = iUv; }
 	void setUv(const TScalar iU, const TScalar iV) { uv_.x = iU; uv_.y = iV; }
+	void setDUv_dI(const TVector2D& iDUv_dI) { dUv_dI_ = iDUv_dI; }
+	void setDUv_dJ(const TVector2D& iDUv_dJ) { dUv_dJ_ = iDUv_dJ; }
     void setT(TScalar iT) { t_ = iT; }
     void setShader(const TShaderPtr& iShader) { shader_ = iShader; }
 

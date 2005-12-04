@@ -31,6 +31,7 @@
 #include "scene_light.h"
 #include "scene_object.h"
 #include "shader.h"
+#include "shader_light.h"
 #include "ray_tracer.h"
 #include "render_engine.h"
 #include "render_target.h"
@@ -114,6 +115,7 @@ void LIAR_KERNEL_DLL initkernel(void)
     PY_INJECT_CLASS_IN_MODULE(Sampler, kernel, "Abstract base class of samplers")
     PY_INJECT_CLASS_IN_MODULE(SceneObject, kernel, "Abstract base class of scene objects")
     PY_INJECT_CLASS_IN_MODULE(Shader, kernel, "Abstract base class of shaders")
+    PY_INJECT_CLASS_IN_MODULE(ShaderLight, kernel, "Abstract base class of light shaders")
     //PY_INJECT_CLASS_IN_MODULE(SpectrumFormat, kernel, "Format of a spectrum's colour representation")
     PY_INJECT_CLASS_IN_MODULE(Texture, kernel, "Abstract base class of textures")
 

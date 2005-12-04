@@ -87,14 +87,14 @@ inline Spectrum::TReference Spectrum::operator[](size_t iBand)
 
 
 
-inline const Spectrum::TValue Spectrum::averagePower() const
+inline const Spectrum::TValue Spectrum::average() const
 {
-	return totalPower() / numberOfBands_;
+	return total() / numberOfBands_;
 }
 
 
 
-inline const Spectrum::TValue Spectrum::totalPower() const
+inline const Spectrum::TValue Spectrum::total() const
 {
 	return xyz_.x + xyz_.y + xyz_.z;
 }
@@ -154,12 +154,20 @@ inline Spectrum& Spectrum::operator/=(TParam iScalar)
 
 
 
-inline Spectrum& Spectrum::pow(TParam iScalar)
+inline void Spectrum::inppow(TParam iScalar)
 {
-	xyz_.x = num::pow(xyz_.x, iScalar);
-	xyz_.y = num::pow(xyz_.y, iScalar);
-	xyz_.z = num::pow(xyz_.z, iScalar);
-	return *this;
+	num::inppow(xyz_.x, iScalar);
+	num::inppow(xyz_.y, iScalar);
+	num::inppow(xyz_.z, iScalar);
+}
+
+
+
+inline void Spectrum::inpclamp(TParam iMin, TParam iMax)
+{
+	num::inpclamp(xyz_.x, iMin, iMax);
+	num::inpclamp(xyz_.y, iMin, iMax);
+	num::inpclamp(xyz_.z, iMin, iMax);
 }
 
 
@@ -196,12 +204,38 @@ inline Spectrum& Spectrum::operator/=(const Spectrum& iOther)
 
 
 
-inline Spectrum& Spectrum::pow(const Spectrum& iOther)
+inline void Spectrum::inppow(const Spectrum& iOther)
 {
-	xyz_.x = num::pow(xyz_.x, iOther.xyz_.x);
-	xyz_.y = num::pow(xyz_.y, iOther.xyz_.y);
-	xyz_.z = num::pow(xyz_.z, iOther.xyz_.z);
-	return *this;
+	num::inppow(xyz_.x, iOther.xyz_.x);
+	num::inppow(xyz_.y, iOther.xyz_.y);
+	num::inppow(xyz_.z, iOther.xyz_.z);
+}
+
+
+
+inline void Spectrum::inpclamp(const Spectrum& iMin, const Spectrum& iMax)
+{
+	num::inpclamp(xyz_.x, iMin.xyz_.x, iMax.xyz_.x);
+	num::inpclamp(xyz_.y, iMin.xyz_.y, iMax.xyz_.y);
+	num::inpclamp(xyz_.z, iMin.xyz_.z, iMax.xyz_.z);
+}
+
+
+
+inline void Spectrum::inpsqr()
+{
+	num::inpsqr(xyz_.x);
+	num::inpsqr(xyz_.y);
+	num::inpsqr(xyz_.z);
+}
+
+
+
+inline void Spectrum::inpsqrt()
+{
+	num::inpsqrt(xyz_.x);
+	num::inpsqrt(xyz_.y);
+	num::inpsqrt(xyz_.z);
 }
 
 
@@ -293,10 +327,87 @@ inline const Spectrum operator/(const Spectrum& iA, const Spectrum& iB)
 inline const Spectrum pow(const Spectrum& iA, const Spectrum& iB)
 {
 	Spectrum result(iA);
-	result.pow(iB);
+	result.inppow(iB);
 	return result;
 }
 
+
+
+/** @relates liar::Spectrum
+ */
+inline const Spectrum clamp(const Spectrum& iA, const Spectrum& iMin, const Spectrum& iMax)
+{
+	Spectrum result(iA);
+	result.inpclamp(iMin, iMax);
+	return result;
+}
+
+
+
+
+/** @relates liar::Spectrum
+ */
+inline const Spectrum operator+(const Spectrum& iA, Spectrum::TParam iB)
+{
+	Spectrum result(iA);
+	result += iB;
+	return result;
+}
+
+
+
+/** @relates liar::Spectrum
+ */
+inline const Spectrum operator-(const Spectrum& iA, Spectrum::TParam iB)
+{
+	Spectrum result(iA);
+	result -= iB;
+	return result;
+}
+
+
+
+/** @relates liar::Spectrum
+ */
+inline const Spectrum operator*(const Spectrum& iA, Spectrum::TParam iB)
+{
+	Spectrum result(iA);
+	result *= iB;
+	return result;
+}
+
+
+
+/** @relates liar::Spectrum
+ */
+inline const Spectrum operator/(const Spectrum& iA, Spectrum::TParam iB)
+{
+	Spectrum result(iA);
+	result /= iB;
+	return result;
+}
+
+
+
+/** @relates liar::Spectrum
+ */
+inline const Spectrum pow(const Spectrum& iA, Spectrum::TParam iB)
+{
+	Spectrum result(iA);
+	result.inppow(iB);
+	return result;
+}
+
+
+
+/** @relates liar::Spectrum
+ */
+inline const Spectrum clamp(const Spectrum& iA, Spectrum::TParam iMin, Spectrum::TParam iMax)
+{
+	Spectrum result(iA);
+	result.inpclamp(iMin, iMax);
+	return result;
+}
 
 
 
@@ -353,7 +464,7 @@ inline const Spectrum operator/(Spectrum::TParam iA, const Spectrum& iB)
 inline const Spectrum pow(Spectrum::TParam iA, const Spectrum& iB)
 {
 	Spectrum result(iA);
-	result.pow(iB);
+	result.inppow(iB);
 	return result;
 }
 
@@ -361,10 +472,10 @@ inline const Spectrum pow(Spectrum::TParam iA, const Spectrum& iB)
 
 /** @relates liar::Spectrum
  */
-inline const Spectrum operator+(const Spectrum& iA, Spectrum::TParam iB)
+inline const Spectrum clamp(Spectrum::TParam iA, const Spectrum& iMin, const Spectrum& iMax)
 {
 	Spectrum result(iA);
-	result += iB;
+	result.inpclamp(iMin, iMax);
 	return result;
 }
 
@@ -372,10 +483,10 @@ inline const Spectrum operator+(const Spectrum& iA, Spectrum::TParam iB)
 
 /** @relates liar::Spectrum
  */
-inline const Spectrum operator-(const Spectrum& iA, Spectrum::TParam iB)
+inline const Spectrum sqr(const Spectrum& iA)
 {
 	Spectrum result(iA);
-	result -= iB;
+	result.inpsqr();
 	return result;
 }
 
@@ -383,32 +494,10 @@ inline const Spectrum operator-(const Spectrum& iA, Spectrum::TParam iB)
 
 /** @relates liar::Spectrum
  */
-inline const Spectrum operator*(const Spectrum& iA, Spectrum::TParam iB)
+inline const Spectrum sqrt(const Spectrum& iA)
 {
 	Spectrum result(iA);
-	result *= iB;
-	return result;
-}
-
-
-
-/** @relates liar::Spectrum
- */
-inline const Spectrum operator/(const Spectrum& iA, Spectrum::TParam iB)
-{
-	Spectrum result(iA);
-	result /= iB;
-	return result;
-}
-
-
-
-/** @relates liar::Spectrum
- */
-inline const Spectrum pow(const Spectrum& iA, Spectrum::TParam iB)
-{
-	Spectrum result(iA);
-	result.pow(iB);
+	result.inpsqrt();
 	return result;
 }
 

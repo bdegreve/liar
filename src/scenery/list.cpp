@@ -109,7 +109,11 @@ void List::doIntersect(const Sample& iSample, const BoundedRay& iRay,
         child->intersect(iSample, iRay, temp);
         if (temp)
         {
-            if (!result || temp.t() < result.t())
+            if (!result)
+            {
+                result.swap(temp);
+            }
+            else if (temp.t() < result.t())
             {
                 result.swap(temp);
             }

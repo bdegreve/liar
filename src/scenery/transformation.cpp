@@ -111,8 +111,7 @@ void Transformation::doIntersect(const Sample& iSample, const BoundedRay& iRay,
 	child_->intersect(iSample, localRay, oResult);
     if (oResult)
     {
-		oResult.setT(oResult.t() / tScaler); // scale t back to original ray
-        oResult.push(this);
+        oResult.push(this, oResult.t() / tScaler);
     }
 }
 
@@ -134,16 +133,11 @@ void Transformation::doLocalContext(const Sample& iSample, const BoundedRay& iRa
 	IntersectionDescendor descendor(iIntersection);
 	LASS_ASSERT(iIntersection.object() == child_.get());
 
-	TScalar t = oResult.t();
-	const BoundedRay localRay = ::liar::kernel::transform(iRay, localToWorld_.inverse(), t);
-	
-	const TScalar tBackup = oResult.t();
-	oResult.setT(t);
-
+	const BoundedRay localRay = ::liar::kernel::transform(iRay, localToWorld_.inverse());
 	child_->localContext(iSample, localRay, iIntersection, oResult);
 
-	oResult.setT(tBackup);
 	oResult.transform(localToWorld_);
+	oResult.setT(iIntersection.t());
 }
 
 

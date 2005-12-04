@@ -85,9 +85,7 @@ Spectrum Lambert::doShade(const Sample& iSample,
 		return Spectrum();
 	}
 	
-	const TVector3D& geoNormal = iContext.normal();
-	const bool isOutside = dot(geoNormal, iPrimaryRay.direction()) < 0;
-	const TVector3D shadeNormal = isOutside ? geoNormal : -geoNormal;
+	const TVector3D shadeNormal = iContext.normal();
 
 	Spectrum result;
 	RayTracer::TLightRange lightSamples = iTracer.sampleLights(iSample, iContext);

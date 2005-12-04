@@ -43,7 +43,7 @@ LIAR_SHADERS_DLL void initshaders(void)
 	// keep in alphabetical order please! [Bramz]
 	//
     PY_INJECT_CLASS_IN_MODULE(Lambert, shaders, "perfect lambert shader")
-    PY_INJECT_CLASS_IN_MODULE(Simple, shaders, "a simple shader")
+    PY_INJECT_CLASS_IN_MODULE(Simple, shaders, "a classic simple shader, Whitted style")
 	PY_INJECT_CLASS_IN_MODULE(Unshaded, shaders, "a shader that doesn't shade :)")
 
 	PyRun_SimpleString("print 'liar.shaders imported (v" 

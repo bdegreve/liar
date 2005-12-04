@@ -36,6 +36,8 @@ def getRoot(var):
 	
 lassRoot = getRoot('LASSROOT')
 systemRoot = getRoot('windir') + 'system32\\'
+print "lassRoot:", lassRoot
+print "systemRoot:", systemRoot
 
 if '_DEBUG' in sys.argv:
 	title = 'liar_d'

@@ -26,7 +26,6 @@
 
 // keep in alphabetical order please! [Bramz]
 //
-//#include "exposure_filter.h"
 #include "image.h"
 
 PY_DECLARE_MODULE(output)
@@ -41,7 +40,6 @@ LIAR_OUTPUT_DLL void initoutput(void)
 	
 	// keep in alphabetical order please! [Bramz]
 	//
-    //PY_INJECT_CLASS_IN_MODULE(ExposureFilter, output, "applies exposure filter to target")
     PY_INJECT_CLASS_IN_MODULE(Image, output, "simple image render target")
 
 	PyRun_SimpleString("print 'liar.output imported (v" 

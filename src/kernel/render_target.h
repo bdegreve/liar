@@ -48,10 +48,10 @@ public:
 
     virtual ~RenderTarget();
 
-    void beginRender() { isRendering_ = true; doBeginRender(); }
-    void writeRender(const Sample& iSample, const Spectrum& iRadiance) { doWriteRender(iSample, iRadiance); }
-    void endRender() { isRendering_ = false; doEndRender(); }
-    bool isRendering() { return isRendering_; }
+    void beginRender();
+    void writeRender(const Sample& iSample, const Spectrum& iRadiance);
+    void endRender();
+    bool isRendering();
 
 protected:
 

@@ -35,6 +35,7 @@ PY_CLASS_CONSTRUCTOR_4(TriangleMesh,
 					   const TriangleMesh::TNormals&, 
 					   const TriangleMesh::TUvs&, 
 					   const TriangleMesh::TIndexTriangles&)
+PY_CLASS_METHOD(TriangleMesh, smoothNormals)
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -43,6 +44,13 @@ TriangleMesh::TriangleMesh(const TVertices& iVertices, const TNormals& iNormals,
 	SceneObject(&Type),
     mesh_(iVertices, iNormals, iUvs, iTriangles)
 {
+}
+
+
+
+void TriangleMesh::smoothNormals()
+{
+	mesh_.smoothNormals();
 }
 
 
@@ -61,8 +69,7 @@ void TriangleMesh::doIntersect(const Sample& iSample, const BoundedRay& iRay,
 	const prim::Result hit = mesh_.intersect(iRay.unboundedRay(), triangle, t, iRay.nearLimit());
 	if (hit == prim::rOne && iRay.inRange(t))
 	{
-		oResult = Intersection(this, t, seNoEvent);
-		oResult.setSpecialField(triangle - mesh_.triangles().begin());
+		oResult = Intersection(this, t, seNoEvent, triangle - mesh_.triangles().begin());
 	}
 	else
 	{
@@ -97,6 +104,7 @@ void TriangleMesh::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
 	const prim::Result result = triangle.intersect(iRay.unboundedRay(), t2, iRay.nearLimit(), &context);
 	LASS_ASSERT(result == prim::rOne && t == t2);
 
+	oResult.setGeometricNormal(context.geometricNormal);
 	oResult.setNormal(context.normal);
 	oResult.setDPoint_dU(context.dPoint_dU);
 	oResult.setDPoint_dV(context.dPoint_dV);

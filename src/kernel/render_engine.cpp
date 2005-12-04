@@ -61,10 +61,7 @@ RenderEngine::~RenderEngine()
 {
     try
     {
-        if (renderTarget_->isRendering())
-        {
-            renderTarget_->endRender();
-        }
+        renderTarget_->endRender();
     }
     catch(...)
     {
@@ -194,7 +191,6 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& iBucket)
 	}
 
 	util::ProgressIndicator progress("rendering bucket " + util::stringCast<std::string>(iBucket));
-    renderTarget_->beginRender();
 	Sample sample;
     TResolution i;
     for (i.y = min.y; i.y < max.y; ++i.y)
@@ -216,7 +212,6 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& iBucket)
         }
     }
 	progress(1.);
-    renderTarget_->endRender();
 }
 
 

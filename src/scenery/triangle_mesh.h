@@ -56,6 +56,8 @@ public:
 	TriangleMesh(const TVertices& iVertices, const TNormals& iNormals,
 		const TUvs& iUvs, const TIndexTriangles& iTriangles);
 
+	void smoothNormals();
+
 private:
 
     LASS_UTIL_ACCEPT_VISITOR

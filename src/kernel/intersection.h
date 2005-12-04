@@ -55,20 +55,18 @@ public:
 	typedef std::size_t TSpecialField;
 
     Intersection();
-    Intersection(const SceneObject* iObject, TScalar iT, SolidEvent iEvent);
+    Intersection(const SceneObject* iObject, TScalar iT, SolidEvent iEvent, 
+		TSpecialField iSpecial = 0);
 
-    void push(const SceneObject* iObject);
-    const SceneObject* const object() const;
-
-	const TScalar t() const { return t_; }
-	void setT(TScalar iT) { t_ = iT; }
+	void push(const SceneObject* iObject) { push(iObject, t(), 0); }
+    void push(const SceneObject* iObject, TScalar iT, TSpecialField iSpecial = 0);
+	const SceneObject* const object() const;
+	const TScalar t() const;
+	const TSpecialField specialField() const;
 
 	const SolidEvent solidEvent() const { return solidEvent_; }
 	void setSolidEvent(SolidEvent iEvent) { solidEvent_ = iEvent; }
 	void flipSolidEvent() { solidEvent_ = flip(solidEvent_); }
-
-	const TSpecialField specialField() const { return special_; }
-	void setSpecialField(TSpecialField iSpecial) { special_ = iSpecial; }
 
     const bool isEmpty() const;
 	const bool operator!() const { return isEmpty(); }
@@ -82,15 +80,25 @@ private:
 
     friend class IntersectionDescendor;
 
-	typedef std::vector<const SceneObject*> TObjectStack;
+	struct IntersectionInfo
+	{
+		TScalar t;
+		const SceneObject* object;
+		TSpecialField special;
+
+		IntersectionInfo(const SceneObject* iObject, TScalar iT, TSpecialField iSpecial): 
+			t(iT), object(iObject), special(iSpecial)
+		{
+		}
+	};
+		
+	typedef std::vector<IntersectionInfo> TIntersectionStack;
 
     void descend() const;
     void ascend() const;
 
-    TObjectStack objectStack_;
-    mutable TObjectStack::const_iterator currentLevel_;
-	TSpecialField special_;
-    TScalar t_;
+    TIntersectionStack intersectionStack_;
+    mutable size_t currentLevel_;
 	SolidEvent solidEvent_;
 
     static Intersection empty_;

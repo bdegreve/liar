@@ -35,6 +35,7 @@ PY_DECLARE_CLASS(RenderTarget)
 
 RenderTarget::~RenderTarget()
 {
+	LASS_ASSERT(!isRendering_);
 }
 
 
@@ -42,9 +43,41 @@ RenderTarget::~RenderTarget()
 // --- protected -----------------------------------------------------------------------------------
 
 RenderTarget::RenderTarget(PyTypeObject* iType):
-    PyObjectPlus(iType)
+    PyObjectPlus(iType),
+	isRendering_(false)
 {
 }
+
+
+
+void RenderTarget::beginRender()
+{
+	if (!isRendering_)
+	{
+		doBeginRender();
+		isRendering_ = true;
+	}
+}
+
+
+
+void RenderTarget::writeRender(const Sample& iSample, const Spectrum& iRadiance)
+{
+	beginRender();
+	doWriteRender(iSample, iRadiance);
+}
+
+
+
+void RenderTarget::endRender()
+{
+	if (isRendering_)
+	{
+		doEndRender();
+		isRendering_ = false;
+	}
+}
+
 
 
 

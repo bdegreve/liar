@@ -55,8 +55,6 @@ public:
 
     virtual ~Shader();
 
-	bool isLight() const { return doIsLight(); }
-
 	Spectrum shade(const Sample& iSample, const DifferentialRay& iRay, 
 		const Intersection& iIntersection, const IntersectionContext& iContext, 
 		const RayTracer& iTracer)
@@ -69,8 +67,6 @@ protected:
     Shader(PyTypeObject* iType);
 
 private:
-
-	virtual bool doIsLight() const;
 
 	virtual Spectrum doShade(const Sample& iSample, const DifferentialRay& iRay, 
 		const Intersection& iIntersection, const IntersectionContext& iContext, 

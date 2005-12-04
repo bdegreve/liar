@@ -90,7 +90,10 @@ Spectrum DirectLighting::doCastRay(const Sample& iSample,
 
 	IntersectionContext context;
 	intersection.object()->localContext(iSample, iPrimaryRay, intersection, context);
-	TShaderPtr shader = context.shader();
+	if (dot(iPrimaryRay.direction(), context.geometricNormal()) > 0)
+	{
+		context.flipNormal();
+	}
 
 	return context.shader()->shade(iSample, iPrimaryRay, intersection, context, *this);
 }

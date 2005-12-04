@@ -365,37 +365,31 @@ TPoint2D sampleConcentricDisk(const TPoint2D& uv)
 const BoundedRay 
 PerspectiveCamera::doGenerateRay(const Sample& iSample, const TVector2D& iScreenSpaceDelta) const
 {
-    using namespace kernel;
-
 	const TPoint2D& screen = iSample.screenCoordinate() + iScreenSpaceDelta;
+
+	const TVector3D cameraDirection = direction_.normal();
     
-	TVector3D direction = directionBase_ + screen.x * right_ + screen.y * down_;
-	TScalar factor = direction.norm() / direction_.norm();
-	direction.normalize();
+	TPoint3D raySupport = position_;
+	TVector3D rayDirection = directionBase_ + screen.x * right_ + screen.y * down_;
+	rayDirection.normalize();
+	TScalar rayFactor = num::inv(dot(rayDirection, cameraDirection));
 
 	if (lensRadius_ > 0 && focalDistance_ > 0)
 	{
 		const TPoint2D& lens = impl::sampleConcentricDisk(iSample.lensCoordinate());
-		const TPoint3D lensPoint = position_ + direction_.normal() +
+		const TPoint3D lensPoint = position_ +
 			lensRadius_ * lens.x * right_.normal() +
-			lensRadius_ * lens.y * down_.normal();
-		
-		const TScalar t = focalDistance_ / direction.z;
-		const TPoint3D focusPoint = position_ + t * direction;
+			lensRadius_ * lens.y * down_.normal();		
+		const TPoint3D focusPoint = position_ + (rayFactor * focalDistance_) * rayDirection;
 
-		direction = focusPoint - lensPoint;
-		direction.normalize();
-
-		const TScalar factor = num::inv(direction.z);
-		const TPoint3D support = lensPoint - factor * direction;
-		return BoundedRay(support, direction, 
-			std::max(tolerance, factor * nearLimit_), factor * farLimit_);
+		raySupport = lensPoint;
+		rayDirection = focusPoint - lensPoint;
+		rayDirection.normalize();
+		rayFactor = num::inv(dot(rayDirection, cameraDirection));
 	}
-	else
-	{
-		return BoundedRay(position_, direction, 
-			std::max(tolerance, factor * nearLimit_), factor * farLimit_);
-	}
+	
+	return BoundedRay(raySupport, rayDirection, 
+		std::max(tolerance, rayFactor * nearLimit_), rayFactor * farLimit_);
 }
 
 

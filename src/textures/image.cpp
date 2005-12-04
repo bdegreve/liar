@@ -395,7 +395,7 @@ io::Image::TPixel Image::nearest(size_t iLevelU, size_t iLevelV, const TPoint2D&
 	const unsigned rows = mipMap.rows();
 
 	const TScalar x = num::fractional(iUv.x) * cols;
-	const TScalar y = num::fractional(iUv.y) * rows;
+	const TScalar y = num::fractional(1.f - iUv.y) * rows;
 	const unsigned i0 = static_cast<unsigned>(num::floor(x));
 	const unsigned j0 = static_cast<unsigned>(num::floor(y));
 
@@ -414,7 +414,7 @@ io::Image::TPixel Image::bilinear(size_t iLevelU, size_t iLevelV, const TPoint2D
 	const unsigned rows = mipMap.rows();
 
 	const TScalar x = num::mod(iUv.x * cols - .5f, static_cast<TScalar>(cols));
-	const TScalar y = num::mod(iUv.y * rows - .5f, static_cast<TScalar>(rows));
+	const TScalar y = num::mod((1.f - iUv.y) * rows - .5f, static_cast<TScalar>(rows));
 	const TScalar x0 = num::floor(x);
 	const TScalar y0 = num::floor(y);
 	const TScalar dx = x - x0;

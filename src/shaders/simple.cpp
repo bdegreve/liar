@@ -185,16 +185,15 @@ Spectrum Simple::doShade(const Sample& iSample,
 	const Spectrum transmittance = transmittance_->lookUp(iSample, iContext);
 
 	const TPoint3D& intersectionPoint = iContext.point();
-	const TVector3D& geoNormal = iContext.normal();
-	const bool isOutside = dot(geoNormal, iPrimaryRay.direction()) < 0;
-	const TVector3D shadeNormal = isOutside ? geoNormal : -geoNormal;
+	const TVector3D& normal = iContext.normal();
+	const bool isLeaving = iIntersection.solidEvent() == seLeaving;
 
 	Spectrum result;
 
 	RayTracer::TLightRange lightSamples = iTracer.sampleLights(iSample, iContext);
 	for (RayTracer::TLightRange::iterator i = lightSamples.begin(); i != lightSamples.end(); ++i)
 	{
-		const TScalar cosTheta = prim::dot(shadeNormal, i->direction());
+		const TScalar cosTheta = prim::dot(normal, i->direction());
 		
 		// diffuse lighting
 		//
@@ -205,10 +204,8 @@ Spectrum Simple::doShade(const Sample& iSample,
 
 		// specular lighting
 		//
-		TVector3D r = shadeNormal;
-		r *= 2 * cosTheta;
-		r -= i->direction();
-		const TScalar cosAlpha = -prim::dot(iPrimaryRay.direction(), r);
+		const TVector3D h = (i->direction() - iPrimaryRay.direction()).normal();
+		const TScalar cosAlpha = prim::dot(h, normal);
 		if (cosAlpha > TNumTraits::zero)
 		{
 			result += i->radiance() * specular * pow(cosAlpha, specularPower);
@@ -222,16 +219,12 @@ Spectrum Simple::doShade(const Sample& iSample,
 
 	if (transmittance)
 	{
-		const TScalar refractionIndex = refractionIndex_->lookUp(iSample, iContext).averagePower();
-		const TScalar n1overn2 = !isOutside ? refractionIndex : num::inv(refractionIndex);
+		const TScalar refractionIndex = refractionIndex_->lookUp(iSample, iContext).average();
+		const TScalar n1overn2 = isLeaving ? refractionIndex : num::inv(refractionIndex);
 		const DifferentialRay refractedRay = refract(iContext, iPrimaryRay, n1overn2);
 		if (refractedRay.isValid())
 		{
 			result += transmittance * iTracer.castRay(iSample, refractedRay);
-		}
-		else
-		{
-			result += Spectrum(TVector3D(1, 0, 1));
 		}
 	}
 
