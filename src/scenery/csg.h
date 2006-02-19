@@ -85,6 +85,7 @@ private:
 	void doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const;
 	const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const;
 	const TAabb3D doBoundingBox() const;
+	const TScalar doArea() const;
 
 	static TOperationDictionary makeOperationDictionary();
 

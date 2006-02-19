@@ -21,60 +21,52 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::scenery::Translation
- *  @brief linear transformation with translation part only.
- *
- *  This transformation object only performs a translation.  While this can also
- *	be achieved by using the general Transformation object, it is in general much
- *	faster.
- *
+/** @class liar::scenery::Parallelogram
+ *  @brief a single parallegoram object
  *  @author Bram de Greve [BdG]
  */
 
 #pragma once
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_SCENERY_TRANSLATION_H
-#define LIAR_GUARDIAN_OF_INCLUSION_SCENERY_TRANSLATION_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_SCENERY_PARALLELOGRAM_H
+#define LIAR_GUARDIAN_OF_INCLUSION_SCENERY_PARALLELOGRAM_H
 
 #include "scenery_common.h"
 #include "../kernel/scene_object.h"
+
+#include <lass/prim/parallelogram_3d.h>
 
 namespace liar
 {
 namespace scenery
 {
 
-class LIAR_SCENERY_DLL Translation: public SceneObject
+class LIAR_SCENERY_DLL Parallelogram: public SceneObject
 {
     PY_HEADER(SceneObject)
 public:
 
-	Translation(const TSceneObjectPtr& iChild, const TVector3D& iLocalToWorld);
-
-	const TSceneObjectPtr& child() const;
-	void setChild(const TSceneObjectPtr& iChild);
-	
-	const TVector3D& localToWorld() const;
-	void setLocalToWorld(const TVector3D& iLocalToWorld);
-	
-	const TVector3D worldToLocal() const;
+    Parallelogram(const TPoint3D& iSupport, const TVector3D& iSizeU, const TVector3D& iSizeV);
 
 private:
 
-    void doAccept(lass::util::VisitorBase& ioVisitor);
+	typedef prim::Parallelogram3D<TScalar> TParallelogram3D;
 
-	void doPreProcess(const TimePeriod& iPeriod);
+    LASS_UTIL_ACCEPT_VISITOR
+    
 	void doIntersect(const Sample& iSample, const BoundedRay& iRay, 
 		Intersection& oResult) const;
 	const bool doIsIntersecting(const Sample& iSample, const BoundedRay& iRay) const;
 	void doLocalContext(const Sample& iSample, const BoundedRay& iRay,
 		const Intersection& iIntersection, IntersectionContext& oResult) const;
-	void doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const;
 	const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const;
+
+	const TPoint3D doSampleSurface(const TVector2D& iSample, TVector3D& oNormal) const;
+
 	const TAabb3D doBoundingBox() const;
 	const TScalar doArea() const;
 
-    TSceneObjectPtr child_;
-    TVector3D localToWorld_;
+    TParallelogram3D parallelogram_;
+	TVector3D normal_;
 };
 
 

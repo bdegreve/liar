@@ -258,9 +258,6 @@
 				RelativePath=".\shader.cpp">
 			</File>
 			<File 
-				RelativePath=".\shader_light.cpp">
-			</File>
-			<File 
 				RelativePath=".\spectrum.cpp">
 				<FileConfiguration 
 					Name="Debug|Win32">
@@ -376,9 +373,6 @@
 			</File>
 			<File 
 				RelativePath=".\shader.h">
-			</File>
-			<File 
-				RelativePath=".\shader_light.h">
 			</File>
 			<File 
 				RelativePath=".\solid_event.h">

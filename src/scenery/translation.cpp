@@ -162,6 +162,13 @@ const TAabb3D Translation::doBoundingBox() const
 
 
 
+const TScalar Translation::doArea() const
+{
+	return child_->area();
+}
+
+
+
 // --- free ----------------------------------------------------------------------------------------
 
 

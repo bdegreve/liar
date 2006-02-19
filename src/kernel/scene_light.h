@@ -45,15 +45,15 @@ class LIAR_KERNEL_DLL SceneLight: public SceneObject
     PY_HEADER(SceneObject)
 public:
 
-	const Spectrum sampleRadiance(const TVector2D& iSample, const TPoint3D& iDestination, 
-		BoundedRay& oShadowRay) const 
+	const Spectrum sampleEmission(const Sample& iCameraSample, const TVector2D& iLightSample, 
+		const TPoint3D& iDestination, BoundedRay& oShadowRay, TScalar& oPdf) const 
 	{ 
-		return doSampleRadiance(iSample, iDestination, oShadowRay);
+		return doSampleEmission(iCameraSample, iLightSample, iDestination, oShadowRay, oPdf);
 	}
 
-	const unsigned numberOfRadianceSamples() const 
+	const unsigned numberOfEmissionSamples() const 
 	{ 
-		return doNumberOfRadianceSamples(); 
+		return doNumberOfEmissionSamples(); 
 	}
 
 	const bool isShadowless() const { return isShadowless_; }
@@ -67,9 +67,9 @@ private:
     
 	LASS_UTIL_ACCEPT_VISITOR
 	
-	virtual const Spectrum doSampleRadiance(const TVector2D& iSample, const TPoint3D& iDestination,
-		BoundedRay& oShadowRay) const = 0;
-	virtual const unsigned doNumberOfRadianceSamples() const = 0;
+	virtual const Spectrum doSampleEmission(const Sample& iSample, const TVector2D& iLightSample,
+		const TPoint3D& iDestination, BoundedRay& oShadowRay, TScalar& oPdf) const = 0;
+	virtual const unsigned doNumberOfEmissionSamples() const = 0;
 
 	bool isShadowless_;
 };

@@ -85,7 +85,7 @@ def load(iFilename):
 					currentMaterial.specularPower = liar.textures.Image(fields[0])
 		return materials
 	
-	def _makeGroup(vertices, uvs, normals, faces, material):
+	def _makeGroup(vertices, normals, uvs, faces, material):
 		# compress vertices, normals and uvs to only those that are used by faces
 		#
 		# see what vertices are used, and assign them a new index.
@@ -104,8 +104,8 @@ def load(iFilename):
 		sorted_components = [[(used_comps[i], i) for i in used_comps] for used_comps in used_components]
 		for k in range(3):
 			sorted_components[k].sort()	
-		compressed_vertices = [vertices[x[1]] for x in sorted_components[0]]
 		compressed_uvs = [uvs[x[1]] for x in sorted_components[1]]
+		compressed_vertices = [vertices[x[1]] for x in sorted_components[0]]
 		compressed_normals = [normals[x[1]] for x in sorted_components[2]]
 		
 		group = liar.scenery.TriangleMesh(compressed_vertices, compressed_normals, compressed_uvs, faces)
@@ -174,26 +174,29 @@ def load(iFilename):
 							vertex[k] += len(vectors[k])
 						else:
 							raise "obj file %s has 0 index on line: %s" % (iFilename, line)
-				# make sure there are no zero normals
+				# reformat vertex data to (v, vn, vt) and make sure its of length 3 
+				# (use None to fill missing values)
 				for vertex in face:
-					if len(vertex) == 3 and _isZero(normals[vertex[2]]):
-						#print "Warning: zero normal detected.  Disabling normal for this vertex"
-						vertex[2:] = []
-				# make sure all vertices have equal length
-				lengths = [len(vertex) for vertex in face]
-				min_length = min(lengths)
-				max_length = max(lengths)
-				if min_length != max_length:
-					face = [vertex[0:min_length] for vertex in face]
+					v = vertex[0]
+					vt = None
+					if len(vertex) > 1:
+						vt = vertex[1]
+					vn = None
+					if len(vertex) > 2:
+						vn = vertex[2]
+					if vn and _isZero(normals[vn]):
+						print "Warning: zero normal detected.  Disabling normal for this vertex"
+						vn = None
+					vertex = (v, vn, vt)
 				# fan-triangulate and add.
 				for i in xrange(1, len(face) - 1):
 					faces.append((face[0], face[i], face[i + 1]))
 	
 	if len(faces) > 0:
 		numFaces += len(faces)
-		groups.append(_makeGroup(vertices, uvs, normals, faces, currentMaterial))
+		groups.append(_makeGroup(vertices, normals, uvs, faces, currentMaterial))
 		faces = []
 	
-	print "%s vertices, %s uvs, %s normals, %s faces" % (len(vertices), len(uvs), len(normals), numFaces)
+	print "%s vertices, %s normals, %s uvs, %s faces" % (len(vertices), len(normals), len(uvs), numFaces)
 	
 	return groups

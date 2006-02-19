@@ -39,7 +39,7 @@ MotionTranslation::MotionTranslation(const TSceneObjectPtr& iChild,
 									 const TVector3D& iLocalToWorldStart,
 									 const TVector3D& iSpeedInWorld):
     SceneObject(&Type),
-    child_(iChild),
+    child_(LASS_ENFORCE_POINTER(iChild)),
     localToWorldStart_(iLocalToWorldStart),
 	speedInWorld_(iSpeedInWorld)
 {
@@ -56,7 +56,7 @@ const TSceneObjectPtr& MotionTranslation::child() const
 
 void MotionTranslation::setChild(const TSceneObjectPtr& iChild)
 {
-	child_ = iChild;
+	child_ = LASS_ENFORCE_POINTER(iChild);
 }
 
 
@@ -147,6 +147,13 @@ const bool MotionTranslation::doContains(const Sample& iSample, const TPoint3D& 
 const TAabb3D MotionTranslation::doBoundingBox() const
 {
 	return aabb_;
+}
+
+
+
+const TScalar MotionTranslation::doArea() const
+{
+	return child_->area();
 }
 
 

@@ -43,8 +43,8 @@ class LIAR_KERNEL_DLL Sample
 {
 public:
 
-	typedef  TSampleSequence1D;
-	typedef  TSampleSequence2D;
+	//typedef  TSampleSequence1D;
+	//typedef  TSampleSequence2D;
 
 	typedef stde::iterator_range<std::vector<TScalar>::const_iterator> TSubSequence1D;
 	typedef stde::iterator_range<std::vector<TVector2D>::const_iterator> TSubSequence2D;

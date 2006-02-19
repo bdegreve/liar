@@ -31,8 +31,9 @@
 
 #pragma once
 #include "kernel_common.h"
-#include "scene_light.h"
+#include "scene_object.h"
 #include "sampler.h"
+#include "scene_light.h"
 
 namespace liar
 {
@@ -45,10 +46,10 @@ public:
 
 	typedef std::vector<TSceneObjectPtr> TObjectPath;
 
-	LightContext(const TObjectPath& iObjectPathToLight);
+	LightContext(const TObjectPath& iObjectPathToLight, const SceneLight& iLight);
 
 	const TObjectPath& objectPath() const { return objectPath_; }
-	const TSceneLightPtr light() const { return light_; }
+	const SceneLight& light() const { return *light_; }
 
 	const int idLightSamples() const { return idLightSamples_; }
 	const int idBsdfSamples() const { return idBsdfSamples_; }
@@ -56,15 +57,15 @@ public:
 
     void requestSamples(const TSamplerPtr& iSampler);
 
-	const Spectrum sampleRadiance(const TVector2D& iSample, const TPoint3D& iPoint, 
-		TTime iTime, BoundedRay& oShadowRay) const;
+	const Spectrum sampleEmission(const Sample& iCameraSample, const TVector2D& iSample,  
+		const TPoint3D& iPoint, BoundedRay& oShadowRay, TScalar& oPdf) const;
 
 private:
 
 	mutable TTransformation3D localToWorld_;	/**< concatenated local to world transformation */
 	mutable TTime timeOfTransformation_;		/**< time localToWorld_ was calculated for */
 	TObjectPath objectPath_;					/**< path in object tree to light (light included) */
-	TSceneLightPtr light_;						/**< direct pointer to light */
+	const SceneLight* light_;					/**< pointer to actual light object */
 	bool hasMotion_;							/**< does light move in time? */
 	int idLightSamples_;			
 	int idBsdfSamples_;

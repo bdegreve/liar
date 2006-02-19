@@ -30,6 +30,7 @@ namespace kernel
 {
 
 PY_DECLARE_CLASS(RayTracer)
+PY_CLASS_MEMBER_RW(RayTracer, "maxRayGeneration", maxRayGeneration, setMaxRayGeneration)
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -46,11 +47,25 @@ const TSceneObjectPtr& RayTracer::scene() const
 
 
 
+const unsigned RayTracer::maxRayGeneration() const
+{
+	return maxRayGeneration_;
+}
+
+
+
 void RayTracer::setScene(const TSceneObjectPtr& iScene)
 {
     scene_ = iScene;
 	lights_ = gatherLightContexts(iScene);
     doPreprocess();
+}
+
+
+
+void RayTracer::setMaxRayGeneration(unsigned iMaxRayGeneration)
+{
+	maxRayGeneration_ = iMaxRayGeneration;
 }
 
 
@@ -73,7 +88,9 @@ void RayTracer::requestSamples(const TSamplerPtr& iSampler)
 // --- protected -----------------------------------------------------------------------------------
 
 RayTracer::RayTracer(PyTypeObject* iType):
-    PyObjectPlus(iType)
+    PyObjectPlus(iType),
+	maxRayGeneration_(8),
+	rayGeneration_(0)
 {
 }
 

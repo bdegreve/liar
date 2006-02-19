@@ -8,7 +8,7 @@ from liar import *
 
 width = 640
 height = 480
-samples_per_pixel = 100
+samples_per_pixel = 16
 lens_radius = 0.5
 
 sphere_radius = 0.8
@@ -64,7 +64,7 @@ engine.camera = camera
 
 engine.target = output.Image("depth_of_field.hdr", (width, height))
 
-camera.lensRadius = 0
-engine.render(((0, 0), (0.5, 1)))
+#camera.lensRadius = 0
+#engine.render(((0, 0), (0.5, 1)))
 camera.lensRadius = lens_radius
-engine.render(((0.5, 0), (1, 1)))
+engine.render(((0.0, 0), (1, 1)))

@@ -21,63 +21,63 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::scenery::Translation
- *  @brief linear transformation with translation part only.
- *
- *  This transformation object only performs a translation.  While this can also
- *	be achieved by using the general Transformation object, it is in general much
- *	faster.
- *
+/** @class liar::scenery::LightPoint
+ *  @brief model of a point light
  *  @author Bram de Greve [BdG]
  */
 
 #pragma once
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_SCENERY_TRANSLATION_H
-#define LIAR_GUARDIAN_OF_INCLUSION_SCENERY_TRANSLATION_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_SCENERY_LIGHT_AREA_H
+#define LIAR_GUARDIAN_OF_INCLUSION_SCENERY_LIGHT_AREA_H
 
 #include "scenery_common.h"
-#include "../kernel/scene_object.h"
+#include "../kernel/scene_light.h"
 
 namespace liar
 {
 namespace scenery
 {
 
-class LIAR_SCENERY_DLL Translation: public SceneObject
+class LIAR_SCENERY_DLL LightArea: public SceneLight
 {
-    PY_HEADER(SceneObject)
+    PY_HEADER(SceneLight)
 public:
 
-	Translation(const TSceneObjectPtr& iChild, const TVector3D& iLocalToWorld);
+	LightArea(const TSceneObjectPtr& iSurface);
 
-	const TSceneObjectPtr& child() const;
-	void setChild(const TSceneObjectPtr& iChild);
-	
-	const TVector3D& localToWorld() const;
-	void setLocalToWorld(const TVector3D& iLocalToWorld);
-	
-	const TVector3D worldToLocal() const;
+	const TSceneObjectPtr& surface() const;
+	const Spectrum& intensity() const;
+	// const unsigned numberOfEmissionSamples() const; [via SceneLight]
+	const bool isDoubleSided() const;
+
+	void setIntensity(const Spectrum& iPower);
+	void setNumberOfEmissionSamples(unsigned iNumberOfSamples);
+	void setDoubleSided(bool iIsDoubleSided);
 
 private:
 
-    void doAccept(lass::util::VisitorBase& ioVisitor);
+    LASS_UTIL_ACCEPT_VISITOR;
 
-	void doPreProcess(const TimePeriod& iPeriod);
 	void doIntersect(const Sample& iSample, const BoundedRay& iRay, 
 		Intersection& oResult) const;
 	const bool doIsIntersecting(const Sample& iSample, const BoundedRay& iRay) const;
 	void doLocalContext(const Sample& iSample, const BoundedRay& iRay,
 		const Intersection& iIntersection, IntersectionContext& oResult) const;
-	void doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const;
 	const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const;
+
 	const TAabb3D doBoundingBox() const;
 	const TScalar doArea() const;
 
-    TSceneObjectPtr child_;
-    TVector3D localToWorld_;
+	const Spectrum doSampleEmission(const Sample& iSample, const TVector2D& iLightSample, 
+		const TPoint3D& iTarget, BoundedRay& oShadowRay, TScalar& oPdf) const;
+	const unsigned doNumberOfEmissionSamples() const;
+
+    TSceneObjectPtr surface_;
+	Spectrum intensity_;
+	TScalar area_;
+	unsigned numberOfEmissionSamples_;
+	bool isSingleSided_;
 };
-
-
 
 }
 

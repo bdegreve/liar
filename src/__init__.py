@@ -27,3 +27,6 @@ import samplers
 import shaders
 import tracers
 import textures
+
+def radians(iDegrees):
+    return iDegrees * (3.1415926535897932384626433832795 / 180)

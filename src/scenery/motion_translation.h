@@ -63,6 +63,7 @@ private:
 	void doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const;
 	const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const;
 	const TAabb3D doBoundingBox() const;
+	const TScalar doArea() const;
 	const bool doHasMotion() const { return true; }
 
 	const TVector3D localToWorld(TTime iTime) const;

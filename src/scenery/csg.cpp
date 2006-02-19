@@ -330,6 +330,14 @@ const TAabb3D Csg::doBoundingBox() const
 
 
 
+const TScalar Csg::doArea() const
+{
+	LASS_THROW("not implemented yet");
+	return TNumTraits::qNaN;
+}
+
+
+
 Csg::TOperationDictionary Csg::makeOperationDictionary()
 {
 	TOperationDictionary result;

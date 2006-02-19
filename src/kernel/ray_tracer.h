@@ -56,7 +56,10 @@ public:
     virtual ~RayTracer();
 
     const TSceneObjectPtr& scene() const;
+	const unsigned maxRayGeneration() const;
+
     void setScene(const TSceneObjectPtr& iScene);
+	void setMaxRayGeneration(const unsigned iRayGeneration);
 
 	void requestSamples(const TSamplerPtr& iSampler);
 
@@ -64,7 +67,12 @@ public:
 	 */
     Spectrum castRay(const Sample& iSample, const DifferentialRay& iPrimaryRay) const 
     { 
-        return doCastRay(iSample, iPrimaryRay); 
+		RayGenerationIncrementor incrementor(*this);
+		if (rayGeneration_ <= maxRayGeneration_)
+		{
+			return doCastRay(iSample, iPrimaryRay);
+		}
+		return Spectrum();
     }
 
 	/** @warning sampleLights is NOT THREAD SAFE!
@@ -87,8 +95,28 @@ private:
     virtual Spectrum doCastRay(const Sample& iSample, const DifferentialRay& iPrimaryRay) const = 0;
 	virtual TLightRange doSampleLights(const Sample& iSample, const IntersectionContext& iContext) const = 0;
 
+	class RayGenerationIncrementor: public util::NonCopyable
+	{
+	public:
+		RayGenerationIncrementor(const RayTracer& iRayTracer): 
+			rayTracer_(iRayTracer) 
+		{ 
+			++rayTracer_.rayGeneration_; 
+		}
+		~RayGenerationIncrementor() 
+		{
+			--rayTracer_.rayGeneration_;
+		}
+	private:
+		const RayTracer& rayTracer_;
+	};			
+	
+	friend class RayGenerationIncrementor;
+
     TSceneObjectPtr scene_;
 	TLightContexts lights_;
+	unsigned maxRayGeneration_;
+	mutable unsigned rayGeneration_;
 };
 
 typedef python::PyObjectPtr<RayTracer>::Type TRayTracerPtr;

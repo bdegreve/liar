@@ -182,6 +182,18 @@ const TAabb3D List::doBoundingBox() const
 
 
 
+const TScalar List::doArea() const
+{
+	TScalar result = 0;
+	for (TChildren::const_iterator i = children_.begin(); i != children_.end(); ++i)
+	{
+		result += (*i)->area();
+	}
+	return result;
+}
+
+
+
 // --- free ----------------------------------------------------------------------------------------
 
 

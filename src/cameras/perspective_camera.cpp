@@ -376,6 +376,7 @@ PerspectiveCamera::doGenerateRay(const Sample& iSample, const TVector2D& iScreen
 
 	if (lensRadius_ > 0 && focalDistance_ > 0)
 	{
+#pragma LASS_TODO("do something with a focal plane versus focal cyilinder")
 		const TPoint2D& lens = impl::sampleConcentricDisk(iSample.lensCoordinate());
 		const TPoint3D lensPoint = position_ +
 			lensRadius_ * lens.x * right_.normal() +

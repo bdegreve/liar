@@ -56,7 +56,7 @@ public:
 	TriangleMesh(const TVertices& iVertices, const TNormals& iNormals,
 		const TUvs& iUvs, const TIndexTriangles& iTriangles);
 
-	void smoothNormals();
+	void smoothNormals(TScalar iMaxAngleInRadians);
 
 private:
 
@@ -68,6 +68,7 @@ private:
 		const Intersection& iIntersection, IntersectionContext& oResult) const;
 	const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const;
 	const TAabb3D doBoundingBox() const;
+	const TScalar doArea() const;
 
     TMesh mesh_;
 };

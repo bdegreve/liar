@@ -262,7 +262,7 @@ const unsigned Stratifier::doRoundSize2D(unsigned iRequestedSize) const
 	const unsigned lowSqrt = static_cast<unsigned>(num::floor(realSqrt));
 	const unsigned highSqrt = lowSqrt + 1;
 
-	return (realSqrt - lowSqrt) < (highSqrt - iRequestedSize) ? lowSqrt : highSqrt;
+	return (realSqrt - lowSqrt) < (highSqrt - iRequestedSize) ? num::sqr(lowSqrt) : num::sqr(highSqrt);
 }
 
 

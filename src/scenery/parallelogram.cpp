@@ -22,23 +22,25 @@
  */
 
 #include "scenery_common.h"
-#include "triangle.h"
+#include "parallelogram.h"
 
 namespace liar
 {
 namespace scenery
 {
 
-PY_DECLARE_CLASS(Triangle)
-PY_CLASS_CONSTRUCTOR_3(Triangle, TPoint3D, TPoint3D, TPoint3D)
+PY_DECLARE_CLASS(Parallelogram)
+PY_CLASS_CONSTRUCTOR_3(Parallelogram, const TPoint3D&, const TVector3D&, const TVector3D&)
 
 
 
 // --- public --------------------------------------------------------------------------------------
 
-Triangle::Triangle(const TPoint3D& iA, const TPoint3D& iB, const TPoint3D& iC):
+Parallelogram::Parallelogram(const TPoint3D& iSupport, const TVector3D& iSizeU, 
+							 const TVector3D& iSizeV):
     SceneObject(&Type),
-    triangle_(iA, iB, iC)
+    parallelogram_(iSupport, iSizeU, iSizeV),
+	normal_(cross(iSizeU, iSizeV).normal())
 {
 }
 
@@ -50,11 +52,12 @@ Triangle::Triangle(const TPoint3D& iA, const TPoint3D& iB, const TPoint3D& iC):
 
 // --- private -------------------------------------------------------------------------------------
 
-void Triangle::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay, 
-						 kernel::Intersection& oResult) const
+void Parallelogram::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay,
+		kernel::Intersection& oResult) const
 {
     TScalar t;
-	const prim::Result hit = prim::intersect(triangle_, iRay.unboundedRay(), t, iRay.nearLimit());
+	const prim::Result hit = prim::intersect(
+		parallelogram_, iRay.unboundedRay(), t, iRay.nearLimit());
 	if (hit == prim::rOne && iRay.inRange(t))
 	{
 		oResult = kernel::Intersection(this, t, seNoEvent);
@@ -67,56 +70,65 @@ void Triangle::doIntersect(const kernel::Sample& iSample, const kernel::BoundedR
 
 
 
-const bool Triangle::doIsIntersecting(const kernel::Sample& iSample, 
+const bool Parallelogram::doIsIntersecting(const kernel::Sample& iSample, 
 									const kernel::BoundedRay& iRay) const
 {
     TScalar t;
-	const prim::Result hit = prim::intersect(triangle_, iRay.unboundedRay(), t, iRay.nearLimit());
+	const prim::Result hit = prim::intersect(
+		parallelogram_, iRay.unboundedRay(), t, iRay.nearLimit());
 	return hit == prim::rOne && iRay.inRange(t);
 }
 
 
 
-void Triangle::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
-                            const kernel::Intersection& iIntersection, 
-                            kernel::IntersectionContext& oResult) const
+void Parallelogram::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
+		const kernel::Intersection& iIntersection, 
+		kernel::IntersectionContext& oResult) const
 {
     TPoint2D uv;
 	TScalar t;
 	const prim::Result hit = prim::intersect(
-		triangle_, iRay.unboundedRay(), uv.x, uv.y, t, iRay.nearLimit());
+		parallelogram_, iRay.unboundedRay(), uv.x, uv.y, t, iRay.nearLimit());
 	LASS_ASSERT(hit == prim::rOne && iRay.inRange(t));
 	LASS_ASSERT(t == iIntersection.t());
 
 	oResult.setPoint(iRay.point(iIntersection.t()));
     oResult.setT(iIntersection.t());
 	oResult.setUv(uv);
-    oResult.setDPoint_dU(triangle_[1] - triangle_[0]);
-    oResult.setDPoint_dV(triangle_[2] - triangle_[0]);
-    oResult.setNormal(triangle_.plane().normal());
+    oResult.setDPoint_dU(parallelogram_.sizeU());
+    oResult.setDPoint_dV(parallelogram_.sizeV());
+    oResult.setNormal(normal_);
     oResult.setDNormal_dU(TVector3D());
     oResult.setDNormal_dV(TVector3D());
 }
 
 
 
-const bool Triangle::doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const
+const bool Parallelogram::doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const
 {
 	return false;
 }
 
 
 
-const TAabb3D Triangle::doBoundingBox() const
+const TPoint3D Parallelogram::doSampleSurface(const TVector2D& iSample, TVector3D& oNormal) const
 {
-	return prim::aabb(triangle_);
+	oNormal = normal_;
+	return parallelogram_.point(iSample.x, iSample.y);
 }
 
 
 
-const TScalar Triangle::doArea() const
+const TAabb3D Parallelogram::doBoundingBox() const
 {
-	return triangle_.area();
+	return prim::aabb(parallelogram_);
+}
+
+
+
+const TScalar Parallelogram::doArea() const
+{
+	return parallelogram_.area();
 }
 
 

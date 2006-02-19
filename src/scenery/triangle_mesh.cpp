@@ -34,8 +34,13 @@ PY_CLASS_CONSTRUCTOR_4(TriangleMesh,
 					   const TriangleMesh::TVertices&, 
 					   const TriangleMesh::TNormals&, 
 					   const TriangleMesh::TUvs&, 
-					   const TriangleMesh::TIndexTriangles&)
-PY_CLASS_METHOD(TriangleMesh, smoothNormals)
+ 					   const TriangleMesh::TIndexTriangles&)
+PY_CLASS_METHOD_DOC(TriangleMesh, smoothNormals, 
+	"smoothNormals(maxAngleInRadians)\n"
+	"generate smooth vertex normals.  maxAngleInRadians is the maximum angle (in radians) that is "
+	"allowed between the smooth vertex normal and face normal of the triangle.  If the angle "
+	"between both normals is less than this maximum, the vertex normal is used to create the "
+	"illusion of a smooth edge.  If not, the face normal is preserved to keep hard edges.")
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -48,9 +53,9 @@ TriangleMesh::TriangleMesh(const TVertices& iVertices, const TNormals& iNormals,
 
 
 
-void TriangleMesh::smoothNormals()
+void TriangleMesh::smoothNormals(TScalar iMaxAngleInRadians)
 {
-	mesh_.smoothNormals();
+	mesh_.smoothNormals(iMaxAngleInRadians);
 }
 
 
@@ -125,6 +130,13 @@ const bool TriangleMesh::doContains(const Sample& iSample, const TPoint3D& iPoin
 const TAabb3D TriangleMesh::doBoundingBox() const
 {
     return mesh_.aabb();
+}
+
+
+
+const TScalar TriangleMesh::doArea() const
+{
+    return mesh_.area();
 }
 
 

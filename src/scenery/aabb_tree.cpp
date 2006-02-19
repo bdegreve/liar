@@ -158,6 +158,18 @@ const TAabb3D AabbTree::doBoundingBox() const
 
 
 
+const TScalar AabbTree::doArea() const
+{
+	TScalar result = 0;
+	for (TChildren::const_iterator i = children_.begin(); i != children_.end(); ++i)
+	{
+		result += (*i)->area();
+	}
+	return result;
+}
+
+
+
 // --- free ----------------------------------------------------------------------------------------
 
 

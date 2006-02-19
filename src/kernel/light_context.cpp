@@ -31,16 +31,19 @@ namespace kernel
 
 // --- public --------------------------------------------------------------------------------------
 
-LightContext::LightContext(const TObjectPath& iObjectPathToLight):
+LightContext::LightContext(const TObjectPath& iObjectPathToLight, const SceneLight& iLight):
 	localToWorld_(),
 	timeOfTransformation_(num::NumTraits<TTime>::qNaN),
 	objectPath_(iObjectPathToLight),
-	light_(python::fromPySharedPtrCast<SceneLight>(objectPath_.back().get())),
+	light_(&iLight),
 	hasMotion_(false),
 	idLightSamples_(-1),
 	idBsdfSamples_(-1),
 	idBsdfComponentSamples_(-1)
 {
+	LASS_ASSERT(!objectPath_.empty());
+	LASS_ASSERT(objectPath_.back().get() == light_);
+
 	for (TObjectPath::const_iterator i = objectPath_.begin(); i != objectPath_.end(); ++i)
 	{
 		hasMotion_ |= (*i)->hasMotion();
@@ -51,7 +54,7 @@ LightContext::LightContext(const TObjectPath& iObjectPathToLight):
 
 void LightContext::requestSamples(const TSamplerPtr& iSampler)
 {
-	const int n = light()->numberOfRadianceSamples();
+	const int n = light_->numberOfEmissionSamples();
 	idLightSamples_ = iSampler->requestSubSequence2D(n);
 	idBsdfSamples_ = iSampler->requestSubSequence2D(n);
 	idBsdfComponentSamples_ = iSampler->requestSubSequence1D(n);
@@ -59,30 +62,34 @@ void LightContext::requestSamples(const TSamplerPtr& iSampler)
 
 
 
-const Spectrum LightContext::sampleRadiance(const TVector2D& iSample, 
-											const TPoint3D& iPoint, 
-											TTime iTime,
-											BoundedRay& oShadowRay) const
+const Spectrum LightContext::sampleEmission(const Sample& iCameraSample,
+											const TVector2D& iLightSample, 
+											const TPoint3D& iTarget, 
+											BoundedRay& oShadowRay,
+											TScalar& oPdf) const
 {
-	if (hasMotion_ && iTime != timeOfTransformation_)
+	const TTime time = iCameraSample.time();
+	if ((hasMotion_ && time != timeOfTransformation_) || num::isNaN(timeOfTransformation_))
 	{
 		TTransformation3D temp;
 		for (TObjectPath::const_iterator i = objectPath_.begin(); i != objectPath_.end(); ++i)
 		{
-			(*i)->localSpace(iTime, temp);
+			(*i)->localSpace(time, temp);
 		}
 		localToWorld_.swap(temp);
-		timeOfTransformation_ = iTime;
+		timeOfTransformation_ = time;
 	}
 
-	const TPoint3D localPoint = transform(iPoint, localToWorld_.inverse());
+	const TPoint3D localTarget = transform(iTarget, localToWorld_.inverse());
+	
 	BoundedRay localRay;
-	const Spectrum radiance = light()->sampleRadiance(iSample, localPoint, localRay);
+	const Spectrum radiance = light_->sampleEmission(
+		iCameraSample, iLightSample, localTarget, localRay, oPdf);
 
 	// we must transform back to world space.  But we already do know the starting point, so don't rely
 	// on recalculating that one
 	oShadowRay = transform(localRay, localToWorld_);
-	oShadowRay.support() = iPoint;
+	oShadowRay.support() = iTarget;
 
 	return radiance;
 }
@@ -121,7 +128,7 @@ namespace impl
 		{
 			TSceneObjectPtr objectPtr(python::PyPlus_INCREF(&iSceneLight));
 			objectPath_.push_back(objectPtr);
-			lights_.push_back(LightContext(objectPath_));
+			lights_.push_back(LightContext(objectPath_, iSceneLight));
 		}
 		void doVisitOnExit(SceneObject& iSceneObject)
 		{

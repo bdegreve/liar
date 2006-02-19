@@ -185,6 +185,13 @@ const TAabb3D Sphere::doBoundingBox() const
 
 
 
+const TScalar Sphere::doArea() const
+{
+	return sphere_.area();
+}
+
+
+
 // --- free ----------------------------------------------------------------------------------------
 
 

@@ -27,8 +27,8 @@
  */
 
 #pragma once
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_SCENERY_LIGHT_POINT_H
-#define LIAR_GUARDIAN_OF_INCLUSION_SCENERY_LIGHT_POINT_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_SCENERY_LIGHT_SPOT_H
+#define LIAR_GUARDIAN_OF_INCLUSION_SCENERY_LIGHT_SPOT_H
 
 #include "scenery_common.h"
 #include "../kernel/scene_light.h"
@@ -39,7 +39,7 @@ namespace liar
 namespace scenery
 {
 
-class LIAR_SCENERY_DLL LightPoint: public SceneLight
+class LIAR_SCENERY_DLL LightSpot: public SceneLight
 {
     PY_HEADER(SceneLight)
 public:
@@ -54,16 +54,23 @@ public:
         Attenuation(TScalar iConstant, TScalar iLinear, TScalar iQuadratic);
     };
 
-	LightPoint();
-	LightPoint(const TPoint3D& iPosition, const Spectrum& iPower);
+	LightSpot();
 
 	const TPoint3D& position() const;
-	const Spectrum& power() const;
+	const TVector3D& direction() const;
+	const Spectrum& intensity() const;
 	const Attenuation& attenuation() const;
+	const TScalar outerAngle() const;
+	const TScalar innerAngle() const;
 
 	void setPosition(const TPoint3D& iPosition);
-	void setPower(const Spectrum& iPower);
+	void setDirection(const TVector3D& iDirection);
+	void setIntensity(const Spectrum& iIntensity);
 	void setAttenuation(const Attenuation& iAttenuation);
+	void setOuterAngle(TScalar iRadians);
+	void setInnerAngle(TScalar iRadians);
+
+	void lookAt(const TPoint3D& iTarget);
 
 private:
 
@@ -83,17 +90,20 @@ private:
 	const unsigned doNumberOfEmissionSamples() const;
 
     TPoint3D position_;
-	Spectrum power_;
+    TVector3D direction_;
+	Spectrum intensity_;
     Attenuation attenuation_;
+	TScalar cosOuterAngle_;
+	TScalar cosInnerAngle_;
 };
 
-PY_SHADOW_CLASS(LIAR_SCENERY_DLL, PyLightPointAttenuation, LightPoint::Attenuation);
+PY_SHADOW_CLASS(LIAR_SCENERY_DLL, PyLightSpotAttenuation, LightSpot::Attenuation);
 
 }
 
 }
 
-PY_SHADOW_CASTERS(liar::scenery::PyLightPointAttenuation);
+PY_SHADOW_CASTERS(liar::scenery::PyLightSpotAttenuation);
 
 #endif
 

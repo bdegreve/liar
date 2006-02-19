@@ -105,6 +105,22 @@ void SceneObject::doPreProcess(const TimePeriod& iPeriod)
 
 
 
+const TPoint3D SceneObject::doSampleSurface(const TVector2D& iSample, TVector3D& oNormal) const
+{
+	LASS_THROW("surface sampling is unimplemented for scene objects '" << 
+		typeid(*this).name() << "'.");
+}
+
+
+
+const TPoint3D SceneObject::doSampleSurface(const TVector2D& iSample, const TPoint3D& iTarget, 
+		TVector3D& oNormal) const
+{
+	return doSampleSurface(iSample, oNormal);
+}
+
+
+
 void SceneObject::doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const
 {
 	// most objects don't have a local space matrix.

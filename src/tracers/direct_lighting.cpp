@@ -30,29 +30,12 @@ namespace tracers
 
 PY_DECLARE_CLASS(DirectLighting)
 PY_CLASS_CONSTRUCTOR_0(DirectLighting)
-PY_CLASS_MEMBER_RW(DirectLighting, "maxRayGeneration", maxRayGeneration, setMaxRayGeneration)
 
 // --- public --------------------------------------------------------------------------------------
 
 DirectLighting::DirectLighting():
-	RayTracer(&Type),
-	maxRayGeneration_(32),
-	rayGeneration_(0)
+	RayTracer(&Type)
 {
-}
-
-
-
-const size_t DirectLighting::maxRayGeneration() const
-{
-	return maxRayGeneration_;
-}
-
-
-
-void DirectLighting::setMaxRayGeneration(size_t iMaxRayGeneration)
-{
-	maxRayGeneration_ = iMaxRayGeneration;
 }
 
 
@@ -73,14 +56,8 @@ void DirectLighting::doRequestSamples(const TSamplerPtr& iSampler)
 
 
 Spectrum DirectLighting::doCastRay(const Sample& iSample,
-										   const DifferentialRay& iPrimaryRay) const
+								   const DifferentialRay& iPrimaryRay) const
 {
-	GenerationIncrementor incrementor(*this);
-	if (rayGeneration_ > maxRayGeneration_)
-	{
-		return Spectrum();
-	}
-
 	Intersection intersection;
 	scene()->intersect(iSample, iPrimaryRay, intersection);
 	if (!intersection)
@@ -111,15 +88,20 @@ DirectLighting::TLightRange DirectLighting::doSampleLights(const Sample& iSample
 	const TLightContexts::const_iterator end = lights().end();
 	for (TLightContexts::const_iterator light = lights().begin(); light != end; ++light)
 	{
-		for (Sample::TSubSequence2D lightSample = iSample.subSequence2D(light->idLightSamples()); lightSample; ++lightSample)
+		Sample::TSubSequence2D subSequence = iSample.subSequence2D(light->idLightSamples());
+		const TScalar scale = TNumTraits::one / subSequence.size();
+		while (subSequence)
 		{
 			BoundedRay shadowRay;
-			Spectrum radiance = light->sampleRadiance(
-				*lightSample, iContext.point(), iContext.t(), shadowRay);
+			TScalar pdf;
+			Spectrum radiance = light->sampleEmission(
+				iSample, *subSequence, iContext.point(), shadowRay, pdf);
 			if (!scene()->isIntersecting(iSample, shadowRay))
 			{
-				*output++ = LightSample(radiance, shadowRay.direction());
+				*output++ = LightSample(scale * radiance, shadowRay.direction(), pdf);
 			}
+
+			++subSequence;
 		}
 	}
 

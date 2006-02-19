@@ -68,7 +68,7 @@ LightPoint::Attenuation::Attenuation(TScalar iConstant, TScalar iLinear, TScalar
 LightPoint::LightPoint():
     SceneLight(&Type),
 	position_(TPoint3D()),
-	power_(Spectrum()),
+	power_(Spectrum(1)),
     attenuation_()
 {
 }
@@ -174,24 +174,34 @@ const TAabb3D LightPoint::doBoundingBox() const
 
 
 
-const Spectrum LightPoint::doSampleRadiance(const TVector2D& iSample, 
-													const TPoint3D& iDestination,
-													BoundedRay& oShadowRay) const
+const TScalar LightPoint::doArea() const
+{
+	return 0;
+}
+
+
+
+const Spectrum LightPoint::doSampleEmission(const Sample& iSample,
+											const TVector2D& iLightSample, 
+											const TPoint3D& iDestination,
+											BoundedRay& oShadowRay,
+											TScalar& oPdf) const
 {
 	Spectrum result = power_;
     const TScalar squaredDistance = (position_ - iDestination).squaredNorm();
+	const TScalar distance = num::sqrt(squaredDistance);
 	const TScalar att = attenuation_.constant + 
-		attenuation_.linear * num::sqrt(squaredDistance) + 
+		attenuation_.linear * distance + 
 		attenuation_.quadratic * squaredDistance;
 	result /= att;
 
-	oShadowRay = BoundedRay(iDestination, position_, tolerance, prim::distance(iDestination, position_));
+	oShadowRay = BoundedRay(iDestination, position_, tolerance, distance);
 	return result;
 }
 
 
 
-const unsigned LightPoint::doNumberOfRadianceSamples() const
+const unsigned LightPoint::doNumberOfEmissionSamples() const
 {
 	return 1;
 }

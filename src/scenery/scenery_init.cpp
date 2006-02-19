@@ -27,14 +27,18 @@
 //
 #include "aabb_tree.h"
 #include "csg.h"
+#include "light_area.h"
+#include "light_directional.h"
 #include "light_point.h"
+#include "light_spot.h"
 #include "list.h"
 #include "motion_translation.h"
+#include "parallelogram.h"
 #include "plane.h"
 #include "sphere.h"
 #include "transformation.h"
 #include "translation.h"
-//#include "triangle.h"
+#include "triangle.h"
 #include "triangle_mesh.h"
 
 #include <lass/io/proxy_man.h>
@@ -57,14 +61,18 @@ LIAR_SCENERY_DLL void initscenery(void)
 	//
 	PY_INJECT_CLASS_IN_MODULE(AabbTree, scenery, "AABB tree of child objects")
 	PY_INJECT_CLASS_IN_MODULE(Csg, scenery, "Constructive Solid Geometry")
+	PY_INJECT_CLASS_IN_MODULE(LightArea, scenery, "area light")
+	PY_INJECT_CLASS_IN_MODULE(LightDirectional, scenery, "directional light")
 	PY_INJECT_CLASS_IN_MODULE(LightPoint, scenery, "point light")
+	PY_INJECT_CLASS_IN_MODULE(LightSpot, scenery, "spot light")
     PY_INJECT_CLASS_IN_MODULE(List, scenery, "flat list of child objects")
 	PY_INJECT_CLASS_IN_MODULE(MotionTranslation, scenery, "time-dependent translation")
+    PY_INJECT_CLASS_IN_MODULE(Parallelogram, scenery, "finite parallelogram")
     PY_INJECT_CLASS_IN_MODULE(Plane, scenery, "infinite plane")
     PY_INJECT_CLASS_IN_MODULE(Sphere, scenery, "a nice sphere")
     PY_INJECT_CLASS_IN_MODULE(Transformation, scenery, "transformation of local space")
     PY_INJECT_CLASS_IN_MODULE(Translation, scenery, "translation of local space")
-    //PY_INJECT_CLASS_IN_MODULE(Triangle, scenery, "a single triangle")
+    PY_INJECT_CLASS_IN_MODULE(Triangle, scenery, "a single triangle")
     PY_INJECT_CLASS_IN_MODULE(TriangleMesh, scenery, "a simple triangle mesh")
 
 	PyRun_SimpleString("print 'liar.scenery imported (v" 

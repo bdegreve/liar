@@ -164,6 +164,13 @@ const TAabb3D Transformation::doBoundingBox() const
 
 
 
+const TScalar Transformation::doArea() const
+{
+	return child_->area();
+}
+
+
+
 // --- free ----------------------------------------------------------------------------------------
 
 

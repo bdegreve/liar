@@ -104,8 +104,20 @@ public:
 		doLocalSpace(iTime, ioLocalToWorld); 
 	}
 
+	const TPoint3D sampleSurface(const TVector2D& iSample, TVector3D& oNormal) const
+	{
+		return doSampleSurface(iSample, oNormal);
+	}
+	const TPoint3D sampleSurface(const TVector2D& iSample, const TPoint3D& iTarget, 
+		TVector3D& oNormal) const
+	{
+		return doSampleSurface(iSample, iTarget, oNormal);
+	}
+
     const TAabb3D boundingBox() const { return doBoundingBox(); }
 	const bool hasMotion() const { return doHasMotion(); }
+
+	TScalar area() const { return doArea(); }
 
     const TShaderPtr& shader() const;
     void setShader(const TShaderPtr& iShader);
@@ -133,8 +145,13 @@ private:
     virtual void doLocalContext(const Sample& iSample, const BoundedRay& iRay,
 		const Intersection& iIntersection, IntersectionContext& oResult) const = 0;
 	virtual const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const = 0;
-    virtual const TAabb3D doBoundingBox() const = 0;
-
+    
+	virtual const TPoint3D doSampleSurface(const TVector2D& iSample, TVector3D& oNormal) const;
+	virtual const TPoint3D doSampleSurface(const TVector2D& iSample, const TPoint3D& iTarget,
+		TVector3D& oNormal) const;
+	
+	virtual const TAabb3D doBoundingBox() const = 0;
+	virtual const TScalar doArea() const = 0;
 	virtual void doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const;
 	virtual const bool doHasMotion() const;
 

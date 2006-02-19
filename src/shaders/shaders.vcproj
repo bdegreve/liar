@@ -35,7 +35,8 @@
 				BrowseInformation="1"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3">
+				DebugInformationFormat="3"
+				AdditionalOptions="">
 				<IntelOptions 
 					Optimization="0"
 					OmitFramePointers="0"
@@ -46,7 +47,8 @@
 					TreatWChar_tAsBuiltInType="1"
 					ForceConformanceInForLoopScope="1"
 					RuntimeTypeInfo="1"
-					AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_SHADERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;shaders_common.h&quot; /Fp&quot;Debug/shaders_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/shaders_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"/>
+					AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_SHADERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;shaders_common.h&quot; /Fp&quot;Debug/shaders_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/shaders_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"
+					MSOriginalAdditionalOptions=""/>
 			</Tool>
 			<Tool 
 				Name="VCCustomBuildTool"/>
@@ -56,9 +58,11 @@
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\bin"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb">
+				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
+				AdditionalOptions="">
 				<IntelOptions 
-					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/shaders_d.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\shaders_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/shaders_d.lib&quot;  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"/>
+					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/shaders_d.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\shaders_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/shaders_d.lib&quot;  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
+					MSOriginalAdditionalOptions=""/>
 			</Tool>
 			<Tool 
 				Name="VCMIDLTool"/>
@@ -110,7 +114,8 @@
 				BrowseInformation="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3">
+				DebugInformationFormat="3"
+				AdditionalOptions="">
 				<IntelOptions 
 					Optimization="4"
 					GlobalOptimizations="1"
@@ -125,7 +130,8 @@
 					TreatWChar_tAsBuiltInType="1"
 					ForceConformanceInForLoopScope="1"
 					RuntimeTypeInfo="1"
-					AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /G7 /Qparallel /D &quot;LIAR_SHADERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;shaders_common.h&quot; /Fp&quot;Release/shaders.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/shaders.pdb&quot; /Gd /TP"/>
+					AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /G7 /Qparallel /D &quot;LIAR_SHADERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;shaders_common.h&quot; /Fp&quot;Release/shaders.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/shaders.pdb&quot; /Gd /TP"
+					MSOriginalAdditionalOptions=""/>
 			</Tool>
 			<Tool 
 				Name="VCCustomBuildTool"/>
@@ -135,9 +141,11 @@
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\bin"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb">
+				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
+				AdditionalOptions="">
 				<IntelOptions 
-					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/shaders.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\shaders.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/shaders.lib&quot;  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"/>
+					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/shaders.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\shaders.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/shaders.lib&quot;  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
+					MSOriginalAdditionalOptions=""/>
 			</Tool>
 			<Tool 
 				Name="VCMIDLTool"/>
@@ -179,18 +187,22 @@
 					Name="Debug|Win32">
 					<Tool 
 						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1">
+						UsePrecompiledHeader="1"
+						AdditionalOptions="">
 						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_SHADERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;shaders_common.h&quot; /Fp&quot;Debug/shaders_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/shaders_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"/>
+							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_SHADERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;shaders_common.h&quot; /Fp&quot;Debug/shaders_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/shaders_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"
+							MSOriginalAdditionalOptions=""/>
 					</Tool>
 				</FileConfiguration>
 				<FileConfiguration 
 					Name="Release|Win32">
 					<Tool 
 						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1">
+						UsePrecompiledHeader="1"
+						AdditionalOptions="">
 						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /G7 /Qparallel /D &quot;LIAR_SHADERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;shaders_common.h&quot; /Fp&quot;Release/shaders.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/shaders.pdb&quot; /Gd /TP"/>
+							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /G7 /Qparallel /D &quot;LIAR_SHADERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;shaders_common.h&quot; /Fp&quot;Release/shaders.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/shaders.pdb&quot; /Gd /TP"
+							MSOriginalAdditionalOptions=""/>
 					</Tool>
 				</FileConfiguration>
 			</File>

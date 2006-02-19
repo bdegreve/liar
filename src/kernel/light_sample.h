@@ -42,15 +42,17 @@ class LIAR_KERNEL_DLL LightSample
 {
 public:
 
-	LightSample(const Spectrum& iRadiance, const TVector3D& iDirection);
+	LightSample(const Spectrum& iRadiance, const TVector3D& iDirection, TScalar iPdf);
 
 	const Spectrum& radiance() const { return radiance_; }
 	const TVector3D& direction() const { return direction_; }
+	const TScalar pdf() const { return pdf_; }
 
 private:
 
 	Spectrum radiance_;
 	TVector3D direction_;
+	TScalar pdf_;
 };
 
 typedef std::vector<LightSample> TLightSamples;

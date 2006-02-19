@@ -164,6 +164,13 @@ const TAabb3D Plane::doBoundingBox() const
     }
     return TAabb3D(TPoint3D(-extent), TPoint3D(+extent));
 }
+
+
+
+const TScalar Plane::doArea() const
+{
+	return TNumTraits::infinity;
+}
     
 
 

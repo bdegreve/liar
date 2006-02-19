@@ -66,6 +66,7 @@ private:
 		const Intersection& iIntersection, IntersectionContext& oResult) const;
 	const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const;
 	const TAabb3D doBoundingBox() const;
+	const TScalar doArea() const;
 
     TSceneObjectPtr child_;
     TTransformation3D localToWorld_;
