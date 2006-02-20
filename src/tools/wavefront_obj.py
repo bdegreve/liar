@@ -34,6 +34,12 @@ def load(iFilename):
 	materials = {'': liar.shaders.Simple(liar.textures.Constant(liar.rgb(1, 1, 1)))}
 	currentMaterial = materials['']
 	
+	def _int_or_none(iX):
+		try:
+			return int(iX)
+		except:
+			return None
+	
 	def _floatTuple(iFields):
 		return tuple([float(x) for x in iFields])
 	
@@ -86,29 +92,31 @@ def load(iFilename):
 		return materials
 	
 	def _makeGroup(vertices, normals, uvs, faces, material):
+		components = (vertices, normals, uvs)
+		
 		# compress vertices, normals and uvs to only those that are used by faces
 		#
 		# see what vertices are used, and assign them a new index.
 		used_components = [{}, {}, {}]
 		for face in faces:
 			for vertex in face:
-				for k in range(len(vertex)):
+				for k in range(3):
 					i = vertex[k]
-					if not i in used_components[k]:
+					if i != None and not i in used_components[k]:
 						used_components[k][i] = len(used_components[k])
-						
-		# replace old indices by new ones
-		faces = [[tuple([used_components[k][vertex[k]] for k in range(len(vertex))]) for vertex in face] for face in faces]
 		
 		# build new (compressed) lists of vertices, uvs and normals
 		sorted_components = [[(used_comps[i], i) for i in used_comps] for used_comps in used_components]
 		for k in range(3):
 			sorted_components[k].sort()	
-		compressed_uvs = [uvs[x[1]] for x in sorted_components[1]]
-		compressed_vertices = [vertices[x[1]] for x in sorted_components[0]]
-		compressed_normals = [normals[x[1]] for x in sorted_components[2]]
+		compressed_components = [[components[k][x[1]] for x in sorted_components[k]] for k in range(3)]
+						
+		# replace old indices by new ones
+		for k in range(3):
+			used_components[k][None] = None
+		faces = [[tuple([used_components[k][vertex[k]] for k in range(3)]) for vertex in face] for face in faces]
 		
-		group = liar.scenery.TriangleMesh(compressed_vertices, compressed_normals, compressed_uvs, faces)
+		group = liar.scenery.TriangleMesh(compressed_components[0], compressed_components[1], compressed_components[2], faces)
 		group.shader = material
 		return group
 			
@@ -163,20 +171,22 @@ def load(iFilename):
 			
 			elif command == 'f':
 				_enforceFields(len(fields) >= 3)
-				face = [[int(x) for x in field.split('/')] for field in fields]
+				face = [[_int_or_none(x) for x in field.split('/')] for field in fields]
 				# make sure all indices are in correct range
 				for vertex in face:
 					length = len(vertex)
 					for k in range(length):
-						if vertex[k] > 0:
-							vertex[k] -= 1
-						elif vertex[k] < 0:
-							vertex[k] += len(vectors[k])
-						else:
-							raise "obj file %s has 0 index on line: %s" % (iFilename, line)
+						if vertex[k] != None:
+							if vertex[k] > 0:
+								vertex[k] -= 1
+							elif vertex[k] < 0:
+								vertex[k] += len(vectors[k])
+							else:
+								raise "obj file %s has 0 index on line: %s" % (iFilename, line)
 				# reformat vertex data to (v, vn, vt) and make sure its of length 3 
 				# (use None to fill missing values)
-				for vertex in face:
+				for i in xrange(len(face)):
+					vertex = face[i]
 					v = vertex[0]
 					vt = None
 					if len(vertex) > 1:
@@ -187,7 +197,7 @@ def load(iFilename):
 					if vn and _isZero(normals[vn]):
 						print "Warning: zero normal detected.  Disabling normal for this vertex"
 						vn = None
-					vertex = (v, vn, vt)
+					face[i] = (v, vn, vt)
 				# fan-triangulate and add.
 				for i in xrange(1, len(face) - 1):
 					faces.append((face[0], face[i], face[i + 1]))
