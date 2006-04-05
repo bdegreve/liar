@@ -44,7 +44,10 @@ namespace liar
 namespace kernel
 {
 class IntersectionContext;
+class RayTracer;
 class Sampler;
+
+typedef python::PyObjectPtr<RayTracer>::Type TRayTracerPtr;
 
 class LIAR_KERNEL_DLL RayTracer: public python::PyObjectPlus
 {
@@ -65,7 +68,7 @@ public:
 
 	/** @warning castRay is NOT THREAD SAFE!
 	 */
-    Spectrum castRay(const Sample& iSample, const DifferentialRay& iPrimaryRay) const 
+    const Spectrum castRay(const Sample& iSample, const DifferentialRay& iPrimaryRay) const 
     { 
 		RayGenerationIncrementor incrementor(*this);
 		if (rayGeneration_ <= maxRayGeneration_)
@@ -77,10 +80,16 @@ public:
 
 	/** @warning sampleLights is NOT THREAD SAFE!
 	 */
-	TLightRange sampleLights(const Sample& iSample, const IntersectionContext& iContext) const
+	const TLightRange sampleLights(const Sample& iSample, const IntersectionContext& iContext) const
 	{
 		return doSampleLights(iSample, iContext);
 	}
+
+	const TRayTracerPtr clone() const;
+
+	const TPyObjectPtr reduce() const;
+	const TPyObjectPtr getState() const;
+	void setState(const TPyObjectPtr& iState);
 
 protected:
 
@@ -92,8 +101,14 @@ private:
 
     virtual void doPreprocess() = 0;
 	virtual void doRequestSamples(const TSamplerPtr& iSampler) = 0;
-    virtual Spectrum doCastRay(const Sample& iSample, const DifferentialRay& iPrimaryRay) const = 0;
-	virtual TLightRange doSampleLights(const Sample& iSample, const IntersectionContext& iContext) const = 0;
+    virtual const Spectrum doCastRay(const Sample& iSample, 
+		const DifferentialRay& iPrimaryRay) const = 0;
+	virtual const TLightRange doSampleLights(const Sample& iSample, 
+		const IntersectionContext& iContext) const = 0;
+	virtual const TRayTracerPtr doClone() const = 0;
+
+	virtual const TPyObjectPtr doGetState() const = 0;
+	virtual void doSetState(const TPyObjectPtr& iState) = 0;
 
 	class RayGenerationIncrementor: public util::NonCopyable
 	{
@@ -118,8 +133,6 @@ private:
 	unsigned maxRayGeneration_;
 	mutable unsigned rayGeneration_;
 };
-
-typedef python::PyObjectPtr<RayTracer>::Type TRayTracerPtr;
 
 }
 

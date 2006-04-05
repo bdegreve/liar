@@ -47,10 +47,22 @@ Time::Time():
 
 // --- private -------------------------------------------------------------------------------------
 
-Spectrum Time::doLookUp(const Sample& iSample, 
-								const IntersectionContext& iContext) const
+const Spectrum Time::doLookUp(const Sample& iSample, const IntersectionContext& iContext) const
 {
 	return Spectrum(static_cast<TScalar>(iSample.time()));
+}
+
+
+
+const TPyObjectPtr Time::doGetState() const
+{
+	return python::makeTuple();
+}
+
+
+
+void Time::doSetState(const TPyObjectPtr& iState)
+{
 }
 
 

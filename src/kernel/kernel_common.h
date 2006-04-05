@@ -88,6 +88,8 @@ typedef prim::Ray3D<TScalar, prim::Normalized, prim::Unbounded> TRay3D;
 typedef prim::Aabb3D<TScalar> TAabb3D;
 typedef prim::Transformation3D<TScalar> TTransformation3D;
 
+typedef python::PyObjectPtr<PyObject>::Type TPyObjectPtr;
+
 
 
 // globals

@@ -42,6 +42,7 @@ Parallelogram::Parallelogram(const TPoint3D& iSupport, const TVector3D& iSizeU,
     parallelogram_(iSupport, iSizeU, iSizeV),
 	normal_(cross(iSizeU, iSizeV).normal())
 {
+	invArea_ = num::inv(parallelogram_.area());
 }
 
 
@@ -111,9 +112,18 @@ const bool Parallelogram::doContains(const kernel::Sample& iSample, const TPoint
 
 
 
-const TPoint3D Parallelogram::doSampleSurface(const TVector2D& iSample, TVector3D& oNormal) const
+const bool Parallelogram::doHasSurfaceSampling() const
+{
+	return true;
+}
+
+
+
+const TPoint3D Parallelogram::doSampleSurface(const TVector2D& iSample, TVector3D& oNormal,
+											  TScalar& oPdf) const
 {
 	oNormal = normal_;
+	oPdf = invArea_;
 	return parallelogram_.point(iSample.x, iSample.y);
 }
 
@@ -129,6 +139,27 @@ const TAabb3D Parallelogram::doBoundingBox() const
 const TScalar Parallelogram::doArea() const
 {
 	return parallelogram_.area();
+}
+
+
+
+const TPyObjectPtr Parallelogram::doGetState() const
+{
+	return python::makeTuple(
+		parallelogram_.support(), parallelogram_.sizeU(), parallelogram_.sizeV());
+}
+
+
+
+void Parallelogram::doSetState(const TPyObjectPtr& iState)
+{
+	TPoint3D support;
+	TVector3D sizeU;
+	TVector3D sizeV;
+	LASS_ENFORCE(python::decodeTuple(iState, support, sizeU, sizeV));
+	parallelogram_ = TParallelogram3D(support, sizeU, sizeV);
+	normal_ = cross(sizeU, sizeV).normal();
+	invArea_ = num::inv(parallelogram_.area());
 }
 
 

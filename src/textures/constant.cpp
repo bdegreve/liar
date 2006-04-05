@@ -91,10 +91,23 @@ void Constant::setValue(const Spectrum& iValue)
 
 // --- private -------------------------------------------------------------------------------------
 
-Spectrum Constant::doLookUp(const Sample& iSample, 
-									const IntersectionContext& iContext) const
+const Spectrum Constant::doLookUp(const Sample& iSample, const IntersectionContext& iContext) const
 {
 	return value_;
+}
+
+
+
+const TPyObjectPtr Constant::doGetState() const
+{
+	return python::makeTuple(value_);
+}
+
+
+
+void Constant::doSetState(const TPyObjectPtr& iState)
+{
+	python::decodeTuple(iState, value_);
 }
 
 

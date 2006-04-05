@@ -58,7 +58,8 @@ public:
     void requestSamples(const TSamplerPtr& iSampler);
 
 	const Spectrum sampleEmission(const Sample& iCameraSample, const TVector2D& iSample,  
-		const TPoint3D& iPoint, BoundedRay& oShadowRay, TScalar& oPdf) const;
+		const TPoint3D& iTarget, const TVector3D& iTargetNormal, BoundedRay& oShadowRay, 
+		TScalar& oPdf) const;
 
 private:
 

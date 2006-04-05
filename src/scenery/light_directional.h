@@ -45,13 +45,13 @@ class LIAR_SCENERY_DLL LightDirectional: public SceneLight
 public:
 
 	LightDirectional();
-	LightDirectional(const TVector3D& iDirection, const Spectrum& iIntensity);
+	LightDirectional(const TVector3D& iDirection, const Spectrum& iRadiance);
 
 	const TVector3D& direction() const;
-	const Spectrum& intensity() const;
+	const Spectrum& radiance() const;
 
 	void setDirection(const TVector3D& iDirection);
-	void setIntensity(const Spectrum& iIntensity);
+	void setRadiance(const Spectrum& iRadiance);
 
 private:
 
@@ -67,11 +67,15 @@ private:
 	const TScalar doArea() const;
 
 	const Spectrum doSampleEmission(const Sample& iSample, const TVector2D& iLightSample, 
-		const TPoint3D& iTarget, BoundedRay& oShadowRay, TScalar& oPdf) const;
+		const TPoint3D& iTarget, const TVector3D& iTargetNormal, BoundedRay& oShadowRay, 
+		TScalar& oPdf) const;
 	const unsigned doNumberOfEmissionSamples() const;
 
+	const TPyObjectPtr doGetLightState() const;
+	void doSetLightState(const TPyObjectPtr& iState);
+
     TVector3D direction_;
-	Spectrum intensity_;
+	Spectrum radiance_;
 };
 
 }

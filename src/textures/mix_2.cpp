@@ -62,6 +62,19 @@ Mix2::Mix2(PyTypeObject* iType, const TTexturePtr& iA, const TTexturePtr& iB):
 
 // --- private -------------------------------------------------------------------------------------
 
+const TPyObjectPtr Mix2::doGetState() const
+{
+	return python::makeTuple(a_, b_, doGetMixState());
+}
+
+
+
+void Mix2::doSetState(const TPyObjectPtr& iState)
+{
+	TPyObjectPtr state;
+	python::decodeTuple(iState, a_, b_, state);
+	doSetMixState(state);
+}
 
 
 

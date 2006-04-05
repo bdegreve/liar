@@ -73,6 +73,9 @@ private:
 	const TAabb3D doBoundingBox() const;
 	const TScalar doArea() const;
 
+	const TPyObjectPtr doGetState() const;
+	void doSetState(const TPyObjectPtr& iState);
+
     TSceneObjectPtr child_;
     TVector3D localToWorld_;
 };

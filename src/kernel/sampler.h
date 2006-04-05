@@ -71,6 +71,12 @@ public:
 
     static TSamplerPtr& defaultSampler();
 
+	const TSamplerPtr clone() const;
+
+	const TPyObjectPtr reduce() const;
+	const TPyObjectPtr getState() const;
+	void setState(const TPyObjectPtr& iState);
+
 protected:
 
     Sampler(PyTypeObject* iType);
@@ -100,6 +106,11 @@ private:
 
 	virtual const unsigned doRoundSize1D(unsigned iRequestedSize) const;
 	virtual const unsigned doRoundSize2D(unsigned iRequestedSize) const;
+
+	virtual const TSamplerPtr doClone() const = 0;
+
+	virtual const TPyObjectPtr doGetState() const = 0;
+	virtual void doSetState(const TPyObjectPtr& iState) = 0;
 
 	const unsigned subSequenceSize1D(int iId) const { return subSequenceSize1D_[iId]; }
 	const unsigned subSequenceSize2D(int iId) const { return subSequenceSize2D_[iId]; }

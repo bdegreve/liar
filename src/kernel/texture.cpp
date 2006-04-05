@@ -30,6 +30,9 @@ namespace kernel
 {
 
 PY_DECLARE_CLASS(Texture)
+PY_CLASS_METHOD_NAME(Texture, reduce, "__reduce__")
+PY_CLASS_METHOD_NAME(Texture, getState, "__getstate__")
+PY_CLASS_METHOD_NAME(Texture, setState, "__setstate__")
 
 typedef impl::TextureBlack TTextureBlack;
 PY_DECLARE_CLASS_NAME(TTextureBlack, "Black");
@@ -59,6 +62,28 @@ const TTexturePtr& Texture::black()
 const TTexturePtr& Texture::white()
 {
 	return white_;
+}
+
+
+
+const TPyObjectPtr Texture::reduce() const
+{
+	return python::makeTuple(
+		reinterpret_cast<PyObject*>(this->GetType()), python::makeTuple(), this->getState());
+}
+
+
+
+const TPyObjectPtr Texture::getState() const
+{
+	return doGetState();
+}
+
+
+
+void Texture::setState(const TPyObjectPtr& iState)
+{
+	doSetState(iState);
 }
 
 

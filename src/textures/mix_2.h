@@ -53,6 +53,12 @@ protected:
 
 private:
 
+	const TPyObjectPtr doGetState() const;
+	void doSetState(const TPyObjectPtr& iState);
+
+	virtual const TPyObjectPtr doGetMixState() const = 0;
+	virtual void doSetMixState(const TPyObjectPtr& iState) = 0;
+
 	TTexturePtr a_;
 	TTexturePtr b_;
 };

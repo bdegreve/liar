@@ -170,6 +170,20 @@ const TScalar AabbTree::doArea() const
 
 
 
+const TPyObjectPtr AabbTree::doGetState() const
+{
+	return python::makeTuple(children_);
+}
+
+
+
+void AabbTree::doSetState(const TPyObjectPtr& iState)
+{
+	LASS_ENFORCE(python::decodeTuple(iState, children_));
+}
+
+
+
 // --- free ----------------------------------------------------------------------------------------
 
 

@@ -69,9 +69,12 @@ public:
 
 private:
 
-	Spectrum doShade(const Sample& iSample,	const DifferentialRay& iPrimaryRay, 
+	const Spectrum doShade(const Sample& iSample,	const DifferentialRay& iPrimaryRay, 
 		const Intersection& iIntersection, const IntersectionContext& iContext, 
 		const RayTracer& iTracer);
+
+	const TPyObjectPtr doGetState() const;
+	void doSetState(const TPyObjectPtr& iState);
 
 	TTexturePtr diffuse_;
 	TTexturePtr specular_;

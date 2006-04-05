@@ -30,6 +30,9 @@ namespace kernel
 {
 
 PY_DECLARE_CLASS(Camera)
+PY_CLASS_METHOD_NAME(Camera, reduce, "__reduce__")
+PY_CLASS_METHOD_NAME(Camera, getState, "__getstate__")
+PY_CLASS_METHOD_NAME(Camera, setState, "__setstate__")
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -55,6 +58,14 @@ const DifferentialRay Camera::primaryRay(const Sample& iSample, const TVector2D&
 	const TRay3D differentialJ = doGenerateRay(iSample, TVector2D(0, iScreenSpaceDelta.y)).unboundedRay();
 
 	return DifferentialRay(centralRay, differentialI, differentialJ);
+}
+
+
+
+const TPyObjectPtr Camera::reduce() const
+{
+	return python::makeTuple(
+		reinterpret_cast<PyObject*>(this->GetType()), python::makeTuple(), this->getState());
 }
 
 

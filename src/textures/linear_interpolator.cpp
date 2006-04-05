@@ -116,8 +116,8 @@ void LinearInterpolator::addKey(const TScalar iKeyValue,
 
 // --- private -------------------------------------------------------------------------------------
 
-Spectrum LinearInterpolator::doLookUp(const Sample& iSample, 
-										const IntersectionContext& iContext) const
+const Spectrum 
+LinearInterpolator::doLookUp(const Sample& iSample, const IntersectionContext& iContext) const
 {
 	const TScalar controlValue = control_->lookUp(iSample, iContext).average();
 
@@ -142,6 +142,20 @@ Spectrum LinearInterpolator::doLookUp(const Sample& iSample,
 		prevI->second->lookUp(iSample, iContext),
 		i->second->lookUp(iSample, iContext),
 		static_cast<TScalar>(blendFactor));
+}
+
+
+
+const TPyObjectPtr LinearInterpolator::doGetState() const
+{
+	return python::makeTuple(keys_, control_);
+}
+
+
+
+void LinearInterpolator::doSetState(const TPyObjectPtr& iState)
+{
+	python::decodeTuple(iState, keys_, control_);
 }
 
 

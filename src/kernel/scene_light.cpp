@@ -48,8 +48,21 @@ SceneLight::SceneLight(PyTypeObject* iType):
 }
 
 
-
 // --- private -------------------------------------------------------------------------------------
+
+const TPyObjectPtr SceneLight::doGetState() const
+{
+	return python::makeTuple(isShadowless_, doGetLightState());
+}
+
+
+
+void SceneLight::doSetState(const TPyObjectPtr& iState)
+{
+	TPyObjectPtr lightState;
+	python::decodeTuple(iState, isShadowless_, lightState);
+	doSetLightState(lightState);
+}
 
 
 

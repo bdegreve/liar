@@ -94,8 +94,8 @@ void CheckerBoard::setDefaultAntiAliasing(const std::string& iMode)
 
 // --- private -------------------------------------------------------------------------------------
 
-Spectrum CheckerBoard::doLookUp(const Sample& iSample, 
-										const IntersectionContext& iContext) const
+const Spectrum 
+CheckerBoard::doLookUp(const Sample& iSample, const IntersectionContext& iContext) const
 {
 #pragma LASS_FIXME("points need transform too [Bramz]")
 	const TVector2D uv = iContext.uv().position().transform(num::fractional);
@@ -136,7 +136,21 @@ Spectrum CheckerBoard::doLookUp(const Sample& iSample,
 
 
 
-TScalar CheckerBoard::integrate(const TVector2D& iMin, const TVector2D& iMax) const
+const TPyObjectPtr CheckerBoard::doGetMixState() const
+{
+	return python::makeTuple(split_);
+}
+
+
+
+void CheckerBoard::doSetMixState(const TPyObjectPtr& iState)
+{
+	python::decodeTuple(iState, split_);
+}
+
+
+
+const TScalar CheckerBoard::integrate(const TVector2D& iMin, const TVector2D& iMax) const
 {
 	const TVector2D min0 = iMin.transform(num::floor);
 	const TVector2D max0 = iMax.transform(num::floor);

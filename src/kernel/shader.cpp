@@ -30,11 +30,21 @@ namespace kernel
 {
 
 PY_DECLARE_CLASS(Shader)
+PY_CLASS_METHOD_NAME(Shader, reduce, "__reduce__")
+PY_CLASS_METHOD_NAME(Shader, getState, "__getstate__")
+PY_CLASS_METHOD_NAME(Shader, setState, "__setstate__")
 
 // --- public --------------------------------------------------------------------------------------
 
 Shader::~Shader()
 {
+}
+
+
+
+void Shader::requestSamples(const TSamplerPtr& iSampler)
+{
+	doRequestSamples(iSampler);
 }
 
 
@@ -48,7 +58,35 @@ Shader::Shader(PyTypeObject* iType):
 
 
 
+const TPyObjectPtr Shader::reduce() const
+{
+	return python::makeTuple(
+		reinterpret_cast<PyObject*>(this->GetType()), python::makeTuple(), this->getState());
+}
+
+
+
+const TPyObjectPtr Shader::getState() const
+{
+	return doGetState();
+}
+
+
+
+void Shader::setState(const TPyObjectPtr& iState)
+{
+	doSetState(iState);
+}
+
+
+
 // --- private -------------------------------------------------------------------------------------
+
+void Shader::doRequestSamples(const TSamplerPtr& iSampler)
+{
+}
+
+
 
 // --- free ----------------------------------------------------------------------------------------
 

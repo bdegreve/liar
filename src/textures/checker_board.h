@@ -63,9 +63,13 @@ private:
 
 	typedef util::Dictionary<std::string, AntiAliasing> TAntiAliasingDictionary;
 
-	Spectrum doLookUp(const Sample& iSample, 
+	const Spectrum doLookUp(const Sample& iSample, 
 		const IntersectionContext& iContext) const;
-	TScalar integrate(const TVector2D& iMin, const TVector2D& iMax) const;
+
+	const TPyObjectPtr doGetMixState() const;
+	void doSetMixState(const TPyObjectPtr& iState);
+
+	const TScalar integrate(const TVector2D& iMin, const TVector2D& iMax) const;
 
 	static TAntiAliasingDictionary makeAntiAliasingDictionary();
 

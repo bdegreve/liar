@@ -38,6 +38,8 @@
 #include "ray_tracer.h"
 
 #include <lass/prim/aabb_2d.h>
+#include <lass/util/progress_indicator.h>
+#include <lass/util/thread_pool.h>
 
 namespace liar
 {
@@ -59,12 +61,14 @@ public:
     const TSceneObjectPtr& scene() const;
     const TRenderTargetPtr& target() const;
     const TRayTracerPtr& tracer() const;
+	const unsigned numberOfThreads() const;
 
     void setCamera(const TCameraPtr& iCamera);
     void setSampler(const TSamplerPtr& iSampler);
     void setScene(const TSceneObjectPtr& iScene);
     void setTarget(const TRenderTargetPtr& iRenderTarget);
     void setTracer(const TRayTracerPtr& iRayTracer);
+	void setNumberOfThreads(unsigned iNumber);
 
     void render(TTime iTime, const TBucket& iBucket);
     void render(TTime iTime);
@@ -73,17 +77,66 @@ public:
 
 private:
 
+	class Progress
+	{
+	public:
+		Progress(const std::string& iCaption, unsigned iTotalNumberOfSamples);
+		~Progress();
+		Progress& operator+=(unsigned iNumNewSamplesWritten);
+	private:
+		util::ProgressIndicator indicator_;
+		unsigned numSamplesWritten_;
+		unsigned totalNumSamples_;
+	};
+
+	class Task
+	{
+	public:
+		typedef Sampler::TResolution TResolution;
+		Task() {}
+		Task(const TResolution& iBegin, const TResolution& iEnd): begin_(iBegin), end_(iEnd) {}
+		const TResolution& begin() const { return begin_; }
+		const TResolution& end() const { return end_; }
+	private:
+		TResolution begin_;
+		TResolution end_;
+	};
+
+	class Consumer
+	{
+	public:
+		Consumer(RenderEngine& iEngine, const TRayTracerPtr& iRayTracer,
+				const TSamplerPtr& iSampler, Progress& ioProgress,
+				const TVector2D& iPixelSize, const TimePeriod& iTimePeriod);
+		Consumer(const Consumer& iOther);
+		Consumer& operator=(const Consumer& iOther);
+		void operator()(const Task& iTask);
+	private:
+		RenderEngine* engine_;
+		TRayTracerPtr rayTracer_;
+		TSamplerPtr sampler_;
+		Progress* progress_;
+		TVector2D pixelSize_;
+		TimePeriod timePeriod_;
+	};
+
+	friend class Consumer;
+
+	void writeRender(const OutputSample* iFirst, const OutputSample* iLast, Progress& ioProgress);
+	const bool isCanceling() const;
+
     TCameraPtr camera_;
     TRayTracerPtr rayTracer_;
     TRenderTargetPtr renderTarget_;
     TSamplerPtr sampler_;
     TSceneObjectPtr scene_;
+	util::CriticalSection mutex_;
+	util::Condition signal_;
+	unsigned numberOfThreads_;
 	bool isDirty_;
 
     static const TBucket bucketBound_;
 };
-
-
 
 }
 

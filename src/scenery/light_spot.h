@@ -31,6 +31,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_SCENERY_LIGHT_SPOT_H
 
 #include "scenery_common.h"
+#include "../kernel/attenuation.h"
 #include "../kernel/scene_light.h"
 #include <lass/util/pyshadow_object.h>
 
@@ -44,29 +45,19 @@ class LIAR_SCENERY_DLL LightSpot: public SceneLight
     PY_HEADER(SceneLight)
 public:
 
-    struct Attenuation
-    {
-        TScalar constant;
-        TScalar linear;
-        TScalar quadratic;
-
-		Attenuation();
-        Attenuation(TScalar iConstant, TScalar iLinear, TScalar iQuadratic);
-    };
-
 	LightSpot();
 
 	const TPoint3D& position() const;
 	const TVector3D& direction() const;
 	const Spectrum& intensity() const;
-	const Attenuation& attenuation() const;
+	const TAttenuationPtr& attenuation() const;
 	const TScalar outerAngle() const;
 	const TScalar innerAngle() const;
 
 	void setPosition(const TPoint3D& iPosition);
 	void setDirection(const TVector3D& iDirection);
 	void setIntensity(const Spectrum& iIntensity);
-	void setAttenuation(const Attenuation& iAttenuation);
+	void setAttenuation(const TAttenuationPtr& iAttenuation);
 	void setOuterAngle(TScalar iRadians);
 	void setInnerAngle(TScalar iRadians);
 
@@ -86,24 +77,24 @@ private:
 	const TScalar doArea() const;
 
 	const Spectrum doSampleEmission(const Sample& iSample, const TVector2D& iLightSample, 
-		const TPoint3D& iTarget, BoundedRay& oShadowRay, TScalar& oPdf) const;
+		const TPoint3D& iTarget, const TVector3D& iTargetNormal, BoundedRay& oShadowRay, 
+		TScalar& oPdf) const;
 	const unsigned doNumberOfEmissionSamples() const;
+
+	const TPyObjectPtr doGetLightState() const;
+	void doSetLightState(const TPyObjectPtr& iState);
 
     TPoint3D position_;
     TVector3D direction_;
 	Spectrum intensity_;
-    Attenuation attenuation_;
+    TAttenuationPtr attenuation_;
 	TScalar cosOuterAngle_;
 	TScalar cosInnerAngle_;
 };
 
-PY_SHADOW_CLASS(LIAR_SCENERY_DLL, PyLightSpotAttenuation, LightSpot::Attenuation);
-
 }
 
 }
-
-PY_SHADOW_CASTERS(liar::scenery::PyLightSpotAttenuation);
 
 #endif
 

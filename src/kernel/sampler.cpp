@@ -33,7 +33,11 @@ namespace kernel
 PY_DECLARE_CLASS(Sampler)
 PY_CLASS_MEMBER_RW(Sampler, "resolution", resolution, setResolution)
 PY_CLASS_MEMBER_RW(Sampler, "samplesPerPixel", samplesPerPixel, setSamplesPerPixel)
-PY_CLASS_METHOD(Sampler, seed);
+PY_CLASS_METHOD(Sampler, seed)
+PY_CLASS_METHOD_NAME(Sampler, reduce, "__reduce__")
+PY_CLASS_METHOD_NAME(Sampler, getState, "__getstate__")
+PY_CLASS_METHOD_NAME(Sampler, setState, "__setstate__")
+
 
 TSamplerPtr Sampler::defaultSampler_;
 
@@ -42,6 +46,56 @@ TSamplerPtr Sampler::defaultSampler_;
 TSamplerPtr& Sampler::defaultSampler()
 {
     return defaultSampler_;
+}
+
+
+
+/** clone the sampler ...
+ */
+const TSamplerPtr Sampler::clone() const
+{
+	const TSamplerPtr result = doClone();
+	LASS_ASSERT(typeid(*result) == typeid(*this));
+	return result;
+}
+
+
+
+const TPyObjectPtr Sampler::reduce() const
+{
+	return python::makeTuple(
+		reinterpret_cast<PyObject*>(this->GetType()), python::makeTuple(), this->getState());
+}
+
+
+
+const TPyObjectPtr Sampler::getState() const
+{
+	return python::makeTuple(
+		subSequenceSize1D_,
+		subSequenceSize2D_,
+		subSequenceOffset1D_,
+		subSequenceOffset2D_,
+		totalSubSequenceSize1D_,
+		totalSubSequenceSize2D_,
+		doGetState());
+}
+
+
+
+void Sampler::setState(const TPyObjectPtr& iState)
+{
+	TPyObjectPtr state;
+	python::decodeTuple(
+		iState,
+		subSequenceSize1D_,
+		subSequenceSize2D_,
+		subSequenceOffset1D_,
+		subSequenceOffset2D_,
+		totalSubSequenceSize1D_,
+		totalSubSequenceSize2D_,
+		state);
+	doSetState(state);
 }
 
 

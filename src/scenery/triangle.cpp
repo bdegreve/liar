@@ -121,6 +121,24 @@ const TScalar Triangle::doArea() const
 
 
 
+const TPyObjectPtr Triangle::doGetState() const
+{
+	return python::makeTuple(triangle_[0], triangle_[1], triangle_[2]);
+}
+
+
+
+void Triangle::doSetState(const TPyObjectPtr& iState)
+{
+	TPoint3D a;
+	TPoint3D b;
+	TPoint3D c;
+	LASS_ENFORCE(python::decodeTuple(iState, a, b, c));
+	triangle_ = TTriangle3D(a, b, c);
+}
+
+
+
 // --- free ----------------------------------------------------------------------------------------
 
 

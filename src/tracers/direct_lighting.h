@@ -48,10 +48,14 @@ private:
 
 	void doPreprocess();
 	void doRequestSamples(const TSamplerPtr& iSampler);
-	Spectrum doCastRay(const Sample& iSample,
+	const Spectrum doCastRay(const Sample& iSample,
 		const DifferentialRay& iPrimaryRay) const;
-	TLightRange doSampleLights(const Sample& iSample,
+	const TLightRange doSampleLights(const Sample& iSample,
 		const IntersectionContext& iContext) const;
+	const TRayTracerPtr doClone() const;
+
+	const TPyObjectPtr doGetState() const;
+	void doSetState(const TPyObjectPtr& iState);
 
 	mutable TLightSamples lightSamples_;
 	mutable size_t rayGeneration_;

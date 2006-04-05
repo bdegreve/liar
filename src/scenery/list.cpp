@@ -194,6 +194,20 @@ const TScalar List::doArea() const
 
 
 
+const TPyObjectPtr List::doGetState() const
+{
+	return python::makeTuple(children_);
+}
+
+
+
+void List::doSetState(const TPyObjectPtr& iState)
+{
+	LASS_ENFORCE(python::decodeTuple(iState, children_));
+}
+
+
+
 // --- free ----------------------------------------------------------------------------------------
 
 

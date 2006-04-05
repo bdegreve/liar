@@ -29,13 +29,6 @@ namespace liar
 namespace scenery
 {
 
-PY_DECLARE_CLASS_NAME(PyLightSpotAttenuation, "Attenuation")
-PY_CLASS_CONSTRUCTOR_0(PyLightSpotAttenuation);
-PY_CLASS_CONSTRUCTOR_3(PyLightSpotAttenuation, TScalar, TScalar, TScalar);
-PY_CLASS_PUBLIC_MEMBER(PyLightSpotAttenuation, constant);
-PY_CLASS_PUBLIC_MEMBER(PyLightSpotAttenuation, linear);
-PY_CLASS_PUBLIC_MEMBER(PyLightSpotAttenuation, quadratic);
-
 PY_DECLARE_CLASS(LightSpot)
 PY_CLASS_CONSTRUCTOR_0(LightSpot)
 PY_CLASS_MEMBER_RW(LightSpot, "position", position, setPosition)
@@ -45,35 +38,15 @@ PY_CLASS_MEMBER_RW(LightSpot, "attenuation", attenuation, setAttenuation)
 PY_CLASS_MEMBER_RW(LightSpot, "outerAngle", outerAngle, setOuterAngle)
 PY_CLASS_MEMBER_RW(LightSpot, "innerAngle", innerAngle, setInnerAngle)
 PY_CLASS_METHOD(LightSpot, lookAt);
-PY_CLASS_INNER_CLASS_NAME(LightSpot, PyLightSpotAttenuation, "Attenuation")
-
 
 // --- public --------------------------------------------------------------------------------------
-
-LightSpot::Attenuation::Attenuation():
-	constant(TNumTraits::zero),
-    linear(TNumTraits::zero),
-    quadratic(2 * TNumTraits::pi)
-{
-}
-
-
-
-LightSpot::Attenuation::Attenuation(TScalar iConstant, TScalar iLinear, TScalar iQuadratic):
-    constant(iConstant),
-    linear(iLinear),
-    quadratic(iQuadratic)
-{
-}
-
-
 
 LightSpot::LightSpot():
     SceneLight(&Type),
 	position_(TPoint3D()),
 	direction_(TVector3D(0, 0, -1)),
 	intensity_(Spectrum(1)),
-    attenuation_(),
+	attenuation_(Attenuation::defaultAttenuation()),
 	cosOuterAngle_(num::cos(TNumTraits::pi / 4)),
 	cosInnerAngle_(num::cos(TNumTraits::pi / 6))
 {
@@ -102,7 +75,7 @@ const Spectrum& LightSpot::intensity() const
 
 
 
-const LightSpot::Attenuation& LightSpot::attenuation() const
+const TAttenuationPtr& LightSpot::attenuation() const
 {
 	return attenuation_;
 }
@@ -144,7 +117,7 @@ void LightSpot::setIntensity(const Spectrum& iIntensity)
 
 
 
-void LightSpot::setAttenuation(const LightSpot::Attenuation& iAttenuation)
+void LightSpot::setAttenuation(const TAttenuationPtr& iAttenuation)
 {
 	attenuation_ = iAttenuation;
 }
@@ -225,40 +198,39 @@ const TScalar LightSpot::doArea() const
 
 
 
-const Spectrum LightSpot::doSampleEmission(const Sample& iSample,
-											const TVector2D& iLightSample, 
-											const TPoint3D& iDestination,
-											BoundedRay& oShadowRay,
-											TScalar& oPdf) const
+const Spectrum LightSpot::doSampleEmission(
+		const Sample& iSample,
+		const TVector2D& iLightSample, 
+		const TPoint3D& iTarget,
+		const TVector3D& iTargetNormal,
+		BoundedRay& oShadowRay,
+		TScalar& oPdf) const
 {
-	TVector3D toDestination = iDestination - position_;
-	const TScalar squaredDistance = toDestination.squaredNorm();
+	TVector3D toLight = position_ - iTarget;
+	const TScalar squaredDistance = toLight.squaredNorm();
 	const TScalar distance = num::sqrt(squaredDistance);
-	toDestination /= distance;
+	toLight /= distance;
 	
-	const TScalar cosTheta = dot(direction_, toDestination);
+	const TScalar cosTheta = -dot(direction_, toLight);
 	if (cosTheta < cosOuterAngle_)
 	{
+		oPdf = TNumTraits::zero;
 		return Spectrum(TNumTraits::zero);
 	}
 
 	TScalar multiplier = TNumTraits::one;
-
 	if (cosTheta < cosInnerAngle_)
 	{
+		LASS_ASSERT(cosTheta >= cosOuterAngle_);
 		multiplier = num::cubic((cosTheta - cosOuterAngle_) / (cosInnerAngle_ - cosOuterAngle_));
 	}
 
-	const TScalar attenuation = attenuation_.constant + 
-		attenuation_.linear * distance + 
-		attenuation_.quadratic * squaredDistance;
-	multiplier /= attenuation;
+	multiplier /= attenuation_->attenuation(distance, squaredDistance);
 	
-    Spectrum result = intensity_;
-	result *= multiplier;
-
-	oShadowRay = BoundedRay(iDestination, position_, tolerance, distance);
-	return result;
+	oShadowRay = BoundedRay(iTarget, toLight, tolerance, distance, 
+		prim::IsAlreadyNormalized());
+	oPdf = TNumTraits::one;
+	return intensity_ * multiplier;
 }
 
 
@@ -266,6 +238,22 @@ const Spectrum LightSpot::doSampleEmission(const Sample& iSample,
 const unsigned LightSpot::doNumberOfEmissionSamples() const
 {
 	return 1;
+}
+
+
+
+const TPyObjectPtr LightSpot::doGetLightState() const
+{
+	return python::makeTuple(position_, direction_, intensity_, attenuation_,
+		cosOuterAngle_, cosInnerAngle_);
+}
+
+
+
+void LightSpot::doSetLightState(const TPyObjectPtr& iState)
+{
+	python::decodeTuple(iState, position_, direction_, intensity_, attenuation_,
+		cosOuterAngle_, cosInnerAngle_);
 }
 
 

@@ -53,6 +53,9 @@ public:
 
 private:
 
+	typedef std::vector<TVector2D> TStrata2D;
+	typedef std::vector<TScalar> TStrata1D;
+
     typedef num::RandomMT19937 TNumberGenerator;
     typedef num::DistributionUniform<TScalar, TNumberGenerator, num::rtRightOpen> TJitterGenerator;
 
@@ -78,6 +81,11 @@ private:
 	virtual const unsigned doRoundSize1D(unsigned iRequestedSize) const;
 	virtual const unsigned doRoundSize2D(unsigned iRequestedSize) const;
 
+	virtual const TSamplerPtr doClone() const;
+
+	virtual const TPyObjectPtr doGetState() const;
+	virtual void doSetState(const TPyObjectPtr& iState);
+
 	void shuffleTimeStrata();
 
     TNumberGenerator numberGenerator_;
@@ -87,11 +95,10 @@ private:
     TVector2D reciprocalResolution_;
 	TVector2D stratum2DSize_;
     TScalar stratum1DSize_;
-    std::vector<TVector2D> screenStrata_;
-    std::vector<TVector2D> lensStrata_;
-	std::vector<TScalar> timeStrata_;
+    TStrata2D screenStrata_;
+    TStrata2D lensStrata_;
+	TStrata1D timeStrata_;
     unsigned strataPerPixel_;
-	std::vector<size_t> randomStrataSequence_;
 	bool isJittered_;
 };
 

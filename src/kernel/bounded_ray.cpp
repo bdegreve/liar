@@ -55,6 +55,19 @@ BoundedRay::BoundedRay(const TPoint3D& iSupport, const TVector3D& iDirection,
     nearLimit_(iNearLimit),
     farLimit_(iFarLimit)
 {
+	LASS_ASSERT(nearLimit_ < farLimit_);
+}
+
+
+
+BoundedRay::BoundedRay(const TPoint3D& iSupport, const TVector3D& iDirection, 
+					   TScalar iNearLimit, TScalar iFarLimit,
+					   prim::IsAlreadyNormalized):
+    unboundedRay_(iSupport, iDirection, prim::IsAlreadyNormalized()),
+    nearLimit_(iNearLimit),
+    farLimit_(iFarLimit)
+{
+	LASS_ASSERT(nearLimit_ < farLimit_);
 }
 
 
@@ -65,6 +78,7 @@ BoundedRay::BoundedRay(const TPoint3D& iSupport, const TPoint3D& iLookAt,
     nearLimit_(iNearLimit),
     farLimit_(iFarLimit)
 {
+	LASS_ASSERT(nearLimit_ < farLimit_);
 }
 
 

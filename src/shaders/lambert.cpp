@@ -73,13 +73,14 @@ void Lambert::setDiffuse(const TTexturePtr& iDiffuse)
 
 // --- private -------------------------------------------------------------------------------------
 
-Spectrum Lambert::doShade(const Sample& iSample,
-						  const DifferentialRay& iPrimaryRay,
-						  const Intersection& iIntersection,
-						  const IntersectionContext& iContext,
-						  const RayTracer& iTracer)
+const Spectrum Lambert::doShade(
+	const Sample& iSample,
+	const DifferentialRay& iPrimaryRay,
+	const Intersection& iIntersection,
+	const IntersectionContext& iContext,
+	const RayTracer& iTracer)
 {
-	const Spectrum diffuse = diffuse_->lookUp(iSample, iContext);
+	const Spectrum diffuse = diffuse_->lookUp(iSample, iContext) / TNumTraits::pi;
 	if (!diffuse)
 	{
 		return Spectrum();
@@ -100,6 +101,20 @@ Spectrum Lambert::doShade(const Sample& iSample,
 	result *= diffuse;
 
 	return result;
+}
+
+
+
+const TPyObjectPtr Lambert::doGetState() const
+{
+	return python::makeTuple(diffuse_);
+}
+
+
+
+void Lambert::doSetState(const TPyObjectPtr& iState)
+{
+	python::decodeTuple(iState, diffuse_);
 }
 
 

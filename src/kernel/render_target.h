@@ -32,6 +32,7 @@
 
 #include "kernel_common.h"
 #include "differential_ray.h"
+#include "output_sample.h"
 #include "sample.h"
 #include "spectrum.h"
 #include <lass/prim/vector_2d.h>
@@ -49,9 +50,11 @@ public:
     virtual ~RenderTarget();
 
     void beginRender();
-    void writeRender(const Sample& iSample, const Spectrum& iRadiance);
+    void writeRender(const OutputSample* iFirst, const OutputSample* iLast);
     void endRender();
-    bool isRendering();
+	const bool isRendering() const;
+
+	const bool isCanceling() const { return doIsCanceling(); }
 
 protected:
 
@@ -60,8 +63,9 @@ protected:
 private:
 
     virtual void doBeginRender() = 0;
-    virtual void doWriteRender(const Sample& iSample, const Spectrum& iRadiance) = 0;
+    virtual void doWriteRender(const OutputSample* iFirst, const OutputSample* iLast) = 0;
     virtual void doEndRender() = 0;
+	virtual const bool doIsCanceling() const;
 
     bool isRendering_;
 };

@@ -43,9 +43,11 @@ class Intersection;
 class IntersectionContext;
 class RayTracer;
 class Sample;
+class Sampler;
 class SceneObject;
 class LightContext;
 
+typedef python::PyObjectPtr<Sampler>::Type TSamplerPtr;
 typedef python::PyObjectPtr<SceneObject>::Type TSceneObjectPtr;
 
 class LIAR_KERNEL_DLL Shader: public python::PyObjectPlus
@@ -55,12 +57,18 @@ public:
 
     virtual ~Shader();
 
-	Spectrum shade(const Sample& iSample, const DifferentialRay& iRay, 
+	const Spectrum shade(const Sample& iSample, const DifferentialRay& iRay, 
 		const Intersection& iIntersection, const IntersectionContext& iContext, 
 		const RayTracer& iTracer)
 	{
 		return doShade(iSample, iRay, iIntersection, iContext, iTracer);
 	}
+
+	void requestSamples(const TSamplerPtr& iSampler);
+
+	const TPyObjectPtr reduce() const;
+	const TPyObjectPtr getState() const;
+	void setState(const TPyObjectPtr& iState);
 
 protected:
 
@@ -68,9 +76,14 @@ protected:
 
 private:
 
-	virtual Spectrum doShade(const Sample& iSample, const DifferentialRay& iRay, 
+	virtual const Spectrum doShade(const Sample& iSample, const DifferentialRay& iRay, 
 		const Intersection& iIntersection, const IntersectionContext& iContext, 
 		const RayTracer& iTracer) = 0;
+
+	virtual void doRequestSamples(const TSamplerPtr& iSampler);
+
+	virtual const TPyObjectPtr doGetState() const = 0;
+	virtual void doSetState(const TPyObjectPtr& iState) = 0;
 };
 
 typedef python::PyObjectPtr<Shader>::Type TShaderPtr;

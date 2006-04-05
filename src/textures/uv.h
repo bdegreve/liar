@@ -46,8 +46,11 @@ public:
 
 private:
 
-	Spectrum doLookUp(const Sample& iSample, 
+	const Spectrum doLookUp(const Sample& iSample, 
 		const IntersectionContext& iContext) const;
+
+	const TPyObjectPtr doGetMixState() const;
+	void doSetMixState(const TPyObjectPtr& iState);
 };
 
 }

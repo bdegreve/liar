@@ -73,13 +73,28 @@ void Unshaded::setColour(const TTexturePtr& iColour)
 
 // --- private -------------------------------------------------------------------------------------
 
-Spectrum Unshaded::doShade(const Sample& iSample,
-						   const DifferentialRay& iPrimaryRay,
-						   const Intersection& iIntersection,
-						   const IntersectionContext& iContext,
-						   const RayTracer& iTracer)
+const Spectrum Unshaded::doShade(
+	const Sample& iSample,
+	const DifferentialRay& iPrimaryRay,
+	const Intersection& iIntersection,
+	const IntersectionContext& iContext,
+	const RayTracer& iTracer)
 {
 	return colour_->lookUp(iSample, iContext);
+}
+
+
+
+const TPyObjectPtr Unshaded::doGetState() const
+{
+	return python::makeTuple(colour_);
+}
+
+
+
+void Unshaded::doSetState(const TPyObjectPtr& iState)
+{
+	python::decodeTuple(iState, colour_);
 }
 
 

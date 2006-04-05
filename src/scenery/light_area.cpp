@@ -32,10 +32,12 @@ namespace scenery
 PY_DECLARE_CLASS(LightArea)
 PY_CLASS_CONSTRUCTOR_1(LightArea, const TSceneObjectPtr&)
 PY_CLASS_MEMBER_R(LightArea, "surface", surface)
-PY_CLASS_MEMBER_RW(LightArea, "intensity", intensity, setIntensity)
+PY_CLASS_MEMBER_RW(LightArea, "radiance", radiance, setRadiance)
+PY_CLASS_MEMBER_RW(LightArea, "attenuation", attenuation, setAttenuation)
 PY_CLASS_MEMBER_RW(LightArea, "numberOfEmissionSamples", numberOfEmissionSamples, 
 	setNumberOfEmissionSamples)
 PY_CLASS_MEMBER_RW(LightArea, "isDoubleSided", isDoubleSided, setDoubleSided)
+
 
 
 // --- public --------------------------------------------------------------------------------------
@@ -43,12 +45,18 @@ PY_CLASS_MEMBER_RW(LightArea, "isDoubleSided", isDoubleSided, setDoubleSided)
 LightArea::LightArea(const TSceneObjectPtr& iSurface):
     SceneLight(&Type),
 	surface_(LASS_ENFORCE_POINTER(iSurface)),
-	intensity_(Spectrum(1)),
+	radiance_(Spectrum(1)),
+	attenuation_(Attenuation::defaultAttenuation()),
 	numberOfEmissionSamples_(9),
 	isSingleSided_(true)
 {
+	if (!surface_->hasSurfaceSampling())
+	{
+		LASS_THROW("The object used a surface for a LightArea must support surface sampling. "
+			"Objects of type '" << typeid(*surface_).name() << "' don't support that.");
+	}
+
 	LASS_ASSERT(surface_);
-	area_ = surface_->area();
 }
 
 
@@ -60,9 +68,16 @@ const TSceneObjectPtr& LightArea::surface() const
 
 
 
-const Spectrum& LightArea::intensity() const
+const Spectrum& LightArea::radiance() const
 {
-	return intensity_;
+	return radiance_;
+}
+
+
+
+const TAttenuationPtr& LightArea::attenuation() const
+{
+	return attenuation_;
 }
 
 
@@ -74,9 +89,16 @@ const bool LightArea::isDoubleSided() const
 
 
 
-void LightArea::setIntensity(const Spectrum& iIntensity)
+void LightArea::setRadiance(const Spectrum& iRadiance)
 {
-	intensity_ = iIntensity;
+	radiance_ = iRadiance;
+}
+
+
+
+void LightArea::setAttenuation(const TAttenuationPtr& iAttenuation)
+{
+	attenuation_ = iAttenuation;
 }
 
 
@@ -106,6 +128,10 @@ void LightArea::doIntersect(const Sample& iSample, const BoundedRay& iRay,
 {
 	LASS_ASSERT(surface_);
 	surface_->intersect(iSample, iRay, oResult);
+	if (oResult)
+	{
+		oResult.push(this);
+	}
 }
 
 
@@ -123,6 +149,7 @@ void LightArea::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
 								const Intersection& iIntersection, 
 								IntersectionContext& oResult) const
 {
+    IntersectionDescendor descend(iIntersection);
 	LASS_ASSERT(surface_);
 	surface_->localContext(iSample, iRay, iIntersection, oResult);
 }
@@ -154,29 +181,49 @@ const TScalar LightArea::doArea() const
 
 
 
-const Spectrum LightArea::doSampleEmission(const Sample& iSample,
-											const TVector2D& iLightSample, 
-											const TPoint3D& iTarget,
-											BoundedRay& oShadowRay,
-											TScalar& oPdf) const
+const Spectrum LightArea::doSampleEmission(
+		const Sample& iSample,
+		const TVector2D& iLightSample, 
+		const TPoint3D& iTarget,
+		const TVector3D& iNormalTarget,
+		BoundedRay& oShadowRay,
+		TScalar& oPdf) const
 {
 	LASS_ASSERT(surface_);
-	TVector3D normal;
-	const TPoint3D point = surface_->sampleSurface(iLightSample, iTarget, normal);
+	TVector3D normalLight;
+	const TPoint3D pointLight = 
+		surface_->sampleSurface(iLightSample, iTarget, iNormalTarget, normalLight, oPdf);
 
-	TVector3D toTarget = iTarget - point;
-	const TScalar squaredDistance = toTarget.squaredNorm();
+	TVector3D toLight = pointLight - iTarget;
+	const TScalar squaredDistance = toLight.squaredNorm();
 	const TScalar distance = num::sqrt(squaredDistance);
-	toTarget /= distance;
-	
-	const TScalar cosTheta = dot(normal, toTarget);
-	if (isSingleSided_ && cosTheta < 0)
+	toLight /= distance;
+
+	const TScalar cosThetaTarget = dot(iNormalTarget, toLight);
+	if (cosThetaTarget <= TNumTraits::zero)
 	{
+		oPdf = TNumTraits::zero;
 		return Spectrum();
 	}
+	
+	TScalar cosThetaLight = -dot(normalLight, toLight);
+	if (cosThetaLight <= TNumTraits::zero)
+	{
+		if (isSingleSided_)
+		{
+			oPdf = TNumTraits::zero;
+			return Spectrum();
+		}
+		else
+		{
+			cosThetaLight = -cosThetaLight;
+		}
+	}
 
-	oShadowRay = BoundedRay(iTarget, point, tolerance, distance);
-	return intensity_ * area_ * cosTheta / (2 * TNumTraits::pi * distance);
+	oShadowRay = BoundedRay(iTarget, toLight, tolerance, distance, 
+		prim::IsAlreadyNormalized());
+	return radiance_;
+	//return radiance_ * (cosThetaLight / (attenuation_->attenuation(distance, squaredDistance)));
 }
 
 
@@ -184,6 +231,22 @@ const Spectrum LightArea::doSampleEmission(const Sample& iSample,
 const unsigned LightArea::doNumberOfEmissionSamples() const
 {
 	return numberOfEmissionSamples_;
+}
+
+
+
+const TPyObjectPtr LightArea::doGetLightState() const
+{
+	return python::makeTuple(surface_, radiance_, attenuation_, 
+		numberOfEmissionSamples_, isSingleSided_);
+}
+
+
+
+void LightArea::doSetLightState(const TPyObjectPtr& iState)
+{
+	python::decodeTuple(iState, surface_, radiance_, attenuation_,
+		numberOfEmissionSamples_, isSingleSided_);
 }
 
 

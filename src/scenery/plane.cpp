@@ -171,6 +171,23 @@ const TScalar Plane::doArea() const
 {
 	return TNumTraits::infinity;
 }
+
+
+
+const TPyObjectPtr Plane::doGetState() const
+{
+	return python::makeTuple(plane_.normal(), plane_.d());
+}
+
+
+
+void Plane::doSetState(const TPyObjectPtr& iState)
+{
+	TVector3D normal;
+	TScalar d;
+	LASS_ENFORCE(python::decodeTuple(iState, normal, d));
+	plane_ = TPlane3D(normal, d);
+}
     
 
 

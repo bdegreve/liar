@@ -48,6 +48,9 @@ public:
 	BoundedRay(const TPoint3D& iSupport, const TVector3D& iDirection, 
 		const TScalar iNearLimit = liar::TNumTraits::zero, 
 		const TScalar iFarLimit = liar::TNumTraits::infinity);
+	BoundedRay(const TPoint3D& iSupport, const TVector3D& iDirection, 
+		const TScalar iNearLimit, const TScalar iFarLimit,
+		prim::IsAlreadyNormalized);
 	BoundedRay(const TPoint3D& iSupport, const TPoint3D& iLookAt, 
 		const TScalar iNearLimit = liar::TNumTraits::zero, 
 		const TScalar iFarLimit = liar::TNumTraits::infinity);
@@ -61,7 +64,12 @@ public:
 	const TVector3D& direction() const { return unboundedRay_.direction(); }
 
 	const TPoint3D point(TScalar iT) const { return unboundedRay_.point(iT); }
-	const bool inRange(TScalar iT) const { return num::almostInOpenRange(iT, nearLimit_, farLimit_, tolerance); }
+	const bool inRange(TScalar iT) const 
+	{ 
+		//return num::almostInOpenRange(iT, nearLimit_, farLimit_, tolerance); 
+		return iT > nearLimit_ * (TNumTraits::one + tolerance) &&
+			iT < farLimit_ * (TNumTraits::one - tolerance);
+	}
 
 private:
 

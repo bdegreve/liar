@@ -141,6 +141,27 @@ const TScalar TriangleMesh::doArea() const
 
 
 
+const TPyObjectPtr TriangleMesh::doGetState() const
+{
+	TIndexTriangles triangles;
+	mesh_.indexTriangles(std::back_inserter(triangles));
+	return python::makeTuple(mesh_.vertices(), mesh_.normals(), mesh_.uvs(), triangles);
+}
+
+
+
+void TriangleMesh::doSetState(const TPyObjectPtr& iState)
+{
+	TMesh::TVertices vertices;
+	TMesh::TNormals normals;
+	TMesh::TUvs uvs;
+	TIndexTriangles triangles;
+	LASS_ENFORCE(python::decodeTuple(iState, vertices, normals, uvs, triangles));
+	mesh_ = TMesh(vertices, normals, uvs, triangles);
+}
+
+
+
 // --- free ----------------------------------------------------------------------------------------
 
 

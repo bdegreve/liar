@@ -79,6 +79,9 @@ private:
 	const TAabb3D doBoundingBox() const;
 	virtual const TScalar doArea() const;
 
+	const TPyObjectPtr doGetState() const;
+	void doSetState(const TPyObjectPtr& iState);
+
     TChildren children_;
 };
 

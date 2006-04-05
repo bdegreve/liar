@@ -69,6 +69,15 @@ private:
 	const TAabb3D doBoundingBox() const;
 	const TScalar doArea() const;
 
+	const bool doHasSurfaceSampling() const;
+	const TPoint3D doSampleSurface(const TVector2D& iSample, TVector3D& oNormal,
+		TScalar& oPdf) const;
+	const TPoint3D doSampleSurface(const TVector2D& iSample, const TPoint3D& iTarget,
+		TVector3D& oNormal,	TScalar& oPdf) const;
+
+	const TPyObjectPtr doGetState() const;
+	void doSetState(const TPyObjectPtr& iState);
+
     TSphere3D sphere_;
     TScalar invRadius_;
 };

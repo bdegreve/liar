@@ -171,6 +171,20 @@ const TScalar Transformation::doArea() const
 
 
 
+const TPyObjectPtr Transformation::doGetState() const
+{
+	return python::makeTuple(child_, localToWorld_);
+}
+
+
+
+void Transformation::doSetState(const TPyObjectPtr& iState)
+{
+	LASS_ENFORCE(python::decodeTuple(iState, child_, localToWorld_));
+}
+
+
+
 // --- free ----------------------------------------------------------------------------------------
 
 

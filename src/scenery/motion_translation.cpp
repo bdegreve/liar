@@ -158,6 +158,20 @@ const TScalar MotionTranslation::doArea() const
 
 
 
+const TPyObjectPtr MotionTranslation::doGetState() const
+{
+	return python::makeTuple(child_, localToWorldStart_, speedInWorld_);
+}
+
+
+
+void MotionTranslation::doSetState(const TPyObjectPtr& iState)
+{
+	LASS_ENFORCE(python::decodeTuple(iState, child_, localToWorldStart_, speedInWorld_));
+}
+
+
+
 inline const TVector3D MotionTranslation::localToWorld(TTime iTime) const
 {
 	return localToWorldStart_ + static_cast<TScalar>(iTime) * speedInWorld_;

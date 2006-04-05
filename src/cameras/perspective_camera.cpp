@@ -53,10 +53,10 @@ PerspectiveCamera::PerspectiveCamera():
     sky_(0, 0, 1),
 	fovAngle_(TNumTraits::pi / 2),
 	aspectRatio_(0.75f),
-	focalDistance_(TNumTraits::infinity),
+	focalDistance_(TNumTraits::max),
 	lensRadius_(TNumTraits::zero),
 	nearLimit_(TNumTraits::zero),
-	farLimit_(TNumTraits::infinity),
+	farLimit_(TNumTraits::max),
 	shutterOpenDelta_(0),
 	shutterCloseDelta_(0)
 {
@@ -98,6 +98,8 @@ void PerspectiveCamera::lookAt(const TPoint3D& iLookAt)
     setDirection(iLookAt - position_);
     right_ = prim::cross(direction_, sky_);
     down_ = prim::cross(direction_, right_);
+	rightNormal_ = right_.normal();
+	downNormal_ = down_.normal();
     setFovAngle(fovAngle_);
     initTransformation();
 	focalDistance_ = prim::distance(position_, iLookAt);
@@ -179,6 +181,7 @@ const TVector3D& PerspectiveCamera::right() const
 void PerspectiveCamera::setRight(const TVector3D& iRight)
 {
     right_ = iRight;
+	rightNormal_ = right_.normal();
 
     const TVector3D orthoRight = direction_.reject(right_);
     const TVector3D orthoDown = direction_.reject(down_);
@@ -200,6 +203,7 @@ const TVector3D& PerspectiveCamera::down() const
 void PerspectiveCamera::setDown(const TVector3D& iDown)
 {
     down_ = iDown;
+	downNormal_ = down_.normal();
 
     const TVector3D orthoRight = direction_.reject(down_);
     const TVector3D orthoDown = direction_.reject(right_);
@@ -316,6 +320,7 @@ void PerspectiveCamera::setFarLimit(TScalar iDistance)
 namespace impl
 {
 
+#pragma LASS_TODO("move this to LASS [Bramz]")
 TPoint2D sampleConcentricDisk(const TPoint2D& uv)
 {
 	TScalar r, theta;
@@ -379,8 +384,8 @@ PerspectiveCamera::doGenerateRay(const Sample& iSample, const TVector2D& iScreen
 #pragma LASS_TODO("do something with a focal plane versus focal cyilinder")
 		const TPoint2D& lens = impl::sampleConcentricDisk(iSample.lensCoordinate());
 		const TPoint3D lensPoint = position_ +
-			lensRadius_ * lens.x * right_.normal() +
-			lensRadius_ * lens.y * down_.normal();		
+			lensRadius_ * lens.x * rightNormal_ +
+			lensRadius_ * lens.y * downNormal_;		
 		const TPoint3D focusPoint = position_ + (rayFactor * focalDistance_) * rayDirection;
 
 		raySupport = lensPoint;
@@ -390,7 +395,8 @@ PerspectiveCamera::doGenerateRay(const Sample& iSample, const TVector2D& iScreen
 	}
 	
 	return BoundedRay(raySupport, rayDirection, 
-		std::max(tolerance, rayFactor * nearLimit_), rayFactor * farLimit_);
+		std::max(tolerance, rayFactor * nearLimit_), rayFactor * farLimit_,
+		prim::IsAlreadyNormalized());
 }
 
 
@@ -407,6 +413,52 @@ void PerspectiveCamera::initTransformation()
     directionBase_ = direction_ - (down_ + right_) / 2;
 }
 
+
+
+const TPyObjectPtr PerspectiveCamera::doGetState() const
+{
+	return python::makeTuple(
+			position_,
+			right_,
+			down_,
+			direction_,
+			sky_,
+			rightNormal_,
+			downNormal_,
+			shutterOpenDelta_,
+ 			shutterCloseDelta_,
+			fovAngle_,
+			aspectRatio_,
+			nearLimit_,
+			farLimit_,
+			focalDistance_,
+			lensRadius_);
+}
+
+
+
+void PerspectiveCamera::doSetState(const TPyObjectPtr& iState)
+{
+	LASS_ENFORCE(python::decodeTuple(
+		iState,
+		position_,
+		right_,
+		down_,
+		direction_,
+		sky_,
+		rightNormal_,
+		downNormal_,
+		shutterOpenDelta_,
+ 		shutterCloseDelta_,
+		fovAngle_,
+		aspectRatio_,
+		nearLimit_,
+		farLimit_,
+		focalDistance_,
+		lensRadius_
+	) == 0);
+	initTransformation();
+}
 
 
 // --- free ----------------------------------------------------------------------------------------

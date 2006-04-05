@@ -70,6 +70,9 @@ private:
 	const TAabb3D doBoundingBox() const;
 	const TScalar doArea() const;
 
+	const TPyObjectPtr doGetState() const;
+	void doSetState(const TPyObjectPtr& iState);
+
     TMesh mesh_;
 };
 

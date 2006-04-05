@@ -61,10 +61,10 @@ void RenderTarget::beginRender()
 
 
 
-void RenderTarget::writeRender(const Sample& iSample, const Spectrum& iRadiance)
+void RenderTarget::writeRender(const OutputSample* iFirst, const OutputSample* iLast)
 {
 	beginRender();
-	doWriteRender(iSample, iRadiance);
+	doWriteRender(iFirst, iLast);
 }
 
 
@@ -80,8 +80,19 @@ void RenderTarget::endRender()
 
 
 
+const bool RenderTarget::isRendering() const
+{
+	return isRendering_;
+}
+
+
 
 // --- private -------------------------------------------------------------------------------------
+
+const bool RenderTarget::doIsCanceling() const
+{
+	return false;
+}
 
 
 

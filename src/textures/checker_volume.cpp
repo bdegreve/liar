@@ -63,8 +63,8 @@ void CheckerVolume::setSplit(const TVector3D& iSplit)
 
 // --- private -------------------------------------------------------------------------------------
 
-Spectrum CheckerVolume::doLookUp(const Sample& iSample, 
-										 const IntersectionContext& iContext) const
+const Spectrum 
+CheckerVolume::doLookUp(const Sample& iSample, const IntersectionContext& iContext) const
 {
 	const TScalar x = num::fractional(iContext.point().x);
 	const TScalar y = num::fractional(iContext.point().y);
@@ -77,6 +77,20 @@ Spectrum CheckerVolume::doLookUp(const Sample& iSample,
 	{
 		return ((x < split_.x) != (y < split_.y) ? textureA() : textureB())->lookUp(iSample, iContext);
 	}
+}
+
+
+
+const TPyObjectPtr CheckerVolume::doGetMixState() const
+{
+	return python::makeTuple(split_);
+}
+
+
+
+void CheckerVolume::doSetMixState(const TPyObjectPtr& iState)
+{
+	python::decodeTuple(iState, split_);
 }
 
 

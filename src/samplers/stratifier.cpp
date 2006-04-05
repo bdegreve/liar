@@ -267,6 +267,42 @@ const unsigned Stratifier::doRoundSize2D(unsigned iRequestedSize) const
 
 
 
+const TSamplerPtr Stratifier::doClone() const
+{
+	return TSamplerPtr(new Stratifier(*this));
+}
+
+
+
+const TPyObjectPtr Stratifier::doGetState() const
+{
+	std::vector<TNumberGenerator::TValue> numGenState;
+	numberGenerator_.getState(std::back_inserter(numGenState));
+	return python::makeTuple(numGenState, resolution_,	strataPerPixel_,
+		timeStrata_, lensStrata_, isJittered_);
+}
+
+
+
+void Stratifier::doSetState(const TPyObjectPtr& iState)
+{
+	std::vector<TNumberGenerator::TValue> numGenState;
+	TResolution resolution;
+	unsigned strataPerPixel;
+	TStrata2D lensStrata;
+	TStrata1D timeStrata;
+
+	python::decodeTuple(iState, numGenState, resolution, strataPerPixel, lensStrata,
+        timeStrata,	isJittered_);
+
+	numberGenerator_.setState(numGenState.begin(), numGenState.end());
+	setResolution(resolution);
+	setSamplesPerPixel(strataPerPixel);
+	lensStrata_.swap(lensStrata);
+	timeStrata_.swap(timeStrata);
+}
+
+
 void Stratifier::shuffleTimeStrata()
 {
 	typedef num::DistributionUniform<unsigned, TNumberGenerator, num::rtRightOpen> TRandomSelector;
@@ -279,7 +315,6 @@ void Stratifier::shuffleTimeStrata()
 		std::swap(timeStrata_[i], timeStrata_[selector()]);
 	}
 }
-
 
 
 // --- free ----------------------------------------------------------------------------------------

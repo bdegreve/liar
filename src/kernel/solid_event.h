@@ -50,7 +50,7 @@ enum SolidEvent
 /** Flip event so that entering becomes leaving and vice versa
  *	@relates SolidEvent
  */
-inline SolidEvent flip(SolidEvent iEvent)
+inline const SolidEvent flip(SolidEvent iEvent)
 {
 	static SolidEvent result[] = { seNoEvent, seLeaving, seEntering };
 	return result[iEvent];

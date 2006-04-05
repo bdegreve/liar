@@ -31,6 +31,34 @@ namespace kernel
 
 PY_DECLARE_CLASS(RayTracer)
 PY_CLASS_MEMBER_RW(RayTracer, "maxRayGeneration", maxRayGeneration, setMaxRayGeneration)
+PY_CLASS_METHOD_NAME(RayTracer, reduce, "__reduce__")
+PY_CLASS_METHOD_NAME(RayTracer, getState, "__getstate__")
+PY_CLASS_METHOD_NAME(RayTracer, setState, "__setstate__")
+
+// --- impl ----------------------------------------------------------------------------------------
+
+namespace impl
+{
+	class RequestShaderSamples
+	{
+	public:
+		RequestShaderSamples(const TSamplerPtr& iSampler): sampler_(iSampler) {};
+		void operator()(const SceneObject& iObject)
+		{
+			Shader* shader = iObject.shader().get();
+			if (shader && visited_.count(shader) == 0)
+			{
+				shader->requestSamples(sampler_);
+				visited_.insert(shader);
+			}
+		}
+	private:
+		std::set<Shader*> visited_;
+		TSamplerPtr sampler_;
+	};
+}
+
+
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -71,16 +99,51 @@ void RayTracer::setMaxRayGeneration(unsigned iMaxRayGeneration)
 
 
 void RayTracer::requestSamples(const TSamplerPtr& iSampler) 
-{ 
+{
 	if (scene_ && iSampler)
 	{
 		iSampler->clearSubSequenceRequests();
+
 		for (TLightContexts::iterator i = lights_.begin(); i != lights_.end(); ++i)
 		{
 			i->requestSamples(iSampler);
 		}
+
+		forAllObjects(scene_, impl::RequestShaderSamples(iSampler));
+
 		doRequestSamples(iSampler); 
 	}
+}
+
+
+
+const TRayTracerPtr RayTracer::clone() const
+{
+	const TRayTracerPtr result = doClone();
+	LASS_ASSERT(typeid(*result) == typeid(*this));
+	return result;
+}
+
+
+
+const TPyObjectPtr RayTracer::reduce() const
+{
+	return python::makeTuple(
+		reinterpret_cast<PyObject*>(this->GetType()), python::makeTuple(), this->getState());
+}
+
+
+
+const TPyObjectPtr RayTracer::getState() const
+{
+	return doGetState();
+}
+
+
+
+void RayTracer::setState(const TPyObjectPtr& iState)
+{
+	doSetState(iState);
 }
 
 

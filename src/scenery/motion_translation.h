@@ -66,6 +66,9 @@ private:
 	const TScalar doArea() const;
 	const bool doHasMotion() const { return true; }
 
+	const TPyObjectPtr doGetState() const;
+	void doSetState(const TPyObjectPtr& iState);
+
 	const TVector3D localToWorld(TTime iTime) const;
 
     TSceneObjectPtr child_;

@@ -33,7 +33,7 @@ PY_DECLARE_CLASS(LightDirectional)
 PY_CLASS_CONSTRUCTOR_0(LightDirectional)
 PY_CLASS_CONSTRUCTOR_2(LightDirectional, const TVector3D&, const Spectrum&)
 PY_CLASS_MEMBER_RW(LightDirectional, "direction", direction, setDirection)
-PY_CLASS_MEMBER_RW(LightDirectional, "intensity", intensity, setIntensity)
+PY_CLASS_MEMBER_RW(LightDirectional, "radiance", radiance, setRadiance)
 
 
 // --- public --------------------------------------------------------------------------------------
@@ -41,16 +41,16 @@ PY_CLASS_MEMBER_RW(LightDirectional, "intensity", intensity, setIntensity)
 LightDirectional::LightDirectional():
     SceneLight(&Type),
     direction_(TVector3D(0, 0, -1)),
-	intensity_(Spectrum(1))
+	radiance_(Spectrum(1))
 {
 }
 
 
 
-LightDirectional::LightDirectional(const TVector3D& iDirection, const Spectrum& iIntensity):
+LightDirectional::LightDirectional(const TVector3D& iDirection, const Spectrum& iRadiance):
     SceneLight(&Type),
     direction_(iDirection),
-	intensity_(iIntensity)
+	radiance_(iRadiance)
 {
 }
 
@@ -63,23 +63,23 @@ const TVector3D& LightDirectional::direction() const
 
 
 
-const Spectrum& LightDirectional::intensity() const
+const Spectrum& LightDirectional::radiance() const
 {
-	return intensity_;
+	return radiance_;
 }
 
 
 
 void LightDirectional::setDirection(const TVector3D& iDirection)
 {
-	direction_ = iDirection;
+	direction_ = iDirection.normal();
 }
 
 
 
-void LightDirectional::setIntensity(const Spectrum& iIntensity)
+void LightDirectional::setRadiance(const Spectrum& iRadiance)
 {
-	intensity_ = iIntensity;
+	radiance_ = iRadiance;
 }
 
 
@@ -138,14 +138,18 @@ const TScalar LightDirectional::doArea() const
 
 
 
-const Spectrum LightDirectional::doSampleEmission(const Sample& iSample,
-											const TVector2D& iLightSample, 
-											const TPoint3D& iDestination,
-											BoundedRay& oShadowRay,
-											TScalar& oPdf) const
+const Spectrum LightDirectional::doSampleEmission(
+		const Sample& iSample,
+		const TVector2D& iLightSample, 
+		const TPoint3D& iTarget,
+		const TVector3D& iTargetNormal,
+		BoundedRay& oShadowRay,
+		TScalar& oPdf) const
 {
-	oShadowRay = BoundedRay(iDestination, -direction_, tolerance, TNumTraits::infinity);
-	return intensity_;
+	oShadowRay = BoundedRay(iTarget, -direction_, tolerance, TNumTraits::infinity,
+		prim::IsAlreadyNormalized());
+	oPdf = TNumTraits::one;
+	return radiance_;
 }
 
 
@@ -153,6 +157,20 @@ const Spectrum LightDirectional::doSampleEmission(const Sample& iSample,
 const unsigned LightDirectional::doNumberOfEmissionSamples() const
 {
 	return 1;
+}
+
+
+
+const TPyObjectPtr LightDirectional::doGetLightState() const
+{
+	return python::makeTuple(direction_, radiance_);
+}
+
+
+
+void LightDirectional::doSetLightState(const TPyObjectPtr& iState)
+{
+	python::decodeTuple(iState, direction_, radiance_);
 }
 
 

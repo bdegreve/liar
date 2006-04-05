@@ -60,13 +60,19 @@ private:
 		const Intersection& iIntersection, IntersectionContext& oResult) const;
 	const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const;
 
-	const TPoint3D doSampleSurface(const TVector2D& iSample, TVector3D& oNormal) const;
+	const bool doHasSurfaceSampling() const;
+	const TPoint3D doSampleSurface(const TVector2D& iSample, TVector3D& oNormal,
+		TScalar& oPdf) const;
 
 	const TAabb3D doBoundingBox() const;
 	const TScalar doArea() const;
 
+	const TPyObjectPtr doGetState() const;
+	void doSetState(const TPyObjectPtr& iState);
+
     TParallelogram3D parallelogram_;
 	TVector3D normal_;
+	TScalar invArea_;
 };
 
 

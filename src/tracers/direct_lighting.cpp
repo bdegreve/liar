@@ -55,8 +55,8 @@ void DirectLighting::doRequestSamples(const TSamplerPtr& iSampler)
 
 
 
-Spectrum DirectLighting::doCastRay(const Sample& iSample,
-								   const DifferentialRay& iPrimaryRay) const
+const Spectrum 
+DirectLighting::doCastRay(const Sample& iSample, const DifferentialRay& iPrimaryRay) const
 {
 	Intersection intersection;
 	scene()->intersect(iSample, iPrimaryRay, intersection);
@@ -77,8 +77,8 @@ Spectrum DirectLighting::doCastRay(const Sample& iSample,
 
 
 
-DirectLighting::TLightRange DirectLighting::doSampleLights(const Sample& iSample,
-									const IntersectionContext& iContext) const
+const DirectLighting::TLightRange 
+DirectLighting::doSampleLights(const Sample& iSample, const IntersectionContext& iContext) const
 {
 	using namespace kernel;
 
@@ -95,10 +95,10 @@ DirectLighting::TLightRange DirectLighting::doSampleLights(const Sample& iSample
 			BoundedRay shadowRay;
 			TScalar pdf;
 			Spectrum radiance = light->sampleEmission(
-				iSample, *subSequence, iContext.point(), shadowRay, pdf);
-			if (!scene()->isIntersecting(iSample, shadowRay))
+				iSample, *subSequence, iContext.point(), iContext.normal(), shadowRay, pdf);
+			if (pdf > 0 && !scene()->isIntersecting(iSample, shadowRay))
 			{
-				*output++ = LightSample(scale * radiance, shadowRay.direction(), pdf);
+				*output++ = LightSample((scale / pdf) * radiance, shadowRay.direction());
 			}
 
 			++subSequence;
@@ -107,6 +107,27 @@ DirectLighting::TLightRange DirectLighting::doSampleLights(const Sample& iSample
 
 	//oLightSamples.swap(result);
 	return TLightRange(lightSamples_.begin(), output.get());
+}
+
+
+
+const TRayTracerPtr DirectLighting::doClone() const
+{
+	return TRayTracerPtr(new DirectLighting(*this));
+}
+
+
+
+const TPyObjectPtr DirectLighting::doGetState() const
+{
+	return python::makeTuple(maxRayGeneration_);
+}
+
+
+
+void DirectLighting::doSetState(const TPyObjectPtr& iState)
+{
+	python::decodeTuple(iState, maxRayGeneration_);
 }
 
 

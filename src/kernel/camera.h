@@ -52,6 +52,10 @@ public:
     const DifferentialRay primaryRay(const Sample& iSample, const TVector2D& iScreenSpaceDelta) const;
 	const TimePeriod shutterDelta() const { return doShutterDelta(); }
 
+	const TPyObjectPtr reduce() const;
+	const TPyObjectPtr getState() const { return doGetState(); }
+	void setState(const TPyObjectPtr& iState) { doSetState(iState); }
+
 protected:
 
     Camera(PyTypeObject* iType);
@@ -61,6 +65,9 @@ private:
     virtual const BoundedRay doGenerateRay(const Sample& iSample, 
 		const TVector2D& iScreenSpaceDelta) const = 0;
 	virtual const TimePeriod doShutterDelta() const = 0;
+
+	virtual const TPyObjectPtr doGetState() const = 0;
+	virtual void doSetState(const TPyObjectPtr& iState) = 0;
 };
 
 typedef python::PyObjectPtr<Camera>::Type TCameraPtr;

@@ -63,14 +63,27 @@ void GridBoard::setThickness(const TVector2D& iThickness)
 
 // --- private -------------------------------------------------------------------------------------
 
-Spectrum GridBoard::doLookUp(const Sample& iSample, 
-									 const IntersectionContext& iContext) const
+const Spectrum GridBoard::doLookUp(const Sample& iSample, const IntersectionContext& iContext) const
 {
 	const TScalar u = num::fractional(iContext.uv().x);
 	const TScalar v = num::fractional(iContext.uv().y);
 	const bool isA = u < halfThickness_.x || v < halfThickness_.x || 
 		u > (TNumTraits::one - halfThickness_.x) || v > (TNumTraits::one - halfThickness_.y);
 	return (isA ? textureA() : textureB())->lookUp(iSample, iContext);	
+}
+
+
+
+const TPyObjectPtr GridBoard::doGetMixState() const
+{
+	return python::makeTuple(halfThickness_);
+}
+
+
+
+void GridBoard::doSetMixState(const TPyObjectPtr& iState)
+{
+	python::decodeTuple(iState, halfThickness_);
 }
 
 

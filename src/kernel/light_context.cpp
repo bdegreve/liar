@@ -64,7 +64,8 @@ void LightContext::requestSamples(const TSamplerPtr& iSampler)
 
 const Spectrum LightContext::sampleEmission(const Sample& iCameraSample,
 											const TVector2D& iLightSample, 
-											const TPoint3D& iTarget, 
+											const TPoint3D& iTarget,
+											const TVector3D& iTargetNormal,
 											BoundedRay& oShadowRay,
 											TScalar& oPdf) const
 {
@@ -81,10 +82,11 @@ const Spectrum LightContext::sampleEmission(const Sample& iCameraSample,
 	}
 
 	const TPoint3D localTarget = transform(iTarget, localToWorld_.inverse());
+	const TVector3D localNormal = normalTransform(iTargetNormal, localToWorld_.inverse()).normal();
 	
 	BoundedRay localRay;
 	const Spectrum radiance = light_->sampleEmission(
-		iCameraSample, iLightSample, localTarget, localRay, oPdf);
+		iCameraSample, iLightSample, localTarget, localNormal, localRay, oPdf);
 
 	// we must transform back to world space.  But we already do know the starting point, so don't rely
 	// on recalculating that one

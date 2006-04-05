@@ -47,12 +47,24 @@ Uv::Uv(const TTexturePtr& iA, const TTexturePtr& iB):
 
 // --- private -------------------------------------------------------------------------------------
 
-Spectrum Uv::doLookUp(const Sample& iSample, 
-							  const IntersectionContext& iContext) const
+const Spectrum Uv::doLookUp(const Sample& iSample, const IntersectionContext& iContext) const
 {
 	const TScalar u = num::mod(iContext.uv().x, TNumTraits::one);
 	const TScalar v = num::mod(iContext.uv().y, TNumTraits::one);
 	return u * textureA()->lookUp(iSample, iContext) + v * textureB()->lookUp(iSample, iContext);	
+}
+
+
+
+const TPyObjectPtr Uv::doGetMixState() const
+{
+	return python::makeTuple();
+}
+
+
+
+void Uv::doSetMixState(const TPyObjectPtr& iState)
+{
 }
 
 

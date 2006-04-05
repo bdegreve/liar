@@ -122,8 +122,7 @@ void Image::setDefaultMipMapping(const std::string& iMode)
 
 // --- private -------------------------------------------------------------------------------------
 
-Spectrum Image::doLookUp(const Sample& iSample, 
-								 const IntersectionContext& iContext) const
+const Spectrum Image::doLookUp(const Sample& iSample, const IntersectionContext& iContext) const
 {
 	if (mipMapping_ != currentMipMapping_)
 	{
@@ -185,6 +184,21 @@ Spectrum Image::doLookUp(const Sample& iSample,
 	}
 
 	return Spectrum(TVector3D(result.r, result.g, result.b));
+}
+
+
+
+const TPyObjectPtr Image::doGetState() const
+{
+	LASS_THROW("not implemented yet");
+	return TPyObjectPtr();
+}
+
+
+
+void Image::doSetState(const TPyObjectPtr& iState)
+{
+	LASS_THROW("not implemented yet");
 }
 
 

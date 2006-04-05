@@ -6,8 +6,8 @@
 from __future__ import division
 from liar import *
 
-width = 640
-height = 480
+width = 320
+height = 240
 samples_per_pixel = 16
 lens_radius = 0.5
 
@@ -40,15 +40,15 @@ for i in range(0, grid_size, grid_step):
 
 keyLight = scenery.LightPoint()
 keyLight.position = (0, -10, 10)
-keyLight.power = rgb(1000, 1000, 500)
+keyLight.intensity = rgb(250, 250, 150)
 
 fillLight = scenery.LightPoint()
 fillLight.position = (2 * grid_size, -10, 10)
-fillLight.power = rgb(300, 300, 600)
+fillLight.intensity = rgb(100, 100, 150)
 
 backLight = scenery.LightPoint()
 backLight.position = (10, 10, 10)
-backLight.power = rgb(200, 200, 400)
+backLight.intensity = rgb(50, 50, 100)
 
 # setup
 
@@ -64,7 +64,7 @@ engine.camera = camera
 
 engine.target = output.Image("depth_of_field.hdr", (width, height))
 
-#camera.lensRadius = 0
-#engine.render(((0, 0), (0.5, 1)))
+camera.lensRadius = 0
+engine.render(((0, 0), (0.5, 1)))
 camera.lensRadius = lens_radius
-engine.render(((0.0, 0), (1, 1)))
+engine.render(((0.5, 0), (1, 1)))

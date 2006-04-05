@@ -46,9 +46,11 @@ class LIAR_KERNEL_DLL SceneLight: public SceneObject
 public:
 
 	const Spectrum sampleEmission(const Sample& iCameraSample, const TVector2D& iLightSample, 
-		const TPoint3D& iDestination, BoundedRay& oShadowRay, TScalar& oPdf) const 
+		const TPoint3D& iTarget, const TVector3D& iTargetNormal, BoundedRay& oShadowRay, 
+		TScalar& oPdf) const
 	{ 
-		return doSampleEmission(iCameraSample, iLightSample, iDestination, oShadowRay, oPdf);
+		return doSampleEmission(
+			iCameraSample, iLightSample, iTarget, iTargetNormal, oShadowRay, oPdf);
 	}
 
 	const unsigned numberOfEmissionSamples() const 
@@ -66,10 +68,17 @@ protected:
 private:
     
 	LASS_UTIL_ACCEPT_VISITOR
+
+	const TPyObjectPtr doGetState() const;
+	void doSetState(const TPyObjectPtr& iState);
 	
 	virtual const Spectrum doSampleEmission(const Sample& iSample, const TVector2D& iLightSample,
-		const TPoint3D& iDestination, BoundedRay& oShadowRay, TScalar& oPdf) const = 0;
+		const TPoint3D& iTarget, const TVector3D& iTargetNormal, BoundedRay& oShadowRay, 
+		TScalar& oPdf) const = 0;
 	virtual const unsigned doNumberOfEmissionSamples() const = 0;
+	
+	virtual const TPyObjectPtr doGetLightState() const = 0;
+	virtual void doSetLightState(const TPyObjectPtr& iState) = 0;
 
 	bool isShadowless_;
 };

@@ -24,6 +24,7 @@
 #include "scenery_common.h"
 #include "sphere.h"
 #include <lass/meta/type_list.h>
+#include <lass/prim/impl/plane_3d_impl_detail.h>
 
 namespace liar
 {
@@ -188,6 +189,92 @@ const TAabb3D Sphere::doBoundingBox() const
 const TScalar Sphere::doArea() const
 {
 	return sphere_.area();
+}
+
+
+
+const TPyObjectPtr Sphere::doGetState() const
+{
+	return python::makeTuple(sphere_.center(), sphere_.radius());
+}
+
+
+
+void Sphere::doSetState(const TPyObjectPtr& iState)
+{
+	TPoint3D center;
+	TScalar radius;
+	LASS_ENFORCE(python::decodeTuple(iState, center, radius));
+	sphere_ = TSphere3D(center, radius);
+	invRadius_ = num::inv(radius);
+}
+
+
+
+const bool Sphere::doHasSurfaceSampling() const
+{
+	return true;
+}
+
+
+
+const TPoint3D Sphere::doSampleSurface(const TVector2D& iSample, TVector3D& oNormal, 
+		TScalar& oPdf) const
+{
+	const TScalar z = 2 * iSample.y - 1;
+	const TScalar rho = num::sqrt(1 - num::sqr(z));
+	const TScalar theta = 2 * TNumTraits::pi * iSample.x;
+	const TScalar x = rho * num::cos(theta);
+	const TScalar y = rho * num::sin(theta);
+
+	oNormal = TVector3D(x, y, z);
+	oPdf = 1 / (4 * TNumTraits::pi * num::sqr(sphere_.radius()));
+	return sphere_.center() + sphere_.radius() * oNormal;
+}
+
+
+
+const TPoint3D Sphere::doSampleSurface(const TVector2D& iSample, const TPoint3D& iTarget,
+		TVector3D& oNormal, TScalar& oPdf) const
+{
+	if (sphere_.contains(iTarget))
+	{
+		return sampleSurface(iSample, oNormal, oPdf);
+	}
+
+	TVector3D k = sphere_.center() - iTarget;
+	const TScalar sqrDistance = k.squaredNorm();
+	const TScalar distance = num::sqrt(sqrDistance);
+	k /= distance;
+	TVector3D i, j;
+	prim::impl::Plane3DImplDetail::generateDirections(k, i, j);
+
+	const TScalar cosThetaMax = num::sqrt(
+		std::max(TNumTraits::zero, 1 - num::sqr(sphere_.radius()) / sqrDistance));
+	const TScalar cosTheta = 1 - iSample.x * (1 - cosThetaMax);
+	const TScalar phi = 2 * TNumTraits::pi * iSample.y;
+	const TVector3D dir = cosTheta * k + 
+		num::sqrt(std::max(TNumTraits::zero, 1 - num::sqr(cosTheta))) * 
+			(num::cos(phi) * i + num::sin(phi) * j);
+
+	// http://flipcode.dxbug.com/wiki/index.php?title=Line-Sphere_%28Collision%29
+	const TScalar c = sqrDistance - num::sqr(sphere_.radius());
+	const TScalar delta = sqrDistance * num::sqr(cosTheta) - c;
+	const TScalar t = delta > 0 ? (distance * cosTheta - num::sqrt(delta)) : (distance * cosTheta);
+
+	const TPoint3D point = iTarget + t * dir;
+	oNormal = (point - sphere_.center());
+	if (oNormal.isZero())
+	{
+		oNormal = -k;
+	}
+	else
+	{
+		oNormal.normalize();
+	}
+	oPdf = num::inv(2 * TNumTraits::pi * (1 - cosThetaMax));
+
+	return sphere_.center() + sphere_.radius() * oNormal;
 }
 
 

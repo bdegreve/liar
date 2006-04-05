@@ -23,6 +23,7 @@
 
 #include "kernel_common.h"
 #include "render_engine.h"
+#include <lass/io/keyboard.h>
 #include <lass/util/progress_indicator.h>
 
 namespace liar
@@ -37,6 +38,7 @@ PY_CLASS_MEMBER_RW(RenderEngine, "tracer", tracer, setTracer)
 PY_CLASS_MEMBER_RW(RenderEngine, "target", target, setTarget)
 PY_CLASS_MEMBER_RW(RenderEngine, "sampler", sampler, setSampler)
 PY_CLASS_MEMBER_RW(RenderEngine, "scene", scene, setScene)
+PY_CLASS_MEMBER_RW(RenderEngine, "numberOfThreads", numberOfThreads, setNumberOfThreads)
 PY_CLASS_METHOD_QUALIFIED_0(RenderEngine, render, void)
 PY_CLASS_METHOD_QUALIFIED_1(RenderEngine, render, void, TTime)
 PY_CLASS_METHOD_QUALIFIED_1(RenderEngine, render, void, const RenderEngine::TBucket&)
@@ -51,6 +53,7 @@ const RenderEngine::TBucket RenderEngine::bucketBound_(
 
 RenderEngine::RenderEngine():
     PyObjectPlus(&Type),
+	numberOfThreads_(1),
 	isDirty_(false)
 {
 }
@@ -105,6 +108,13 @@ const TRayTracerPtr& RenderEngine::tracer() const
 
 
 
+const unsigned RenderEngine::numberOfThreads() const
+{
+    return numberOfThreads_;
+}
+
+
+
 void RenderEngine::setCamera(const TCameraPtr& iCamera)
 {
     camera_ = iCamera;
@@ -140,6 +150,13 @@ void RenderEngine::setTracer(const TRayTracerPtr& iRayTracer)
 {
     rayTracer_ = iRayTracer;
 	isDirty_ = true;
+}
+
+
+
+void RenderEngine::setNumberOfThreads(unsigned iNumber)
+{
+	numberOfThreads_ = std::min<unsigned>(iNumber, 1);
 }
 
 
@@ -181,37 +198,52 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& iBucket)
 
     const TResolution min(num::round(iBucket.min().x * resolution.x), num::round(iBucket.min().y * resolution.y));
     const TResolution max(num::round(iBucket.max().x * resolution.x), num::round(iBucket.max().y * resolution.y));
+	const unsigned numberOfPixels = (max.x - min.x) * (max.y - min.y);
+	const unsigned numberOfSamples = numberOfPixels * samplesPerPixel;
+
 
 	if (isDirty_)
 	{
+		
 		scene_->preProcess(timePeriod);
 		rayTracer_->setScene(scene_);
 		rayTracer_->requestSamples(sampler_);
 		isDirty_ = false;
 	}
 
-	util::ProgressIndicator progress("rendering bucket " + util::stringCast<std::string>(iBucket));
-	Sample sample;
-    TResolution i;
-    for (i.y = min.y; i.y < max.y; ++i.y)
-    {
-		progress(static_cast<double>(i.y) / max.y);
-        for (i.x = min.x; i.x < max.x; ++i.x)
-        {
-            for (unsigned k = 0; k < samplesPerPixel; ++k)
-            {
-				if (i == TResolution(82, 87) && k == 0)
+	Progress progress("rendering bucket " + util::stringCast<std::string>(iBucket), 
+		numberOfSamples);
+
+	Consumer consumer(*this, rayTracer_, sampler_, progress, pixelSize, timePeriod);
+	if (numberOfThreads_ == 1)
+	{
+		Task task(min, max);
+		consumer(task);
+	}
+	else
+	{
+		typedef util::ThreadPool<Task, Consumer> TThreadPool;
+		TThreadPool pool(numberOfThreads_, 2 * numberOfThreads_, consumer);
+
+		const TResolution::TValue step = 64;
+		TResolution i;
+		for (i.y = min.y; i.y < max.y; i.y += step)
+		{
+			for (i.x = min.x; i.x < max.x; i.x += step)
+			{
+				if (isCanceling())
 				{
-					int a = 5;
+					pool.clearQueue();
+					return;
 				}
-                sampler_->sample(i, k, timePeriod, sample);
-                DifferentialRay primaryRay = camera_->primaryRay(sample, pixelSize);
-                Spectrum radiance = rayTracer_->castRay(sample, primaryRay);
-                renderTarget_->writeRender(sample, radiance);
-            }
-        }
-    }
-	progress(1.);
+
+				TResolution end(std::min(i.x + step, max.x), std::min(i.y + step, max.y));
+				pool.add(Task(i, end));
+			}
+		}
+
+		// ~TThreadPool will wait for completion ...
+	}
 }
 
 
@@ -242,6 +274,135 @@ void RenderEngine::render()
 
 
 // --- private -------------------------------------------------------------------------------------
+
+void RenderEngine::writeRender(const OutputSample* iFirst, const OutputSample* iLast, 
+		Progress& ioProgress)
+{
+	LASS_LOCK(mutex_)
+	{
+		renderTarget_->writeRender(iFirst, iLast);
+		ioProgress += static_cast<unsigned>(iLast - iFirst);
+	}
+}
+
+
+
+const bool RenderEngine::isCanceling() const
+{
+	return renderTarget_->isCanceling();
+}
+
+
+
+// --- Consumer ------------------------------------------------------------------------------------
+
+RenderEngine::Consumer::Consumer(RenderEngine& iEngine, const TRayTracerPtr& iRayTracer,
+		const TSamplerPtr& iSampler, Progress& ioProgress,
+		const TVector2D& iPixelSize, const TimePeriod& iTimePeriod):
+	engine_(&iEngine),
+	rayTracer_(LASS_ENFORCE_POINTER(iRayTracer)),
+	sampler_(LASS_ENFORCE_POINTER(iSampler)),
+	progress_(&ioProgress),
+	pixelSize_(iPixelSize),
+	timePeriod_(iTimePeriod)
+{
+}
+
+
+
+RenderEngine::Consumer::Consumer(const Consumer& iOther):
+	engine_(iOther.engine_),
+	rayTracer_(iOther.rayTracer_->clone()),
+	sampler_(iOther.sampler_->clone()),
+	progress_(iOther.progress_),
+	pixelSize_(iOther.pixelSize_),
+	timePeriod_(iOther.timePeriod_)
+{
+}			
+
+
+
+RenderEngine::Consumer& RenderEngine::Consumer::operator=(const Consumer& iOther)
+{	
+	engine_ = iOther.engine_;
+	rayTracer_ = iOther.rayTracer_->clone();
+	sampler_ = iOther.sampler_->clone();
+	progress_ = iOther.progress_;
+	pixelSize_ = iOther.pixelSize_;
+	timePeriod_ = iOther.timePeriod_;
+	return *this;
+}			
+	
+
+
+void RenderEngine::Consumer::operator()(const Task& iTask)
+{
+	typedef Sampler::TResolution TResolution;
+
+	const TResolution begin = iTask.begin();
+	const TResolution end = iTask.end();
+	const unsigned samplesPerPixel = sampler_->samplesPerPixel();
+
+	const unsigned outputSize = 1024;
+	TOutputSamples outputSamples(outputSize);
+	unsigned outputIndex = 0;
+
+	Sample sample;
+	TResolution i;
+	for (i.y = begin.y; i.y < end.y; ++i.y)
+	{
+		for (i.x = begin.x; i.x < end.x; ++i.x)
+		{
+			for (unsigned k = 0; k < samplesPerPixel; ++k)
+			{
+				if (engine_->isCanceling())
+				{
+					return;
+				}
+
+				sampler_->sample(i, k, timePeriod_, sample);
+				const DifferentialRay primaryRay = engine_->camera_->primaryRay(sample, pixelSize_);
+				const Spectrum radiance = rayTracer_->castRay(sample, primaryRay);
+
+				outputSamples[outputIndex++] = OutputSample(sample, radiance);
+				if (outputIndex == outputSize)
+				{
+					engine_->writeRender(&outputSamples[0], &outputSamples[outputSize], *progress_);
+					outputIndex = 0;
+				}
+			}
+		}
+	}
+
+	engine_->writeRender(&outputSamples[0], &outputSamples[outputIndex], *progress_);
+}
+
+
+
+// --- Progress ------------------------------------------------------------------------------------
+
+RenderEngine::Progress::Progress(const std::string& iCaption, unsigned iTotalNumberOfSamples):
+	indicator_(iCaption),
+	numSamplesWritten_(0),
+	totalNumSamples_(iTotalNumberOfSamples)
+{
+}
+
+
+
+RenderEngine::Progress::~Progress()
+{
+	indicator_(1.);
+}
+
+
+
+RenderEngine::Progress& RenderEngine::Progress::operator+=(unsigned iNumNewSamplesWritten)
+{
+	numSamplesWritten_ += iNumNewSamplesWritten;
+	indicator_(static_cast<double>(numSamplesWritten_) / totalNumSamples_);
+	return *this;
+}
 
 
 

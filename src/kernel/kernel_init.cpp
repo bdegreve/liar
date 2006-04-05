@@ -25,9 +25,10 @@
 
 // keep in alphabetical order please! [Bramz]
 //
+#include "attenuation.h"
 #include "camera.h"
 #include "sampler.h"
-#include "scene_composite.h"
+//#include "scene_composite.h"
 #include "scene_light.h"
 #include "scene_object.h"
 #include "shader.h"
@@ -107,6 +108,7 @@ void LIAR_KERNEL_DLL initkernel(void)
 
 	// keep in alphabetical order please! [Bramz]
 	//
+	PY_INJECT_CLASS_IN_MODULE(Attenuation, kernel, "Attenuation constants")
     PY_INJECT_CLASS_IN_MODULE(Camera, kernel, "Abstract base class of render viewports")
     PY_INJECT_CLASS_IN_MODULE(RayTracer, kernel, "Abstract base class of ray tracers")
     PY_INJECT_CLASS_IN_MODULE(RenderEngine, kernel, "Render engine")
@@ -119,7 +121,7 @@ void LIAR_KERNEL_DLL initkernel(void)
 
 	// must be injected after SceneObject
 	//
-    PY_INJECT_CLASS_IN_MODULE(SceneComposite, kernel, "Abstract base class of invisible scene objects that perform spatial subdivision")
+    //PY_INJECT_CLASS_IN_MODULE(SceneComposite, kernel, "Abstract base class of invisible scene objects that perform spatial subdivision")
     PY_INJECT_CLASS_IN_MODULE(SceneLight, kernel, "Abstract base class of scene lights")
 
 	// init rgb spaces

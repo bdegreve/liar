@@ -338,6 +338,22 @@ const TScalar Csg::doArea() const
 
 
 
+const TPyObjectPtr Csg::doGetState() const
+{
+	return python::makeTuple(childA_, childB_, static_cast<int>(operation_));
+}
+
+
+
+void Csg::doSetState(const TPyObjectPtr& iState)
+{
+	int operation = 0;
+	LASS_ENFORCE(python::decodeTuple(iState, childA_, childB_, operation));
+	operation_ = static_cast<Operation>(operation);
+}
+
+
+
 Csg::TOperationDictionary Csg::makeOperationDictionary()
 {
 	TOperationDictionary result;

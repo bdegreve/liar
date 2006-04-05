@@ -103,9 +103,11 @@
 				EnableIntrinsicFunctions="TRUE"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="TRUE"
+				EnableFiberSafeOptimizations="TRUE"
 				OptimizeForProcessor="2"
+				OptimizeForWindowsApplication="TRUE"
 				PreprocessorDefinitions="LIAR_TRACERS_BUILD_DLL;WIN32;NDEBUG;_USRDLL"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				DefaultCharIsUnsigned="TRUE"
 				TreatWChar_tAsBuiltInType="TRUE"
 				ForceConformanceInForLoopScope="TRUE"
@@ -125,14 +127,16 @@
 					EnableIntrinsicFunctions="1"
 					FavorSizeOrSpeed="1"
 					OmitFramePointers="1"
+					EnableFiberSafeOptimizations="1"
 					OptimizeForProcessor="3"
+					OptimizeForWindowsApplication="1"
 					Parallelization="1"
-					RuntimeLibrary="0"
+					RuntimeLibrary="2"
 					DefaultCharIsUnsigned="1"
 					TreatWChar_tAsBuiltInType="1"
 					ForceConformanceInForLoopScope="1"
 					RuntimeTypeInfo="1"
-					AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /G7 /Qparallel /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MT /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;tracers_common.h&quot; /Fp&quot;Release/tracers.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/tracers.pdb&quot; /Gd /TP"
+					AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;tracers_common.h&quot; /Fp&quot;Release/tracers.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/tracers.pdb&quot; /Gd /TP"
 					MSOriginalAdditionalOptions=""/>
 			</Tool>
 			<Tool 
@@ -203,7 +207,7 @@
 						Name="VCCLCompilerTool"
 						AdditionalOptions="">
 						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /G7 /Qparallel /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MT /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;tracers_common.h&quot; /Fp&quot;Release/tracers.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/tracers.pdb&quot; /Gd /TP"
+							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;tracers_common.h&quot; /Fp&quot;Release/tracers.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/tracers.pdb&quot; /Gd /TP"
 							MSOriginalAdditionalOptions=""/>
 					</Tool>
 				</FileConfiguration>
@@ -228,7 +232,7 @@
 						UsePrecompiledHeader="1"
 						AdditionalOptions="">
 						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /G7 /Qparallel /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MT /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;tracers_common.h&quot; /Fp&quot;Release/tracers.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/tracers.pdb&quot; /Gd /TP"
+							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;tracers_common.h&quot; /Fp&quot;Release/tracers.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/tracers.pdb&quot; /Gd /TP"
 							MSOriginalAdditionalOptions=""/>
 					</Tool>
 				</FileConfiguration>
@@ -251,7 +255,7 @@
 						Name="VCCLCompilerTool"
 						AdditionalOptions="">
 						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /G7 /Qparallel /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MT /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;tracers_common.h&quot; /Fp&quot;Release/tracers.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/tracers.pdb&quot; /Gd /TP"
+							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_TRACERS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;tracers_common.h&quot; /Fp&quot;Release/tracers.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/tracers.pdb&quot; /Gd /TP"
 							MSOriginalAdditionalOptions=""/>
 					</Tool>
 				</FileConfiguration>
@@ -263,6 +267,9 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File 
 				RelativePath=".\direct_lighting.h">
+			</File>
+			<File 
+				RelativePath=".\path_tracer.h">
 			</File>
 			<File 
 				RelativePath=".\photon_mapper.h">

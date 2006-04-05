@@ -67,7 +67,7 @@ public:
 private:
 
     virtual void doBeginRender();
-	virtual void doWriteRender(const Sample& iSample, const Spectrum& iRadiance);
+	virtual void doWriteRender(const OutputSample* iFirst, const OutputSample* iLast);
     virtual void doEndRender();
 
     io::Image image_;

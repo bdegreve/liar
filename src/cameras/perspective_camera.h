@@ -94,6 +94,9 @@ private:
 		const TVector2D& iScreenSpaceDelta) const;
 	const TimePeriod doShutterDelta() const;
 
+	const TPyObjectPtr doGetState() const;
+	void doSetState(const TPyObjectPtr& iState);
+
     void initTransformation();
 
     TPoint3D position_;
@@ -101,6 +104,8 @@ private:
     TVector3D down_;         /**< j unit */
     TVector3D direction_;    /**< k unit */
     TVector3D sky_;
+	TVector3D rightNormal_;
+	TVector3D downNormal_;
 	TTime shutterOpenDelta_;
  	TTime shutterCloseDelta_;
 	TScalar fovAngle_;

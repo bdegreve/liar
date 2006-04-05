@@ -83,7 +83,7 @@ DifferentialRay reflect(const IntersectionContext& iContext, const DifferentialR
 		dIncident_dJ + 2 * (dCosI_dJ * normal + cosI * iContext.dNormal_dJ());
 
 	return DifferentialRay(
-		BoundedRay(support, reflected, tolerance, TNumTraits::infinity),
+		BoundedRay(support, reflected, tolerance, TNumTraits::infinity, prim::IsAlreadyNormalized()),
 		TRay3D(supportI, reflectedI), TRay3D(supportJ, reflectedJ));
 }
 

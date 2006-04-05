@@ -126,7 +126,7 @@ void Image::setExposureTime(TScalar iTime)
 
 
 
-// --- protected -----------------------------------------------------------------------------------
+// --- private -------------------------------------------------------------------------------------
 
 void Image::doBeginRender()
 {
@@ -137,27 +137,32 @@ void Image::doBeginRender()
 
 
 
-void Image::doWriteRender(const Sample& iSample, const Spectrum& iRadiance)
+void Image::doWriteRender(const OutputSample* iFirst, const OutputSample* iLast)
 {
     LASS_ASSERT(size_.x > 0 && size_.y > 0);
 
-	const TPoint2D& position = iSample.screenCoordinate();
-    LASS_ASSERT(position.x >= 0 && position.y >= 0 && position.x < 1 && position.y < 1);
-    const unsigned i = static_cast<unsigned>(num::floor(position.x * size_.x));
-    const unsigned j = static_cast<unsigned>(num::floor(position.y * size_.y));
-	if (i < 0 || i >= size_.x || j < 0 || j >= size_.y)
+	while (iFirst != iLast)
 	{
-		return;
+		const TPoint2D& position = iFirst->screenCoordinate();
+		LASS_ASSERT(position.x >= 0 && position.y >= 0 && position.x < 1 && position.y < 1);
+		const unsigned i = static_cast<unsigned>(num::floor(position.x * size_.x));
+		const unsigned j = static_cast<unsigned>(num::floor(position.y * size_.y));
+		if (i < 0 || i >= size_.x || j < 0 || j >= size_.y)
+		{
+			return;
+		}
+		LASS_ASSERT(i < size_.x && j < size_.y);
+
+		TVector3D xyz = iFirst->radiance().xyz();
+		xyz *= iFirst->weight();
+		
+		image_(j, i) += rgbSpace_->convert(xyz);
+		++numberOfSamples_[j * size_.x + i];
+
+		++iFirst;
 	}
-    LASS_ASSERT(i < size_.x && j < size_.y);
 
-	TVector3D xyz = iRadiance.xyz();
-	xyz *= iSample.weight();
-	
-    image_(j, i) += rgbSpace_->convert(xyz);
-	++numberOfSamples_[j * size_.x + i];
-
-    isSaved_ = false;
+	isSaved_ = false;
 }
 
 
@@ -180,10 +185,6 @@ void Image::doEndRender()
     image_.save(filename_);
     isSaved_ = true;
 }
-
-
-
-// --- private -------------------------------------------------------------------------------------
 
 
 

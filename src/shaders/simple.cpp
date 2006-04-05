@@ -172,13 +172,15 @@ void Simple::setRefractionIndex(const TTexturePtr& iRefractionIndex)
 
 // --- private -------------------------------------------------------------------------------------
 
-Spectrum Simple::doShade(const Sample& iSample,
-						 const DifferentialRay& iPrimaryRay,
-						 const Intersection& iIntersection,
-						 const IntersectionContext& iContext,
-						 const RayTracer& iTracer)
+const Spectrum Simple::doShade(	
+	const Sample& iSample,
+	const DifferentialRay& iPrimaryRay,
+	const Intersection& iIntersection,
+	const IntersectionContext& iContext,
+	const RayTracer& iTracer)
+
 {
-	const Spectrum diffuse = diffuse_->lookUp(iSample, iContext);
+	const Spectrum diffuse = diffuse_->lookUp(iSample, iContext) / TNumTraits::pi;
 	const Spectrum specular = specular_->lookUp(iSample, iContext);
 	const Spectrum specularPower = specularPower_->lookUp(iSample, iContext);
 	const Spectrum reflectance = reflectance_->lookUp(iSample, iContext);
@@ -229,6 +231,22 @@ Spectrum Simple::doShade(const Sample& iSample,
 	}
 
 	return result;
+}
+
+
+
+const TPyObjectPtr Simple::doGetState() const
+{
+	return python::makeTuple(diffuse_, specular_, specularPower_, reflectance_,
+		transmittance_, refractionIndex_);
+}
+
+
+
+void Simple::doSetState(const TPyObjectPtr& iState)
+{
+	python::decodeTuple(iState, diffuse_, specular_, specularPower_, reflectance_,
+		transmittance_, refractionIndex_);
 }
 
 

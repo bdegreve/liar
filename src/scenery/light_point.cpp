@@ -29,57 +29,31 @@ namespace liar
 namespace scenery
 {
 
-PY_DECLARE_CLASS_NAME(PyLightPointAttenuation, "Attenuation")
-PY_CLASS_CONSTRUCTOR_0(PyLightPointAttenuation);
-PY_CLASS_CONSTRUCTOR_3(PyLightPointAttenuation, TScalar, TScalar, TScalar);
-PY_CLASS_PUBLIC_MEMBER(PyLightPointAttenuation, constant);
-PY_CLASS_PUBLIC_MEMBER(PyLightPointAttenuation, linear);
-PY_CLASS_PUBLIC_MEMBER(PyLightPointAttenuation, quadratic);
-
 PY_DECLARE_CLASS(LightPoint)
 PY_CLASS_CONSTRUCTOR_0(LightPoint)
 PY_CLASS_CONSTRUCTOR_2(LightPoint, const TPoint3D&, const Spectrum&)
 PY_CLASS_MEMBER_RW(LightPoint, "position", position, setPosition)
-PY_CLASS_MEMBER_RW(LightPoint, "power", power, setPower)
+PY_CLASS_MEMBER_RW(LightPoint, "intensity", intensity, setIntensity)
 PY_CLASS_MEMBER_RW(LightPoint, "attenuation", attenuation, setAttenuation)
-PY_CLASS_INNER_CLASS_NAME(LightPoint, PyLightPointAttenuation, "Attenuation")
 
 
 // --- public --------------------------------------------------------------------------------------
 
-LightPoint::Attenuation::Attenuation():
-	constant(TNumTraits::zero),
-    linear(TNumTraits::zero),
-    quadratic(2 * TNumTraits::pi)
-{
-}
-
-
-
-LightPoint::Attenuation::Attenuation(TScalar iConstant, TScalar iLinear, TScalar iQuadratic):
-    constant(iConstant),
-    linear(iLinear),
-    quadratic(iQuadratic)
-{
-}
-
-
-
 LightPoint::LightPoint():
     SceneLight(&Type),
 	position_(TPoint3D()),
-	power_(Spectrum(1)),
-    attenuation_()
+	intensity_(Spectrum(1)),
+	attenuation_(Attenuation::defaultAttenuation())
 {
 }
 
 
 
-LightPoint::LightPoint(const TPoint3D& iPosition, const Spectrum& iPower):
+LightPoint::LightPoint(const TPoint3D& iPosition, const Spectrum& iIntensity):
     SceneLight(&Type),
     position_(iPosition),
-	power_(iPower),
-    attenuation_()
+	intensity_(iIntensity),
+	attenuation_(Attenuation::defaultAttenuation())
 {
 }
 
@@ -92,14 +66,14 @@ const TPoint3D& LightPoint::position() const
 
 
 
-const Spectrum& LightPoint::power() const
+const Spectrum& LightPoint::intensity() const
 {
-	return power_;
+	return intensity_;
 }
 
 
 
-const LightPoint::Attenuation& LightPoint::attenuation() const
+const TAttenuationPtr& LightPoint::attenuation() const
 {
 	return attenuation_;
 }
@@ -113,14 +87,14 @@ void LightPoint::setPosition(const TPoint3D& iPosition)
 
 
 
-void LightPoint::setPower(const Spectrum& iPower)
+void LightPoint::setIntensity(const Spectrum& iIntensity)
 {
-	power_ = iPower;
+	intensity_ = iIntensity;
 }
 
 
 
-void LightPoint::setAttenuation(const LightPoint::Attenuation& iAttenuation)
+void LightPoint::setAttenuation(const TAttenuationPtr& iAttenuation)
 {
 	attenuation_ = iAttenuation;
 }
@@ -181,22 +155,24 @@ const TScalar LightPoint::doArea() const
 
 
 
-const Spectrum LightPoint::doSampleEmission(const Sample& iSample,
-											const TVector2D& iLightSample, 
-											const TPoint3D& iDestination,
-											BoundedRay& oShadowRay,
-											TScalar& oPdf) const
+const Spectrum LightPoint::doSampleEmission(
+		const Sample& iSample,
+		const TVector2D& iLightSample, 
+		const TPoint3D& iTarget,
+		const TVector3D& iTargetNormal,
+		BoundedRay& oShadowRay,
+		TScalar& oPdf) const
 {
-	Spectrum result = power_;
-    const TScalar squaredDistance = (position_ - iDestination).squaredNorm();
+	TVector3D toLight = position_ - iTarget;
+    const TScalar squaredDistance = (position_ - iTarget).squaredNorm();
 	const TScalar distance = num::sqrt(squaredDistance);
-	const TScalar att = attenuation_.constant + 
-		attenuation_.linear * distance + 
-		attenuation_.quadratic * squaredDistance;
-	result /= att;
+	toLight /= distance;
 
-	oShadowRay = BoundedRay(iDestination, position_, tolerance, distance);
-	return result;
+	oShadowRay = BoundedRay(iTarget, toLight, tolerance, distance, 
+		prim::IsAlreadyNormalized());
+	oPdf = TNumTraits::one;
+
+	return intensity_ / attenuation_->attenuation(distance, squaredDistance);
 }
 
 
@@ -204,6 +180,20 @@ const Spectrum LightPoint::doSampleEmission(const Sample& iSample,
 const unsigned LightPoint::doNumberOfEmissionSamples() const
 {
 	return 1;
+}
+
+
+
+const TPyObjectPtr LightPoint::doGetLightState() const
+{
+	return python::makeTuple(position_, intensity_, attenuation_);
+}
+
+
+
+void LightPoint::doSetLightState(const TPyObjectPtr& iState)
+{
+	python::decodeTuple(iState, position_, intensity_, attenuation_);
 }
 
 
