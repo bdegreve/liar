@@ -161,10 +161,9 @@ def load(iFilename):
 	
 	data = loadData(ply, elements)
 	
-	s = 1
 	vertices = []
 	for v in data['vertex']:
-		vertices.append((s*v[vertexX], s*v[vertexY], s*v[vertexZ]))
+		vertices.append((v[vertexX], v[vertexY], v[vertexZ]))
 		
 	triangles = []
 	for face in data['face']:

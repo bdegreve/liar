@@ -96,12 +96,6 @@ void PerspectiveCamera::setPosition(const TPoint3D& iPosition)
 void PerspectiveCamera::lookAt(const TPoint3D& iLookAt)
 {
     setDirection(iLookAt - position_);
-    right_ = prim::cross(direction_, sky_);
-    down_ = prim::cross(direction_, right_);
-	rightNormal_ = right_.normal();
-	downNormal_ = down_.normal();
-    setFovAngle(fovAngle_);
-    initTransformation();
 	focalDistance_ = prim::distance(position_, iLookAt);
 }
 
@@ -166,6 +160,11 @@ const TVector3D& PerspectiveCamera::direction() const
 void PerspectiveCamera::setDirection(const TVector3D& iDirection) 
 {
     direction_ = iDirection;
+    right_ = prim::cross(direction_, sky_);
+    down_ = prim::cross(direction_, right_);
+	rightNormal_ = right_.normal();
+	downNormal_ = down_.normal();
+    setFovAngle(fovAngle_);
     initTransformation();
 }
 

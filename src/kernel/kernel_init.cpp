@@ -28,7 +28,7 @@
 #include "attenuation.h"
 #include "camera.h"
 #include "sampler.h"
-//#include "scene_composite.h"
+#include "scene_composite.h"
 #include "scene_light.h"
 #include "scene_object.h"
 #include "shader.h"
@@ -37,7 +37,7 @@
 #include "render_target.h"
 #include "rgb_space.h"
 #include "spectrum.h"
-//#include "spectrum_format.h"
+#include "spectrum_format.h"
 #include "texture.h"
 
 #include <lass/io/proxy_man.h>

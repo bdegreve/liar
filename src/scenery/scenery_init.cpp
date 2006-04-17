@@ -36,6 +36,7 @@
 #include "parallelogram.h"
 #include "plane.h"
 #include "sphere.h"
+#include "sky.h"
 #include "transformation.h"
 #include "translation.h"
 #include "triangle.h"
@@ -70,6 +71,7 @@ LIAR_SCENERY_DLL void initscenery(void)
     PY_INJECT_CLASS_IN_MODULE(Parallelogram, scenery, "finite parallelogram")
     PY_INJECT_CLASS_IN_MODULE(Plane, scenery, "infinite plane")
     PY_INJECT_CLASS_IN_MODULE(Sphere, scenery, "a nice sphere")
+    PY_INJECT_CLASS_IN_MODULE(Sky, scenery, "sky sphere")
     PY_INJECT_CLASS_IN_MODULE(Transformation, scenery, "transformation of local space")
     PY_INJECT_CLASS_IN_MODULE(Translation, scenery, "translation of local space")
     PY_INJECT_CLASS_IN_MODULE(Triangle, scenery, "a single triangle")

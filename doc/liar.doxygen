@@ -1,10 +1,10 @@
-# Doxyfile 1.4.1
+# Doxyfile 1.4.6
 
 #---------------------------------------------------------------------------
 # Project related configuration options
 #---------------------------------------------------------------------------
 PROJECT_NAME           = "LiAR isn't a raytracer"
-PROJECT_NUMBER         = 0.0
+PROJECT_NUMBER         = 0.2
 OUTPUT_DIRECTORY       = .
 CREATE_SUBDIRS         = YES
 OUTPUT_LANGUAGE        = English
@@ -22,11 +22,13 @@ JAVADOC_AUTOBRIEF      = YES
 MULTILINE_CPP_IS_BRIEF = NO
 DETAILS_AT_TOP         = YES
 INHERIT_DOCS           = YES
-DISTRIBUTE_GROUP_DOC   = YES
+SEPARATE_MEMBER_PAGES  = NO
 TAB_SIZE               = 4
 ALIASES                = 
 OPTIMIZE_OUTPUT_FOR_C  = YES
 OPTIMIZE_OUTPUT_JAVA   = NO
+BUILTIN_STL_SUPPORT    = YES
+DISTRIBUTE_GROUP_DOC   = YES
 SUBGROUPING            = YES
 #---------------------------------------------------------------------------
 # Build related configuration options
@@ -99,6 +101,7 @@ INLINE_SOURCES         = NO
 STRIP_CODE_COMMENTS    = NO
 REFERENCED_BY_RELATION = YES
 REFERENCES_RELATION    = YES
+USE_HTAGS              = NO
 VERBATIM_HEADERS       = YES
 #---------------------------------------------------------------------------
 # configuration options related to the alphabetical class index

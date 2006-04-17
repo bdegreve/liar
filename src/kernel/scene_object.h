@@ -58,76 +58,32 @@ public:
 
     virtual ~SceneObject();
 
-	void preProcess(const TimePeriod& iPeriod) { doPreProcess(iPeriod); }
+	void preProcess(const TimePeriod& iPeriod);
 
-    void intersect(const Sample& iSample, const BoundedRay& iRay, Intersection& oResult) const
-	{ 
-		doIntersect(iSample, iRay, oResult);
-		LASS_ASSERT(!oResult || oResult.object() == this);
-	}
-	void intersect(const Sample& iSample, const DifferentialRay& iRay, Intersection& oResult) const
-	{ 
-		doIntersect(iSample, iRay.centralRay(), oResult); 
-		LASS_ASSERT(!oResult || oResult.object() == this);
-	}
-	
-	const bool isIntersecting(const Sample& iSample, const BoundedRay& iRay) const 
-	{
-		return doIsIntersecting(iSample, iRay);
-	}
-	const bool isIntersecting(const Sample& iSample, const DifferentialRay& iRay) const 
-	{
-		return doIsIntersecting(iSample, iRay.centralRay()); 
-	}
-
+    void intersect(const Sample& iSample, const BoundedRay& iRay, Intersection& oResult) const;
+	void intersect(const Sample& iSample, const DifferentialRay& iRay, 
+		Intersection& oResult) const;
+	const bool isIntersecting(const Sample& iSample, const BoundedRay& iRay) const ;
+	const bool isIntersecting(const Sample& iSample, const DifferentialRay& iRay) const;
 	void localContext(const Sample& iSample, const BoundedRay& iRay, 
-			const Intersection& iIntersection, IntersectionContext& oResult) const
-    {
-		LASS_ASSERT(iIntersection.object() == this);
-        doLocalContext(iSample, iRay, iIntersection, oResult);
-        if (shader_)
-        {
-            oResult.setShader(shader_);
-        }
-    }
+			const Intersection& iIntersection, IntersectionContext& oResult) const;
 	void localContext(const Sample& iSample, const DifferentialRay& iRay, 
-			const Intersection& iIntersection, IntersectionContext& oResult) const
-    {
-		localContext(iSample, iRay.centralRay(), iIntersection, oResult);
-		oResult.setScreenSpaceDifferentials(iRay);
-    }
+			const Intersection& iIntersection, IntersectionContext& oResult) const;
+	const bool contains(const Sample& iSample, const TPoint3D& iPoint) const;
+    void localSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const;
 
-	const bool contains(const Sample& iSample, const TPoint3D& iPoint) const 
-	{ 
-		return doContains(iSample, iPoint); 
-	}
-
-    void localSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const 
-	{ 
-		doLocalSpace(iTime, ioLocalToWorld); 
-	}
-
-	const bool hasSurfaceSampling() const { return doHasSurfaceSampling(); }
+	const bool hasSurfaceSampling() const;
 	const TPoint3D sampleSurface(const TVector2D& iSample, TVector3D& oNormal, 
-			TScalar& oPdf) const
-	{
-		return doSampleSurface(iSample, oNormal, oPdf);
-	}
+			TScalar& oPdf) const;
 	const TPoint3D sampleSurface(const TVector2D& iSample, const TPoint3D& iTarget, 
-			TVector3D& oNormal, TScalar& oPdf) const
-	{
-		return doSampleSurface(iSample, iTarget, oNormal, oPdf);
-	}
+			TVector3D& oNormal, TScalar& oPdf) const;
 	const TPoint3D sampleSurface(const TVector2D& iSample, const TPoint3D& iTarget,
-		const TVector3D& iTargetNormal, TVector3D& oNormal, TScalar& oPdf) const
-	{
-		return doSampleSurface(iSample, iTarget, iTargetNormal, oNormal, oPdf);
-	}
+		const TVector3D& iTargetNormal, TVector3D& oNormal, TScalar& oPdf) const;
 
-    const TAabb3D boundingBox() const { return doBoundingBox(); }
-	const bool hasMotion() const { return doHasMotion(); }
+    const TAabb3D boundingBox() const;
+	const bool hasMotion() const;
 
-	const TScalar area() const { return doArea(); }
+	const TScalar area() const;
 
     const TShaderPtr& shader() const;
     void setShader(const TShaderPtr& iShader);
@@ -267,6 +223,8 @@ struct TryParent<SceneObject>: public util::VisitNonStrict<SceneObject>
 }
 
 }
+
+#include "scene_object.inl"
 
 #endif
 
