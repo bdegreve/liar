@@ -28,7 +28,7 @@
 #include "attenuation.h"
 #include "camera.h"
 #include "sampler.h"
-#include "scene_composite.h"
+//#include "scene_composite.h"
 #include "scene_light.h"
 #include "scene_object.h"
 #include "shader.h"

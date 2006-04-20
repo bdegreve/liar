@@ -22,6 +22,7 @@
 import liar.scenery
 import liar.shaders
 import liar.textures
+import math
 
 def load(iFilename):
 	vertices = []
@@ -45,7 +46,13 @@ def load(iFilename):
 	
 	def _isZero(iTuple):
 		return min([x == 0 for x in iTuple])
-	
+		
+	def _normalize(n):
+		norm = math.sqrt(sum([x * x for x in n]))
+		if norm == 0:
+			return n
+		return tuple([x / norm for x in n])
+		
 	def _loadMaterials(iFilename):
 		currentMaterial = None
 		materials = {}
@@ -154,7 +161,7 @@ def load(iFilename):
 			elif command == 'g':
 				if len(faces) > 0:
 					numFaces += len(faces)
-					groups.append(_makeGroup(vertices, uvs, normals, faces, currentMaterial))
+					groups.append(_makeGroup(vertices, normals, uvs, faces, currentMaterial))
 					faces = []
 			
 			elif command == 'v':
@@ -163,7 +170,7 @@ def load(iFilename):
 			
 			elif command == 'vn':
 				_enforceFields(len(fields) == 3)
-				normals.append(_floatTuple(fields))
+				normals.append(_normalize(_floatTuple(fields)))
 			
 			elif command == 'vt':
 				_enforceFields(len(fields) == 2)
@@ -172,6 +179,7 @@ def load(iFilename):
 			elif command == 'f':
 				_enforceFields(len(fields) >= 3)
 				face = [[_int_or_none(x) for x in field.split('/')] for field in fields]
+				
 				# make sure all indices are in correct range
 				for vertex in face:
 					length = len(vertex)
@@ -183,21 +191,37 @@ def load(iFilename):
 								vertex[k] += len(vectors[k])
 							else:
 								raise "obj file %s has 0 index on line: %s" % (iFilename, line)
+				
 				# reformat vertex data to (v, vn, vt) and make sure its of length 3 
 				# (use None to fill missing values)
-				for i in xrange(len(face)):
+				size = len(face)
+				numNormals = 0
+				numUvs = 0
+				for i in xrange(size):
 					vertex = face[i]
 					v = vertex[0]
 					vt = None
 					if len(vertex) > 1:
 						vt = vertex[1]
+					if vt != None:
+						numUvs += 1
 					vn = None
 					if len(vertex) > 2:
 						vn = vertex[2]
-					if vn and _isZero(normals[vn]):
-						print "Warning: zero normal detected.  Disabling normal for this vertex"
+					if vn != None and _isZero(normals[vn]):
 						vn = None
+					if vn != None:
+						numNormals += 1
 					face[i] = (v, vn, vt)
+					
+				# make sure either none or all vertices have a normal/uv
+				if numNormals > 0 and numNormals < size:
+					print "WARNING: either none or all face vertices must have normal, forcing to none"
+					face = [(v[0], None, v[2]) for v in face]
+				if numUvs > 0 and numUvs < size:
+					print "WARNING: either none or all face vertices must have uv coord, forcing to none"
+					face = [(v[0], v[1], None) for v in face]				
+					
 				# fan-triangulate and add.
 				for i in xrange(1, len(face) - 1):
 					faces.append((face[0], face[i], face[i + 1]))

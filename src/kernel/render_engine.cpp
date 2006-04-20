@@ -156,7 +156,7 @@ void RenderEngine::setTracer(const TRayTracerPtr& iRayTracer)
 
 void RenderEngine::setNumberOfThreads(unsigned iNumber)
 {
-	numberOfThreads_ = std::min<unsigned>(iNumber, 1);
+	numberOfThreads_ = std::max<unsigned>(iNumber, 1);
 }
 
 
