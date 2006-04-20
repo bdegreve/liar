@@ -29,6 +29,8 @@ namespace liar
 namespace kernel
 {
 
+util::CriticalSection LightContext::mutex_;
+
 // --- public --------------------------------------------------------------------------------------
 
 LightContext::LightContext(const TObjectPath& iObjectPathToLight, const SceneLight& iLight):
@@ -72,13 +74,16 @@ const Spectrum LightContext::sampleEmission(const Sample& iCameraSample,
 	const TTime time = iCameraSample.time();
 	if ((hasMotion_ && time != timeOfTransformation_) || num::isNaN(timeOfTransformation_))
 	{
-		TTransformation3D temp;
-		for (TObjectPath::const_iterator i = objectPath_.begin(); i != objectPath_.end(); ++i)
+		LASS_LOCK(mutex_)
 		{
-			(*i)->localSpace(time, temp);
+			TTransformation3D temp;
+			for (TObjectPath::const_iterator i = objectPath_.begin(); i != objectPath_.end(); ++i)
+			{
+				(*i)->localSpace(time, temp);
+			}
+			localToWorld_.swap(temp);
+			timeOfTransformation_ = time;
 		}
-		localToWorld_.swap(temp);
-		timeOfTransformation_ = time;
 	}
 
 	const TPoint3D localTarget = transform(iTarget, localToWorld_.inverse());

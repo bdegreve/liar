@@ -67,11 +67,14 @@ DirectLighting::doCastRay(const Sample& iSample, const DifferentialRay& iPrimary
 
 	IntersectionContext context;
 	intersection.object()->localContext(iSample, iPrimaryRay, intersection, context);
+	if (!context.shader())
+	{
+		return Spectrum();
+	}
 	if (dot(iPrimaryRay.direction(), context.geometricNormal()) > 0)
 	{
 		context.flipNormal();
 	}
-
 	return context.shader()->shade(iSample, iPrimaryRay, intersection, context, *this);
 }
 

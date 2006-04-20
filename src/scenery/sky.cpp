@@ -74,7 +74,7 @@ const bool Sky::doIsIntersecting(const Sample& iSample, const BoundedRay& iRay) 
 void Sky::doLocalContext(const Sample& iSample, const BoundedRay& iRay, 
 		const Intersection& iIntersection, IntersectionContext& oResult) const
 {
-	LASS_ASSERT(iIntersection.t() == radius_);
+	//LASS_ASSERT(iIntersection.t() == radius_);
     oResult.setT(radius_);
     oResult.setPoint(iRay.point(radius_));
 

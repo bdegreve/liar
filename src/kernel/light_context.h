@@ -34,6 +34,7 @@
 #include "scene_object.h"
 #include "sampler.h"
 #include "scene_light.h"
+#include <lass/util/thread.h>
 
 namespace liar
 {
@@ -71,6 +72,8 @@ private:
 	int idLightSamples_;			
 	int idBsdfSamples_;
 	int idBsdfComponentSamples_;
+
+	static util::CriticalSection mutex_;
 };
 
 typedef std::vector<LightContext> TLightContexts;

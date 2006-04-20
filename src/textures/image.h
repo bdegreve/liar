@@ -34,6 +34,7 @@
 #include <lass/io/image.h>
 #include <lass/prim/xy.h>
 #include <lass/util/dictionary.h>
+#include <lass/util/thread.h>
 
 namespace liar
 {
@@ -111,6 +112,7 @@ private:
 	mutable TMipMaps mipMaps_;
 	mutable size_t numLevelsU_;
 	mutable size_t numLevelsV_;
+	mutable util::CriticalSection mutex_;
 
 	static TAntiAliasingDictionary antiAliasingDictionary_;
 	static TMipMappingDictionary mipMappingDictionary_;

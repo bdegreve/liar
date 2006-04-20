@@ -208,58 +208,66 @@ void Image::doSetState(const TPyObjectPtr& iState)
  */
 void Image::makeMipMaps(MipMapping iMode) const
 {
-	TMipMaps mipMaps;
-	mipMaps.push_back(THorizontalMipMaps(1, image_));
-
-	switch (iMode)
+	LASS_LOCK(mutex_)
 	{
-	case mmNone:
-		break;
-
-	case mmIsotropic:
+		if (mipMapping_ == currentMipMapping_)
 		{
-			THorizontalMipMaps& level = mipMaps.front(); 
-			while (level.back()->rows() > 1 || level.back()->cols() > 1)
-			{
-				TImagePtr temp = makeMipMap(level.back(), true);
-				level.push_back(makeMipMap(temp, false));
-			}
+			return;
 		}
-		break;
 
-	case mmAnisotropic:
-		{	
-			// expand vertically first
-			//
-			while (mipMaps.back().front()->rows() > 1)
-			{
-				THorizontalMipMaps newLevel;
-				newLevel.push_back(makeMipMap(mipMaps.back().front(), true));
-				mipMaps.push_back(newLevel);
-			}
+		TMipMaps mipMaps;
+		mipMaps.push_back(THorizontalMipMaps(1, image_));
 
-			// then expand each level horizontally
-			//
-			for (TMipMaps::iterator level = mipMaps.begin(); level != mipMaps.end(); ++level)
+		switch (iMode)
+		{
+		case mmNone:
+			break;
+
+		case mmIsotropic:
 			{
-				LASS_ASSERT(!level->empty());
-				while (level->back()->cols() > 1)
+				THorizontalMipMaps& level = mipMaps.front(); 
+				while (level.back()->rows() > 1 || level.back()->cols() > 1)
 				{
-					level->push_back(makeMipMap(level->back(), false));
+					TImagePtr temp = makeMipMap(level.back(), true);
+					level.push_back(makeMipMap(temp, false));
 				}
-				LASS_ASSERT(level->size() == mipMaps.front().size());
 			}
+			break;
+
+		case mmAnisotropic:
+			{	
+				// expand vertically first
+				//
+				while (mipMaps.back().front()->rows() > 1)
+				{
+					THorizontalMipMaps newLevel;
+					newLevel.push_back(makeMipMap(mipMaps.back().front(), true));
+					mipMaps.push_back(newLevel);
+				}
+
+				// then expand each level horizontally
+				//
+				for (TMipMaps::iterator level = mipMaps.begin(); level != mipMaps.end(); ++level)
+				{
+					LASS_ASSERT(!level->empty());
+					while (level->back()->cols() > 1)
+					{
+						level->push_back(makeMipMap(level->back(), false));
+					}
+					LASS_ASSERT(level->size() == mipMaps.front().size());
+				}
+			}
+			break;
+
+		default:
+			LASS_ASSERT_UNREACHABLE;
 		}
-		break;
 
-	default:
-		LASS_ASSERT_UNREACHABLE;
+		mipMaps_.swap(mipMaps);
+		currentMipMapping_ = iMode;
+		numLevelsU_ = mipMaps_.front().size();
+		numLevelsV_ = mipMaps_.size();
 	}
-
-	mipMaps_.swap(mipMaps);
-	currentMipMapping_ = iMode;
-	numLevelsU_ = mipMaps_.front().size();
-	numLevelsV_ = mipMaps_.size();
 }
 
 
