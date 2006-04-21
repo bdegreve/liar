@@ -134,7 +134,7 @@ inline void SceneObject::localContext(const Sample& iSample, const BoundedRay& i
 {
 	LASS_ASSERT(iIntersection.object() == this);
     doLocalContext(iSample, iRay, iIntersection, oResult);
-    if (shader_)
+	if (!oResult.shader() || this->isOverridingShader_)
     {
         oResult.setShader(shader_);
     }

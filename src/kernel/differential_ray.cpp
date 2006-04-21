@@ -60,6 +60,16 @@ DifferentialRay::DifferentialRay(const BoundedRay& iCentralRay,
 
 // --- free ----------------------------------------------------------------------------------------
 
+DifferentialRay transform(const DifferentialRay& iRay, const TTransformation3D& iTransformation)
+{
+	return DifferentialRay(
+		kernel::transform(iRay.centralRay(), iTransformation),
+		prim::transform(iRay.differentialI(), iTransformation),
+		prim::transform(iRay.differentialJ(), iTransformation));
+}
+
+
+
 DifferentialRay reflect(const IntersectionContext& iContext, const DifferentialRay& iRay)
 {
 	const TVector3D& normal = iContext.normal();

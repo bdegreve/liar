@@ -77,8 +77,7 @@ const Spectrum Unshaded::doShade(
 	const Sample& iSample,
 	const DifferentialRay& iPrimaryRay,
 	const Intersection& iIntersection,
-	const IntersectionContext& iContext,
-	const RayTracer& iTracer)
+	const IntersectionContext& iContext) const
 {
 	return colour_->lookUp(iSample, iContext);
 }

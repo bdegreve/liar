@@ -33,6 +33,7 @@ namespace kernel
 
 PY_DECLARE_CLASS(SceneObject)
 PY_CLASS_MEMBER_RW(SceneObject, "shader", shader, setShader)
+PY_CLASS_MEMBER_RW(SceneObject, "isOverridingShader", isOverridingShader, setOverridingShader)
 PY_CLASS_MEMBER_RW(SceneObject, "interior", interior, setInterior)
 PY_CLASS_METHOD_NAME(SceneObject, reduce, "__reduce__")
 PY_CLASS_METHOD_NAME(SceneObject, getState, "__getstate__")
@@ -58,6 +59,20 @@ const TShaderPtr& SceneObject::shader() const
 void SceneObject::setShader(const TShaderPtr& iShader)
 {
     shader_ = iShader;
+}
+
+
+
+const bool SceneObject::isOverridingShader() const
+{
+    return isOverridingShader_;
+}
+
+
+
+void SceneObject::setOverridingShader(bool iEnabled)
+{
+    isOverridingShader_ = iEnabled;
 }
 
 
@@ -118,7 +133,8 @@ void SceneObject::setState(const TPyObjectPtr& iState)
 
 SceneObject::SceneObject(PyTypeObject* iType):
     python::PyObjectPlus(iType),
-    shader_(defaultShader_)
+    shader_(defaultShader_),
+	isOverridingShader_(false)
 {
 }
 

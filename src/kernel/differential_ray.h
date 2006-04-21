@@ -72,11 +72,12 @@ private:
     TRay3D differentialJ_;
 };
 
+LIAR_KERNEL_DLL DifferentialRay transform(const DifferentialRay& iRay,
+		const TTransformation3D& iTransformation);
 LIAR_KERNEL_DLL DifferentialRay reflect(const IntersectionContext& iContext, 
-										const DifferentialRay& iRay); 
+		const DifferentialRay& iRay); 
 LIAR_KERNEL_DLL DifferentialRay refract(const IntersectionContext& iContext,
-										const DifferentialRay& iRay, 
-										TScalar iRefractionIndex1over2); 
+		const DifferentialRay& iRay, TScalar iRefractionIndex1over2); 
 }
 
 }

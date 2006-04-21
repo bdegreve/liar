@@ -31,6 +31,7 @@
 
 #pragma once
 #include "kernel_common.h"
+#include "light_sample.h"
 #include "shader.h"
 
 namespace liar
@@ -44,7 +45,7 @@ class LIAR_KERNEL_DLL IntersectionContext
 {
 public:
 
-	IntersectionContext();
+	IntersectionContext(const RayTracer* iTracer = 0);
 
     const TPoint3D& point() const { return point_; }
 	const TVector3D& dPoint_dU() const { return dPoint_dU_; }
@@ -84,6 +85,11 @@ public:
 	void flipNormal();
 	void flipGeometricNormal();
 
+	const Spectrum shade(const Sample& iSample, const DifferentialRay& iRay, 
+		const Intersection& iIntersection) const;
+	const Spectrum gather(const Sample& iSample, const DifferentialRay& iRay) const;
+	const TLightSamplesRange sampleLights(const Sample& iSample) const;
+
 private:
 
 	void setScreenSpaceDifferentialsI(const TRay3D& iRay, TVector3D& oDPoint, 
@@ -107,7 +113,10 @@ private:
 	TVector2D dUv_dJ_;		/**< partial derivative of uv_ to screen space coordinate j */
 
 	TScalar t_;				/**< parameter of point_ on ray */
-    TShaderPtr shader_;		/**< shader to be used */
+	const RayTracer* tracer_;	/**< tracer to be used */
+    TShaderPtr shader_;	/**< shader to be used */
+
+	TTransformation3D localToWorld_;
 
 	bool hasScreenSpaceDifferentials_;
 };

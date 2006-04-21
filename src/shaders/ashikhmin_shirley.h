@@ -69,13 +69,12 @@ public:
 private:
 
 	const Spectrum doShade(const Sample& iSample,	const DifferentialRay& iPrimaryRay, 
-		const Intersection& iIntersection, const IntersectionContext& iContext, 
-		const RayTracer& iTracer);
+		const Intersection& iIntersection, const IntersectionContext& iContext) const;
 	void doRequestSamples(const TSamplerPtr& iSampler);
 
 	const Spectrum brdf(const TVector3D& k1, const TVector3D& k2, const TVector3D& h,
 		const TVector3D& n, const TVector3D& u, const TVector3D& v,
-		const Spectrum& Rs, const Spectrum& Rd, TScalar n_u, TScalar n_v);
+		const Spectrum& Rs, const Spectrum& Rd, TScalar n_u, TScalar n_v) const;
 	const TVector3D generateH(const TVector2D& iSample, 
 		const TVector3D& n, const TVector3D& u, const TVector3D& v, 
 		TScalar n_u, TScalar n_v, TScalar& oPdf) const ;

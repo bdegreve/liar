@@ -33,6 +33,8 @@
 #include "kernel_common.h"
 #include "spectrum.h"
 
+#include <lass/stde/iterator_range.h>
+
 namespace liar
 {
 namespace kernel
@@ -56,6 +58,7 @@ private:
 };
 
 typedef std::vector<LightSample> TLightSamples;
+typedef stde::iterator_range<TLightSamples::const_iterator> TLightSamplesRange;
 
 }
 

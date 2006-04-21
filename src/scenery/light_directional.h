@@ -21,8 +21,8 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::scenery::LightPoint
- *  @brief model of a point light
+/** @class liar::scenery::LightLightDirectional 
+ *  @brief model of a directional light like the sun
  *  @author Bram de Greve [BdG]
  */
 

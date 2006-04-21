@@ -24,6 +24,7 @@
 #include "kernel_common.h"
 #include "intersection_context.h"
 #include "differential_ray.h"
+#include "ray_tracer.h"
 #include <lass/num/impl/matrix_solve.h>
 #include <lass/prim/plane_3d.h>
 
@@ -34,7 +35,7 @@ namespace kernel
 
 // --- public --------------------------------------------------------------------------------------
 
-IntersectionContext::IntersectionContext():
+IntersectionContext::IntersectionContext(const RayTracer* iTracer):
 	point_(),
 	dPoint_dU_(),
 	dPoint_dV_(),
@@ -50,7 +51,8 @@ IntersectionContext::IntersectionContext():
 	dUv_dI_(),
 	dUv_dJ_(),
 	t_(),
-	shader_(),
+	tracer_(iTracer),
+	shader_(0),
 	hasScreenSpaceDifferentials_(false)
 {
 }
@@ -68,6 +70,12 @@ void IntersectionContext::setScreenSpaceDifferentials(const DifferentialRay& iRa
 
 void IntersectionContext::transform(const TTransformation3D& iTransformation)
 {
+	if (shader_)
+	{
+		localToWorld_ = prim::concatenate(localToWorld_, iTransformation);
+		return;
+	}
+
 	point_ = prim::transform(point_, iTransformation);
 	dPoint_dU_ = prim::transform(dPoint_dU_, iTransformation);
 	dPoint_dV_ = prim::transform(dPoint_dV_, iTransformation);
@@ -96,6 +104,12 @@ void IntersectionContext::transform(const TTransformation3D& iTransformation)
 
 void IntersectionContext::translate(const TVector3D& iOffset)
 {
+	if (shader_)
+	{
+		localToWorld_ = prim::concatenate(localToWorld_, TTransformation3D::translation(iOffset));
+		return;
+	}
+
 	point_ += iOffset;
 }
 
@@ -117,6 +131,31 @@ void IntersectionContext::flipGeometricNormal()
 	geometricNormal_ = -geometricNormal_;
 }
 
+
+
+const Spectrum IntersectionContext::shade(const Sample& iSample, const DifferentialRay& iRay, 
+		const Intersection& iIntersection) const
+{
+	DifferentialRay localRay = kernel::transform(iRay, localToWorld_.inverse());
+	return shader_ ? shader_->shade(iSample, localRay, iIntersection, *this) : xyz(1, 0, 1);
+}
+
+
+
+const Spectrum IntersectionContext::gather(const Sample& iSample, const DifferentialRay& iRay) const
+{
+	DifferentialRay globalRay = kernel::transform(iRay, localToWorld_);
+	return tracer_ ? tracer_->castRay(iSample, globalRay) : Spectrum();
+}
+
+
+
+const TLightSamplesRange IntersectionContext::sampleLights(const Sample& iSample) const
+{
+	const TPoint3D globalPoint = prim::transform(point_, localToWorld_);
+	const TVector3D globalNormal = prim::transform(geometricNormal_, localToWorld_);
+	return tracer_ ? tracer_->sampleLights(iSample, globalPoint, globalNormal) : TLightSamplesRange();
+}
 
 
 

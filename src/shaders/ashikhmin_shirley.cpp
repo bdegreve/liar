@@ -157,8 +157,7 @@ const Spectrum AshikhminShirley::doShade(
 	const Sample& iSample,
 	const DifferentialRay& iPrimaryRay,
 	const Intersection& iIntersection,
-	const IntersectionContext& iContext,
-	const RayTracer& iTracer)
+	const IntersectionContext& iContext) const
 {
 	
 	const TVector3D k1 = -iPrimaryRay.direction();
@@ -174,8 +173,8 @@ const Spectrum AshikhminShirley::doShade(
 	Spectrum result;
 
 	
-	RayTracer::TLightRange lightSamples = iTracer.sampleLights(iSample, iContext);
-	for (RayTracer::TLightRange::iterator i = lightSamples.begin(); i != lightSamples.end(); ++i)
+	TLightSamplesRange lightSamples = iContext.sampleLights(iSample);
+	for (TLightSamplesRange::iterator i = lightSamples.begin(); i != lightSamples.end(); ++i)
 	{
 		const TVector3D k2 = i->direction();
 		const TScalar cosTheta = prim::dot(n, k2);
@@ -208,7 +207,7 @@ const Spectrum AshikhminShirley::doShade(
 			DifferentialRay differentialRay(boundedRay, ray, ray);
 
 			result += (scaler / pdf) * brdf(k1, k2, h, n, u, v, Rs, Rd, nu, nv) * 
-				iTracer.castRay(iSample, differentialRay);
+				iContext.gather(iSample, differentialRay);
 		}
 
 		++sample;
@@ -245,7 +244,7 @@ void AshikhminShirley::doSetState(const TPyObjectPtr& iState)
 inline const Spectrum AshikhminShirley::brdf(
 		const TVector3D& k1, const TVector3D& k2, const TVector3D& h,
 		const TVector3D& n, const TVector3D& u, const TVector3D& v,
-		const Spectrum& Rs, const Spectrum& Rd, TScalar nu, TScalar nv)
+		const Spectrum& Rs, const Spectrum& Rd, TScalar nu, TScalar nv) const
 {
 	const TScalar n_dot_k1 = dot(n, k1);
 	const TScalar n_dot_k2 = dot(n, k2);

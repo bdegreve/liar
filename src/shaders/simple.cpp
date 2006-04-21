@@ -176,9 +176,7 @@ const Spectrum Simple::doShade(
 	const Sample& iSample,
 	const DifferentialRay& iPrimaryRay,
 	const Intersection& iIntersection,
-	const IntersectionContext& iContext,
-	const RayTracer& iTracer)
-
+	const IntersectionContext& iContext) const
 {
 	const Spectrum diffuse = diffuse_->lookUp(iSample, iContext) / TNumTraits::pi;
 	const Spectrum specular = specular_->lookUp(iSample, iContext);
@@ -192,8 +190,8 @@ const Spectrum Simple::doShade(
 
 	Spectrum result;
 
-	RayTracer::TLightRange lightSamples = iTracer.sampleLights(iSample, iContext);
-	for (RayTracer::TLightRange::iterator i = lightSamples.begin(); i != lightSamples.end(); ++i)
+	TLightSamplesRange lightSamples = iContext.sampleLights(iSample);
+	for (TLightSamplesRange::iterator i = lightSamples.begin(); i != lightSamples.end(); ++i)
 	{
 		const TScalar cosTheta = prim::dot(normal, i->direction());
 		
@@ -216,7 +214,7 @@ const Spectrum Simple::doShade(
 
 	if (reflectance)
 	{
-		result += reflectance * iTracer.castRay(iSample, reflect(iContext, iPrimaryRay));
+		result += reflectance * iContext.gather(iSample, reflect(iContext, iPrimaryRay));
 	}
 
 	if (transmittance)
@@ -226,7 +224,7 @@ const Spectrum Simple::doShade(
 		const DifferentialRay refractedRay = refract(iContext, iPrimaryRay, n1overn2);
 		if (refractedRay.isValid())
 		{
-			result += transmittance * iTracer.castRay(iSample, refractedRay);
+			result += transmittance * iContext.gather(iSample, refractedRay);
 		}
 	}
 

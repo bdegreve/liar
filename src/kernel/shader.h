@@ -58,10 +58,9 @@ public:
     virtual ~Shader();
 
 	const Spectrum shade(const Sample& iSample, const DifferentialRay& iRay, 
-		const Intersection& iIntersection, const IntersectionContext& iContext, 
-		const RayTracer& iTracer)
+		const Intersection& iIntersection, const IntersectionContext& iContext) const
 	{
-		return doShade(iSample, iRay, iIntersection, iContext, iTracer);
+		return doShade(iSample, iRay, iIntersection, iContext);
 	}
 
 	void requestSamples(const TSamplerPtr& iSampler);
@@ -77,8 +76,7 @@ protected:
 private:
 
 	virtual const Spectrum doShade(const Sample& iSample, const DifferentialRay& iRay, 
-		const Intersection& iIntersection, const IntersectionContext& iContext, 
-		const RayTracer& iTracer) = 0;
+		const Intersection& iIntersection, const IntersectionContext& iContext) const = 0;
 
 	virtual void doRequestSamples(const TSamplerPtr& iSampler);
 

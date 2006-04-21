@@ -65,7 +65,7 @@ DirectLighting::doCastRay(const Sample& iSample, const DifferentialRay& iPrimary
 		return Spectrum();
 	}
 
-	IntersectionContext context;
+	IntersectionContext context(this);
 	intersection.object()->localContext(iSample, iPrimaryRay, intersection, context);
 	if (!context.shader())
 	{
@@ -75,17 +75,17 @@ DirectLighting::doCastRay(const Sample& iSample, const DifferentialRay& iPrimary
 	{
 		context.flipNormal();
 	}
-	return context.shader()->shade(iSample, iPrimaryRay, intersection, context, *this);
+	return context.shade(iSample, iPrimaryRay, intersection);
 }
 
 
 
-const DirectLighting::TLightRange 
-DirectLighting::doSampleLights(const Sample& iSample, const IntersectionContext& iContext) const
+const TLightSamplesRange
+DirectLighting::doSampleLights(const Sample& iSample, const TPoint3D& iTarget, 
+		const TVector3D& iTargetNormal) const
 {
 	using namespace kernel;
 
-	//TLightSamples result;
 	stde::overwrite_insert_iterator<TLightSamples> output(lightSamples_);
 
 	const TLightContexts::const_iterator end = lights().end();
@@ -98,7 +98,7 @@ DirectLighting::doSampleLights(const Sample& iSample, const IntersectionContext&
 			BoundedRay shadowRay;
 			TScalar pdf;
 			Spectrum radiance = light->sampleEmission(
-				iSample, *subSequence, iContext.point(), iContext.normal(), shadowRay, pdf);
+				iSample, *subSequence, iTarget, iTargetNormal, shadowRay, pdf);
 			if (pdf > 0 && !scene()->isIntersecting(iSample, shadowRay))
 			{
 				*output++ = LightSample((scale / pdf) * radiance, shadowRay.direction());
@@ -108,8 +108,7 @@ DirectLighting::doSampleLights(const Sample& iSample, const IntersectionContext&
 		}
 	}
 
-	//oLightSamples.swap(result);
-	return TLightRange(lightSamples_.begin(), output.get());
+	return TLightSamplesRange(lightSamples_.begin(), output.get());
 }
 
 

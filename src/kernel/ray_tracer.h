@@ -37,8 +37,6 @@
 #include "light_context.h"
 #include "light_sample.h"
 
-#include <lass/stde/iterator_range.h>
-
 namespace liar
 {
 namespace kernel
@@ -46,15 +44,15 @@ namespace kernel
 class IntersectionContext;
 class RayTracer;
 class Sampler;
+class SceneObject;
 
 typedef python::PyObjectPtr<RayTracer>::Type TRayTracerPtr;
+typedef python::PyObjectPtr<SceneObject>::Type TSceneObjectPtr;
 
 class LIAR_KERNEL_DLL RayTracer: public python::PyObjectPlus
 {
     PY_HEADER(python::PyObjectPlus)
 public:
-
-	typedef stde::iterator_range<TLightSamples::const_iterator> TLightRange;
 
     virtual ~RayTracer();
 
@@ -80,9 +78,10 @@ public:
 
 	/** @warning sampleLights is NOT THREAD SAFE!
 	 */
-	const TLightRange sampleLights(const Sample& iSample, const IntersectionContext& iContext) const
+	const TLightSamplesRange sampleLights(const Sample& iSample, 
+			const TPoint3D& iTarget, const TVector3D& iTargetNormal) const
 	{
-		return doSampleLights(iSample, iContext);
+		return doSampleLights(iSample, iTarget, iTargetNormal);
 	}
 
 	const TRayTracerPtr clone() const;
@@ -103,8 +102,8 @@ private:
 	virtual void doRequestSamples(const TSamplerPtr& iSampler) = 0;
     virtual const Spectrum doCastRay(const Sample& iSample, 
 		const DifferentialRay& iPrimaryRay) const = 0;
-	virtual const TLightRange doSampleLights(const Sample& iSample, 
-		const IntersectionContext& iContext) const = 0;
+	virtual const TLightSamplesRange doSampleLights(const Sample& iSample, 
+		const TPoint3D& iTarget, const TVector3D& iTargetNormal) const = 0;
 	virtual const TRayTracerPtr doClone() const = 0;
 
 	virtual const TPyObjectPtr doGetState() const = 0;

@@ -77,8 +77,7 @@ const Spectrum Lambert::doShade(
 	const Sample& iSample,
 	const DifferentialRay& iPrimaryRay,
 	const Intersection& iIntersection,
-	const IntersectionContext& iContext,
-	const RayTracer& iTracer)
+	const IntersectionContext& iContext) const
 {
 	const Spectrum diffuse = diffuse_->lookUp(iSample, iContext) / TNumTraits::pi;
 	if (!diffuse)
@@ -89,8 +88,8 @@ const Spectrum Lambert::doShade(
 	const TVector3D shadeNormal = iContext.normal();
 
 	Spectrum result;
-	RayTracer::TLightRange lightSamples = iTracer.sampleLights(iSample, iContext);
-	for (RayTracer::TLightRange::iterator i = lightSamples.begin(); i != lightSamples.end(); ++i)
+	TLightSamplesRange lightSamples = iContext.sampleLights(iSample);
+	for (TLightSamplesRange::iterator i = lightSamples.begin(); i != lightSamples.end(); ++i)
 	{
 		const TScalar cosTheta = prim::dot(shadeNormal, i->direction());
 		if (cosTheta > TNumTraits::zero)

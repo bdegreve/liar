@@ -70,8 +70,7 @@ public:
 private:
 
 	const Spectrum doShade(const Sample& iSample,	const DifferentialRay& iPrimaryRay, 
-		const Intersection& iIntersection, const IntersectionContext& iContext, 
-		const RayTracer& iTracer);
+		const Intersection& iIntersection, const IntersectionContext& iContext) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& iState);

@@ -50,8 +50,8 @@ private:
 	void doRequestSamples(const TSamplerPtr& iSampler);
 	const Spectrum doCastRay(const Sample& iSample,
 		const DifferentialRay& iPrimaryRay) const;
-	const TLightRange doSampleLights(const Sample& iSample,
-		const IntersectionContext& iContext) const;
+	const TLightSamplesRange doSampleLights(const Sample& iSample,
+		const TPoint3D& iTarget, const TVector3D& iTargetNormal) const;
 	const TRayTracerPtr doClone() const;
 
 	const TPyObjectPtr doGetState() const;
