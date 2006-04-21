@@ -104,8 +104,9 @@ void List::doIntersect(const Sample& iSample, const BoundedRay& iRay,
 	const TChildren::const_iterator end = children_.end();
     for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
     {
-        TChildren::value_type child = *i;
         Intersection temp;
+		const SceneObject* child = i->get();
+		LASS_ASSERT(child);
         child->intersect(iSample, iRay, temp);
         if (temp)
         {
@@ -134,7 +135,9 @@ const bool List::doIsIntersecting(const Sample& iSample,
 	const TChildren::const_iterator end = children_.end();
     for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
     {
-		if ((*i)->isIntersecting(iSample, iRay))
+		const SceneObject* child = i->get();
+		LASS_ASSERT(child);
+		if (child->isIntersecting(iSample, iRay))
 		{
 			return true;
 		}
@@ -159,7 +162,9 @@ const bool List::doContains(const Sample& iSample, const TPoint3D& iPoint) const
 	const TChildren::const_iterator end = children_.end();
     for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
     {
-		if ((*i)->contains(iSample, iPoint))
+		const SceneObject* child = i->get();
+		LASS_ASSERT(child);
+		if (child->contains(iSample, iPoint))
 		{
 			return true;
 		}
@@ -175,7 +180,9 @@ const TAabb3D List::doBoundingBox() const
 	const TChildren::const_iterator end = children_.end();
     for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
     {
-		result += (*i)->boundingBox();
+		const SceneObject* child = i->get();
+		LASS_ASSERT(child);
+		result += child->boundingBox();
 	}
 	return result;
 }
@@ -187,7 +194,9 @@ const TScalar List::doArea() const
 	TScalar result = 0;
 	for (TChildren::const_iterator i = children_.begin(); i != children_.end(); ++i)
 	{
-		result += (*i)->area();
+		const SceneObject* child = i->get();
+		LASS_ASSERT(child);
+		result += child->area();
 	}
 	return result;
 }

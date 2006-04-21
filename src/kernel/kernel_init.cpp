@@ -42,6 +42,7 @@
 
 #include <lass/io/proxy_man.h>
 #include <lass/stde/extended_string.h>
+#include <lass/util/process.h>
 
 void license()
 {
@@ -64,6 +65,10 @@ PY_DECLARE_MODULE(kernel)
 PY_MODULE_FUNCTION(kernel, license)
 PY_MODULE_FUNCTION(kernel, tolerance)
 PY_MODULE_FUNCTION(kernel, setTolerance)
+
+using util::setProcessPriority;
+PY_MODULE_FUNCTION_QUALIFIED_DOC_1(kernel, setProcessPriority, void, const std::string&,
+	"setProcessPriority({low, belownormal, normal, abovenormal, high}\n")
 
 using liar::TScalar;
 using liar::TVector3D;
@@ -142,6 +147,8 @@ void LIAR_KERNEL_DLL initkernel(void)
 	PyRun_SimpleString( std::string("print \"" + header.str() + "\"\n").c_str());
 	PyRun_SimpleString("print 'liar.kernel imported (v" 
 		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");
+
+	util::setProcessPriority(util::ppBelowNormal);
 }
 
 }

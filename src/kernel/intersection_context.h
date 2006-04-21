@@ -62,7 +62,7 @@ public:
 	const TVector2D& dUv_dI() const { return dUv_dI_; }
 	const TVector2D& dUv_dJ() const { return dUv_dJ_; }
     const TScalar t() const { return t_; }
-    const TShaderPtr& shader() const { return shader_; }
+    const Shader* const shader() const { return shader_; }
 
     void setPoint(const TPoint3D& iPoint) { point_ = iPoint; }
 	void setDPoint_dU(const TVector3D& iDPoint_dU) { dPoint_dU_ = iDPoint_dU; }
@@ -76,7 +76,7 @@ public:
 	void setDUv_dI(const TVector2D& iDUv_dI) { dUv_dI_ = iDUv_dI; }
 	void setDUv_dJ(const TVector2D& iDUv_dJ) { dUv_dJ_ = iDUv_dJ; }
     void setT(TScalar iT) { t_ = iT; }
-    void setShader(const TShaderPtr& iShader) { shader_ = iShader; }
+    void setShader(const TShaderPtr& iShader) { shader_ = iShader.get(); }
 
 	void setScreenSpaceDifferentials(const DifferentialRay& iRay);
 
@@ -113,8 +113,8 @@ private:
 	TVector2D dUv_dJ_;		/**< partial derivative of uv_ to screen space coordinate j */
 
 	TScalar t_;				/**< parameter of point_ on ray */
+    const Shader* shader_;		/**< shader to be used */
 	const RayTracer* tracer_;	/**< tracer to be used */
-    TShaderPtr shader_;	/**< shader to be used */
 
 	TTransformation3D localToWorld_;
 
