@@ -26,7 +26,6 @@
  *  @author Bram de Greve [BdG]
  */
 
-#pragma once
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SAMPLE_H
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SAMPLE_H
 

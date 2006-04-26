@@ -29,7 +29,6 @@
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_LIGHT_SAMPLE_H
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_LIGHT_SAMPLE_H
 
-#pragma once
 #include "kernel_common.h"
 #include "spectrum.h"
 

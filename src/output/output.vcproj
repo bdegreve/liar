@@ -61,7 +61,7 @@
 				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
 				AdditionalOptions="">
 				<IntelOptions 
-					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/output_d.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\output_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/output_d.lib&quot;  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
+					AllOptions="/NOLOGO /DLL /OUT:&quot;D:\bram\visual_studio_projects\liar\src\..\bin/output_d.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;D:\bram\visual_studio_projects\liar\src\..\bin\output_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;D:\bram\visual_studio_projects\liar\src\..\bin/output_d.lib&quot;  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
 					MSOriginalAdditionalOptions=""/>
 			</Tool>
 			<Tool 
@@ -148,7 +148,7 @@
 				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
 				AdditionalOptions="">
 				<IntelOptions 
-					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/output.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\output.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/output.lib&quot;  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
+					AllOptions="/NOLOGO /DLL /OUT:&quot;D:\bram\visual_studio_projects\liar\src\..\bin/output.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;D:\bram\visual_studio_projects\liar\src\..\bin\output.pdb&quot; /TLBID:1 /IMPLIB:&quot;D:\bram\visual_studio_projects\liar\src\..\bin/output.lib&quot;  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
 					MSOriginalAdditionalOptions=""/>
 			</Tool>
 			<Tool 
@@ -171,8 +171,6 @@
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool 
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-			<IntelOptions 
-				CompilerName="1"/>
 		</Configuration>
 	</Configurations>
 	<References>

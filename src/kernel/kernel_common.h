@@ -31,7 +31,6 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  */
 
-#pragma once
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_KERNEL_COMMON_H
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_KERNEL_COMMON_H
 

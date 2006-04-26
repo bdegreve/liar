@@ -21,7 +21,6 @@
  *  http://liar.sourceforge.net
  */
 
-#pragma once
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_CONFIG_H
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_CONFIG_H
 

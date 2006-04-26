@@ -29,7 +29,6 @@
  *  pixel that contains the sample and add it to the pixel value.
  */
 
-#pragma once
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_OUTPUT_IMAGE_H
 #define LIAR_GUARDIAN_OF_INCLUSION_OUTPUT_IMAGE_H
 

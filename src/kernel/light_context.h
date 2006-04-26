@@ -29,7 +29,6 @@
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_LIGHT_CONTEXT_H
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_LIGHT_CONTEXT_H
 
-#pragma once
 #include "kernel_common.h"
 #include "scene_object.h"
 #include "sampler.h"

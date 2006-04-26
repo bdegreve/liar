@@ -31,7 +31,6 @@
  *  @author Bram de Greve [BdG]
  */
 
-#pragma once
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_INTERSECTION_H
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_INTERSECTION_H
 

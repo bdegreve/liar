@@ -35,7 +35,7 @@
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"
-				AdditionalOptions="&lt;?ICLPrjArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot; /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_CAMERAS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;cameras_common.h&quot; /Fp&quot;Debug/cameras_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/cameras_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;">
+				AdditionalOptions="">
 				<IntelOptions 
 					Optimization="0"
 					OmitFramePointers="0"
@@ -47,7 +47,7 @@
 					ForceConformanceInForLoopScope="1"
 					RuntimeTypeInfo="1"
 					AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_CAMERAS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;cameras_common.h&quot; /Fp&quot;Debug/cameras_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/cameras_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"
-					MSOriginalAdditionalOptions="&lt;?ICLPrjArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot; /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_CAMERAS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;cameras_common.h&quot; /Fp&quot;Debug/cameras_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/cameras_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;"/>
+					MSOriginalAdditionalOptions=""/>
 			</Tool>
 			<Tool 
 				Name="VCCustomBuildTool"/>
@@ -61,10 +61,10 @@
 				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
 				ImportLibrary="$(OutDir)/cameras.lib"
 				TargetMachine="1"
-				AdditionalOptions="&lt;?ICLPrjArgs?&gt; /NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/cameras_d.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\cameras_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/cameras.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;">
+				AdditionalOptions="">
 				<IntelOptions 
-					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/cameras_d.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\cameras_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/cameras.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
-					MSOriginalAdditionalOptions="&lt;?ICLPrjArgs?&gt; /NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/cameras_d.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\cameras_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/cameras.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;"/>
+					AllOptions="/NOLOGO /DLL /OUT:&quot;D:\bram\visual_studio_projects\liar\src\..\bin/cameras_d.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;D:\bram\visual_studio_projects\liar\src\..\bin\cameras_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;D:\bram\visual_studio_projects\liar\src\..\bin/cameras.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
+					MSOriginalAdditionalOptions=""/>
 			</Tool>
 			<Tool 
 				Name="VCMIDLTool"/>
@@ -119,7 +119,7 @@
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"
-				AdditionalOptions="&lt;?ICLPrjArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot; /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_CAMERAS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;cameras_common.h&quot; /Fp&quot;Release/cameras.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/cameras.pdb&quot; /Gd /TP &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;">
+				AdditionalOptions="">
 				<IntelOptions 
 					Optimization="4"
 					GlobalOptimizations="1"
@@ -137,7 +137,7 @@
 					ForceConformanceInForLoopScope="1"
 					RuntimeTypeInfo="1"
 					AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_CAMERAS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;cameras_common.h&quot; /Fp&quot;Release/cameras.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/cameras.pdb&quot; /Gd /TP"
-					MSOriginalAdditionalOptions="&lt;?ICLPrjArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot; /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_CAMERAS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;cameras_common.h&quot; /Fp&quot;Release/cameras.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/cameras.pdb&quot; /Gd /TP &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;"/>
+					MSOriginalAdditionalOptions=""/>
 			</Tool>
 			<Tool 
 				Name="VCCustomBuildTool"/>
@@ -152,10 +152,10 @@
 				EnableCOMDATFolding="2"
 				ImportLibrary="$(OutDir)/cameras.lib"
 				TargetMachine="1"
-				AdditionalOptions="&lt;?ICLPrjArgs?&gt; /NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/cameras.pyd&quot; /INCREMENTAL:NO /DEBUG /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\cameras.pdb&quot; /OPT:REF /OPT:ICF /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/cameras.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;">
+				AdditionalOptions="">
 				<IntelOptions 
-					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/cameras.pyd&quot; /INCREMENTAL:NO /DEBUG /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\cameras.pdb&quot; /OPT:REF /OPT:ICF /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/cameras.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
-					MSOriginalAdditionalOptions="&lt;?ICLPrjArgs?&gt; /NOLOGO /DLL /OUT:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/cameras.pyd&quot; /INCREMENTAL:NO /DEBUG /PDB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin\cameras.pdb&quot; /OPT:REF /OPT:ICF /TLBID:1 /IMPLIB:&quot;C:\bram\visual_studio_projects\liar\src\..\bin/cameras.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;"/>
+					AllOptions="/NOLOGO /DLL /OUT:&quot;D:\bram\visual_studio_projects\liar\src\..\bin/cameras.pyd&quot; /INCREMENTAL:NO /DEBUG /PDB:&quot;D:\bram\visual_studio_projects\liar\src\..\bin\cameras.pdb&quot; /OPT:REF /OPT:ICF /TLBID:1 /IMPLIB:&quot;D:\bram\visual_studio_projects\liar\src\..\bin/cameras.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
+					MSOriginalAdditionalOptions=""/>
 			</Tool>
 			<Tool 
 				Name="VCMIDLTool"/>
@@ -177,8 +177,6 @@
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool 
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-			<IntelOptions 
-				CompilerName="1"/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -195,10 +193,10 @@
 					<Tool 
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"
-						AdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_CAMERAS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;cameras_common.h&quot; /Fp&quot;Debug/cameras_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/cameras_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;">
+						AdditionalOptions="">
 						<IntelOptions 
 							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_CAMERAS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;cameras_common.h&quot; /Fp&quot;Debug/cameras_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/cameras_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"
-							MSOriginalAdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_CAMERAS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;cameras_common.h&quot; /Fp&quot;Debug/cameras_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/cameras_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;"/>
+							MSOriginalAdditionalOptions=""/>
 					</Tool>
 				</FileConfiguration>
 				<FileConfiguration 
@@ -206,10 +204,10 @@
 					<Tool 
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"
-						AdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_CAMERAS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;cameras_common.h&quot; /Fp&quot;Release/cameras.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/cameras.pdb&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;">
+						AdditionalOptions="">
 						<IntelOptions 
 							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_CAMERAS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;cameras_common.h&quot; /Fp&quot;Release/cameras.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/cameras.pdb&quot; /Gd /TP"
-							MSOriginalAdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_CAMERAS_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;cameras_common.h&quot; /Fp&quot;Release/cameras.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/cameras.pdb&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;"/>
+							MSOriginalAdditionalOptions=""/>
 					</Tool>
 				</FileConfiguration>
 			</File>

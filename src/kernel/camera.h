@@ -28,7 +28,6 @@
  *  Concrete cameras that to be used by LiAR should derive from this class.
  */
 
-#pragma once
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_CAMERA_H
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_CAMERA_H
 

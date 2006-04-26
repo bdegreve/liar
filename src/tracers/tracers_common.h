@@ -24,7 +24,6 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  */
 
-#pragma once
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_TRACERS_TRACERS_COMMON_H
 #define LIAR_GUARDIAN_OF_INCLUSION_TRACERS_TRACERS_COMMON_H
 

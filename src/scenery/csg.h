@@ -32,7 +32,6 @@
  *  @author Bram de Greve [BdG]
  */
 
-#pragma once
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_SCENERY_CSG_H
 #define LIAR_GUARDIAN_OF_INCLUSION_SCENERY_CSG_H
 

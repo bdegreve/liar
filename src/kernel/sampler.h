@@ -31,7 +31,6 @@
  *  how can we manage they don't screw each other. 
  */
 
-#pragma once
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SAMPLER_H
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SAMPLER_H
 

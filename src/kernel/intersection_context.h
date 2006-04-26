@@ -29,7 +29,6 @@
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_INTERSECTION_CONTEXT_H
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_INTERSECTION_CONTEXT_H
 
-#pragma once
 #include "kernel_common.h"
 #include "light_sample.h"
 #include "shader.h"

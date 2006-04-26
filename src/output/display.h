@@ -28,7 +28,6 @@
  *  http://www.pixeltoaster.com
  */
 
-#pragma once
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_OUTPUT_DISPLAY_H
 #define LIAR_GUARDIAN_OF_INCLUSION_OUTPUT_DISPLAY_H
 
