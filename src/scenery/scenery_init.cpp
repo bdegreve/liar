@@ -30,6 +30,7 @@
 #include "light_area.h"
 #include "light_directional.h"
 #include "light_point.h"
+#include "light_sky.h"
 #include "light_spot.h"
 #include "list.h"
 #include "motion_translation.h"
@@ -65,6 +66,7 @@ LIAR_SCENERY_DLL void initscenery(void)
 	PY_INJECT_CLASS_IN_MODULE(LightArea, scenery, "area light")
 	PY_INJECT_CLASS_IN_MODULE(LightDirectional, scenery, "directional light")
 	PY_INJECT_CLASS_IN_MODULE(LightPoint, scenery, "point light")
+	PY_INJECT_CLASS_IN_MODULE(LightSky, scenery, "infinite sky light")
 	PY_INJECT_CLASS_IN_MODULE(LightSpot, scenery, "spot light")
     PY_INJECT_CLASS_IN_MODULE(List, scenery, "flat list of child objects")
 	PY_INJECT_CLASS_IN_MODULE(MotionTranslation, scenery, "time-dependent translation")

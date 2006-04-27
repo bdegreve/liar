@@ -66,7 +66,7 @@ PY_MODULE_FUNCTION(kernel, license)
 PY_MODULE_FUNCTION(kernel, tolerance)
 PY_MODULE_FUNCTION(kernel, setTolerance)
 
-using util::setProcessPriority;
+using liar::util::setProcessPriority;
 PY_MODULE_FUNCTION_QUALIFIED_DOC_1(kernel, setProcessPriority, void, const std::string&,
 	"setProcessPriority({low, belownormal, normal, abovenormal, high}\n")
 
