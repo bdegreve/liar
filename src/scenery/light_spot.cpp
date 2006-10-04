@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 
 #include "scenery_common.h"
 #include "light_spot.h"
+#include <lass/num/distribution_transformations.h>
+#include <lass/prim/impl/plane_3d_impl_detail.h>
 
 namespace liar
 {
@@ -42,7 +44,6 @@ PY_CLASS_METHOD(LightSpot, lookAt);
 // --- public --------------------------------------------------------------------------------------
 
 LightSpot::LightSpot():
-    SceneLight(&Type),
 	position_(TPoint3D()),
 	direction_(TVector3D(0, 0, -1)),
 	intensity_(Spectrum(1)),
@@ -103,9 +104,11 @@ const TScalar LightSpot::innerAngle() const
 
 
 
-void LightSpot::setDirection(const TVector3D& iDirection)
+void LightSpot::setDirection(const TVector3D& direction)
 {
-	direction_ = iDirection.normal();
+	direction_ = direction.normal();
+	prim::impl::Plane3DImplDetail::generateDirections(
+		direction_, tangentU_, tangentV_);
 }
 
 
@@ -138,9 +141,9 @@ void LightSpot::setInnerAngle(TScalar iRadians)
 
 
 
-void LightSpot::lookAt(const TPoint3D& iTarget)
+void LightSpot::lookAt(const TPoint3D& target)
 {
-	setDirection(iTarget - position_);
+	setDirection(target - position_);
 }
 
 
@@ -151,32 +154,32 @@ void LightSpot::lookAt(const TPoint3D& iTarget)
 
 // --- private -------------------------------------------------------------------------------------
 
-void LightSpot::doIntersect(const Sample& iSample, const BoundedRay& iRAy, 
-							 Intersection& oResult) const
+void LightSpot::doIntersect(const Sample& sample, const BoundedRay& iRAy, 
+							 Intersection& result) const
 {
-	oResult = Intersection::empty();
+	result = Intersection::empty();
 }
 
 
 
-const bool LightSpot::doIsIntersecting(const Sample& iSample, 
-										const BoundedRay& iRay) const
+const bool LightSpot::doIsIntersecting(const Sample& sample, 
+										const BoundedRay& ray) const
 {
 	return false;
 }
 
 
 
-void LightSpot::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
-								const Intersection& iIntersection, 
-								IntersectionContext& oResult) const
+void LightSpot::doLocalContext(const Sample& sample, const BoundedRay& ray,
+								const Intersection& intersection, 
+								IntersectionContext& result) const
 {
 	LASS_THROW("since LightSpot can never return an intersection, you've called dead code.");
 }
 
 
 
-const bool LightSpot::doContains(const Sample& iSample, const TPoint3D& iPoint) const
+const bool LightSpot::doContains(const Sample& sample, const TPoint3D& point) const
 {
 	return false;
 }
@@ -199,40 +202,52 @@ const TScalar LightSpot::doArea() const
 
 
 const Spectrum LightSpot::doSampleEmission(
-		const Sample& iSample,
-		const TVector2D& iLightSample, 
-		const TPoint3D& iTarget,
-		const TVector3D& iTargetNormal,
-		BoundedRay& oShadowRay,
-		TScalar& oPdf) const
+		const Sample& sample,
+		const TPoint2D& lightSample, 
+		const TPoint3D& target,
+		const TVector3D& targetNormal,
+		BoundedRay& shadowRay,
+		TScalar& pdf) const
 {
-	TVector3D toLight = position_ - iTarget;
+	TVector3D toLight = position_ - target;
 	const TScalar squaredDistance = toLight.squaredNorm();
 	const TScalar distance = num::sqrt(squaredDistance);
 	toLight /= distance;
 	
 	const TScalar cosTheta = -dot(direction_, toLight);
-	if (cosTheta < cosOuterAngle_)
+	TScalar multiplier = fallOff(cosTheta);
+	if (multiplier == TNumTraits::zero)
 	{
-		oPdf = TNumTraits::zero;
+		pdf = TNumTraits::zero;
 		return Spectrum(TNumTraits::zero);
 	}
-
-	TScalar multiplier = TNumTraits::one;
-	if (cosTheta < cosInnerAngle_)
-	{
-		LASS_ASSERT(cosTheta >= cosOuterAngle_);
-		multiplier = num::cubic((cosTheta - cosOuterAngle_) / (cosInnerAngle_ - cosOuterAngle_));
-	}
-
 	multiplier /= attenuation_->attenuation(distance, squaredDistance);
 	
-	oShadowRay = BoundedRay(iTarget, toLight, tolerance, distance, 
+	shadowRay = BoundedRay(target, toLight, tolerance, distance, 
 		prim::IsAlreadyNormalized());
-	oPdf = TNumTraits::one;
+	pdf = TNumTraits::one;
 	return intensity_ * multiplier;
 }
 
+
+
+const Spectrum LightSpot::doSampleEmission(const TPoint2D& sampleA, const TPoint2D& sampleB,
+		const TPoint3D& sceneCenter, TScalar sceneRadius, TRay3D& emissionRay, TScalar& pdf) const
+{
+	const TPoint3D local = num::uniformCone(sampleB, cosOuterAngle_, pdf);
+	const TVector3D direction = tangentU_ * local.x + tangentV_ * local.y + direction_ * local.z;
+	emissionRay = TRay3D(position_, direction);
+	const TScalar cosTheta = local.z;
+	return intensity_ * fallOff(cosTheta);
+}
+
+
+
+const Spectrum LightSpot::doTotalPower(TScalar sceneRadius) const
+{
+	const TScalar factor = ((1 - cosInnerAngle_) + (cosInnerAngle_ - cosOuterAngle_) / 4);
+	return (2 * TNumTraits::pi * factor) * intensity_;
+}
 
 
 const unsigned LightSpot::doNumberOfEmissionSamples() const
@@ -250,12 +265,26 @@ const TPyObjectPtr LightSpot::doGetLightState() const
 
 
 
-void LightSpot::doSetLightState(const TPyObjectPtr& iState)
+void LightSpot::doSetLightState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(iState, position_, direction_, intensity_, attenuation_,
+	python::decodeTuple(state, position_, direction_, intensity_, attenuation_,
 		cosOuterAngle_, cosInnerAngle_);
 }
 
+
+
+TScalar LightSpot::fallOff(TScalar cosTheta) const
+{
+	if (cosTheta < cosOuterAngle_)
+	{
+		return 0;
+	}
+	if (cosTheta > cosInnerAngle_)
+	{
+		return 1;
+	}
+	return num::cubic((cosTheta - cosOuterAngle_) / (cosInnerAngle_ - cosOuterAngle_));
+}
 
 
 // --- free ----------------------------------------------------------------------------------------

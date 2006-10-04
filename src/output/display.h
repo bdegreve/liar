@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::output::Image
  *  @brief render target to a PixelToaster display
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  *
  *  http://www.pixeltoaster.com
  */
@@ -56,7 +56,7 @@ public:
 
 	typedef prim::Vector2D<size_t> TSize;
 
-	Display(const std::string& iTitle, const TSize& iSize);
+	Display(const std::string& title, const TSize& size);
     ~Display();
 
 	const std::string& title() const;
@@ -65,9 +65,9 @@ public:
     const TScalar gamma() const;
 	const TScalar exposureTime() const;
 
-	void setRgbSpace(const TRgbSpacePtr& iRgbSpace);
-    void setGamma(TScalar iGammaExponent);
-	void setExposureTime(TScalar iTime);
+	void setRgbSpace(const TRgbSpacePtr& rgbSpace);
+    void setGamma(TScalar gammaExponent);
+	void setExposureTime(TScalar time);
 
 private:
 
@@ -75,11 +75,11 @@ private:
 	typedef std::vector<unsigned> TCounter;
 
     void doBeginRender();
-	void doWriteRender(const OutputSample* iFirst, const OutputSample* iLast);
+	void doWriteRender(const OutputSample* first, const OutputSample* last);
     void doEndRender();
 	const bool doIsCanceling() const;
 		
-	void onKeyPressed(PixelToaster::Key iKey);
+	void onKeyPressed(PixelToaster::Key key);
 	void onClose();
 
 	void displayLoop();

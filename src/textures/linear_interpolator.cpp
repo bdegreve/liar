@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -40,7 +40,6 @@ PY_CLASS_METHOD(LinearInterpolator, addKey)
 // --- public --------------------------------------------------------------------------------------
 
 LinearInterpolator::LinearInterpolator():
-	Texture(&Type),
 	keys_(),
 	control_(Texture::black())
 {
@@ -49,13 +48,12 @@ LinearInterpolator::LinearInterpolator():
 
 
 
-LinearInterpolator::LinearInterpolator(const TKeyTextures& iKeyTextures, 
-									   const TTexturePtr& iControlTexture):
-	Texture(&Type),
+LinearInterpolator::LinearInterpolator(const TKeyTextures& keyTextures, 
+									   const TTexturePtr& controlTexture):
 	keys_(),
-	control_(iControlTexture)
+	control_(controlTexture)
 {
-	setKeys(iKeyTextures);
+	setKeys(keyTextures);
 }
 
 
@@ -80,9 +78,9 @@ const TTexturePtr& LinearInterpolator::control() const
 
 /** set list of key textures
  */
-void LinearInterpolator::setKeys(const TKeyTextures& iKeyTextures)
+void LinearInterpolator::setKeys(const TKeyTextures& keyTextures)
 {
-	keys_ = iKeyTextures;
+	keys_ = keyTextures;
 	std::sort(keys_.begin(), keys_.end(), LesserKey());
 }
 
@@ -99,10 +97,10 @@ void LinearInterpolator::setControl(const TTexturePtr& iContolTexture)
 
 /** add a key texture to the list
  */
-void LinearInterpolator::addKey(const TScalar iKeyValue, 
-								const TTexturePtr& iKeyTexture)
+void LinearInterpolator::addKey(const TScalar keyValue, 
+								const TTexturePtr& keyTexture)
 {
-	TKeyTexture key(iKeyValue, iKeyTexture);
+	TKeyTexture key(keyValue, keyTexture);
 	TKeyTextures::iterator i = std::lower_bound(keys_.begin(), keys_.end(), key, LesserKey());
 	keys_.insert(i, key);
 }
@@ -117,30 +115,30 @@ void LinearInterpolator::addKey(const TScalar iKeyValue,
 // --- private -------------------------------------------------------------------------------------
 
 const Spectrum 
-LinearInterpolator::doLookUp(const Sample& iSample, const IntersectionContext& iContext) const
+LinearInterpolator::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
-	const TScalar controlValue = control_->lookUp(iSample, iContext).average();
+	const TScalar keyValue = control_->lookUp(sample, context).average();
 
-	TKeyTexture sentinel(controlValue, TTexturePtr());
+	TKeyTexture sentinel(keyValue, TTexturePtr());
 	TKeyTextures::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), sentinel, LesserKey());
 	
 	if (i == keys_.begin())
 	{
-		return keys_.front().second->lookUp(iSample, iContext);
+		return keys_.front().second->lookUp(sample, context);
 	}
 	if (i == keys_.end())
 	{
-		return keys_.back().second->lookUp(iSample, iContext);
+		return keys_.back().second->lookUp(sample, context);
 	}
 	
 	TKeyTextures::const_iterator prevI = stde::prior(i);
 	LASS_ASSERT(prevI->first != i->first); // due to lower_bound
 
-	const TTime blendFactor = (iSample.time() - prevI->first) / (i->first - prevI->first);
+	const TTime blendFactor = (sample.time() - prevI->first) / (i->first - prevI->first);
 	
 	return blend(
-		prevI->second->lookUp(iSample, iContext),
-		i->second->lookUp(iSample, iContext),
+		prevI->second->lookUp(sample, context),
+		i->second->lookUp(sample, context),
 		static_cast<TScalar>(blendFactor));
 }
 
@@ -153,9 +151,9 @@ const TPyObjectPtr LinearInterpolator::doGetState() const
 
 
 
-void LinearInterpolator::doSetState(const TPyObjectPtr& iState)
+void LinearInterpolator::doSetState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(iState, keys_, control_);
+	python::decodeTuple(state, keys_, control_);
 }
 
 

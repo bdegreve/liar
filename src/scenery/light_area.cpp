@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 
 #include "scenery_common.h"
 #include "light_area.h"
+#include <lass/num/distribution_transformations.h>
 
 namespace liar
 {
@@ -43,7 +44,6 @@ PY_CLASS_MEMBER_RW(LightArea, "isDoubleSided", isDoubleSided, setDoubleSided)
 // --- public --------------------------------------------------------------------------------------
 
 LightArea::LightArea(const TSceneObjectPtr& iSurface):
-    SceneLight(&Type),
 	surface_(LASS_ENFORCE_POINTER(iSurface)),
 	radiance_(Spectrum(1)),
 	attenuation_(Attenuation::defaultAttenuation()),
@@ -89,9 +89,9 @@ const bool LightArea::isDoubleSided() const
 
 
 
-void LightArea::setRadiance(const Spectrum& iRadiance)
+void LightArea::setRadiance(const Spectrum& radiance)
 {
-	radiance_ = iRadiance;
+	radiance_ = radiance;
 }
 
 
@@ -103,9 +103,9 @@ void LightArea::setAttenuation(const TAttenuationPtr& iAttenuation)
 
 
 
-void LightArea::setNumberOfEmissionSamples(unsigned iNumber)
+void LightArea::setNumberOfEmissionSamples(unsigned number)
 {
-	numberOfEmissionSamples_ = iNumber;
+	numberOfEmissionSamples_ = number;
 }
 
 
@@ -123,43 +123,43 @@ void LightArea::setDoubleSided(bool iIsDoubleSided)
 
 // --- private -------------------------------------------------------------------------------------
 
-void LightArea::doIntersect(const Sample& iSample, const BoundedRay& iRay, 
-							 Intersection& oResult) const
+void LightArea::doIntersect(const Sample& sample, const BoundedRay& ray, 
+							 Intersection& result) const
 {
 	LASS_ASSERT(surface_);
-	surface_->intersect(iSample, iRay, oResult);
-	if (oResult)
+	surface_->intersect(sample, ray, result);
+	if (result)
 	{
-		oResult.push(this);
+		result.push(this);
 	}
 }
 
 
 
-const bool LightArea::doIsIntersecting(const Sample& iSample, 
-											  const BoundedRay& iRay) const
+const bool LightArea::doIsIntersecting(const Sample& sample, 
+											  const BoundedRay& ray) const
 {
 	LASS_ASSERT(surface_);
-	return surface_->isIntersecting(iSample, iRay);
+	return surface_->isIntersecting(sample, ray);
 }
 
 
 
-void LightArea::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
-								const Intersection& iIntersection, 
-								IntersectionContext& oResult) const
+void LightArea::doLocalContext(const Sample& sample, const BoundedRay& ray,
+								const Intersection& intersection, 
+								IntersectionContext& result) const
 {
-    IntersectionDescendor descend(iIntersection);
+    IntersectionDescendor descend(intersection);
 	LASS_ASSERT(surface_);
-	surface_->localContext(iSample, iRay, iIntersection, oResult);
+	surface_->localContext(sample, ray, intersection, result);
 }
 
 
 
-const bool LightArea::doContains(const Sample& iSample, const TPoint3D& iPoint) const
+const bool LightArea::doContains(const Sample& sample, const TPoint3D& point) const
 {
 	LASS_ASSERT(surface_);
-	return surface_->contains(iSample, iPoint);
+	return surface_->contains(sample, point);
 }
 
 
@@ -182,19 +182,19 @@ const TScalar LightArea::doArea() const
 
 
 const Spectrum LightArea::doSampleEmission(
-		const Sample& iSample,
-		const TVector2D& iLightSample, 
-		const TPoint3D& iTarget,
+		const Sample& sample,
+		const TPoint2D& lightSample, 
+		const TPoint3D& target,
 		const TVector3D& iNormalTarget,
-		BoundedRay& oShadowRay,
-		TScalar& oPdf) const
+		BoundedRay& shadowRay,
+		TScalar& pdf) const
 {
 	LASS_ASSERT(surface_);
 	TVector3D normalLight;
 	const TPoint3D pointLight = 
-		surface_->sampleSurface(iLightSample, iTarget, iNormalTarget, normalLight, oPdf);
+		surface_->sampleSurface(lightSample, target, iNormalTarget, normalLight, pdf);
 
-	TVector3D toLight = pointLight - iTarget;
+	TVector3D toLight = pointLight - target;
 	const TScalar squaredDistance = toLight.squaredNorm();
 	const TScalar distance = num::sqrt(squaredDistance);
 	toLight /= distance;
@@ -202,7 +202,7 @@ const Spectrum LightArea::doSampleEmission(
 	const TScalar cosThetaTarget = dot(iNormalTarget, toLight);
 	if (cosThetaTarget <= TNumTraits::zero)
 	{
-		oPdf = TNumTraits::zero;
+		pdf = TNumTraits::zero;
 		return Spectrum();
 	}
 	
@@ -211,7 +211,7 @@ const Spectrum LightArea::doSampleEmission(
 	{
 		if (isSingleSided_)
 		{
-			oPdf = TNumTraits::zero;
+			pdf = TNumTraits::zero;
 			return Spectrum();
 		}
 		else
@@ -220,10 +220,39 @@ const Spectrum LightArea::doSampleEmission(
 		}
 	}
 
-	oShadowRay = BoundedRay(iTarget, toLight, tolerance, distance, 
+	shadowRay = BoundedRay(target, toLight, tolerance, distance, 
 		prim::IsAlreadyNormalized());
 	return radiance_;
 	//return radiance_ * (cosThetaLight / (attenuation_->attenuation(distance, squaredDistance)));
+}
+
+
+
+const Spectrum LightArea::doSampleEmission(const TPoint2D& sampleA, const TPoint2D& sampleB,
+		const TPoint3D& sceneCenter, TScalar sceneRadius, TRay3D& emissionRay, TScalar& pdf) const
+{
+	TVector3D originNormal;
+	TScalar originPdf;
+	const TPoint3D origin = surface_->sampleSurface(sampleA, originNormal, originPdf);
+
+	TScalar directionPdf;
+	TVector3D direction = num::uniformSphere(sampleB, directionPdf).position();
+	if (dot(originNormal, direction) < 0)
+	{
+		direction = -direction;
+	}
+
+	emissionRay = TRay3D(origin, direction);
+	pdf = originPdf / (2 * TNumTraits::pi);
+
+	return radiance_;
+}
+
+
+
+const Spectrum LightArea::doTotalPower(TScalar sceneRadius) const
+{
+	return (TNumTraits::pi * surface_->area()) * radiance_;
 }
 
 
@@ -243,9 +272,9 @@ const TPyObjectPtr LightArea::doGetLightState() const
 
 
 
-void LightArea::doSetLightState(const TPyObjectPtr& iState)
+void LightArea::doSetLightState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(iState, surface_, radiance_, attenuation_,
+	python::decodeTuple(state, surface_, radiance_, attenuation_,
 		numberOfEmissionSamples_, isSingleSided_);
 }
 

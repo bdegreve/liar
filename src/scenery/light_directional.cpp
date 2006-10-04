@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 
 #include "scenery_common.h"
 #include "light_directional.h"
+#include <lass/num/distribution_transformations.h>
+#include <lass/prim/impl/plane_3d_impl_detail.h>
 
 namespace liar
 {
@@ -39,19 +41,17 @@ PY_CLASS_MEMBER_RW(LightDirectional, "radiance", radiance, setRadiance)
 // --- public --------------------------------------------------------------------------------------
 
 LightDirectional::LightDirectional():
-    SceneLight(&Type),
-    direction_(TVector3D(0, 0, -1)),
 	radiance_(Spectrum(1))
 {
+	setDirection(TVector3D(0, 0, -1));
 }
 
 
 
-LightDirectional::LightDirectional(const TVector3D& iDirection, const Spectrum& iRadiance):
-    SceneLight(&Type),
-    direction_(iDirection),
-	radiance_(iRadiance)
+LightDirectional::LightDirectional(const TVector3D& direction, const Spectrum& radiance):
+	radiance_(radiance)
 {
+	setDirection(direction);
 }
 
 
@@ -70,16 +70,18 @@ const Spectrum& LightDirectional::radiance() const
 
 
 
-void LightDirectional::setDirection(const TVector3D& iDirection)
+void LightDirectional::setDirection(const TVector3D& direction)
 {
-	direction_ = iDirection.normal();
+	direction_ = direction.normal();
+	lass::prim::impl::Plane3DImplDetail::generateDirections(
+		direction_, tangentU_, tangentV_);
 }
 
 
 
-void LightDirectional::setRadiance(const Spectrum& iRadiance)
+void LightDirectional::setRadiance(const Spectrum& radiance)
 {
-	radiance_ = iRadiance;
+	radiance_ = radiance;
 }
 
 
@@ -91,32 +93,38 @@ void LightDirectional::setRadiance(const Spectrum& iRadiance)
 
 // --- private -------------------------------------------------------------------------------------
 
-void LightDirectional::doIntersect(const Sample& iSample, const BoundedRay& iRAy, 
-							 Intersection& oResult) const
+void LightDirectional::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period)
 {
-	oResult = Intersection::empty();
 }
 
 
 
-const bool LightDirectional::doIsIntersecting(const Sample& iSample, 
-											  const BoundedRay& iRay) const
+void LightDirectional::doIntersect(const Sample& sample, const BoundedRay& iRAy, 
+							 Intersection& result) const
+{
+	result = Intersection::empty();
+}
+
+
+
+const bool LightDirectional::doIsIntersecting(const Sample& sample, 
+											  const BoundedRay& ray) const
 {
 	return false;
 }
 
 
 
-void LightDirectional::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
-								const Intersection& iIntersection, 
-								IntersectionContext& oResult) const
+void LightDirectional::doLocalContext(const Sample& sample, const BoundedRay& ray,
+								const Intersection& intersection, 
+								IntersectionContext& result) const
 {
 	LASS_THROW("since LightDirectional can never return an intersection, you've called dead code.");
 }
 
 
 
-const bool LightDirectional::doContains(const Sample& iSample, const TPoint3D& iPoint) const
+const bool LightDirectional::doContains(const Sample& sample, const TPoint3D& point) const
 {
 	return false;
 }
@@ -139,17 +147,37 @@ const TScalar LightDirectional::doArea() const
 
 
 const Spectrum LightDirectional::doSampleEmission(
-		const Sample& iSample,
-		const TVector2D& iLightSample, 
-		const TPoint3D& iTarget,
-		const TVector3D& iTargetNormal,
-		BoundedRay& oShadowRay,
-		TScalar& oPdf) const
+		const Sample& sample,
+		const TPoint2D& lightSample, 
+		const TPoint3D& target,
+		const TVector3D& targetNormal,
+		BoundedRay& shadowRay,
+		TScalar& pdf) const
 {
-	oShadowRay = BoundedRay(iTarget, -direction_, tolerance, TNumTraits::infinity,
+	shadowRay = BoundedRay(target, -direction_, tolerance, TNumTraits::infinity,
 		prim::IsAlreadyNormalized());
-	oPdf = TNumTraits::one;
+	pdf = TNumTraits::one;
 	return radiance_;
+}
+
+
+
+const Spectrum LightDirectional::doSampleEmission(const TPoint2D& sampleA, const TPoint2D& sampleB,
+		const TPoint3D& sceneCenter, TScalar sceneRadius, TRay3D& emissionRay, TScalar& pdf) const
+{
+	const TPoint2D uv = num::uniformDisk(sampleB, pdf);
+	const TPoint3D begin = sceneCenter + 
+		sceneRadius * (tangentU_ * uv.x + tangentV_ * uv.y - direction_);
+	emissionRay = TRay3D(begin, direction_);
+	pdf /= num::sqr(sceneRadius);
+	return radiance_;
+}
+
+
+
+const Spectrum LightDirectional::doTotalPower(TScalar sceneRadius) const
+{
+	return (2 * TNumTraits::pi * num::sqr(sceneRadius)) * radiance_;
 }
 
 
@@ -168,10 +196,11 @@ const TPyObjectPtr LightDirectional::doGetLightState() const
 
 
 
-void LightDirectional::doSetLightState(const TPyObjectPtr& iState)
+void LightDirectional::doSetLightState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(iState, direction_, radiance_);
+	python::decodeTuple(state, direction_, radiance_);
 }
+
 
 
 

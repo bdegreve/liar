@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::RgbSpace
  *  @brief transformation from XYZ tristimulus to RGB and vice versa.
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_RGB_SPACE_H
@@ -47,17 +47,17 @@ class LIAR_KERNEL_DLL RgbSpace: public python::PyObjectPlus
 public:
 
 	RgbSpace();
-	RgbSpace(const TVector3D& iRed, const TVector3D& iGreen, const TVector3D& iBlue);
+	RgbSpace(const TVector3D& red, const TVector3D& green, const TVector3D& blue);
 	
-	const TVector3D convert(const prim::ColorRGBA& iRgb) const;
-	const prim::ColorRGBA convert(const TVector3D& iXyz) const;
+	const TVector3D convert(const prim::ColorRGBA& rgb) const;
+	const prim::ColorRGBA convert(const TVector3D& xyz) const;
 
 	const TVector3D& red() const;
 	const TVector3D& green() const;
 	const TVector3D& blue() const;
 
 	static const TRgbSpacePtr& defaultSpace();
-	static void setDefaultSpace(const TRgbSpacePtr& iDefault);
+	static void setDefaultSpace(const TRgbSpacePtr& defaultSpace);
 
 private:
 
@@ -71,19 +71,19 @@ private:
 	static TRgbSpacePtr defaultSpace_;
 };
 
-Spectrum rgb(const prim::ColorRGBA& iRgb);
-Spectrum rgb(const prim::ColorRGBA& iRgb, const TRgbSpacePtr& iRgbSpace);
-Spectrum rgb(TScalar iRed, TScalar iGreen, TScalar iBlue);
-Spectrum rgb(TScalar iRed, TScalar iGreen, TScalar iBlue, const TRgbSpacePtr& iRgbSpace);
+Spectrum rgb(const prim::ColorRGBA& rgb);
+Spectrum rgb(const prim::ColorRGBA& rgb, const TRgbSpacePtr& rgbSpace);
+Spectrum rgb(TScalar red, TScalar green, TScalar blue);
+Spectrum rgb(TScalar red, TScalar green, TScalar blue, const TRgbSpacePtr& rgbSpace);
 
 /*
-Spectrum rgb(const prim::ColorRGBA& iRgb, 
+Spectrum rgb(const prim::ColorRGBA& rgb, 
 	const TSpectrumFormatPtr& iSpectrumFormat);
-Spectrum rgb(const prim::ColorRGBA& iRgb, const TRgbSpacePtr& iRgbSpace, 
+Spectrum rgb(const prim::ColorRGBA& rgb, const TRgbSpacePtr& rgbSpace, 
 	const TSpectrumFormatPtr& iSpectrumFormat);
-Spectrum rgb(TScalar iRed, TScalar iGreen, TScalar iBlue, 
+Spectrum rgb(TScalar red, TScalar green, TScalar blue, 
 	const TSpectrumFormatPtr& iSpectrumFormat);
-Spectrum rgb(TScalar iRed, TScalar iGreen, TScalar iBlue, const TRgbSpacePtr& iRgbSpace, 
+Spectrum rgb(TScalar red, TScalar green, TScalar blue, const TRgbSpacePtr& rgbSpace, 
 	const TSpectrumFormatPtr& iSpectrumFormat);
 */
 

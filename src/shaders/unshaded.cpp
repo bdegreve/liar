@@ -38,7 +38,6 @@ PY_CLASS_MEMBER_RW_DOC(Unshaded, "colour", colour, setColour, "texture")
 // --- public --------------------------------------------------------------------------------------
 
 Unshaded::Unshaded():
-	Shader(&Type),
 	colour_(Texture::white())
 {
 }
@@ -46,7 +45,6 @@ Unshaded::Unshaded():
 
 
 Unshaded::Unshaded(const TTexturePtr& iColour):
-	Shader(&Type),
 	colour_(iColour)
 {
 }

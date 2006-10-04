@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -44,20 +44,20 @@ public:
 
 	const TTexturePtr& textureA() const { return a_; }
 	const TTexturePtr& textureB() const { return b_; }
-	void setTextureA(const TTexturePtr& iA);
-	void setTextureB(const TTexturePtr& iB);
+	void setTextureA(const TTexturePtr& a);
+	void setTextureB(const TTexturePtr& b);
 
 protected:
 
-	Mix2(PyTypeObject* iType, const TTexturePtr& iA, const TTexturePtr& iB);
+	Mix2(const TTexturePtr& a, const TTexturePtr& b);
 
 private:
 
 	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& iState);
+	void doSetState(const TPyObjectPtr& state);
 
 	virtual const TPyObjectPtr doGetMixState() const = 0;
-	virtual void doSetMixState(const TPyObjectPtr& iState) = 0;
+	virtual void doSetMixState(const TPyObjectPtr& state) = 0;
 
 	TTexturePtr a_;
 	TTexturePtr b_;

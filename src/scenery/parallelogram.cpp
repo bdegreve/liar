@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -38,7 +38,6 @@ PY_CLASS_CONSTRUCTOR_3(Parallelogram, const TPoint3D&, const TVector3D&, const T
 
 Parallelogram::Parallelogram(const TPoint3D& iSupport, const TVector3D& iSizeU, 
 							 const TVector3D& iSizeV):
-    SceneObject(&Type),
     parallelogram_(iSupport, iSizeU, iSizeV),
 	normal_(cross(iSizeU, iSizeV).normal())
 {
@@ -53,59 +52,59 @@ Parallelogram::Parallelogram(const TPoint3D& iSupport, const TVector3D& iSizeU,
 
 // --- private -------------------------------------------------------------------------------------
 
-void Parallelogram::doIntersect(const kernel::Sample& iSample, const kernel::BoundedRay& iRay,
-		kernel::Intersection& oResult) const
+void Parallelogram::doIntersect(const kernel::Sample& sample, const kernel::BoundedRay& ray,
+		kernel::Intersection& result) const
 {
     TScalar t;
 	const prim::Result hit = prim::intersect(
-		parallelogram_, iRay.unboundedRay(), t, iRay.nearLimit());
-	if (hit == prim::rOne && iRay.inRange(t))
+		parallelogram_, ray.unboundedRay(), t, ray.nearLimit());
+	if (hit == prim::rOne && ray.inRange(t))
 	{
-		oResult = kernel::Intersection(this, t, seNoEvent);
+		result = kernel::Intersection(this, t, seNoEvent);
 	}
 	else
 	{
-		oResult = kernel::Intersection::empty();
+		result = kernel::Intersection::empty();
 	}
 }
 
 
 
-const bool Parallelogram::doIsIntersecting(const kernel::Sample& iSample, 
-									const kernel::BoundedRay& iRay) const
+const bool Parallelogram::doIsIntersecting(const kernel::Sample& sample, 
+									const kernel::BoundedRay& ray) const
 {
     TScalar t;
 	const prim::Result hit = prim::intersect(
-		parallelogram_, iRay.unboundedRay(), t, iRay.nearLimit());
-	return hit == prim::rOne && iRay.inRange(t);
+		parallelogram_, ray.unboundedRay(), t, ray.nearLimit());
+	return hit == prim::rOne && ray.inRange(t);
 }
 
 
 
-void Parallelogram::doLocalContext(const kernel::Sample& iSample, const BoundedRay& iRay,
-		const kernel::Intersection& iIntersection, 
-		kernel::IntersectionContext& oResult) const
+void Parallelogram::doLocalContext(const kernel::Sample& sample, const BoundedRay& ray,
+		const kernel::Intersection& intersection, 
+		kernel::IntersectionContext& result) const
 {
     TPoint2D uv;
 	TScalar t;
 	const prim::Result hit = prim::intersect(
-		parallelogram_, iRay.unboundedRay(), uv.x, uv.y, t, iRay.nearLimit());
-	LASS_ASSERT(hit == prim::rOne && iRay.inRange(t));
-	LASS_ASSERT(t == iIntersection.t());
+		parallelogram_, ray.unboundedRay(), uv.x, uv.y, t, ray.nearLimit());
+	LASS_ASSERT(hit == prim::rOne && ray.inRange(t));
+	LASS_ASSERT(t == intersection.t());
 
-	oResult.setPoint(iRay.point(iIntersection.t()));
-    oResult.setT(iIntersection.t());
-	oResult.setUv(uv);
-    oResult.setDPoint_dU(parallelogram_.sizeU());
-    oResult.setDPoint_dV(parallelogram_.sizeV());
-    oResult.setNormal(normal_);
-    oResult.setDNormal_dU(TVector3D());
-    oResult.setDNormal_dV(TVector3D());
+	result.setPoint(ray.point(intersection.t()));
+    result.setT(intersection.t());
+	result.setUv(uv);
+    result.setDPoint_dU(parallelogram_.sizeU());
+    result.setDPoint_dV(parallelogram_.sizeV());
+    result.setNormal(normal_);
+    result.setDNormal_dU(TVector3D());
+    result.setDNormal_dV(TVector3D());
 }
 
 
 
-const bool Parallelogram::doContains(const kernel::Sample& iSample, const TPoint3D& iPoint) const
+const bool Parallelogram::doContains(const kernel::Sample& sample, const TPoint3D& point) const
 {
 	return false;
 }
@@ -119,12 +118,12 @@ const bool Parallelogram::doHasSurfaceSampling() const
 
 
 
-const TPoint3D Parallelogram::doSampleSurface(const TVector2D& iSample, TVector3D& oNormal,
-											  TScalar& oPdf) const
+const TPoint3D Parallelogram::doSampleSurface(const TPoint2D& sample, TVector3D& normal,
+											  TScalar& pdf) const
 {
-	oNormal = normal_;
-	oPdf = invArea_;
-	return parallelogram_.point(iSample.x, iSample.y);
+	normal = normal_;
+	pdf = invArea_;
+	return parallelogram_.point(sample.x, sample.y);
 }
 
 
@@ -151,12 +150,12 @@ const TPyObjectPtr Parallelogram::doGetState() const
 
 
 
-void Parallelogram::doSetState(const TPyObjectPtr& iState)
+void Parallelogram::doSetState(const TPyObjectPtr& state)
 {
 	TPoint3D support;
 	TVector3D sizeU;
 	TVector3D sizeV;
-	LASS_ENFORCE(python::decodeTuple(iState, support, sizeU, sizeV));
+	LASS_ENFORCE(python::decodeTuple(state, support, sizeU, sizeV));
 	parallelogram_ = TParallelogram3D(support, sizeU, sizeV);
 	normal_ = cross(sizeU, sizeV).normal();
 	invArea_ = num::inv(parallelogram_.area());

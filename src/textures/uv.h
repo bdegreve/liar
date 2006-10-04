@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -42,15 +42,15 @@ class LIAR_TEXTURES_DLL Uv: public Mix2
 	PY_HEADER(Mix2)
 public:
 
-	Uv(const TTexturePtr& iA, const TTexturePtr& iB);
+	Uv(const TTexturePtr& a, const TTexturePtr& b);
 
 private:
 
-	const Spectrum doLookUp(const Sample& iSample, 
-		const IntersectionContext& iContext) const;
+	const Spectrum doLookUp(const Sample& sample, 
+		const IntersectionContext& context) const;
 
 	const TPyObjectPtr doGetMixState() const;
-	void doSetMixState(const TPyObjectPtr& iState);
+	void doSetMixState(const TPyObjectPtr& state);
 };
 
 }

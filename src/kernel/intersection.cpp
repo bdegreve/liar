@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -47,22 +47,22 @@ Intersection::Intersection():
 
 
 
-Intersection::Intersection(const SceneObject* iObject, TScalar iT, SolidEvent iEvent, TSpecialField iSpecial):
-	solidEvent_(iEvent),
+Intersection::Intersection(const SceneObject* object, TScalar t, SolidEvent event, TSpecialField special):
+	solidEvent_(event),
 	currentLevel_(0)
 {
 	intersectionStack_.reserve(4);
-	push(iObject, iT, iSpecial);
+	push(object, t, special);
 }
 
 
 
-void Intersection::push(const SceneObject* iObject, TScalar iT, TSpecialField iSpecial)
+void Intersection::push(const SceneObject* object, TScalar t, TSpecialField special)
 {
-	LASS_ASSERT(iT > 0);
-    intersectionStack_.push_back(IntersectionInfo(iObject, iT, iSpecial));
+	LASS_ASSERT(t > 0);
+    intersectionStack_.push_back(IntersectionInfo(object, t, special));
 	currentLevel_ = intersectionStack_.size() - 1;
-	LASS_ASSERT(intersectionStack_[currentLevel_].t == iT);
+	LASS_ASSERT(intersectionStack_[currentLevel_].t == t);
 }
 
 
@@ -88,6 +88,12 @@ const Intersection::TSpecialField Intersection::specialField() const
 }
 
 
+const size_t Intersection::level() const
+{
+	return currentLevel_;
+}
+
+
 
 const bool Intersection::isEmpty() const
 {
@@ -108,11 +114,11 @@ const Intersection& Intersection::empty()
 
 /** swap data with other intersection
  */
-void Intersection::swap(Intersection& iOther)
+void Intersection::swap(Intersection& other)
 {
-    std::swap(intersectionStack_, iOther.intersectionStack_);
-    std::swap(currentLevel_, iOther.currentLevel_);
-	std::swap(solidEvent_, iOther.solidEvent_);
+    std::swap(intersectionStack_, other.intersectionStack_);
+    std::swap(currentLevel_, other.currentLevel_);
+	std::swap(solidEvent_, other.solidEvent_);
 }
 
 

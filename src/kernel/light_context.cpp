@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -33,11 +33,11 @@ util::CriticalSection LightContext::mutex_;
 
 // --- public --------------------------------------------------------------------------------------
 
-LightContext::LightContext(const TObjectPath& iObjectPathToLight, const SceneLight& iLight):
+LightContext::LightContext(const TObjectPath& objectPathToLight, const SceneLight& light):
 	localToWorld_(),
 	timeOfTransformation_(num::NumTraits<TTime>::qNaN),
-	objectPath_(iObjectPathToLight),
-	light_(&iLight),
+	objectPath_(objectPathToLight),
+	light_(&light),
 	hasMotion_(false),
 	idLightSamples_(-1),
 	idBsdfSamples_(-1),
@@ -54,24 +54,74 @@ LightContext::LightContext(const TObjectPath& iObjectPathToLight, const SceneLig
 
 
 
-void LightContext::requestSamples(const TSamplerPtr& iSampler)
+void LightContext::requestSamples(const TSamplerPtr& sampler)
 {
 	const int n = light_->numberOfEmissionSamples();
-	idLightSamples_ = iSampler->requestSubSequence2D(n);
-	idBsdfSamples_ = iSampler->requestSubSequence2D(n);
-	idBsdfComponentSamples_ = iSampler->requestSubSequence1D(n);
+	idLightSamples_ = sampler->requestSubSequence2D(n);
+	idBsdfSamples_ = sampler->requestSubSequence2D(n);
+	idBsdfComponentSamples_ = sampler->requestSubSequence1D(n);
 }
 
 
 
-const Spectrum LightContext::sampleEmission(const Sample& iCameraSample,
-											const TVector2D& iLightSample, 
-											const TPoint3D& iTarget,
-											const TVector3D& iTargetNormal,
-											BoundedRay& oShadowRay,
-											TScalar& oPdf) const
+const Spectrum LightContext::sampleEmission(const Sample& cameraSample,
+											const TPoint2D& lightSample, 
+											const TPoint3D& target,
+											const TVector3D& targetNormal,
+											BoundedRay& shadowRay,
+											TScalar& pdf) const
 {
-	const TTime time = iCameraSample.time();
+	setTime(cameraSample.time());
+
+	const TPoint3D localTarget = transform(target, localToWorld_.inverse());
+	const TVector3D localNormal = normalTransform(targetNormal, localToWorld_.inverse()).normal();
+	
+	BoundedRay localRay;
+	const Spectrum radiance = light_->sampleEmission(
+		cameraSample, lightSample, localTarget, localNormal, localRay, pdf);
+
+	// we must transform back to world space.  But we already do know the starting point, so don't rely
+	// on recalculating that one
+	shadowRay = transform(localRay, localToWorld_);
+	shadowRay.support() = target;
+
+	return radiance;
+}
+
+
+
+const Spectrum LightContext::sampleEmission(const TPoint2D& sampleA, const TPoint2D& sampleB,
+		TRay3D& emissionRay, TScalar& pdf) const
+{
+	setTime(0);
+
+	TPoint3D sceneCenter;
+	TScalar sceneRadius = 1000;
+
+	TRay3D localRay;
+	const Spectrum radiance = light_->sampleEmission(
+		sampleA, sampleB, sceneCenter, sceneRadius, localRay, pdf);
+
+	emissionRay = prim::transform(localRay, localToWorld_);
+	return radiance;
+}
+
+
+
+const Spectrum LightContext::totalPower() const
+{
+	return light_->totalPower(1000);
+}
+
+
+
+
+// --- protected -----------------------------------------------------------------------------------
+
+// --- private -------------------------------------------------------------------------------------
+
+void LightContext::setTime(TTime time) const
+{
 	if ((hasMotion_ && time != timeOfTransformation_) || num::isNaN(timeOfTransformation_))
 	{
 		LASS_LOCK(mutex_)
@@ -85,27 +135,7 @@ const Spectrum LightContext::sampleEmission(const Sample& iCameraSample,
 			timeOfTransformation_ = time;
 		}
 	}
-
-	const TPoint3D localTarget = transform(iTarget, localToWorld_.inverse());
-	const TVector3D localNormal = normalTransform(iTargetNormal, localToWorld_.inverse()).normal();
-	
-	BoundedRay localRay;
-	const Spectrum radiance = light_->sampleEmission(
-		iCameraSample, iLightSample, localTarget, localNormal, localRay, oPdf);
-
-	// we must transform back to world space.  But we already do know the starting point, so don't rely
-	// on recalculating that one
-	oShadowRay = transform(localRay, localToWorld_);
-	oShadowRay.support() = iTarget;
-
-	return radiance;
 }
-
-
-
-// --- protected -----------------------------------------------------------------------------------
-
-// --- private -------------------------------------------------------------------------------------
 
 // --- free ----------------------------------------------------------------------------------------
 
@@ -117,18 +147,18 @@ namespace impl
 		public util::Visitor<SceneLight>
 	{
 	public:
-		const TLightContexts& operator()(const TSceneObjectPtr& iScene)
+		const TLightContexts& operator()(const TSceneObjectPtr& scene)
 		{
 			lights_.clear();
 			objectPath_.clear();
-			iScene->accept(*this);
+			scene->accept(*this);
 			return lights_;
 		}
 	private:
 	  
-		void doVisit(SceneObject& iSceneObject)
+		void doVisit(SceneObject& object)
 		{
-			TSceneObjectPtr objectPtr(python::PyPlus_INCREF(&iSceneObject));
+			TSceneObjectPtr objectPtr(python::PyPlus_INCREF(&object));
 			objectPath_.push_back(objectPtr);
 		}
 		void doVisit(SceneLight& iSceneLight)
@@ -137,7 +167,7 @@ namespace impl
 			objectPath_.push_back(objectPtr);
 			lights_.push_back(LightContext(objectPath_, iSceneLight));
 		}
-		void doVisitOnExit(SceneObject& iSceneObject)
+		void doVisitOnExit(SceneObject& object)
 		{
 			objectPath_.pop_back();
 		}
@@ -153,10 +183,10 @@ namespace impl
 
 /** gather light contexts of all light in a scene, and return as vector
  */
-TLightContexts gatherLightContexts(const TSceneObjectPtr& iScene)
+TLightContexts gatherLightContexts(const TSceneObjectPtr& scene)
 {
 	impl::LightContextGatherer gatherer;
-	return gatherer(iScene);
+	return gatherer(scene);
 }
 
 }

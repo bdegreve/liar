@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 
 /** @class liar::tracers::DirectLighting
  *  @brief a ray tracer that only uses direct lighting.
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_TRACERS_DIRECT_LIGHTING_H
@@ -46,15 +46,15 @@ private:
 	
 
 	void doPreprocess();
-	void doRequestSamples(const TSamplerPtr& iSampler);
-	const Spectrum doCastRay(const Sample& iSample,
-		const DifferentialRay& iPrimaryRay) const;
-	const TLightSamplesRange doSampleLights(const Sample& iSample,
-		const TPoint3D& iTarget, const TVector3D& iTargetNormal) const;
+	void doRequestSamples(const TSamplerPtr& sampler);
+	const Spectrum doCastRay(const Sample& sample,
+		const DifferentialRay& primaryRay) const;
+	const TLightSamplesRange doSampleLights(const Sample& sample,
+		const TPoint3D& target, const TVector3D& targetNormal) const;
 	const TRayTracerPtr doClone() const;
 
 	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& iState);
+	void doSetState(const TPyObjectPtr& state);
 
 	mutable TLightSamples lightSamples_;
 	mutable size_t rayGeneration_;

@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
  */
 
 /** @class liar::samplers::Stratifier
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_SAMPLERS_STRATIFIER_H
@@ -44,11 +44,11 @@ class LIAR_SAMPLERS_DLL Stratifier: public Sampler
 public:
 
     Stratifier();
-    Stratifier(const TResolution& iResolution, unsigned iNumberOfSamplesPerPixel);
-    Stratifier(const TResolution& iResolution);
+    Stratifier(const TResolution& resolution, unsigned numberOfSamplesPerPixel);
+    Stratifier(const TResolution& resolution);
 
 	const bool jittered() const;
-	void setJittered(bool iEnabled);
+	void setJittered(bool enabled);
 
 private:
 
@@ -58,32 +58,32 @@ private:
     typedef num::RandomMT19937 TNumberGenerator;
     typedef num::DistributionUniform<TScalar, TNumberGenerator, num::rtRightOpen> TJitterGenerator;
 
-	void init(const TResolution& iResolution = TResolution(320, 240), unsigned iNumberOfSamples = 1);
+	void init(const TResolution& resolution = TResolution(320, 240), unsigned iNumberOfSamples = 1);
 
 	virtual const TResolution& doResolution() const;
     virtual const unsigned doSamplesPerPixel() const;
-    virtual void doSetResolution(const TResolution& iResolution);
-    virtual void doSetSamplesPerPixel(unsigned iSamplesPerPixel);
-	virtual void doSeed(unsigned iRandomSeed);
+    virtual void doSetResolution(const TResolution& resolution);
+    virtual void doSetSamplesPerPixel(unsigned samplesPerPixel);
+	virtual void doSeed(unsigned randomSeed);
 
-	virtual void doSampleScreen(const TResolution& iPixel, unsigned iSubPixel, 
-		TPoint2D& oScreenCoordinate);
-	virtual void doSampleLens(const TResolution& iPixel, unsigned iSubPixel, 
-		TPoint2D& oScreenCoordinate);
-	virtual void doSampleTime(const TResolution& iPixel, unsigned iSubPixel, 
-		const TimePeriod& iPeriod, TTime& oTime);
-	virtual void doSampleSubSequence1D(const TResolution& iPixel, unsigned iSubPixel, 
-		TScalar* oBegin, TScalar* oEnd);
-	virtual void doSampleSubSequence2D(const TResolution& iPixel, unsigned iSubPixel, 
-		TVector2D* oBegin, TVector2D* oEnd);
+	virtual void doSampleScreen(const TResolution& pixel, unsigned subPixel, 
+		TSample2D& oScreenCoordinate);
+	virtual void doSampleLens(const TResolution& pixel, unsigned subPixel, 
+		TSample2D& oScreenCoordinate);
+	virtual void doSampleTime(const TResolution& pixel, unsigned subPixel, 
+		const TimePeriod& period, TTime& oTime);
+	virtual void doSampleSubSequence1D(const TResolution& pixel, unsigned subPixel, 
+		TSample1D* oBegin, TSample1D* oEnd);
+	virtual void doSampleSubSequence2D(const TResolution& pixel, unsigned subPixel, 
+		TSample2D* oBegin, TSample2D* oEnd);
 
-	virtual const unsigned doRoundSize1D(unsigned iRequestedSize) const;
-	virtual const unsigned doRoundSize2D(unsigned iRequestedSize) const;
+	virtual const unsigned doRoundSize1D(unsigned requestedSize) const;
+	virtual const unsigned doRoundSize2D(unsigned requestedSize) const;
 
 	virtual const TSamplerPtr doClone() const;
 
 	virtual const TPyObjectPtr doGetState() const;
-	virtual void doSetState(const TPyObjectPtr& iState);
+	virtual void doSetState(const TPyObjectPtr& state);
 
 	void shuffleTimeStrata();
 

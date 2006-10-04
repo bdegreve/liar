@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -52,7 +52,6 @@ const RenderEngine::TBucket RenderEngine::bucketBound_(
 // --- public --------------------------------------------------------------------------------------
 
 RenderEngine::RenderEngine():
-    PyObjectPlus(&Type),
 	numberOfThreads_(1),
 	isDirty_(false)
 {
@@ -115,33 +114,33 @@ const unsigned RenderEngine::numberOfThreads() const
 
 
 
-void RenderEngine::setCamera(const TCameraPtr& iCamera)
+void RenderEngine::setCamera(const TCameraPtr& camera)
 {
-    camera_ = iCamera;
+    camera_ = camera;
 	isDirty_ = true;
 }
 
 
 
-void RenderEngine::setSampler(const TSamplerPtr& iSampler)
+void RenderEngine::setSampler(const TSamplerPtr& sampler)
 {
-    sampler_ = iSampler;
+    sampler_ = sampler;
 	isDirty_ = true;
 }
 
 
 
-void RenderEngine::setScene(const TSceneObjectPtr& iScene)
+void RenderEngine::setScene(const TSceneObjectPtr& scene)
 {
-    scene_ = iScene;
+    scene_ = scene;
 	isDirty_ = true;
 }
 
 
 
-void RenderEngine::setTarget(const TRenderTargetPtr& iRenderTarget)
+void RenderEngine::setTarget(const TRenderTargetPtr& renderTarget)
 {
-    renderTarget_ = iRenderTarget;
+    renderTarget_ = renderTarget;
 }
 
 
@@ -154,14 +153,14 @@ void RenderEngine::setTracer(const TRayTracerPtr& iRayTracer)
 
 
 
-void RenderEngine::setNumberOfThreads(unsigned iNumber)
+void RenderEngine::setNumberOfThreads(unsigned number)
 {
-	numberOfThreads_ = std::max<unsigned>(iNumber, 1);
+	numberOfThreads_ = std::max<unsigned>(number, 1);
 }
 
 
 
-void RenderEngine::render(TTime iFrameTime, const TBucket& iBucket)
+void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 {
     if (!camera_)
     {
@@ -183,9 +182,9 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& iBucket)
     {
         LASS_THROW("can't render - no render target attached to engine.");
     }
-    if (!bucketBound_.contains(iBucket))
+    if (!bucketBound_.contains(bucket))
     {
-        LASS_THROW("can't render - render bucket '" << iBucket << "' goes outside valid boundary '"
+        LASS_THROW("can't render - render bucket '" << bucket << "' goes outside valid boundary '"
             << bucketBound_ << "'.");
     }
 	
@@ -196,8 +195,8 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& iBucket)
     const unsigned samplesPerPixel = sampler_->samplesPerPixel();
 	const TimePeriod timePeriod = iFrameTime + camera_->shutterDelta();
 
-    const TResolution min(num::round(iBucket.min().x * resolution.x), num::round(iBucket.min().y * resolution.y));
-    const TResolution max(num::round(iBucket.max().x * resolution.x), num::round(iBucket.max().y * resolution.y));
+    const TResolution min(num::round(bucket.min().x * resolution.x), num::round(bucket.min().y * resolution.y));
+    const TResolution max(num::round(bucket.max().x * resolution.x), num::round(bucket.max().y * resolution.y));
 	const unsigned numberOfPixels = (max.x - min.x) * (max.y - min.y);
 	const unsigned numberOfSamples = numberOfPixels * samplesPerPixel;
 
@@ -205,13 +204,13 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& iBucket)
 	if (isDirty_)
 	{
 		
-		scene_->preProcess(timePeriod);
+		scene_->preProcess(scene_, timePeriod);
 		rayTracer_->setScene(scene_);
 		rayTracer_->requestSamples(sampler_);
 		isDirty_ = false;
 	}
 
-	Progress progress("rendering bucket " + util::stringCast<std::string>(iBucket), 
+	Progress progress("rendering bucket " + util::stringCast<std::string>(bucket), 
 		numberOfSamples);
 
 	Consumer consumer(*this, rayTracer_, sampler_, progress, pixelSize, timePeriod);
@@ -255,9 +254,9 @@ void RenderEngine::render(TTime iShutterOpen)
 
 
 
-void RenderEngine::render(const TBucket& iBucket)
+void RenderEngine::render(const TBucket& bucket)
 {
-    render(0, iBucket);
+    render(0, bucket);
 }
 
 
@@ -275,13 +274,13 @@ void RenderEngine::render()
 
 // --- private -------------------------------------------------------------------------------------
 
-void RenderEngine::writeRender(const OutputSample* iFirst, const OutputSample* iLast, 
+void RenderEngine::writeRender(const OutputSample* first, const OutputSample* last, 
 		Progress& ioProgress)
 {
 	LASS_LOCK(mutex_)
 	{
-		renderTarget_->writeRender(iFirst, iLast);
-		ioProgress += static_cast<unsigned>(iLast - iFirst);
+		renderTarget_->writeRender(first, last);
+		ioProgress += static_cast<unsigned>(last - first);
 	}
 }
 
@@ -297,11 +296,11 @@ const bool RenderEngine::isCanceling() const
 // --- Consumer ------------------------------------------------------------------------------------
 
 RenderEngine::Consumer::Consumer(RenderEngine& iEngine, const TRayTracerPtr& iRayTracer,
-		const TSamplerPtr& iSampler, Progress& ioProgress,
+		const TSamplerPtr& sampler, Progress& ioProgress,
 		const TVector2D& iPixelSize, const TimePeriod& iTimePeriod):
 	engine_(&iEngine),
 	rayTracer_(LASS_ENFORCE_POINTER(iRayTracer)),
-	sampler_(LASS_ENFORCE_POINTER(iSampler)),
+	sampler_(LASS_ENFORCE_POINTER(sampler)),
 	progress_(&ioProgress),
 	pixelSize_(iPixelSize),
 	timePeriod_(iTimePeriod)
@@ -310,26 +309,26 @@ RenderEngine::Consumer::Consumer(RenderEngine& iEngine, const TRayTracerPtr& iRa
 
 
 
-RenderEngine::Consumer::Consumer(const Consumer& iOther):
-	engine_(iOther.engine_),
-	rayTracer_(iOther.rayTracer_->clone()),
-	sampler_(iOther.sampler_->clone()),
-	progress_(iOther.progress_),
-	pixelSize_(iOther.pixelSize_),
-	timePeriod_(iOther.timePeriod_)
+RenderEngine::Consumer::Consumer(const Consumer& other):
+	engine_(other.engine_),
+	rayTracer_(other.rayTracer_->clone()),
+	sampler_(other.sampler_->clone()),
+	progress_(other.progress_),
+	pixelSize_(other.pixelSize_),
+	timePeriod_(other.timePeriod_)
 {
 }			
 
 
 
-RenderEngine::Consumer& RenderEngine::Consumer::operator=(const Consumer& iOther)
+RenderEngine::Consumer& RenderEngine::Consumer::operator=(const Consumer& other)
 {	
-	engine_ = iOther.engine_;
-	rayTracer_ = iOther.rayTracer_->clone();
-	sampler_ = iOther.sampler_->clone();
-	progress_ = iOther.progress_;
-	pixelSize_ = iOther.pixelSize_;
-	timePeriod_ = iOther.timePeriod_;
+	engine_ = other.engine_;
+	rayTracer_ = other.rayTracer_->clone();
+	sampler_ = other.sampler_->clone();
+	progress_ = other.progress_;
+	pixelSize_ = other.pixelSize_;
+	timePeriod_ = other.timePeriod_;
 	return *this;
 }			
 	
@@ -381,10 +380,10 @@ void RenderEngine::Consumer::operator()(const Task& iTask)
 
 // --- Progress ------------------------------------------------------------------------------------
 
-RenderEngine::Progress::Progress(const std::string& iCaption, unsigned iTotalNumberOfSamples):
-	indicator_(iCaption),
+RenderEngine::Progress::Progress(const std::string& caption, unsigned totalNumberOfSamples):
+	indicator_(caption),
 	numSamplesWritten_(0),
-	totalNumSamples_(iTotalNumberOfSamples)
+	totalNumSamples_(totalNumberOfSamples)
 {
 }
 
@@ -397,9 +396,9 @@ RenderEngine::Progress::~Progress()
 
 
 
-RenderEngine::Progress& RenderEngine::Progress::operator+=(unsigned iNumNewSamplesWritten)
+RenderEngine::Progress& RenderEngine::Progress::operator+=(unsigned numNewSamplesWritten)
 {
-	numSamplesWritten_ += iNumNewSamplesWritten;
+	numSamplesWritten_ += numNewSamplesWritten;
 	indicator_(static_cast<double>(numSamplesWritten_) / totalNumSamples_);
 	return *this;
 }

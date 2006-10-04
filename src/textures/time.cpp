@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -34,8 +34,7 @@ PY_CLASS_CONSTRUCTOR_0(Time);
 
 // --- public --------------------------------------------------------------------------------------
 
-Time::Time():
-	Texture(&Type)
+Time::Time()
 {
 }
 
@@ -47,9 +46,9 @@ Time::Time():
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum Time::doLookUp(const Sample& iSample, const IntersectionContext& iContext) const
+const Spectrum Time::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
-	return Spectrum(static_cast<TScalar>(iSample.time()));
+	return Spectrum(static_cast<TScalar>(sample.time()));
 }
 
 
@@ -61,7 +60,7 @@ const TPyObjectPtr Time::doGetState() const
 
 
 
-void Time::doSetState(const TPyObjectPtr& iState)
+void Time::doSetState(const TPyObjectPtr& state)
 {
 }
 

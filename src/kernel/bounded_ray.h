@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::BoundedRay
  *	@brief a 3D ray associated with a near and far clipping limit
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_BOUNDED_RAY_H
@@ -41,18 +41,18 @@ class LIAR_KERNEL_DLL BoundedRay
 public:
 
 	BoundedRay();
-    BoundedRay(const TRay3D& iUnboundedRay, 
-		const TScalar iNearLimit = liar::TNumTraits::zero, 
-		const TScalar iFarLimit = liar::TNumTraits::infinity);
-	BoundedRay(const TPoint3D& iSupport, const TVector3D& iDirection, 
-		const TScalar iNearLimit = liar::TNumTraits::zero, 
-		const TScalar iFarLimit = liar::TNumTraits::infinity);
-	BoundedRay(const TPoint3D& iSupport, const TVector3D& iDirection, 
-		const TScalar iNearLimit, const TScalar iFarLimit,
+    BoundedRay(const TRay3D& unboundedRay, 
+		const TScalar nearLimit = liar::TNumTraits::zero, 
+		const TScalar farLimit = liar::TNumTraits::infinity);
+	BoundedRay(const TPoint3D& support, const TVector3D& direction, 
+		const TScalar nearLimit = liar::TNumTraits::zero, 
+		const TScalar farLimit = liar::TNumTraits::infinity);
+	BoundedRay(const TPoint3D& support, const TVector3D& normalizedDirection, 
+		const TScalar nearLimit, const TScalar farLimit,
 		prim::IsAlreadyNormalized);
-	BoundedRay(const TPoint3D& iSupport, const TPoint3D& iLookAt, 
-		const TScalar iNearLimit = liar::TNumTraits::zero, 
-		const TScalar iFarLimit = liar::TNumTraits::infinity);
+	BoundedRay(const TPoint3D& support, const TPoint3D& iLookAt, 
+		const TScalar nearLimit = liar::TNumTraits::zero, 
+		const TScalar farLimit = liar::TNumTraits::infinity);
 
 	const TRay3D& unboundedRay() const { return unboundedRay_; }
 	const TScalar nearLimit() const { return nearLimit_; }
@@ -62,12 +62,14 @@ public:
 	TPoint3D& support() { return unboundedRay_.support(); }
 	const TVector3D& direction() const { return unboundedRay_.direction(); }
 
-	const TPoint3D point(TScalar iT) const { return unboundedRay_.point(iT); }
-	const bool inRange(TScalar iT) const 
+	const TPoint3D point(TScalar t) const { return unboundedRay_.point(t); }
+
+	/** return true if @a t is between the scalar bounds of the ray */
+	const bool inRange(TScalar t) const 
 	{ 
-		//return num::almostInOpenRange(iT, nearLimit_, farLimit_, tolerance); 
-		return iT > nearLimit_ * (TNumTraits::one + tolerance) &&
-			iT < farLimit_ * (TNumTraits::one - tolerance);
+		//return num::almostInOpenRange(t, nearLimit_, farLimit_, tolerance); 
+		return t > nearLimit_ * (TNumTraits::one + tolerance) &&
+			t < farLimit_ * (TNumTraits::one - tolerance);
 	}
 
 private:
@@ -77,9 +79,9 @@ private:
 	TScalar farLimit_;
 };
 
-LIAR_KERNEL_DLL BoundedRay transform(const BoundedRay& iRay, const TTransformation3D& iTransformation);
-LIAR_KERNEL_DLL BoundedRay transform(const BoundedRay& iRay, const TTransformation3D& iTransformation, TScalar& ioParameter);
-LIAR_KERNEL_DLL BoundedRay translate(const BoundedRay& iRay, const TVector3D& iOffset);
+LIAR_KERNEL_DLL BoundedRay transform(const BoundedRay& ray, const TTransformation3D& transformation);
+LIAR_KERNEL_DLL BoundedRay transform(const BoundedRay& ray, const TTransformation3D& transformation, TScalar& parameter);
+LIAR_KERNEL_DLL BoundedRay translate(const BoundedRay& ray, const TVector3D& offset);
 
 }
 

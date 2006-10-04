@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -46,7 +46,6 @@ Csg::TOperationDictionary Csg::operationDictionary_ = Csg::makeOperationDictiona
 
 Csg::Csg(const TSceneObjectPtr& iChildA,
 		 const TSceneObjectPtr& iChildB):
-    SceneObject(&Type),
     childA_(iChildA),
     childB_(iChildB),
 	operation_(oUnion)
@@ -58,7 +57,6 @@ Csg::Csg(const TSceneObjectPtr& iChildA,
 Csg::Csg(const TSceneObjectPtr& iChildA,
 		 const TSceneObjectPtr& iChildB,
 		 const std::string& iOperation):
-    SceneObject(&Type),
     childA_(iChildA),
     childB_(iChildB)
 {
@@ -89,16 +87,16 @@ const std::string Csg::operation() const
 
 
 
-void Csg::setChildA(const TSceneObjectPtr& iChild)
+void Csg::setChildA(const TSceneObjectPtr& child)
 {
-	childA_ = iChild;
+	childA_ = child;
 }
 
 
 
-void Csg::setChildB(const TSceneObjectPtr& iChild)
+void Csg::setChildB(const TSceneObjectPtr& child)
 {
-	childB_ = iChild;
+	childB_ = child;
 }
 
 
@@ -114,33 +112,33 @@ void Csg::setOperation(const std::string& iOperation)
 
 // --- private -------------------------------------------------------------------------------------
 
-void Csg::doAccept(util::VisitorBase& ioVisitor)
+void Csg::doAccept(util::VisitorBase& visitor)
 {
-    doVisit(*this, ioVisitor);
-    childA_->accept(ioVisitor);
-    childB_->accept(ioVisitor);
-	doVisitOnExit(*this, ioVisitor);
+    doVisit(*this, visitor);
+    childA_->accept(visitor);
+    childB_->accept(visitor);
+	doVisitOnExit(*this, visitor);
 }
 
 
 
-void Csg::doPreProcess(const TimePeriod& iPeriod)
+void Csg::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period)
 {
-	childA_->preProcess(iPeriod);
-	childB_->preProcess(iPeriod);
+	childA_->preProcess(scene, period);
+	childB_->preProcess(scene, period);
 }
 
 
 
-void Csg::doIntersect(const Sample& iSample, const BoundedRay& iRay, 
-					  Intersection& oResult) const
+void Csg::doIntersect(const Sample& sample, const BoundedRay& ray, 
+					  Intersection& result) const
 {
 	Intersection resultA;
 	Intersection resultB;
 	Intersection finalResult;
 	
-	childA_->intersect(iSample, iRay, resultA);
-	childB_->intersect(iSample, iRay, resultB);
+	childA_->intersect(sample, ray, resultA);
+	childB_->intersect(sample, ray, resultB);
 	while (!finalResult && (resultA && resultB))
 	{
 		if (num::almostEqual(resultA.t(), resultB.t(), tolerance))
@@ -170,9 +168,9 @@ void Csg::doIntersect(const Sample& iSample, const BoundedRay& iRay,
 			{
 			case 0:
 				{
-					BoundedRay ray(iRay.unboundedRay(), resultA.t(), iRay.farLimit());
-					childA_->intersect(iSample, ray, resultB);
-					childB_->intersect(iSample, ray, resultB);
+					BoundedRay ray(ray.unboundedRay(), resultA.t(), ray.farLimit());
+					childA_->intersect(sample, ray, resultB);
+					childB_->intersect(sample, ray, resultB);
 				}
 				break;
 			case 1:
@@ -199,8 +197,8 @@ void Csg::doIntersect(const Sample& iSample, const BoundedRay& iRay,
 			}
 			else
 			{
-				BoundedRay ray(iRay.unboundedRay(), resultA.t(), iRay.farLimit());
-				childA_->intersect(iSample, ray, resultA);
+				BoundedRay ray(ray.unboundedRay(), resultA.t(), ray.farLimit());
+				childA_->intersect(sample, ray, resultA);
 			}
 		}
 		else // if (resultB.t() < resultA.t())
@@ -217,8 +215,8 @@ void Csg::doIntersect(const Sample& iSample, const BoundedRay& iRay,
 			}
 			else
 			{
-				BoundedRay ray(iRay.unboundedRay(), resultB.t(), iRay.farLimit());
-				childB_->intersect(iSample, ray, resultB);
+				BoundedRay ray(ray.unboundedRay(), resultB.t(), ray.farLimit());
+				childB_->intersect(sample, ray, resultB);
 			}
 		}
 	}
@@ -227,14 +225,14 @@ void Csg::doIntersect(const Sample& iSample, const BoundedRay& iRay,
 	{
 		if (resultB)
 		{
-			if (childA_->contains(iSample, iRay.point(resultB.t())) == (operation_ != oUnion))
+			if (childA_->contains(sample, ray.point(resultB.t())) == (operation_ != oUnion))
 			{
 				finalResult.swap(resultB);
 			}
 		}
 		else if (resultA)
 		{
-			if (childB_->contains(iSample, iRay.point(resultB.t())) == (operation_ == oIntersection))
+			if (childB_->contains(sample, ray.point(resultB.t())) == (operation_ == oIntersection))
 			{
 				finalResult.swap(resultA);
 			}
@@ -246,60 +244,60 @@ void Csg::doIntersect(const Sample& iSample, const BoundedRay& iRay,
 		finalResult.push(this);
 	}
 
-	oResult.swap(finalResult);
+	result.swap(finalResult);
 }
 
 
 
 
-const bool Csg::doIsIntersecting(const Sample& iSample, 
-								 const BoundedRay& iRay) const
+const bool Csg::doIsIntersecting(const Sample& sample, 
+								 const BoundedRay& ray) const
 {
 	Intersection temp;
-	intersect(iSample, iRay, temp);
+	intersect(sample, ray, temp);
 	return temp;
 }
 
 
 
-void Csg::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
-								 const Intersection& iIntersection, 
-								 IntersectionContext& oResult) const
+void Csg::doLocalContext(const Sample& sample, const BoundedRay& ray,
+								 const Intersection& intersection, 
+								 IntersectionContext& result) const
 {
-    IntersectionDescendor descend(iIntersection);
-	if (iIntersection.object() == childA_.get())
+    IntersectionDescendor descend(intersection);
+	if (intersection.object() == childA_.get())
 	{
-		childA_->localContext(iSample, iRay, iIntersection, oResult);
+		childA_->localContext(sample, ray, intersection, result);
 	}
 	else
 	{
-		LASS_ASSERT(iIntersection.object() == childB_.get());
-		childB_->localContext(iSample, iRay, iIntersection, oResult);
-		if (operation_ == oDifference)
+		LASS_ASSERT(intersection.object() == childB_.get());
+		childB_->localContext(sample, ray, intersection, result);
+		/*if (operation_ == oDifference)
 		{
-			oResult.flipGeometricNormal();
-		}
+			result.flipNormal();
+		}*/
 	}
 }
 
 
 
-void Csg::doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const 
+void Csg::doLocalSpace(TTime time, TTransformation3D& localToWorld) const 
 {
 }
 
 
 
-const bool Csg::doContains(const Sample& iSample, const TPoint3D& iPoint) const
+const bool Csg::doContains(const Sample& sample, const TPoint3D& point) const
 {
 	switch (operation_)
 	{
 	case oUnion:
-		return childA_->contains(iSample, iPoint) || childB_->contains(iSample, iPoint);
+		return childA_->contains(sample, point) || childB_->contains(sample, point);
 	case oIntersection:
-		return childA_->contains(iSample, iPoint) && childB_->contains(iSample, iPoint);
+		return childA_->contains(sample, point) && childB_->contains(sample, point);
 	case oDifference:
-		return childA_->contains(iSample, iPoint) && !childB_->contains(iSample, iPoint);
+		return childA_->contains(sample, point) && !childB_->contains(sample, point);
 	default:
 		LASS_ASSERT_UNREACHABLE;
 		return false;
@@ -345,10 +343,10 @@ const TPyObjectPtr Csg::doGetState() const
 
 
 
-void Csg::doSetState(const TPyObjectPtr& iState)
+void Csg::doSetState(const TPyObjectPtr& state)
 {
 	int operation = 0;
-	LASS_ENFORCE(python::decodeTuple(iState, childA_, childB_, operation));
+	LASS_ENFORCE(python::decodeTuple(state, childA_, childB_, operation));
 	operation_ = static_cast<Operation>(operation);
 }
 
@@ -357,6 +355,7 @@ void Csg::doSetState(const TPyObjectPtr& iState)
 Csg::TOperationDictionary Csg::makeOperationDictionary()
 {
 	TOperationDictionary result;
+	result.enableSuggestions();
 	result.add("union", oUnion);
 	result.add("intersection", oIntersection);
 	result.add("difference", oDifference);

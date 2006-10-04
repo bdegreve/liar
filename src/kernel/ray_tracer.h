@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::RayTracer
  *  @brief base class of the actual ray tracer
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_RAY_TRACER_H
@@ -58,55 +58,55 @@ public:
     const TSceneObjectPtr& scene() const;
 	const unsigned maxRayGeneration() const;
 
-    void setScene(const TSceneObjectPtr& iScene);
-	void setMaxRayGeneration(const unsigned iRayGeneration);
+    void setScene(const TSceneObjectPtr& scene);
+	void setMaxRayGeneration(const unsigned rayGeneration);
 
-	void requestSamples(const TSamplerPtr& iSampler);
+	void requestSamples(const TSamplerPtr& sampler);
 
 	/** @warning castRay is NOT THREAD SAFE!
 	 */
-    const Spectrum castRay(const Sample& iSample, const DifferentialRay& iPrimaryRay) const 
+    const Spectrum castRay(const Sample& sample, const DifferentialRay& primaryRay) const 
     { 
 		RayGenerationIncrementor incrementor(*this);
 		if (rayGeneration_ <= maxRayGeneration_)
 		{
-			return doCastRay(iSample, iPrimaryRay);
+			return doCastRay(sample, primaryRay);
 		}
 		return Spectrum();
     }
 
 	/** @warning sampleLights is NOT THREAD SAFE!
 	 */
-	const TLightSamplesRange sampleLights(const Sample& iSample, 
-			const TPoint3D& iTarget, const TVector3D& iTargetNormal) const
+	const TLightSamplesRange sampleLights(const Sample& sample, 
+			const TPoint3D& target, const TVector3D& targetNormal) const
 	{
-		return doSampleLights(iSample, iTarget, iTargetNormal);
+		return doSampleLights(sample, target, targetNormal);
 	}
 
 	const TRayTracerPtr clone() const;
 
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const;
-	void setState(const TPyObjectPtr& iState);
+	void setState(const TPyObjectPtr& state);
 
 protected:
 
-    RayTracer(PyTypeObject* iType);
+    RayTracer();
 
 	const TLightContexts& lights() const { return lights_; }
 
 private:
 
     virtual void doPreprocess() = 0;
-	virtual void doRequestSamples(const TSamplerPtr& iSampler) = 0;
-    virtual const Spectrum doCastRay(const Sample& iSample, 
-		const DifferentialRay& iPrimaryRay) const = 0;
-	virtual const TLightSamplesRange doSampleLights(const Sample& iSample, 
-		const TPoint3D& iTarget, const TVector3D& iTargetNormal) const = 0;
+	virtual void doRequestSamples(const TSamplerPtr& sampler) = 0;
+    virtual const Spectrum doCastRay(const Sample& sample, 
+		const DifferentialRay& primaryRay) const = 0;
+	virtual const TLightSamplesRange doSampleLights(const Sample& sample, 
+		const TPoint3D& target, const TVector3D& targetNormal) const = 0;
 	virtual const TRayTracerPtr doClone() const = 0;
 
 	virtual const TPyObjectPtr doGetState() const = 0;
-	virtual void doSetState(const TPyObjectPtr& iState) = 0;
+	virtual void doSetState(const TPyObjectPtr& state) = 0;
 
 	class RayGenerationIncrementor: public util::NonCopyable
 	{

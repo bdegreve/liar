@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::Shader
  *  @brief base class of all shaders
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SHADER_H
@@ -31,6 +31,7 @@
 
 #include "kernel_common.h"
 #include "spectrum.h"
+#include <lass/util/small_object.h>
 
 namespace liar
 {
@@ -54,33 +55,70 @@ class LIAR_KERNEL_DLL Shader: public python::PyObjectPlus
     PY_HEADER(python::PyObjectPlus)
 public:
 
+	enum CapsFlags
+	{
+		capsReflection = 0x01,
+		capsTransmission = 0x02,
+		capsDiffuse = 0x04,
+		capsSpecular = 0x08,
+	};
+
     virtual ~Shader();
 
-	const Spectrum shade(const Sample& iSample, const DifferentialRay& iRay, 
-		const Intersection& iIntersection, const IntersectionContext& iContext) const
+	const unsigned caps() const { return caps_; }
+	const bool hasCaps(unsigned wantedCaps) const { return (caps_ & wantedCaps) == wantedCaps; }
+
+	const Spectrum emission(const Sample& sample, const IntersectionContext& context, 
+		const TVector3D& omegaOut) const
 	{
-		return doShade(iSample, iRay, iIntersection, iContext);
+		return doEmission(sample, context, omegaOut);
 	}
 
-	void requestSamples(const TSamplerPtr& iSampler);
+	void bsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
+		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn, 
+		Spectrum* firstValue, TScalar* firstPdf) const
+	{
+		return doBsdf(sample, context, omegaOut, firstOmegaIn, lastOmegaIn, 
+			firstValue, firstPdf);
+	}
+
+	void sampleBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
+		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
+		TVector3D* firstOmegaIn, Spectrum* firstValue, TScalar* firstPdf) const
+	{
+		return doSampleBsdf(sample, context, omegaOut, firstBsdfSample, lastBsdfSample, 
+			firstOmegaIn, firstValue, firstPdf);
+	}
+
+	void requestSamples(const TSamplerPtr& sampler);
 
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const;
-	void setState(const TPyObjectPtr& iState);
+	void setState(const TPyObjectPtr& state);
 
 protected:
 
-    Shader(PyTypeObject* iType);
+    Shader(unsigned capabilityFlags);
 
 private:
 
-	virtual const Spectrum doShade(const Sample& iSample, const DifferentialRay& iRay, 
-		const Intersection& iIntersection, const IntersectionContext& iContext) const = 0;
+	virtual const Spectrum doEmission(const Sample& sample, const IntersectionContext& context,
+		const TVector3D& omegaOut) const;
 
-	virtual void doRequestSamples(const TSamplerPtr& iSampler);
+	virtual void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
+		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn, 
+		Spectrum* firstValue, TScalar* firstPdf) const = 0;
+
+	virtual void doSampleBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
+		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
+		TVector3D* firstOmegaIn, Spectrum* firstValue, TScalar* firstPdf) const = 0;
+	
+	virtual void doRequestSamples(const TSamplerPtr& sampler);
 
 	virtual const TPyObjectPtr doGetState() const = 0;
-	virtual void doSetState(const TPyObjectPtr& iState) = 0;
+	virtual void doSetState(const TPyObjectPtr& state) = 0;
+
+	unsigned caps_;
 };
 
 typedef python::PyObjectPtr<Shader>::Type TShaderPtr;

@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -42,10 +42,10 @@ namespace impl
 	class RequestShaderSamples
 	{
 	public:
-		RequestShaderSamples(const TSamplerPtr& iSampler): sampler_(iSampler) {};
-		void operator()(const SceneObject& iObject)
+		RequestShaderSamples(const TSamplerPtr& sampler): sampler_(sampler) {};
+		void operator()(const SceneObject& object)
 		{
-			Shader* shader = iObject.shader().get();
+			Shader* shader = object.shader().get();
 			if (shader && visited_.count(shader) == 0)
 			{
 				shader->requestSamples(sampler_);
@@ -82,10 +82,10 @@ const unsigned RayTracer::maxRayGeneration() const
 
 
 
-void RayTracer::setScene(const TSceneObjectPtr& iScene)
+void RayTracer::setScene(const TSceneObjectPtr& scene)
 {
-    scene_ = iScene;
-	lights_ = gatherLightContexts(iScene);
+    scene_ = scene;
+	lights_ = gatherLightContexts(scene);
     doPreprocess();
 }
 
@@ -98,20 +98,20 @@ void RayTracer::setMaxRayGeneration(unsigned iMaxRayGeneration)
 
 
 
-void RayTracer::requestSamples(const TSamplerPtr& iSampler) 
+void RayTracer::requestSamples(const TSamplerPtr& sampler) 
 {
-	if (scene_ && iSampler)
+	if (scene_ && sampler)
 	{
-		iSampler->clearSubSequenceRequests();
+		sampler->clearSubSequenceRequests();
 
 		for (TLightContexts::iterator i = lights_.begin(); i != lights_.end(); ++i)
 		{
-			i->requestSamples(iSampler);
+			i->requestSamples(sampler);
 		}
 
-		forAllObjects(scene_, impl::RequestShaderSamples(iSampler));
+		forAllObjects(scene_, impl::RequestShaderSamples(sampler));
 
-		doRequestSamples(iSampler); 
+		doRequestSamples(sampler); 
 	}
 }
 
@@ -129,7 +129,8 @@ const TRayTracerPtr RayTracer::clone() const
 const TPyObjectPtr RayTracer::reduce() const
 {
 	return python::makeTuple(
-		reinterpret_cast<PyObject*>(this->GetType()), python::makeTuple(), this->getState());
+		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->GetType())), 
+		python::makeTuple(), this->getState());
 }
 
 
@@ -141,17 +142,16 @@ const TPyObjectPtr RayTracer::getState() const
 
 
 
-void RayTracer::setState(const TPyObjectPtr& iState)
+void RayTracer::setState(const TPyObjectPtr& state)
 {
-	doSetState(iState);
+	doSetState(state);
 }
 
 
 
 // --- protected -----------------------------------------------------------------------------------
 
-RayTracer::RayTracer(PyTypeObject* iType):
-    PyObjectPlus(iType),
+RayTracer::RayTracer():
 	maxRayGeneration_(8),
 	rayGeneration_(0)
 {

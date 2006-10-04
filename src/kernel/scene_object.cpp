@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -56,9 +56,9 @@ const TShaderPtr& SceneObject::shader() const
 
 
 
-void SceneObject::setShader(const TShaderPtr& iShader)
+void SceneObject::setShader(const TShaderPtr& shader)
 {
-    shader_ = iShader;
+    shader_ = shader;
 }
 
 
@@ -70,9 +70,9 @@ const bool SceneObject::isOverridingShader() const
 
 
 
-void SceneObject::setOverridingShader(bool iEnabled)
+void SceneObject::setOverridingShader(bool enabled)
 {
-    isOverridingShader_ = iEnabled;
+    isOverridingShader_ = enabled;
 }
 
 
@@ -84,9 +84,9 @@ const TMediumPtr& SceneObject::interior() const
 
 
 
-void SceneObject::setInterior(const TMediumPtr& iMedium)
+void SceneObject::setInterior(const TMediumPtr& medium)
 {
-	interior_ = iMedium;
+	interior_ = medium;
 }
 
 
@@ -108,7 +108,8 @@ void SceneObject::setDefaultShader(const TShaderPtr& iDefaultShader)
 const TPyObjectPtr SceneObject::reduce() const
 {
 	return python::makeTuple(
-		reinterpret_cast<PyObject*>(this->GetType()), python::makeTuple(), this->getState());
+		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->GetType())), 
+		python::makeTuple(), this->getState());
 }
 
 
@@ -120,19 +121,18 @@ const TPyObjectPtr SceneObject::getState() const
 
 
 
-void SceneObject::setState(const TPyObjectPtr& iState)
+void SceneObject::setState(const TPyObjectPtr& state)
 {
-	TPyObjectPtr state;
-	LASS_ENFORCE(python::decodeTuple(iState, shader_, interior_, state));
-	doSetState(state);
+	TPyObjectPtr derivedState;
+	LASS_ENFORCE(python::decodeTuple(state, shader_, interior_, derivedState));
+	doSetState(derivedState);
 }
 
 
 
 // --- protected -----------------------------------------------------------------------------------
 
-SceneObject::SceneObject(PyTypeObject* iType):
-    python::PyObjectPlus(iType),
+SceneObject::SceneObject():
     shader_(defaultShader_),
 	isOverridingShader_(false)
 {
@@ -142,7 +142,7 @@ SceneObject::SceneObject(PyTypeObject* iType):
 
 // --- private -------------------------------------------------------------------------------------
 
-void SceneObject::doPreProcess(const TimePeriod& iPeriod)
+void SceneObject::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period)
 {
 	// not all objects need this
 }
@@ -161,12 +161,12 @@ const bool SceneObject::doHasSurfaceSampling() const
 
 
 /** If an object can sample its surface, it must at least override this function.
- *  Using the (u,v) coordinates in @a iSample, it must generate a point on that surface,
- *  store the normal of the surface in that point in @a oNormal, store its probability
- *  density in @a oPdf and return that point.
+ *  Using the (u,v) coordinates in @a sample, it must generate a point on that surface,
+ *  store the normal of the surface in that point in @a normal, store its probability
+ *  density in @a pdf and return that point.
  */
-const TPoint3D SceneObject::doSampleSurface(const TVector2D& iSample, TVector3D& oNormal,
-		TScalar& oPdf) const
+const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, TVector3D& normal,
+		TScalar& pdf) const
 {
 	LASS_ASSERT(hasSurfaceSampling() == false);
 	LASS_THROW("surface sampling is unimplemented for scene objects '" << 
@@ -179,10 +179,10 @@ const TPoint3D SceneObject::doSampleSurface(const TVector2D& iSample, TVector3D&
  *  know the target (for a shadow ray).  If they have, they can override this function,
  *  if not, the more general one will be called by default.
  */
-const TPoint3D SceneObject::doSampleSurface(const TVector2D& iSample, const TPoint3D& iTarget, 
-		TVector3D& oNormal, TScalar& oPdf) const
+const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TPoint3D& target, 
+		TVector3D& normal, TScalar& pdf) const
 {
-	return doSampleSurface(iSample, oNormal, oPdf);
+	return doSampleSurface(sample, normal, pdf);
 }
 
 
@@ -192,15 +192,15 @@ const TPoint3D SceneObject::doSampleSurface(const TVector2D& iSample, const TPoi
  *  If they have, they can override this function, if not, the more general one will 
  *  be called by default.
  */
-const TPoint3D SceneObject::doSampleSurface(const TVector2D& iSample, const TPoint3D& iTarget, 
-		const TVector3D& iTargetNormal, TVector3D& oNormal, TScalar& oPdf) const
+const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TPoint3D& target, 
+		const TVector3D& targetNormal, TVector3D& normal, TScalar& pdf) const
 {
-	return doSampleSurface(iSample, iTarget, oNormal, oPdf);
+	return doSampleSurface(sample, target, normal, pdf);
 }
 
 
 
-void SceneObject::doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const
+void SceneObject::doLocalSpace(TTime time, TTransformation3D& localToWorld) const
 {
 	// most objects don't have a local space matrix.
 }

@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -42,15 +42,15 @@ class LIAR_TEXTURES_DLL CheckerBoard: public Mix2
 	PY_HEADER(Mix2)
 public:
 
-	CheckerBoard(const TTexturePtr& iA, const TTexturePtr& iB);
+	CheckerBoard(const TTexturePtr& a, const TTexturePtr& b);
 
 	const std::string antiAliasing() const;
-	void setAntiAliasing(const std::string& iMode);
+	void setAntiAliasing(const std::string& mode);
 
 	const TVector2D& split() const;
-	void setSplit(const TVector2D& iSplit);
+	void setSplit(const TVector2D& split);
 
-	static void setDefaultAntiAliasing(const std::string& iMode);
+	static void setDefaultAntiAliasing(const std::string& mode);
 
 private:
 
@@ -63,13 +63,13 @@ private:
 
 	typedef util::Dictionary<std::string, AntiAliasing> TAntiAliasingDictionary;
 
-	const Spectrum doLookUp(const Sample& iSample, 
-		const IntersectionContext& iContext) const;
+	const Spectrum doLookUp(const Sample& sample, 
+		const IntersectionContext& context) const;
 
 	const TPyObjectPtr doGetMixState() const;
-	void doSetMixState(const TPyObjectPtr& iState);
+	void doSetMixState(const TPyObjectPtr& state);
 
-	const TScalar integrate(const TVector2D& iMin, const TVector2D& iMax) const;
+	const TScalar integrate(const TVector2D& min, const TVector2D& max) const;
 
 	static TAntiAliasingDictionary makeAntiAliasingDictionary();
 

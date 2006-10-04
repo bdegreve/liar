@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -25,7 +25,8 @@
 
 // keep in alphabetical order please! [Bramz]
 //
-#include "direct_lighting.h"
+//#include "direct_lighting.h"
+#include "photon_mapper.h"
 
 #include <lass/io/proxy_man.h>
 
@@ -41,7 +42,8 @@ LIAR_TRACERS_DLL void inittracers(void)
 
 	// keep in alphabetical order please! [Bramz]
 	//
-	PY_INJECT_CLASS_IN_MODULE(DirectLighting, tracers, "simple ray tracer")
+	//PY_INJECT_CLASS_IN_MODULE(DirectLighting, tracers, "simple ray tracer")
+	PY_INJECT_CLASS_IN_MODULE(PhotonMapper, tracers, "ray tracer with photon mapper")
 
 	PyRun_SimpleString("print 'liar.tracers imported (v" 
 		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");

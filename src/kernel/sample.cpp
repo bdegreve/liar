@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@ namespace kernel
 // --- public --------------------------------------------------------------------------------------
 
 Sample::Sample():
-    screenCoordinate_(TPoint2D(0, 0)),
-    lensCoordinate_(TPoint2D(0, 0)),
+    screenCoordinate_(TSample2D(0, 0)),
+    lensCoordinate_(TSample2D(0, 0)),
 	time_(0.f),
     weight_(1),
 	sampler_(0)
@@ -43,14 +43,14 @@ Sample::Sample():
 
 
 
-const TPoint2D& Sample::screenCoordinate() const
+const Sample::TSample2D& Sample::screenCoordinate() const
 {
     return screenCoordinate_;
 }
 
 
 
-const TPoint2D& Sample::lensCoordinate() const
+const Sample::TSample2D& Sample::lensCoordinate() const
 {
     return lensCoordinate_;
 }
@@ -77,21 +77,21 @@ void Sample::setWeight(TScalar iWeight)
 
 
 
-const Sample::TSubSequence1D Sample::subSequence1D(int iId) const
+const Sample::TSubSequence1D Sample::subSequence1D(int id) const
 {
-	LASS_ASSERT(iId >= 0);
-	const unsigned k = sampler_->subSequenceOffset1D(iId);
-	const unsigned n = sampler_->subSequenceSize1D(iId);
+	LASS_ASSERT(id >= 0);
+	const unsigned k = sampler_->subSequenceOffset1D(id);
+	const unsigned n = sampler_->subSequenceSize1D(id);
 	return TSubSequence1D(subSequences1D_.begin() + k, subSequences1D_.begin() + k + n);
 }
 
 
 
-const Sample::TSubSequence2D Sample::subSequence2D(int iId) const
+const Sample::TSubSequence2D Sample::subSequence2D(int id) const
 {
-	LASS_ASSERT(iId >= 0);
-	const unsigned k = sampler_->subSequenceOffset2D(iId);
-	const unsigned n = sampler_->subSequenceSize2D(iId);
+	LASS_ASSERT(id >= 0);
+	const unsigned k = sampler_->subSequenceOffset2D(id);
+	const unsigned n = sampler_->subSequenceSize2D(id);
 	return TSubSequence2D(subSequences2D_.begin() + k, subSequences2D_.begin() + k + n);
 }
 

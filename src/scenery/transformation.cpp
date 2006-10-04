@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -38,11 +38,10 @@ PY_CLASS_MEMBER_R(Transformation, "worldToLocal", worldToLocal)
 
 // --- public --------------------------------------------------------------------------------------
 
-Transformation::Transformation(const TSceneObjectPtr& iChild, 
-							   const TTransformation3D& iLocalToWorld):
-    SceneObject(&Type),
-    child_(iChild),
-    localToWorld_(iLocalToWorld)
+Transformation::Transformation(const TSceneObjectPtr& child, 
+							   const TTransformation3D& localToWorld):
+    child_(child),
+    localToWorld_(localToWorld)
 {
 }
 
@@ -55,9 +54,9 @@ const TSceneObjectPtr& Transformation::child() const
 
 
 
-void Transformation::setChild(const TSceneObjectPtr& iChild)
+void Transformation::setChild(const TSceneObjectPtr& child)
 {
-	child_ = iChild;
+	child_ = child;
 }
 
 
@@ -69,9 +68,9 @@ const TTransformation3D& Transformation::localToWorld() const
 
 
 
-void Transformation::setLocalToWorld(const TTransformation3D& iLocalToWorld)
+void Transformation::setLocalToWorld(const TTransformation3D& localToWorld)
 {
-	localToWorld_ = iLocalToWorld;
+	localToWorld_ = localToWorld;
 }
 
 
@@ -87,72 +86,72 @@ const TTransformation3D Transformation::worldToLocal() const
 
 // --- private -------------------------------------------------------------------------------------
 
-void Transformation::doPreProcess(const TimePeriod& iPeriod)
+void Transformation::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period)
 {
-	child_->preProcess(iPeriod);
+	child_->preProcess(scene, period);
 }
 
 
 
-void Transformation::doAccept(util::VisitorBase& ioVisitor)
+void Transformation::doAccept(util::VisitorBase& visitor)
 {
-    doVisit(*this, ioVisitor);
-    child_->accept(ioVisitor);
-	doVisitOnExit(*this, ioVisitor);
+    doVisit(*this, visitor);
+    child_->accept(visitor);
+	doVisitOnExit(*this, visitor);
 }
 
 
 
-void Transformation::doIntersect(const Sample& iSample, const BoundedRay& iRay, 
-								 Intersection& oResult) const
+void Transformation::doIntersect(const Sample& sample, const BoundedRay& ray, 
+								 Intersection& result) const
 {
 	TScalar tScaler = TNumTraits::one;
-	const BoundedRay localRay = transform(iRay, localToWorld_.inverse(), tScaler);
-	child_->intersect(iSample, localRay, oResult);
-    if (oResult)
+	const BoundedRay localRay = transform(ray, localToWorld_.inverse(), tScaler);
+	child_->intersect(sample, localRay, result);
+    if (result)
     {
-        oResult.push(this, oResult.t() / tScaler);
+        result.push(this, result.t() / tScaler);
     }
 }
 
 
 
-const bool Transformation::doIsIntersecting(const Sample& iSample, 
-											const BoundedRay& iRay) const
+const bool Transformation::doIsIntersecting(const Sample& sample, 
+											const BoundedRay& ray) const
 {
-	const BoundedRay localRay = transform(iRay, localToWorld_.inverse());
-	return child_->isIntersecting(iSample, localRay);
+	const BoundedRay localRay = transform(ray, localToWorld_.inverse());
+	return child_->isIntersecting(sample, localRay);
 }
 
 
 
-void Transformation::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
-									const Intersection& iIntersection, 
-									IntersectionContext& oResult) const
+void Transformation::doLocalContext(const Sample& sample, const BoundedRay& ray,
+									const Intersection& intersection, 
+									IntersectionContext& result) const
 {
-	IntersectionDescendor descendor(iIntersection);
-	LASS_ASSERT(iIntersection.object() == child_.get());
+	IntersectionDescendor descendor(intersection);
+	LASS_ASSERT(intersection.object() == child_.get());
 
-	const BoundedRay localRay = ::liar::kernel::transform(iRay, localToWorld_.inverse());
-	child_->localContext(iSample, localRay, iIntersection, oResult);
+	const BoundedRay localRay = ::liar::kernel::transform(ray, localToWorld_.inverse());
+	child_->localContext(sample, localRay, intersection, result);
 
-	oResult.transform(localToWorld_);
-	oResult.setT(iIntersection.t());
+	result.transformBy(localToWorld_);
+	result.setT(intersection.t());
 }
 
 
 
-void Transformation::doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const
+void Transformation::doLocalSpace(TTime time, TTransformation3D& localToWorld) const
 {
-	ioLocalToWorld = concatenate(localToWorld_, ioLocalToWorld);
+	localToWorld = concatenate(localToWorld_, localToWorld);
 }
 
 
 
-const bool Transformation::doContains(const Sample& iSample, const TPoint3D& iPoint) const
+const bool Transformation::doContains(const Sample& sample, const TPoint3D& point) const
 {
-	const TPoint3D localPoint = transform(iPoint, localToWorld_.inverse());
-	return child_->contains(iSample, localPoint);
+	const TPoint3D localPoint = transform(point, localToWorld_.inverse());
+	return child_->contains(sample, localPoint);
 }
 
 
@@ -178,9 +177,9 @@ const TPyObjectPtr Transformation::doGetState() const
 
 
 
-void Transformation::doSetState(const TPyObjectPtr& iState)
+void Transformation::doSetState(const TPyObjectPtr& state)
 {
-	LASS_ENFORCE(python::decodeTuple(iState, child_, localToWorld_));
+	LASS_ENFORCE(python::decodeTuple(state, child_, localToWorld_));
 }
 
 

@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -57,8 +57,7 @@ TSpectrumFormatPtr SpectrumFormat::defaultFormat_ = TSpectrumFormatPtr(new Spect
  *  
  *  The CIE-1964 standard observer is used to calculate XYZ tristimulus weights
  */
-SpectrumFormat::SpectrumFormat(unsigned iNumberOfBands):
-	PyObjectPlus(&Type)
+SpectrumFormat::SpectrumFormat(unsigned iNumberOfBands)
 {
 	boundaries_ = generateBoundaries(iNumberOfBands, 380e-9f, 780e-9f);
 	centres_ = centresFromBoundaries(boundaries_);
@@ -76,8 +75,7 @@ SpectrumFormat::SpectrumFormat(unsigned iNumberOfBands):
  *  The CIE-1964 standard observer is used to calculate XYZ tristimulus weights.
  */
 SpectrumFormat::SpectrumFormat(unsigned iNumberOfBands, TScalar iBeginWavelength, 
-							   TScalar iEndWavelength):
-	PyObjectPlus(&Type)
+							   TScalar iEndWavelength)
 {
 	boundaries_ = generateBoundaries(iNumberOfBands, iBeginWavelength, iEndWavelength);
 	centres_ = centresFromBoundaries(boundaries_);
@@ -95,7 +93,6 @@ SpectrumFormat::SpectrumFormat(unsigned iNumberOfBands, TScalar iBeginWavelength
  *  The CIE-1964 standard observer is used to calculate XYZ tristimulus weights.
  */
 SpectrumFormat::SpectrumFormat(const TWavelengths& iBandBoundaries):
-	PyObjectPlus(&Type),
 	boundaries_(iBandBoundaries)
 {
 	centres_ = centresFromBoundaries(boundaries_);
@@ -115,7 +112,6 @@ SpectrumFormat::SpectrumFormat(const TWavelengths& iBandBoundaries):
  */
 SpectrumFormat::SpectrumFormat(const TWavelengths& iBandBoundaries,
 							   const TXyzWeights& iXyzWeights):
-	PyObjectPlus(&Type),
 	boundaries_(iBandBoundaries),
 	xyzWeights_(iXyzWeights)
 {
@@ -142,42 +138,42 @@ const TScalar SpectrumFormat::totalBandWidth() const
 
 
 
-const TScalar SpectrumFormat::beginWavelength(unsigned iBand) const
+const TScalar SpectrumFormat::beginWavelength(unsigned band) const
 {
-	LASS_ASSERT(iBand < numberOfBands());
-	return boundaries_[iBand];
+	LASS_ASSERT(band < numberOfBands());
+	return boundaries_[band];
 }
 
 
 
-const TScalar SpectrumFormat::endWavelength(unsigned iBand) const
+const TScalar SpectrumFormat::endWavelength(unsigned band) const
 {
-	LASS_ASSERT(iBand < numberOfBands());
-	return boundaries_[iBand + 1];
+	LASS_ASSERT(band < numberOfBands());
+	return boundaries_[band + 1];
 }
 
 
 
-const TScalar SpectrumFormat::centerWavelength(unsigned iBand) const
+const TScalar SpectrumFormat::centerWavelength(unsigned band) const
 {
-	LASS_ASSERT(iBand < numberOfBands());
-	return centres_[iBand];
+	LASS_ASSERT(band < numberOfBands());
+	return centres_[band];
 }
 
 
 
-const TScalar SpectrumFormat::bandWidth(unsigned iBand) const
+const TScalar SpectrumFormat::bandWidth(unsigned band) const
 {
-	LASS_ASSERT(iBand < numberOfBands());
-	return boundaries_[iBand + 1] - boundaries_[iBand];
+	LASS_ASSERT(band < numberOfBands());
+	return boundaries_[band + 1] - boundaries_[band];
 }
 
 
 
-const TVector3D SpectrumFormat::xyzWeight(unsigned iBand) const
+const TVector3D SpectrumFormat::xyzWeight(unsigned band) const
 {
-	LASS_ASSERT(iBand < numberOfBands());
-	return xyzWeights_[iBand];
+	LASS_ASSERT(band < numberOfBands());
+	return xyzWeights_[band];
 }
 
 

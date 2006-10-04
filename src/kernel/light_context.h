@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::LightContext
  *  @brief unfolded context for a light
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_LIGHT_CONTEXT_H
@@ -46,7 +46,7 @@ public:
 
 	typedef std::vector<TSceneObjectPtr> TObjectPath;
 
-	LightContext(const TObjectPath& iObjectPathToLight, const SceneLight& iLight);
+	LightContext(const TObjectPath& objectPathToLight, const SceneLight& light);
 
 	const TObjectPath& objectPath() const { return objectPath_; }
 	const SceneLight& light() const { return *light_; }
@@ -55,13 +55,18 @@ public:
 	const int idBsdfSamples() const { return idBsdfSamples_; }
 	const int idBsdfComponentSamples() const { return idBsdfComponentSamples_; }
 
-    void requestSamples(const TSamplerPtr& iSampler);
+    void requestSamples(const TSamplerPtr& sampler);
 
-	const Spectrum sampleEmission(const Sample& iCameraSample, const TVector2D& iSample,  
-		const TPoint3D& iTarget, const TVector3D& iTargetNormal, BoundedRay& oShadowRay, 
-		TScalar& oPdf) const;
+	const Spectrum sampleEmission(const Sample& cameraSample, const TPoint2D& sample,  
+		const TPoint3D& target, const TVector3D& targetNormal, BoundedRay& shadowRay, 
+		TScalar& pdf) const;
+	const Spectrum sampleEmission(const TPoint2D& sampleA, const TPoint2D& sampleB,
+		TRay3D& emissionRay, TScalar& pdf) const;
+	const Spectrum totalPower() const;
 
 private:
+
+	void setTime(TTime time) const;
 
 	mutable TTransformation3D localToWorld_;	/**< concatenated local to world transformation */
 	mutable TTime timeOfTransformation_;		/**< time localToWorld_ was calculated for */
@@ -77,7 +82,7 @@ private:
 
 typedef std::vector<LightContext> TLightContexts;
 
-TLightContexts gatherLightContexts(const TSceneObjectPtr& iSceneObject);
+TLightContexts gatherLightContexts(const TSceneObjectPtr& scene);
 
 }
 

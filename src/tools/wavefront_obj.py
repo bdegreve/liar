@@ -1,6 +1,6 @@
 #
 #	LiAR isn't a raytracer
-#	Copyright (C) 2004-2005  Bram de Greve (bramz@sourceforge.net)
+#	Copyright (C) 2004-2006  Bram de Greve (bramz@sourceforge.net)
 #
 #	This program is free software; you can redistribute it and/or modify
 #	it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import liar.shaders
 import liar.textures
 import math
 
-def load(iFilename):
+def load(filename):
 	vertices = []
 	normals = []
 	uvs = []
@@ -35,9 +35,9 @@ def load(iFilename):
 	materials = {'': liar.shaders.Simple(liar.textures.Constant(liar.rgb(1, 1, 1)))}
 	currentMaterial = materials['']
 	
-	def _int_or_none(iX):
+	def _int_or_none(x):
 		try:
-			return int(iX)
+			return int(x)
 		except:
 			return None
 	
@@ -53,13 +53,13 @@ def load(iFilename):
 			return n
 		return tuple([x / norm for x in n])
 		
-	def _loadMaterials(iFilename):
+	def _loadMaterials(filename):
 		currentMaterial = None
 		materials = {}
-		for line in file(iFilename):
+		for line in file(filename):
 			def _enforceFields(iSuccess):
 				if not iSuccess:
-					raise "material libary %s has syntax error: %s" % (iFilename, line)
+					raise "material libary %s has syntax error: %s" % (filename, line)
 				
 			fields = line.split()
 			if len(fields) > 0:
@@ -127,15 +127,15 @@ def load(iFilename):
 		group.shader = material
 		return group
 			
-	print "loading Wavefront OBJ file %s ..." % iFilename
+	print "loading Wavefront OBJ file %s ..." % filename
 	
-	for line in file(iFilename):
+	for line in file(filename):
 		fields = line.split()
 		if len(fields) > 0:
 			
 			def _enforceFields(iSuccess):
 				if not iSuccess:
-					raise "obj file %s has syntax error: %s" % (iFilename, line)
+					raise "obj file %s has syntax error: %s" % (filename, line)
 			
 			command = fields[0]
 			fields = fields[1:]
@@ -154,7 +154,7 @@ def load(iFilename):
 				except:
 					name = ''
 				if name not in materials.keys():
-					print "obj file %s uses unknown material '%s', using default instead: %s" % (iFilename, name, line)
+					print "obj file %s uses unknown material '%s', using default instead: %s" % (filename, name, line)
 					name = ''
 				currentMaterial = materials[name]
 			
@@ -190,7 +190,7 @@ def load(iFilename):
 							elif vertex[k] < 0:
 								vertex[k] += len(vectors[k])
 							else:
-								raise "obj file %s has 0 index on line: %s" % (iFilename, line)
+								raise "obj file %s has 0 index on line: %s" % (filename, line)
 				
 				# reformat vertex data to (v, vn, vt) and make sure its of length 3 
 				# (use None to fill missing values)

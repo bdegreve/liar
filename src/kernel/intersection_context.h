@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::IntersectionContext
  *  @brief contains local geometry context of intersection point
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_INTERSECTION_CONTEXT_H
@@ -44,55 +44,56 @@ class LIAR_KERNEL_DLL IntersectionContext
 {
 public:
 
-	IntersectionContext(const RayTracer* iTracer = 0);
+	IntersectionContext(const RayTracer* tracer = 0);
 
     const TPoint3D& point() const { return point_; }
 	const TVector3D& dPoint_dU() const { return dPoint_dU_; }
 	const TVector3D& dPoint_dV() const { return dPoint_dV_; }
 	const TVector3D& dPoint_dI() const { return dPoint_dI_; }
 	const TVector3D& dPoint_dJ() const { return dPoint_dJ_; }
+	const TVector3D& geometricNormal() const { return geometricNormal_; }
     const TVector3D& normal() const { return normal_; }
 	const TVector3D& dNormal_dU() const { return dNormal_dU_; }
 	const TVector3D& dNormal_dV() const { return dNormal_dV_; }
 	const TVector3D& dNormal_dI() const { return dNormal_dI_; }
 	const TVector3D& dNormal_dJ() const { return dNormal_dJ_; }
-	const TVector3D& geometricNormal() const { return geometricNormal_; }
 	const TPoint2D& uv() const { return uv_; }
 	const TVector2D& dUv_dI() const { return dUv_dI_; }
 	const TVector2D& dUv_dJ() const { return dUv_dJ_; }
     const TScalar t() const { return t_; }
     const Shader* const shader() const { return shader_; }
 
-    void setPoint(const TPoint3D& iPoint) { point_ = iPoint; }
-	void setDPoint_dU(const TVector3D& iDPoint_dU) { dPoint_dU_ = iDPoint_dU; }
-	void setDPoint_dV(const TVector3D& iDPoint_dV) { dPoint_dV_ = iDPoint_dV; }
-    void setNormal(const TVector3D& iNormal) { normal_ = iNormal; }
-	void setDNormal_dU(const TVector3D& iDNormal_dU) { dNormal_dU_ = iDNormal_dU; }
-	void setDNormal_dV(const TVector3D& iDNormal_dV) { dNormal_dV_ = iDNormal_dV; }
-	void setGeometricNormal(const TVector3D& iNormal) { geometricNormal_ = iNormal; }
-	void setUv(const TPoint2D& iUv) { uv_ = iUv; }
-	void setUv(const TScalar iU, const TScalar iV) { uv_.x = iU; uv_.y = iV; }
-	void setDUv_dI(const TVector2D& iDUv_dI) { dUv_dI_ = iDUv_dI; }
-	void setDUv_dJ(const TVector2D& iDUv_dJ) { dUv_dJ_ = iDUv_dJ; }
-    void setT(TScalar iT) { t_ = iT; }
-    void setShader(const TShaderPtr& iShader) { shader_ = iShader.get(); }
+    void setPoint(const TPoint3D& point) {  LASS_ASSERT(!shader_); point_ = point; }
+	void setDPoint_dU(const TVector3D& dPoint_dU) { LASS_ASSERT(!shader_); dPoint_dU_ = dPoint_dU; }
+	void setDPoint_dV(const TVector3D& dPoint_dV) { LASS_ASSERT(!shader_); dPoint_dV_ = dPoint_dV; }
+	void setGeometricNormal(const TVector3D& geometricNormal) { geometricNormal_ = geometricNormal; }
+    void setNormal(const TVector3D& normal) { normal_ = normal; }
+	void setDNormal_dU(const TVector3D& dNormal_dU) { dNormal_dU_ = dNormal_dU; }
+	void setDNormal_dV(const TVector3D& dNormal_dV) { dNormal_dV_ = dNormal_dV; }
+	void setUv(const TPoint2D& uv) { uv_ = uv; }
+	void setUv(const TScalar u, const TScalar iV) { uv_.x = u; uv_.y = iV; }
+	void setDUv_dI(const TVector2D& dUv_dI) { dUv_dI_ = dUv_dI; }
+	void setDUv_dJ(const TVector2D& dUv_dJ) { dUv_dJ_ = dUv_dJ; }
+    void setT(TScalar t) { t_ = t; }
+    void setShader(const TShaderPtr& shader);
 
-	void setScreenSpaceDifferentials(const DifferentialRay& iRay);
+	void setScreenSpaceDifferentials(const DifferentialRay& ray);
 
-	void transform(const TTransformation3D& iTransformation);
-	void translate(const TVector3D& iOffset);
-	void flipNormal();
-	void flipGeometricNormal();
+	void transformBy(const TTransformation3D& transformation);
+	void translateBy(const TVector3D& offset);
+	const TVector3D flipTo(const TVector3D& worldOmega);
 
-	const Spectrum shade(const Sample& iSample, const DifferentialRay& iRay, 
-		const Intersection& iIntersection) const;
-	const Spectrum gather(const Sample& iSample, const DifferentialRay& iRay) const;
-	const TLightSamplesRange sampleLights(const Sample& iSample) const;
+	const TTransformation3D& shaderToWorld() const { LASS_ASSERT(shader_); return shaderToWorld_; }
+	const TVector3D shaderToWorld(const TVector3D& v) const { return prim::transform(v, shaderToWorld()); }
+
+	const TTransformation3D worldToShader() const { return shaderToWorld().inverse(); }
+	const TVector3D worldToShader(const TVector3D& v) const { return prim::transform(v, worldToShader()); }
 
 private:
 
-	void setScreenSpaceDifferentialsI(const TRay3D& iRay, TVector3D& oDPoint, 
+	void setScreenSpaceDifferentialsI(const TRay3D& ray, TVector3D& oDPoint, 
 		TVector3D& oDNormal, TVector2D& oDUv);
+	void generateShaderToWorld();
 
     TPoint3D point_;		/**< world space coordinate */
 	TVector3D dPoint_dU_;	/**< partial derivative of point_ to surface coordinate u */
@@ -100,12 +101,13 @@ private:
 	TVector3D dPoint_dI_;	/**< partial derivative of point_ to screen space coordinate i */
 	TVector3D dPoint_dJ_;	/**< partial derivative of point_ to screen space coordinate j */
 
+	TVector3D geometricNormal_;	/**< normal of underlying geometry.  Do we need it?  Yes, think 
+									triangle normal in triangle meshes ...*/
 	TVector3D normal_;		/**< normal of surface in world space */
 	TVector3D dNormal_dU_;	/**< partial derivative of normal_ to surface coordinate u */
 	TVector3D dNormal_dV_;	/**< partial derivative of normal_ to surface coordinate v */
 	TVector3D dNormal_dI_;	/**< partial derivative of normal_ to screen space coordinate i */
 	TVector3D dNormal_dJ_;	/**< partial derivative of normal_ to screen space coordinate j */
-	TVector3D geometricNormal_;
 
 	TPoint2D uv_;			/**< parametric coordinate of point_ on surface */
 	TVector2D dUv_dI_;		/**< partial derivative of uv_ to screen space coordinate i */
@@ -115,7 +117,7 @@ private:
     const Shader* shader_;		/**< shader to be used */
 	const RayTracer* tracer_;	/**< tracer to be used */
 
-	TTransformation3D localToWorld_;
+	TTransformation3D shaderToWorld_;
 
 	bool hasScreenSpaceDifferentials_;
 };

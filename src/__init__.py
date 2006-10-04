@@ -1,6 +1,6 @@
 #
 #	LiAR isn't a raytracer
-#	Copyright (C) 2004-2005  Bram de Greve (bramz@sourceforge.net)
+#	Copyright (C) 2004-2006  Bram de Greve (bramz@sourceforge.net)
 #
 #	This program is free software; you can redistribute it and/or modify
 #	it under the terms of the GNU General Public License as published by

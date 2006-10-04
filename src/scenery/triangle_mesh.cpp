@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -46,7 +46,6 @@ PY_CLASS_METHOD_DOC(TriangleMesh, smoothNormals,
 
 TriangleMesh::TriangleMesh(const TVertices& iVertices, const TNormals& iNormals,
 		const TUvs& iUvs, const TIndexTriangles& iTriangles):
-	SceneObject(&Type),
     mesh_(iVertices, iNormals, iUvs, iTriangles)
 {
 }
@@ -66,62 +65,62 @@ void TriangleMesh::smoothNormals(TScalar iMaxAngleInRadians)
 
 // --- private -------------------------------------------------------------------------------------
 
-void TriangleMesh::doIntersect(const Sample& iSample, const BoundedRay& iRay, 
-						 Intersection& oResult) const
+void TriangleMesh::doIntersect(const Sample& sample, const BoundedRay& ray, 
+						 Intersection& result) const
 {
     TScalar t;
 	TMesh::TTriangleIterator triangle;
-	const prim::Result hit = mesh_.intersect(iRay.unboundedRay(), triangle, t, iRay.nearLimit());
-	if (hit == prim::rOne && iRay.inRange(t))
+	const prim::Result hit = mesh_.intersect(ray.unboundedRay(), triangle, t, ray.nearLimit());
+	if (hit == prim::rOne && ray.inRange(t))
 	{
-		oResult = Intersection(this, t, seNoEvent, triangle - mesh_.triangles().begin());
+		result = Intersection(this, t, seNoEvent, triangle - mesh_.triangles().begin());
 	}
 	else
 	{
-		oResult = Intersection::empty();
+		result = Intersection::empty();
 	}
 }
 
 
 
-const bool TriangleMesh::doIsIntersecting(const Sample& iSample, 
-									const BoundedRay& iRay) const
+const bool TriangleMesh::doIsIntersecting(const Sample& sample, 
+									const BoundedRay& ray) const
 {
-	return mesh_.intersects(iRay.unboundedRay(), iRay.nearLimit(), iRay.farLimit());
+	return mesh_.intersects(ray.unboundedRay(), ray.nearLimit(), ray.farLimit());
 }
 
 
 
-void TriangleMesh::doLocalContext(const Sample& iSample, const BoundedRay& iRay,                            
-								  const Intersection& iIntersection, 
-								  IntersectionContext& oResult) const
+void TriangleMesh::doLocalContext(const Sample& sample, const BoundedRay& ray,                            
+								  const Intersection& intersection, 
+								  IntersectionContext& result) const
 {
-	const TScalar t = iIntersection.t();
-	const TPoint3D point = iRay.point(t);
-    oResult.setT(t);
-    oResult.setPoint(point);
+	const TScalar t = intersection.t();
+	const TPoint3D point = ray.point(t);
+    result.setT(t);
+    result.setPoint(point);
 
-	LASS_ASSERT(iIntersection.specialField() < mesh_.triangles().size());
-	const TMesh::TTriangle& triangle = mesh_.triangles()[iIntersection.specialField()];
+	LASS_ASSERT(intersection.specialField() < mesh_.triangles().size());
+	const TMesh::TTriangle& triangle = mesh_.triangles()[intersection.specialField()];
 
 	TMesh::TIntersectionContext context;
 	TScalar t2;	
-	const prim::Result result = triangle.intersect(iRay.unboundedRay(), t2, iRay.nearLimit(), &context);
+	const prim::Result r = triangle.intersect(ray.unboundedRay(), t2, ray.nearLimit(), &context);
 #pragma LASS_FIXME("why can t != t2?")
-	//LASS_ASSERT(result == prim::rOne && t == t2);
+	LASS_ASSERT(r == prim::rOne /*&& t == t2*/);
 
-	oResult.setGeometricNormal(context.geometricNormal);
-	oResult.setNormal(context.normal);
-	oResult.setDPoint_dU(context.dPoint_dU);
-	oResult.setDPoint_dV(context.dPoint_dV);
-	oResult.setDNormal_dU(context.dNormal_dU);
-	oResult.setDNormal_dV(context.dNormal_dV);
-	oResult.setUv(context.uv);
+	result.setGeometricNormal(context.geometricNormal);
+	result.setNormal(context.normal);
+	result.setDPoint_dU(context.dPoint_dU);
+	result.setDPoint_dV(context.dPoint_dV);
+	result.setDNormal_dU(context.dNormal_dU);
+	result.setDNormal_dV(context.dNormal_dV);
+	result.setUv(context.uv);
 }
 
 
 
-const bool TriangleMesh::doContains(const Sample& iSample, const TPoint3D& iPoint) const
+const bool TriangleMesh::doContains(const Sample& sample, const TPoint3D& point) const
 {
 	return false;
 }
@@ -151,13 +150,13 @@ const TPyObjectPtr TriangleMesh::doGetState() const
 
 
 
-void TriangleMesh::doSetState(const TPyObjectPtr& iState)
+void TriangleMesh::doSetState(const TPyObjectPtr& state)
 {
 	TMesh::TVertices vertices;
 	TMesh::TNormals normals;
 	TMesh::TUvs uvs;
 	TIndexTriangles triangles;
-	LASS_ENFORCE(python::decodeTuple(iState, vertices, normals, uvs, triangles));
+	LASS_ENFORCE(python::decodeTuple(state, vertices, normals, uvs, triangles));
 	mesh_ = TMesh(vertices, normals, uvs, triangles);
 }
 

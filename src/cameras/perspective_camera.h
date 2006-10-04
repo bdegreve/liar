@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::cameras::PerspectiveCamera
  *  @brief a standard perspective camera
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_CAMERAS_PERSPECTIVE_CAMERA_H
@@ -51,50 +51,50 @@ public:
     void lookAt(const TPoint3D&);
 
     const TScalar fovAngle() const;
-    void setFovAngle(TScalar iFov);
+    void setFovAngle(TScalar fov);
 
     const TScalar aspectRatio() const;
-    void setAspectRatio(TScalar iRatio);
+    void setAspectRatio(TScalar ratio);
 
-    void tilt(TScalar iAngle);
-    void pitch(TScalar iAngle);
-    void roll(TScalar iAngle);
+    void tilt(TScalar angle);
+    void pitch(TScalar angle);
+    void roll(TScalar angle);
 
     const TVector3D& direction() const;
-    void setDirection(const TVector3D& iDirection);
+    void setDirection(const TVector3D& direction);
 
     const TVector3D& down() const;
-    void setDown(const TVector3D& iDown);
+    void setDown(const TVector3D& down);
 
     const TVector3D& right() const;
     void setRight(const TVector3D& iRight);
 
 	const TVector3D& sky() const;
-	void setSky(const TVector3D& iSky);
+	void setSky(const TVector3D& sky);
 
 	const TTime shutterOpenDelta() const;
 	const TTime shutterCloseDelta() const;
-	void setShutterOpenDelta(TTime iShutterOpenDelta);
-	void setShutterCloseDelta(TTime iShutterCloseDelta);
+	void setShutterOpenDelta(TTime shutterOpenDelta);
+	void setShutterCloseDelta(TTime shutterCloseDelta);
 
 	TScalar focalDistance() const;
 	TScalar lensRadius() const;
-	void setFocalDistance(TScalar iDistance);
-	void setLensRadius(TScalar iRadius);
+	void setFocalDistance(TScalar distance);
+	void setLensRadius(TScalar radius);
 
 	TScalar nearLimit() const;
 	TScalar farLimit() const;
-	void setNearLimit(TScalar iDistance);
-	void setFarLimit(TScalar iDistance);
+	void setNearLimit(TScalar distance);
+	void setFarLimit(TScalar distance);
 
 private:
 
-    const BoundedRay doGenerateRay(const Sample& iSample, 
-		const TVector2D& iScreenSpaceDelta) const;
+    const BoundedRay doGenerateRay(const Sample& sample, 
+		const TVector2D& screenSpaceDelta) const;
 	const TimePeriod doShutterDelta() const;
 
 	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& iState);
+	void doSetState(const TPyObjectPtr& state);
 
     void initTransformation();
 

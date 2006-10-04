@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::DifferentialRay
  *  @brief a bounded ray plus two rays for screen space differentials
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_DIFFERENTIAL_RAY_H
@@ -45,9 +45,9 @@ class LIAR_KERNEL_DLL DifferentialRay
 public:
 
 	DifferentialRay();
-    DifferentialRay(const BoundedRay& iCentralRay, 
-		const TRay3D& iDifferentialI, 
-		const TRay3D& iDifferentialJ);
+    DifferentialRay(const BoundedRay& centralRay, 
+		const TRay3D& differentialI, 
+		const TRay3D& differentialJ);
 
 	const BoundedRay& centralRay() const { return centralRay_; }
 	const TRay3D& differentialI() const { return differentialI_; }
@@ -58,11 +58,11 @@ public:
 
 	const bool isValid() const { return centralRay_.unboundedRay().isValid(); }
 
-	friend LIAR_KERNEL_DLL DifferentialRay reflect(const IntersectionContext& iContext, 
-										const DifferentialRay& iRay); 
-	friend LIAR_KERNEL_DLL DifferentialRay refract(const IntersectionContext& iContext, 
-										const DifferentialRay& iRay, 
-										TScalar iRelativeRefractionIndex); 
+	friend LIAR_KERNEL_DLL DifferentialRay reflect(const IntersectionContext& context, 
+										const DifferentialRay& ray); 
+	friend LIAR_KERNEL_DLL DifferentialRay refract(const IntersectionContext& context, 
+										const DifferentialRay& ray, 
+										TScalar refractionIndex1over2); 
 
 private:
 
@@ -71,12 +71,12 @@ private:
     TRay3D differentialJ_;
 };
 
-LIAR_KERNEL_DLL DifferentialRay transform(const DifferentialRay& iRay,
-		const TTransformation3D& iTransformation);
-LIAR_KERNEL_DLL DifferentialRay reflect(const IntersectionContext& iContext, 
-		const DifferentialRay& iRay); 
-LIAR_KERNEL_DLL DifferentialRay refract(const IntersectionContext& iContext,
-		const DifferentialRay& iRay, TScalar iRefractionIndex1over2); 
+LIAR_KERNEL_DLL DifferentialRay transform(const DifferentialRay& ray,
+		const TTransformation3D& transformation);
+LIAR_KERNEL_DLL DifferentialRay reflect(const IntersectionContext& context, 
+		const DifferentialRay& ray); 
+LIAR_KERNEL_DLL DifferentialRay refract(const IntersectionContext& context,
+		const DifferentialRay& ray, TScalar refractionIndex1over2); 
 }
 
 }

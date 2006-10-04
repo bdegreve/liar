@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 
 #include "scenery_common.h"
 #include "light_point.h"
+#include <lass/num/distribution_transformations.h>
 
 namespace liar
 {
@@ -40,7 +41,6 @@ PY_CLASS_MEMBER_RW(LightPoint, "attenuation", attenuation, setAttenuation)
 // --- public --------------------------------------------------------------------------------------
 
 LightPoint::LightPoint():
-    SceneLight(&Type),
 	position_(TPoint3D()),
 	intensity_(Spectrum(1)),
 	attenuation_(Attenuation::defaultAttenuation())
@@ -50,7 +50,6 @@ LightPoint::LightPoint():
 
 
 LightPoint::LightPoint(const TPoint3D& iPosition, const Spectrum& iIntensity):
-    SceneLight(&Type),
     position_(iPosition),
 	intensity_(iIntensity),
 	attenuation_(Attenuation::defaultAttenuation())
@@ -108,32 +107,32 @@ void LightPoint::setAttenuation(const TAttenuationPtr& iAttenuation)
 
 // --- private -------------------------------------------------------------------------------------
 
-void LightPoint::doIntersect(const Sample& iSample, const BoundedRay& iRAy, 
-							 Intersection& oResult) const
+void LightPoint::doIntersect(const Sample& sample, const BoundedRay& iRAy, 
+							 Intersection& result) const
 {
-	oResult = Intersection::empty();
+	result = Intersection::empty();
 }
 
 
 
-const bool LightPoint::doIsIntersecting(const Sample& iSample, 
-										const BoundedRay& iRay) const
+const bool LightPoint::doIsIntersecting(const Sample& sample, 
+										const BoundedRay& ray) const
 {
 	return false;
 }
 
 
 
-void LightPoint::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
-								const Intersection& iIntersection, 
-								IntersectionContext& oResult) const
+void LightPoint::doLocalContext(const Sample& sample, const BoundedRay& ray,
+								const Intersection& intersection, 
+								IntersectionContext& result) const
 {
 	LASS_THROW("since LightPoint can never return an intersection, you've called dead code.");
 }
 
 
 
-const bool LightPoint::doContains(const Sample& iSample, const TPoint3D& iPoint) const
+const bool LightPoint::doContains(const Sample& sample, const TPoint3D& point) const
 {
 	return false;
 }
@@ -156,23 +155,40 @@ const TScalar LightPoint::doArea() const
 
 
 const Spectrum LightPoint::doSampleEmission(
-		const Sample& iSample,
-		const TVector2D& iLightSample, 
-		const TPoint3D& iTarget,
-		const TVector3D& iTargetNormal,
-		BoundedRay& oShadowRay,
-		TScalar& oPdf) const
+		const Sample& sample,
+		const TPoint2D& lightSample, 
+		const TPoint3D& target,
+		const TVector3D& targetNormal,
+		BoundedRay& shadowRay,
+		TScalar& pdf) const
 {
-	TVector3D toLight = position_ - iTarget;
-    const TScalar squaredDistance = (position_ - iTarget).squaredNorm();
+	TVector3D toLight = position_ - target;
+    const TScalar squaredDistance = (position_ - target).squaredNorm();
 	const TScalar distance = num::sqrt(squaredDistance);
 	toLight /= distance;
 
-	oShadowRay = BoundedRay(iTarget, toLight, tolerance, distance, 
+	shadowRay = BoundedRay(target, toLight, tolerance, distance, 
 		prim::IsAlreadyNormalized());
-	oPdf = TNumTraits::one;
+	pdf = TNumTraits::one;
 
 	return intensity_ / attenuation_->attenuation(distance, squaredDistance);
+}
+
+
+
+const Spectrum LightPoint::doSampleEmission(const TPoint2D& sampleA, const TPoint2D& sampleB,
+		const TPoint3D& sceneCenter, TScalar sceneRadius, TRay3D& emissionRay, TScalar& pdf) const
+{
+	const TVector3D direction = num::uniformSphere(sampleB, pdf).position();
+	emissionRay = TRay3D(position_, direction);
+	return intensity_;
+}
+
+
+
+const Spectrum LightPoint::doTotalPower(TScalar sceneRadius) const
+{
+	return (4 * TNumTraits::pi) * intensity_;
 }
 
 
@@ -191,9 +207,9 @@ const TPyObjectPtr LightPoint::doGetLightState() const
 
 
 
-void LightPoint::doSetLightState(const TPyObjectPtr& iState)
+void LightPoint::doSetLightState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(iState, position_, intensity_, attenuation_);
+	python::decodeTuple(state, position_, intensity_, attenuation_);
 }
 
 

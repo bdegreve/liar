@@ -33,8 +33,7 @@ PY_CLASS_CONSTRUCTOR_0(DirectLighting)
 
 // --- public --------------------------------------------------------------------------------------
 
-DirectLighting::DirectLighting():
-	RayTracer(&Type)
+DirectLighting::DirectLighting()
 {
 }
 
@@ -56,59 +55,70 @@ void DirectLighting::doRequestSamples(const TSamplerPtr& iSampler)
 
 
 const Spectrum 
-DirectLighting::doCastRay(const Sample& iSample, const DifferentialRay& iPrimaryRay) const
+DirectLighting::doCastRay(const Sample& sample, const DifferentialRay& primaryRay) const
 {
 	Intersection intersection;
-	scene()->intersect(iSample, iPrimaryRay, intersection);
+	scene()->intersect(sample, primaryRay, intersection);
 	if (!intersection)
 	{
 		return Spectrum();
 	}
 
 	IntersectionContext context(this);
-	intersection.object()->localContext(iSample, iPrimaryRay, intersection, context);
-	if (!context.shader())
+	intersection.object()->localContext(sample, primaryRay, intersection, context);
+	
+	const Shader* shader = context.shader();
+	if (!shader)
 	{
 		return Spectrum();
 	}
-	if (dot(iPrimaryRay.direction(), context.geometricNormal()) > 0)
+
+	const TVector3D dirOut = -primaryRay.direction();
+
+#pragma LASS_FIXME("dirOut and geometricNormal are not in the same space")
+	if (dot(dirOut, intersectionContext.geometricNormal()) < 0)
 	{
-		context.flipNormal();
+		intersectionContext.flipNormal();
 	}
-	return context.shade(iSample, iPrimaryRay, intersection);
-}
 
-
-
-const TLightSamplesRange
-DirectLighting::doSampleLights(const Sample& iSample, const TPoint3D& iTarget, 
-		const TVector3D& iTargetNormal) const
-{
-	using namespace kernel;
-
-	stde::overwrite_insert_iterator<TLightSamples> output(lightSamples_);
+	Spectrum result = shader->emission(sample, context, dirOut);
 
 	const TLightContexts::const_iterator end = lights().end();
 	for (TLightContexts::const_iterator light = lights().begin(); light != end; ++light)
 	{
-		Sample::TSubSequence2D subSequence = iSample.subSequence2D(light->idLightSamples());
-		const TScalar scale = TNumTraits::one / subSequence.size();
-		while (subSequence)
+		Sample::TSubSequence2D lightSample = sample.subSequence2D(light->idLightSamples());
+		Sample::TSubSequence2D bsdfSample = sample.subSequence2D(light->idBsdfSamples());
+		Sample::TSubSequence1D componentSample = sample.subSequence1D(light->idBsdfComponentSamples());
+		LASS_ASSERT(bsdfSample.size() == lightSample.size() && componentSample.size() == lightSample.size());
+		const TScalar n = static_cast<TScalar>(lightSample.size());
+		while (lightSample)
 		{
-			BoundedRay shadowRay;
-			TScalar pdf;
-			Spectrum radiance = light->sampleEmission(
-				iSample, *subSequence, iTarget, iTargetNormal, shadowRay, pdf);
-			if (pdf > 0 && !scene()->isIntersecting(iSample, shadowRay))
+			const Spectrum radiance = light->sampleEmission(
+				sample, *lightSample, iTarget, iTargetNormal, shadowRay, lightPdf);
+			if (lightPdf > 0 && radiance)
 			{
-				*output++ = LightSample((scale / pdf) * radiance, shadowRay.direction());
-			}
+				const TVector3D dirLight = shadowRay.direction();
+				TSCalar bsdfPdf;
+				Spectrum bsdf = *BSDF*->bsdf(dirEye, dirLight, bsdfPdf)
+				if (bsdf && !scene()->isIntersecting(sample, shadowRay))
+				{
+					const TScalar weight = light->isDelta() ?
+						TNumTraits::one : powerHeuristic(1, lightPdf, 1, bsdfPdf);
+					result += bsdf * radiance * 
+						(weight * abs(dot(dirEye, dirLight)) / (n * lightPdf));
+				}
+				if (!light->isDelta())
+				{
+					*BSDF*->sampleBsdf(sample, *bsdfSample, *componentSample, 
+						
+				}
 
-			++subSequence;
+
+			++lightSample;
+			++brdfSample;
+			++componentSample;
 		}
 	}
-
-	return TLightSamplesRange(lightSamples_.begin(), output.get());
 }
 
 

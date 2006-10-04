@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -34,8 +34,8 @@ PY_CLASS_CONSTRUCTOR_2(Uv, TTexturePtr, TTexturePtr);
 
 // --- public --------------------------------------------------------------------------------------
 
-Uv::Uv(const TTexturePtr& iA, const TTexturePtr& iB):
-	Mix2(&Type, iA, iB)
+Uv::Uv(const TTexturePtr& a, const TTexturePtr& b):
+	Mix2(a, b)
 {
 }
 
@@ -47,11 +47,11 @@ Uv::Uv(const TTexturePtr& iA, const TTexturePtr& iB):
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum Uv::doLookUp(const Sample& iSample, const IntersectionContext& iContext) const
+const Spectrum Uv::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
-	const TScalar u = num::mod(iContext.uv().x, TNumTraits::one);
-	const TScalar v = num::mod(iContext.uv().y, TNumTraits::one);
-	return u * textureA()->lookUp(iSample, iContext) + v * textureB()->lookUp(iSample, iContext);	
+	const TScalar u = num::mod(context.uv().x, TNumTraits::one);
+	const TScalar v = num::mod(context.uv().y, TNumTraits::one);
+	return u * textureA()->lookUp(sample, context) + v * textureB()->lookUp(sample, context);	
 }
 
 
@@ -63,7 +63,7 @@ const TPyObjectPtr Uv::doGetMixState() const
 
 
 
-void Uv::doSetMixState(const TPyObjectPtr& iState)
+void Uv::doSetMixState(const TPyObjectPtr& state)
 {
 }
 

@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 #include "shaders_common.h"
 #include "lambert.h"
-#include "../kernel/ray_tracer.h"
+#include <lass/num/distribution_transformations.h>
 
 namespace liar
 {
@@ -38,7 +38,7 @@ PY_CLASS_MEMBER_RW_DOC(Lambert, "diffuse", diffuse, setDiffuse, "texture for dif
 // --- public --------------------------------------------------------------------------------------
 
 Lambert::Lambert():
-	Shader(&Type),
+	Shader(capsReflection | capsDiffuse),
 	diffuse_(Texture::white())
 {
 }
@@ -46,7 +46,7 @@ Lambert::Lambert():
 
 
 Lambert::Lambert(const TTexturePtr& iDiffuse):
-	Shader(&Type),
+	Shader(capsReflection | capsDiffuse),
 	diffuse_(iDiffuse)
 {
 }
@@ -73,33 +73,44 @@ void Lambert::setDiffuse(const TTexturePtr& iDiffuse)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum Lambert::doShade(
-	const Sample& iSample,
-	const DifferentialRay& iPrimaryRay,
-	const Intersection& iIntersection,
-	const IntersectionContext& iContext) const
+void Lambert::doBsdf(
+		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
+		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn,
+		Spectrum* firstValue, TScalar* firstPdf) const
 {
-	const Spectrum diffuse = diffuse_->lookUp(iSample, iContext) / TNumTraits::pi;
-	if (!diffuse)
+	const Spectrum diffuseOverPi = diffuse_->lookUp(sample, context) / TNumTraits::pi;
+	while (firstOmegaIn != lastOmegaIn)
 	{
-		return Spectrum();
-	}
-	
-	const TVector3D shadeNormal = iContext.normal();
-
-	Spectrum result;
-	TLightSamplesRange lightSamples = iContext.sampleLights(iSample);
-	for (TLightSamplesRange::iterator i = lightSamples.begin(); i != lightSamples.end(); ++i)
-	{
-		const TScalar cosTheta = prim::dot(shadeNormal, i->direction());
-		if (cosTheta > TNumTraits::zero)
+		if (firstOmegaIn->z * omegaOut.z > 0)
 		{
-			result += i->radiance() * cosTheta;
+			*firstValue++ = diffuseOverPi;
+			*firstPdf++ = num::abs(firstOmegaIn->z) / TNumTraits::pi;
 		}
+		else
+		{
+			*firstValue++ = Spectrum();
+			*firstPdf++ = 0;
+		}
+		++firstOmegaIn;
 	}
-	result *= diffuse;
+}
 
-	return result;
+
+void Lambert::doSampleBsdf(
+		const Sample& sample, const IntersectionContext& context, const TVector3D& dirIn,
+		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
+		TVector3D* firstDirOut, Spectrum* firstValue, TScalar* firstPdf) const
+{
+	const Spectrum diffuseOverPi = diffuse_->lookUp(sample, context) / TNumTraits::pi;
+	const TScalar zSign = dirIn.z < 0 ? -1 : 1;
+	while (firstBsdfSample != lastBsdfSample)
+	{
+		TVector3D localDirOut = 
+			num::cosineHemisphere(*firstBsdfSample++, *firstPdf++).position();
+		localDirOut.z *= zSign;
+		*firstDirOut++ = localDirOut;
+		*firstValue++ = diffuseOverPi;
+	}
 }
 
 
@@ -111,9 +122,9 @@ const TPyObjectPtr Lambert::doGetState() const
 
 
 
-void Lambert::doSetState(const TPyObjectPtr& iState)
+void Lambert::doSetState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(iState, diffuse_);
+	python::decodeTuple(state, diffuse_);
 }
 
 

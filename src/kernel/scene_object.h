@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::SceneObject
  *  @brief base class of all objects in a scene representation
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SCENE_OBJECT_H
@@ -50,6 +50,14 @@ namespace impl
 	template <typename VisitableType> struct TryParent;
 }
 
+class SceneObject;
+
+/** @relates SceneObject
+ */
+typedef python::PyObjectPtr<SceneObject>::Type TSceneObjectPtr;
+
+
+
 class LIAR_KERNEL_DLL SceneObject: public python::PyObjectPlus, public lass::util::VisitableBase<impl::TryParent>
 {
     PY_HEADER(python::PyObjectPlus)
@@ -57,27 +65,27 @@ public:
 
     virtual ~SceneObject();
 
-	void preProcess(const TimePeriod& iPeriod);
+	void preProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
 
-    void intersect(const Sample& iSample, const BoundedRay& iRay, Intersection& oResult) const;
-	void intersect(const Sample& iSample, const DifferentialRay& iRay, 
-		Intersection& oResult) const;
-	const bool isIntersecting(const Sample& iSample, const BoundedRay& iRay) const ;
-	const bool isIntersecting(const Sample& iSample, const DifferentialRay& iRay) const;
-	void localContext(const Sample& iSample, const BoundedRay& iRay, 
-			const Intersection& iIntersection, IntersectionContext& oResult) const;
-	void localContext(const Sample& iSample, const DifferentialRay& iRay, 
-			const Intersection& iIntersection, IntersectionContext& oResult) const;
-	const bool contains(const Sample& iSample, const TPoint3D& iPoint) const;
-    void localSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const;
+    void intersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
+	void intersect(const Sample& sample, const DifferentialRay& ray, 
+		Intersection& result) const;
+	const bool isIntersecting(const Sample& sample, const BoundedRay& ray) const ;
+	const bool isIntersecting(const Sample& sample, const DifferentialRay& ray) const;
+	void localContext(const Sample& sample, const BoundedRay& ray, 
+			const Intersection& intersection, IntersectionContext& result) const;
+	void localContext(const Sample& sample, const DifferentialRay& ray, 
+			const Intersection& intersection, IntersectionContext& result) const;
+	const bool contains(const Sample& sample, const TPoint3D& point) const;
+    void localSpace(TTime time, TTransformation3D& localToWorld) const;
 
 	const bool hasSurfaceSampling() const;
-	const TPoint3D sampleSurface(const TVector2D& iSample, TVector3D& oNormal, 
-			TScalar& oPdf) const;
-	const TPoint3D sampleSurface(const TVector2D& iSample, const TPoint3D& iTarget, 
-			TVector3D& oNormal, TScalar& oPdf) const;
-	const TPoint3D sampleSurface(const TVector2D& iSample, const TPoint3D& iTarget,
-		const TVector3D& iTargetNormal, TVector3D& oNormal, TScalar& oPdf) const;
+	const TPoint3D sampleSurface(const TPoint2D& sample, TVector3D& normal, 
+			TScalar& pdf) const;
+	const TPoint3D sampleSurface(const TPoint2D& sample, const TPoint3D& target, 
+			TVector3D& normal, TScalar& pdf) const;
+	const TPoint3D sampleSurface(const TPoint2D& sample, const TPoint3D& target,
+		const TVector3D& targetNormal, TVector3D& normal, TScalar& pdf) const;
 
     const TAabb3D boundingBox() const;
 	const bool hasMotion() const;
@@ -85,23 +93,23 @@ public:
 	const TScalar area() const;
 
     const TShaderPtr& shader() const;
-    void setShader(const TShaderPtr& iShader);
+    void setShader(const TShaderPtr& shader);
 	const bool isOverridingShader() const;
-	void setOverridingShader(bool iEnabled = true);
+	void setOverridingShader(bool enabled = true);
 
 	const TMediumPtr& interior() const;
-	void setInterior(const TMediumPtr& iMedium);
+	void setInterior(const TMediumPtr& medium);
 
     static const TShaderPtr& defaultShader();
-    static void setDefaultShader(const TShaderPtr& i_defaultShader);
+    static void setDefaultShader(const TShaderPtr& defaultShader);
 
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const;
-	void setState(const TPyObjectPtr& iState);
+	void setState(const TPyObjectPtr& state);
 	
 protected:
 
-    SceneObject(PyTypeObject* iType);
+    SceneObject();
 
 private:
 
@@ -110,89 +118,85 @@ private:
 	bool isOverridingShader_;
 
     LASS_UTIL_ACCEPT_VISITOR;
-	virtual void doPreProcess(const TimePeriod& iPeriod);
-    virtual void doIntersect(const Sample& iSample, const BoundedRay& iRay, 
-			Intersection& oResult) const = 0;
-	virtual const bool doIsIntersecting(const Sample& iSample, const BoundedRay& iRay) const = 0;
-    virtual void doLocalContext(const Sample& iSample, const BoundedRay& iRay,
-			const Intersection& iIntersection, IntersectionContext& oResult) const = 0;
-	virtual const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const = 0;
+	virtual void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
+    virtual void doIntersect(const Sample& sample, const BoundedRay& ray, 
+			Intersection& result) const = 0;
+	virtual const bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const = 0;
+    virtual void doLocalContext(const Sample& sample, const BoundedRay& ray,
+			const Intersection& intersection, IntersectionContext& result) const = 0;
+	virtual const bool doContains(const Sample& sample, const TPoint3D& point) const = 0;
     
 	virtual const bool doHasSurfaceSampling() const;
-	virtual const TPoint3D doSampleSurface(const TVector2D& iSample, TVector3D& oNormal,
-			TScalar& oPdf) const;
-	virtual const TPoint3D doSampleSurface(const TVector2D& iSample, const TPoint3D& iTarget,
-			TVector3D& oNormal, TScalar& oPdf) const;
-	virtual const TPoint3D doSampleSurface(const TVector2D& iSample, const TPoint3D& iTarget,
-			const TVector3D& iTargetNormal, TVector3D& oNormal, TScalar& oPdf) const;
+	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal,
+			TScalar& pdf) const;
+	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, const TPoint3D& target,
+			TVector3D& normal, TScalar& pdf) const;
+	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, const TPoint3D& target,
+			const TVector3D& targetNormal, TVector3D& normal, TScalar& pdf) const;
 	
 	virtual const TAabb3D doBoundingBox() const = 0;
 	virtual const TScalar doArea() const = 0;
-	virtual void doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const;
+	virtual void doLocalSpace(TTime time, TTransformation3D& localToWorld) const;
 	virtual const bool doHasMotion() const;
 
 	virtual const TPyObjectPtr doGetState() const = 0;
-	virtual void doSetState(const TPyObjectPtr& iState) = 0;
+	virtual void doSetState(const TPyObjectPtr& state) = 0;
 
     static TShaderPtr defaultShader_;
 };
 
-/** @relates SceneObject
- */
-typedef python::PyObjectPtr<SceneObject>::Type TSceneObjectPtr;
-
 /** Applies a function to all objects in the tree.
  *  @relates SceneObject
- *  @param iObjectTree [in] the root object of the tree to be visited.
- *  @param iFunctor [in] the callback to be invoked
+ *  @param objectTree [in] the root object of the tree to be visited.
+ *  @param functor [in] the callback to be invoked
  *
- *  If an SceneObject is instantiated more than once in @a iObjectTree (i.e. it occurs more than
- *	once in the tree), then @a iFunctor is applied to each instance
+ *  If an SceneObject is instantiated more than once in @a objectTree (i.e. it occurs more than
+ *	once in the tree), then @a functor is applied to each instance
  */
 template <typename Functor>
-void forAllObjects(const TSceneObjectPtr& iObjectTree, Functor iFunctor)
+void forAllObjects(const TSceneObjectPtr& objectTree, Functor functor)
 {
 	class InstanceVisitor: public util::VisitorBase, public util::Visitor<SceneObject>
 	{
 	public:
-		InstanceVisitor(Functor iFun): functor_(iFun) {}
+		InstanceVisitor(Functor fun): functor_(fun) {}
 	private:
-		void doVisit(SceneObject& iSceneObject) { functor_(iSceneObject); }
+		void doVisit(SceneObject& object) { functor_(object); }
 		Functor functor_;
 	};
-	InstanceVisitor visitor(iFunctor);
-	iObjectTree->accept(visitor);
+	InstanceVisitor visitor(functor);
+	objectTree->accept(visitor);
 }
 
 /** Applies a function to eeach unique object in the tree.
  *  @relates SceneObject
- *  @param iObjectTree [in] the root object of the tree to be visited.
- *  @param iFunctor [in] the callback to be invoked
+ *  @param objectTree [in] the root object of the tree to be visited.
+ *  @param functor [in] the callback to be invoked
  *
- *  If an SceneObject is instantiated more than once in @a iObjectTree (i.e. it occurs more than
- *	once in the tree), then @a iFunctor is applied to each instance
+ *  If an SceneObject is instantiated more than once in @a objectTree (i.e. it occurs more than
+ *	once in the tree), then @a functor is applied to each instance
  */
 template <typename Functor>
-void forUniqueObjects(const TSceneObjectPtr& iObjectTree, Functor iFunctor)
+void forUniqueObjects(const TSceneObjectPtr& objectTree, Functor functor)
 {
 	class InstanceVisitor: public util::VisitorBase, public util::Visitor<SceneObject>
 	{
 	public:
-		InstanceVisitor(Functor iFun): functor_(iFun) {}
+		InstanceVisitor(Functor fun): functor_(fun) {}
 	private:
-		void doVisit(SceneObject& iSceneObject)
+		void doVisit(SceneObject& object)
 		{
-			if (visited_.count(&iSceneObject) == 0)
+			if (visited_.count(&object) == 0)
 			{
-				visited_.insert(&iSceneObject);
-				functor_(iSceneObject);
+				visited_.insert(&object);
+				functor_(object);
 			}
 		}
 		Functor functor_;
 		std::set<SceneObject*> visited_;
 	};
-	InstanceVisitor visitor(iFunctor);
-	iObjectTree->accept(visitor);
+	InstanceVisitor visitor(functor);
+	objectTree->accept(visitor);
 }
 
 
@@ -205,13 +209,13 @@ namespace impl
 template <typename VisitableType>
 struct TryParent
 {
-	static void onUnknownVisitor(VisitableType& iVisited, util::VisitorBase& iVisitor)
+	static void onUnknownVisitor(VisitableType& visited, util::VisitorBase& visitor)
 	{
-		VisitableType::doVisit(static_cast<typename VisitableType::TPyParent&>(iVisited), iVisitor);
+		VisitableType::doVisit(static_cast<typename VisitableType::TPyParent&>(visited), visitor);
 	}
-	static void onUnknownVisitorOnExit(VisitableType& iVisited, util::VisitorBase& iVisitor)
+	static void onUnknownVisitorOnExit(VisitableType& visited, util::VisitorBase& visitor)
 	{
-		VisitableType::doVisitOnExit(static_cast<typename VisitableType::TPyParent&>(iVisited), iVisitor);
+		VisitableType::doVisitOnExit(static_cast<typename VisitableType::TPyParent&>(visited), visitor);
 	}
 };
 

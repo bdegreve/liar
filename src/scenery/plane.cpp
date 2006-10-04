@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -38,7 +38,6 @@ PY_CLASS_MEMBER_RW(Plane, "d", d, setD)
 // --- public --------------------------------------------------------------------------------------
 
 Plane::Plane():
-	SceneObject(&Type),
 	plane_(TVector3D(0, 0, 1), 0)
 {
 }
@@ -46,7 +45,6 @@ Plane::Plane():
 
 
 Plane::Plane(const TVector3D& i_normal, TScalar i_d):
-    SceneObject(&Type),
     plane_(i_normal, i_d)
 {
 }
@@ -60,9 +58,9 @@ const TVector3D& Plane::normal() const
 
 
 
-void Plane::setNormal(const TVector3D& iNormal)
+void Plane::setNormal(const TVector3D& normal)
 {
-	plane_ = TPlane3D(iNormal, plane_.d());
+	plane_ = TPlane3D(normal, plane_.d());
 }
 
 
@@ -87,56 +85,56 @@ void Plane::setD(TScalar iD)
 
 // --- private -------------------------------------------------------------------------------------
 
-void Plane::doIntersect(const Sample& iSample, const BoundedRay& iRay, 
-						Intersection& oResult) const
+void Plane::doIntersect(const Sample& sample, const BoundedRay& ray, 
+						Intersection& result) const
 {
     TScalar t;
-    const prim::Result hit = prim::intersect(plane_, iRay.unboundedRay(), t, iRay.nearLimit());
-	if (hit == prim::rOne && iRay.inRange(t)) 
+    const prim::Result hit = prim::intersect(plane_, ray.unboundedRay(), t, ray.nearLimit());
+	if (hit == prim::rOne && ray.inRange(t)) 
     {
-		oResult = Intersection(this, t, seNoEvent);
+		result = Intersection(this, t, seNoEvent);
     }
     else
     {
-        oResult = Intersection::empty();
+        result = Intersection::empty();
     }
 }
 
 
 
-const bool Plane::doIsIntersecting(const Sample& iSample, 
-								   const BoundedRay& iRay) const
+const bool Plane::doIsIntersecting(const Sample& sample, 
+								   const BoundedRay& ray) const
 {
     TScalar t;
-	const prim::Result hit = prim::intersect(plane_, iRay.unboundedRay(), t, iRay.nearLimit());
-	return hit == prim::rOne && iRay.inRange(t);
+	const prim::Result hit = prim::intersect(plane_, ray.unboundedRay(), t, ray.nearLimit());
+	return hit == prim::rOne && ray.inRange(t);
 }
 
 
-void Plane::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
-                           const Intersection& iIntersection, 
-                           IntersectionContext& oResult) const
+void Plane::doLocalContext(const Sample& sample, const BoundedRay& ray,
+                           const Intersection& intersection, 
+                           IntersectionContext& result) const
 {
-    oResult.setPoint(iRay.point(iIntersection.t()));
+    result.setPoint(ray.point(intersection.t()));
     TVector3D dPoint_dU;
     TVector3D dPoint_dV;
     plane_.getDirections(dPoint_dU, dPoint_dV);
-    oResult.setDPoint_dU(dPoint_dU);
-    oResult.setDPoint_dV(dPoint_dV);
+    result.setDPoint_dU(dPoint_dU);
+    result.setDPoint_dV(dPoint_dV);
 
-    oResult.setNormal(plane_.normal());
-    oResult.setDNormal_dU(TVector3D());
-    oResult.setDNormal_dV(TVector3D());
+    result.setNormal(plane_.normal());
+    result.setDNormal_dU(TVector3D());
+    result.setDNormal_dV(TVector3D());
 	
-	oResult.setGeometricNormal(oResult.normal());
+	result.setGeometricNormal(result.normal());
 
-	oResult.setUv(plane_.uv(oResult.point()));
-    oResult.setT(iIntersection.t());
+	result.setUv(plane_.uv(result.point()));
+    result.setT(intersection.t());
 }
 
 
 
-const bool Plane::doContains(const Sample& iSample, const TPoint3D& iPoint) const
+const bool Plane::doContains(const Sample& sample, const TPoint3D& point) const
 {
 	return false;
 }
@@ -181,11 +179,11 @@ const TPyObjectPtr Plane::doGetState() const
 
 
 
-void Plane::doSetState(const TPyObjectPtr& iState)
+void Plane::doSetState(const TPyObjectPtr& state)
 {
 	TVector3D normal;
 	TScalar d;
-	LASS_ENFORCE(python::decodeTuple(iState, normal, d));
+	LASS_ENFORCE(python::decodeTuple(state, normal, d));
 	plane_ = TPlane3D(normal, d);
 }
     

@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -38,16 +38,14 @@ PY_CLASS_MEMBER_RW(Constant, "value", value, setValue);
 // --- public --------------------------------------------------------------------------------------
 
 Constant::Constant(const Spectrum& iSpectrum):
-	Texture(&Type),
 	value_(iSpectrum)
 {
 }
 
 
 
-Constant::Constant(TScalar iValue):
-	Texture(&Type),
-	value_(iValue)
+Constant::Constant(TScalar value):
+	value_(value)
 {
 }
 
@@ -78,9 +76,9 @@ const Spectrum& Constant::value() const
 
 
 
-void Constant::setValue(const Spectrum& iValue)
+void Constant::setValue(const Spectrum& value)
 {
-	value_ = iValue;
+	value_ = value;
 }
 
 
@@ -91,7 +89,7 @@ void Constant::setValue(const Spectrum& iValue)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum Constant::doLookUp(const Sample& iSample, const IntersectionContext& iContext) const
+const Spectrum Constant::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	return value_;
 }
@@ -105,9 +103,9 @@ const TPyObjectPtr Constant::doGetState() const
 
 
 
-void Constant::doSetState(const TPyObjectPtr& iState)
+void Constant::doSetState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(iState, value_);
+	python::decodeTuple(state, value_);
 }
 
 

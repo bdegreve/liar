@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@
 #include <lass/prim/aabb_3d.h>
 #include <lass/prim/color_rgba.h>
 #include <lass/prim/transformation_3d.h>
-#include <lass/util/pyobject_plus.h>
+#include <lass/util/python_api.h>
 
 #include "config.h"
 

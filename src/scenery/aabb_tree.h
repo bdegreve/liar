@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::scenery::AabbTree
  *  @brief compound of some child scenery in an AABB tree.
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_SCENERY_AABB_TREE_H
@@ -46,41 +46,41 @@ public:
     typedef std::vector<TSceneObjectPtr> TChildren;
 
     AabbTree();
-    AabbTree(const TChildren& iChildren); // for python
+    AabbTree(const TChildren& children); // for python
 
-    template <typename InputIterator> AabbTree(InputIterator iBegin, InputIterator iEnd):
+    template <typename InputIterator> AabbTree(InputIterator first, InputIterator last):
         SceneComposite(&Type)
     {
-        add(iBegin, iEnd);
+        add(first, last);
     }
 
-    void add(const TSceneObjectPtr& iChild);
-	void add(const TChildren& iChildren); // for python
+    void add(const TSceneObjectPtr& child);
+	void add(const TChildren& children); // for python
 
-	template <typename InputIterator> void add(InputIterator iBegin, InputIterator iEnd)
+	template <typename InputIterator> void add(InputIterator first, InputIterator last)
 	{
-        while (iBegin != iEnd)
+        while (first != last)
 		{
-			this->add(*iBegin++);
+			this->add(*first++);
 		}
 	}
 
 private:
 
-    void doAccept(lass::util::VisitorBase& ioVisitor);
+    void doAccept(lass::util::VisitorBase& visitor);
 
-	void doPreProcess(const TimePeriod& iPeriod);
-	void doIntersect(const Sample& iSample, const BoundedRay& iRay, 
-		Intersection& oResult) const;
-	const bool doIsIntersecting(const Sample& iSample, const BoundedRay& iRay) const;
-	void doLocalContext(const Sample& iSample, const BoundedRay& iRay,
-		const Intersection& iIntersection, IntersectionContext& oResult) const;
-	const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const;
+	void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
+	void doIntersect(const Sample& sample, const BoundedRay& ray, 
+		Intersection& result) const;
+	const bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
+	void doLocalContext(const Sample& sample, const BoundedRay& ray,
+		const Intersection& intersection, IntersectionContext& result) const;
+	const bool doContains(const Sample& sample, const TPoint3D& point) const;
 	const TAabb3D doBoundingBox() const;
 	const TScalar doArea() const;
 
 	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& iState);
+	void doSetState(const TPyObjectPtr& state);
 
 	struct Info
 	{
@@ -108,71 +108,76 @@ private:
 		
 		enum { dimension = TPoint::dimension };
 
-		static const TAabb aabb(TObjectIterator iObject)
+		static const TAabb aabb(TObjectIterator object)
 		{
-			return (*iObject)->boundingBox();
+			return (*object)->boundingBox();
 		}
 
-		static const bool contains(TObjectIterator iObject, const TPoint& iPoint, 
-			const TInfo* iInfo)
+		static const bool contains(TObjectIterator object, const TPoint& point, 
+			const TInfo* info)
 		{
-			LASS_ASSERT(iInfo && iInfo->sample);
-			return (*iObject)->contains(*iInfo->sample, iPoint);
+			LASS_ASSERT(info && info->sample);
+			return (*object)->contains(*info->sample, point);
 		}
 
-		static const bool intersect(TObjectIterator iObject, const TRay& iRay, 
-			TReference oT, TParam iMinT, const TInfo* iInfo)
+		static const bool intersect(TObjectIterator object, const TRay& ray, 
+			TReference t, TParam minT, const TInfo* info)
 		{
-			LASS_ASSERT(iInfo && iInfo->sample && iInfo->intersectionResult);
+			LASS_ASSERT(info && info->sample && info->intersectionResult);
 			Intersection temp;
-			(*iObject)->intersect(*iInfo->sample, iRay, temp);
-			if (temp && temp.t() > iMinT)
+			(*object)->intersect(*info->sample, ray, temp);
+			if (temp && temp.t() > minT)
 			{
-				oT = temp.t();
-				if (iInfo->intersectionResult->isEmpty() || 
-					temp.t() < iInfo->intersectionResult->t())
+				t = temp.t();
+				if (info->intersectionResult->isEmpty() || 
+					temp.t() < info->intersectionResult->t())
 				{
-					iInfo->intersectionResult->swap(temp);
+					info->intersectionResult->swap(temp);
 				}
 				return true;
 			}
 			return false;
 		}
 
-		static const bool intersects(TObjectIterator iObject, const TRay& iRay, 
-			TParam iMinT, TParam iMaxT, const TInfo* iInfo)
+		static const bool intersects(TObjectIterator object, const TRay& ray, 
+			TParam minT, TParam maxT, const TInfo* info)
 		{
-			LASS_ASSERT(iInfo && iInfo->sample);
-			return (*iObject)->isIntersecting(*iInfo->sample, iRay);
+			LASS_ASSERT(info && info->sample);
+			return (*object)->isIntersecting(*info->sample, ray);
 		}
 
-		static const bool contains(const TAabb& iAabb, const TPoint& iPoint) 
+		static TAabb emptyAabb()
+		{
+			return TAabb();
+		}
+
+		static const bool contains(const TAabb& aabb, const TPoint& point) 
 		{ 
-			return iAabb.contains(iPoint); 
+			return aabb.contains(point); 
 		}
 
-		static const bool intersect(const TAabb& iAabb, const TRay& iRay, 
-			TReference oT, const TParam iMinT)
+		static const bool intersect(const TAabb& aabb, const TRay& ray, 
+			TReference t, const TParam minT)
 		{
-			TScalar t;
+			TScalar temp;
 			prim::Result hit = 
-				prim::intersect(iAabb, iRay.unboundedRay(), t, iMinT);
+				prim::intersect(aabb, ray.unboundedRay(), temp, minT);
 			if (hit == prim::rOne)
 			{
-				oT = t;
+				t = temp;
 				return true;
 			}
 			return false;
 		}
 
-		static const TAabb join(const TAabb& iA, const TAabb& iB) { return iA + iB; }
-		static const TPoint min(const TAabb& iAabb) { return iAabb.min(); }
-		static const TPoint max(const TAabb& iAabb) { return iAabb.max(); }
-		static const TPoint support(const TRay& iRay) { return iRay.support();	}
-		static const TVector direction(const TRay& iRay) {	return iRay.direction(); }
-		static const TValue coordinate(const TPoint& iPoint, size_t iAxis) { return iPoint[iAxis]; }
-		static const TValue component(const TVector& iVector, size_t iAxis) { return iVector[iAxis]; }
-		static const TVector reciprocal(const TVector& iVector) { return iVector.reciprocal();	}
+		static const TAabb join(const TAabb& a, const TAabb& b) { return a + b; }
+		static const TPoint min(const TAabb& aabb) { return aabb.min(); }
+		static const TPoint max(const TAabb& aabb) { return aabb.max(); }
+		static const TPoint support(const TRay& ray) { return ray.support();	}
+		static const TVector direction(const TRay& ray) {	return ray.direction(); }
+		static const TValue coordinate(const TPoint& point, size_t axis) { return point[axis]; }
+		static const TValue component(const TVector& vector, size_t axis) { return vector[axis]; }
+		static const TVector reciprocal(const TVector& vector) { return vector.reciprocal();	}
 	};
 
 	typedef spat::AabbTree<TChildren::value_type, ObjectTraits> TTree;

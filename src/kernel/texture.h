@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::Texture
  *  @brief abstract base class of all textures
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_TEXTURE_H
@@ -48,9 +48,9 @@ class LIAR_KERNEL_DLL Texture: public python::PyObjectPlus
 public:
 
     virtual ~Texture();
-    const Spectrum lookUp(const Sample& iSample, const IntersectionContext& iContext) const 
+    const Spectrum lookUp(const Sample& sample, const IntersectionContext& context) const 
 	{ 
-		return doLookUp(iSample, iContext); 
+		return doLookUp(sample, context); 
 	}
 
 	static const TTexturePtr& black();
@@ -58,19 +58,19 @@ public:
 
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const;
-	void setState(const TPyObjectPtr& iState);
+	void setState(const TPyObjectPtr& state);
 
 protected:
 
-    Texture(PyTypeObject* iType);
+    Texture();
 
 private:
 
-	virtual const Spectrum doLookUp(const Sample& iSample, 
-		const IntersectionContext& iContext) const = 0;
+	virtual const Spectrum doLookUp(const Sample& sample, 
+		const IntersectionContext& context) const = 0;
 
 	virtual const TPyObjectPtr doGetState() const = 0;
-	virtual void doSetState(const TPyObjectPtr& iState) = 0;
+	virtual void doSetState(const TPyObjectPtr& state) = 0;
 
 	static TTexturePtr black_;
 	static TTexturePtr white_;
@@ -84,28 +84,28 @@ namespace impl
 	{
 		PY_HEADER(Texture);
 	public:
-		TextureBlack(): Texture(&Type) {}
+		TextureBlack() {}
 	private:
 		const Spectrum doLookUp(const Sample&, const IntersectionContext&) const 
 		{ 
 			return Spectrum(TNumTraits::zero); 
 		}
 		const TPyObjectPtr doGetState() const { return python::makeTuple(); }
-		void doSetState(const TPyObjectPtr& iState) {}
+		void doSetState(const TPyObjectPtr& state) {}
 	};
 
 	class LIAR_KERNEL_DLL TextureWhite: public Texture
 	{
 		PY_HEADER(Texture);
 	public:
-		TextureWhite(): Texture(&Type) {}
+		TextureWhite() {}
 	private:
 		const Spectrum doLookUp(const Sample&, const IntersectionContext&) const 
 		{ 
 			return Spectrum(TNumTraits::one); 
 		}
 		const TPyObjectPtr doGetState() const { return python::makeTuple(); }
-		void doSetState(const TPyObjectPtr& iState) {}
+		void doSetState(const TPyObjectPtr& state) {}
 	};
 }
 

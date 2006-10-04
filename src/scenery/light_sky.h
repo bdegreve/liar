@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::scenery::LightSky
  *  @brief model of a point light
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #pragma once
@@ -52,9 +52,9 @@ public:
 	// const unsigned numberOfEmissionSamples() const; [via SceneLight]
 	const unsigned samplingResolution() const;
 
-	void setRadiance(const TTexturePtr& iRadiance);
+	void setRadiance(const TTexturePtr& radiance);
 	void setNumberOfEmissionSamples(unsigned iNumberOfSamples);
-	void setSamplingResolution(unsigned iResolution);
+	void setSamplingResolution(unsigned resolution);
 
 private:
 
@@ -62,30 +62,35 @@ private:
 
     LASS_UTIL_ACCEPT_VISITOR;
 
-	void doPreProcess(const TimePeriod& iPeriod);
+	void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
 
-	void doIntersect(const Sample& iSample, const BoundedRay& iRay, 
-		Intersection& oResult) const;
-	const bool doIsIntersecting(const Sample& iSample, const BoundedRay& iRay) const;
-	void doLocalContext(const Sample& iSample, const BoundedRay& iRay,
-		const Intersection& iIntersection, IntersectionContext& oResult) const;
-	const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const;
+	void doIntersect(const Sample& sample, const BoundedRay& ray, 
+		Intersection& result) const;
+	const bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
+	void doLocalContext(const Sample& sample, const BoundedRay& ray,
+		const Intersection& intersection, IntersectionContext& result) const;
+	const bool doContains(const Sample& sample, const TPoint3D& point) const;
 	const TAabb3D doBoundingBox() const;
 	const TScalar doArea() const;
 
-	const Spectrum doSampleEmission(const Sample& iSample, const TVector2D& iLightSample, 
-		const TPoint3D& iTarget, const TVector3D& iTargetNormal, BoundedRay& oShadowRay, 
-		TScalar& oPdf) const;
+	const Spectrum doSampleEmission(const Sample& sample, const TPoint2D& lightSample, 
+		const TPoint3D& target, const TVector3D& targetNormal, BoundedRay& shadowRay, 
+		TScalar& pdf) const;
+	const Spectrum doSampleEmission(const TPoint2D& sampleA, const TPoint2D& sampleB,
+		const TPoint3D& sceneCenter, TScalar sceneRadius, TRay3D& emissionRay, TScalar& pdf) const;
+	const Spectrum doTotalPower(TScalar sceneRadius) const;
 	const unsigned doNumberOfEmissionSamples() const;
 
 	const TPyObjectPtr doGetLightState() const;
-	void doSetLightState(const TPyObjectPtr& iState);
+	void doSetLightState(const TPyObjectPtr& state);
 
-	void buildPdf(TMap& oPdf) const;
+	void buildPdf(TMap& pdf, Spectrum& averageRadiance) const;
 	void buildCdf(const TMap& iPdf, TMap& oMarginalCdfU, TMap& oConditionalCdfV) const;
-	const TVector3D direction(unsigned i, unsigned j) const;
-	const Spectrum lookUpRadiance(const Sample& iSample, unsigned i, unsigned j) const;
+	void sampleMap(const TPoint2D& sample, TScalar&, TScalar& j, TScalar& pdf) const;
+	const TVector3D direction(TScalar i, TScalar j) const;
+	const Spectrum lookUpRadiance(const Sample& sample, TScalar i, TScalar j) const;
 
+	Spectrum averageRadiance_;
 	TTexturePtr radiance_;
 	TMap marginalCdfU_;
 	TMap conditionalCdfV_;

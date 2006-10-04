@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -22,8 +22,11 @@
  */
 
 /** @class liar::Attenuation
- *  @brief a bounded ray plus two rays for screen space differentials
- *  @author Bram de Greve [BdG]
+ *  @brief Defines geometric attenuation of lights
+ *  @author Bram de Greve [Bramz]
+ *
+ *  Defines a geometric attenuation of the form 1 / (constant + linear * r + quadratic * r * r)
+ *  where r is the ray distance.
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_ATTENUATION_H
@@ -45,31 +48,31 @@ class LIAR_KERNEL_DLL Attenuation: public python::PyObjectPlus
 public:
 
 	Attenuation();
-    Attenuation(TScalar iConstant, TScalar iLinear, TScalar iQuadratic);
+    Attenuation(TScalar constant, TScalar linear, TScalar quadratic);
     
 	const TScalar constant() const;
     const TScalar linear() const;
     const TScalar quadratic() const;
     
-	void setConstant(TScalar iX);
-	void setLinear(TScalar iX);
-	void setQuadratic(TScalar iX);
+	void setConstant(TScalar constant);
+	void setLinear(TScalar linear);
+	void setQuadratic(TScalar quadratic);
 
-	TScalar attenuation(TScalar iDistance) const
+	TScalar attenuation(TScalar distance) const
 	{
-		return attenuation(iDistance, num::sqr(iDistance));
+		return attenuation(distance, num::sqr(distance));
 	}
 
-	TScalar attenuation(TScalar iDistance, TScalar iSquaredDistance) const
+	TScalar attenuation(TScalar distance, TScalar squaredDistance) const
 	{
-		return constant_ + linear_ * iDistance + quadratic_ * iSquaredDistance;
+		return constant_ + linear_ * distance + quadratic_ * squaredDistance;
 	}
 
 	static TAttenuationPtr defaultAttenuation();
 
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const;
-	void setState(const TPyObjectPtr& iState);
+	void setState(const TPyObjectPtr& state);
 
 private:
 

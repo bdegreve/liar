@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::shaders::Lambert
  *  @brief very simple shader using lambert's cosine law.
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_LAMBERT_H
@@ -51,11 +51,18 @@ public:
 
 private:
 
-	const Spectrum doShade(const Sample& iSample,	const DifferentialRay& iPrimaryRay, 
-		const Intersection& iIntersection, const IntersectionContext& iContext) const;
+	virtual void doBsdf(
+		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
+		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn, 
+		Spectrum* firstValue, TScalar* firstPdf) const;
+
+	virtual void doSampleBsdf(
+		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut, 
+		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
+		TVector3D* firstOmegaIn, Spectrum* firstValue, TScalar* firstPdf) const;
 
 	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& iState);
+	void doSetState(const TPyObjectPtr& state);
 
 	TTexturePtr diffuse_;
 };

@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -35,26 +35,25 @@ PY_CLASS_MEMBER_RW_DOC(Mix2, "textureB", textureB, setTextureB, "second texture"
 
 // --- public --------------------------------------------------------------------------------------
 
-void Mix2::setTextureA(const TTexturePtr& iA)
+void Mix2::setTextureA(const TTexturePtr& a)
 {
-	a_ = iA;
+	a_ = a;
 }
 
 
 
-void Mix2::setTextureB(const TTexturePtr& iB)
+void Mix2::setTextureB(const TTexturePtr& b)
 {
-	b_ = iB;
+	b_ = b;
 }
 
 
 
 // --- protected -----------------------------------------------------------------------------------
 
-Mix2::Mix2(PyTypeObject* iType, const TTexturePtr& iA, const TTexturePtr& iB):
-	Texture(iType),
-	a_(iA),
-	b_(iB)
+Mix2::Mix2(const TTexturePtr& a, const TTexturePtr& b):
+	a_(a),
+	b_(b)
 {
 }
 
@@ -69,11 +68,11 @@ const TPyObjectPtr Mix2::doGetState() const
 
 
 
-void Mix2::doSetState(const TPyObjectPtr& iState)
+void Mix2::doSetState(const TPyObjectPtr& state)
 {
-	TPyObjectPtr state;
-	python::decodeTuple(iState, a_, b_, state);
-	doSetMixState(state);
+	TPyObjectPtr wrappedState;
+	python::decodeTuple(state, a_, b_, wrappedState);
+	doSetMixState(wrappedState);
 }
 
 

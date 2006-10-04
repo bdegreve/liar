@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::output::Image
  *  @brief render target to image file
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  *
  *  The image render target does not apply any filter on the ouput samples.  All it does, is to finding the
  *  pixel that contains the sample and add it to the pixel value.
@@ -49,7 +49,7 @@ public:
 
 	typedef prim::Vector2D<size_t> TSize;
 
-	Image(const std::string& iFilename, const TSize& iSize);
+	Image(const std::string& filename, const TSize& size);
     ~Image();
 
 	const std::string& filename() const;
@@ -58,15 +58,15 @@ public:
     const TScalar gamma() const;
 	const TScalar exposureTime() const;
 
-	void setFilename(const std::string& iFilename);
-	void setRgbSpace(const TRgbSpacePtr& iRgbSpace);
-    void setGamma(TScalar iGammaExponent);
-	void setExposureTime(TScalar iTime);
+	void setFilename(const std::string& filename);
+	void setRgbSpace(const TRgbSpacePtr& rgbSpace);
+    void setGamma(TScalar gammaExponent);
+	void setExposureTime(TScalar time);
 
 private:
 
     virtual void doBeginRender();
-	virtual void doWriteRender(const OutputSample* iFirst, const OutputSample* iLast);
+	virtual void doWriteRender(const OutputSample* first, const OutputSample* last);
     virtual void doEndRender();
 
     io::Image image_;

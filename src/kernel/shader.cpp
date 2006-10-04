@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -42,17 +42,17 @@ Shader::~Shader()
 
 
 
-void Shader::requestSamples(const TSamplerPtr& iSampler)
+void Shader::requestSamples(const TSamplerPtr& sampler)
 {
-	doRequestSamples(iSampler);
+	doRequestSamples(sampler);
 }
 
 
 
 // --- protected -----------------------------------------------------------------------------------
 
-Shader::Shader(PyTypeObject* iType):
-    python::PyObjectPlus(iType)
+Shader::Shader(unsigned capabilityFlags):
+	caps_(capabilityFlags)
 {
 }
 
@@ -61,7 +61,8 @@ Shader::Shader(PyTypeObject* iType):
 const TPyObjectPtr Shader::reduce() const
 {
 	return python::makeTuple(
-		reinterpret_cast<PyObject*>(this->GetType()), python::makeTuple(), this->getState());
+		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->GetType())), 
+		python::makeTuple(), this->getState());
 }
 
 
@@ -73,17 +74,25 @@ const TPyObjectPtr Shader::getState() const
 
 
 
-void Shader::setState(const TPyObjectPtr& iState)
+void Shader::setState(const TPyObjectPtr& state)
 {
-	doSetState(iState);
+	doSetState(state);
 }
 
 
 
 // --- private -------------------------------------------------------------------------------------
 
-void Shader::doRequestSamples(const TSamplerPtr& iSampler)
+void Shader::doRequestSamples(const TSamplerPtr& sampler)
 {
+}
+
+
+
+const Spectrum Shader::doEmission(const Sample& sample, const IntersectionContext& context, 
+		const TVector3D& dirOut) const
+{
+	return Spectrum();
 }
 
 

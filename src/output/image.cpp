@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -39,11 +39,10 @@ PY_CLASS_MEMBER_RW(Image, "exposureTime", exposureTime, setExposureTime)
 
 // --- public --------------------------------------------------------------------------------------
 
-Image::Image(const std::string& iFilename, const TSize& iSize):
-    RenderTarget(&Type),
+Image::Image(const std::string& filename, const TSize& size):
 	image_(),
-    filename_(iFilename),
-    size_(iSize),
+    filename_(filename),
+    size_(size),
 	rgbSpace_(RgbSpace::defaultSpace()),
     gamma_(1.f),
 	exposureTime_(-1.f),
@@ -98,30 +97,30 @@ const TScalar Image::exposureTime() const
 
 
 
-void Image::setFilename(const std::string& iFilename)
+void Image::setFilename(const std::string& filename)
 {
-	filename_ = iFilename;
+	filename_ = filename;
 }
 
 
 
-void Image::setRgbSpace(const TRgbSpacePtr& iRgbSpace)
+void Image::setRgbSpace(const TRgbSpacePtr& rgbSpace)
 {
-	rgbSpace_ = iRgbSpace;
+	rgbSpace_ = rgbSpace;
 }
 
 
 
-void Image::setGamma(TScalar iGamma)
+void Image::setGamma(TScalar gammaExponent)
 {
-    gamma_ = iGamma;
+    gamma_ = gammaExponent;
 }
 
 
 
-void Image::setExposureTime(TScalar iTime)
+void Image::setExposureTime(TScalar time)
 {
-    exposureTime_ = iTime;
+    exposureTime_ = time;
 }
 
 
@@ -137,13 +136,13 @@ void Image::doBeginRender()
 
 
 
-void Image::doWriteRender(const OutputSample* iFirst, const OutputSample* iLast)
+void Image::doWriteRender(const OutputSample* first, const OutputSample* last)
 {
     LASS_ASSERT(size_.x > 0 && size_.y > 0);
 
-	while (iFirst != iLast)
+	while (first != last)
 	{
-		const TPoint2D& position = iFirst->screenCoordinate();
+		const TPoint2D& position = first->screenCoordinate();
 		LASS_ASSERT(position.x >= 0 && position.y >= 0 && position.x < 1 && position.y < 1);
 		const unsigned i = static_cast<unsigned>(num::floor(position.x * size_.x));
 		const unsigned j = static_cast<unsigned>(num::floor(position.y * size_.y));
@@ -153,13 +152,13 @@ void Image::doWriteRender(const OutputSample* iFirst, const OutputSample* iLast)
 		}
 		LASS_ASSERT(i < size_.x && j < size_.y);
 
-		TVector3D xyz = iFirst->radiance().xyz();
-		xyz *= iFirst->weight();
+		TVector3D xyz = first->radiance().xyz();
+		xyz *= first->weight();
 		
 		image_(j, i) += rgbSpace_->convert(xyz);
 		++numberOfSamples_[j * size_.x + i];
 
-		++iFirst;
+		++first;
 	}
 
 	isSaved_ = false;

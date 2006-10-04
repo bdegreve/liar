@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::scenery::TriangleMesh
  *  @brief a simple triangle mesh
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_SCENERY_TRIANGLE_MESH_H
@@ -61,16 +61,16 @@ private:
 
     LASS_UTIL_ACCEPT_VISITOR
     
-	void doIntersect(const Sample& iSample, const BoundedRay& iRay, Intersection& oResult) const;
-	const bool doIsIntersecting(const Sample& iSample, const BoundedRay& iRay) const;
-	void doLocalContext(const Sample& iSample, const BoundedRay& iRay,
-		const Intersection& iIntersection, IntersectionContext& oResult) const;
-	const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const;
+	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
+	const bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
+	void doLocalContext(const Sample& sample, const BoundedRay& ray,
+		const Intersection& intersection, IntersectionContext& result) const;
+	const bool doContains(const Sample& sample, const TPoint3D& point) const;
 	const TAabb3D doBoundingBox() const;
 	const TScalar doArea() const;
 
 	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& iState);
+	void doSetState(const TPyObjectPtr& state);
 
     TMesh mesh_;
 };

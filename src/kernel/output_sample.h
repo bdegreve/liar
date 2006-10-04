@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ class LIAR_KERNEL_DLL OutputSample
 public:
 
 	OutputSample();
-	OutputSample(const Sample& iSample, const Spectrum& iRadiance);
+	OutputSample(const Sample& sample, const Spectrum& radiance);
 
 	const Spectrum& radiance() const { return radiance_; }
 	const TPoint2D& screenCoordinate() const { return screenCoordinate_; }

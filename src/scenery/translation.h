@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
  *	be achieved by using the general Transformation object, it is in general much
  *	faster.
  *
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_SCENERY_TRANSLATION_H
@@ -47,33 +47,33 @@ class LIAR_SCENERY_DLL Translation: public SceneObject
     PY_HEADER(SceneObject)
 public:
 
-	Translation(const TSceneObjectPtr& iChild, const TVector3D& iLocalToWorld);
+	Translation(const TSceneObjectPtr& child, const TVector3D& localToWorld);
 
 	const TSceneObjectPtr& child() const;
-	void setChild(const TSceneObjectPtr& iChild);
+	void setChild(const TSceneObjectPtr& child);
 	
 	const TVector3D& localToWorld() const;
-	void setLocalToWorld(const TVector3D& iLocalToWorld);
+	void setLocalToWorld(const TVector3D& localToWorld);
 	
 	const TVector3D worldToLocal() const;
 
 private:
 
-    void doAccept(lass::util::VisitorBase& ioVisitor);
+    void doAccept(lass::util::VisitorBase& visitor);
 
-	void doPreProcess(const TimePeriod& iPeriod);
-	void doIntersect(const Sample& iSample, const BoundedRay& iRay, 
-		Intersection& oResult) const;
-	const bool doIsIntersecting(const Sample& iSample, const BoundedRay& iRay) const;
-	void doLocalContext(const Sample& iSample, const BoundedRay& iRay,
-		const Intersection& iIntersection, IntersectionContext& oResult) const;
-	void doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const;
-	const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const;
+	void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
+	void doIntersect(const Sample& sample, const BoundedRay& ray, 
+		Intersection& result) const;
+	const bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
+	void doLocalContext(const Sample& sample, const BoundedRay& ray,
+		const Intersection& intersection, IntersectionContext& result) const;
+	void doLocalSpace(TTime time, TTransformation3D& localToWorld) const;
+	const bool doContains(const Sample& sample, const TPoint3D& point) const;
 	const TAabb3D doBoundingBox() const;
 	const TScalar doArea() const;
 
 	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& iState);
+	void doSetState(const TPyObjectPtr& state);
 
     TSceneObjectPtr child_;
     TVector3D localToWorld_;

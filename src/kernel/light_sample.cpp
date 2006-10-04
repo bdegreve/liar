@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -31,9 +31,9 @@ namespace kernel
 
 // --- public --------------------------------------------------------------------------------------
 
-LightSample::LightSample(const Spectrum& iRadiance, const TVector3D& iDirection/*, TScalar iPdf*/):
-	radiance_(iRadiance),
-	direction_(iDirection)
+LightSample::LightSample(const Spectrum& radiance, const TVector3D& direction/*, TScalar iPdf*/):
+	radiance_(radiance),
+	direction_(direction)
 	//pdf_(iPdf)
 {
 }

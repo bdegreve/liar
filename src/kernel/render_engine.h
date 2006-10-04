@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::RenderEngine
  *  @brief keeps the ray tracer running
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_RENDER_ENGINE_H
@@ -62,16 +62,16 @@ public:
     const TRayTracerPtr& tracer() const;
 	const unsigned numberOfThreads() const;
 
-    void setCamera(const TCameraPtr& iCamera);
-    void setSampler(const TSamplerPtr& iSampler);
-    void setScene(const TSceneObjectPtr& iScene);
-    void setTarget(const TRenderTargetPtr& iRenderTarget);
+    void setCamera(const TCameraPtr& camera);
+    void setSampler(const TSamplerPtr& sampler);
+    void setScene(const TSceneObjectPtr& scene);
+    void setTarget(const TRenderTargetPtr& renderTarget);
     void setTracer(const TRayTracerPtr& iRayTracer);
-	void setNumberOfThreads(unsigned iNumber);
+	void setNumberOfThreads(unsigned number);
 
-    void render(TTime iTime, const TBucket& iBucket);
-    void render(TTime iTime);
-    void render(const TBucket& iBucket);
+    void render(TTime time, const TBucket& bucket);
+    void render(TTime time);
+    void render(const TBucket& bucket);
     void render();
 
 private:
@@ -79,9 +79,9 @@ private:
 	class Progress
 	{
 	public:
-		Progress(const std::string& iCaption, unsigned iTotalNumberOfSamples);
+		Progress(const std::string& caption, unsigned totalNumberOfSamples);
 		~Progress();
-		Progress& operator+=(unsigned iNumNewSamplesWritten);
+		Progress& operator+=(unsigned numNewSamplesWritten);
 	private:
 		util::ProgressIndicator indicator_;
 		unsigned numSamplesWritten_;
@@ -93,7 +93,7 @@ private:
 	public:
 		typedef Sampler::TResolution TResolution;
 		Task() {}
-		Task(const TResolution& iBegin, const TResolution& iEnd): begin_(iBegin), end_(iEnd) {}
+		Task(const TResolution& begin, const TResolution& end): begin_(begin), end_(end) {}
 		const TResolution& begin() const { return begin_; }
 		const TResolution& end() const { return end_; }
 	private:
@@ -105,10 +105,10 @@ private:
 	{
 	public:
 		Consumer(RenderEngine& iEngine, const TRayTracerPtr& iRayTracer,
-				const TSamplerPtr& iSampler, Progress& ioProgress,
+				const TSamplerPtr& sampler, Progress& ioProgress,
 				const TVector2D& iPixelSize, const TimePeriod& iTimePeriod);
-		Consumer(const Consumer& iOther);
-		Consumer& operator=(const Consumer& iOther);
+		Consumer(const Consumer& other);
+		Consumer& operator=(const Consumer& other);
 		void operator()(const Task& iTask);
 	private:
 		RenderEngine* engine_;
@@ -121,7 +121,7 @@ private:
 
 	friend class Consumer;
 
-	void writeRender(const OutputSample* iFirst, const OutputSample* iLast, Progress& ioProgress);
+	void writeRender(const OutputSample* first, const OutputSample* last, Progress& ioProgress);
 	const bool isCanceling() const;
 
     TCameraPtr camera_;

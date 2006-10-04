@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -47,17 +47,16 @@ TScalar Medium::refractiveIndex() const
 
 
 
-void Medium::setRefractiveIndex(TScalar iValue)
+void Medium::setRefractiveIndex(TScalar value)
 {
-	refractiveIndex_ = iValue;
+	refractiveIndex_ = value;
 }
 
 
 
 // --- protected -----------------------------------------------------------------------------------
 
-Medium::Medium(PyTypeObject* iType):
-    python::PyObjectPlus(iType),
+Medium::Medium():
 	refractiveIndex_(TNumTraits::one)
 {
 }

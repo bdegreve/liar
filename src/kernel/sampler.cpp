@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -64,7 +64,8 @@ const TSamplerPtr Sampler::clone() const
 const TPyObjectPtr Sampler::reduce() const
 {
 	return python::makeTuple(
-		reinterpret_cast<PyObject*>(this->GetType()), python::makeTuple(), this->getState());
+		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->GetType())), 
+		python::makeTuple(), this->getState());
 }
 
 
@@ -83,27 +84,26 @@ const TPyObjectPtr Sampler::getState() const
 
 
 
-void Sampler::setState(const TPyObjectPtr& iState)
+void Sampler::setState(const TPyObjectPtr& state)
 {
-	TPyObjectPtr state;
+	TPyObjectPtr derivedState;
 	python::decodeTuple(
-		iState,
+		state,
 		subSequenceSize1D_,
 		subSequenceSize2D_,
 		subSequenceOffset1D_,
 		subSequenceOffset2D_,
 		totalSubSequenceSize1D_,
 		totalSubSequenceSize2D_,
-		state);
-	doSetState(state);
+		derivedState);
+	doSetState(derivedState);
 }
 
 
 
 // --- protected -----------------------------------------------------------------------------------
 
-Sampler::Sampler(PyTypeObject* iType):
-    python::PyObjectPlus(iType),
+Sampler::Sampler():
 	totalSubSequenceSize1D_(0),
 	totalSubSequenceSize2D_(0)
 {
@@ -113,9 +113,9 @@ Sampler::Sampler(PyTypeObject* iType):
 
 
 
-const int Sampler::requestSubSequence1D(unsigned iRequestedSize)
+const int Sampler::requestSubSequence1D(unsigned requestedSize)
 {
-	const unsigned size = doRoundSize1D(iRequestedSize);
+	const unsigned size = doRoundSize1D(requestedSize);
 	totalSubSequenceSize1D_ += size;
 	subSequenceSize1D_.push_back(size);
 	subSequenceOffset1D_.push_back(subSequenceOffset1D_.back() + size);
@@ -126,9 +126,9 @@ const int Sampler::requestSubSequence1D(unsigned iRequestedSize)
 
 
 
-const int Sampler::requestSubSequence2D(unsigned iRequestedSize)
+const int Sampler::requestSubSequence2D(unsigned requestedSize)
 {
-	const unsigned size = doRoundSize2D(iRequestedSize);
+	const unsigned size = doRoundSize2D(requestedSize);
 	totalSubSequenceSize2D_ += size;
 	subSequenceSize2D_.push_back(size);
 	subSequenceOffset2D_.push_back(subSequenceOffset2D_.back() + size);
@@ -153,33 +153,33 @@ void Sampler::clearSubSequenceRequests()
 }
 
 
-void Sampler::sample(const TResolution& iPixel, unsigned iSubPixel, const TimePeriod& iPeriod, 
-					 Sample& oSample)
+void Sampler::sample(const TResolution& pixel, unsigned subPixel, const TimePeriod& period, 
+					 Sample& sample)
 {
-	oSample.sampler_ = this;
+	sample.sampler_ = this;
 
-	doSampleScreen(iPixel, iSubPixel, oSample.screenCoordinate_);
-	doSampleLens(iPixel, iSubPixel, oSample.lensCoordinate_);
-	doSampleTime(iPixel, iSubPixel, iPeriod, oSample.time_);
+	doSampleScreen(pixel, subPixel, sample.screenCoordinate_);
+	doSampleLens(pixel, subPixel, sample.lensCoordinate_);
+	doSampleTime(pixel, subPixel, period, sample.time_);
 
-	oSample.subSequences1D_.resize(totalSubSequenceSize1D_);
+	sample.subSequences1D_.resize(totalSubSequenceSize1D_);
 	const size_t n1D = subSequenceSize1D_.size();
 	for (size_t k = 0; k < n1D; ++k)
 	{
 		const unsigned offset = subSequenceOffset1D_[k];
 		const unsigned size = subSequenceSize1D_[k];
-		doSampleSubSequence1D(iPixel, iSubPixel, &oSample.subSequences1D_[offset],
-			&oSample.subSequences1D_[offset + size]);
+		doSampleSubSequence1D(pixel, subPixel, &sample.subSequences1D_[offset],
+			&sample.subSequences1D_[offset + size]);
 	}
 
-	oSample.subSequences2D_.resize(totalSubSequenceSize2D_);
+	sample.subSequences2D_.resize(totalSubSequenceSize2D_);
 	const size_t n2D = subSequenceSize2D_.size();
 	for (size_t k = 0; k < n2D; ++k)
 	{
 		const unsigned offset = subSequenceOffset2D_[k];
 		const unsigned size = subSequenceSize2D_[k];
-		doSampleSubSequence2D(iPixel, iSubPixel, &oSample.subSequences2D_[offset],
-			&oSample.subSequences2D_[offset + size]);
+		doSampleSubSequence2D(pixel, subPixel, &sample.subSequences2D_[offset],
+			&sample.subSequences2D_[offset + size]);
 	}
 }
 
@@ -187,16 +187,16 @@ void Sampler::sample(const TResolution& iPixel, unsigned iSubPixel, const TimePe
 
 // --- private -------------------------------------------------------------------------------------
 
-const unsigned Sampler::doRoundSize1D(unsigned iRequestedSize) const
+const unsigned Sampler::doRoundSize1D(unsigned requestedSize) const
 {
-	return iRequestedSize;
+	return requestedSize;
 }
 
 
 
-const unsigned Sampler::doRoundSize2D(unsigned iRequestedSize) const
+const unsigned Sampler::doRoundSize2D(unsigned requestedSize) const
 {
-	return iRequestedSize;
+	return requestedSize;
 }
 
 

@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 
 #include "cameras_common.h"
 #include "perspective_camera.h"
+#include <lass/num/distribution_transformations.h>
 
 namespace liar
 {
@@ -48,7 +49,6 @@ PY_CLASS_MEMBER_RW(PerspectiveCamera, "shutterCloseDelta", shutterCloseDelta, se
 // --- public --------------------------------------------------------------------------------------
 
 PerspectiveCamera::PerspectiveCamera():
-    Camera(&Type),
     position_(0, 0, 0),
     sky_(0, 0, 1),
 	fovAngle_(TNumTraits::pi / 2),
@@ -111,13 +111,13 @@ const TScalar PerspectiveCamera::fovAngle() const
 
 
 /** adjust horizontal FOV in radians.
- *  - @c fovAngle = iFov
+ *  - @c fovAngle = fov
  *  - @c right is scaled so that its orthogonal part to direction expands the FOV.
  *  - @c down is also scaled so that the aspect ratio is preserved.
  */
-void PerspectiveCamera::setFovAngle(TScalar iFov)
+void PerspectiveCamera::setFovAngle(TScalar fov)
 {
-    fovAngle_ = iFov;
+    fovAngle_ = fov;
     right_ *= 2 * num::tan(fovAngle_ / 2) * direction_.norm() / direction_.reject(right_).norm();
     setAspectRatio(aspectRatio_);
     initTransformation();
@@ -157,9 +157,9 @@ const TVector3D& PerspectiveCamera::direction() const
 
 /** set @e direction of camera directly.
  */
-void PerspectiveCamera::setDirection(const TVector3D& iDirection) 
+void PerspectiveCamera::setDirection(const TVector3D& direction) 
 {
-    direction_ = iDirection;
+    direction_ = direction;
     right_ = prim::cross(direction_, sky_);
     down_ = prim::cross(direction_, right_);
 	rightNormal_ = right_.normal();
@@ -199,9 +199,9 @@ const TVector3D& PerspectiveCamera::down() const
 
 
 
-void PerspectiveCamera::setDown(const TVector3D& iDown)
+void PerspectiveCamera::setDown(const TVector3D& down)
 {
-    down_ = iDown;
+    down_ = down;
 	downNormal_ = down_.normal();
 
     const TVector3D orthoRight = direction_.reject(down_);
@@ -220,9 +220,9 @@ const TVector3D& PerspectiveCamera::sky() const
 
 
 
-void PerspectiveCamera::setSky(const TVector3D& iSky)
+void PerspectiveCamera::setSky(const TVector3D& sky)
 {
-    sky_ = iSky;
+    sky_ = sky;
 }
 
 
@@ -241,16 +241,16 @@ const TTime PerspectiveCamera::shutterCloseDelta() const
 
 
 
-void PerspectiveCamera::setShutterOpenDelta(TTimeDelta iShutterOpenDelta)
+void PerspectiveCamera::setShutterOpenDelta(TTimeDelta shutterOpenDelta)
 {
-    shutterOpenDelta_ = iShutterOpenDelta;
+    shutterOpenDelta_ = shutterOpenDelta;
 }
 
 
 
-void PerspectiveCamera::setShutterCloseDelta(TTimeDelta iShutterCloseDelta)
+void PerspectiveCamera::setShutterCloseDelta(TTimeDelta shutterCloseDelta)
 {
-    shutterCloseDelta_ = iShutterCloseDelta;
+    shutterCloseDelta_ = shutterCloseDelta;
 }
 
 
@@ -269,16 +269,16 @@ TScalar PerspectiveCamera::lensRadius() const
 
 
 
-void PerspectiveCamera::setFocalDistance(TScalar iDistance)
+void PerspectiveCamera::setFocalDistance(TScalar distance)
 {
-    focalDistance_ = iDistance;
+    focalDistance_ = distance;
 }
 
 
 
-void PerspectiveCamera::setLensRadius(TScalar iRadius)
+void PerspectiveCamera::setLensRadius(TScalar radius)
 {
-    lensRadius_ = iRadius;
+    lensRadius_ = radius;
 }
 
 
@@ -296,16 +296,16 @@ TScalar PerspectiveCamera::farLimit() const
 
 
 
-void PerspectiveCamera::setNearLimit(TScalar iDistance)
+void PerspectiveCamera::setNearLimit(TScalar distance)
 {
-	nearLimit_ = iDistance;
+	nearLimit_ = distance;
 }
 
 
 
-void PerspectiveCamera::setFarLimit(TScalar iDistance)
+void PerspectiveCamera::setFarLimit(TScalar distance)
 {
-	farLimit_ = iDistance;
+	farLimit_ = distance;
 }
 
 
@@ -316,60 +316,10 @@ void PerspectiveCamera::setFarLimit(TScalar iDistance)
 
 // --- private -------------------------------------------------------------------------------------
    
-namespace impl
-{
-
-#pragma LASS_TODO("move this to LASS [Bramz]")
-TPoint2D sampleConcentricDisk(const TPoint2D& uv)
-{
-	TScalar r, theta;
-	const TScalar x = 2 * uv.x - 1;
-	const TScalar y = 2 * uv.y - 1;
-	const TScalar pi_4 = TNumTraits::pi / 4;
-
-	if (x > -y) 
-	{
-		if (x > y) 
-		{
-			r = x;
-			theta = pi_4 * (y / x);
-		}
-		else       
-		{
-			r = y;
-			theta = pi_4 * (2 - (x / y));
-		}
-	}
-	else 
-	{
-		if (x < y) 
-		{	
-			r = -x;
-			theta = pi_4 * (4 + (y / x));
-		}
-		else       
-		{
-			r = -y;
-			if (y != 0)
-			{
-                theta = pi_4 * (6 - (x / y));
-			}
-            else
-			{
-                theta = 0;
-			}
-		}
-	}
-
-	return TPoint2D(r * num::cos(theta), r * num::sin(theta));
-}
-
-}
-
 const BoundedRay 
-PerspectiveCamera::doGenerateRay(const Sample& iSample, const TVector2D& iScreenSpaceDelta) const
+PerspectiveCamera::doGenerateRay(const Sample& sample, const TVector2D& screenSpaceDelta) const
 {
-	const TPoint2D& screen = iSample.screenCoordinate() + iScreenSpaceDelta;
+	const TPoint2D& screen = sample.screenCoordinate() + screenSpaceDelta;
 
 	const TVector3D cameraDirection = direction_.normal();
     
@@ -381,7 +331,8 @@ PerspectiveCamera::doGenerateRay(const Sample& iSample, const TVector2D& iScreen
 	if (lensRadius_ > 0 && focalDistance_ > 0)
 	{
 #pragma LASS_TODO("do something with a focal plane versus focal cyilinder")
-		const TPoint2D& lens = impl::sampleConcentricDisk(iSample.lensCoordinate());
+		TScalar pdf;
+		const TPoint2D& lens = num::uniformDisk(sample.lensCoordinate(), pdf);
 		const TPoint3D lensPoint = position_ +
 			lensRadius_ * lens.x * rightNormal_ +
 			lensRadius_ * lens.y * downNormal_;		
@@ -436,10 +387,10 @@ const TPyObjectPtr PerspectiveCamera::doGetState() const
 
 
 
-void PerspectiveCamera::doSetState(const TPyObjectPtr& iState)
+void PerspectiveCamera::doSetState(const TPyObjectPtr& state)
 {
 	LASS_ENFORCE(python::decodeTuple(
-		iState,
+		state,
 		position_,
 		right_,
 		down_,

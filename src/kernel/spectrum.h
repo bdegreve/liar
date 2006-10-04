@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::Spectrum
  *  @brief respresentation of a colour spectrum.
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SPECTRUM_H
@@ -46,14 +46,14 @@ public:
 	typedef util::CallTraits<TScalar>::TReference TReference;
 
 	Spectrum();
-	explicit Spectrum(TParam iScalar);
-	explicit Spectrum(const TVector3D& iXYZ);
+	explicit Spectrum(TParam scalar);
+	explicit Spectrum(const TVector3D& xyz);
 
-	Spectrum& operator=(const Spectrum& iOther);
-	Spectrum& operator=(TParam iScalar);
+	Spectrum& operator=(const Spectrum& other);
+	Spectrum& operator=(TParam scalar);
 
-	TParam operator[](size_t iBand) const;
-	TReference operator[](size_t iBand);
+	TParam operator[](size_t band) const;
+	TReference operator[](size_t band);
 	const size_t numberOfBands() const { return numberOfBands_; }
 	
 	const TValue average() const;
@@ -63,24 +63,24 @@ public:
 	const Spectrum operator-() const;
 	const Spectrum reciprocal() const;
 
-	Spectrum& operator+=(const Spectrum& iOther);
-	Spectrum& operator-=(const Spectrum& iOther);
-	Spectrum& operator*=(const Spectrum& iOther);
-	Spectrum& operator/=(const Spectrum& iOther);
-	void inppow(const Spectrum& iOther);
-	void inpclamp(const Spectrum& iMin, const Spectrum& iMax); 
+	Spectrum& operator+=(const Spectrum& other);
+	Spectrum& operator-=(const Spectrum& other);
+	Spectrum& operator*=(const Spectrum& other);
+	Spectrum& operator/=(const Spectrum& other);
+	void inppow(const Spectrum& other);
+	void inpclamp(const Spectrum& min, const Spectrum& max); 
 	
-	Spectrum& operator+=(TParam iScalar);
-	Spectrum& operator-=(TParam iScalar);
-	Spectrum& operator*=(TParam iScalar);
-	Spectrum& operator/=(TParam iScalar);
-	void inppow(TParam iScalar);
-	void inpclamp(TParam iMin, TParam iMax); 
+	Spectrum& operator+=(TParam scalar);
+	Spectrum& operator-=(TParam scalar);
+	Spectrum& operator*=(TParam scalar);
+	Spectrum& operator/=(TParam scalar);
+	void inppow(TParam scalar);
+	void inpclamp(TParam min, TParam max); 
 	
 	void inpsqr();
 	void inpsqrt();
 
-	void swap(Spectrum& iOther);
+	void swap(Spectrum& other);
 
 	const bool operator!() const;
 	operator num::SafeBool() const;
@@ -96,37 +96,57 @@ private:
 
 PY_SHADOW_CLASS(LIAR_KERNEL_DLL, PySpectrum, Spectrum);
 
-inline const Spectrum operator+(const Spectrum& iA, const Spectrum& iB);
-inline const Spectrum operator-(const Spectrum& iA, const Spectrum& iB);
-inline const Spectrum operator*(const Spectrum& iA, const Spectrum& iB);
-inline const Spectrum operator/(const Spectrum& iA, const Spectrum& iB);
-inline const Spectrum pow(const Spectrum& iA, const Spectrum& iB);
-inline const Spectrum clamp(const Spectrum& iA, const Spectrum& iMin, const Spectrum& iMax);
+inline const Spectrum operator+(const Spectrum& a, const Spectrum& b);
+inline const Spectrum operator-(const Spectrum& a, const Spectrum& b);
+inline const Spectrum operator*(const Spectrum& a, const Spectrum& b);
+inline const Spectrum operator/(const Spectrum& a, const Spectrum& b);
+inline const Spectrum pow(const Spectrum& a, const Spectrum& b);
+inline const Spectrum clamp(const Spectrum& a, const Spectrum& min, const Spectrum& max);
 
-inline const Spectrum operator+(const Spectrum& iA, Spectrum::TParam iB);
-inline const Spectrum operator-(const Spectrum& iA, Spectrum::TParam iB);
-inline const Spectrum operator*(const Spectrum& iA, Spectrum::TParam iB);
-inline const Spectrum operator/(const Spectrum& iA, Spectrum::TParam iB);
-inline const Spectrum pow(const Spectrum& iA, Spectrum::TParam iB);
-inline const Spectrum clamp(const Spectrum& iA, Spectrum::TParam iMin, Spectrum::TParam iMax);
+inline const Spectrum operator+(const Spectrum& a, Spectrum::TParam b);
+inline const Spectrum operator-(const Spectrum& a, Spectrum::TParam b);
+inline const Spectrum operator*(const Spectrum& a, Spectrum::TParam b);
+inline const Spectrum operator/(const Spectrum& a, Spectrum::TParam b);
+inline const Spectrum pow(const Spectrum& a, Spectrum::TParam b);
+inline const Spectrum clamp(const Spectrum& a, Spectrum::TParam min, Spectrum::TParam max);
 
-inline const Spectrum operator+(Spectrum::TParam iA, const Spectrum& iB);
-inline const Spectrum operator-(Spectrum::TParam iA, const Spectrum& iB);
-inline const Spectrum operator*(Spectrum::TParam iA, const Spectrum& iB);
-inline const Spectrum operator/(Spectrum::TParam iA, const Spectrum& iB);
-inline const Spectrum pow(Spectrum::TParam iA, const Spectrum& iB);
-inline const Spectrum clamp(Spectrum::TParam iA, const Spectrum& iMin, const Spectrum& iMax);
+inline const Spectrum operator+(Spectrum::TParam a, const Spectrum& b);
+inline const Spectrum operator-(Spectrum::TParam a, const Spectrum& b);
+inline const Spectrum operator*(Spectrum::TParam a, const Spectrum& b);
+inline const Spectrum operator/(Spectrum::TParam a, const Spectrum& b);
+inline const Spectrum pow(Spectrum::TParam a, const Spectrum& b);
+inline const Spectrum clamp(Spectrum::TParam a, const Spectrum& min, const Spectrum& max);
 
-inline const Spectrum sqr(const Spectrum& iA);
-inline const Spectrum sqrt(const Spectrum& iA);
+inline const Spectrum sqr(const Spectrum& a);
+inline const Spectrum sqrt(const Spectrum& a);
 
-inline const Spectrum blend(const Spectrum& iA, const Spectrum& iB, Spectrum::TParam iFactor);
+inline const Spectrum blend(const Spectrum& a, const Spectrum& b, Spectrum::TParam iFactor);
 
-Spectrum xyz(const TVector3D& iXYZ);
-Spectrum xyz(TScalar iX, TScalar iY, TScalar iZ);
+Spectrum xyz(const TVector3D& xyz);
+Spectrum xyz(TScalar x, TScalar y, TScalar z);
 
-//Spectrum xyz(const TVector3D& iXYZ, const TSpectrumFormatPtr& iFormat);
-//Spectrum xyz(TScalar iX, TScalar iY, TScalar iZ, const TSpectrumFormatPtr& iFormat);
+//Spectrum xyz(const TVector3D& xyz, const TSpectrumFormatPtr& iFormat);
+//Spectrum xyz(TScalar x, TScalar y, TScalar z, const TSpectrumFormatPtr& iFormat);
+
+template <typename E, typename T>
+std::basic_ostream<E, T>& operator<<(std::basic_ostream<E, T>& stream, const Spectrum& spectrum)
+{
+	std::basic_ostringstream<E, T> buffer;
+	buffer.copyfmt(stream);
+	buffer.width(0);
+	buffer << "{";
+	for (size_t i = 0; i < spectrum.numberOfBands(); ++i)
+	{
+		if (i != 0)
+		{
+			buffer << ",";
+		}
+		buffer << spectrum[i];
+	}
+	buffer << "}";
+	stream << buffer.str();
+	return stream;
+}
 
 }
 

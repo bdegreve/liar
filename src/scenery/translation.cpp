@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -38,11 +38,10 @@ PY_CLASS_MEMBER_R(Translation, "worldToLocal", worldToLocal)
 
 // --- public --------------------------------------------------------------------------------------
 
-Translation::Translation(const TSceneObjectPtr& iChild, 
-							   const TVector3D& iLocalToWorld):
-    SceneObject(&Type),
-    child_(iChild),
-    localToWorld_(iLocalToWorld)
+Translation::Translation(const TSceneObjectPtr& child, 
+							   const TVector3D& localToWorld):
+    child_(child),
+    localToWorld_(localToWorld)
 {
 }
 
@@ -55,9 +54,9 @@ const TSceneObjectPtr& Translation::child() const
 
 
 
-void Translation::setChild(const TSceneObjectPtr& iChild)
+void Translation::setChild(const TSceneObjectPtr& child)
 {
-	child_ = iChild;
+	child_ = child;
 }
 
 
@@ -69,9 +68,9 @@ const TVector3D& Translation::localToWorld() const
 
 
 
-void Translation::setLocalToWorld(const TVector3D& iLocalToWorld)
+void Translation::setLocalToWorld(const TVector3D& localToWorld)
 {
-	localToWorld_ = iLocalToWorld;
+	localToWorld_ = localToWorld;
 }
 
 
@@ -87,69 +86,69 @@ const TVector3D Translation::worldToLocal() const
 
 // --- private -------------------------------------------------------------------------------------
 
-void Translation::doPreProcess(const TimePeriod& iPeriod)
+void Translation::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period)
 {
-	child_->preProcess(iPeriod);
+	child_->preProcess(scene, period);
 }
 
 
 
-void Translation::doAccept(util::VisitorBase& ioVisitor)
+void Translation::doAccept(util::VisitorBase& visitor)
 {
-    doVisit(*this, ioVisitor);
-    child_->accept(ioVisitor);
-	doVisitOnExit(*this, ioVisitor);
+    doVisit(*this, visitor);
+    child_->accept(visitor);
+	doVisitOnExit(*this, visitor);
 }
 
 
 
-void Translation::doIntersect(const Sample& iSample, const BoundedRay& iRay, 
-							  Intersection& oResult) const
+void Translation::doIntersect(const Sample& sample, const BoundedRay& ray, 
+							  Intersection& result) const
 {
-	const BoundedRay localRay = translate(iRay, -localToWorld_);
-	child_->intersect(iSample, localRay, oResult);
-    if (oResult)
+	const BoundedRay localRay = translate(ray, -localToWorld_);
+	child_->intersect(sample, localRay, result);
+    if (result)
     {
-        oResult.push(this);
+        result.push(this);
     }
 }
 
 
 
-const bool Translation::doIsIntersecting(const Sample& iSample, 
-										 const BoundedRay& iRay) const
+const bool Translation::doIsIntersecting(const Sample& sample, 
+										 const BoundedRay& ray) const
 {
-	const BoundedRay localRay = translate(iRay, -localToWorld_);
-	return child_->isIntersecting(iSample, localRay);
+	const BoundedRay localRay = translate(ray, -localToWorld_);
+	return child_->isIntersecting(sample, localRay);
 }
 
 
 
-void Translation::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
-								 const Intersection& iIntersection, 
-								 IntersectionContext& oResult) const
+void Translation::doLocalContext(const Sample& sample, const BoundedRay& ray,
+								 const Intersection& intersection, 
+								 IntersectionContext& result) const
 {
-	IntersectionDescendor descendor(iIntersection);
-	LASS_ASSERT(iIntersection.object() == child_.get());
+	IntersectionDescendor descendor(intersection);
+	LASS_ASSERT(intersection.object() == child_.get());
 
-	const TRay3D localRay(iRay.support() - localToWorld_, iRay.direction());
-	child_->localContext(iSample, localRay, iIntersection, oResult);
-	oResult.translate(localToWorld_);
+	const TRay3D localRay(ray.support() - localToWorld_, ray.direction());
+	child_->localContext(sample, localRay, intersection, result);
+	result.translateBy(localToWorld_);
 }
 
 
 
-void Translation::doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const 
+void Translation::doLocalSpace(TTime time, TTransformation3D& localToWorld) const 
 {
-	ioLocalToWorld = concatenate(TTransformation3D::translation(localToWorld_), ioLocalToWorld);
+	localToWorld = concatenate(TTransformation3D::translation(localToWorld_), localToWorld);
 }
 
 
 
-const bool Translation::doContains(const Sample& iSample, const TPoint3D& iPoint) const
+const bool Translation::doContains(const Sample& sample, const TPoint3D& point) const
 {
-	const TPoint3D localPoint = iPoint - localToWorld_;
-	return child_->contains(iSample, localPoint);
+	const TPoint3D localPoint = point - localToWorld_;
+	return child_->contains(sample, localPoint);
 }
 
 
@@ -176,9 +175,9 @@ const TPyObjectPtr Translation::doGetState() const
 
 
 
-void Translation::doSetState(const TPyObjectPtr& iState)
+void Translation::doSetState(const TPyObjectPtr& state)
 {
-	LASS_ENFORCE(python::decodeTuple(iState, child_, localToWorld_));
+	LASS_ENFORCE(python::decodeTuple(state, child_, localToWorld_));
 }
 
 

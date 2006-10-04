@@ -44,7 +44,6 @@ PY_CLASS_MEMBER_RW_DOC(Simple, "refractionIndex", refractionIndex, setRefraction
 // --- public --------------------------------------------------------------------------------------
 
 Simple::Simple():
-	Shader(&Type),
 	diffuse_(Texture::black()),
 	specular_(Texture::black()),
 	specularPower_(Texture::white()),
@@ -57,7 +56,6 @@ Simple::Simple():
 
 
 Simple::Simple(const TTexturePtr& iDiffuse):
-	Shader(&Type),
 	diffuse_(iDiffuse),
 	specular_(Texture::black()),
 	specularPower_(Texture::white()),
@@ -70,7 +68,6 @@ Simple::Simple(const TTexturePtr& iDiffuse):
 
 
 Simple::Simple(const TTexturePtr& iDiffuse, const TTexturePtr& iSpecular):
-	Shader(&Type),
 	diffuse_(iDiffuse),
 	specular_(iSpecular),
 	specularPower_(Texture::white()),

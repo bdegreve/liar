@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -46,29 +46,29 @@ public:
 	typedef std::vector<TKeyTexture> TKeyTextures;
 
 	LinearInterpolator();
-	LinearInterpolator(const TKeyTextures& iKeyTextures, 
-		const TTexturePtr& iControlTexture);
+	LinearInterpolator(const TKeyTextures& keyTextures, 
+		const TTexturePtr& controlTexture);
 
 	const TKeyTextures& keys() const;
 	const TTexturePtr& control() const;
 
-	void setKeys(const TKeyTextures& iKeyTextures);
-	void setControl(const TTexturePtr& iControlTexture);
+	void setKeys(const TKeyTextures& keyTextures);
+	void setControl(const TTexturePtr& controlTexture);
 
-	void addKey(TScalar iKeyValue, const TTexturePtr& iKeyTexture);
+	void addKey(TScalar keyValue, const TTexturePtr& keyTexture);
 
 private:
 
 	struct LesserKey
 	{
-		bool operator()(const TKeyTexture& iA, const TKeyTexture& iB) const { return iA.first < iB.first; }
+		bool operator()(const TKeyTexture& a, const TKeyTexture& b) const { return a.first < b.first; }
 	};
 
-	const Spectrum doLookUp(const Sample& iSample, 
-		const IntersectionContext& iContext) const;
+	const Spectrum doLookUp(const Sample& sample, 
+		const IntersectionContext& context) const;
 
 	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& iState);
+	void doSetState(const TPyObjectPtr& state);
 
 	TKeyTextures keys_;
 	TTexturePtr control_;

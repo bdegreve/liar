@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
  *		@arg M. Ashikhmin, P. Shirley, <i>An Anisotropic Phong BRDF Model</i>, 
  *		Journal of Graphics Tools, <b>5</b> (2), 25--32 (2001).
  *
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_ASHIKHMIN_SHIRLEY_H
@@ -64,23 +64,23 @@ public:
 	void setSpecularPowerV(const TTexturePtr& iSpecularPower);
 
 	const unsigned numberOfSamples() const;
-	void setNumberOfSamples(unsigned iNumber);
+	void setNumberOfSamples(unsigned number);
 
 private:
 
-	const Spectrum doShade(const Sample& iSample,	const DifferentialRay& iPrimaryRay, 
-		const Intersection& iIntersection, const IntersectionContext& iContext) const;
-	void doRequestSamples(const TSamplerPtr& iSampler);
+	const Spectrum doShade(const Sample& sample,	const DifferentialRay& primaryRay, 
+		const Intersection& intersection, const IntersectionContext& context) const;
+	void doRequestSamples(const TSamplerPtr& sampler);
 
 	const Spectrum brdf(const TVector3D& k1, const TVector3D& k2, const TVector3D& h,
 		const TVector3D& n, const TVector3D& u, const TVector3D& v,
 		const Spectrum& Rs, const Spectrum& Rd, TScalar n_u, TScalar n_v) const;
-	const TVector3D generateH(const TVector2D& iSample, 
+	const TVector3D generateH(const TVector2D& sample, 
 		const TVector3D& n, const TVector3D& u, const TVector3D& v, 
-		TScalar n_u, TScalar n_v, TScalar& oPdf) const ;
+		TScalar n_u, TScalar n_v, TScalar& pdf) const ;
 
 	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& iState);
+	void doSetState(const TPyObjectPtr& state);
 
 	TTexturePtr diffuse_;
 	TTexturePtr specular_;

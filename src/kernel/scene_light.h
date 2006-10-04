@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::SceneLight
  *  @brief base class of all light emiting scene objects
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SCENE_LIGHT_H
@@ -44,14 +44,22 @@ class LIAR_KERNEL_DLL SceneLight: public SceneObject
     PY_HEADER(SceneObject)
 public:
 
-	const Spectrum sampleEmission(const Sample& iCameraSample, const TVector2D& iLightSample, 
-		const TPoint3D& iTarget, const TVector3D& iTargetNormal, BoundedRay& oShadowRay, 
-		TScalar& oPdf) const
+	const Spectrum sampleEmission(const Sample& cameraSample, const TPoint2D& lightSample, 
+		const TPoint3D& target, const TVector3D& targetNormal, BoundedRay& shadowRay,
+		TScalar& pdf) const
 	{ 
 		return doSampleEmission(
-			iCameraSample, iLightSample, iTarget, iTargetNormal, oShadowRay, oPdf);
+			cameraSample, lightSample, target, targetNormal, shadowRay, pdf);
 	}
-
+	const Spectrum sampleEmission(const TPoint2D& sampleA, const TPoint2D& sampleB,
+		const TPoint3D& sceneCenter, TScalar sceneRadius, TRay3D& emissionRay, TScalar& pdf) const
+	{
+		return doSampleEmission(sampleA, sampleB, sceneCenter, sceneRadius, emissionRay, pdf);
+	}
+	const Spectrum totalPower(TScalar sceneRadius) const
+	{
+		return doTotalPower(sceneRadius);
+	}
 	const unsigned numberOfEmissionSamples() const 
 	{ 
 		return doNumberOfEmissionSamples(); 
@@ -62,22 +70,25 @@ public:
 
 protected:
 
-    SceneLight(PyTypeObject* iType);
+    SceneLight();
 
 private:
     
 	LASS_UTIL_ACCEPT_VISITOR
 
 	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& iState);
+	void doSetState(const TPyObjectPtr& state);
 	
-	virtual const Spectrum doSampleEmission(const Sample& iSample, const TVector2D& iLightSample,
-		const TPoint3D& iTarget, const TVector3D& iTargetNormal, BoundedRay& oShadowRay, 
-		TScalar& oPdf) const = 0;
+	virtual const Spectrum doSampleEmission(const Sample& sample, const TPoint2D& lightSample,
+		const TPoint3D& target, const TVector3D& targetNormal, BoundedRay& shadowRay, 
+		TScalar& pdf) const = 0;
+	virtual const Spectrum doSampleEmission(const TPoint2D& sampleA, const TPoint2D& sampleB,
+		const TPoint3D& sceneCenter, TScalar sceneRadius, TRay3D& emissionRay, TScalar& pdf) const = 0;
+	virtual const Spectrum doTotalPower(TScalar sceneRadius) const = 0;
 	virtual const unsigned doNumberOfEmissionSamples() const = 0;
 	
 	virtual const TPyObjectPtr doGetLightState() const = 0;
-	virtual void doSetLightState(const TPyObjectPtr& iState) = 0;
+	virtual void doSetLightState(const TPyObjectPtr& state) = 0;
 
 	bool isShadowless_;
 };

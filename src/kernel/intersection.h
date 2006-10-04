@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,12 +23,12 @@
 
 /** @class liar::Intersection
  *  @brief represents intersection between ray and object
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 /** @class liar::IntersectionDescendor
  *  @brief automatic descendor of intersection object stack
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_INTERSECTION_H
@@ -54,24 +54,25 @@ public:
 	typedef std::size_t TSpecialField;
 
     Intersection();
-    Intersection(const SceneObject* iObject, TScalar iT, SolidEvent iEvent, 
-		TSpecialField iSpecial = 0);
+    Intersection(const SceneObject* object, TScalar t, SolidEvent event, 
+		TSpecialField special = 0);
 
-	void push(const SceneObject* iObject) { push(iObject, t(), 0); }
-    void push(const SceneObject* iObject, TScalar iT, TSpecialField iSpecial = 0);
+	void push(const SceneObject* object) { push(object, t(), 0); }
+    void push(const SceneObject* object, TScalar t, TSpecialField special = 0);
 	const SceneObject* const object() const;
 	const TScalar t() const;
 	const TSpecialField specialField() const;
+	const size_t level() const;
 
 	const SolidEvent solidEvent() const { return solidEvent_; }
-	void setSolidEvent(SolidEvent iEvent) { solidEvent_ = iEvent; }
+	void setSolidEvent(SolidEvent event) { solidEvent_ = event; }
 	void flipSolidEvent() { solidEvent_ = flip(solidEvent_); }
 
     const bool isEmpty() const;
 	const bool operator!() const { return isEmpty(); }
 	operator num::SafeBool() const { return isEmpty() ? num::safeFalse : num::safeTrue; }
 
-    void swap(Intersection& iOther);
+    void swap(Intersection& other);
 
     static const Intersection& empty();
 
@@ -85,8 +86,8 @@ private:
 		const SceneObject* object;
 		TSpecialField special;
 
-		IntersectionInfo(const SceneObject* iObject, TScalar iT, TSpecialField iSpecial): 
-			t(iT), object(iObject), special(iSpecial)
+		IntersectionInfo(const SceneObject* object, TScalar t, TSpecialField special): 
+			t(t), object(object), special(special)
 		{
 		}
 	};
@@ -108,7 +109,7 @@ private:
 class LIAR_KERNEL_DLL IntersectionDescendor: public util::NonCopyable
 {
 public:
-    IntersectionDescendor(const Intersection& iIntersection): intersection_(iIntersection) 
+    IntersectionDescendor(const Intersection& intersection): intersection_(intersection) 
     { 
         intersection_.descend(); 
     }

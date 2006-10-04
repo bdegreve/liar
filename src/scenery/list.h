@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::scenery::List
  *  @brief compound of some child scenery in a linear list.
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_SCENERY_LIST_H
@@ -45,41 +45,41 @@ public:
     typedef std::vector<TSceneObjectPtr> TChildren;
 
     List();
-    List(const TChildren& iChildren); // for python
+    List(const TChildren& children); // for python
 
-    template <typename InputIterator> List(InputIterator iBegin, InputIterator iEnd):
+    template <typename InputIterator> List(InputIterator first, InputIterator last):
         SceneComposite(&Type)
     {
-        add(iBegin, iEnd);
+        add(first, last);
     }
 
-    void add(const TSceneObjectPtr& iChild);
-	void add(const TChildren& iChildren); // for python
+    void add(const TSceneObjectPtr& child);
+	void add(const TChildren& children); // for python
 
-	template <typename InputIterator> void add(InputIterator iBegin, InputIterator iEnd)
+	template <typename InputIterator> void add(InputIterator first, InputIterator last)
 	{
-        while (iBegin != iEnd)
+        while (first != last)
 		{
-			this->add(*iBegin++);
+			this->add(*first++);
 		}
 	}
 
 private:
 
-    void doAccept(lass::util::VisitorBase& ioVisitor);
+    void doAccept(lass::util::VisitorBase& visitor);
 
-	void doPreProcess(const TimePeriod& iPeriod);
-	void doIntersect(const Sample& iSample, const BoundedRay& iRay, 
-		Intersection& oResult) const;
-	const bool doIsIntersecting(const Sample& iSample, const BoundedRay& iRay) const;
-	void doLocalContext(const Sample& iSample, const BoundedRay& iRay,
-		const Intersection& iIntersection, IntersectionContext& oResult) const;
-	const bool doContains(const Sample& iSample, const TPoint3D& iPoint) const;
+	void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
+	void doIntersect(const Sample& sample, const BoundedRay& ray, 
+		Intersection& result) const;
+	const bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
+	void doLocalContext(const Sample& sample, const BoundedRay& ray,
+		const Intersection& intersection, IntersectionContext& result) const;
+	const bool doContains(const Sample& sample, const TPoint3D& point) const;
 	const TAabb3D doBoundingBox() const;
 	virtual const TScalar doArea() const;
 
 	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& iState);
+	void doSetState(const TPyObjectPtr& state);
 
     TChildren children_;
 };

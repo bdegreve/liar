@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -42,8 +42,7 @@ RenderTarget::~RenderTarget()
 
 // --- protected -----------------------------------------------------------------------------------
 
-RenderTarget::RenderTarget(PyTypeObject* iType):
-    PyObjectPlus(iType),
+RenderTarget::RenderTarget():
 	isRendering_(false)
 {
 }
@@ -61,10 +60,10 @@ void RenderTarget::beginRender()
 
 
 
-void RenderTarget::writeRender(const OutputSample* iFirst, const OutputSample* iLast)
+void RenderTarget::writeRender(const OutputSample* first, const OutputSample* last)
 {
 	beginRender();
-	doWriteRender(iFirst, iLast);
+	doWriteRender(first, last);
 }
 
 

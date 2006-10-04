@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -43,26 +43,30 @@ TAttenuationPtr Attenuation::defaultAttenuation_(new Attenuation);
 
 // --- public --------------------------------------------------------------------------------------
 
+/** Construct with default quadratic attenuation 1 / (2 * pi * r * r).
+ */
 Attenuation::Attenuation():
-	python::PyObjectPlus(&Type),
 	constant_(TNumTraits::zero),
 	linear_(TNumTraits::zero),
-	quadratic_(TNumTraits::one)
+	quadratic_(2 * TNumTraits::pi)
 {
 }
 
 
 
-Attenuation::Attenuation(TScalar iConstant, TScalar iLinear, TScalar iQuadratic):
-	python::PyObjectPlus(&Type),
-	constant_(iConstant),
-	linear_(iLinear),
-	quadratic_(iQuadratic)
+/** Construct with custom attenuation.
+ */
+Attenuation::Attenuation(TScalar constant, TScalar linear, TScalar quadratic):
+	constant_(constant),
+	linear_(linear),
+	quadratic_(quadratic)
 {
 }
 
 
 
+/** return constant attenuation term.
+ */
 const TScalar Attenuation::constant() const
 {
 	return constant_;
@@ -70,6 +74,8 @@ const TScalar Attenuation::constant() const
 
 
 
+/** return factor of linear attenuation term.
+ */
 const TScalar Attenuation::linear() const
 {
 	return linear_;
@@ -77,6 +83,8 @@ const TScalar Attenuation::linear() const
 
 
 
+/** return factor of quadratic attenuation term.
+ */
 const TScalar Attenuation::quadratic() const
 {
 	return quadratic_;
@@ -84,27 +92,35 @@ const TScalar Attenuation::quadratic() const
 
 
 
-void Attenuation::setConstant(TScalar iX)
+/** set constant attenuation term
+ */
+void Attenuation::setConstant(TScalar constant)
 {
-	constant_ = iX;
+	constant_ = constant;
 }
 
 
 
-void Attenuation::setLinear(TScalar iX)
+/** set factor of linear attenuation term
+ */
+void Attenuation::setLinear(TScalar linear)
 {
-	linear_ = iX;
+	linear_ = linear;
 }
 
 
 
-void Attenuation::setQuadratic(TScalar iX)
+/** set factor of quadratic attenuation term
+ */
+void Attenuation::setQuadratic(TScalar quadratic)
 {
-	quadratic_ = iX;
+	quadratic_ = quadratic;
 }
 
 
 
+/** return default attenuation object 1 / (2 * pi * r * r).
+ */
 TAttenuationPtr Attenuation::defaultAttenuation()
 {
 	return defaultAttenuation_;
@@ -115,7 +131,8 @@ TAttenuationPtr Attenuation::defaultAttenuation()
 const TPyObjectPtr Attenuation::reduce() const
 {
 	return python::makeTuple(
-		reinterpret_cast<PyObject*>(this->GetType()), python::makeTuple(), this->getState());
+		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->GetType())), 
+		python::makeTuple(), this->getState());
 }
 
 
@@ -127,9 +144,9 @@ const TPyObjectPtr Attenuation::getState() const
 
 
 
-void Attenuation::setState(const TPyObjectPtr& iState)
+void Attenuation::setState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(iState, constant_, linear_, quadratic_);
+	python::decodeTuple(state, constant_, linear_, quadratic_);
 }
 
 

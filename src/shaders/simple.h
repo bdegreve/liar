@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::shaders::Lambert
  *  @brief a simple plain old raytracing shader
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_SIMPLE_H
@@ -69,11 +69,11 @@ public:
 
 private:
 
-	const Spectrum doShade(const Sample& iSample,	const DifferentialRay& iPrimaryRay, 
-		const Intersection& iIntersection, const IntersectionContext& iContext) const;
+	const Spectrum doShade(const Sample& sample,	const DifferentialRay& primaryRay, 
+		const Intersection& intersection, const IntersectionContext& context) const;
 
 	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& iState);
+	void doSetState(const TPyObjectPtr& state);
 
 	TTexturePtr diffuse_;
 	TTexturePtr specular_;

@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -44,8 +44,8 @@ CheckerBoard::AntiAliasing CheckerBoard::defaultAntiAliasing_ = CheckerBoard::aa
 
 // --- public --------------------------------------------------------------------------------------
 
-CheckerBoard::CheckerBoard(const TTexturePtr& iA, const TTexturePtr& iB):
-	Mix2(&Type, iA, iB),
+CheckerBoard::CheckerBoard(const TTexturePtr& a, const TTexturePtr& b):
+	Mix2(a, b),
 	split_(0.5f, 0.5f),
 	antiAliasing_(defaultAntiAliasing_)
 {
@@ -60,9 +60,9 @@ const TVector2D& CheckerBoard::split() const
 
 
 
-void CheckerBoard::setSplit(const TVector2D& iSplit)
+void CheckerBoard::setSplit(const TVector2D& split)
 {
-	split_ = iSplit;
+	split_ = split;
 }
 
 
@@ -74,16 +74,16 @@ const std::string CheckerBoard::antiAliasing() const
 
 
 
-void CheckerBoard::setAntiAliasing(const std::string& iMode)
+void CheckerBoard::setAntiAliasing(const std::string& mode)
 {
-	antiAliasing_ = antiAliasingDictionary_[stde::tolower(iMode)];
+	antiAliasing_ = antiAliasingDictionary_[stde::tolower(mode)];
 }
 
 
 
-void CheckerBoard::setDefaultAntiAliasing(const std::string& iMode)
+void CheckerBoard::setDefaultAntiAliasing(const std::string& mode)
 {
-	defaultAntiAliasing_ = antiAliasingDictionary_[stde::tolower(iMode)];
+	defaultAntiAliasing_ = antiAliasingDictionary_[stde::tolower(mode)];
 }
 
 
@@ -95,21 +95,21 @@ void CheckerBoard::setDefaultAntiAliasing(const std::string& iMode)
 // --- private -------------------------------------------------------------------------------------
 
 const Spectrum 
-CheckerBoard::doLookUp(const Sample& iSample, const IntersectionContext& iContext) const
+CheckerBoard::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 #pragma LASS_FIXME("points need transform too [Bramz]")
-	const TVector2D uv = iContext.uv().position().transform(num::fractional);
+	const TVector2D uv = context.uv().position().transform(num::fractional);
 
 	switch (antiAliasing_)
 	{
 	case aaNone:
 		return ((uv.x < split_.x) == (uv.y < split_.y) ? textureA() : textureB())->lookUp(
-			iSample, iContext);
+			sample, context);
 		
 	case aaBilinear:
 		{
 			const TVector2D dUv = prim::pointwiseMax(
-				iContext.dUv_dI().transform(num::abs), iContext.dUv_dJ().transform(num::abs));
+				context.dUv_dI().transform(num::abs), context.dUv_dJ().transform(num::abs));
             const TVector2D uvMin = uv - dUv;
 			const TVector2D uvMax = uv + dUv;
 			const TScalar area = 4 * dUv.x * dUv.y;
@@ -117,13 +117,13 @@ CheckerBoard::doLookUp(const Sample& iSample, const IntersectionContext& iContex
 			{
 				const TScalar areaA = integrate(uvMin, uvMax);
 				const TScalar weightA = num::clamp(areaA / area, TNumTraits::zero, TNumTraits::one);
-                return weightA * textureA()->lookUp(iSample, iContext) +
-					(1 - weightA) * textureB()->lookUp(iSample, iContext);
+                return weightA * textureA()->lookUp(sample, context) +
+					(1 - weightA) * textureB()->lookUp(sample, context);
 			}
 			else
 			{
 				return ((uv.x < split_.x) == (uv.y < split_.y) ? textureA() : textureB())->lookUp(
-					iSample, iContext);
+					sample, context);
 			}
 		}
 
@@ -143,20 +143,20 @@ const TPyObjectPtr CheckerBoard::doGetMixState() const
 
 
 
-void CheckerBoard::doSetMixState(const TPyObjectPtr& iState)
+void CheckerBoard::doSetMixState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(iState, split_);
+	python::decodeTuple(state, split_);
 }
 
 
 
-const TScalar CheckerBoard::integrate(const TVector2D& iMin, const TVector2D& iMax) const
+const TScalar CheckerBoard::integrate(const TVector2D& min, const TVector2D& max) const
 {
-	const TVector2D min0 = iMin.transform(num::floor);
-	const TVector2D max0 = iMax.transform(num::floor);
+	const TVector2D min0 = min.transform(num::floor);
+	const TVector2D max0 = max.transform(num::floor);
 	const TVector2D delta0 = max0 - min0;
-	const TVector2D dMin = iMin - min0;
-	const TVector2D dMax = iMax - max0;
+	const TVector2D dMin = min - min0;
+	const TVector2D dMax = max - max0;
 
 	const TVector2D dMinU(std::min(dMin.x, split_.x), std::max(dMin.x - split_.x, TNumTraits::zero));
 	const TVector2D dMinV(std::min(dMin.y, split_.y), std::max(dMin.y - split_.y, TNumTraits::zero));
@@ -179,6 +179,7 @@ const TScalar CheckerBoard::integrate(const TVector2D& iMin, const TVector2D& iM
 CheckerBoard::TAntiAliasingDictionary CheckerBoard::makeAntiAliasingDictionary()
 {
 	TAntiAliasingDictionary result;
+	result.enableSuggestions(true);
 	result.add("none", aaNone);
 	result.add("bilinear", aaBilinear);
 	return result;

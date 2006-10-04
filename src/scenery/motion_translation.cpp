@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -35,11 +35,10 @@ PY_CLASS_MEMBER_RW(MotionTranslation, "child", child, setChild)
 
 // --- public --------------------------------------------------------------------------------------
 
-MotionTranslation::MotionTranslation(const TSceneObjectPtr& iChild, 
+MotionTranslation::MotionTranslation(const TSceneObjectPtr& child, 
 									 const TVector3D& iLocalToWorldStart,
 									 const TVector3D& iSpeedInWorld):
-    SceneObject(&Type),
-    child_(LASS_ENFORCE_POINTER(iChild)),
+    child_(LASS_ENFORCE_POINTER(child)),
     localToWorldStart_(iLocalToWorldStart),
 	speedInWorld_(iSpeedInWorld)
 {
@@ -54,9 +53,9 @@ const TSceneObjectPtr& MotionTranslation::child() const
 
 
 
-void MotionTranslation::setChild(const TSceneObjectPtr& iChild)
+void MotionTranslation::setChild(const TSceneObjectPtr& child)
 {
-	child_ = LASS_ENFORCE_POINTER(iChild);
+	child_ = LASS_ENFORCE_POINTER(child);
 }
 
 
@@ -68,78 +67,78 @@ void MotionTranslation::setChild(const TSceneObjectPtr& iChild)
 // --- private -------------------------------------------------------------------------------------
 
 
-void MotionTranslation::doAccept(util::VisitorBase& ioVisitor)
+void MotionTranslation::doAccept(util::VisitorBase& visitor)
 {
-    doVisit(*this, ioVisitor);
-    child_->accept(ioVisitor);
-	doVisitOnExit(*this, ioVisitor);
+    doVisit(*this, visitor);
+    child_->accept(visitor);
+	doVisitOnExit(*this, visitor);
 }
 
 
 
-void MotionTranslation::doPreProcess(const TimePeriod& iPeriod)
+void MotionTranslation::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period)
 {
-	child_->preProcess(iPeriod);
+	child_->preProcess(scene, period);
 
 	const TAabb3D localBox = child_->boundingBox();
 
-	const TVector3D offsetBegin = localToWorld(iPeriod.begin());
-	const TVector3D offsetEnd = localToWorld(iPeriod.end());
+	const TVector3D offsetBegin = localToWorldOffset(period.begin());
+	const TVector3D offsetEnd = localToWorldOffset(period.end());
 	aabb_ = TAabb3D(localBox.min() + offsetBegin, localBox.max() + offsetBegin);
 	aabb_ += TAabb3D(localBox.min() + offsetEnd, localBox.max() + offsetEnd);
 }
 
 
 
-void MotionTranslation::doIntersect(const Sample& iSample, const BoundedRay& iRay, 
-							  Intersection& oResult) const
+void MotionTranslation::doIntersect(const Sample& sample, const BoundedRay& ray, 
+							  Intersection& result) const
 {
-	const BoundedRay localRay = translate(iRay, -localToWorld(iSample.time()));
-	child_->intersect(iSample, localRay, oResult);
-    if (oResult)
+	const BoundedRay localRay = translate(ray, -localToWorldOffset(sample.time()));
+	child_->intersect(sample, localRay, result);
+    if (result)
     {
-        oResult.push(this);
+        result.push(this);
     }
 }
 
 
 
-const bool MotionTranslation::doIsIntersecting(const Sample& iSample, 
-											   const BoundedRay& iRay) const
+const bool MotionTranslation::doIsIntersecting(const Sample& sample, 
+											   const BoundedRay& ray) const
 {
-	const BoundedRay localRay = translate(iRay, -localToWorld(iSample.time()));
-	return child_->isIntersecting(iSample, localRay);
+	const BoundedRay localRay = translate(ray, -localToWorldOffset(sample.time()));
+	return child_->isIntersecting(sample, localRay);
 }
 
 
 
-void MotionTranslation::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
-									   const Intersection& iIntersection, 
-									   IntersectionContext& oResult) const
+void MotionTranslation::doLocalContext(const Sample& sample, const BoundedRay& ray,
+									   const Intersection& intersection, 
+									   IntersectionContext& result) const
 {
-	IntersectionDescendor descendor(iIntersection);
-	LASS_ASSERT(iIntersection.object() == child_.get());
+	IntersectionDescendor descendor(intersection);
+	LASS_ASSERT(intersection.object() == child_.get());
 
-	const TVector3D offset = localToWorld(iSample.time());
-	const TRay3D localRay(iRay.support() - offset, iRay.direction());
-	child_->localContext(iSample, localRay, iIntersection, oResult);
-	oResult.translate(offset);
+	const TVector3D offset = localToWorldOffset(sample.time());
+	const TRay3D localRay(ray.support() - offset, ray.direction());
+	child_->localContext(sample, localRay, intersection, result);
+	result.translateBy(offset);
 }
 
 
 
-void MotionTranslation::doLocalSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const 
+void MotionTranslation::doLocalSpace(TTime time, TTransformation3D& localToWorld) const 
 {
-	ioLocalToWorld = concatenate(
-		TTransformation3D::translation(localToWorld(iTime)), ioLocalToWorld);
+	localToWorld = concatenate(
+		TTransformation3D::translation(localToWorldOffset(time)), localToWorld);
 }
 
 
 
-const bool MotionTranslation::doContains(const Sample& iSample, const TPoint3D& iPoint) const
+const bool MotionTranslation::doContains(const Sample& sample, const TPoint3D& point) const
 {
-	const TPoint3D localPoint = iPoint - localToWorld(iSample.time());
-	return child_->contains(iSample, localPoint);
+	const TPoint3D localPoint = point - localToWorldOffset(sample.time());
+	return child_->contains(sample, localPoint);
 }
 
 
@@ -165,16 +164,16 @@ const TPyObjectPtr MotionTranslation::doGetState() const
 
 
 
-void MotionTranslation::doSetState(const TPyObjectPtr& iState)
+void MotionTranslation::doSetState(const TPyObjectPtr& state)
 {
-	LASS_ENFORCE(python::decodeTuple(iState, child_, localToWorldStart_, speedInWorld_));
+	LASS_ENFORCE(python::decodeTuple(state, child_, localToWorldStart_, speedInWorld_));
 }
 
 
 
-inline const TVector3D MotionTranslation::localToWorld(TTime iTime) const
+inline const TVector3D MotionTranslation::localToWorldOffset(TTime time) const
 {
-	return localToWorldStart_ + static_cast<TScalar>(iTime) * speedInWorld_;
+	return localToWorldStart_ + static_cast<TScalar>(time) * speedInWorld_;
 }
 
 

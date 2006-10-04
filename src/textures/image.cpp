@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -51,26 +51,24 @@ Image::MipMapping Image::defaultMipMapping_ = Image::mmAnisotropic;
 
 // --- public --------------------------------------------------------------------------------------
 
-Image::Image(const std::string& iFilename):
-	Texture(&Type),
+Image::Image(const std::string& filename):
 	antiAliasing_(defaultAntiAliasing_),
 	mipMapping_(defaultMipMapping_),
 	currentMipMapping_(mmUninitialized)
 {
-	image_ = TImagePtr(new io::Image(iFilename));
+	image_ = TImagePtr(new io::Image(filename));
 }
 
 
 
-Image::Image(const std::string& iFilename, 
-			 const std::string& iAntiAliasing, 
-			 const std::string& iMipMapping):
-	Texture(&Type),
+Image::Image(const std::string& filename, 
+			 const std::string& antiAliasing, 
+			 const std::string& mipMapping):
 	currentMipMapping_(mmUninitialized)
 {
-	setAntiAliasing(iAntiAliasing);
-	setMipMapping(iMipMapping);
-	image_ = TImagePtr(new io::Image(iFilename));
+	setAntiAliasing(antiAliasing);
+	setMipMapping(mipMapping);
+	image_ = TImagePtr(new io::Image(filename));
 }
 
 
@@ -89,30 +87,30 @@ const std::string Image::mipMapping() const
 
 
 
-void Image::setAntiAliasing(const std::string& iMode)
+void Image::setAntiAliasing(const std::string& mode)
 {
-	antiAliasing_ = antiAliasingDictionary_[stde::tolower(iMode)];
+	antiAliasing_ = antiAliasingDictionary_[stde::tolower(mode)];
 }
 
 
 
-void Image::setMipMapping(const std::string& iMode)
+void Image::setMipMapping(const std::string& mode)
 {
-	mipMapping_ = mipMappingDictionary_[stde::tolower(iMode)];
+	mipMapping_ = mipMappingDictionary_[stde::tolower(mode)];
 }
 
 
 
-void Image::setDefaultAntiAliasing(const std::string& iMode)
+void Image::setDefaultAntiAliasing(const std::string& mode)
 {
-	defaultAntiAliasing_ = antiAliasingDictionary_[stde::tolower(iMode)];
+	defaultAntiAliasing_ = antiAliasingDictionary_[stde::tolower(mode)];
 }
 
 
 
-void Image::setDefaultMipMapping(const std::string& iMode)
+void Image::setDefaultMipMapping(const std::string& mode)
 {
-	defaultMipMapping_ = mipMappingDictionary_[stde::tolower(iMode)];
+	defaultMipMapping_ = mipMappingDictionary_[stde::tolower(mode)];
 }
 
 
@@ -122,16 +120,16 @@ void Image::setDefaultMipMapping(const std::string& iMode)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum Image::doLookUp(const Sample& iSample, const IntersectionContext& iContext) const
+const Spectrum Image::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	if (mipMapping_ != currentMipMapping_)
 	{
 		makeMipMaps(mipMapping_);
 	}
 
-	const TPoint2D& uv = iContext.uv();
-	const TVector2D& dUv_dI = iContext.dUv_dI();
-	const TVector2D& dUv_dJ = iContext.dUv_dJ();
+	const TPoint2D& uv = context.uv();
+	const TVector2D& dUv_dI = context.dUv_dI();
+	const TVector2D& dUv_dJ = context.dUv_dJ();
 
 	unsigned levelU0 = 0, levelU1 = 0, levelV0 = 0, levelV1 = 0;
 	TScalar dLevelU = TNumTraits::zero, dLevelV = TNumTraits::zero;
@@ -196,7 +194,7 @@ const TPyObjectPtr Image::doGetState() const
 
 
 
-void Image::doSetState(const TPyObjectPtr& iState)
+void Image::doSetState(const TPyObjectPtr& state)
 {
 	LASS_THROW("not implemented yet");
 }
@@ -206,7 +204,7 @@ void Image::doSetState(const TPyObjectPtr& iState)
 /** Make a grid of mip maps.
  *  In case of isotropic mip mapping, we'll only fill one row.
  */
-void Image::makeMipMaps(MipMapping iMode) const
+void Image::makeMipMaps(MipMapping mode) const
 {
 	LASS_LOCK(mutex_)
 	{
@@ -218,7 +216,7 @@ void Image::makeMipMaps(MipMapping iMode) const
 		TMipMaps mipMaps;
 		mipMaps.push_back(THorizontalMipMaps(1, image_));
 
-		switch (iMode)
+		switch (mode)
 		{
 		case mmNone:
 			break;
@@ -264,7 +262,7 @@ void Image::makeMipMaps(MipMapping iMode) const
 		}
 
 		mipMaps_.swap(mipMaps);
-		currentMipMapping_ = iMode;
+		currentMipMapping_ = mode;
 		numLevelsU_ = mipMaps_.front().size();
 		numLevelsV_ = mipMaps_.size();
 	}
@@ -408,7 +406,7 @@ void Image::mipMapLevel(TScalar iWidth, size_t iNumLevels,
 
 
 
-io::Image::TPixel Image::nearest(size_t iLevelU, size_t iLevelV, const TPoint2D& iUv) const
+io::Image::TPixel Image::nearest(size_t iLevelU, size_t iLevelV, const TPoint2D& uv) const
 {
 	LASS_ASSERT(iLevelU < numLevelsU_ && iLevelV < numLevelsV_);
 	const io::Image& mipMap = *mipMaps_[iLevelV][iLevelU];
@@ -416,8 +414,8 @@ io::Image::TPixel Image::nearest(size_t iLevelU, size_t iLevelV, const TPoint2D&
     const unsigned cols = mipMap.cols();
 	const unsigned rows = mipMap.rows();
 
-	const TScalar x = num::fractional(iUv.x) * cols;
-	const TScalar y = num::fractional(1.f - iUv.y) * rows;
+	const TScalar x = num::fractional(uv.x) * cols;
+	const TScalar y = num::fractional(1.f - uv.y) * rows;
 	const unsigned i0 = static_cast<unsigned>(num::floor(x));
 	const unsigned j0 = static_cast<unsigned>(num::floor(y));
 
@@ -427,7 +425,7 @@ io::Image::TPixel Image::nearest(size_t iLevelU, size_t iLevelV, const TPoint2D&
 
 
 
-io::Image::TPixel Image::bilinear(size_t iLevelU, size_t iLevelV, const TPoint2D& iUv) const
+io::Image::TPixel Image::bilinear(size_t iLevelU, size_t iLevelV, const TPoint2D& uv) const
 {
 	LASS_ASSERT(iLevelU < numLevelsU_ && iLevelV < numLevelsV_);
 	const io::Image& mipMap = *mipMaps_[iLevelV][iLevelU];
@@ -435,8 +433,8 @@ io::Image::TPixel Image::bilinear(size_t iLevelU, size_t iLevelV, const TPoint2D
     const unsigned cols = mipMap.cols();
 	const unsigned rows = mipMap.rows();
 
-	const TScalar x = num::mod(iUv.x * cols - .5f, static_cast<TScalar>(cols));
-	const TScalar y = num::mod((1.f - iUv.y) * rows - .5f, static_cast<TScalar>(rows));
+	const TScalar x = num::mod(uv.x * cols - .5f, static_cast<TScalar>(cols));
+	const TScalar y = num::mod((1.f - uv.y) * rows - .5f, static_cast<TScalar>(rows));
 	const TScalar x0 = num::floor(x);
 	const TScalar y0 = num::floor(y);
 	const TScalar dx = x - x0;
@@ -457,6 +455,7 @@ io::Image::TPixel Image::bilinear(size_t iLevelU, size_t iLevelV, const TPoint2D
 Image::TAntiAliasingDictionary Image::makeAntiAliasingDictionary()
 {
 	TAntiAliasingDictionary result;
+	result.enableSuggestions();
 	result.add("none", aaNone);
 	result.add("bilinear", aaBilinear);
 	result.add("trilinear", aaTrilinear);
@@ -468,6 +467,7 @@ Image::TAntiAliasingDictionary Image::makeAntiAliasingDictionary()
 Image::TMipMappingDictionary Image::makeMipMappingDictionary()
 {
 	TMipMappingDictionary result;
+	result.enableSuggestions();
 	result.add("none", mmNone);
 	result.add("isotropic", mmIsotropic);
 	result.add("anisotropic", mmAnisotropic);

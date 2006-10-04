@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -35,8 +35,8 @@ PY_CLASS_MEMBER_RW(CheckerVolume, "split", split, setSplit);
 
 // --- public --------------------------------------------------------------------------------------
 
-CheckerVolume::CheckerVolume(const TTexturePtr& iA, const TTexturePtr& iB):
-	Mix2(&Type, iA, iB),
+CheckerVolume::CheckerVolume(const TTexturePtr& a, const TTexturePtr& b):
+	Mix2(a, b),
 	split_(0.5f, 0.5f, 0.5f)
 {
 }
@@ -50,9 +50,9 @@ const TVector3D& CheckerVolume::split() const
 
 
 
-void CheckerVolume::setSplit(const TVector3D& iSplit)
+void CheckerVolume::setSplit(const TVector3D& split)
 {
-	split_ = iSplit;
+	split_ = split;
 }
 
 
@@ -64,18 +64,18 @@ void CheckerVolume::setSplit(const TVector3D& iSplit)
 // --- private -------------------------------------------------------------------------------------
 
 const Spectrum 
-CheckerVolume::doLookUp(const Sample& iSample, const IntersectionContext& iContext) const
+CheckerVolume::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
-	const TScalar x = num::fractional(iContext.point().x);
-	const TScalar y = num::fractional(iContext.point().y);
-	const TScalar z = num::fractional(iContext.point().z);
+	const TScalar x = num::fractional(context.point().x);
+	const TScalar y = num::fractional(context.point().y);
+	const TScalar z = num::fractional(context.point().z);
 	if (z < split_.z)
 	{
-		return ((x < split_.x) == (y < split_.y) ? textureA() : textureB())->lookUp(iSample, iContext);	
+		return ((x < split_.x) == (y < split_.y) ? textureA() : textureB())->lookUp(sample, context);	
 	}
 	else
 	{
-		return ((x < split_.x) != (y < split_.y) ? textureA() : textureB())->lookUp(iSample, iContext);
+		return ((x < split_.x) != (y < split_.y) ? textureA() : textureB())->lookUp(sample, context);
 	}
 }
 
@@ -88,9 +88,9 @@ const TPyObjectPtr CheckerVolume::doGetMixState() const
 
 
 
-void CheckerVolume::doSetMixState(const TPyObjectPtr& iState)
+void CheckerVolume::doSetMixState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(iState, split_);
+	python::decodeTuple(state, split_);
 }
 
 

@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::SolidEvent
  *  @brief enumeration of intersection events that can happen with a solid
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SOLID_EVENT_H
@@ -49,10 +49,10 @@ enum SolidEvent
 /** Flip event so that entering becomes leaving and vice versa
  *	@relates SolidEvent
  */
-inline const SolidEvent flip(SolidEvent iEvent)
+inline const SolidEvent flip(SolidEvent event)
 {
 	static SolidEvent result[] = { seNoEvent, seLeaving, seEntering };
-	return result[iEvent];
+	return result[event];
 }
 
 }

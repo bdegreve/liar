@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -35,8 +35,8 @@ PY_CLASS_MEMBER_RW(GridBoard, "thickness", thickness, setThickness);
 
 // --- public --------------------------------------------------------------------------------------
 
-GridBoard::GridBoard(const TTexturePtr& iA, const TTexturePtr& iB):
-	Mix2(&Type, iA, iB),
+GridBoard::GridBoard(const TTexturePtr& a, const TTexturePtr& b):
+	Mix2(a, b),
 	halfThickness_(0.05f, 0.05f)
 {
 }
@@ -63,13 +63,13 @@ void GridBoard::setThickness(const TVector2D& iThickness)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum GridBoard::doLookUp(const Sample& iSample, const IntersectionContext& iContext) const
+const Spectrum GridBoard::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
-	const TScalar u = num::fractional(iContext.uv().x);
-	const TScalar v = num::fractional(iContext.uv().y);
+	const TScalar u = num::fractional(context.uv().x);
+	const TScalar v = num::fractional(context.uv().y);
 	const bool isA = u < halfThickness_.x || v < halfThickness_.x || 
 		u > (TNumTraits::one - halfThickness_.x) || v > (TNumTraits::one - halfThickness_.y);
-	return (isA ? textureA() : textureB())->lookUp(iSample, iContext);	
+	return (isA ? textureA() : textureB())->lookUp(sample, context);	
 }
 
 
@@ -81,9 +81,9 @@ const TPyObjectPtr GridBoard::doGetMixState() const
 
 
 
-void GridBoard::doSetMixState(const TPyObjectPtr& iState)
+void GridBoard::doSetMixState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(iState, halfThickness_);
+	python::decodeTuple(state, halfThickness_);
 }
 
 

@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::RenderTarget
  *  @brief render target, canvas or film of camera
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_RENDER_TARGET_H
@@ -49,7 +49,7 @@ public:
     virtual ~RenderTarget();
 
     void beginRender();
-    void writeRender(const OutputSample* iFirst, const OutputSample* iLast);
+    void writeRender(const OutputSample* first, const OutputSample* last);
     void endRender();
 	const bool isRendering() const;
 
@@ -57,12 +57,12 @@ public:
 
 protected:
 
-    RenderTarget(PyTypeObject* iType);
+    RenderTarget();
 
 private:
 
     virtual void doBeginRender() = 0;
-    virtual void doWriteRender(const OutputSample* iFirst, const OutputSample* iLast) = 0;
+    virtual void doWriteRender(const OutputSample* first, const OutputSample* last) = 0;
     virtual void doEndRender() = 0;
 	virtual const bool doIsCanceling() const;
 

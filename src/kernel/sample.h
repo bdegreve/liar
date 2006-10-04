@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::Sample
  *  @brief representation of a single sample that must be rendered
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SAMPLE_H
@@ -45,31 +45,33 @@ public:
 	//typedef  TSampleSequence1D;
 	//typedef  TSampleSequence2D;
 
-	typedef stde::iterator_range<std::vector<TScalar>::const_iterator> TSubSequence1D;
-	typedef stde::iterator_range<std::vector<TVector2D>::const_iterator> TSubSequence2D;
+	typedef TScalar TSample1D;
+	typedef TPoint2D TSample2D;
+	typedef stde::iterator_range<std::vector<TSample1D>::const_iterator> TSubSequence1D;
+	typedef stde::iterator_range<std::vector<TSample2D>::const_iterator> TSubSequence2D;
 
     Sample();
     
-	const TPoint2D& screenCoordinate() const;
-	const TPoint2D& lensCoordinate() const;
+	const TSample2D& screenCoordinate() const;
+	const TSample2D& lensCoordinate() const;
 	const TTime time() const;
 
     const TScalar weight() const;
     void setWeight(TScalar iWeight);
 
-    const TSubSequence1D subSequence1D(int iId) const;
-    const TSubSequence2D subSequence2D(int iId) const;
+    const TSubSequence1D subSequence1D(int id) const;
+    const TSubSequence2D subSequence2D(int id) const;
 
 private:
 
 	friend class Sampler;
 
-    TPoint2D screenCoordinate_;
-	TPoint2D lensCoordinate_;
+    TSample2D screenCoordinate_;
+	TSample2D lensCoordinate_;
 	TTime time_;
     TScalar weight_;
-    std::vector<TScalar> subSequences1D_;
-    std::vector<TVector2D> subSequences2D_;
+    std::vector<TSample1D> subSequences1D_;
+    std::vector<TSample2D> subSequences2D_;
 	Sampler* sampler_;
 };
 

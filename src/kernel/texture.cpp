@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -69,7 +69,8 @@ const TTexturePtr& Texture::white()
 const TPyObjectPtr Texture::reduce() const
 {
 	return python::makeTuple(
-		reinterpret_cast<PyObject*>(this->GetType()), python::makeTuple(), this->getState());
+		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->GetType())), 
+		python::makeTuple(), this->getState());
 }
 
 
@@ -81,17 +82,16 @@ const TPyObjectPtr Texture::getState() const
 
 
 
-void Texture::setState(const TPyObjectPtr& iState)
+void Texture::setState(const TPyObjectPtr& state)
 {
-	doSetState(iState);
+	doSetState(state);
 }
 
 
 
 // --- protected -----------------------------------------------------------------------------------
 
-Texture::Texture(PyTypeObject* iType):
-    python::PyObjectPlus(iType)
+Texture::Texture()
 {
 }
 

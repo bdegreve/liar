@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -38,31 +38,29 @@ PY_CLASS_METHOD_QUALIFIED_1(AabbTree, add, void, const AabbTree::TChildren&)
 
 // --- public --------------------------------------------------------------------------------------
 
-AabbTree::AabbTree():
-    SceneObject(&Type)
+AabbTree::AabbTree()
 {
 }
 
 
 
-AabbTree::AabbTree(const TChildren& iChildren):
-    SceneObject(&Type),
-    children_(iChildren)
+AabbTree::AabbTree(const TChildren& children):
+    children_(children)
 {
 }
 
 
 
-void AabbTree::add(const TSceneObjectPtr& iChild)
+void AabbTree::add(const TSceneObjectPtr& child)
 {
-    children_.push_back(iChild);
+    children_.push_back(child);
 }
 
 
 
-void AabbTree::add(const TChildren& iChildren)
+void AabbTree::add(const TChildren& children)
 {
-    children_.insert(children_.end(), iChildren.begin(), iChildren.end());
+    children_.insert(children_.end(), children.begin(), children.end());
 }
 
 
@@ -73,80 +71,80 @@ void AabbTree::add(const TChildren& iChildren)
 
 // --- private -------------------------------------------------------------------------------------
 
-void AabbTree::doAccept(util::VisitorBase& ioVisitor)
+void AabbTree::doAccept(util::VisitorBase& visitor)
 {
-	doVisit(*this, ioVisitor);
+	doVisit(*this, visitor);
 	const TChildren::const_iterator end = children_.end();
     for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
     {
-        (*i)->accept(ioVisitor);
+        (*i)->accept(visitor);
     }
-	doVisitOnExit(*this, ioVisitor);
+	doVisitOnExit(*this, visitor);
 }
 
 
 
-void AabbTree::doPreProcess(const TimePeriod& iPeriod)
+void AabbTree::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period)
 {
 	const TChildren::const_iterator end = children_.end();
     for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
     {
-        (*i)->preProcess(iPeriod);
+        (*i)->preProcess(scene, period);
     }
 	tree_.reset(children_.begin(), children_.end());
 }
 
 
 
-void AabbTree::doIntersect(const Sample& iSample, const BoundedRay& iRay,
-					   Intersection& oResult) const
+void AabbTree::doIntersect(const Sample& sample, const BoundedRay& ray,
+					   Intersection& result) const
 {
-	Intersection result;
+	Intersection treeResult;
     Info info;
-	info.sample = &iSample;
-	info.intersectionResult = &result;
+	info.sample = &sample;
+	info.intersectionResult = &treeResult;
 	TScalar t;
-	if (tree_.intersect(iRay, t, iRay.nearLimit(), &info) != children_.end())
+	if (tree_.intersect(ray, t, ray.nearLimit(), &info) != children_.end())
 	{
-		LASS_ASSERT(result);
-        result.push(this);
+		LASS_ASSERT(treeResult);
+        treeResult.push(this);
     }
 	else
 	{
-		LASS_ASSERT(!result);
+		LASS_ASSERT(!treeResult);
 	}
-    oResult.swap(result);
+    result.swap(treeResult);
 }
 
 
 
-const bool AabbTree::doIsIntersecting(const Sample& iSample, 
-								  const BoundedRay& iRay) const
+const bool AabbTree::doIsIntersecting(const Sample& sample, 
+								  const BoundedRay& ray) const
 {
     Info info;
-	info.sample = &iSample;
+	info.sample = &sample;
 	info.intersectionResult = 0;
-	return tree_.intersects(iRay, iRay.nearLimit(), iRay.farLimit(), &info);
+	return tree_.intersects(ray, ray.nearLimit(), ray.farLimit(), &info);
 }
 
 
 
-void AabbTree::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
-                          const Intersection& iIntersection,
-                          IntersectionContext& oResult) const
+void AabbTree::doLocalContext(const Sample& sample, const BoundedRay& ray,
+                          const Intersection& intersection,
+                          IntersectionContext& result) const
 {
-    IntersectionDescendor descend(iIntersection);
-    iIntersection.object()->localContext(iSample, iRay, iIntersection, oResult);
+    IntersectionDescendor descend(intersection);
+    intersection.object()->localContext(sample, ray, intersection, result);
 }
 
 
 
-const bool AabbTree::doContains(const Sample& iSample, const TPoint3D& iPoint) const
+const bool AabbTree::doContains(const Sample& sample, const TPoint3D& point) const
 {
     Info info;
-	info.sample = &iSample;
+	info.sample = &sample;
 	info.intersectionResult = 0;
-	return tree_.contains(iPoint, &info);
+	return tree_.contains(point, &info);
 }
 
 
@@ -177,9 +175,9 @@ const TPyObjectPtr AabbTree::doGetState() const
 
 
 
-void AabbTree::doSetState(const TPyObjectPtr& iState)
+void AabbTree::doSetState(const TPyObjectPtr& state)
 {
-	LASS_ENFORCE(python::decodeTuple(iState, children_));
+	LASS_ENFORCE(python::decodeTuple(state, children_));
 }
 
 

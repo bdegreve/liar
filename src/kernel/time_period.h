@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::TimePeriod
  *  @brief a period in time
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_TIME_PERIOD_H
@@ -40,18 +40,18 @@ class LIAR_KERNEL_DLL TimePeriod
 {
 public:
 
-	TimePeriod(TTime iBegin, TTime iEnd): begin_(iBegin), end_(iEnd) {}
+	TimePeriod(TTime begin, TTime end): begin_(begin), end_(end) {}
 
 	const TTime begin() const { return begin_; }
 	const TTime end() const { return end_; }
 	const TTime duration() const { return end_ - begin_; }
 
-	const TTime interpolate(TScalar iTau) const { return begin_ + iTau * duration(); }
+	const TTime interpolate(TScalar tau) const { return begin_ + tau * duration(); }
 
-	TimePeriod& operator+=(TTime iOffset) 
+	TimePeriod& operator+=(TTime offset) 
 	{ 
-		begin_ += iOffset; 
-		end_ += iOffset; 
+		begin_ += offset; 
+		end_ += offset; 
 		return *this; 
 	}
 
@@ -61,17 +61,17 @@ private:
 	TTime end_;
 };
 
-inline TimePeriod operator+(const TimePeriod& iPeriod, TTime iOffset)
+inline TimePeriod operator+(const TimePeriod& period, TTime offset)
 {
-	TimePeriod result(iPeriod);
-	result += iOffset;
+	TimePeriod result(period);
+	result += offset;
 	return result;
 }
 
-inline TimePeriod operator+(TTime iOffset, const TimePeriod& iPeriod)
+inline TimePeriod operator+(TTime offset, const TimePeriod& period)
 {
-	TimePeriod result(iPeriod);
-	result += iOffset;
+	TimePeriod result(period);
+	result += offset;
 	return result;
 }
 

@@ -42,7 +42,6 @@ PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, "numberOfSamples", numberOfSamples, set
 // --- public --------------------------------------------------------------------------------------
 
 AshikhminShirley::AshikhminShirley():
-	Shader(&Type),
 	diffuse_(Texture::white()),
 	specular_(Texture::white()),
 	specularPowerU_(Texture::white()),
@@ -55,7 +54,6 @@ AshikhminShirley::AshikhminShirley():
 
 
 AshikhminShirley::AshikhminShirley(const TTexturePtr& iDiffuse, const TTexturePtr& iSpecular):
-	Shader(&Type),
 	diffuse_(iDiffuse),
 	specular_(iSpecular),
 	specularPowerU_(Texture::white()),

@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -38,31 +38,29 @@ PY_CLASS_METHOD_QUALIFIED_1(List, add, void, const List::TChildren&)
 
 // --- public --------------------------------------------------------------------------------------
 
-List::List():
-    SceneObject(&Type)
+List::List()
 {
 }
 
 
 
-List::List(const TChildren& iChildren):
-    SceneObject(&Type),
-    children_(iChildren)
+List::List(const TChildren& children):
+    children_(children)
 {
 }
 
 
 
-void List::add(const TSceneObjectPtr& iChild)
+void List::add(const TSceneObjectPtr& child)
 {
-    children_.push_back(iChild);
+    children_.push_back(child);
 }
 
 
 
-void List::add(const TChildren& iChildren)
+void List::add(const TChildren& children)
 {
-    children_.insert(children_.end(), iChildren.begin(), iChildren.end());
+    children_.insert(children_.end(), children.begin(), children.end());
 }
 
 
@@ -73,71 +71,71 @@ void List::add(const TChildren& iChildren)
 
 // --- private -------------------------------------------------------------------------------------
 
-void List::doAccept(util::VisitorBase& ioVisitor)
+void List::doAccept(util::VisitorBase& visitor)
 {
-	doVisit(*this, ioVisitor);
+	doVisit(*this, visitor);
 	const TChildren::const_iterator end = children_.end();
     for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
     {
-        (*i)->accept(ioVisitor);
+        (*i)->accept(visitor);
     }
-	doVisitOnExit(*this, ioVisitor);
+	doVisitOnExit(*this, visitor);
 }
 
 
 
-void List::doPreProcess(const TimePeriod& iPeriod)
+void List::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period)
 {
 	const TChildren::const_iterator end = children_.end();
     for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
     {
-        (*i)->preProcess(iPeriod);
+        (*i)->preProcess(scene, period);
     }
 }
 
 
 
-void List::doIntersect(const Sample& iSample, const BoundedRay& iRay,
-					   Intersection& oResult) const
+void List::doIntersect(const Sample& sample, const BoundedRay& ray,
+					   Intersection& result) const
 {
-    Intersection result = Intersection::empty();
+    Intersection listResult = Intersection::empty();
 	const TChildren::const_iterator end = children_.end();
     for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
     {
         Intersection temp;
 		const SceneObject* child = i->get();
 		LASS_ASSERT(child);
-        child->intersect(iSample, iRay, temp);
+        child->intersect(sample, ray, temp);
         if (temp)
         {
-            if (!result)
+            if (!listResult)
             {
-                result.swap(temp);
+                listResult.swap(temp);
             }
-            else if (temp.t() < result.t())
+            else if (temp.t() < listResult.t())
             {
-                result.swap(temp);
+                listResult.swap(temp);
             }
         }
     }
-    if (result)
+    if (listResult)
     {
-        result.push(this);
+        listResult.push(this);
     }
-    oResult.swap(result);
+    result.swap(listResult);
 }
 
 
 
-const bool List::doIsIntersecting(const Sample& iSample, 
-								  const BoundedRay& iRay) const
+const bool List::doIsIntersecting(const Sample& sample, 
+								  const BoundedRay& ray) const
 {
 	const TChildren::const_iterator end = children_.end();
     for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
     {
 		const SceneObject* child = i->get();
 		LASS_ASSERT(child);
-		if (child->isIntersecting(iSample, iRay))
+		if (child->isIntersecting(sample, ray))
 		{
 			return true;
 		}
@@ -147,24 +145,24 @@ const bool List::doIsIntersecting(const Sample& iSample,
 
 
 
-void List::doLocalContext(const Sample& iSample, const BoundedRay& iRay,
-                          const Intersection& iIntersection,
-                          IntersectionContext& oResult) const
+void List::doLocalContext(const Sample& sample, const BoundedRay& ray,
+                          const Intersection& intersection,
+                          IntersectionContext& result) const
 {
-    IntersectionDescendor descend(iIntersection);
-    iIntersection.object()->localContext(iSample, iRay, iIntersection, oResult);
+    IntersectionDescendor descend(intersection);
+    intersection.object()->localContext(sample, ray, intersection, result);
 }
 
 
 
-const bool List::doContains(const Sample& iSample, const TPoint3D& iPoint) const
+const bool List::doContains(const Sample& sample, const TPoint3D& point) const
 {
 	const TChildren::const_iterator end = children_.end();
     for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
     {
 		const SceneObject* child = i->get();
 		LASS_ASSERT(child);
-		if (child->contains(iSample, iPoint))
+		if (child->contains(sample, point))
 		{
 			return true;
 		}
@@ -210,9 +208,9 @@ const TPyObjectPtr List::doGetState() const
 
 
 
-void List::doSetState(const TPyObjectPtr& iState)
+void List::doSetState(const TPyObjectPtr& state)
 {
-	LASS_ENFORCE(python::decodeTuple(iState, children_));
+	LASS_ENFORCE(python::decodeTuple(state, children_));
 }
 
 

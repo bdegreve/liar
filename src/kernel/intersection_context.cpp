@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -35,127 +35,112 @@ namespace kernel
 
 // --- public --------------------------------------------------------------------------------------
 
-IntersectionContext::IntersectionContext(const RayTracer* iTracer):
+IntersectionContext::IntersectionContext(const RayTracer* tracer):
 	point_(),
 	dPoint_dU_(),
 	dPoint_dV_(),
 	dPoint_dI_(),
 	dPoint_dJ_(),
+	geometricNormal_(),
 	normal_(),
 	dNormal_dU_(),
 	dNormal_dV_(),
 	dNormal_dI_(),
 	dNormal_dJ_(),
-	geometricNormal_(),
 	uv_(),
 	dUv_dI_(),
 	dUv_dJ_(),
 	t_(),
-	tracer_(iTracer),
+	tracer_(tracer),
 	shader_(0),
+	shaderToWorld_(),
 	hasScreenSpaceDifferentials_(false)
 {
 }
 
 
 
-void IntersectionContext::setScreenSpaceDifferentials(const DifferentialRay& iRay)
+void IntersectionContext::setShader(const TShaderPtr& shader)
 {
-	setScreenSpaceDifferentialsI(iRay.differentialI(), dPoint_dI_, dNormal_dI_, dUv_dI_);
-	setScreenSpaceDifferentialsI(iRay.differentialJ(), dPoint_dJ_, dNormal_dJ_, dUv_dJ_);
+	shader_ = shader.get();
+	generateShaderToWorld();
+}
+
+
+
+void IntersectionContext::setScreenSpaceDifferentials(const DifferentialRay& ray)
+{
+	setScreenSpaceDifferentialsI(ray.differentialI(), dPoint_dI_, dNormal_dI_, dUv_dI_);
+	setScreenSpaceDifferentialsI(ray.differentialJ(), dPoint_dJ_, dNormal_dJ_, dUv_dJ_);
 	hasScreenSpaceDifferentials_ = true;
 }
 
 
 
-void IntersectionContext::transform(const TTransformation3D& iTransformation)
+void IntersectionContext::transformBy(const TTransformation3D& transformation)
 {
-	if (shader_)
+	if (!shader_)
 	{
-		localToWorld_ = prim::concatenate(localToWorld_, iTransformation);
-		return;
+		point_ = prim::transform(point_, transformation);
+		dPoint_dU_ = prim::transform(dPoint_dU_, transformation);
+		dPoint_dV_ = prim::transform(dPoint_dV_, transformation);
+
+		geometricNormal_ = prim::normalTransform(geometricNormal_, transformation);
+		normal_ = prim::normalTransform(normal_, transformation);
+		dNormal_dU_ = prim::normalTransform(dNormal_dU_, transformation);
+		dNormal_dV_ = prim::normalTransform(dNormal_dV_, transformation);
+		const TScalar rescaleNormal = num::inv(normal_.norm());
+		normal_ *= rescaleNormal;
+		dNormal_dU_ *= rescaleNormal;
+		dNormal_dV_ *= rescaleNormal;
+		
+		if (hasScreenSpaceDifferentials_)
+		{
+			dPoint_dI_ = prim::transform(dPoint_dI_, transformation);
+			dPoint_dJ_ = prim::transform(dPoint_dJ_, transformation);
+			dNormal_dI_ = prim::normalTransform(dNormal_dI_, transformation);
+			dNormal_dJ_ = prim::normalTransform(dNormal_dJ_, transformation);
+		}
 	}
-
-	point_ = prim::transform(point_, iTransformation);
-	dPoint_dU_ = prim::transform(dPoint_dU_, iTransformation);
-	dPoint_dV_ = prim::transform(dPoint_dV_, iTransformation);
-
-	normal_ = prim::normalTransform(normal_, iTransformation);
-	dNormal_dU_ = prim::normalTransform(dNormal_dU_, iTransformation);
-	dNormal_dV_ = prim::normalTransform(dNormal_dV_, iTransformation);
-	const TScalar rescaleNormal = num::inv(normal_.norm());
-	normal_ *= rescaleNormal;
-	dNormal_dU_ *= rescaleNormal;
-	dNormal_dV_ *= rescaleNormal;
-
-	geometricNormal_ = prim::normalTransform(geometricNormal_, iTransformation);
-	geometricNormal_.normalize();
-	
-	if (hasScreenSpaceDifferentials_)
+	else
 	{
-		dPoint_dI_ = prim::transform(dPoint_dI_, iTransformation);
-		dPoint_dJ_ = prim::transform(dPoint_dJ_, iTransformation);
-		dNormal_dI_ = prim::normalTransform(dNormal_dI_, iTransformation);
-		dNormal_dJ_ = prim::normalTransform(dNormal_dJ_, iTransformation);
+		shaderToWorld_ = prim::concatenate(shaderToWorld_, transformation);
 	}
 }
 
 
 
-void IntersectionContext::translate(const TVector3D& iOffset)
+void IntersectionContext::translateBy(const TVector3D& offset)
 {
-	if (shader_)
+	if (!shader_)
 	{
-		localToWorld_ = prim::concatenate(localToWorld_, TTransformation3D::translation(iOffset));
-		return;
+		point_ += offset;
 	}
-
-	point_ += iOffset;
+	else
+	{
+		shaderToWorld_ = prim::concatenate(shaderToWorld_, TTransformation3D::translation(offset));
+	}
 }
 
 
 
-void IntersectionContext::flipNormal()
+/** flip the normal so that it -- in world space -- is in the same hemisphere as @a worldOmega.
+ */
+const TVector3D IntersectionContext::flipTo(const TVector3D& worldOmega)
 {
+	const TVector3D worldNormal = prim::transform(TVector3D(0, 0, 1), shaderToWorld_);
+	if (dot(worldNormal, worldOmega) >= 0)
+	{
+		return worldNormal;
+	}
+	geometricNormal_ = -geometricNormal_;
 	normal_ = -normal_;
 	dNormal_dU_ = -dNormal_dU_;
 	dNormal_dV_ = -dNormal_dV_;
-	dNormal_dI_ = -dNormal_dI_;
-	dNormal_dJ_ = -dNormal_dJ_;
+	shaderToWorld_ = prim::concatenate(TTransformation3D::scaler(TVector3D(0, 0, -1)), shaderToWorld_);
+	return -worldNormal;
 }
 
-
-
-void IntersectionContext::flipGeometricNormal()
-{
-	geometricNormal_ = -geometricNormal_;
-}
-
-
-
-const Spectrum IntersectionContext::shade(const Sample& iSample, const DifferentialRay& iRay, 
-		const Intersection& iIntersection) const
-{
-	DifferentialRay localRay = kernel::transform(iRay, localToWorld_.inverse());
-	return shader_ ? shader_->shade(iSample, localRay, iIntersection, *this) : xyz(1, 0, 1);
-}
-
-
-
-const Spectrum IntersectionContext::gather(const Sample& iSample, const DifferentialRay& iRay) const
-{
-	DifferentialRay globalRay = kernel::transform(iRay, localToWorld_);
-	return tracer_ ? tracer_->castRay(iSample, globalRay) : Spectrum();
-}
-
-
-
-const TLightSamplesRange IntersectionContext::sampleLights(const Sample& iSample) const
-{
-	const TPoint3D globalPoint = prim::transform(point_, localToWorld_);
-	const TVector3D globalNormal = prim::transform(geometricNormal_, localToWorld_);
-	return tracer_ ? tracer_->sampleLights(iSample, globalPoint, globalNormal) : TLightSamplesRange();
-}
 
 
 
@@ -195,6 +180,19 @@ void IntersectionContext::setScreenSpaceDifferentialsI(const TRay3D& iRay_dI,
 	oDNormal_dI = dNormal_dU_ * solution[0] + dNormal_dV_ * solution[1];
 	oDUv_dI = TVector2D(solution[0], solution[1]);
 }
+
+
+
+void IntersectionContext::generateShaderToWorld()
+{
+	if (shader_)
+	{
+		const TVector3D u = dPoint_dU_.normal();
+		const TVector3D v = cross(normal_, u);
+		shaderToWorld_ = TTransformation3D(point_, u, v, normal_);
+	}
+}
+
 
 
 

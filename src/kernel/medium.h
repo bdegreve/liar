@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::Medium
  *  @brief base class of all media
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_MEDIUM_H
@@ -45,11 +45,11 @@ public:
     virtual ~Medium();
 
 	TScalar refractiveIndex() const;
-	void setRefractiveIndex(TScalar iValue);
+	void setRefractiveIndex(TScalar value);
 
 protected:
 
-    Medium(PyTypeObject* iType);
+    Medium();
 
 private:
 

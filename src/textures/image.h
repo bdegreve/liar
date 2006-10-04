@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -46,19 +46,19 @@ class LIAR_TEXTURES_DLL Image: public Texture
 	PY_HEADER(Texture)
 public:
 
-	explicit Image(const std::string& iFilename);
-	Image(const std::string& iFilename, const std::string& iAntiAliasing, 
-		const std::string& iMipMapping);
+	explicit Image(const std::string& filename);
+	Image(const std::string& filename, const std::string& antiAliasing, 
+		const std::string& mipMapping);
 
 	const std::string antiAliasing() const;
 	const std::string mipMapping() const;
-	void setAntiAliasing(const std::string& iMode);
-	void setMipMapping(const std::string& iMode);
+	void setAntiAliasing(const std::string& mode);
+	void setMipMapping(const std::string& mode);
 
-	void loadFile(const std::string& iFilename);
+	void loadFile(const std::string& filename);
 
-	static void setDefaultAntiAliasing(const std::string& iMode);
-	static void setDefaultMipMapping(const std::string& iMode);
+	static void setDefaultAntiAliasing(const std::string& mode);
+	static void setDefaultMipMapping(const std::string& mode);
 
 private:
 
@@ -85,13 +85,13 @@ private:
 	typedef util::Dictionary<std::string, AntiAliasing> TAntiAliasingDictionary;
 	typedef util::Dictionary<std::string, MipMapping> TMipMappingDictionary;
 
-	const Spectrum doLookUp(const Sample& iSample, 
-		const IntersectionContext& iContext) const;
+	const Spectrum doLookUp(const Sample& sample, 
+		const IntersectionContext& context) const;
 
 	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& iState);
+	void doSetState(const TPyObjectPtr& state);
 
-	void makeMipMaps(MipMapping iMode) const;
+	void makeMipMaps(MipMapping mode) const;
 	TImagePtr makeMipMap(const TImagePtr iOldImagePtr, prim::XY iCompressionAxis) const;
 	TImagePtr makeMipMapEven(const TImagePtr iOldImagePtr, prim::XY iCompressionAxis) const;
 	TImagePtr makeMipMapOdd(const TImagePtr iOldImagePtr, prim::XY iCompressionAxis) const;
@@ -99,8 +99,8 @@ private:
 	void mipMapLevel(TScalar iWidth, size_t iNumLevels, 
 		size_t& oLevel0, size_t& oLevel1, TScalar& oDLevel) const;
 
-	io::Image::TPixel nearest(size_t iLevelU, size_t iLevelV, const TPoint2D& iUv) const;
-	io::Image::TPixel bilinear(size_t iLevelU, size_t iLevelV, const TPoint2D& iUv) const;
+	io::Image::TPixel nearest(size_t iLevelU, size_t iLevelV, const TPoint2D& uv) const;
+	io::Image::TPixel bilinear(size_t iLevelU, size_t iLevelV, const TPoint2D& uv) const;
 
 	static TAntiAliasingDictionary makeAntiAliasingDictionary();
 	static TMipMappingDictionary makeMipMappingDictionary();

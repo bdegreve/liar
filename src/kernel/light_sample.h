@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::LightSample
  *  @brief a radiance sample from a light shader
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_LIGHT_SAMPLE_H
@@ -43,7 +43,7 @@ class LIAR_KERNEL_DLL LightSample
 {
 public:
 
-	LightSample(const Spectrum& iRadiance, const TVector3D& iDirection/*, TScalar iPdf*/);
+	LightSample(const Spectrum& radiance, const TVector3D& direction/*, TScalar iPdf*/);
 
 	const Spectrum& radiance() const { return radiance_; }
 	const TVector3D& direction() const { return direction_; }

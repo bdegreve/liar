@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -28,59 +28,64 @@ namespace kernel
 
 /** do some preprocessing before rendering.
  *
- *  @param iPeriod [in]
+ *	@param scene [in]
+ *		pointer to the entire scene.
+ *  @param period [in]
  *		timespan covered by render.
+ *
+ *	@remark you can't rely on the scene being preprocessed when this function is called,
+ *		since this function is called at the very same monent scene _is_ preprocessed!
  */
-inline void SceneObject::preProcess(const TimePeriod& iPeriod) 
+inline void SceneObject::preProcess(const TSceneObjectPtr& scene, const TimePeriod& period) 
 { 
-	doPreProcess(iPeriod); 
+	doPreProcess(scene, period); 
 }
 
 
 
 /** intersect object with normal BoundedRay.
  *
- *  @param iSample [in]
+ *  @param sample [in]
  *		sample information
- *	@param iRay [in]
+ *	@param ray [in]
  *		ray to intersect with
- *  @param oResult [out]
+ *  @param result [out]
  *		information on intersection.
  */
-inline void SceneObject::intersect(const Sample& iSample, const BoundedRay& iRay, 
-		Intersection& oResult) const
+inline void SceneObject::intersect(const Sample& sample, const BoundedRay& ray, 
+		Intersection& result) const
 { 
-	doIntersect(iSample, iRay, oResult);
-	LASS_ASSERT(!oResult || oResult.object() == this);
+	doIntersect(sample, ray, result);
+	LASS_ASSERT(!result || result.object() == this);
 }
 
 
 
 /** intersect object with a DifferentialRay.
  *
- *  @param iSample [in]
+ *  @param sample [in]
  *		sample information
- *	@param iRay [in]
+ *	@param ray [in]
  *		ray to intersect with
- *  @param oResult [out]
+ *  @param result [out]
  *		information on intersection.
  *
  *  Intersection with differential ray is equivalent to intersection with its central ray.
  */
-inline void SceneObject::intersect(const Sample& iSample, const DifferentialRay& iRay, 
-		Intersection& oResult) const
+inline void SceneObject::intersect(const Sample& sample, const DifferentialRay& ray, 
+		Intersection& result) const
 { 
-	doIntersect(iSample, iRay.centralRay(), oResult); 
-	LASS_ASSERT(!oResult || oResult.object() == this);
+	doIntersect(sample, ray.centralRay(), result); 
+	LASS_ASSERT(!result || result.object() == this);
 }
 	
 
 
 /** check if object intersects with BoundedRay.
  *
- *  @param iSample [in]
+ *  @param sample [in]
  *		sample information
- *	@param iRay [in]
+ *	@param ray [in]
  *		ray to intersect with
  *
  *  @return
@@ -89,18 +94,18 @@ inline void SceneObject::intersect(const Sample& iSample, const DifferentialRay&
  *  If you're only interested in whether a ray intersects an object, this method may be cheaper
  *  than a full intersection test.
  */
-inline const bool SceneObject::isIntersecting(const Sample& iSample, const BoundedRay& iRay) const
+inline const bool SceneObject::isIntersecting(const Sample& sample, const BoundedRay& ray) const
 {
-	return doIsIntersecting(iSample, iRay);
+	return doIsIntersecting(sample, ray);
 }
 	
 
 
 /** check if object intersects with DifferentialRay.
  *
- *  @param iSample [in]
+ *  @param sample [in]
  *		sample information
- *	@param iRay [in]
+ *	@param ray [in]
  *		ray to intersect with
  *
  *  @return
@@ -110,87 +115,91 @@ inline const bool SceneObject::isIntersecting(const Sample& iSample, const Bound
  *  If you're only interested in whether a ray intersects an object, this method may be cheaper
  *  than a full intersection test.
  */
-inline const bool SceneObject::isIntersecting(const Sample& iSample, 
-		const DifferentialRay& iRay) const 
+inline const bool SceneObject::isIntersecting(const Sample& sample, 
+		const DifferentialRay& ray) const 
 {
-	return doIsIntersecting(iSample, iRay.centralRay()); 
+	return doIsIntersecting(sample, ray.centralRay()); 
 }
 
 
 
 /** get geometrical information on intersection with BoundedRay
  *
- *  @param iSample [in]
+ *  @param sample [in]
  *		sample information
- *	@param iRay [in]
+ *	@param ray [in]
  *		ray to intersect with
- *  @param iIntersection [in]
+ *  @param intersection [in]
  *		the result of a successful intersection is used as input.
  *	@param IntersectionContext [out]
  *		geometrical information on intersection
  */
-inline void SceneObject::localContext(const Sample& iSample, const BoundedRay& iRay, 
-		const Intersection& iIntersection, IntersectionContext& oResult) const
+inline void SceneObject::localContext(const Sample& sample, const BoundedRay& ray, 
+		const Intersection& intersection, IntersectionContext& result) const
 {
-	LASS_ASSERT(iIntersection.object() == this);
-    doLocalContext(iSample, iRay, iIntersection, oResult);
-	if (!oResult.shader() || this->isOverridingShader_)
+	LASS_ASSERT(intersection.object() == this);
+    doLocalContext(sample, ray, intersection, result);
+	if (!result.shader() || this->isOverridingShader_)
     {
-        oResult.setShader(shader_);
+        result.setShader(shader_);
     }
+	if (intersection.level() == 0) // top level
+	{
+		result.flipTo(-ray.direction());
+	}
 }
 
 
 
 /** get geometrical information on intersection with DifferentialRay.
  *
- *  @param iSample [in]
+ *  @param sample [in]
  *		sample information
- *	@param iRay [in]
+ *	@param ray [in]
  *		ray to intersect with
- *  @param iIntersection [in]
+ *  @param intersection [in]
  *		the result of a successful intersection is used as input.
  *	@param IntersectionContext [out]
  *		geometrical information on intersection
  *
  *  Also sets screen differentials.
  */
-inline void SceneObject::localContext(const Sample& iSample, const DifferentialRay& iRay, 
-		const Intersection& iIntersection, IntersectionContext& oResult) const
+inline void SceneObject::localContext(const Sample& sample, const DifferentialRay& ray, 
+		const Intersection& intersection, IntersectionContext& result) const
 {
-	localContext(iSample, iRay.centralRay(), iIntersection, oResult);
-	oResult.setScreenSpaceDifferentials(iRay);
+	localContext(sample, ray.centralRay(), intersection, result);
+	result.setScreenSpaceDifferentials(ray);
 }
 
 
 
 /** check if object contains a point.
  *	
- *	@param iSample [in]
+ *	@param sample [in]
  *		sample information
- *	@param iPoint [in]
+ *	@param point [in]
  *		the point to be checked
  *
  *	@return
  *		true if point is inside object, false if it is not.
  */
-inline const bool SceneObject::contains(const Sample& iSample, const TPoint3D& iPoint) const 
+inline const bool SceneObject::contains(const Sample& sample, const TPoint3D& point) const 
 { 
-	return doContains(iSample, iPoint); 
+	return doContains(sample, point); 
 }
 
 
 
 /** Add local-to-world transformation to transformation object.
  *
- *	@param iTime [in]
+ *	@param time [in]
  *		exact scene time for motion transformations, to get correct motion blur.
- *	@param ioLocalToWorld [in,out]
+ *	@param localToWorld [in,out]
  *		transformation from local space to world space.
  */
-inline void SceneObject::localSpace(TTime iTime, TTransformation3D& ioLocalToWorld) const 
+inline void SceneObject::localSpace(TTime time, TTransformation3D& localToWorld) const 
 { 
-	doLocalSpace(iTime, ioLocalToWorld); 
+	doLocalSpace(time, localToWorld); 
 }
 
 
@@ -211,33 +220,33 @@ inline const bool SceneObject::hasSurfaceSampling() const
 
 /** sample surface without target position.
  *
- *  @param iSample [in]
+ *  @param sample [in]
  *		(u,v) sample
- *	@param oNormal [out]
+ *	@param normal [out]
  *		normal of surface at sampled position.
- *  @param oPdf [out]
+ *  @param pdf [out]
  *		value of probability density function the position was choosen with.
  *
  *  This is also a fallback for sampleSurface with target position.
  */
-inline const TPoint3D SceneObject::sampleSurface(const TVector2D& iSample, TVector3D& oNormal, 
-		TScalar& oPdf) const
+inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, TVector3D& normal, 
+		TScalar& pdf) const
 {
 	LASS_ASSERT(hasSurfaceSampling());
-	return doSampleSurface(iSample, oNormal, oPdf);
+	return doSampleSurface(sample, normal, pdf);
 }
 
 
 
 /** sample surface with target position.
  *
- *  @param iSample [in]
+ *  @param sample [in]
  *		(u,v) sample
- *  @param iTarget [in]
+ *  @param target [in]
  *		point being illuminated.
- *	@param oNormal [out]
+ *	@param normal [out]
  *		normal of surface at sampled position.
- *  @param oPdf [out]
+ *  @param pdf [out]
  *		value of probability density function the position was choosen with.
  *
  *  This is used to sample a point on an area light to illuminate a target point.  This way
@@ -246,25 +255,25 @@ inline const TPoint3D SceneObject::sampleSurface(const TVector2D& iSample, TVect
  *  Scene objects that do not implement this will fallback on sampleSurface without target 
  *	position.  This is also a fallback for sampleSurface with target position and target normal.
  */
-inline const TPoint3D SceneObject::sampleSurface(const TVector2D& iSample, const TPoint3D& iTarget,
-		TVector3D& oNormal, TScalar& oPdf) const
+inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, const TPoint3D& target,
+		TVector3D& normal, TScalar& pdf) const
 {
-	return doSampleSurface(iSample, iTarget, oNormal, oPdf);
+	return doSampleSurface(sample, target, normal, pdf);
 }
 
 
 
 /** sample surface with target position and target normal.
  *
- *  @param iSample [in]
+ *  @param sample [in]
  *		(u,v) sample
- *  @param iTarget [in]
+ *  @param target [in]
  *		point being illuminated.
- *  @param iTargetNormal [in]
- *		surface normal at iTarget
- *	@param oNormal [out]
+ *  @param targetNormal [in]
+ *		surface normal at target
+ *	@param normal [out]
  *		normal of surface at sampled position.
- *  @param oPdf [out]
+ *  @param pdf [out]
  *		value of probability density function the position was choosen with.
  *
  *  This is used to sample a point on an area light to illuminate a target point.  This way
@@ -273,10 +282,10 @@ inline const TPoint3D SceneObject::sampleSurface(const TVector2D& iSample, const
  *  Scene objects that do not implement this will fallback on sampleSurface with only a target 
  *	point.
  */
-inline const TPoint3D SceneObject::sampleSurface(const TVector2D& iSample, const TPoint3D& iTarget,
-		const TVector3D& iTargetNormal, TVector3D& oNormal, TScalar& oPdf) const
+inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, const TPoint3D& target,
+		const TVector3D& targetNormal, TVector3D& normal, TScalar& pdf) const
 {
-	return doSampleSurface(iSample, iTarget, iTargetNormal, oNormal, oPdf);
+	return doSampleSurface(sample, target, targetNormal, normal, pdf);
 }
 
 

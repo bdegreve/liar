@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -48,18 +48,18 @@ PY_DECLARE_CLASS_NAME(PySpectrum, "Spectrum")
 
 /** Make a spectrum from CIE xyz values using the default spectrum format
  */
-Spectrum xyz(TScalar iX, TScalar iY, TScalar iZ)
+Spectrum xyz(TScalar x, TScalar y, TScalar z)
 {
-	return Spectrum(TVector3D(iX, iY, iZ));
+	return Spectrum(TVector3D(x, y, z));
 }
 
 
 
 /** Make a spectrum from CIE xyz values using the default spectrum format
  */
-Spectrum xyz(const TVector3D& iXYZ)
+Spectrum xyz(const TVector3D& xyz)
 {
-	return Spectrum(iXYZ);
+	return Spectrum(xyz);
 }
 
 

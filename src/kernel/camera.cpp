@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -44,18 +44,17 @@ Camera::~Camera()
 
 // --- protected -----------------------------------------------------------------------------------
 
-Camera::Camera(PyTypeObject* iType):
-    python::PyObjectPlus(iType)
+Camera::Camera()
 {
 }
 
 
 
-const DifferentialRay Camera::primaryRay(const Sample& iSample, const TVector2D& iScreenSpaceDelta) const
+const DifferentialRay Camera::primaryRay(const Sample& sample, const TVector2D& screenSpaceDelta) const
 {
-	const BoundedRay centralRay = doGenerateRay(iSample, TVector2D(0, 0));
-	const TRay3D differentialI = doGenerateRay(iSample, TVector2D(iScreenSpaceDelta.x, 0)).unboundedRay();
-	const TRay3D differentialJ = doGenerateRay(iSample, TVector2D(0, iScreenSpaceDelta.y)).unboundedRay();
+	const BoundedRay centralRay = doGenerateRay(sample, TVector2D(0, 0));
+	const TRay3D differentialI = doGenerateRay(sample, TVector2D(screenSpaceDelta.x, 0)).unboundedRay();
+	const TRay3D differentialJ = doGenerateRay(sample, TVector2D(0, screenSpaceDelta.y)).unboundedRay();
 
 	return DifferentialRay(centralRay, differentialI, differentialJ);
 }
@@ -65,7 +64,8 @@ const DifferentialRay Camera::primaryRay(const Sample& iSample, const TVector2D&
 const TPyObjectPtr Camera::reduce() const
 {
 	return python::makeTuple(
-		reinterpret_cast<PyObject*>(this->GetType()), python::makeTuple(), this->getState());
+		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->GetType())), 
+		python::makeTuple(), this->getState());
 }
 
 

@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -39,7 +39,6 @@ PY_CLASS_MEMBER_RW(Stratifier, "jittered", jittered, setJittered)
 // --- public --------------------------------------------------------------------------------------
 
 Stratifier::Stratifier():
-    Sampler(&Type),
 	jitterGenerator_(numberGenerator_),
 	isJittered_(true)
 {
@@ -48,22 +47,20 @@ Stratifier::Stratifier():
 
 
 
-Stratifier::Stratifier(const TResolution& iResolution):
-    Sampler(&Type),
+Stratifier::Stratifier(const TResolution& resolution):
 	jitterGenerator_(numberGenerator_),
 	isJittered_(true)
 {
-	init(iResolution);
+	init(resolution);
 }
 
 
 
-Stratifier::Stratifier(const TResolution& iResolution, unsigned iNumberOfSamplesPerPixel):
-    Sampler(&Type),
+Stratifier::Stratifier(const TResolution& resolution, unsigned numberOfSamplesPerPixel):
 	jitterGenerator_(numberGenerator_),
 	isJittered_(true)
 {
-	init(iResolution, iNumberOfSamplesPerPixel);
+	init(resolution, numberOfSamplesPerPixel);
 }
 
 
@@ -75,9 +72,9 @@ const bool Stratifier::jittered() const
 
 
 
-void Stratifier::setJittered(bool iEnabled)
+void Stratifier::setJittered(bool enabled)
 {
-	isJittered_ = iEnabled;
+	isJittered_ = enabled;
 }
 
 
@@ -89,10 +86,10 @@ void Stratifier::setJittered(bool iEnabled)
 
 // --- private -------------------------------------------------------------------------------------
 
-void Stratifier::init(const TResolution& iResolution, unsigned iNumberOfSamplesPerPixel)
+void Stratifier::init(const TResolution& resolution, unsigned numberOfSamplesPerPixel)
 {
-	setResolution(iResolution);
-	setSamplesPerPixel(iNumberOfSamplesPerPixel);
+	setResolution(resolution);
+	setSamplesPerPixel(numberOfSamplesPerPixel);
 }
 
 
@@ -111,19 +108,19 @@ const unsigned Stratifier::doSamplesPerPixel() const
 
 
 
-void Stratifier::doSetResolution(const TResolution& iResolution)
+void Stratifier::doSetResolution(const TResolution& resolution)
 {
-    LASS_ASSERT(iResolution.x > 0 && iResolution.y > 0);
-    resolution_ = iResolution;
-    reciprocalResolution_ = TVector2D(iResolution).reciprocal();
+    LASS_ASSERT(resolution.x > 0 && resolution.y > 0);
+    resolution_ = resolution;
+    reciprocalResolution_ = TVector2D(resolution).reciprocal();
 }
 
 
 
-void Stratifier::doSetSamplesPerPixel(unsigned iSamplesPerPixel)
+void Stratifier::doSetSamplesPerPixel(unsigned samplesPerPixel)
 {
     const unsigned strataPerAxis = static_cast<unsigned>(num::ceil(
-        num::sqrt(static_cast<TScalar>(iSamplesPerPixel))));
+        num::sqrt(static_cast<TScalar>(samplesPerPixel))));
     
     strataPerPixel_ = strataPerAxis * strataPerAxis;
     stratum1DSize_ = TNumTraits::one / strataPerPixel_;
@@ -150,25 +147,25 @@ void Stratifier::doSetSamplesPerPixel(unsigned iSamplesPerPixel)
 
 
 
-void Stratifier::doSeed(unsigned iRandomSeed)
+void Stratifier::doSeed(unsigned randomSeed)
 {
-	numberGenerator_.seed(iRandomSeed);
+	numberGenerator_.seed(randomSeed);
 }
 
 
 
-void Stratifier::doSampleScreen(const TResolution& iPixel, unsigned iSubPixel, 
-								TPoint2D& oScreenCoordinate)
+void Stratifier::doSampleScreen(const TResolution& pixel, unsigned subPixel, 
+								TSample2D& oScreenCoordinate)
 {
-    LASS_ASSERT(iPixel.x < resolution_.x && iPixel.y < resolution_.y);
-    LASS_ASSERT(iSubPixel < strataPerPixel_);
+    LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
+    LASS_ASSERT(subPixel < strataPerPixel_);
 
-	TVector2D position = screenStrata_[iSubPixel];
+	TVector2D position = screenStrata_[subPixel];
 	position.x += isJittered_ ? jitterGenerator_() : .5f;
 	position.y += isJittered_ ? jitterGenerator_() : .5f;
 	position *= stratum2DSize_;
 
-	position += TVector2D(iPixel);
+	position += TVector2D(pixel);
 	position *= reciprocalResolution_;
 
 	oScreenCoordinate = TPoint2D(position);
@@ -176,45 +173,45 @@ void Stratifier::doSampleScreen(const TResolution& iPixel, unsigned iSubPixel,
 
 
 
-void Stratifier::doSampleLens(const TResolution& iPixel, unsigned iSubPixel, 
-							  TPoint2D& oLensCoordinate)
+void Stratifier::doSampleLens(const TResolution& pixel, unsigned subPixel, 
+							  TSample2D& oLensCoordinate)
 {
-    LASS_ASSERT(iPixel.x < resolution_.x && iPixel.y < resolution_.y);
-    LASS_ASSERT(iSubPixel < strataPerPixel_);
+    LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
+    LASS_ASSERT(subPixel < strataPerPixel_);
 
-	if (iSubPixel == 0)
+	if (subPixel == 0)
 	{
 		stde::random_shuffle_r(lensStrata_, numberGenerator_);	
 	}
-	TVector2D position = lensStrata_[iSubPixel];
+	TVector2D position = lensStrata_[subPixel];
 	position.x += isJittered_ ? jitterGenerator_() : .5f;
 	position.y += isJittered_ ? jitterGenerator_() : .5f;
 	position *= stratum2DSize_;
 
-	oLensCoordinate = TPoint2D(position);
+	oLensCoordinate = TSample2D(position);
 }
 
 
 
-void Stratifier::doSampleTime(const TResolution& iPixel, unsigned iSubPixel, 
-							  const TimePeriod& iPeriod, TTime& oTime)
+void Stratifier::doSampleTime(const TResolution& pixel, unsigned subPixel, 
+							  const TimePeriod& period, TTime& oTime)
 {
-    LASS_ASSERT(iPixel.x < resolution_.x && iPixel.y < resolution_.y);
-    LASS_ASSERT(iSubPixel < strataPerPixel_);
+    LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
+    LASS_ASSERT(subPixel < strataPerPixel_);
 
-	if (iSubPixel == 0)
+	if (subPixel == 0)
 	{
 		stde::random_shuffle_r(timeStrata_, numberGenerator_);	
 	}
 	const TScalar tau = 
-		(timeStrata_[iSubPixel] + (isJittered_ ? jitterGenerator_() : 0.5f)) * stratum1DSize_;
-	oTime = iPeriod.interpolate(tau);
+		(timeStrata_[subPixel] + (isJittered_ ? jitterGenerator_() : 0.5f)) * stratum1DSize_;
+	oTime = period.interpolate(tau);
 }
 
 
 
-void Stratifier::doSampleSubSequence1D(const TResolution& iPixel, unsigned iSubPixel, 
-									   TScalar* oBegin, TScalar* oEnd)
+void Stratifier::doSampleSubSequence1D(const TResolution& pixel, unsigned subPixel, 
+									   TSample1D* oBegin, TSample1D* oEnd)
 {
 	const ptrdiff_t size = oEnd - oBegin;
 	const TScalar scale = 1.f / size;
@@ -227,8 +224,8 @@ void Stratifier::doSampleSubSequence1D(const TResolution& iPixel, unsigned iSubP
 
 
 
-void Stratifier::doSampleSubSequence2D(const TResolution& iPixel, unsigned iSubPixel, 
-									   TVector2D* oBegin, TVector2D* oEnd)
+void Stratifier::doSampleSubSequence2D(const TResolution& pixel, unsigned subPixel, 
+									   TSample2D* oBegin, TSample2D* oEnd)
 {
 	const size_t size = oEnd - oBegin;
 	const size_t sqrtSize = static_cast<size_t>(num::sqrt(static_cast<double>(size)));
@@ -249,20 +246,20 @@ void Stratifier::doSampleSubSequence2D(const TResolution& iPixel, unsigned iSubP
 
 
 
-const unsigned Stratifier::doRoundSize1D(unsigned iRequestedSize) const
+const unsigned Stratifier::doRoundSize1D(unsigned requestedSize) const
 {
-	return iRequestedSize;
+	return requestedSize;
 }
 
 
 
-const unsigned Stratifier::doRoundSize2D(unsigned iRequestedSize) const
+const unsigned Stratifier::doRoundSize2D(unsigned requestedSize) const
 {
-	const TScalar realSqrt = num::sqrt(static_cast<TScalar>(iRequestedSize));
+	const TScalar realSqrt = num::sqrt(static_cast<TScalar>(requestedSize));
 	const unsigned lowSqrt = static_cast<unsigned>(num::floor(realSqrt));
 	const unsigned highSqrt = lowSqrt + 1;
 
-	return (realSqrt - lowSqrt) < (highSqrt - iRequestedSize) ? num::sqr(lowSqrt) : num::sqr(highSqrt);
+	return (realSqrt - lowSqrt) < (highSqrt - requestedSize) ? num::sqr(lowSqrt) : num::sqr(highSqrt);
 }
 
 
@@ -284,7 +281,7 @@ const TPyObjectPtr Stratifier::doGetState() const
 
 
 
-void Stratifier::doSetState(const TPyObjectPtr& iState)
+void Stratifier::doSetState(const TPyObjectPtr& state)
 {
 	std::vector<TNumberGenerator::TValue> numGenState;
 	TResolution resolution;
@@ -292,7 +289,7 @@ void Stratifier::doSetState(const TPyObjectPtr& iState)
 	TStrata2D lensStrata;
 	TStrata1D timeStrata;
 
-	python::decodeTuple(iState, numGenState, resolution, strataPerPixel, lensStrata,
+	python::decodeTuple(state, numGenState, resolution, strataPerPixel, lensStrata,
         timeStrata,	isJittered_);
 
 	numberGenerator_.setState(numGenState.begin(), numGenState.end());

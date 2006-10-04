@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -54,11 +54,10 @@ TRgbSpacePtr RgbSpace::defaultSpace_ = TRgbSpacePtr(new RgbSpace(
 
 
 
-RgbSpace::RgbSpace(const TVector3D& iRed, const TVector3D& iGreen, const TVector3D& iBlue):
-	python::PyObjectPlus(&Type),
-	red_(iRed),
-	green_(iGreen),
-	blue_(iBlue),
+RgbSpace::RgbSpace(const TVector3D& red, const TVector3D& green, const TVector3D& blue):
+	red_(red),
+	green_(green),
+	blue_(blue),
 	x_(1, 0, 0),
 	y_(0, 1, 0),
 	z_(0, 0, 1)
@@ -88,19 +87,19 @@ RgbSpace::RgbSpace(const TVector3D& iRed, const TVector3D& iGreen, const TVector
 
 
 
-const TVector3D RgbSpace::convert(const prim::ColorRGBA& iRgb) const
+const TVector3D RgbSpace::convert(const prim::ColorRGBA& rgb) const
 {
-	return red_ * iRgb.r + green_ * iRgb.g + blue_ * iRgb.b;
+	return red_ * rgb.r + green_ * rgb.g + blue_ * rgb.b;
 }
 
 
 
-const prim::ColorRGBA RgbSpace::convert(const TVector3D& iXyz) const
+const prim::ColorRGBA RgbSpace::convert(const TVector3D& xyz) const
 {
 	return prim::ColorRGBA(
-		x_.r * iXyz.x + y_.r * iXyz.y + z_.r * iXyz.z,
-		x_.g * iXyz.x + y_.g * iXyz.y + z_.g * iXyz.z,
-		x_.b * iXyz.x + y_.b * iXyz.y + z_.b * iXyz.z,
+		x_.r * xyz.x + y_.r * xyz.y + z_.r * xyz.z,
+		x_.g * xyz.x + y_.g * xyz.y + z_.g * xyz.z,
+		x_.b * xyz.x + y_.b * xyz.y + z_.b * xyz.z,
 		1);
 }
 
@@ -160,14 +159,14 @@ Spectrum rgb(const prim::ColorRGBA& iColor, const TRgbSpacePtr& iSpace)
 	return xyz(iSpace->convert(iColor));
 }
 
-Spectrum rgb(TScalar iRed, TScalar iGreen, TScalar iBlue)
+Spectrum rgb(TScalar red, TScalar green, TScalar blue)
 {
-	return xyz(RgbSpace::defaultSpace()->convert(prim::ColorRGBA(iRed, iGreen, iBlue)));
+	return xyz(RgbSpace::defaultSpace()->convert(prim::ColorRGBA(red, green, blue)));
 }
 
-Spectrum rgb(TScalar iRed, TScalar iGreen, TScalar iBlue, const TRgbSpacePtr& iSpace)
+Spectrum rgb(TScalar red, TScalar green, TScalar blue, const TRgbSpacePtr& iSpace)
 {
-	return xyz(iSpace->convert(prim::ColorRGBA(iRed, iGreen, iBlue)));
+	return xyz(iSpace->convert(prim::ColorRGBA(red, green, blue)));
 }
 /*
 Spectrum rgb(const prim::ColorRGBA& iColor, const TSpectrumFormatPtr& iFormat)
@@ -180,14 +179,14 @@ Spectrum rgb(const prim::ColorRGBA& iColor, const TRgbSpacePtr& iSpace, const TS
 	return xyz(iSpace->convert(iColor), iFormat);
 }
 
-Spectrum rgb(TScalar iRed, TScalar iGreen, TScalar iBlue, const TSpectrumFormatPtr& iFormat)
+Spectrum rgb(TScalar red, TScalar green, TScalar blue, const TSpectrumFormatPtr& iFormat)
 {
-	return xyz(RgbSpace::defaultSpace()->convert(prim::ColorRGBA(iRed, iGreen, iBlue)), iFormat);
+	return xyz(RgbSpace::defaultSpace()->convert(prim::ColorRGBA(red, green, blue)), iFormat);
 }
 
-Spectrum rgb(TScalar iRed, TScalar iGreen, TScalar iBlue, const TRgbSpacePtr& iSpace, const TSpectrumFormatPtr& iFormat)
+Spectrum rgb(TScalar red, TScalar green, TScalar blue, const TRgbSpacePtr& iSpace, const TSpectrumFormatPtr& iFormat)
 {
-	return xyz(iSpace->convert(prim::ColorRGBA(iRed, iGreen, iBlue)), iFormat);
+	return xyz(iSpace->convert(prim::ColorRGBA(red, green, blue)), iFormat);
 }
 */
 

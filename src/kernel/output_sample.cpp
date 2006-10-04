@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -41,10 +41,10 @@ OutputSample::OutputSample():
 
 
 
-OutputSample::OutputSample(const Sample& iSample, const Spectrum& iRadiance):
-	radiance_(iRadiance),
-	screenCoordinate_(iSample.screenCoordinate()),
-	weight_(iSample.weight())
+OutputSample::OutputSample(const Sample& sample, const Spectrum& radiance):
+	radiance_(radiance),
+	screenCoordinate_(sample.screenCoordinate()),
+	weight_(sample.weight())
 {
 }
 

@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::Camera
  *  @brief Abstract base class of render viewports
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  *
  *  Concrete cameras that to be used by LiAR should derive from this class.
  */
@@ -48,25 +48,25 @@ public:
     
     virtual ~Camera();
 
-    const DifferentialRay primaryRay(const Sample& iSample, const TVector2D& iScreenSpaceDelta) const;
+    const DifferentialRay primaryRay(const Sample& sample, const TVector2D& screenSpaceDelta) const;
 	const TimePeriod shutterDelta() const { return doShutterDelta(); }
 
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const { return doGetState(); }
-	void setState(const TPyObjectPtr& iState) { doSetState(iState); }
+	void setState(const TPyObjectPtr& state) { doSetState(state); }
 
 protected:
 
-    Camera(PyTypeObject* iType);
+    Camera();
 
 private:
 
-    virtual const BoundedRay doGenerateRay(const Sample& iSample, 
-		const TVector2D& iScreenSpaceDelta) const = 0;
+    virtual const BoundedRay doGenerateRay(const Sample& sample, 
+		const TVector2D& screenSpaceDelta) const = 0;
 	virtual const TimePeriod doShutterDelta() const = 0;
 
 	virtual const TPyObjectPtr doGetState() const = 0;
-	virtual void doSetState(const TPyObjectPtr& iState) = 0;
+	virtual void doSetState(const TPyObjectPtr& state) = 0;
 };
 
 typedef python::PyObjectPtr<Camera>::Type TCameraPtr;

@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -41,8 +41,7 @@ PY_CLASS_MEMBER_RW_DOC(SceneLight, "isShadowless", isShadowless, setShadowless,
 
 // --- protected -----------------------------------------------------------------------------------
 
-SceneLight::SceneLight(PyTypeObject* iType):
-    SceneObject(iType),
+SceneLight::SceneLight():
 	isShadowless_(false)
 {
 }
@@ -57,10 +56,10 @@ const TPyObjectPtr SceneLight::doGetState() const
 
 
 
-void SceneLight::doSetState(const TPyObjectPtr& iState)
+void SceneLight::doSetState(const TPyObjectPtr& state)
 {
 	TPyObjectPtr lightState;
-	python::decodeTuple(iState, isShadowless_, lightState);
+	python::decodeTuple(state, isShadowless_, lightState);
 	doSetLightState(lightState);
 }
 

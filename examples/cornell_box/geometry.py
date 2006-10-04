@@ -24,7 +24,7 @@ def getLights():
 	light = scenery.LightArea(surface)
 	light.radiance = rgb(I, I, I)
 	light.numberOfEmissionSamples = 16
-	light.shader = shaders.Unshaded(textures.Constant(light.radiance))
+	#light.shader = shaders.Lambert(textures.Constant(light.radiance))
 	return [light]
 
 def getWalls():

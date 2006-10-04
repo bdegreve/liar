@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2005  Bram de Greve
+ *  Copyright (C) 2004-2006  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 /** @class liar::Sampler
  *  @brief generates samples to be feed to the ray tracer.
- *  @author Bram de Greve [BdG]
+ *  @author Bram de Greve [Bramz]
  *
  *  @warning
  *  THE INTERFACE OF THE SAMPLER IS STILL PRELIMINARY.  The main problem is how to avoid that two 
@@ -57,16 +57,16 @@ public:
 
     const TResolution& resolution() const { return doResolution(); }
     const unsigned samplesPerPixel() const { return doSamplesPerPixel(); }
-    void setResolution(const TResolution& iResolution) { doSetResolution(iResolution); }
-    void setSamplesPerPixel(unsigned iSamplesPerPixel) { doSetSamplesPerPixel(iSamplesPerPixel); }
-	void seed(unsigned iRandomSeed) { doSeed(iRandomSeed); }
+    void setResolution(const TResolution& resolution) { doSetResolution(resolution); }
+    void setSamplesPerPixel(unsigned samplesPerPixel) { doSetSamplesPerPixel(samplesPerPixel); }
+	void seed(unsigned randomSeed) { doSeed(randomSeed); }
 
-    const int requestSubSequence1D(unsigned iRequestedSize);
-    const int requestSubSequence2D(unsigned iRequestedSize);
+    const int requestSubSequence1D(unsigned requestedSize);
+    const int requestSubSequence2D(unsigned requestedSize);
 	void clearSubSequenceRequests();
 
-    void sample(const TResolution& iPixel, unsigned iSubPixel, const TimePeriod& iPeriod, 
-		Sample& oSample);
+    void sample(const TResolution& pixel, unsigned subPixel, const TimePeriod& period, 
+		Sample& sample);
 
     static TSamplerPtr& defaultSampler();
 
@@ -74,11 +74,14 @@ public:
 
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const;
-	void setState(const TPyObjectPtr& iState);
+	void setState(const TPyObjectPtr& state);
 
 protected:
 
-    Sampler(PyTypeObject* iType);
+	typedef TScalar TSample1D;
+	typedef TPoint2D TSample2D;
+
+    Sampler();
 
 private:
 
@@ -88,33 +91,33 @@ private:
 
     virtual const TResolution& doResolution() const = 0;
     virtual const unsigned doSamplesPerPixel() const = 0;
-    virtual void doSetResolution(const TResolution& iResolution) = 0;
-    virtual void doSetSamplesPerPixel(unsigned iSamplesPerPixel) = 0;
-	virtual void doSeed(unsigned iRandomSeed) = 0;
+    virtual void doSetResolution(const TResolution& resolution) = 0;
+    virtual void doSetSamplesPerPixel(unsigned samplesPerPixel) = 0;
+	virtual void doSeed(unsigned randomSeed) = 0;
     
-	virtual void doSampleScreen(const TResolution& iPixel, unsigned iSubPixel, 
-		TPoint2D& oScreenCoordinate) = 0;
-	virtual void doSampleLens(const TResolution& iPixel, unsigned iSubPixel, 
-		TPoint2D& oLensCoordinate) = 0;
-	virtual void doSampleTime(const TResolution& iPixel, unsigned iSubPixel, 
-		const TimePeriod& iPeriod, TTime& oTime) = 0;
-	virtual void doSampleSubSequence1D(const TResolution& iPixel, unsigned iSubPixel, 
-		TScalar* oBegin, TScalar* oEnd) = 0;
-	virtual void doSampleSubSequence2D(const TResolution& iPixel, unsigned iSubPixel, 
-		TVector2D* oBegin, TVector2D* oEnd) = 0;
+	virtual void doSampleScreen(const TResolution& pixel, unsigned subPixel, 
+		TSample2D& oScreenCoordinate) = 0;
+	virtual void doSampleLens(const TResolution& pixel, unsigned subPixel, 
+		TSample2D& oLensCoordinate) = 0;
+	virtual void doSampleTime(const TResolution& pixel, unsigned subPixel, 
+		const TimePeriod& period, TTime& oTime) = 0;
+	virtual void doSampleSubSequence1D(const TResolution& pixel, unsigned subPixel, 
+		TSample1D* oBegin, TSample1D* oEnd) = 0;
+	virtual void doSampleSubSequence2D(const TResolution& pixel, unsigned subPixel, 
+		TSample2D* oBegin, TSample2D* oEnd) = 0;
 
-	virtual const unsigned doRoundSize1D(unsigned iRequestedSize) const;
-	virtual const unsigned doRoundSize2D(unsigned iRequestedSize) const;
+	virtual const unsigned doRoundSize1D(unsigned requestedSize) const;
+	virtual const unsigned doRoundSize2D(unsigned requestedSize) const;
 
 	virtual const TSamplerPtr doClone() const = 0;
 
 	virtual const TPyObjectPtr doGetState() const = 0;
-	virtual void doSetState(const TPyObjectPtr& iState) = 0;
+	virtual void doSetState(const TPyObjectPtr& state) = 0;
 
-	const unsigned subSequenceSize1D(int iId) const { return subSequenceSize1D_[iId]; }
-	const unsigned subSequenceSize2D(int iId) const { return subSequenceSize2D_[iId]; }
-	const unsigned subSequenceOffset1D(int iId) const { return subSequenceOffset1D_[iId]; }
-	const unsigned subSequenceOffset2D(int iId) const { return subSequenceOffset2D_[iId]; }
+	const unsigned subSequenceSize1D(int id) const { return subSequenceSize1D_[id]; }
+	const unsigned subSequenceSize2D(int id) const { return subSequenceSize2D_[id]; }
+	const unsigned subSequenceOffset1D(int id) const { return subSequenceOffset1D_[id]; }
+	const unsigned subSequenceOffset2D(int id) const { return subSequenceOffset2D_[id]; }
 
     static TSamplerPtr defaultSampler_;
 
