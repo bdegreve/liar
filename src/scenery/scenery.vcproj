@@ -1,377 +1,388 @@
 <?xml version="1.0" encoding="Windows-1252"?>
-<VisualStudioProject 
+<VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="8.00"
 	Name="scenery"
 	ProjectGUID="{729E713E-24F3-4455-B8F6-FE9BD28D3265}"
-	Keyword="Win32Proj">
+	Keyword="Win32Proj"
+	>
 	<Platforms>
-		<Platform 
-			Name="Win32"/>
+		<Platform
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
-		<Configuration 
+		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)..\bin"
 			IntermediateDirectory="Debug"
 			ConfigurationType="2"
-			CharacterSet="2">
-			<Tool 
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions=""
 				Optimization="0"
 				PreprocessorDefinitions="LIAR_SCENERY_BUILD_DLL;WIN32;_DEBUG;_USRDLL"
-				MinimalRebuild="TRUE"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				DefaultCharIsUnsigned="TRUE"
-				TreatWChar_tAsBuiltInType="TRUE"
-				ForceConformanceInForLoopScope="TRUE"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="3"
+				DefaultCharIsUnsigned="true"
+				TreatWChar_tAsBuiltInType="true"
+				ForceConformanceInForLoopScope="true"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="scenery_common.h"
 				ProgramDataBaseFileName="$(IntDir)/$(TargetName).pdb"
 				BrowseInformation="1"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
-				AdditionalOptions="&lt;?ICLPrjArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot; /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;scenery_common.h&quot; /Fp&quot;Debug/scenery_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/scenery_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;">
-				<IntelOptions 
-					Optimization="0"
-					MinimalRebuild="1"
-					BasicRuntimeChecks="3"
-					RuntimeLibrary="3"
-					DefaultCharIsUnsigned="1"
-					TreatWChar_tAsBuiltInType="1"
-					ForceConformanceInForLoopScope="1"
-					RuntimeTypeInfo="1"
-					AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;scenery_common.h&quot; /Fp&quot;Debug/scenery_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/scenery_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"
-					MSOriginalAdditionalOptions="&lt;?ICLPrjArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot; /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;scenery_common.h&quot; /Fp&quot;Debug/scenery_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/scenery_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;"/>
-			</Tool>
-			<Tool 
-				Name="VCCustomBuildTool"/>
-			<Tool 
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
 				Name="VCLinkerTool"
+				AdditionalOptions=""
 				OutputFile="$(OutDir)/scenery_d.pyd"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\bin"
-				GenerateDebugInformation="TRUE"
+				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
 				ImportLibrary="$(OutDir)/scenery.lib"
 				TargetMachine="1"
-				AdditionalOptions="&lt;?ICLPrjArgs?&gt; /NOLOGO /DLL /OUT:&quot;C:\temp\liar\src\..\bin/scenery_d.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\temp\liar\src\..\bin\scenery_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\temp\liar\src\..\bin/scenery.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;">
-				<IntelOptions 
-					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\temp\liar\src\..\bin/scenery_d.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\temp\liar\src\..\bin\scenery_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\temp\liar\src\..\bin/scenery.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
-					MSOriginalAdditionalOptions="&lt;?ICLPrjArgs?&gt; /NOLOGO /DLL /OUT:&quot;C:\temp\liar\src\..\bin/scenery_d.pyd&quot; /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\temp\liar\src\..\bin\scenery_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\temp\liar\src\..\bin/scenery.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;"/>
-			</Tool>
-			<Tool 
-				Name="VCMIDLTool"/>
-			<Tool 
-				Name="VCPostBuildEventTool"/>
-			<Tool 
-				Name="VCPreBuildEventTool"/>
-			<Tool 
-				Name="VCPreLinkEventTool"/>
-			<Tool 
-				Name="VCResourceCompilerTool"/>
-			<Tool 
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool 
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool 
-				Name="VCWebDeploymentTool"/>
-			<Tool 
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool 
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-			<IntelOptions 
-				CompilerName="1"/>
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
-		<Configuration 
+		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)..\bin"
 			IntermediateDirectory="Release"
 			ConfigurationType="2"
-			CharacterSet="2">
-			<Tool 
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions=""
 				Optimization="3"
-				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="TRUE"
+				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				OmitFramePointers="TRUE"
-				EnableFiberSafeOptimizations="TRUE"
-				OptimizeForProcessor="2"
-				OptimizeForWindowsApplication="TRUE"
+				OmitFramePointers="true"
+				EnableFiberSafeOptimizations="true"
 				PreprocessorDefinitions="LIAR_SCENERY_BUILD_DLL;WIN32;NDEBUG;_USRDLL"
 				RuntimeLibrary="2"
-				DefaultCharIsUnsigned="TRUE"
-				TreatWChar_tAsBuiltInType="TRUE"
-				ForceConformanceInForLoopScope="TRUE"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="3"
+				DefaultCharIsUnsigned="true"
+				TreatWChar_tAsBuiltInType="true"
+				ForceConformanceInForLoopScope="true"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="scenery_common.h"
 				ProgramDataBaseFileName="$(IntDir)/$(TargetName).pdb"
 				BrowseInformation="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
-				AdditionalOptions="&lt;?ICLPrjArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot; /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;scenery_common.h&quot; /Fp&quot;Release/scenery.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/scenery.pdb&quot; /Gd /TP &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;">
-				<IntelOptions 
-					Optimization="4"
-					GlobalOptimizations="1"
-					InlineFunctionExpansion="2"
-					EnableIntrinsicFunctions="1"
-					FavorSizeOrSpeed="1"
-					OmitFramePointers="1"
-					EnableFiberSafeOptimizations="1"
-					OptimizeForProcessor="3"
-					OptimizeForWindowsApplication="1"
-					Parallelization="1"
-					RuntimeLibrary="2"
-					DefaultCharIsUnsigned="1"
-					TreatWChar_tAsBuiltInType="1"
-					ForceConformanceInForLoopScope="1"
-					RuntimeTypeInfo="1"
-					AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;scenery_common.h&quot; /Fp&quot;Release/scenery.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/scenery.pdb&quot; /Gd /TP"
-					MSOriginalAdditionalOptions="&lt;?ICLPrjArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot; /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;scenery_common.h&quot; /Fp&quot;Release/scenery.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/scenery.pdb&quot; /Gd /TP &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;"/>
-			</Tool>
-			<Tool 
-				Name="VCCustomBuildTool"/>
-			<Tool 
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
 				Name="VCLinkerTool"
+				AdditionalOptions=""
 				OutputFile="$(OutDir)/scenery.pyd"
 				LinkIncremental="1"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\bin"
-				GenerateDebugInformation="TRUE"
+				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				ImportLibrary="$(OutDir)/scenery.lib"
 				TargetMachine="1"
-				AdditionalOptions="&lt;?ICLPrjArgs?&gt; /NOLOGO /DLL /OUT:&quot;C:\temp\liar\src\..\bin/scenery.pyd&quot; /INCREMENTAL:NO /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\temp\liar\src\..\bin\scenery.pdb&quot; /OPT:REF /OPT:ICF /TLBID:1 /IMPLIB:&quot;C:\temp\liar\src\..\bin/scenery.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;">
-				<IntelOptions 
-					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\temp\liar\src\..\bin/scenery.pyd&quot; /INCREMENTAL:NO /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\temp\liar\src\..\bin\scenery.pdb&quot; /OPT:REF /OPT:ICF /TLBID:1 /IMPLIB:&quot;C:\temp\liar\src\..\bin/scenery.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
-					MSOriginalAdditionalOptions="&lt;?ICLPrjArgs?&gt; /NOLOGO /DLL /OUT:&quot;C:\temp\liar\src\..\bin/scenery.pyd&quot; /INCREMENTAL:NO /LIBPATH:&quot;..\..\bin&quot; /DEBUG /PDB:&quot;C:\temp\liar\src\..\bin\scenery.pdb&quot; /OPT:REF /OPT:ICF /TLBID:1 /IMPLIB:&quot;C:\temp\liar\src\..\bin/scenery.lib&quot; /MACHINE:IX86  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;"/>
-			</Tool>
-			<Tool 
-				Name="VCMIDLTool"/>
-			<Tool 
-				Name="VCPostBuildEventTool"/>
-			<Tool 
-				Name="VCPreBuildEventTool"/>
-			<Tool 
-				Name="VCPreLinkEventTool"/>
-			<Tool 
-				Name="VCResourceCompilerTool"/>
-			<Tool 
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool 
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool 
-				Name="VCWebDeploymentTool"/>
-			<Tool 
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool 
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-			<IntelOptions 
-				CompilerName="1"/>
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
 	</References>
 	<Files>
-		<Filter 
+		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
-			<File 
-				RelativePath=".\aabb_tree.cpp">
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
+			<File
+				RelativePath=".\aabb_tree.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\csg.cpp">
+			<File
+				RelativePath=".\csg.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\light_area.cpp">
+			<File
+				RelativePath=".\light_area.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\light_directional.cpp">
+			<File
+				RelativePath=".\light_directional.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\light_point.cpp">
-				<FileConfiguration 
-					Name="Debug|Win32">
-					<Tool 
-						Name="VCCLCompilerTool"
-						AdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;scenery_common.h&quot; /Fp&quot;Debug/scenery_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/scenery_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;">
-						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;scenery_common.h&quot; /Fp&quot;Debug/scenery_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/scenery_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"
-							MSOriginalAdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;scenery_common.h&quot; /Fp&quot;Debug/scenery_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/scenery_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;"/>
-					</Tool>
-				</FileConfiguration>
-				<FileConfiguration 
-					Name="Release|Win32">
-					<Tool 
-						Name="VCCLCompilerTool"
-						AdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;scenery_common.h&quot; /Fp&quot;Release/scenery.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/scenery.pdb&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;">
-						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;scenery_common.h&quot; /Fp&quot;Release/scenery.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/scenery.pdb&quot; /Gd /TP"
-							MSOriginalAdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;scenery_common.h&quot; /Fp&quot;Release/scenery.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/scenery.pdb&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;"/>
-					</Tool>
-				</FileConfiguration>
+			<File
+				RelativePath=".\light_point.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\light_sky.cpp">
+			<File
+				RelativePath=".\light_sky.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\light_spot.cpp">
+			<File
+				RelativePath=".\light_spot.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\list.cpp">
-				<FileConfiguration 
-					Name="Debug|Win32">
-					<Tool 
-						Name="VCCLCompilerTool"
-						AdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;scenery_common.h&quot; /Fp&quot;Debug/scenery_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/scenery_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;">
-						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;scenery_common.h&quot; /Fp&quot;Debug/scenery_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/scenery_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"
-							MSOriginalAdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;scenery_common.h&quot; /Fp&quot;Debug/scenery_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/scenery_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;"/>
-					</Tool>
-				</FileConfiguration>
-				<FileConfiguration 
-					Name="Release|Win32">
-					<Tool 
-						Name="VCCLCompilerTool"
-						AdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;scenery_common.h&quot; /Fp&quot;Release/scenery.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/scenery.pdb&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;">
-						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;scenery_common.h&quot; /Fp&quot;Release/scenery.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/scenery.pdb&quot; /Gd /TP"
-							MSOriginalAdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;scenery_common.h&quot; /Fp&quot;Release/scenery.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/scenery.pdb&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;"/>
-					</Tool>
-				</FileConfiguration>
+			<File
+				RelativePath=".\list.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\motion_translation.cpp">
+			<File
+				RelativePath=".\motion_translation.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\parallelogram.cpp">
+			<File
+				RelativePath=".\parallelogram.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\plane.cpp">
+			<File
+				RelativePath=".\plane.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\scenery_common.cpp">
-				<FileConfiguration 
-					Name="Debug|Win32">
-					<Tool 
+			<File
+				RelativePath=".\scenery_common.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"
-						AdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;scenery_common.h&quot; /Fp&quot;Debug/scenery_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/scenery_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;">
-						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;scenery_common.h&quot; /Fp&quot;Debug/scenery_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/scenery_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"
-							MSOriginalAdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;scenery_common.h&quot; /Fp&quot;Debug/scenery_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/scenery_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;"/>
-					</Tool>
+					/>
 				</FileConfiguration>
-				<FileConfiguration 
-					Name="Release|Win32">
-					<Tool 
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"
-						AdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;scenery_common.h&quot; /Fp&quot;Release/scenery.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/scenery.pdb&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;">
-						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;scenery_common.h&quot; /Fp&quot;Release/scenery.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/scenery.pdb&quot; /Gd /TP"
-							MSOriginalAdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_SCENERY_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;scenery_common.h&quot; /Fp&quot;Release/scenery.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/scenery.pdb&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;"/>
-					</Tool>
+					/>
 				</FileConfiguration>
 			</File>
-			<File 
-				RelativePath=".\scenery_init.cpp">
+			<File
+				RelativePath=".\scenery_init.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\sky.cpp">
+			<File
+				RelativePath=".\sky.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\sphere.cpp">
+			<File
+				RelativePath=".\sphere.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\transformation.cpp">
+			<File
+				RelativePath=".\transformation.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\translation.cpp">
+			<File
+				RelativePath=".\translation.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\triangle.cpp">
+			<File
+				RelativePath=".\triangle.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\triangle_mesh.cpp">
+			<File
+				RelativePath=".\triangle_mesh.cpp"
+				>
 			</File>
 		</Filter>
-		<Filter 
+		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
-			<File 
-				RelativePath=".\aabb_tree.h">
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
+			<File
+				RelativePath=".\aabb_tree.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\csg.h">
+			<File
+				RelativePath=".\csg.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\light_area.h">
+			<File
+				RelativePath=".\light_area.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\light_directional.h">
+			<File
+				RelativePath=".\light_directional.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\light_point.h">
+			<File
+				RelativePath=".\light_point.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\light_sky.h">
+			<File
+				RelativePath=".\light_sky.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\light_spot.h">
+			<File
+				RelativePath=".\light_spot.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\list.h">
+			<File
+				RelativePath=".\list.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\motion_translation.h">
+			<File
+				RelativePath=".\motion_translation.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\parallelogram.h">
+			<File
+				RelativePath=".\parallelogram.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\plane.h">
+			<File
+				RelativePath=".\plane.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\scenery_common.h">
+			<File
+				RelativePath=".\scenery_common.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\sky.h">
+			<File
+				RelativePath=".\sky.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\sphere.h">
+			<File
+				RelativePath=".\sphere.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\transformation.h">
+			<File
+				RelativePath=".\transformation.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\translation.h">
+			<File
+				RelativePath=".\translation.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\triangle.h">
+			<File
+				RelativePath=".\triangle.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\triangle_mesh.h">
+			<File
+				RelativePath=".\triangle_mesh.h"
+				>
 			</File>
 		</Filter>
-		<Filter 
+		<Filter
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}">
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
 		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
 </VisualStudioProject>
-

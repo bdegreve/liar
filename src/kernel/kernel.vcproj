@@ -1,410 +1,426 @@
 <?xml version="1.0" encoding="Windows-1252"?>
-<VisualStudioProject 
+<VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="8.00"
 	Name="kernel"
 	ProjectGUID="{7EDECEE0-95E0-4A42-ABFB-FF389886DA2F}"
-	Keyword="Win32Proj">
+	Keyword="Win32Proj"
+	>
 	<Platforms>
-		<Platform 
-			Name="Win32"/>
+		<Platform
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
-		<Configuration 
+		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)..\bin"
 			IntermediateDirectory="Debug"
 			ConfigurationType="2"
-			CharacterSet="2">
-			<Tool 
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				OmitFramePointers="FALSE"
+				OmitFramePointers="false"
 				PreprocessorDefinitions="LIAR_KERNEL_BUILD_DLL;WIN32;_DEBUG;_USRDLL"
-				MinimalRebuild="TRUE"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				DefaultCharIsUnsigned="TRUE"
-				TreatWChar_tAsBuiltInType="TRUE"
-				ForceConformanceInForLoopScope="TRUE"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="3"
+				DefaultCharIsUnsigned="true"
+				TreatWChar_tAsBuiltInType="true"
+				ForceConformanceInForLoopScope="true"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="kernel_common.h"
 				ProgramDataBaseFileName="$(IntDir)/$(TargetName).pdb"
 				BrowseInformation="1"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
-				AdditionalOptions="&lt;?ICLPrjArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot; /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;kernel_common.h&quot; /Fp&quot;Debug/kernel_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/kernel_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;">
-				<IntelOptions 
-					Optimization="0"
-					OmitFramePointers="0"
-					MinimalRebuild="1"
-					BasicRuntimeChecks="3"
-					RuntimeLibrary="3"
-					DefaultCharIsUnsigned="1"
-					TreatWChar_tAsBuiltInType="1"
-					ForceConformanceInForLoopScope="1"
-					RuntimeTypeInfo="1"
-					AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;kernel_common.h&quot; /Fp&quot;Debug/kernel_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/kernel_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"
-					MSOriginalAdditionalOptions="&lt;?ICLPrjArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot; /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;kernel_common.h&quot; /Fp&quot;Debug/kernel_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/kernel_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;"/>
-			</Tool>
-			<Tool 
-				Name="VCCustomBuildTool"/>
-			<Tool 
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/$(ProjectName)_d.pyd"
-				SuppressStartupBanner="TRUE"
-				GenerateDebugInformation="TRUE"
+				SuppressStartupBanner="true"
+				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
-				AdditionalOptions="&lt;?ICLPrjArgs?&gt; /NOLOGO /DLL /OUT:&quot;C:\temp\liar\src\..\bin/kernel_d.pyd&quot; /DEBUG /PDB:&quot;C:\temp\liar\src\..\bin\kernel_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\temp\liar\src\..\bin/kernel_d.lib&quot;  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;">
-				<IntelOptions 
-					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\temp\liar\src\..\bin/kernel_d.pyd&quot; /DEBUG /PDB:&quot;C:\temp\liar\src\..\bin\kernel_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\temp\liar\src\..\bin/kernel_d.lib&quot;  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
-					MSOriginalAdditionalOptions="&lt;?ICLPrjArgs?&gt; /NOLOGO /DLL /OUT:&quot;C:\temp\liar\src\..\bin/kernel_d.pyd&quot; /DEBUG /PDB:&quot;C:\temp\liar\src\..\bin\kernel_d.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\temp\liar\src\..\bin/kernel_d.lib&quot;  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;"/>
-			</Tool>
-			<Tool 
-				Name="VCMIDLTool"/>
-			<Tool 
-				Name="VCPostBuildEventTool"/>
-			<Tool 
-				Name="VCPreBuildEventTool"/>
-			<Tool 
-				Name="VCPreLinkEventTool"/>
-			<Tool 
-				Name="VCResourceCompilerTool"/>
-			<Tool 
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool 
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool 
-				Name="VCWebDeploymentTool"/>
-			<Tool 
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool 
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-			<IntelOptions 
-				CompilerName="1"/>
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
-		<Configuration 
+		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)..\bin"
 			IntermediateDirectory="Release"
 			ConfigurationType="2"
-			CharacterSet="2">
-			<Tool 
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="3"
-				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="TRUE"
+				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				OmitFramePointers="TRUE"
-				EnableFiberSafeOptimizations="TRUE"
-				OptimizeForProcessor="2"
-				OptimizeForWindowsApplication="TRUE"
+				OmitFramePointers="true"
+				EnableFiberSafeOptimizations="true"
 				PreprocessorDefinitions="LIAR_KERNEL_BUILD_DLL;WIN32;NDEBUG;_USRDLL"
 				RuntimeLibrary="2"
-				DefaultCharIsUnsigned="TRUE"
-				TreatWChar_tAsBuiltInType="TRUE"
-				ForceConformanceInForLoopScope="TRUE"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="3"
+				DefaultCharIsUnsigned="true"
+				TreatWChar_tAsBuiltInType="true"
+				ForceConformanceInForLoopScope="true"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="kernel_common.h"
 				ProgramDataBaseFileName="$(IntDir)/$(TargetName).pdb"
 				BrowseInformation="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
-				AdditionalOptions="&lt;?ICLPrjArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot; /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;kernel_common.h&quot; /Fp&quot;Release/kernel.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/kernel.pdb&quot; /Gd /TP &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;">
-				<IntelOptions 
-					Optimization="4"
-					GlobalOptimizations="1"
-					InlineFunctionExpansion="2"
-					EnableIntrinsicFunctions="1"
-					FavorSizeOrSpeed="1"
-					OmitFramePointers="1"
-					EnableFiberSafeOptimizations="1"
-					OptimizeForProcessor="3"
-					OptimizeForWindowsApplication="1"
-					Parallelization="1"
-					RuntimeLibrary="2"
-					DefaultCharIsUnsigned="1"
-					TreatWChar_tAsBuiltInType="1"
-					ForceConformanceInForLoopScope="1"
-					RuntimeTypeInfo="1"
-					AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;kernel_common.h&quot; /Fp&quot;Release/kernel.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/kernel.pdb&quot; /Gd /TP"
-					MSOriginalAdditionalOptions="&lt;?ICLPrjArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot; /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;kernel_common.h&quot; /Fp&quot;Release/kernel.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/kernel.pdb&quot; /Gd /TP &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;"/>
-			</Tool>
-			<Tool 
-				Name="VCCustomBuildTool"/>
-			<Tool 
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/$(ProjectName).pyd"
-				SuppressStartupBanner="TRUE"
-				GenerateDebugInformation="TRUE"
+				SuppressStartupBanner="true"
+				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
-				AdditionalOptions="&lt;?ICLPrjArgs?&gt; /NOLOGO /DLL /OUT:&quot;C:\temp\liar\src\..\bin/kernel.pyd&quot; /DEBUG /PDB:&quot;C:\temp\liar\src\..\bin\kernel.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\temp\liar\src\..\bin/kernel.lib&quot;  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;">
-				<IntelOptions 
-					AllOptions="/NOLOGO /DLL /OUT:&quot;C:\temp\liar\src\..\bin/kernel.pyd&quot; /DEBUG /PDB:&quot;C:\temp\liar\src\..\bin\kernel.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\temp\liar\src\..\bin/kernel.lib&quot;  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"
-					MSOriginalAdditionalOptions="&lt;?ICLPrjArgs?&gt; /NOLOGO /DLL /OUT:&quot;C:\temp\liar\src\..\bin/kernel.pyd&quot; /DEBUG /PDB:&quot;C:\temp\liar\src\..\bin\kernel.pdb&quot; /TLBID:1 /IMPLIB:&quot;C:\temp\liar\src\..\bin/kernel.lib&quot;  kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib &lt;?/ICLPrjArgs?&gt; &lt;?IVCSpawnPrjArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnPrjArgs?&gt;"/>
-			</Tool>
-			<Tool 
-				Name="VCMIDLTool"/>
-			<Tool 
-				Name="VCPostBuildEventTool"/>
-			<Tool 
-				Name="VCPreBuildEventTool"/>
-			<Tool 
-				Name="VCPreLinkEventTool"/>
-			<Tool 
-				Name="VCResourceCompilerTool"/>
-			<Tool 
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool 
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool 
-				Name="VCWebDeploymentTool"/>
-			<Tool 
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool 
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-			<IntelOptions 
-				CompilerName="1"/>
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
 	</References>
 	<Files>
-		<Filter 
+		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
-			<File 
-				RelativePath=".\attenuation.cpp">
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
+			<File
+				RelativePath=".\attenuation.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\bounded_ray.cpp">
+			<File
+				RelativePath=".\bounded_ray.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\camera.cpp">
+			<File
+				RelativePath=".\camera.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\differential_ray.cpp">
+			<File
+				RelativePath=".\differential_ray.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\intersection.cpp">
+			<File
+				RelativePath=".\intersection.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\intersection_context.cpp">
+			<File
+				RelativePath=".\intersection_context.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\kernel_common.cpp">
-				<FileConfiguration 
-					Name="Debug|Win32">
-					<Tool 
+			<File
+				RelativePath=".\kernel_common.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"
-						AdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;kernel_common.h&quot; /Fp&quot;Debug/kernel_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/kernel_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;">
-						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;kernel_common.h&quot; /Fp&quot;Debug/kernel_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/kernel_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"
-							MSOriginalAdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;kernel_common.h&quot; /Fp&quot;Debug/kernel_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/kernel_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;"/>
-					</Tool>
+					/>
 				</FileConfiguration>
-				<FileConfiguration 
-					Name="Release|Win32">
-					<Tool 
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="1"
-						AdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;kernel_common.h&quot; /Fp&quot;Release/kernel.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/kernel.pdb&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;">
-						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;kernel_common.h&quot; /Fp&quot;Release/kernel.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/kernel.pdb&quot; /Gd /TP"
-							MSOriginalAdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yc&quot;kernel_common.h&quot; /Fp&quot;Release/kernel.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/kernel.pdb&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;"/>
-					</Tool>
+					/>
 				</FileConfiguration>
 			</File>
-			<File 
-				RelativePath=".\kernel_init.cpp">
+			<File
+				RelativePath=".\kernel_init.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\light_context.cpp">
+			<File
+				RelativePath=".\light_context.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\light_sample.cpp">
+			<File
+				RelativePath=".\light_sample.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\medium.cpp">
+			<File
+				RelativePath=".\medium.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\output_sample.cpp">
+			<File
+				RelativePath=".\output_sample.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\ray_tracer.cpp">
+			<File
+				RelativePath=".\ray_tracer.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\render_engine.cpp">
+			<File
+				RelativePath=".\render_engine.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\render_target.cpp">
+			<File
+				RelativePath=".\render_target.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\rgb_space.cpp">
+			<File
+				RelativePath=".\rgb_space.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\sample.cpp">
+			<File
+				RelativePath=".\sample.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\sample_transformations.cpp">
+			<File
+				RelativePath=".\sampler.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\sampler.cpp">
+			<File
+				RelativePath=".\scene_light.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\scene_light.cpp">
+			<File
+				RelativePath=".\scene_object.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\scene_object.cpp">
+			<File
+				RelativePath=".\scene_object.inl"
+				>
 			</File>
-			<File 
-				RelativePath=".\scene_object.inl">
+			<File
+				RelativePath=".\shader.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\shader.cpp">
+			<File
+				RelativePath=".\spectrum.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\spectrum.cpp">
-				<FileConfiguration 
-					Name="Debug|Win32">
-					<Tool 
-						Name="VCCLCompilerTool"
-						AdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;kernel_common.h&quot; /Fp&quot;Debug/kernel_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/kernel_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;">
-						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;kernel_common.h&quot; /Fp&quot;Debug/kernel_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/kernel_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"
-							MSOriginalAdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;kernel_common.h&quot; /Fp&quot;Debug/kernel_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/kernel_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;"/>
-					</Tool>
-				</FileConfiguration>
-				<FileConfiguration 
-					Name="Release|Win32">
-					<Tool 
-						Name="VCCLCompilerTool"
-						AdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;kernel_common.h&quot; /Fp&quot;Release/kernel.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/kernel.pdb&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;">
-						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;kernel_common.h&quot; /Fp&quot;Release/kernel.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/kernel.pdb&quot; /Gd /TP"
-							MSOriginalAdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;kernel_common.h&quot; /Fp&quot;Release/kernel.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/kernel.pdb&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;"/>
-					</Tool>
-				</FileConfiguration>
+			<File
+				RelativePath=".\spectrum.inl"
+				>
 			</File>
-			<File 
-				RelativePath=".\spectrum.inl">
+			<File
+				RelativePath=".\spectrum_format.cpp"
+				>
 			</File>
-			<File 
-				RelativePath=".\spectrum_format.cpp">
-			</File>
-			<File 
-				RelativePath=".\texture.cpp">
-				<FileConfiguration 
-					Name="Debug|Win32">
-					<Tool 
-						Name="VCCLCompilerTool"
-						AdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;kernel_common.h&quot; /Fp&quot;Debug/kernel_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/kernel_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;">
-						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;kernel_common.h&quot; /Fp&quot;Debug/kernel_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/kernel_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP"
-							MSOriginalAdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Od /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;_DEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /Gm /EHsc /RTC1 /MDd /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;kernel_common.h&quot; /Fp&quot;Debug/kernel_d.pch&quot; /Fo&quot;Debug/&quot; /Fd&quot;Debug/kernel_d.pdb&quot; /FR&quot;Debug/&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;"/>
-					</Tool>
-				</FileConfiguration>
-				<FileConfiguration 
-					Name="Release|Win32">
-					<Tool 
-						Name="VCCLCompilerTool"
-						AdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;kernel_common.h&quot; /Fp&quot;Release/kernel.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/kernel.pdb&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;">
-						<IntelOptions 
-							AllOptions="/c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;kernel_common.h&quot; /Fp&quot;Release/kernel.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/kernel.pdb&quot; /Gd /TP"
-							MSOriginalAdditionalOptions=" &lt;?ICLFileArgs?&gt; /Qvc7.1 /Qlocation,link,&quot;$(VCInstallDir)bin&quot;  /c  /Zi /nologo /W3 /Wp64 /Ox /Og /Ob2 /Oi /Ot /Oy /GT /G7 /GA /Qparallel /D &quot;LIAR_KERNEL_BUILD_DLL&quot; /D &quot;WIN32&quot; /D &quot;NDEBUG&quot; /D &quot;_USRDLL&quot; /D &quot;_WINDLL&quot; /D &quot;_MBCS&quot; /FD /EHsc /MD /J /Zc:wchar_t /Zc:forScope /GR /Yu&quot;kernel_common.h&quot; /Fp&quot;Release/kernel.pch&quot; /Fo&quot;Release/&quot; /Fd&quot;Release/kernel.pdb&quot; /Gd /TP &lt;?/ICLFileArgs?&gt; &lt;?IVCSpawnFileArgs?&gt; #$UseNonIntelTool #$BinPath:&quot;C:\Program Files\Intel\Compiler70\ia32\bin;C:\Program Files\Common Files\Intel\Shared Files\ia32\bin;$(VSInstallDir)Common7\IDE&quot; #$LibPath:&quot;C:\Program Files\Intel\Compiler70\ia32\lib;C:\Program Files\Common Files\Intel\Shared Files\ia32\lib&quot; #$IncPath:&quot;C:\Program Files\Intel\Compiler70\ia32\include&quot; &lt;?/IVCSpawnFileArgs?&gt;"/>
-					</Tool>
-				</FileConfiguration>
+			<File
+				RelativePath=".\texture.cpp"
+				>
 			</File>
 		</Filter>
-		<Filter 
+		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
-			<File 
-				RelativePath=".\attenuation.h">
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
+			<File
+				RelativePath=".\attenuation.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\bounded_ray.h">
+			<File
+				RelativePath=".\bounded_ray.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\camera.h">
+			<File
+				RelativePath=".\camera.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\config.h">
+			<File
+				RelativePath=".\config.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\differential_ray.h">
+			<File
+				RelativePath=".\differential_ray.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\intersection.h">
+			<File
+				RelativePath=".\intersection.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\intersection_context.h">
+			<File
+				RelativePath=".\intersection_context.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\kernel_common.h">
+			<File
+				RelativePath=".\kernel_common.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\light_context.h">
+			<File
+				RelativePath=".\light_context.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\light_sample.h">
+			<File
+				RelativePath=".\light_sample.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\medium.h">
+			<File
+				RelativePath=".\medium.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\output_sample.h">
+			<File
+				RelativePath=".\output_sample.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\ray_tracer.h">
+			<File
+				RelativePath=".\ray_tracer.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\render_engine.h">
+			<File
+				RelativePath=".\render_engine.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\render_target.h">
+			<File
+				RelativePath=".\render_target.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\rgb_space.h">
+			<File
+				RelativePath=".\rgb_space.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\sample.h">
+			<File
+				RelativePath=".\sample.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\sampler.h">
+			<File
+				RelativePath=".\sampler.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\scene_light.h">
+			<File
+				RelativePath=".\scene_light.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\scene_object.h">
+			<File
+				RelativePath=".\scene_object.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\shader.h">
+			<File
+				RelativePath=".\shader.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\solid_event.h">
+			<File
+				RelativePath=".\solid_event.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\spectrum.h">
+			<File
+				RelativePath=".\spectrum.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\texture.h">
+			<File
+				RelativePath=".\texture.h"
+				>
 			</File>
-			<File 
-				RelativePath=".\time_period.h">
+			<File
+				RelativePath=".\time_period.h"
+				>
 			</File>
 		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
 </VisualStudioProject>
-

@@ -143,7 +143,7 @@ void Display::doBeginRender()
 	}
 	
 	displayLoop_.reset(
-		util::threadFun(util::makeCallback(this, displayLoop), util::threadJoinable));
+		util::threadFun(util::makeCallback(this, &Display::displayLoop), util::threadJoinable));
 	displayLoop_->run();
 }
 

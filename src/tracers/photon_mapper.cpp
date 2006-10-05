@@ -55,6 +55,12 @@ PhotonMapper::PhotonMapper():
 	isRayTracingDirect_(true),
 	photonNeighbourhood_(1)
 {
+	for (int i = 0; i < numMapTypes; ++i)
+	{
+		estimationRadius_[i] = 1;
+		requestedMapSize_[i] = 100000;
+		estimationSize_[i] = 100;
+	}
 }
 
 

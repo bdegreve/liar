@@ -86,8 +86,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
       data_files = [('lib/site-packages/liar',[r'..\..\bin\%s%s.pyd' % (x, pyDebug) for x in modules]),
                     ('lib/site-packages/liar',[r'..\..\bin\%s%s.%s' % (x, pyDebug, y) for x in modules for y in pdb]),
                     ('lib/site-packages/liar',[r'..\..\doc\gpl.txt']),
-                    ('lib/site-packages/liar',[r'%sbin\lass_win32_vc71%s.dll' % (lassRoot, pyDebug)]),
-                    ('lib/site-packages/liar',[r'%sbin\lass_win32_vc71%s.%s' % (lassRoot, pyDebug, y) for y in pdb]),
+                    ('lib/site-packages/liar',[r'%sbin\lass_win32_vc8%s.dll' % (lassRoot, pyDebug)]),
+                    ('lib/site-packages/liar',[r'%sbin\lass_win32_vc8%s.%s' % (lassRoot, pyDebug, y) for y in pdb]),
                     ('lib/site-packages/liar',['%smsvcr71%s.dll' % (systemRoot, winDebug), '%smsvcp71%s.dll' % (systemRoot, winDebug)]),
                     ]
       )
