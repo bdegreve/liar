@@ -51,8 +51,18 @@ public:
 
 private:
 
-	const Spectrum doShade(const Sample& sample,	const DifferentialRay& primaryRay, 
-		const Intersection& intersection, const IntersectionContext& context) const;
+	virtual const Spectrum doEmission(const Sample& sample, const IntersectionContext& context,
+		const TVector3D& omegaOut) const;
+
+	virtual void doBsdf(
+		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
+		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn, 
+		Spectrum* firstValue, TScalar* firstPdf) const;
+
+	virtual void doSampleBsdf(
+		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut, 
+		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
+		TVector3D* firstOmegaIn, Spectrum* firstValue, TScalar* firstPdf) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);

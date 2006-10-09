@@ -277,7 +277,7 @@ void RenderEngine::render()
 void RenderEngine::writeRender(const OutputSample* first, const OutputSample* last, 
 		Progress& ioProgress)
 {
-	LASS_LOCK(mutex_)
+	LASS_LOCK(lock_)
 	{
 		renderTarget_->writeRender(first, last);
 		ioProgress += static_cast<unsigned>(last - first);
@@ -366,7 +366,7 @@ void RenderEngine::Consumer::operator()(const Task& iTask)
 				outputSamples[outputIndex++] = OutputSample(sample, radiance);
 				if (outputIndex == outputSize)
 				{
-					engine_->writeRender(&outputSamples[0], &outputSamples[outputSize], *progress_);
+					engine_->writeRender(&outputSamples[0], &outputSamples[0] + outputSize, *progress_);
 					outputIndex = 0;
 				}
 			}

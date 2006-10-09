@@ -58,6 +58,9 @@ public:
 	const unsigned maxNumberOfPhotons() const;
 	void setMaxNumberOfPhotons(unsigned maxNumberOfPhotons);
 
+	const unsigned numFinalGatherRays() const;
+	void setNumFinalGatherRays(unsigned numFinalGatherRays);
+
 	const bool isVisualizingPhotonMap() const;
 	void setVisualizePhotonMap(bool enabled = true);
 
@@ -125,9 +128,9 @@ private:
 		TRandomSecondary::TValue iSeed);
 	void tracePhoton(const Sample& sample, const Spectrum& power, const BoundedRay& ray,
 		unsigned geneneration, TUniformSecondary& uniform);
-	const Spectrum estimateIrradiance(const IntersectionContext& context) const;
+	const Spectrum estimateIrradiance(const TPoint3D& point, const TVector3D& normal) const;
 	const Spectrum estimateRadiance(const Sample& sample, const IntersectionContext& context, 
-		const TVector3D& omegaOut) const;
+		const TPoint3D& point, const TVector3D& omegaOut) const;
 
 	TPhotonBuffer photonBuffer_[numMapTypes];
 	TPhotonMap photonMap_[numMapTypes];
@@ -136,6 +139,8 @@ private:
 	unsigned requestedMapSize_[numMapTypes];
 	unsigned estimationSize_[numMapTypes];
 	unsigned maxNumberOfPhotons_;
+	unsigned numFinalGatherRays_;
+	int idFinalGatherSamples_;
 	bool isVisualizingPhotonMap_;
 	bool isRayTracingDirect_;
 

@@ -129,7 +129,7 @@ private:
     TRenderTargetPtr renderTarget_;
     TSamplerPtr sampler_;
     TSceneObjectPtr scene_;
-	util::CriticalSection mutex_;
+	util::Semaphore lock_;
 	util::Condition signal_;
 	unsigned numberOfThreads_;
 	bool isDirty_;

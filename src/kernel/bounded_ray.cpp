@@ -49,7 +49,7 @@ BoundedRay::BoundedRay(const TRay3D& unboundedRay, TScalar nearLimit, TScalar fa
     nearLimit_(nearLimit),
     farLimit_(farLimit)
 {
-	LASS_ASSERT(nearLimit_ < farLimit_);
+	LASS_ASSERT(nearLimit_ <= farLimit_);
 }
 
 

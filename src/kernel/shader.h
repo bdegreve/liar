@@ -57,10 +57,12 @@ public:
 
 	enum CapsFlags
 	{
-		capsReflection = 0x01,
-		capsTransmission = 0x02,
-		capsDiffuse = 0x04,
-		capsSpecular = 0x08,
+		capsNone = 0x00,
+		capsEmission = 0x01,
+		capsReflection = 0x02,
+		capsTransmission = 0x04,
+		capsDiffuse = 0x08,
+		capsSpecular = 0x10,
 	};
 
     virtual ~Shader();

@@ -38,6 +38,8 @@
 #include "solid_event.h"
 #include <lass/util/non_copyable.h>
 #include <lass/num/safe_bool.h>
+#include <lass/util/allocator.h>
+#include <lass/stde/lass_allocator.h>
 
 namespace liar
 {
@@ -91,8 +93,18 @@ private:
 		{
 		}
 	};
-		
-	typedef std::vector<IntersectionInfo> TIntersectionStack;
+	
+	typedef stde::lass_allocator<
+			IntersectionInfo,
+			util::AllocatorSingleton<
+				util::AllocatorVariableHybrid<
+					util::AllocatorFreeList<>, 256
+				>
+			>
+		>
+		TIntersectionInfoAllocator;
+
+	typedef std::vector<IntersectionInfo, TIntersectionInfoAllocator> TIntersectionStack;
 
     void descend() const;
     void ascend() const;

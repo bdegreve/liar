@@ -24,13 +24,13 @@ def getLights():
 	light = scenery.LightArea(surface)
 	light.radiance = rgb(I, I, I)
 	light.numberOfEmissionSamples = 16
-	#light.shader = shaders.Lambert(textures.Constant(light.radiance))
+	light.shader = shaders.Unshaded(textures.Constant(light.radiance))
 	return [light]
 
 def getWalls():
-	white = shaders.Lambert(textures.Constant(rgb(0.5, 0.5, 0.5)))
-	red = shaders.Lambert(textures.Constant(rgb(1.0, 0.5, 0.5)))
-	green = shaders.Lambert(textures.Constant(rgb(0.5, 1.0, 0.5)))
+	white = shaders.Lambert(textures.Constant(rgb(1, 1, 1)))
+	red = shaders.Lambert(textures.Constant(rgb(1.0, 0.1, 0.1)))
+	green = shaders.Lambert(textures.Constant(rgb(0.1, 1.0, 0.1)))
 	
 	floor = scenery.Parallelogram(scale(0, 0, 559.2), scale(552.8, 0, 0), scale(0, 0, -559.2))
 	floor.shader = white

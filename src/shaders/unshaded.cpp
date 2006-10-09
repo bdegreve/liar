@@ -24,6 +24,7 @@
 #include "shaders_common.h"
 #include "unshaded.h"
 #include "../kernel/ray_tracer.h"
+#include <lass/num/distribution_transformations.h>
 
 namespace liar
 {
@@ -38,6 +39,7 @@ PY_CLASS_MEMBER_RW_DOC(Unshaded, "colour", colour, setColour, "texture")
 // --- public --------------------------------------------------------------------------------------
 
 Unshaded::Unshaded():
+	Shader(Shader::capsEmission),
 	colour_(Texture::white())
 {
 }
@@ -45,6 +47,7 @@ Unshaded::Unshaded():
 
 
 Unshaded::Unshaded(const TTexturePtr& iColour):
+	Shader(Shader::capsEmission),
 	colour_(iColour)
 {
 }
@@ -71,13 +74,42 @@ void Unshaded::setColour(const TTexturePtr& iColour)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum Unshaded::doShade(
-	const Sample& iSample,
-	const DifferentialRay& iPrimaryRay,
-	const Intersection& iIntersection,
-	const IntersectionContext& iContext) const
+const Spectrum Unshaded::doEmission(const Sample& sample, const IntersectionContext& context,
+		const TVector3D& omegaOut) const
 {
-	return colour_->lookUp(iSample, iContext);
+	return colour_->lookUp(sample, context);
+}
+
+
+
+void Unshaded::doBsdf(
+		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
+		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn,
+		Spectrum* firstValue, TScalar* firstPdf) const
+{
+	while (firstOmegaIn != lastOmegaIn)
+	{
+		*firstValue++ = Spectrum();
+		*firstPdf++ = 0;
+		++firstOmegaIn;
+	}
+}
+
+
+void Unshaded::doSampleBsdf(
+		const Sample& sample, const IntersectionContext& context, const TVector3D& dirIn,
+		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
+		TVector3D* firstDirOut, Spectrum* firstValue, TScalar* firstPdf) const
+{
+	const TScalar zSign = dirIn.z < 0 ? -1 : 1;
+	while (firstBsdfSample != lastBsdfSample)
+	{
+		TVector3D localDirOut = 
+			num::cosineHemisphere(*firstBsdfSample++, *firstPdf++).position();
+		localDirOut.z *= zSign;
+		*firstDirOut++ = localDirOut;
+		*firstValue++ = Spectrum();
+	}
 }
 
 

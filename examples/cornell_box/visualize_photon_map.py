@@ -6,10 +6,10 @@
 from liar import *
 import geometry
 
-if False:
+if True:
 	width = 800
 	height = 800
-	super_sampling = 9
+	super_sampling = 4
 else:
 	width = 320
 	height = 320
@@ -24,11 +24,12 @@ image = output.Image("visualize_photon_map.hdr", (width, height))
 
 photonMapper = tracers.PhotonMapper()
 photonMapper.maxNumberOfPhotons = 1000000
-photonMapper.setRequestedMapSize("global", 20000)
+photonMapper.setRequestedMapSize("global", 2000)
 photonMapper.setEstimationRadius("global", 0.05)
 photonMapper.setEstimationSize("global", 100)
-photonMapper.isVisualizingPhotonMap = False
-photonMapper.isRayTracingDirect = False
+photonMapper.isVisualizingPhotonMap = True
+photonMapper.isRayTracingDirect = True
+photonMapper.numFinalGatherRays = 0
 
 engine = RenderEngine()
 engine.tracer = photonMapper
@@ -36,5 +37,6 @@ engine.sampler = samplers.Stratifier((width, height), super_sampling)
 engine.scene = scenery.List(walls + blocks + lights)
 engine.camera = camera
 engine.target = image
+engine.numberOfThreads = 1
 engine.render()
 

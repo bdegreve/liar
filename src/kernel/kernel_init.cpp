@@ -41,6 +41,7 @@
 #include "texture.h"
 
 #include <lass/io/proxy_man.h>
+#include <lass/io/logger.h>
 #include <lass/stde/extended_string.h>
 #include <lass/util/process.h>
 
@@ -96,7 +97,6 @@ PY_MODULE_FUNCTION_QUALIFIED_4(kernel, rgb, Spectrum, TScalar, TScalar, TScalar,
 //PY_MODULE_FUNCTION_QUALIFIED_3(kernel, rgb, Spectrum, const ColorRGBA&, const TRgbSpacePtr&, const TSpectrumFormatPtr&)
 //PY_MODULE_FUNCTION_QUALIFIED_4(kernel, rgb, Spectrum, TScalar, TScalar, TScalar, const TSpectrumFormatPtr&)
 //PY_MODULE_FUNCTION_QUALIFIED_5(kernel, rgb, Spectrum, TScalar, TScalar, TScalar, const TRgbSpacePtr&, const TSpectrumFormatPtr&)
-
 
 extern "C"
 {

@@ -105,7 +105,7 @@ DirectLighting::doCastRay(const Sample& sample, const DifferentialRay& primaryRa
 					const TScalar weight = light->isDelta() ?
 						TNumTraits::one : powerHeuristic(1, lightPdf, 1, bsdfPdf);
 					result += bsdf * radiance * 
-						(weight * abs(dot(dirEye, dirLight)) / (n * lightPdf));
+						(weight * abs(dot(omegaIn.z)) / (n * lightPdf));
 				}
 				if (!light->isDelta())
 				{

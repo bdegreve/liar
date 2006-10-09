@@ -45,8 +45,9 @@
 				OmitFramePointers="false"
 				PreprocessorDefinitions="LIAR_SHADERS_BUILD_DLL;WIN32;_DEBUG;_USRDLL"
 				MinimalRebuild="true"
-				BasicRuntimeChecks="3"
+				BasicRuntimeChecks="0"
 				RuntimeLibrary="3"
+				BufferSecurityCheck="false"
 				DefaultCharIsUnsigned="true"
 				TreatWChar_tAsBuiltInType="true"
 				ForceConformanceInForLoopScope="true"
@@ -230,6 +231,10 @@
 				RelativePath=".\shaders_init.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\unshaded.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -250,6 +255,10 @@
 			</File>
 			<File
 				RelativePath=".\simple.h"
+				>
+			</File>
+			<File
+				RelativePath=".\unshaded.h"
 				>
 			</File>
 		</Filter>

@@ -169,7 +169,7 @@ void Sampler::sample(const TResolution& pixel, unsigned subPixel, const TimePeri
 		const unsigned offset = subSequenceOffset1D_[k];
 		const unsigned size = subSequenceSize1D_[k];
 		doSampleSubSequence1D(pixel, subPixel, &sample.subSequences1D_[offset],
-			&sample.subSequences1D_[offset + size]);
+			&sample.subSequences1D_[offset] + size);
 	}
 
 	sample.subSequences2D_.resize(totalSubSequenceSize2D_);
@@ -179,7 +179,7 @@ void Sampler::sample(const TResolution& pixel, unsigned subPixel, const TimePeri
 		const unsigned offset = subSequenceOffset2D_[k];
 		const unsigned size = subSequenceSize2D_[k];
 		doSampleSubSequence2D(pixel, subPixel, &sample.subSequences2D_[offset],
-			&sample.subSequences2D_[offset + size]);
+			&sample.subSequences2D_[offset] + size);
 	}
 }
 
