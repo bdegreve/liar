@@ -109,7 +109,8 @@ private:
 
 	typedef std::vector<TScalar> TLightCdf;
 	typedef num::RandomMT19937 TRandomPrimary;
-	typedef num::RandomParkMiller TRandomSecondary;
+	typedef num::RandomMT19937 TRandomSecondary;
+	//typedef num::RandomParkMiller TRandomSecondary;
 	typedef num::DistributionUniform<TScalar, TRandomPrimary> TUniformPrimary;
 	typedef num::DistributionUniform<TScalar, TRandomSecondary> TUniformSecondary;
 

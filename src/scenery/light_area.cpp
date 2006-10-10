@@ -24,6 +24,7 @@
 #include "scenery_common.h"
 #include "light_area.h"
 #include <lass/num/distribution_transformations.h>
+#include <lass/prim/impl/plane_3d_impl_detail.h>
 
 namespace liar
 {
@@ -185,45 +186,28 @@ const Spectrum LightArea::doSampleEmission(
 		const Sample& sample,
 		const TPoint2D& lightSample, 
 		const TPoint3D& target,
-		const TVector3D& iNormalTarget,
+		const TVector3D& normalTarget,
 		BoundedRay& shadowRay,
 		TScalar& pdf) const
 {
 	LASS_ASSERT(surface_);
 	TVector3D normalLight;
 	const TPoint3D pointLight = 
-		surface_->sampleSurface(lightSample, target, iNormalTarget, normalLight, pdf);
+		surface_->sampleSurface(lightSample, target, normalTarget, normalLight, pdf);
 
 	TVector3D toLight = pointLight - target;
-	const TScalar squaredDistance = toLight.squaredNorm();
-	const TScalar distance = num::sqrt(squaredDistance);
+	const TScalar distance = toLight.norm();
 	toLight /= distance;
 
-	const TScalar cosThetaTarget = dot(iNormalTarget, toLight);
-	if (cosThetaTarget <= TNumTraits::zero)
+	if ((dot(normalTarget, toLight) <= 0) || (isSingleSided_ && dot(normalLight, toLight) > 0))
 	{
-		pdf = TNumTraits::zero;
+		pdf = 0;
 		return Spectrum();
-	}
-	
-	TScalar cosThetaLight = -dot(normalLight, toLight);
-	if (cosThetaLight <= TNumTraits::zero)
-	{
-		if (isSingleSided_)
-		{
-			pdf = TNumTraits::zero;
-			return Spectrum();
-		}
-		else
-		{
-			cosThetaLight = -cosThetaLight;
-		}
 	}
 
 	shadowRay = BoundedRay(target, toLight, tolerance, distance, 
 		prim::IsAlreadyNormalized());
-	return radiance_;
-	//return radiance_ * (cosThetaLight / (attenuation_->attenuation(distance, squaredDistance)));
+	return radiance_ ;
 }
 
 
@@ -235,17 +219,31 @@ const Spectrum LightArea::doSampleEmission(const TPoint2D& sampleA, const TPoint
 	TScalar originPdf;
 	const TPoint3D origin = surface_->sampleSurface(sampleA, originNormal, originPdf);
 
+	/*
 	TScalar directionPdf;
 	TVector3D direction = num::uniformSphere(sampleB, directionPdf).position();
-	if (dot(originNormal, direction) < 0)
+	const TScalar cosTheta = dot(originNormal, direction);
+	if (cosTheta < 0)
 	{
 		direction = -direction;
 	}
-
+	
 	emissionRay = TRay3D(origin, direction);
 	pdf = originPdf / (2 * TNumTraits::pi);
-
 	return radiance_;
+	/*/
+	TVector3D originU, originV;
+	prim::impl::Plane3DImplDetail::generateDirections(originNormal, originU, originV);
+	
+	TScalar directionPdf;
+	TVector3D localDirection = num::cosineHemisphere(sampleB, directionPdf).position();
+	const TVector3D direction = originU * localDirection.x + originV * localDirection.y
+		+ originNormal * localDirection.z;
+
+	emissionRay = TRay3D(origin, direction);
+	pdf = originPdf * directionPdf;
+	return radiance_ * localDirection.z;
+	/**/
 }
 
 

@@ -10,7 +10,7 @@
 from liar import *
 import math
 
-s = 0.001
+s = 0.01
 
 def scale(*i):
 	return tuple([s * x for x in i])

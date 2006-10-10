@@ -291,7 +291,7 @@ const Spectrum PhotonMapper::doCastRay(const kernel::Sample& sample,
 		}
 	}
 
-	if (numFinalGatherRays_ > 0)
+	if (isRayTracingDirect_ && numFinalGatherRays_ > 0)
 	{
 		LASS_ASSERT(idFinalGatherSamples_ >= 0);
 		Sample::TSubSequence2D gatherSample = sample.subSequence2D(idFinalGatherSamples_);
@@ -449,7 +449,7 @@ void PhotonMapper::emitPhoton(MapType iType, const LightContext& light, TScalar 
 	Spectrum spectrum = light.sampleEmission(sampleA, sampleB, ray, pdf);
 	if (pdf > 0 && spectrum)
 	{
-		spectrum /= lightPdf * pdf * 2; 
+		spectrum /= lightPdf * pdf; 
 		tracePhoton(dummy, spectrum, BoundedRay(ray), 0, uniform);
 	}
 }
@@ -515,7 +515,7 @@ void PhotonMapper::tracePhoton(
 	const TScalar cos_thetaOut = omegaIn.z;
 	Spectrum newPower = power * spectrum * (abs(cos_thetaOut) / pdf);
 	const TScalar attenuation = newPower.average() / power.average();
-	if (attenuation > 1)
+	if (attenuation > 1.01)
 	{
 		LASS_COUT << "attenuation: " << attenuation << std::endl;
 	}

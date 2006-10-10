@@ -178,11 +178,21 @@ const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, TVector3D& n
 /** Some objects may have a better strategy for sampling a point on its surface when they
  *  know the target (for a shadow ray).  If they have, they can override this function,
  *  if not, the more general one will be called by default.
+ *
  */
 const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TPoint3D& target, 
 		TVector3D& normal, TScalar& pdf) const
 {
-	return doSampleSurface(sample, normal, pdf);
+	const TPoint3D result = doSampleSurface(sample, normal, pdf);
+	
+	TVector3D toLight = result - target;
+	const TScalar squaredDistance = toLight.squaredNorm();
+	toLight /= num::sqrt(squaredDistance);
+
+	const TScalar cosTheta = dot(normal, toLight);
+
+	pdf *= squaredDistance / num::abs(cosTheta);
+	return result;
 }
 
 

@@ -45,6 +45,12 @@
 #   endif
 #endif
 
+// maybe Bill Gates likes to global lock iterator operations, but I don't.
+#ifdef _MSC_VER
+#	define _SECURE_SCL 0
+#	define _HAS_ITERATOR_DEBUGGING 0
+#endif
+
 #define LASS_USE_DLL
 #include <lass/num/num_traits.h>
 #include <lass/num/basic_ops.h>
