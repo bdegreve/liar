@@ -47,8 +47,8 @@ public:
 
 	typedef TScalar TSample1D;
 	typedef TPoint2D TSample2D;
-	typedef stde::iterator_range<std::vector<TSample1D>::const_iterator> TSubSequence1D;
-	typedef stde::iterator_range<std::vector<TSample2D>::const_iterator> TSubSequence2D;
+	typedef stde::iterator_range<const TSample1D*> TSubSequence1D;
+	typedef stde::iterator_range<const TSample2D*> TSubSequence2D;
 
     Sample();
     

@@ -202,11 +202,11 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 
 
 	if (isDirty_)
-	{
-		
+	{		
 		scene_->preProcess(scene_, timePeriod);
 		rayTracer_->setScene(scene_);
 		rayTracer_->requestSamples(sampler_);
+		rayTracer_->preProcess(sampler_, timePeriod);
 		isDirty_ = false;
 	}
 

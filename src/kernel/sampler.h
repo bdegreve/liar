@@ -67,6 +67,7 @@ public:
 
     void sample(const TResolution& pixel, unsigned subPixel, const TimePeriod& period, 
 		Sample& sample);
+	void sample(const TimePeriod& period, Sample& sample);
 
     static TSamplerPtr& defaultSampler();
 

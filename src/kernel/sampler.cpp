@@ -50,8 +50,90 @@ TSamplerPtr& Sampler::defaultSampler()
 
 
 
-/** clone the sampler ...
- */
+const int Sampler::requestSubSequence1D(unsigned requestedSize)
+{
+	const unsigned size = doRoundSize1D(requestedSize);
+	totalSubSequenceSize1D_ += size;
+	subSequenceSize1D_.push_back(size);
+	subSequenceOffset1D_.push_back(subSequenceOffset1D_.back() + size);
+
+	LASS_ASSERT(static_cast<int>(subSequenceSize1D_.size()) - 1 >= 0);
+	return static_cast<int>(subSequenceSize1D_.size()) - 1;
+}
+
+
+
+const int Sampler::requestSubSequence2D(unsigned requestedSize)
+{
+	const unsigned size = doRoundSize2D(requestedSize);
+	totalSubSequenceSize2D_ += size;
+	subSequenceSize2D_.push_back(size);
+	subSequenceOffset2D_.push_back(subSequenceOffset2D_.back() + size);
+
+	LASS_ASSERT(static_cast<int>(subSequenceSize2D_.size()) - 1 >= 0);
+	return static_cast<int>(subSequenceSize2D_.size()) - 1;
+}
+
+
+
+void Sampler::clearSubSequenceRequests()
+{
+	totalSubSequenceSize1D_ = 0;
+	subSequenceSize1D_.clear();
+	subSequenceOffset1D_.clear();
+	subSequenceOffset1D_.push_back(0);
+
+	totalSubSequenceSize2D_ = 0;
+	subSequenceSize2D_.clear();
+	subSequenceOffset2D_.clear();
+	subSequenceOffset2D_.push_back(0);
+}
+
+
+
+void Sampler::sample(const TResolution& pixel, unsigned subPixel, const TimePeriod& period, 
+					 Sample& sample)
+{
+	sample.sampler_ = this;
+
+	doSampleScreen(pixel, subPixel, sample.screenCoordinate_);
+	doSampleLens(pixel, subPixel, sample.lensCoordinate_);
+	doSampleTime(pixel, subPixel, period, sample.time_);
+
+	sample.subSequences1D_.resize(totalSubSequenceSize1D_);
+	const size_t n1D = subSequenceSize1D_.size();
+	for (size_t k = 0; k < n1D; ++k)
+	{
+		const unsigned offset = subSequenceOffset1D_[k];
+		const unsigned size = subSequenceSize1D_[k];
+		doSampleSubSequence1D(pixel, subPixel, &sample.subSequences1D_[offset],
+			&sample.subSequences1D_[offset] + size);
+	}
+
+	sample.subSequences2D_.resize(totalSubSequenceSize2D_);
+	const size_t n2D = subSequenceSize2D_.size();
+	for (size_t k = 0; k < n2D; ++k)
+	{
+		const unsigned offset = subSequenceOffset2D_[k];
+		const unsigned size = subSequenceSize2D_[k];
+		doSampleSubSequence2D(pixel, subPixel, &sample.subSequences2D_[offset],
+			&sample.subSequences2D_[offset] + size);
+	}
+}
+
+
+
+void Sampler::sample(const TimePeriod& period, Sample& sample)
+{
+	// make up a pixel and subpixel =)
+	TResolution pixel(0, 0);
+	unsigned subPixel = 0;
+
+	Sampler::sample(pixel, subPixel, period, sample);
+}
+
+
+
 const TSamplerPtr Sampler::clone() const
 {
 	const TSamplerPtr result = doClone();
@@ -109,78 +191,6 @@ Sampler::Sampler():
 {
 	subSequenceOffset1D_.push_back(0);
 	subSequenceOffset2D_.push_back(0);
-}
-
-
-
-const int Sampler::requestSubSequence1D(unsigned requestedSize)
-{
-	const unsigned size = doRoundSize1D(requestedSize);
-	totalSubSequenceSize1D_ += size;
-	subSequenceSize1D_.push_back(size);
-	subSequenceOffset1D_.push_back(subSequenceOffset1D_.back() + size);
-
-	LASS_ASSERT(static_cast<int>(subSequenceSize1D_.size()) - 1 >= 0);
-	return static_cast<int>(subSequenceSize1D_.size()) - 1;
-}
-
-
-
-const int Sampler::requestSubSequence2D(unsigned requestedSize)
-{
-	const unsigned size = doRoundSize2D(requestedSize);
-	totalSubSequenceSize2D_ += size;
-	subSequenceSize2D_.push_back(size);
-	subSequenceOffset2D_.push_back(subSequenceOffset2D_.back() + size);
-
-	LASS_ASSERT(static_cast<int>(subSequenceSize2D_.size()) - 1 >= 0);
-	return static_cast<int>(subSequenceSize2D_.size()) - 1;
-}
-
-
-
-void Sampler::clearSubSequenceRequests()
-{
-	totalSubSequenceSize1D_ = 0;
-	subSequenceSize1D_.clear();
-	subSequenceOffset1D_.clear();
-	subSequenceOffset1D_.push_back(0);
-
-	totalSubSequenceSize2D_ = 0;
-	subSequenceSize2D_.clear();
-	subSequenceOffset2D_.clear();
-	subSequenceOffset2D_.push_back(0);
-}
-
-
-void Sampler::sample(const TResolution& pixel, unsigned subPixel, const TimePeriod& period, 
-					 Sample& sample)
-{
-	sample.sampler_ = this;
-
-	doSampleScreen(pixel, subPixel, sample.screenCoordinate_);
-	doSampleLens(pixel, subPixel, sample.lensCoordinate_);
-	doSampleTime(pixel, subPixel, period, sample.time_);
-
-	sample.subSequences1D_.resize(totalSubSequenceSize1D_);
-	const size_t n1D = subSequenceSize1D_.size();
-	for (size_t k = 0; k < n1D; ++k)
-	{
-		const unsigned offset = subSequenceOffset1D_[k];
-		const unsigned size = subSequenceSize1D_[k];
-		doSampleSubSequence1D(pixel, subPixel, &sample.subSequences1D_[offset],
-			&sample.subSequences1D_[offset] + size);
-	}
-
-	sample.subSequences2D_.resize(totalSubSequenceSize2D_);
-	const size_t n2D = subSequenceSize2D_.size();
-	for (size_t k = 0; k < n2D; ++k)
-	{
-		const unsigned offset = subSequenceOffset2D_[k];
-		const unsigned size = subSequenceSize2D_[k];
-		doSampleSubSequence2D(pixel, subPixel, &sample.subSequences2D_[offset],
-			&sample.subSequences2D_[offset] + size);
-	}
 }
 
 

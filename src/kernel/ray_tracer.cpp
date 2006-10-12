@@ -86,7 +86,6 @@ void RayTracer::setScene(const TSceneObjectPtr& scene)
 {
     scene_ = scene;
 	lights_ = gatherLightContexts(scene);
-    doPreprocess();
 }
 
 
@@ -113,6 +112,13 @@ void RayTracer::requestSamples(const TSamplerPtr& sampler)
 
 		doRequestSamples(sampler); 
 	}
+}
+
+
+
+void RayTracer::preProcess(const TSamplerPtr& sampler, const TimePeriod& period)
+{
+	doPreProcess(sampler, period);
 }
 
 

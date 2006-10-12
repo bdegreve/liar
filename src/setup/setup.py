@@ -19,11 +19,27 @@
 #	http://liar.sourceforge.net
 #
 
-from distutils.core import setup,Extension
+modules = ['kernel', 'cameras', 'output', 'samplers', 'scenery', 'shaders', 'textures', 'tracers']
+
 import os
+import os.path
 import sys
 
-modules = ['kernel', 'cameras', 'output', 'samplers', 'scenery', 'shaders', 'textures', 'tracers']
+script, conf = sys.argv
+dirname = os.path.dirname(script)
+
+buildIsComplete = True
+for m in modules:
+	try:
+		state = file(os.path.join(dirname, "%s.%s.state" % (m, conf))).read()
+		print m, conf, state
+		if state != "end":
+			buildIsComplete = False
+	except:
+		buildIsComplete = False
+
+if not buildIsComplete:
+	raise "Build is not complete"
 
 def getRoot(var):
 	root = os.getenv(var)
@@ -50,19 +66,19 @@ else:
 	winDebug = ''
 	pdb = []
 	
+
+from distutils.core import setup,Extension
 sys.argv = [sys.argv[0], 'bdist_wininst']
 
-print "HELLO!"
-
 setup(name = title,
-      version = "0.2.0",
-      author = "Bram de Greve",
-      author_email = "bramz@sourceforge.net",
-      maintainer = "Bram de Greve",
-      maintainer_email = "bramz@sourceforge.net",
-      url = "http://liar.sourceforge.net",
-      description = "LiAR isn't a raytracer",
-      long_description = """     
+	version = "0.2.0",
+	author = "Bram de Greve",
+	author_email = "bramz@sourceforge.net",
+	maintainer = "Bram de Greve",
+	maintainer_email = "bramz@sourceforge.net",
+	url = "http://liar.sourceforge.net",
+	description = "LiAR isn't a raytracer",
+	long_description = """     
 LiAR isn't a raytracer
 Copyright (C) 2004-2006  Bram de Greve (bramz@sourceforge.net)
 
@@ -80,14 +96,15 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """,
-      download_url = "http://liar.sourceforge.net",
-      packages=['liar', 'liar.tools'],
-	  package_dir={'liar': '..'},      
-      data_files = [('lib/site-packages/liar',[r'..\..\bin\%s%s.pyd' % (x, pyDebug) for x in modules]),
-                    ('lib/site-packages/liar',[r'..\..\bin\%s%s.%s' % (x, pyDebug, y) for x in modules for y in pdb]),
-                    ('lib/site-packages/liar',[r'..\..\doc\gpl.txt']),
-                    ('lib/site-packages/liar',[r'%sbin\lass_win32_vc8%s.dll' % (lassRoot, pyDebug)]),
-                    ('lib/site-packages/liar',[r'%sbin\lass_win32_vc8%s.%s' % (lassRoot, pyDebug, y) for y in pdb]),
-                    ('lib/site-packages/liar',['%smsvcr71%s.dll' % (systemRoot, winDebug), '%smsvcp71%s.dll' % (systemRoot, winDebug)]),
-                    ]
-      )
+	download_url = "http://liar.sourceforge.net",
+	packages=['liar', 'liar.tools'],
+	package_dir={'liar': '..'},      
+	data_files = [
+		('lib/site-packages/liar',[r'..\..\bin\%s%s.pyd' % (x, pyDebug) for x in modules]),
+		('lib/site-packages/liar',[r'..\..\bin\%s%s.%s' % (x, pyDebug, y) for x in modules for y in pdb]),
+		('lib/site-packages/liar',[r'..\..\doc\gpl.txt']),
+		('lib/site-packages/liar',[r'%sbin\lass_win32_vc8%s.dll' % (lassRoot, pyDebug)]),
+		('lib/site-packages/liar',[r'%sbin\lass_win32_vc8%s.%s' % (lassRoot, pyDebug, y) for y in pdb]),
+		('lib/site-packages/liar',['%smsvcr71%s.dll' % (systemRoot, winDebug), '%smsvcp71%s.dll' % (systemRoot, winDebug)]),
+		]
+	)

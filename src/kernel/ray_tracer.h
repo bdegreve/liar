@@ -62,6 +62,7 @@ public:
 	void setMaxRayGeneration(const unsigned rayGeneration);
 
 	void requestSamples(const TSamplerPtr& sampler);
+	void preProcess(const TSamplerPtr& sampler, const TimePeriod& period);
 
 	/** @warning castRay is NOT THREAD SAFE!
 	 */
@@ -97,8 +98,8 @@ protected:
 
 private:
 
-    virtual void doPreprocess() = 0;
 	virtual void doRequestSamples(const TSamplerPtr& sampler) = 0;
+    virtual void doPreProcess(const TSamplerPtr& samper, const TimePeriod& period) = 0;
     virtual const Spectrum doCastRay(const Sample& sample, 
 		const DifferentialRay& primaryRay) const = 0;
 	virtual const TLightSamplesRange doSampleLights(const Sample& sample, 

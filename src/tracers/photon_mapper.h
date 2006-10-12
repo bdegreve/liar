@@ -61,6 +61,9 @@ public:
 	const unsigned numFinalGatherRays() const;
 	void setNumFinalGatherRays(unsigned numFinalGatherRays);
 
+	const TScalar ratioPrecomputedIrradiance() const;
+	void setRatioPrecomputedIrradiance(TScalar ratio);
+
 	const bool isVisualizingPhotonMap() const;
 	void setVisualizePhotonMap(bool enabled = true);
 
@@ -77,13 +80,23 @@ private:
 		TVector3D omegaIn;
 		Spectrum power;
 	};
-
 	typedef std::vector<Photon> TPhotonBuffer;
 
-	struct PhotonTraits
+	struct Irradiance
 	{
-		typedef TPhotonBuffer::const_iterator TObjectIterator;
-		typedef const Photon& TObjectReference;
+		Irradiance(const TPoint3D& position, const TVector3D& normal):
+			position(position), normal(normal), irradiance() {}
+		TPoint3D position;
+		TVector3D normal;
+		Spectrum irradiance;
+	};
+	typedef std::vector<Irradiance> TIrradianceBuffer;
+
+	template <typename Buffer>
+	struct KdTreeTraits
+	{
+		typedef typename Buffer::const_iterator TObjectIterator;
+		typedef typename Buffer::const_reference TObjectReference;
 		typedef TPoint3D TPoint;
 		typedef TPoint::TValue TValue;
 		typedef TPoint::TParam TParam;
@@ -93,8 +106,9 @@ private:
 
 		static const TPoint& position(TObjectIterator object) { return object->position; }
 	};
+	typedef spat::KdTree<Photon, KdTreeTraits<TPhotonBuffer> > TPhotonMap;
+	typedef spat::KdTree<Irradiance, KdTreeTraits<TIrradianceBuffer> > TIrradianceMap;
 
-	typedef spat::KdTree<Photon, PhotonTraits> TPhotonMap;
 	typedef std::vector<TPhotonMap::Neighbour> TPhotonNeighbourhood;
 
 	enum MapType
@@ -114,8 +128,14 @@ private:
 	typedef num::DistributionUniform<TScalar, TRandomPrimary> TUniformPrimary;
 	typedef num::DistributionUniform<TScalar, TRandomSecondary> TUniformSecondary;
 
-	void doPreprocess();
+	enum GatherStage
+	{
+		primaryGather,
+		secondaryGather
+	};
+
 	void doRequestSamples(const TSamplerPtr& sampler);
+	void doPreProcess(const TSamplerPtr& sampler, const TimePeriod& period);
 	const Spectrum doCastRay(const Sample& sample, const DifferentialRay& primaryRay) const;
 	const TLightSamplesRange doSampleLights(const Sample& sample,
 		const TPoint3D& target, const TVector3D& targetNormal) const;
@@ -124,23 +144,35 @@ private:
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-	void buildPhotonMap(MapType iType, const TLightCdf& iCumulativeLightPower);
+	void buildPhotonMap(MapType iType, const TLightCdf& iCumulativeLightPower,
+		const TSamplerPtr& sampler, const TimePeriod& period);
 	void emitPhoton(MapType iType, const LightContext& light, TScalar lightPdf, 
-		TRandomSecondary::TValue iSeed);
+		const Sample& sample, TRandomSecondary::TValue secondarySeed);
 	void tracePhoton(const Sample& sample, const Spectrum& power, const BoundedRay& ray,
 		unsigned geneneration, TUniformSecondary& uniform);
+	void buildIrradianceMap();
+
+	const Spectrum traceDirect(const Sample& sample, const IntersectionContext& context,
+		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaOut) const;
+	const Spectrum gatherIndirect(const Sample& sample, const IntersectionContext& context,
+		const TPoint3D& target, const TVector3D& omegaOut, const TPoint2D* firstSample, 
+		const TPoint2D* lastSample, GatherStage gatherStage = primaryGather) const;
+
 	const Spectrum estimateIrradiance(const TPoint3D& point, const TVector3D& normal) const;
 	const Spectrum estimateRadiance(const Sample& sample, const IntersectionContext& context, 
-		const TPoint3D& point, const TVector3D& omegaOut) const;
+		const TPoint3D& point, const TVector3D& omegaOut, GatherStage gatherStage = primaryGather) const;
 
 	TPhotonBuffer photonBuffer_[numMapTypes];
 	TPhotonMap photonMap_[numMapTypes];
+	TIrradianceBuffer irradianceBuffer_;
+	TIrradianceMap irradianceMap_;
 	mutable TPhotonNeighbourhood photonNeighbourhood_;
 	TScalar estimationRadius_[numMapTypes];
 	unsigned requestedMapSize_[numMapTypes];
 	unsigned estimationSize_[numMapTypes];
 	unsigned maxNumberOfPhotons_;
 	unsigned numFinalGatherRays_;
+	TScalar ratioPrecomputedIrradiance_;
 	int idFinalGatherSamples_;
 	bool isVisualizingPhotonMap_;
 	bool isRayTracingDirect_;
