@@ -24,6 +24,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="python.exe &quot;$(SolutionDir)setup\build_state.py&quot; $(ProjectName) $(ConfigurationName) begin"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -97,6 +98,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="python.exe &quot;$(SolutionDir)setup\build_state.py&quot; $(ProjectName) $(ConfigurationName) end"
 			/>
 		</Configuration>
 		<Configuration
@@ -109,6 +111,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="python.exe &quot;$(SolutionDir)setup\build_state.py&quot; $(ProjectName) $(ConfigurationName) begin"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -183,6 +186,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="python.exe &quot;$(SolutionDir)setup\build_state.py&quot; $(ProjectName) $(ConfigurationName) end"
 			/>
 		</Configuration>
 	</Configurations>

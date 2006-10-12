@@ -94,14 +94,14 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="mkdir &quot;$(ProjectDir)..\..\dist&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)dist\liar_d-0.2.0.win32.exe&quot; &quot;$(ProjectDir)..\..\dist&quot; /Y&#x0D;&#x0A;&quot;$(ProjectDir)..\..\dist\liar_d-0.2.0.win32.exe&quot;&#x0D;&#x0A;"
+				CommandLine="python.exe &quot;$(ProjectDir)setup.py&quot; $(ConfigurationName)&#x0D;&#x0A;mkdir &quot;$(ProjectDir)..\..\dist&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)dist\liar_d-0.2.0.win32.exe&quot; &quot;$(ProjectDir)..\..\dist&quot; /Y&#x0D;&#x0A;&quot;$(ProjectDir)..\..\dist\liar_d-0.2.0.win32.exe&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="Release"
 			IntermediateDirectory="Release"
-			ConfigurationType="1"
+			ConfigurationType="10"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
 			>
@@ -112,69 +112,11 @@
 				Name="VCCustomBuildTool"
 			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
 				Name="VCMIDLTool"
 			/>
 			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions=""
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
-				RuntimeLibrary="0"
-				UsePrecompiledHeader="0"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions=""
-				OutputFile="$(OutDir)/setup.exe"
-				LinkIncremental="1"
-				SuppressStartupBanner="true"
-				GenerateDebugInformation="true"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="mkdir &quot;$(ProjectDir)..\..\dist&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)dist\liar-0.2.0.win32.exe&quot; &quot;$(ProjectDir)..\..\dist&quot; /Y&#x0D;&#x0A;&quot;$(ProjectDir)..\..\dist\liar-0.2.0.win32.exe&quot;&#x0D;&#x0A;"
+				CommandLine="python.exe &quot;$(ProjectDir)setup.py&quot; $(ConfigurationName)&#x0D;&#x0A;mkdir &quot;$(ProjectDir)..\..\dist&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)dist\liar-0.2.0.win32.exe&quot; &quot;$(ProjectDir)..\..\dist&quot; /Y&#x0D;&#x0A;&quot;$(ProjectDir)..\..\dist\liar-0.2.0.win32.exe&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -187,6 +129,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\build_state.py"
+				>
+			</File>
+			<File
 				RelativePath=".\setup.cfg"
 				>
 			</File>
@@ -198,8 +144,8 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="python.exe .\$(InputFileName) _DEBUG&#x0D;&#x0A;"
-						Outputs="foo"
+						CommandLine=""
+						Outputs=""
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -207,8 +153,8 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="python.exe .\$(InputFileName)&#x0D;&#x0A;"
-						Outputs="foo"
+						CommandLine=""
+						Outputs=""
 					/>
 				</FileConfiguration>
 			</File>
