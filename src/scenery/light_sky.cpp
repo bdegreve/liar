@@ -23,6 +23,7 @@
 
 #include "scenery_common.h"
 #include "light_sky.h"
+#include <lass/prim/sphere_3d.h>
 #include <lass/num/distribution_transformations.h>
 
 namespace liar
@@ -214,6 +215,31 @@ const TScalar LightSky::doArea() const
 
 
 
+const Spectrum LightSky::doEmission(
+		const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+{
+	const TVector3D dir = ray.direction();
+	const TScalar i = num::atan2(dir.y, dir.x) * resolution_ / (2 * TNumTraits::pi);
+	const TScalar j = (dir.z + 1) * resolution_ / 2;
+
+	const int ii = static_cast<int>(num::floor(i));
+	LASS_ASSERT(ii >= 0 && ii < resolution_);
+	const TScalar u0 = ii > 0 ? marginalCdfU_[ii - 1] : TNumTraits::zero;
+	const TScalar margPdfU = marginalCdfU_[ii] - u0;
+
+	const TScalar* condCdfV = &conditionalCdfV_[ii * resolution_];
+	const int jj = static_cast<int>(num::floor(j));
+	LASS_ASSERT(jj >= 0 && jj < resolution_);
+	const TScalar v0 = jj > 0 ? condCdfV[jj - 1] : TNumTraits::zero;
+	const TScalar condPdfV = condCdfV[jj] - v0;
+
+	shadowRay = BoundedRay(ray, tolerance, TNumTraits::infinity);
+	pdf = margPdfU * condPdfV * (resolution_ * resolution_) / (4 * TNumTraits::pi);
+	return lookUpRadiance(sample, i, j);
+}
+
+
+
 const Spectrum LightSky::doSampleEmission(
 		const Sample& sample,
 		const TPoint2D& lightSample, 
@@ -234,20 +260,23 @@ const Spectrum LightSky::doSampleEmission(
 
 
 
-const Spectrum LightSky::doSampleEmission(const TPoint2D& sampleA, const TPoint2D& sampleB,
-		const TPoint3D& sceneCenter, TScalar sceneRadius, TRay3D& emissionRay, TScalar& pdf) const
+const Spectrum LightSky::doSampleEmission(
+		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
+		const TAabb3D& sceneBound, BoundedRay& emissionRay, TScalar& pdf) const
 {
+	const prim::Sphere3D<TScalar> worldSphere = boundingSphere(sceneBound);
+
 	TScalar i, j, originPdf;
-	sampleMap(sampleA, i, j, originPdf);
+	sampleMap(lightSampleA, i, j, originPdf);
 	const TVector3D originDir = direction(i, j);
-	const TPoint3D origin = sceneCenter + sceneRadius * originDir;
+	const TPoint3D origin = worldSphere.center() + worldSphere.radius() * originDir;
 	
 	TScalar targetPdf;
-	const TPoint3D target = sceneCenter + 
-		sceneRadius * num::uniformSphere(sampleB, targetPdf).position();
+	const TPoint3D target = worldSphere.center() + 
+		worldSphere.radius() * num::uniformSphere(lightSampleB, targetPdf).position();
 	const TVector3D targetDir = target - origin;
 
-	emissionRay = TRay3D(origin, target - origin);
+	emissionRay = BoundedRay(origin, target - origin, tolerance);
 
 	pdf = originPdf * targetPdf * -dot(emissionRay.direction(), originDir);
 	LASS_ASSERT(pdf >= 0);
@@ -258,9 +287,10 @@ const Spectrum LightSky::doSampleEmission(const TPoint2D& sampleA, const TPoint2
 
 
 
-const Spectrum LightSky::doTotalPower(TScalar sceneRadius) const
+const Spectrum LightSky::doTotalPower(const TAabb3D& sceneBound) const
 {
-	return (TNumTraits::pi * num::sqr(sceneRadius)) * averageRadiance_;
+	const prim::Sphere3D<TScalar> worldSphere = boundingSphere(sceneBound);
+	return (TNumTraits::pi * num::sqr(worldSphere.radius())) * averageRadiance_;
 }
 
 
@@ -268,6 +298,13 @@ const Spectrum LightSky::doTotalPower(TScalar sceneRadius) const
 const unsigned LightSky::doNumberOfEmissionSamples() const
 {
 	return numberOfSamples_;
+}
+
+
+
+const bool LightSky::doIsSingular() const
+{
+	return false;
 }
 
 

@@ -78,6 +78,10 @@ LIAR_KERNEL_DLL DifferentialRay reflect(const IntersectionContext& context,
 		const DifferentialRay& ray); 
 LIAR_KERNEL_DLL DifferentialRay refract(const IntersectionContext& context,
 		const DifferentialRay& ray, TScalar refractionIndex1over2); 
+LIAR_KERNEL_DLL DifferentialRay bound(
+	const DifferentialRay& ray, TScalar nearLimit, TScalar farLimit = TNumTraits::infinity);
+
+
 }
 
 }

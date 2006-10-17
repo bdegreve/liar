@@ -71,7 +71,7 @@ public:
 		RayGenerationIncrementor incrementor(*this);
 		if (rayGeneration_ <= maxRayGeneration_)
 		{
-			return doCastRay(sample, primaryRay);
+			return doCastRay(sample, primaryRay, rayGeneration_);
 		}
 		return Spectrum();
     }

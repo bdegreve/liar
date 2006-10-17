@@ -231,19 +231,30 @@ const Spectrum LightSpot::doSampleEmission(
 
 
 
-const Spectrum LightSpot::doSampleEmission(const TPoint2D& sampleA, const TPoint2D& sampleB,
-		const TPoint3D& sceneCenter, TScalar sceneRadius, TRay3D& emissionRay, TScalar& pdf) const
+const Spectrum LightSpot::doEmission(
+		const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
-	const TPoint3D local = num::uniformCone(sampleB, cosOuterAngle_, pdf);
+	shadowRay = ray;
+	pdf = 0;
+	return Spectrum();
+}
+
+
+
+const Spectrum LightSpot::doSampleEmission(
+		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
+		const TAabb3D& sceneBound, BoundedRay& emissionRay, TScalar& pdf) const
+{
+	const TPoint3D local = num::uniformCone(lightSampleA, cosOuterAngle_, pdf);
 	const TVector3D direction = tangentU_ * local.x + tangentV_ * local.y + direction_ * local.z;
-	emissionRay = TRay3D(position_, direction);
+	emissionRay = BoundedRay(position_, direction, tolerance);
 	const TScalar cosTheta = local.z;
 	return intensity_ * fallOff(cosTheta);
 }
 
 
 
-const Spectrum LightSpot::doTotalPower(TScalar sceneRadius) const
+const Spectrum LightSpot::doTotalPower(const TAabb3D& sceneBound) const
 {
 	const TScalar factor = ((1 - cosInnerAngle_) + (cosInnerAngle_ - cosOuterAngle_) / 4);
 	return (2 * TNumTraits::pi * factor) * intensity_;
@@ -253,6 +264,13 @@ const Spectrum LightSpot::doTotalPower(TScalar sceneRadius) const
 const unsigned LightSpot::doNumberOfEmissionSamples() const
 {
 	return 1;
+}
+
+
+
+const bool LightSpot::doIsSingular() const
+{
+	return true;
 }
 
 

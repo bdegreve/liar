@@ -128,10 +128,9 @@ private:
 	typedef num::DistributionUniform<TScalar, TRandomPrimary> TUniformPrimary;
 	typedef num::DistributionUniform<TScalar, TRandomSecondary> TUniformSecondary;
 
-	enum GatherStage
+	enum
 	{
-		primaryGather,
-		secondaryGather
+		numGatherStages_ = 2,
 	};
 
 	void doRequestSamples(const TSamplerPtr& sampler);
@@ -156,11 +155,11 @@ private:
 		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaOut) const;
 	const Spectrum gatherIndirect(const Sample& sample, const IntersectionContext& context,
 		const TPoint3D& target, const TVector3D& omegaOut, const TPoint2D* firstSample, 
-		const TPoint2D* lastSample, GatherStage gatherStage = primaryGather) const;
+		const TPoint2D* lastSample, size_t gatherStage = 0) const;
 
 	const Spectrum estimateIrradiance(const TPoint3D& point, const TVector3D& normal) const;
 	const Spectrum estimateRadiance(const Sample& sample, const IntersectionContext& context, 
-		const TPoint3D& point, const TVector3D& omegaOut, GatherStage gatherStage = primaryGather) const;
+		const TPoint3D& point, const TVector3D& omegaOut, size_t gatherStage = 0) const;
 
 	TPhotonBuffer photonBuffer_[numMapTypes];
 	TPhotonMap photonMap_[numMapTypes];

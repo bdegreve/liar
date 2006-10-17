@@ -169,6 +169,15 @@ BoundedRay translate(const BoundedRay& ray, const TVector3D& offset)
 }
 
 
+
+/** @relates BoundedRay
+ */
+BoundedRay bound(const BoundedRay& ray, TScalar nearLimit, TScalar farLimit)
+{
+	return BoundedRay(ray.unboundedRay(), std::max(ray.nearLimit(), nearLimit),
+		std::min(ray.farLimit(), farLimit));
+}
+
 }
 
 }

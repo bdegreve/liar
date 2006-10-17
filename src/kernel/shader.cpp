@@ -51,8 +51,9 @@ void Shader::requestSamples(const TSamplerPtr& sampler)
 
 // --- protected -----------------------------------------------------------------------------------
 
-Shader::Shader(unsigned capabilityFlags):
-	caps_(capabilityFlags)
+Shader::Shader(unsigned capabilityFlags, CapsStrictness strictness):
+	caps_(capabilityFlags),
+	capsStrictness_(strictness)
 {
 }
 
@@ -79,6 +80,20 @@ void Shader::setState(const TPyObjectPtr& state)
 	doSetState(state);
 }
 
+
+
+/** Helper for shaders that want to return black samples as result of sampleBsdf
+ */
+void Shader::setBlackSamples(const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
+		TVector3D* firstOmegaIn, Spectrum* firstValue, TScalar* firstPdf) const
+{
+	while (firstBsdfSample++ != lastBsdfSample)
+	{
+		*firstOmegaIn++ = TVector3D(0, 0, 1);
+		*firstValue++ = Spectrum();
+		*firstPdf++ = 0;
+	}
+}
 
 
 // --- private -------------------------------------------------------------------------------------

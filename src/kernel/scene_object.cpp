@@ -160,6 +160,15 @@ const bool SceneObject::doHasSurfaceSampling() const
 
 
 
+void SceneObject::doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+{
+	LASS_ASSERT(hasSurfaceSampling() == false);
+	LASS_THROW("surface sampling is unimplemented for scene objects '" << 
+		typeid(*this).name() << "'.");
+}
+
+
+
 /** If an object can sample its surface, it must at least override this function.
  *  Using the (u,v) coordinates in @a sample, it must generate a point on that surface,
  *  store the normal of the surface in that point in @a normal, store its probability

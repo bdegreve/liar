@@ -156,8 +156,7 @@ const Spectrum AshikhminShirley::doShade(
 	const DifferentialRay& iPrimaryRay,
 	const Intersection& iIntersection,
 	const IntersectionContext& iContext) const
-{
-	
+{	
 	const TVector3D k1 = -iPrimaryRay.direction();
 	const TVector3D n = iContext.normal();
 	const TVector3D u = iContext.dPoint_dU().normal();

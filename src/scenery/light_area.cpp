@@ -182,13 +182,20 @@ const TScalar LightArea::doArea() const
 
 
 
+const Spectrum LightArea::doEmission(
+		const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+{
+	surface_->fun(ray, shadowRay, pdf);
+	shadowRay = ray;
+	pdf = 0;
+	return Spectrum();
+}
+
+
+
 const Spectrum LightArea::doSampleEmission(
-		const Sample& sample,
-		const TPoint2D& lightSample, 
-		const TPoint3D& target,
-		const TVector3D& normalTarget,
-		BoundedRay& shadowRay,
-		TScalar& pdf) const
+		const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target,
+		const TVector3D& normalTarget, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	LASS_ASSERT(surface_);
 	TVector3D normalLight;
@@ -205,50 +212,36 @@ const Spectrum LightArea::doSampleEmission(
 		return Spectrum();
 	}
 
-	shadowRay = BoundedRay(target, toLight, tolerance, distance, 
-		prim::IsAlreadyNormalized());
+	shadowRay = BoundedRay(target, toLight, tolerance, distance, prim::IsAlreadyNormalized());
 	return radiance_ ;
 }
 
 
 
-const Spectrum LightArea::doSampleEmission(const TPoint2D& sampleA, const TPoint2D& sampleB,
-		const TPoint3D& sceneCenter, TScalar sceneRadius, TRay3D& emissionRay, TScalar& pdf) const
+const Spectrum LightArea::doSampleEmission(
+		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
+		const TAabb3D& sceneBound, BoundedRay& emissionRay, TScalar& pdf) const
 {
 	TVector3D originNormal;
 	TScalar originPdf;
-	const TPoint3D origin = surface_->sampleSurface(sampleA, originNormal, originPdf);
+	const TPoint3D origin = surface_->sampleSurface(lightSampleA, originNormal, originPdf);
 
-	/*
-	TScalar directionPdf;
-	TVector3D direction = num::uniformSphere(sampleB, directionPdf).position();
-	const TScalar cosTheta = dot(originNormal, direction);
-	if (cosTheta < 0)
-	{
-		direction = -direction;
-	}
-	
-	emissionRay = TRay3D(origin, direction);
-	pdf = originPdf / (2 * TNumTraits::pi);
-	return radiance_;
-	/*/
 	TVector3D originU, originV;
 	prim::impl::Plane3DImplDetail::generateDirections(originNormal, originU, originV);
 	
 	TScalar directionPdf;
-	TVector3D localDirection = num::cosineHemisphere(sampleB, directionPdf).position();
+	TVector3D localDirection = num::cosineHemisphere(lightSampleB, directionPdf).position();
 	const TVector3D direction = originU * localDirection.x + originV * localDirection.y
 		+ originNormal * localDirection.z;
 
-	emissionRay = TRay3D(origin, direction);
+	emissionRay = BoundedRay(origin, direction, tolerance);
 	pdf = originPdf * directionPdf;
 	return radiance_ * localDirection.z;
-	/**/
 }
 
 
 
-const Spectrum LightArea::doTotalPower(TScalar sceneRadius) const
+const Spectrum LightArea::doTotalPower(const TAabb3D& sceneBound) const
 {
 	return (TNumTraits::pi * surface_->area()) * radiance_;
 }
@@ -258,6 +251,13 @@ const Spectrum LightArea::doTotalPower(TScalar sceneRadius) const
 const unsigned LightArea::doNumberOfEmissionSamples() const
 {
 	return numberOfEmissionSamples_;
+}
+
+
+
+const bool LightArea::doIsSingular() const
+{
+	return false;
 }
 
 

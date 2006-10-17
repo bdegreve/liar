@@ -29,7 +29,7 @@ namespace liar
 namespace kernel
 {
 
-util::CriticalSection LightContext::mutex_;
+util::CriticalSection LightContext::lock_;
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -54,6 +54,17 @@ LightContext::LightContext(const TObjectPath& objectPathToLight, const SceneLigh
 
 
 
+void LightContext::setSceneBound(const TAabb3D& bound, const TimePeriod& period)
+{
+	setTime(period.begin());
+	const TAabb3D beginBound = transform(bound, localToWorld_.inverse());
+	setTime(period.end());
+	const TAabb3D endBound = transform(bound, localToWorld_.inverse());
+	localBound_ = beginBound + endBound;
+}
+
+
+
 void LightContext::requestSamples(const TSamplerPtr& sampler)
 {
 	const int n = light_->numberOfEmissionSamples();
@@ -64,12 +75,10 @@ void LightContext::requestSamples(const TSamplerPtr& sampler)
 
 
 
-const Spectrum LightContext::sampleEmission(const Sample& cameraSample,
-											const TPoint2D& lightSample, 
-											const TPoint3D& target,
-											const TVector3D& targetNormal,
-											BoundedRay& shadowRay,
-											TScalar& pdf) const
+const Spectrum LightContext::sampleEmission(
+		const Sample& cameraSample, const TPoint2D& lightSample, 
+		const TPoint3D& target,	const TVector3D& targetNormal,		
+		BoundedRay& shadowRay, TScalar& pdf) const
 {
 	setTime(cameraSample.time());
 
@@ -90,19 +99,35 @@ const Spectrum LightContext::sampleEmission(const Sample& cameraSample,
 
 
 
-const Spectrum LightContext::sampleEmission(const TPoint2D& sampleA, const TPoint2D& sampleB,
-		TRay3D& emissionRay, TScalar& pdf) const
+const Spectrum LightContext::sampleEmission(
+		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
+		BoundedRay& emissionRay, TScalar& pdf) const
 {
-	setTime(0);
+	setTime(cameraSample.time());
 
-	TPoint3D sceneCenter;
-	TScalar sceneRadius = 1000;
-
-	TRay3D localRay;
+	BoundedRay localRay;
 	const Spectrum radiance = light_->sampleEmission(
-		sampleA, sampleB, sceneCenter, sceneRadius, localRay, pdf);
+		cameraSample, lightSampleA, lightSampleB, localBound_, localRay, pdf);
+	
+	emissionRay = transform(localRay, localToWorld_);
+	return radiance;
+}
 
-	emissionRay = prim::transform(localRay, localToWorld_);
+
+
+const Spectrum LightContext::emission(
+		const Sample& cameraSample, const TRay3D& ray,
+		BoundedRay& shadowRay, TScalar& pdf) const
+{
+	setTime(cameraSample.time());
+	TScalar scale = 1;
+	const TRay3D localRay = prim::transform(ray, localToWorld_.inverse(), scale);
+
+	BoundedRay localShadowRay;
+	const Spectrum radiance = light_->emission(cameraSample, localRay, localShadowRay, pdf);
+
+	shadowRay = BoundedRay(
+		ray, localShadowRay.nearLimit() / scale, localShadowRay.farLimit() / scale);
 	return radiance;
 }
 
@@ -110,7 +135,14 @@ const Spectrum LightContext::sampleEmission(const TPoint2D& sampleA, const TPoin
 
 const Spectrum LightContext::totalPower() const
 {
-	return light_->totalPower(1000);
+	return light_->totalPower(localBound_);
+}
+
+
+
+const bool LightContext::isSingular() const
+{
+	return light_->isSingular();
 }
 
 
@@ -118,13 +150,15 @@ const Spectrum LightContext::totalPower() const
 
 // --- protected -----------------------------------------------------------------------------------
 
+
+
 // --- private -------------------------------------------------------------------------------------
 
 void LightContext::setTime(TTime time) const
 {
 	if ((hasMotion_ && time != timeOfTransformation_) || num::isNaN(timeOfTransformation_))
 	{
-		LASS_LOCK(mutex_)
+		LASS_LOCK(lock_)
 		{
 			TTransformation3D temp;
 			for (TObjectPath::const_iterator i = objectPath_.begin(); i != objectPath_.end(); ++i)

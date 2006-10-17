@@ -27,6 +27,7 @@
 //
 //#include "ashikhmin_shirley.h"
 #include "lambert.h"
+#include "mirror.h"
 //#include "simple.h"
 #include "unshaded.h"
 
@@ -45,6 +46,7 @@ LIAR_SHADERS_DLL void initshaders(void)
 	//
     //PY_INJECT_CLASS_IN_MODULE(AshikhminShirley, shaders, "Anisotropic Phong BRDF by Ashikhmin & Shirley (2001)" )
     PY_INJECT_CLASS_IN_MODULE(Lambert, shaders, "perfect lambert shader")
+    PY_INJECT_CLASS_IN_MODULE(Mirror, shaders, "perfect mirror shader")
     //PY_INJECT_CLASS_IN_MODULE(Simple, shaders, "a classic simple shader, Whitted style")
 	PY_INJECT_CLASS_IN_MODULE(Unshaded, shaders, "a shader that doesn't shade :)")
 

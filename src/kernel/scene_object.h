@@ -80,6 +80,7 @@ public:
     void localSpace(TTime time, TTransformation3D& localToWorld) const;
 
 	const bool hasSurfaceSampling() const;
+	void fun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
 	const TPoint3D sampleSurface(const TPoint2D& sample, TVector3D& normal, 
 			TScalar& pdf) const;
 	const TPoint3D sampleSurface(const TPoint2D& sample, const TPoint3D& target, 
@@ -127,6 +128,7 @@ private:
 	virtual const bool doContains(const Sample& sample, const TPoint3D& point) const = 0;
     
 	virtual const bool doHasSurfaceSampling() const;
+	virtual void doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
 	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal,
 			TScalar& pdf) const;
 	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, const TPoint3D& target,

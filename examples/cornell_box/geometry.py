@@ -28,9 +28,11 @@ def getLights():
 	return [light]
 
 def getWalls():
-	white = shaders.Lambert(textures.Constant(rgb(1, 1, 1)))
-	red = shaders.Lambert(textures.Constant(rgb(1.0, 0.1, 0.1)))
-	green = shaders.Lambert(textures.Constant(rgb(0.1, 1.0, 0.1)))
+	hi = .7
+	lo = .1
+	white = shaders.Lambert(textures.Constant(rgb(hi, hi, hi)))
+	red = shaders.Lambert(textures.Constant(rgb(hi, lo, lo)))
+	green = shaders.Lambert(textures.Constant(rgb(lo, hi, lo)))
 	
 	floor = scenery.Parallelogram(scale(0, 0, 559.2), scale(552.8, 0, 0), scale(0, 0, -559.2))
 	floor.shader = white
@@ -82,7 +84,7 @@ def generateBox(ps, hs):
 	return scenery.TriangleMesh(verts, normals, [], triangles)	
 	
 def getBlocks():
-	white = shaders.Lambert(textures.Constant(rgb(0.5, 0.5, 0.5)))
+	white = shaders.Lambert(textures.Constant(rgb(.7, .7, .7)))
 	short = generateBox([(130.0, 65.0), (82.0, 225.0), (240.0, 272.0), (290.0, 114.0)], [0.05, 165.0])
 	short.shader = white
 	tall = generateBox([(423.0, 247.0), (265.0, 296.0), (314.0, 456.0), (472.0, 406.0)], [0.05, 330.0])

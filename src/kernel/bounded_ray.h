@@ -42,17 +42,13 @@ public:
 
 	BoundedRay();
     BoundedRay(const TRay3D& unboundedRay, 
-		const TScalar nearLimit = liar::TNumTraits::zero, 
-		const TScalar farLimit = liar::TNumTraits::infinity);
+		TScalar nearLimit = liar::TNumTraits::zero,	TScalar farLimit = liar::TNumTraits::infinity);
 	BoundedRay(const TPoint3D& support, const TVector3D& direction, 
-		const TScalar nearLimit = liar::TNumTraits::zero, 
-		const TScalar farLimit = liar::TNumTraits::infinity);
+		TScalar nearLimit = liar::TNumTraits::zero, TScalar farLimit = liar::TNumTraits::infinity);
 	BoundedRay(const TPoint3D& support, const TVector3D& normalizedDirection, 
-		const TScalar nearLimit, const TScalar farLimit,
-		prim::IsAlreadyNormalized);
+		TScalar nearLimit, TScalar farLimit, prim::IsAlreadyNormalized);
 	BoundedRay(const TPoint3D& support, const TPoint3D& iLookAt, 
-		const TScalar nearLimit = liar::TNumTraits::zero, 
-		const TScalar farLimit = liar::TNumTraits::infinity);
+		TScalar nearLimit = liar::TNumTraits::zero, TScalar farLimit = liar::TNumTraits::infinity);
 
 	const TRay3D& unboundedRay() const { return unboundedRay_; }
 	const TScalar nearLimit() const { return nearLimit_; }
@@ -79,9 +75,14 @@ private:
 	TScalar farLimit_;
 };
 
-LIAR_KERNEL_DLL BoundedRay transform(const BoundedRay& ray, const TTransformation3D& transformation);
-LIAR_KERNEL_DLL BoundedRay transform(const BoundedRay& ray, const TTransformation3D& transformation, TScalar& parameter);
-LIAR_KERNEL_DLL BoundedRay translate(const BoundedRay& ray, const TVector3D& offset);
+LIAR_KERNEL_DLL BoundedRay transform(
+	const BoundedRay& ray, const TTransformation3D& transformation);
+LIAR_KERNEL_DLL BoundedRay transform(
+	const BoundedRay& ray, const TTransformation3D& transformation, TScalar& parameter);
+LIAR_KERNEL_DLL BoundedRay translate(
+	const BoundedRay& ray, const TVector3D& offset);
+LIAR_KERNEL_DLL BoundedRay bound(
+	const BoundedRay& ray, TScalar nearLimit, TScalar farLimit = TNumTraits::infinity);
 
 }
 

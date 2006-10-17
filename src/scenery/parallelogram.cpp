@@ -32,12 +32,10 @@ namespace scenery
 PY_DECLARE_CLASS(Parallelogram)
 PY_CLASS_CONSTRUCTOR_3(Parallelogram, const TPoint3D&, const TVector3D&, const TVector3D&)
 
-
-
 // --- public --------------------------------------------------------------------------------------
 
-Parallelogram::Parallelogram(const TPoint3D& iSupport, const TVector3D& iSizeU, 
-							 const TVector3D& iSizeV):
+Parallelogram::Parallelogram(
+		const TPoint3D& iSupport, const TVector3D& iSizeU, const TVector3D& iSizeV):
     parallelogram_(iSupport, iSizeU, iSizeV),
 	normal_(cross(iSizeU, iSizeV).normal())
 {
@@ -52,7 +50,8 @@ Parallelogram::Parallelogram(const TPoint3D& iSupport, const TVector3D& iSizeU,
 
 // --- private -------------------------------------------------------------------------------------
 
-void Parallelogram::doIntersect(const kernel::Sample& sample, const kernel::BoundedRay& ray,
+void Parallelogram::doIntersect(
+		const kernel::Sample& sample, const kernel::BoundedRay& ray, 
 		kernel::Intersection& result) const
 {
     TScalar t;
@@ -70,8 +69,8 @@ void Parallelogram::doIntersect(const kernel::Sample& sample, const kernel::Boun
 
 
 
-const bool Parallelogram::doIsIntersecting(const kernel::Sample& sample, 
-									const kernel::BoundedRay& ray) const
+const bool Parallelogram::doIsIntersecting(
+		const kernel::Sample& sample, const kernel::BoundedRay& ray) const
 {
     TScalar t;
 	const prim::Result hit = prim::intersect(
@@ -81,9 +80,9 @@ const bool Parallelogram::doIsIntersecting(const kernel::Sample& sample,
 
 
 
-void Parallelogram::doLocalContext(const kernel::Sample& sample, const BoundedRay& ray,
-		const kernel::Intersection& intersection, 
-		kernel::IntersectionContext& result) const
+void Parallelogram::doLocalContext(
+		const kernel::Sample& sample, const BoundedRay& ray, 
+		const kernel::Intersection& intersection, kernel::IntersectionContext& result) const
 {
     TPoint2D uv;
 	TScalar t;
@@ -118,12 +117,29 @@ const bool Parallelogram::doHasSurfaceSampling() const
 
 
 
-const TPoint3D Parallelogram::doSampleSurface(const TPoint2D& sample, TVector3D& normal,
-											  TScalar& pdf) const
+const TPoint3D Parallelogram::doSampleSurface(
+		const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const
 {
 	normal = normal_;
 	pdf = invArea_;
 	return parallelogram_.point(sample.x, sample.y);
+}
+
+
+
+void Parallelogram::doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+{
+	TScalar t;
+	if (prim::intersect(parallelogram_, ray, t, tolerance) == prim::rOne)
+	{
+		shadowRay = BoundedRay(ray, tolerance, t);
+		pdf = invArea_ * num::sqr(t) / num::abs(dot(ray.direction(), normal_));
+	}
+	else
+	{
+		shadowRay = BoundedRay(ray, tolerance);
+		pdf = 0;
+	}
 }
 
 
@@ -166,8 +182,6 @@ void Parallelogram::doSetState(const TPyObjectPtr& state)
 // --- free ----------------------------------------------------------------------------------------
 
 
-
-// --- python --------------------------------------------------------------------------------------
 
 }
 

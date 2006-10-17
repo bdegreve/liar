@@ -112,6 +112,7 @@
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -138,6 +139,7 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
+				WholeProgramOptimization="true"
 				PreprocessorDefinitions="LIAR_SHADERS_BUILD_DLL;WIN32;NDEBUG;_USRDLL"
 				RuntimeLibrary="2"
 				DefaultCharIsUnsigned="true"
@@ -210,6 +212,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\mirror.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\shaders_common.cpp"
 				>
 				<FileConfiguration
@@ -251,6 +257,10 @@
 			</File>
 			<File
 				RelativePath=".\lambert.h"
+				>
+			</File>
+			<File
+				RelativePath=".\mirror.h"
 				>
 			</File>
 			<File

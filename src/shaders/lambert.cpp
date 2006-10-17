@@ -38,7 +38,7 @@ PY_CLASS_MEMBER_RW_DOC(Lambert, "diffuse", diffuse, setDiffuse, "texture for dif
 // --- public --------------------------------------------------------------------------------------
 
 Lambert::Lambert():
-	Shader(capsReflection | capsDiffuse),
+	Shader(capsReflection | capsDiffuse, capsAreStrict),
 	diffuse_(Texture::white())
 {
 }
@@ -46,7 +46,7 @@ Lambert::Lambert():
 
 
 Lambert::Lambert(const TTexturePtr& iDiffuse):
-	Shader(capsReflection | capsDiffuse),
+	Shader(capsReflection | capsDiffuse, capsAreStrict),
 	diffuse_(iDiffuse)
 {
 }
@@ -99,8 +99,10 @@ void Lambert::doBsdf(
 void Lambert::doSampleBsdf(
 		const Sample& sample, const IntersectionContext& context, const TVector3D& dirIn,
 		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
-		TVector3D* firstDirOut, Spectrum* firstValue, TScalar* firstPdf) const
+		TVector3D* firstDirOut, Spectrum* firstValue, TScalar* firstPdf,
+		unsigned allowedCaps) const
 {
+	LASS_ASSERT(testCaps(allowedCaps, caps()));
 	const Spectrum diffuseOverPi = diffuse_->lookUp(sample, context) / TNumTraits::pi;
 	const TScalar zSign = dirIn.z < 0 ? -1 : 1;
 	while (firstBsdfSample != lastBsdfSample)

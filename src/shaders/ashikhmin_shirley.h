@@ -68,8 +68,14 @@ public:
 
 private:
 
-	const Spectrum doShade(const Sample& sample,	const DifferentialRay& primaryRay, 
-		const Intersection& intersection, const IntersectionContext& context) const;
+	virtual void doBsdf(
+		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
+		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn, 
+		Spectrum* firstValue, TScalar* firstPdf) const;
+	virtual void doSampleBsdf(
+		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut, 
+		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
+		TVector3D* firstOmegaIn, Spectrum* firstValue, TScalar* firstPdf) const;
 	void doRequestSamples(const TSamplerPtr& sampler);
 
 	const Spectrum brdf(const TVector3D& k1, const TVector3D& k2, const TVector3D& h,

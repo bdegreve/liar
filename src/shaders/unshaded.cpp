@@ -39,7 +39,7 @@ PY_CLASS_MEMBER_RW_DOC(Unshaded, "colour", colour, setColour, "texture")
 // --- public --------------------------------------------------------------------------------------
 
 Unshaded::Unshaded():
-	Shader(Shader::capsEmission),
+	Shader(Shader::capsEmission, capsAreStrict),
 	colour_(Texture::white())
 {
 }
@@ -47,7 +47,7 @@ Unshaded::Unshaded():
 
 
 Unshaded::Unshaded(const TTexturePtr& iColour):
-	Shader(Shader::capsEmission),
+	Shader(Shader::capsEmission, capsAreStrict),
 	colour_(iColour)
 {
 }
@@ -99,17 +99,10 @@ void Unshaded::doBsdf(
 void Unshaded::doSampleBsdf(
 		const Sample& sample, const IntersectionContext& context, const TVector3D& dirIn,
 		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
-		TVector3D* firstDirOut, Spectrum* firstValue, TScalar* firstPdf) const
+		TVector3D* firstDirOut, Spectrum* firstValue, TScalar* firstPdf,
+		unsigned allowedCaps) const
 {
-	const TScalar zSign = dirIn.z < 0 ? -1 : 1;
-	while (firstBsdfSample != lastBsdfSample)
-	{
-		TVector3D localDirOut = 
-			num::cosineHemisphere(*firstBsdfSample++, *firstPdf++).position();
-		localDirOut.z *= zSign;
-		*firstDirOut++ = localDirOut;
-		*firstValue++ = Spectrum();
-	}
+	setBlackSamples(firstBsdfSample, lastBsdfSample, firstDirOut, firstValue, firstPdf);
 }
 
 

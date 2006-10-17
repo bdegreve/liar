@@ -92,8 +92,7 @@ void Sphere::setRadius(TScalar radius)
 
 // --- private -------------------------------------------------------------------------------------
 
-void Sphere::doIntersect(const Sample& sample, const BoundedRay& ray, 
-						 Intersection& result) const
+void Sphere::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
 {
     TScalar t;
 	const prim::Result hit = prim::intersect(sphere_, ray.unboundedRay(), t, ray.nearLimit());
@@ -111,8 +110,7 @@ void Sphere::doIntersect(const Sample& sample, const BoundedRay& ray,
 
 
 
-const bool Sphere::doIsIntersecting(const Sample& sample, 
-									const BoundedRay& ray) const
+const bool Sphere::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
 {
     TScalar t;
 	const prim::Result hit = prim::intersect(sphere_, ray.unboundedRay(), t, ray.nearLimit());
@@ -121,9 +119,9 @@ const bool Sphere::doIsIntersecting(const Sample& sample,
 
 
 
-void Sphere::doLocalContext(const Sample& sample, const BoundedRay& ray,
-                            const Intersection& intersection, 
-                            IntersectionContext& result) const
+void Sphere::doLocalContext(
+		const Sample& sample, const BoundedRay& ray, const Intersection& intersection,
+		IntersectionContext& result) const
 {
 	const TScalar t = intersection.t();
 	const TPoint3D point = ray.point(t);
@@ -215,8 +213,8 @@ const bool Sphere::doHasSurfaceSampling() const
 
 
 
-const TPoint3D Sphere::doSampleSurface(const TPoint2D& sample, TVector3D& normal, 
-		TScalar& pdf) const
+const TPoint3D Sphere::doSampleSurface(
+		const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const
 {
 	const TScalar z = 2 * sample.y - 1;
 	const TScalar rho = num::sqrt(1 - num::sqr(z));
@@ -231,7 +229,8 @@ const TPoint3D Sphere::doSampleSurface(const TPoint2D& sample, TVector3D& normal
 
 
 
-const TPoint3D Sphere::doSampleSurface(const TPoint2D& sample, const TPoint3D& target,
+const TPoint3D Sphere::doSampleSurface(
+		const TPoint2D& sample, const TPoint3D& target,
 		TVector3D& normal, TScalar& pdf) const
 {
 	if (sphere_.contains(target))
@@ -276,11 +275,30 @@ const TPoint3D Sphere::doSampleSurface(const TPoint2D& sample, const TPoint3D& t
 
 
 
+void Sphere::doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+{
+	TScalar t;
+	const prim::Result r = prim::intersect(sphere_, ray, t, tolerance);
+	shadowRay = BoundedRay(ray, tolerance, t);
+	if (sphere_.contains(ray.support()))
+	{
+		LASS_ASSERT(r == prim::rOne);
+		pdf = num::inv(4 * TNumTraits::pi);
+	}
+	else
+	{
+		const TScalar sqrDistance = (sphere_.center() - ray.support()).squaredNorm();
+		const TScalar cosThetaMax = num::sqrt(
+			std::max(TNumTraits::zero, 1 - num::sqr(sphere_.radius()) / sqrDistance));
+		pdf = num::inv(2 * TNumTraits::pi * (1 - cosThetaMax));		
+	}
+}
+
+
+
 // --- free ----------------------------------------------------------------------------------------
 
 
-
-// --- python --------------------------------------------------------------------------------------
 
 }
 

@@ -142,6 +142,14 @@ DifferentialRay refract(const IntersectionContext& context, const DifferentialRa
 
 
 
+/** @relates DifferentialRay
+ */
+DifferentialRay bound(const DifferentialRay& ray, TScalar nearLimit, TScalar farLimit)
+{
+	return DifferentialRay(bound(ray.centralRay(), nearLimit, farLimit),
+		ray.differentialI(), ray.differentialJ());
+}
+
 }
 
 }

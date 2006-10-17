@@ -6,7 +6,7 @@
 from liar import *
 import geometry
 
-if 1:
+if True:
 	width = 800
 	height = 800
 	super_sampling = 9
@@ -19,14 +19,6 @@ camera = geometry.getCamera()
 walls = geometry.getWalls()
 blocks = geometry.getBlocks()
 lights = geometry.getLights()
-
-
-I = 0.1
-sky = scenery.LightArea(scenery.Sky())
-sky.radiance = rgb(0.5 * I, 0.5 * I, I)
-sky.numberOfEmissionSamples = 36
-sky.shader = shaders.Unshaded(textures.Constant(sky.radiance))
-
 
 image = output.Image("direct_lighting.hdr", (width, height))
 

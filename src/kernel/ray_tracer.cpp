@@ -118,6 +118,11 @@ void RayTracer::requestSamples(const TSamplerPtr& sampler)
 
 void RayTracer::preProcess(const TSamplerPtr& sampler, const TimePeriod& period)
 {
+	const TAabb3D sceneBound = scene_->boundingBox();
+	for (TLightContexts::iterator i = lights_.begin(); i != lights_.end(); ++i)
+	{
+		i->setSceneBound(sceneBound, period);
+	}
 	doPreProcess(sampler, period);
 }
 

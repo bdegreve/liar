@@ -25,6 +25,7 @@
 #include "light_directional.h"
 #include <lass/num/distribution_transformations.h>
 #include <lass/prim/impl/plane_3d_impl_detail.h>
+#include <lass/prim/sphere_3d.h>
 
 namespace liar
 {
@@ -146,13 +147,19 @@ const TScalar LightDirectional::doArea() const
 
 
 
+const Spectrum LightDirectional::doEmission(
+		const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+{
+	shadowRay = ray;
+	pdf = 0;
+	return Spectrum();
+}
+
+
+
 const Spectrum LightDirectional::doSampleEmission(
-		const Sample& sample,
-		const TPoint2D& lightSample, 
-		const TPoint3D& target,
-		const TVector3D& targetNormal,
-		BoundedRay& shadowRay,
-		TScalar& pdf) const
+		const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
+		const TVector3D& targetNormal, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	shadowRay = BoundedRay(target, -direction_, tolerance, TNumTraits::infinity,
 		prim::IsAlreadyNormalized());
@@ -162,22 +169,25 @@ const Spectrum LightDirectional::doSampleEmission(
 
 
 
-const Spectrum LightDirectional::doSampleEmission(const TPoint2D& sampleA, const TPoint2D& sampleB,
-		const TPoint3D& sceneCenter, TScalar sceneRadius, TRay3D& emissionRay, TScalar& pdf) const
+const Spectrum LightDirectional::doSampleEmission(
+		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
+		const TAabb3D& sceneBound, BoundedRay& emissionRay, TScalar& pdf) const
 {
-	const TPoint2D uv = num::uniformDisk(sampleB, pdf);
-	const TPoint3D begin = sceneCenter + 
-		sceneRadius * (tangentU_ * uv.x + tangentV_ * uv.y - direction_);
-	emissionRay = TRay3D(begin, direction_);
-	pdf /= num::sqr(sceneRadius);
+	const prim::Sphere3D<TScalar> worldSphere = boundingSphere(sceneBound);
+	const TPoint2D uv = num::uniformDisk(lightSampleA, pdf);
+	const TPoint3D begin = worldSphere.center() + 
+		worldSphere.radius() * (tangentU_ * uv.x + tangentV_ * uv.y - direction_);
+	emissionRay = BoundedRay(begin, direction_, tolerance);
+	pdf /= num::sqr(worldSphere.radius());
 	return radiance_;
 }
 
 
 
-const Spectrum LightDirectional::doTotalPower(TScalar sceneRadius) const
+const Spectrum LightDirectional::doTotalPower(const TAabb3D& sceneBound) const
 {
-	return (2 * TNumTraits::pi * num::sqr(sceneRadius)) * radiance_;
+	const prim::Sphere3D<TScalar> worldSphere = boundingSphere(sceneBound);
+	return (2 * TNumTraits::pi * num::sqr(worldSphere.radius())) * radiance_;
 }
 
 
@@ -185,6 +195,13 @@ const Spectrum LightDirectional::doTotalPower(TScalar sceneRadius) const
 const unsigned LightDirectional::doNumberOfEmissionSamples() const
 {
 	return 1;
+}
+
+
+
+const bool LightDirectional::doIsSingular() const
+{
+	return true;
 }
 
 

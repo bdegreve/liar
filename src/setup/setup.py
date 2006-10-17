@@ -55,7 +55,7 @@ systemRoot = getRoot('windir') + 'system32\\'
 print "lassRoot:", lassRoot
 print "systemRoot:", systemRoot
 
-if '_DEBUG' in sys.argv:
+if conf == 'Debug':
 	title = 'liar_d'
 	pyDebug = '_d'
 	winDebug = 'd'

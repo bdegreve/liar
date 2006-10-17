@@ -21,6 +21,7 @@
 
 #include "tracers_common.h"
 #include "photon_mapper.h"
+#include "../kernel/per_thread_buffer.h"
 #include <lass/num/distribution.h>
 #include <lass/util/progress_indicator.h>
 #include <lass/stde/range_algorithm.h>
@@ -231,8 +232,8 @@ void PhotonMapper::doPreProcess(const kernel::TSamplerPtr& sampler, const TimePe
 
 
 
-const Spectrum PhotonMapper::doCastRay(const kernel::Sample& sample,
-		const kernel::DifferentialRay& primaryRay) const
+const Spectrum PhotonMapper::doCastRay(
+		const kernel::Sample& sample, const kernel::DifferentialRay& primaryRay) const
 {
 	Intersection intersection;
 	scene()->intersect(sample, primaryRay, intersection);
@@ -254,27 +255,42 @@ const Spectrum PhotonMapper::doCastRay(const kernel::Sample& sample,
 	const Shader* const shader = context.shader();
 	if (!shader)
 	{
-		return Spectrum();
-	}	
+		// leaving or entering something
+		PrimaryRay continuedRay = bound(primaryRay, intersection.t() + tolerance);
+		return this->castRay(sample, continuedRay);
+	}
 	const TVector3D omegaOut = context.worldToShader(-primaryRay.direction());
 
-	Spectrum result = shader->emission(sample, context, omegaOut);	
-	
+	Spectrum result = shader->emission(sample, context, omegaOut)
+
 	if (isRayTracingDirect_)
 	{
 		result += traceDirect(sample, context, target, targetNormal, omegaOut);
 	}
 
-	if (isRayTracingDirect_ && numFinalGatherRays_ > 0)
+	if (shader->hasCaps(Shader::capsDiffuse))
 	{
-		LASS_ASSERT(idFinalGatherSamples_ >= 0);
-		Sample::TSubSequence2D gatherSample = sample.subSequence2D(idFinalGatherSamples_);
-		result += gatherIndirect(
-			sample, context, target, omegaOut, gatherSample.begin(), gatherSample.end());
+		if (isRayTracingDirect_ && numFinalGatherRays_ > 0)
+		{
+			LASS_ASSERT(idFinalGatherSamples_ >= 0);
+			Sample::TSubSequence2D gatherSample = sample.subSequence2D(idFinalGatherSamples_);
+			result += gatherIndirect(
+				sample, context, target, omegaOut, gatherSample.begin(), gatherSample.end());
+		}
+		else
+		{
+			result += estimateRadiance(sample, context, target, omegaOut);
+		}
 	}
-	else
+
+	if (shader->hasCaps(Shader::capsReflection | Shader::capsSpecular))
 	{
-		result += estimateRadiance(sample, context, target, omegaOut);
+		TPoint2d brdfSample(.5, .5);
+		TVector3D omegaIn;
+		Spectrum bsdf;
+		TScalar pdf;
+		shader->sampleBrdf(sample, context, omegaOut, &bsdfSample, &bsdfSample + 1, &omegaIn, &bsdf& pdf);
+		result += this->castRay(sample, reflectedRay);
 	}
 
 	return result;
@@ -411,13 +427,13 @@ void PhotonMapper::emitPhoton(MapType iType, const LightContext& light, TScalar 
 	TPoint2D lightSampleA(uniform(), uniform());
 	TPoint2D lightSampleB(uniform(), uniform());
 
-	TRay3D ray;
+	BoundedRay ray;
 	TScalar pdf;
-	Spectrum spectrum = light.sampleEmission(lightSampleA, lightSampleB, ray, pdf);
+	Spectrum spectrum = light.sampleEmission(sample, lightSampleA, lightSampleB, ray, pdf);
 	if (pdf > 0 && spectrum)
 	{
 		spectrum /= lightPdf * pdf; 
-		tracePhoton(sample, spectrum, BoundedRay(ray, tolerance), 0, uniform);
+		tracePhoton(sample, spectrum, ray, 0, uniform);
 	}
 }
 
@@ -479,7 +495,7 @@ void PhotonMapper::tracePhoton(
 	Spectrum spectrum;
 	TScalar pdf;
 	context.shader()->sampleBsdf(sample, context, omegaOut, &bsdfSample, &bsdfSample + 1,
-		&omegaIn, &spectrum, &pdf);
+		&omegaIn, &spectrum, &pdf, Shader::capsAll);
 	if (pdf == 0 || !spectrum)
 	{
 		return;
@@ -519,15 +535,23 @@ void PhotonMapper::buildIrradianceMap()
 	}
 }
 
-
+namespace temp
+{
+	TScalar squaredHeuristic(TScalar pdfA, TScalar pdfB)
+	{
+		return num::sqr(pdfA) / (num::sqr(pdfA) + num::sqr(pdfB));
+	}
+}
 
 const Spectrum PhotonMapper::traceDirect(
 		const Sample& sample, const IntersectionContext& context,
 		const TPoint3D& target, const TVector3D& targetNormal, 
 		const TVector3D& omegaOut) const
 {
-	Spectrum result;
+	const Shader* const shader = context.shader();
+	LASS_ASSERT(shader);
 
+	Spectrum result;
 	const TLightContexts::const_iterator end = lights().end();
 	for (TLightContexts::const_iterator light = lights().begin(); light != end; ++light)
 	{
@@ -536,26 +560,47 @@ const Spectrum PhotonMapper::traceDirect(
 		Sample::TSubSequence1D componentSample = sample.subSequence1D(light->idBsdfComponentSamples());
 		LASS_ASSERT(bsdfSample.size() == lightSample.size() && componentSample.size() == lightSample.size());
 		const TScalar n = static_cast<TScalar>(lightSample.size());
+		const bool isSingularLight = light->isSingular();
 
 		while (lightSample)
 		{
 			BoundedRay shadowRay;
-			TScalar pdf;
+			TScalar lightPdf;
 			const Spectrum radiance = light->sampleEmission(
-				sample, *lightSample, target, targetNormal, shadowRay, pdf);
-			if (pdf > 0 && radiance)
+				sample, *lightSample, target, targetNormal, shadowRay, lightPdf);
+			if (lightPdf > 0 && radiance)
 			{
 				const TVector3D omegaIn = context.worldToShader(shadowRay.direction());
-				TScalar bsdfPdf;
 				Spectrum bsdf;
-				LASS_ASSERT(context.shader());
-				context.shader()->bsdf(sample, context, omegaOut, 
+				TScalar bsdfPdf;
+				shader->bsdf(sample, context, omegaOut, 
 					&omegaIn, &omegaIn + 1, &bsdf, &bsdfPdf);
 				if (bsdf && !scene()->isIntersecting(sample, shadowRay))
 				{
-					TScalar weight = 1;
+					const TScalar weight = isSingularLight ? 
+						TNumTraits::one : temp::squaredHeuristic(lightPdf, bsdfPdf);
 					result += bsdf * radiance * 
-						(weight * abs(omegaIn.z) / (n * pdf));
+						(weight * abs(omegaIn.z) / (n * lightPdf));
+				}
+			}
+			if (!isSingularLight)
+			{
+				TVector3D omegaIn;
+				Spectrum bsdf;
+				TScalar bsdfPdf;
+				shader->sampleBsdf(sample, context, omegaOut, bsdfSample.begin(), bsdfSample.begin() + 1, 
+					&omegaIn, &bsdf, &bsdfPdf, Shader::capsAll & ~Shader::capsSpecular);
+				if (bsdfPdf > 0 && bsdf)
+				{
+					TRay3D ray(target, context.shaderToWorld(omegaIn));
+					BoundedRay shadowRay;
+					TScalar lightPdf;
+					const Spectrum radiance = light->emission(sample, ray, shadowRay, lightPdf);
+					if (lightPdf > 0 && !scene()->isIntersecting(sample, shadowRay))
+					{
+						const TScalar weight = temp::squaredHeuristic(bsdfPdf, lightPdf);
+						result += bsdf * radiance * (weight * abs(omegaIn.z) / (n * bsdfPdf));
+					}
 				}
 			}
 			++lightSample;
@@ -570,38 +615,45 @@ const Spectrum PhotonMapper::traceDirect(
 
 
 const Spectrum PhotonMapper::gatherIndirect(
-	const Sample& sample, const IntersectionContext& context,
-	const TPoint3D& target, const TVector3D& omegaOut,
-	const TPoint2D* firstSample, const TPoint2D* lastSample,
-	GatherStage gatherStage) const
+		const Sample& sample, const IntersectionContext& context,
+		const TPoint3D& target, const TVector3D& omegaOut,
+		const TPoint2D* firstSample, const TPoint2D* lastSample,
+		size_t gatherStage) const
 {
-	static util::ThreadLocalVariable< std::vector<TVector3D> > omegaIns;
-	static util::ThreadLocalVariable< std::vector<Spectrum> > bsdfs;
-	static util::ThreadLocalVariable< std::vector<TScalar> > pdfs;
+	static PerThreadBuffer<TVector3D> omegaInsPerStage[numGatherStages_];
+	static PerThreadBuffer<Spectrum> bsdfsPerStage[numGatherStages_];
+	static PerThreadBuffer<TScalar> pdfsPerStage[numGatherStages_];
+	
+	PerThreadBuffer<TVector3D>& omegaIns = omegaInsPerStage[gatherStage];
+	PerThreadBuffer<Spectrum>& bsdfs = bsdfsPerStage[gatherStage];
+	PerThreadBuffer<TScalar>& pdfs = pdfsPerStage[gatherStage];
 
-	const int n = lastSample - firstSample;
-	omegaIns->resize(n);
-	bsdfs->resize(n);
-	pdfs->resize(n);
+	const int n = static_cast<int>(lastSample - firstSample);
+	omegaIns.growTo(n);
+	bsdfs.growTo(n);
+	pdfs.growTo(n);
 
 	LASS_ASSERT(context.shader());
 	context.shader()->sampleBsdf(sample, context, omegaOut,
-		firstSample, lastSample, &(*omegaIns)[0], &(*bsdfs)[0], &(*pdfs)[0]);
+		firstSample, lastSample, omegaIns.begin(), bsdfs.begin(), pdfs.begin());
 
 	Spectrum result;
 	for (int i = 0; i < n; ++i)
 	{
-		const TVector3D gatherDirection = context.shaderToWorld((*omegaIns)[i]);
-		const BoundedRay gatherRay(target, gatherDirection, tolerance);
-		Intersection gatherIntersection;
-		scene()->intersect(sample, gatherRay, gatherIntersection);
-		const TPoint3D gatherPoint = gatherRay.point(gatherIntersection.t());
-		IntersectionContext gatherContext(this);
-		scene()->localContext(sample, gatherRay, gatherIntersection, gatherContext);
-		const TVector3D gatherOmega = gatherContext.worldToShader(-gatherDirection);
-		const Spectrum radiance = estimateRadiance(sample, gatherContext, 
-			gatherPoint, gatherOmega, gatherStage);
-		result += (*bsdfs)[i] * radiance * abs(gatherOmega.z) / (n * (*pdfs)[i]);
+		const TVector3D direction = context.shaderToWorld(omegaIns[i]);
+		const BoundedRay ray(target, direction, tolerance);
+		Intersection intersection;
+		scene()->intersect(sample, ray, intersection);
+		if (intersection)
+		{
+			const TPoint3D hitPoint = ray.point(intersection.t());
+			IntersectionContext hitContext(this);
+			scene()->localContext(sample, ray, intersection, hitContext);
+			const TVector3D hitOmega = hitContext.worldToShader(-direction);
+			const Spectrum radiance = estimateRadiance(
+				sample, hitContext, hitPoint, hitOmega, gatherStage);
+			result += bsdfs[i] * radiance * abs(omegaIns[i].z) / (n * pdfs[i]);
+		}
 	}
 	return result;
 }
@@ -645,7 +697,7 @@ const Spectrum PhotonMapper::estimateIrradiance(
 const Spectrum PhotonMapper::estimateRadiance(
 		const Sample& sample, const IntersectionContext& context, 
 		const TPoint3D& point, const TVector3D& omegaOut,
-		GatherStage gatherStage) const
+		size_t gatherStage) const
 {
 	const Shader* const shader = context.shader();
 	if (!shader || !shader->hasCaps(Shader::capsDiffuse))
@@ -653,21 +705,21 @@ const Spectrum PhotonMapper::estimateRadiance(
 		return Spectrum();
 	}
 
-	if (context.t() < estimationRadius_[mtGlobal] && gatherStage == primaryGather)
+	if (context.t() < estimationRadius_[mtGlobal] && gatherStage + 1 < numGatherStages_)
 	{
 		static util::ThreadLocalVariable< num::RandomMT19937 > random2nd;
 		static util::ThreadLocalVariable< num::DistributionUniform<TScalar, num::RandomMT19937> > uniform2nd(*random2nd);
-		static util::ThreadLocalVariable< std::vector<TPoint2D> > samples2nd;
+		static PerThreadBuffer<TPoint2D> samples2nd;
 		const size_t n = 8;
-		samples2nd->resize(n);
+		samples2nd.growTo(n);
 		for (size_t i = 0; i < n; ++i)
 		{
-			(*samples2nd)[i] = TPoint2D((*uniform2nd)(), (*uniform2nd)());
+			samples2nd[i] = TPoint2D((*uniform2nd)(), (*uniform2nd)());
 		}
 		return gatherIndirect(sample, context, point, omegaOut, 
-			&(*samples2nd)[0], &(*samples2nd)[0] + n, secondaryGather);
+			samples2nd.begin(), samples2nd.begin() + n, gatherStage + 1);
 	}
-	
+
 	if (!irradianceMap_.isEmpty())
 	{
 		const Irradiance& nearest = *irradianceMap_.nearestNeighbour(point);

@@ -48,6 +48,8 @@ public:
 
 	LightContext(const TObjectPath& objectPathToLight, const SceneLight& light);
 
+	void setSceneBound(const TAabb3D& bound, const TimePeriod& period);
+
 	const TObjectPath& objectPath() const { return objectPath_; }
 	const SceneLight& light() const { return *light_; }
 
@@ -57,27 +59,32 @@ public:
 
     void requestSamples(const TSamplerPtr& sampler);
 
+	const Spectrum emission(const Sample& cameraSample, const TRay3D& ray,
+		BoundedRay& shadowRay, TScalar& pdf) const;
 	const Spectrum sampleEmission(const Sample& cameraSample, const TPoint2D& sample,  
 		const TPoint3D& target, const TVector3D& targetNormal, BoundedRay& shadowRay, 
 		TScalar& pdf) const;
-	const Spectrum sampleEmission(const TPoint2D& sampleA, const TPoint2D& sampleB,
-		TRay3D& emissionRay, TScalar& pdf) const;
+	const Spectrum sampleEmission(const Sample& cameraSample, const TPoint2D& lightSampleA, 
+		const TPoint2D& lightSampleB, BoundedRay& emissionRay, TScalar& pdf) const;
+
 	const Spectrum totalPower() const;
+	const bool isSingular() const;
 
 private:
 
 	void setTime(TTime time) const;
 
+	TAabb3D localBound_;
 	mutable TTransformation3D localToWorld_;	/**< concatenated local to world transformation */
 	mutable TTime timeOfTransformation_;		/**< time localToWorld_ was calculated for */
 	TObjectPath objectPath_;					/**< path in object tree to light (light included) */
 	const SceneLight* light_;					/**< pointer to actual light object */
-	bool hasMotion_;							/**< does light move in time? */
 	int idLightSamples_;			
 	int idBsdfSamples_;
 	int idBsdfComponentSamples_;
+	bool hasMotion_;							/**< does light move in time? */
 
-	static util::CriticalSection mutex_;
+	static util::CriticalSection lock_;
 };
 
 typedef std::vector<LightContext> TLightContexts;

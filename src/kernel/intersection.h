@@ -93,12 +93,15 @@ private:
 		{
 		}
 	};
-	
+
 	typedef stde::lass_allocator<
 			IntersectionInfo,
 			util::AllocatorSingleton<
-				util::AllocatorVariableHybrid<
-					util::AllocatorFreeList<>, 256
+				util::AllocatorPerThread<
+					util::AllocatorVariableHybrid<
+						util::AllocatorFreeList<>, 
+						256
+					>						
 				>
 			>
 		>

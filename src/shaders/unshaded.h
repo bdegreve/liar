@@ -62,7 +62,8 @@ private:
 	virtual void doSampleBsdf(
 		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut, 
 		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
-		TVector3D* firstOmegaIn, Spectrum* firstValue, TScalar* firstPdf) const;
+		TVector3D* firstOmegaIn, Spectrum* firstValue, TScalar* firstPdf,
+		unsigned allowedCaps) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);

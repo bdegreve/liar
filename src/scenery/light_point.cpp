@@ -107,25 +107,24 @@ void LightPoint::setAttenuation(const TAttenuationPtr& iAttenuation)
 
 // --- private -------------------------------------------------------------------------------------
 
-void LightPoint::doIntersect(const Sample& sample, const BoundedRay& iRAy, 
-							 Intersection& result) const
+void LightPoint::doIntersect(
+		const Sample& sample, const BoundedRay& ray, Intersection& result) const
 {
 	result = Intersection::empty();
 }
 
 
 
-const bool LightPoint::doIsIntersecting(const Sample& sample, 
-										const BoundedRay& ray) const
+const bool LightPoint::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
 {
 	return false;
 }
 
 
 
-void LightPoint::doLocalContext(const Sample& sample, const BoundedRay& ray,
-								const Intersection& intersection, 
-								IntersectionContext& result) const
+void LightPoint::doLocalContext(
+		const Sample& sample, const BoundedRay& ray,
+		const Intersection& intersection, IntersectionContext& result) const
 {
 	LASS_THROW("since LightPoint can never return an intersection, you've called dead code.");
 }
@@ -154,13 +153,19 @@ const TScalar LightPoint::doArea() const
 
 
 
+const Spectrum LightPoint::doEmission(
+		const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+{
+	shadowRay = ray;
+	pdf = 0;
+	return Spectrum();
+}
+
+
 const Spectrum LightPoint::doSampleEmission(
-		const Sample& sample,
-		const TPoint2D& lightSample, 
-		const TPoint3D& target,
-		const TVector3D& targetNormal,
-		BoundedRay& shadowRay,
-		TScalar& pdf) const
+		const Sample& sample, const TPoint2D& lightSample, 
+		const TPoint3D& target,	const TVector3D& targetNormal,
+		BoundedRay& shadowRay, TScalar& pdf) const
 {
 	TVector3D toLight = position_ - target;
     const TScalar squaredDistance = (position_ - target).squaredNorm();
@@ -176,17 +181,18 @@ const Spectrum LightPoint::doSampleEmission(
 
 
 
-const Spectrum LightPoint::doSampleEmission(const TPoint2D& sampleA, const TPoint2D& sampleB,
-		const TPoint3D& sceneCenter, TScalar sceneRadius, TRay3D& emissionRay, TScalar& pdf) const
+const Spectrum LightPoint::doSampleEmission(
+		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
+		const TAabb3D& sceneBound, BoundedRay& emissionRay, TScalar& pdf) const
 {
-	const TVector3D direction = num::uniformSphere(sampleB, pdf).position();
-	emissionRay = TRay3D(position_, direction);
+	const TVector3D direction = num::uniformSphere(lightSampleA, pdf).position();
+	emissionRay = BoundedRay(position_, direction, tolerance);
 	return intensity_;
 }
 
 
 
-const Spectrum LightPoint::doTotalPower(TScalar sceneRadius) const
+const Spectrum LightPoint::doTotalPower(const TAabb3D& sceneBound) const
 {
 	return (4 * TNumTraits::pi) * intensity_;
 }
@@ -196,6 +202,13 @@ const Spectrum LightPoint::doTotalPower(TScalar sceneRadius) const
 const unsigned LightPoint::doNumberOfEmissionSamples() const
 {
 	return 1;
+}
+
+
+
+const bool LightPoint::doIsSingular() const
+{
+	return true;
 }
 
 
