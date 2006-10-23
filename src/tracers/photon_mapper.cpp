@@ -230,10 +230,25 @@ void PhotonMapper::doPreProcess(const kernel::TSamplerPtr& sampler, const TimePe
 	buildIrradianceMap();
 }
 
+namespace temp
+{
+	typedef util::AllocatorSingleton<
+		util::AllocatorPerThread<
+			util::AllocatorVariableHybrid<
+				util::AllocatorFreeList<>,
+				128
+			>
+		>
+	>
+	CustomAllocator;
 
+	template <typename T>
+	class custom_stl_allocator: public stde::lass_allocator<T, CustomAllocator> {};
+}
 
 const Spectrum PhotonMapper::doCastRay(
-		const kernel::Sample& sample, const kernel::DifferentialRay& primaryRay) const
+		const kernel::Sample& sample, const kernel::DifferentialRay& primaryRay,
+		unsigned generation) const
 {
 	Intersection intersection;
 	scene()->intersect(sample, primaryRay, intersection);
@@ -245,23 +260,26 @@ const Spectrum PhotonMapper::doCastRay(
 
 	IntersectionContext context(this);
 	scene()->localContext(sample, primaryRay, intersection, context);
-
-	const TVector3D targetNormal = context.shaderToWorld(TVector3D(0, 0, 1));
-	if (isVisualizingPhotonMap_)
-	{
-		return estimateIrradiance(target, targetNormal);
-	}
+	context.flipTo(-primaryRay.direction());
 
 	const Shader* const shader = context.shader();
 	if (!shader)
 	{
 		// leaving or entering something
-		PrimaryRay continuedRay = bound(primaryRay, intersection.t() + tolerance);
+		const DifferentialRay continuedRay = bound(primaryRay, intersection.t() + tolerance);
 		return this->castRay(sample, continuedRay);
 	}
-	const TVector3D omegaOut = context.worldToShader(-primaryRay.direction());
 
-	Spectrum result = shader->emission(sample, context, omegaOut)
+	const TVector3D targetNormal = context.shaderToWorld(TVector3D(0, 0, 1));
+	const TVector3D omegaOut = context.worldToShader(-primaryRay.direction());
+	LASS_ASSERT(omegaOut.z >= 0);
+
+	if (isVisualizingPhotonMap_)
+	{
+		return estimateIrradiance(target, targetNormal);
+	}
+
+	Spectrum result = shader->emission(sample, context, omegaOut);
 
 	if (isRayTracingDirect_)
 	{
@@ -283,14 +301,54 @@ const Spectrum PhotonMapper::doCastRay(
 		}
 	}
 
-	if (shader->hasCaps(Shader::capsReflection | Shader::capsSpecular))
+	if (shader->hasCaps(Shader::capsSpecular) || shader->hasCaps(Shader::capsGlossy))
 	{
-		TPoint2d brdfSample(.5, .5);
-		TVector3D omegaIn;
-		Spectrum bsdf;
-		TScalar pdf;
-		shader->sampleBrdf(sample, context, omegaOut, &bsdfSample, &bsdfSample + 1, &omegaIn, &bsdf& pdf);
-		result += this->castRay(sample, reflectedRay);
+		if (shader->hasCaps(Shader::capsReflection) && shader->idReflectionSamples() != -1)
+		{
+			Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idReflectionSamples());
+			const size_t n = generation == 0 ? bsdfSample.size() : 1;
+			std::vector<TVector3D, temp::custom_stl_allocator<TVector3D> > omegaIn(n);
+			std::vector<Spectrum, temp::custom_stl_allocator<Spectrum> > bsdf(n);
+			std::vector<TScalar, temp::custom_stl_allocator<TScalar> > pdf(n);
+			shader->sampleBsdf(sample, context, omegaOut, bsdfSample.begin(), bsdfSample.begin() + n, &omegaIn[0], &bsdf[0], &pdf[0],
+				Shader::capsReflection | Shader::capsSpecular | Shader::capsGlossy);
+
+			const TPoint3D beginCentral = target;
+			const TPoint3D beginI = beginCentral + context.dPoint_dI();
+			const TPoint3D beginJ = beginCentral + context.dPoint_dJ();
+
+			const TVector3D incident = primaryRay.centralRay().direction();
+			const TVector3D normal = context.normal();
+			const TScalar cosTheta = -dot(incident, normal);
+
+			const TVector3D dIncident_dI = primaryRay.differentialI().direction() - incident;
+			const TScalar dCosTheta_dI = -dot(dIncident_dI, normal) - dot(incident, context.dNormal_dI());
+			const TVector3D dReflected_dI = dIncident_dI + 2 * (dCosTheta_dI * normal + cosTheta * context.dNormal_dI());
+
+			const TVector3D dIncident_dJ = primaryRay.differentialJ().direction() - incident;
+			const TScalar dCosTheta_dJ = -dot(dIncident_dJ, normal) - dot(incident, context.dNormal_dJ());
+			const TVector3D dReflected_dJ = dIncident_dJ + 2 * (dCosTheta_dJ * normal + cosTheta * context.dNormal_dJ());
+
+			for (size_t i = 0; i < n; ++i)
+			{
+				if (pdf[i] > 0 && bsdf[i])
+				{
+					LASS_ASSERT(omegaIn[i].z > 0);
+					const TVector3D directionCentral = context.shaderToWorld(omegaIn[i]);
+					const TVector3D test = context.shaderToWorld(omegaOut);
+					LASS_ASSERT(dot(normal, directionCentral) > 0);
+					LASS_ASSERT(dot(normal, incident) < 0);
+					const TVector3D directionI = directionCentral + dReflected_dI;
+					const TVector3D directionJ = directionCentral + dReflected_dJ;
+
+					const DifferentialRay reflectedRay(
+						BoundedRay(beginCentral, directionCentral, tolerance),
+						TRay3D(beginI, directionI),
+						TRay3D(beginJ, directionJ));
+					result += bsdf[i] * castRay(sample, reflectedRay) * (num::abs(omegaIn[i].z) / (n * pdf[i]));
+				}
+			}
+		}
 	}
 
 	return result;
@@ -389,7 +447,7 @@ void PhotonMapper::buildPhotonMap(MapType type, const TLightCdf& lightCdf,
 	}
 
 #pragma LASS_NOTE("diagnostic code [Bramz]")
-#ifndef NDEBUG
+#if 1//ndef NDEBUG
 	if (photonBuffer_[type].size() > 0)
 	{
 		std::vector<TScalar> powers;
@@ -454,6 +512,7 @@ void PhotonMapper::tracePhoton(
 
 	IntersectionContext context(this);
 	scene()->localContext(sample, ray, intersection, context);
+	context.flipTo(-ray.direction());
 	const Shader* const shader = context.shader();
 	if (!shader)
 	{
@@ -518,8 +577,7 @@ void PhotonMapper::tracePhoton(
 
 void PhotonMapper::buildIrradianceMap()
 {
-#pragma LASS_FIXME("KdTree needs reset() [Bramz]")
-	irradianceMap_.reset(irradianceBuffer_.begin(), irradianceBuffer_.begin());
+	irradianceMap_.reset();
 	if (ratioPrecomputedIrradiance_ > 0 && numFinalGatherRays_ > 0 && isRayTracingDirect_)
 	{
 		util::ProgressIndicator	progress("precomputing irradiances");
@@ -556,11 +614,18 @@ const Spectrum PhotonMapper::traceDirect(
 	for (TLightContexts::const_iterator light = lights().begin(); light != end; ++light)
 	{
 		Sample::TSubSequence2D lightSample = sample.subSequence2D(light->idLightSamples());
+		/*
 		Sample::TSubSequence2D bsdfSample = sample.subSequence2D(light->idBsdfSamples());
 		Sample::TSubSequence1D componentSample = sample.subSequence1D(light->idBsdfComponentSamples());
 		LASS_ASSERT(bsdfSample.size() == lightSample.size() && componentSample.size() == lightSample.size());
+		*/
 		const TScalar n = static_cast<TScalar>(lightSample.size());
 		const bool isSingularLight = light->isSingular();
+		unsigned caps = Shader::capsAll & ~Shader::capsSpecular;
+		if (!isSingularLight)
+		{
+			caps &= ~Shader::capsGlossy;
+		}
 
 		while (lightSample)
 		{
@@ -574,7 +639,7 @@ const Spectrum PhotonMapper::traceDirect(
 				Spectrum bsdf;
 				TScalar bsdfPdf;
 				shader->bsdf(sample, context, omegaOut, 
-					&omegaIn, &omegaIn + 1, &bsdf, &bsdfPdf);
+					&omegaIn, &omegaIn + 1, &bsdf, &bsdfPdf, caps);
 				if (bsdf && !scene()->isIntersecting(sample, shadowRay))
 				{
 					const TScalar weight = isSingularLight ? 
@@ -583,6 +648,7 @@ const Spectrum PhotonMapper::traceDirect(
 						(weight * abs(omegaIn.z) / (n * lightPdf));
 				}
 			}
+			/*
 			if (!isSingularLight)
 			{
 				TVector3D omegaIn;
@@ -603,9 +669,12 @@ const Spectrum PhotonMapper::traceDirect(
 					}
 				}
 			}
+			*/
 			++lightSample;
+			/*
 			++bsdfSample;
 			++componentSample;
+			*/
 		}
 	}
 
@@ -635,24 +704,28 @@ const Spectrum PhotonMapper::gatherIndirect(
 
 	LASS_ASSERT(context.shader());
 	context.shader()->sampleBsdf(sample, context, omegaOut,
-		firstSample, lastSample, omegaIns.begin(), bsdfs.begin(), pdfs.begin());
+		firstSample, lastSample, omegaIns.begin(), bsdfs.begin(), pdfs.begin(), Shader::capsReflection | Shader::capsDiffuse);
 
 	Spectrum result;
 	for (int i = 0; i < n; ++i)
 	{
-		const TVector3D direction = context.shaderToWorld(omegaIns[i]);
-		const BoundedRay ray(target, direction, tolerance);
-		Intersection intersection;
-		scene()->intersect(sample, ray, intersection);
-		if (intersection)
+		if (pdfs[i] > 0 && bsdfs[i])
 		{
-			const TPoint3D hitPoint = ray.point(intersection.t());
-			IntersectionContext hitContext(this);
-			scene()->localContext(sample, ray, intersection, hitContext);
-			const TVector3D hitOmega = hitContext.worldToShader(-direction);
-			const Spectrum radiance = estimateRadiance(
-				sample, hitContext, hitPoint, hitOmega, gatherStage);
-			result += bsdfs[i] * radiance * abs(omegaIns[i].z) / (n * pdfs[i]);
+			const TVector3D direction = context.shaderToWorld(omegaIns[i]);
+			const BoundedRay ray(target, direction, tolerance);
+			Intersection intersection;
+			scene()->intersect(sample, ray, intersection);
+			if (intersection)
+			{
+				const TPoint3D hitPoint = ray.point(intersection.t());
+				IntersectionContext hitContext(this);
+				scene()->localContext(sample, ray, intersection, hitContext);
+				hitContext.flipTo(-ray.direction());
+				const TVector3D hitOmega = hitContext.worldToShader(-direction);
+				const Spectrum radiance = estimateRadiance(
+					sample, hitContext, hitPoint, hitOmega, gatherStage);
+				result += bsdfs[i] * radiance * abs(omegaIns[i].z) / (n * pdfs[i]);
+			}
 		}
 	}
 	return result;
@@ -729,7 +802,7 @@ const Spectrum PhotonMapper::estimateRadiance(
 			TScalar pdf;
 			Spectrum bsdf;
 			shader->bsdf(sample, context, omegaOut, 
-				&omegaIrradiance, &omegaIrradiance + 1, &bsdf, &pdf);
+				&omegaIrradiance, &omegaIrradiance + 1, &bsdf, &pdf, Shader::capsAll);
 			return pdf > 0 && bsdf ? bsdf * nearest.irradiance : Spectrum();
 		}
 	}
@@ -749,7 +822,7 @@ const Spectrum PhotonMapper::estimateRadiance(
 		TScalar pdf;
 		Spectrum bsdf;
 		shader->bsdf(sample, context, omegaOut, 
-			&omegaPhoton, &omegaPhoton + 1, &bsdf, &pdf);
+			&omegaPhoton, &omegaPhoton + 1, &bsdf, &pdf, Shader::capsAll);
 		if (pdf > 0 && bsdf)
 		{
 			result += bsdf * i->object()->power;

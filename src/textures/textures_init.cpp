@@ -33,6 +33,7 @@
 #include "image.h"
 #include "linear_interpolator.h"
 #include "mix_2.h"
+#include "product.h"
 #include "time.h"
 #include "uv.h"
 
@@ -60,6 +61,7 @@ LIAR_TEXTURES_DLL void inittextures(void)
 	PY_INJECT_CLASS_IN_MODULE(GridBoard, textures, "mixes two textures in 2D grid pattern")
 	PY_INJECT_CLASS_IN_MODULE(Image, textures, "image file")
 	PY_INJECT_CLASS_IN_MODULE(LinearInterpolator, textures, "interpolates textures using gray value of control texture as parameter")
+	PY_INJECT_CLASS_IN_MODULE(Product, textures, "makes product of child textures")
 	PY_INJECT_CLASS_IN_MODULE(Time, textures, "evaluates to sampled time")
 	PY_INJECT_CLASS_IN_MODULE(Uv, textures, "mixes two textures by the u and v context channels")
 

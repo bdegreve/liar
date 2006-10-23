@@ -38,7 +38,7 @@ PY_CLASS_MEMBER_RW_DOC(Mirror, "reflectance", reflectance, setReflectance, "text
 // --- public --------------------------------------------------------------------------------------
 
 Mirror::Mirror():
-	Shader(capsReflection, capsAreStrict),
+	Shader(capsReflection | capsSpecular),
 	reflectance_(Texture::white())
 {
 }
@@ -46,7 +46,7 @@ Mirror::Mirror():
 
 
 Mirror::Mirror(const TTexturePtr& reflectance):
-	Shader(capsReflection, capsAreStrict),
+	Shader(capsReflection | capsSpecular),
 	reflectance_(reflectance)
 {
 }
@@ -73,16 +73,19 @@ void Mirror::setReflectance(const TTexturePtr& reflectance)
 
 // --- private -------------------------------------------------------------------------------------
 
+const unsigned Mirror::doNumReflectionSamples() const
+{
+	return 1;
+}
+
+
+
 void Mirror::doBsdf(
 		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
 		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn,
-		Spectrum* firstValue, TScalar* firstPdf) const
+		Spectrum* firstValue, TScalar* firstPdf, unsigned allowCaps) const
 {
-	while (firstOmegaIn++ != lastOmegaIn)
-	{
-		*firstValue++ = Spectrum();
-		*firstPdf++ = 0;
-	}
+	setBlackBsdf(firstOmegaIn, lastOmegaIn, firstValue, firstPdf);
 }
 
 
@@ -93,14 +96,19 @@ void Mirror::doSampleBsdf(
 		TVector3D* firstOmegaOut, Spectrum* firstValue, TScalar* firstPdf,
 		unsigned allowedCaps) const
 {
-	LASS_ASSERT(testCaps(allowedCaps, caps()));
+	if (!testCaps(allowedCaps, caps()))
+	{
+		setBlackSamples(firstBsdfSample, lastBsdfSample, firstOmegaOut, firstValue, firstPdf);
+		return;
+	}
+
 	const Spectrum r = reflectance_->lookUp(sample, context);
 	const TVector3D omegaOut(-omegaIn.x, -omegaIn.y, omegaIn.z);
 	while (firstBsdfSample++ != lastBsdfSample)
 	{
 		*firstOmegaOut++ = omegaOut;
 		*firstValue++ = r;
-		*firstPdf++ = 1;
+		*firstPdf++ = omegaOut.z;
 	}
 }
 

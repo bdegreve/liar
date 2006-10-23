@@ -68,22 +68,19 @@ public:
 
 private:
 
-	virtual void doBsdf(
+	const unsigned doNumReflectionSamples() const;
+
+	void doBsdf(
 		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
 		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn, 
-		Spectrum* firstValue, TScalar* firstPdf) const;
-	virtual void doSampleBsdf(
+		Spectrum* firstValue, TScalar* firstPdf, unsigned allowedCaps) const;
+	void doSampleBsdf(
 		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut, 
 		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
-		TVector3D* firstOmegaIn, Spectrum* firstValue, TScalar* firstPdf) const;
-	void doRequestSamples(const TSamplerPtr& sampler);
-
-	const Spectrum brdf(const TVector3D& k1, const TVector3D& k2, const TVector3D& h,
-		const TVector3D& n, const TVector3D& u, const TVector3D& v,
-		const Spectrum& Rs, const Spectrum& Rd, TScalar n_u, TScalar n_v) const;
-	const TVector3D generateH(const TVector2D& sample, 
-		const TVector3D& n, const TVector3D& u, const TVector3D& v, 
-		TScalar n_u, TScalar n_v, TScalar& pdf) const ;
+		TVector3D* firstOmegaIn, Spectrum* firstValue, TScalar* firstPdf,
+		unsigned allowedCaps) const;
+	
+	const TVector3D sampleH(const TPoint2D& sample, TScalar nu, TScalar nv/*, TScalar& pdf*/) const ;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
@@ -93,7 +90,6 @@ private:
 	TTexturePtr specularPowerU_;
 	TTexturePtr specularPowerV_;
 	unsigned numberOfSamples_;
-	int samplesId_;
 };
 
 }

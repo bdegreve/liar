@@ -51,10 +51,12 @@ public:
 
 private:
 
+	const unsigned doNumReflectionSamples() const;
+
 	virtual void doBsdf(
 		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
 		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn, 
-		Spectrum* firstValue, TScalar* firstPdf) const;
+		Spectrum* firstValue, TScalar* firstPdf, unsigned allowCaps) const;
 
 	virtual void doSampleBsdf(
 		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut, 

@@ -38,7 +38,7 @@ PY_CLASS_MEMBER_RW_DOC(Lambert, "diffuse", diffuse, setDiffuse, "texture for dif
 // --- public --------------------------------------------------------------------------------------
 
 Lambert::Lambert():
-	Shader(capsReflection | capsDiffuse, capsAreStrict),
+	Shader(capsReflection | capsDiffuse),
 	diffuse_(Texture::white())
 {
 }
@@ -46,7 +46,7 @@ Lambert::Lambert():
 
 
 Lambert::Lambert(const TTexturePtr& iDiffuse):
-	Shader(capsReflection | capsDiffuse, capsAreStrict),
+	Shader(capsReflection | capsDiffuse),
 	diffuse_(iDiffuse)
 {
 }
@@ -76,15 +76,21 @@ void Lambert::setDiffuse(const TTexturePtr& iDiffuse)
 void Lambert::doBsdf(
 		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
 		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn,
-		Spectrum* firstValue, TScalar* firstPdf) const
+		Spectrum* firstValue, TScalar* firstPdf, unsigned allowedCaps) const
 {
+	if (!testCaps(allowedCaps, caps()))
+	{
+		setBlackBsdf(firstOmegaIn, lastOmegaIn, firstValue, firstPdf);
+		return;
+	}
+
 	const Spectrum diffuseOverPi = diffuse_->lookUp(sample, context) / TNumTraits::pi;
 	while (firstOmegaIn != lastOmegaIn)
 	{
-		if (firstOmegaIn->z * omegaOut.z > 0)
+		if (firstOmegaIn->z > 0)
 		{
 			*firstValue++ = diffuseOverPi;
-			*firstPdf++ = num::abs(firstOmegaIn->z) / TNumTraits::pi;
+			*firstPdf++ = firstOmegaIn->z / TNumTraits::pi;
 		}
 		else
 		{
@@ -102,15 +108,16 @@ void Lambert::doSampleBsdf(
 		TVector3D* firstDirOut, Spectrum* firstValue, TScalar* firstPdf,
 		unsigned allowedCaps) const
 {
-	LASS_ASSERT(testCaps(allowedCaps, caps()));
+	if (!testCaps(allowedCaps, caps()))
+	{
+		setBlackSamples(firstBsdfSample, lastBsdfSample, firstDirOut, firstValue, firstPdf);
+		return;
+	}
+
 	const Spectrum diffuseOverPi = diffuse_->lookUp(sample, context) / TNumTraits::pi;
-	const TScalar zSign = dirIn.z < 0 ? -1 : 1;
 	while (firstBsdfSample != lastBsdfSample)
 	{
-		TVector3D localDirOut = 
-			num::cosineHemisphere(*firstBsdfSample++, *firstPdf++).position();
-		localDirOut.z *= zSign;
-		*firstDirOut++ = localDirOut;
+		*firstDirOut++ = num::cosineHemisphere(*firstBsdfSample++, *firstPdf++).position();
 		*firstValue++ = diffuseOverPi;
 	}
 }

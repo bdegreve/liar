@@ -101,6 +101,20 @@ inline const Spectrum::TValue Spectrum::total() const
 
 
 
+inline const Spectrum::TValue Spectrum::absAverage() const
+{
+	return absTotal() / numberOfBands_;
+}
+
+
+
+inline const Spectrum::TValue Spectrum::absTotal() const
+{
+	return num::abs(xyz_.x) + num::abs(xyz_.y) + num::abs(xyz_.z);
+}
+
+
+
 inline const Spectrum& Spectrum::operator+() const
 {
 	return *this;

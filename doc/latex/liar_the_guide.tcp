@@ -6,7 +6,7 @@ Version=4
 MainFile=liar_the_guide.tex
 UseBibTeX=1
 UseMakeIndex=0
-ActiveProfile=LaTeX => PS => PDF
+ActiveProfile=LaTeX => DVI
 ProjectLanguage=en
 ProjectDialect=US
 

@@ -299,6 +299,38 @@ Assume $f$ has $N$ key textures $\left(c_i, K_i\right)$ with $c_i \leq c_{i+1}$:
 		insert the pair $\left(c, K\right)$ to the list of key textures at position $i$ for which $c_{i-1} < c \leq c_i$.
 \end{itemize}
 
+
+
+\subsection{Product}
+
+Calculates product of $N$ factor textures $F_i$.  Evaluates to black if there are no factors.
+
+\begin{equation}
+	f\left(\ldots\right) = \left\{
+		\begin{array}{lcl}
+			\prod_{i=0}^{N-1} F_i\left(\ldots\right) & \Leftrightarrow & N > 0 \\
+			0 & \Leftrightarrow & N = 0 \\
+		\end{array}
+	\right.
+\end{equation}
+
+
+\subsubsection*{constructors}
+\begin{itemize}
+	\item \kw{Product()}:
+		creates a \kw{Product} without factors, $N=0$.
+	\item \kw{Product([$F_0$, $F_1$, \ldots, $F_{N-1}$])}:
+		creates a \kw{Product} with $N$ factor textures $F_i$.
+\end{itemize}
+
+
+\subsubsection*{members}
+\begin{itemize}
+	\item \kw{factors}:
+		get and set the list of factor textures $F_i$.
+\end{itemize}
+
+
  
 \subsection{Time}
 

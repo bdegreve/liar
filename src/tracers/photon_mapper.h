@@ -135,7 +135,8 @@ private:
 
 	void doRequestSamples(const TSamplerPtr& sampler);
 	void doPreProcess(const TSamplerPtr& sampler, const TimePeriod& period);
-	const Spectrum doCastRay(const Sample& sample, const DifferentialRay& primaryRay) const;
+	const Spectrum doCastRay(const Sample& sample, const DifferentialRay& primaryRay,
+		unsigned generation) const;
 	const TLightSamplesRange doSampleLights(const Sample& sample,
 		const TPoint3D& target, const TVector3D& targetNormal) const;
 	const TRayTracerPtr doClone() const;

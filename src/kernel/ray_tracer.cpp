@@ -164,7 +164,7 @@ void RayTracer::setState(const TPyObjectPtr& state)
 
 RayTracer::RayTracer():
 	maxRayGeneration_(8),
-	rayGeneration_(0)
+	rayGeneration_(-1)
 {
 }
 

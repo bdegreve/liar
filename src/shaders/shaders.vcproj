@@ -208,6 +208,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\ashikhmin_shirley.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\lambert.cpp"
 				>
 			</File>
@@ -242,6 +246,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\sum.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\unshaded.cpp"
 				>
 			</File>
@@ -269,6 +277,10 @@
 			</File>
 			<File
 				RelativePath=".\simple.h"
+				>
+			</File>
+			<File
+				RelativePath=".\sum.h"
 				>
 			</File>
 			<File

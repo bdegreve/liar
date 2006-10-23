@@ -69,7 +69,7 @@ public:
     const Spectrum castRay(const Sample& sample, const DifferentialRay& primaryRay) const 
     { 
 		RayGenerationIncrementor incrementor(*this);
-		if (rayGeneration_ <= maxRayGeneration_)
+		if (rayGeneration_ < maxRayGeneration_)
 		{
 			return doCastRay(sample, primaryRay, rayGeneration_);
 		}
@@ -101,7 +101,7 @@ private:
 	virtual void doRequestSamples(const TSamplerPtr& sampler) = 0;
     virtual void doPreProcess(const TSamplerPtr& samper, const TimePeriod& period) = 0;
     virtual const Spectrum doCastRay(const Sample& sample, 
-		const DifferentialRay& primaryRay) const = 0;
+		const DifferentialRay& primaryRay, unsigned generation) const = 0;
 	virtual const TLightSamplesRange doSampleLights(const Sample& sample, 
 		const TPoint3D& target, const TVector3D& targetNormal) const = 0;
 	virtual const TRayTracerPtr doClone() const = 0;

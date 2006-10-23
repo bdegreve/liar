@@ -39,7 +39,7 @@ PY_CLASS_MEMBER_RW_DOC(Unshaded, "colour", colour, setColour, "texture")
 // --- public --------------------------------------------------------------------------------------
 
 Unshaded::Unshaded():
-	Shader(Shader::capsEmission, capsAreStrict),
+	Shader(Shader::capsEmission),
 	colour_(Texture::white())
 {
 }
@@ -47,7 +47,7 @@ Unshaded::Unshaded():
 
 
 Unshaded::Unshaded(const TTexturePtr& iColour):
-	Shader(Shader::capsEmission, capsAreStrict),
+	Shader(Shader::capsEmission),
 	colour_(iColour)
 {
 }
@@ -85,7 +85,7 @@ const Spectrum Unshaded::doEmission(const Sample& sample, const IntersectionCont
 void Unshaded::doBsdf(
 		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
 		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn,
-		Spectrum* firstValue, TScalar* firstPdf) const
+		Spectrum* firstValue, TScalar* firstPdf, unsigned allowCaps) const
 {
 	while (firstOmegaIn != lastOmegaIn)
 	{

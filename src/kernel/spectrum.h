@@ -58,6 +58,8 @@ public:
 	
 	const TValue average() const;
 	const TValue total() const;
+	const TValue absAverage() const;
+	const TValue absTotal() const;
 
 	const Spectrum& operator+() const;
 	const Spectrum operator-() const;

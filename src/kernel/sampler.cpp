@@ -52,6 +52,10 @@ TSamplerPtr& Sampler::defaultSampler()
 
 const int Sampler::requestSubSequence1D(unsigned requestedSize)
 {
+	if (requestedSize == 0)
+	{
+		return -1;
+	}
 	const unsigned size = doRoundSize1D(requestedSize);
 	totalSubSequenceSize1D_ += size;
 	subSequenceSize1D_.push_back(size);
@@ -65,6 +69,10 @@ const int Sampler::requestSubSequence1D(unsigned requestedSize)
 
 const int Sampler::requestSubSequence2D(unsigned requestedSize)
 {
+	if (requestedSize == 0)
+	{
+		return -1;
+	}
 	const unsigned size = doRoundSize2D(requestedSize);
 	totalSubSequenceSize2D_ += size;
 	subSequenceSize2D_.push_back(size);

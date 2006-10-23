@@ -143,10 +143,10 @@ inline void SceneObject::localContext(const Sample& sample, const BoundedRay& ra
     {
         result.setShader(shader_);
     }
-	if (intersection.level() == 0) // top level
-	{
-		result.flipTo(-ray.direction());
-	}
+	//if (intersection.level() == 0) // top level
+	//{
+	//	result.flipTo(-ray.direction());
+	//}
 }
 
 
@@ -168,7 +168,7 @@ inline void SceneObject::localContext(const Sample& sample, const DifferentialRa
 		const Intersection& intersection, IntersectionContext& result) const
 {
 	localContext(sample, ray.centralRay(), intersection, result);
-	result.setScreenSpaceDifferentials(ray);
+	result.setScreenSpaceDifferentials(transform(ray, result.worldToLocal()));
 }
 
 

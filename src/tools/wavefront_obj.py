@@ -32,7 +32,7 @@ def load(filename):
 	faces = []
 	numFaces = 0
 	groups = []
-	materials = {'': liar.shaders.Simple(liar.textures.Constant(liar.rgb(1, 1, 1)))}
+	materials = {'': liar.shaders.Lambert(liar.textures.Constant(liar.rgb(1, 1, 1)))}
 	currentMaterial = materials['']
 	
 	def _int_or_none(x):

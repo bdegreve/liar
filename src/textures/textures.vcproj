@@ -239,6 +239,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\product.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\textures_common.cpp"
 				>
 				<FileConfiguration
@@ -302,6 +306,10 @@
 			</File>
 			<File
 				RelativePath=".\mix_2.h"
+				>
+			</File>
+			<File
+				RelativePath=".\product.h"
 				>
 			</File>
 			<File

@@ -89,6 +89,9 @@ public:
 	const TTransformation3D worldToShader() const { return shaderToWorld().inverse(); }
 	const TVector3D worldToShader(const TVector3D& v) const { return prim::transform(v, worldToShader()); }
 
+	const TTransformation3D& localToWorld() const { LASS_ASSERT(shader_); return localToWorld_; }
+	const TTransformation3D worldToLocal() const { return localToWorld().inverse(); }
+
 private:
 
 	void setScreenSpaceDifferentialsI(const TRay3D& ray, TVector3D& oDPoint, 
@@ -118,6 +121,7 @@ private:
 	const RayTracer* tracer_;	/**< tracer to be used */
 
 	TTransformation3D shaderToWorld_;
+	TTransformation3D localToWorld_;
 
 	bool hasScreenSpaceDifferentials_;
 };

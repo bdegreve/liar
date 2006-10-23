@@ -23,6 +23,7 @@
 
 #include "kernel_common.h"
 #include "shader.h"
+#include "sampler.h"
 
 namespace liar
 {
@@ -44,16 +45,31 @@ Shader::~Shader()
 
 void Shader::requestSamples(const TSamplerPtr& sampler)
 {
+	idReflectionSamples_ = sampler->requestSubSequence2D(doNumReflectionSamples());
+	idTransmissionSamples_ = sampler->requestSubSequence2D(doNumTransmissionSamples());
 	doRequestSamples(sampler);
+}
+
+
+
+const int Shader::idReflectionSamples() const
+{
+	return idReflectionSamples_;
+}
+
+
+
+const int Shader::idTransmissionSamples() const
+{
+	return idTransmissionSamples_;
 }
 
 
 
 // --- protected -----------------------------------------------------------------------------------
 
-Shader::Shader(unsigned capabilityFlags, CapsStrictness strictness):
-	caps_(capabilityFlags),
-	capsStrictness_(strictness)
+Shader::Shader(unsigned capabilityFlags):
+	caps_(capabilityFlags)
 {
 }
 
@@ -82,6 +98,20 @@ void Shader::setState(const TPyObjectPtr& state)
 
 
 
+/** Helper for shaders that want to return black samples as result of bsdf
+ */
+void Shader::setBlackBsdf(const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn, 
+		Spectrum* firstValue, TScalar* firstPdf) const
+{
+	while (firstOmegaIn++ != lastOmegaIn)
+	{
+		*firstValue++ = Spectrum();
+		*firstPdf++ = 0;
+	}
+}
+
+
+
 /** Helper for shaders that want to return black samples as result of sampleBsdf
  */
 void Shader::setBlackSamples(const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
@@ -100,6 +130,20 @@ void Shader::setBlackSamples(const TPoint2D* firstBsdfSample, const TPoint2D* la
 
 void Shader::doRequestSamples(const TSamplerPtr& sampler)
 {
+}
+
+
+
+const unsigned Shader::doNumReflectionSamples() const
+{
+	return 0;
+}
+
+
+
+const unsigned Shader::doNumTransmissionSamples() const
+{
+	return 0;
 }
 
 

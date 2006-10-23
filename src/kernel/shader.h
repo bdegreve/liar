@@ -80,29 +80,26 @@ public:
 
 	void bsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
 		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn, 
-		Spectrum* firstValue, TScalar* firstPdf) const
+		Spectrum* firstValue, TScalar* firstPdf, unsigned allowedCaps) const
 	{
-		return doBsdf(sample, context, omegaOut, firstOmegaIn, lastOmegaIn, 
-			firstValue, firstPdf);
+		LASS_ASSERT(omegaOut.z >= 0);
+		doBsdf(sample, context, omegaOut, firstOmegaIn, lastOmegaIn, 
+			firstValue, firstPdf, allowedCaps);
 	}
 
 	void sampleBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
 		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
 		TVector3D* firstOmegaIn, Spectrum* firstValue, TScalar* firstPdf,
-		unsigned allowedCaps = capsAll) const
+		unsigned allowedCaps) const
 	{
-		if (capsStrictness_ == capsAreStrict && !testCaps(allowedCaps, caps_))
-		{
-			setBlackSamples(firstBsdfSample, lastBsdfSample, firstOmegaIn, firstValue, firstPdf);
-		}
-		else
-		{
-			doSampleBsdf(sample, context, omegaOut, firstBsdfSample, lastBsdfSample, 
-				firstOmegaIn, firstValue, firstPdf, allowedCaps);
-		}
+		LASS_ASSERT(omegaOut.z >= 0);
+		doSampleBsdf(sample, context, omegaOut, firstBsdfSample, lastBsdfSample, 
+			firstOmegaIn, firstValue, firstPdf, allowedCaps);
 	}
 
 	void requestSamples(const TSamplerPtr& sampler);
+	const int idReflectionSamples() const;
+	const int idTransmissionSamples() const;
 
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const;
@@ -110,19 +107,15 @@ public:
 
 protected:
 
-	enum CapsStrictness
-	{
-		capsAreOptional,
-		capsAreStrict
-	};
-
-    Shader(unsigned capabilityFlags, CapsStrictness strictness);
+    Shader(unsigned capabilityFlags);
 
 	const bool testCaps(unsigned capsUnderTest, unsigned wantedCaps) const
 	{
 		return (capsUnderTest & wantedCaps) == wantedCaps;
 	}
 
+	void setBlackBsdf(const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn, 
+		Spectrum* firstValue, TScalar* firstPdf) const;
 	void setBlackSamples(const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
 		TVector3D* firstOmegaIn, Spectrum* firstValue, TScalar* firstPdf) const;
 
@@ -133,7 +126,7 @@ private:
 
 	virtual void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
 		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn, 
-		Spectrum* firstValue, TScalar* firstPdf) const = 0;
+		Spectrum* firstValue, TScalar* firstPdf, unsigned allowedCaps) const = 0;
 
 	virtual void doSampleBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
 		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
@@ -141,12 +134,15 @@ private:
 		unsigned allowedCaps) const = 0;
 	
 	virtual void doRequestSamples(const TSamplerPtr& sampler);
+	virtual const unsigned doNumReflectionSamples() const;
+	virtual const unsigned doNumTransmissionSamples() const;
 
 	virtual const TPyObjectPtr doGetState() const = 0;
 	virtual void doSetState(const TPyObjectPtr& state) = 0;
 
 	unsigned caps_;
-	CapsStrictness capsStrictness_;
+	int idReflectionSamples_;
+	int idTransmissionSamples_;
 };
 
 typedef python::PyObjectPtr<Shader>::Type TShaderPtr;

@@ -54,6 +54,7 @@ IntersectionContext::IntersectionContext(const RayTracer* tracer):
 	tracer_(tracer),
 	shader_(0),
 	shaderToWorld_(),
+	localToWorld_(),
 	hasScreenSpaceDifferentials_(false)
 {
 }
@@ -105,6 +106,7 @@ void IntersectionContext::transformBy(const TTransformation3D& transformation)
 	else
 	{
 		shaderToWorld_ = prim::concatenate(shaderToWorld_, transformation);
+		localToWorld_ = prim::concatenate(localToWorld_, transformation);
 	}
 }
 
@@ -118,7 +120,9 @@ void IntersectionContext::translateBy(const TVector3D& offset)
 	}
 	else
 	{
-		shaderToWorld_ = prim::concatenate(shaderToWorld_, TTransformation3D::translation(offset));
+		TTransformation3D translation = TTransformation3D::translation(offset);
+		shaderToWorld_ = prim::concatenate(shaderToWorld_, translation);
+		localToWorld_ = prim::concatenate(localToWorld_, translation);
 	}
 }
 
@@ -137,7 +141,8 @@ const TVector3D IntersectionContext::flipTo(const TVector3D& worldOmega)
 	normal_ = -normal_;
 	dNormal_dU_ = -dNormal_dU_;
 	dNormal_dV_ = -dNormal_dV_;
-	shaderToWorld_ = prim::concatenate(TTransformation3D::scaler(TVector3D(1, 1, -1)), shaderToWorld_);
+	//shaderToWorld_ = prim::concatenate(TTransformation3D::scaler(TVector3D(1, 1, -1)), shaderToWorld_);
+	shaderToWorld_ = prim::concatenate(shaderToWorld_, TTransformation3D::scaler(TVector3D(1, 1, -1)));
 	return -worldNormal;
 }
 
@@ -148,37 +153,37 @@ const TVector3D IntersectionContext::flipTo(const TVector3D& worldOmega)
 
 // --- private -------------------------------------------------------------------------------------
 
-void IntersectionContext::setScreenSpaceDifferentialsI(const TRay3D& iRay_dI, 
-													   TVector3D& oDPoint_dI, 
-													   TVector3D& oDNormal_dI,
-													   TVector2D& oDUv_dI)
+void IntersectionContext::setScreenSpaceDifferentialsI(const TRay3D& dRay_dI, 
+													   TVector3D& dPoint_dI, 
+													   TVector3D& dNormal_dI,
+													   TVector2D& dUv_dI)
 {	
 	prim::Plane3D<TScalar, prim::Cartesian, prim::Unnormalized> plane(normal_, point_);
 	TScalar t;
-	prim::Result result = prim::intersect(plane, iRay_dI, t);
+	prim::Result result = prim::intersect(plane, dRay_dI, t);
 	if (result != prim::rOne)
 	{
-		oDPoint_dI = TVector3D();
-		oDNormal_dI = TVector3D();
-		oDUv_dI = TVector2D();
+		dPoint_dI = TVector3D();
+		dNormal_dI = TVector3D();
+		dUv_dI = TVector2D();
 		return;
 	}
-	oDPoint_dI = iRay_dI.point(t) - point_;
+	dPoint_dI = dRay_dI.point(t) - point_;
 
 	const prim::XYZ majorAxis = plane.majorAxis();
 	const prim::XYZ a = majorAxis + 1;
 	const prim::XYZ b = majorAxis + 2;
 
 	TScalar matrix[4] = { dPoint_dU_[a], dPoint_dV_[a], dPoint_dU_[b], dPoint_dV_[b] };
-	TScalar solution[2] = { oDPoint_dI[a], oDPoint_dI[b] };
+	TScalar solution[2] = { dPoint_dI[a], dPoint_dI[b] };
 	if (!num::impl::cramer2<TScalar>(matrix, solution, solution + 2))
 	{
-		oDNormal_dI = TVector3D();
-		oDUv_dI = TVector2D();
+		dNormal_dI = TVector3D();
+		dUv_dI = TVector2D();
 		return;
 	}
-	oDNormal_dI = dNormal_dU_ * solution[0] + dNormal_dV_ * solution[1];
-	oDUv_dI = TVector2D(solution[0], solution[1]);
+	dNormal_dI = dNormal_dU_ * solution[0] + dNormal_dV_ * solution[1];
+	dUv_dI = TVector2D(solution[0], solution[1]);
 }
 
 
