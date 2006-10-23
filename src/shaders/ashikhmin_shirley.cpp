@@ -176,15 +176,18 @@ void AshikhminShirley::doBsdf(
 
 	const bool doDiffuse = testCaps(allowedCaps, capsReflection | capsDiffuse);
 	const bool doGlossy = testCaps(allowedCaps, capsReflection | capsGlossy);
-	TScalar pd = doDiffuse ? Rd.absAverage() : 0;
-	TScalar ps = doGlossy ? Rs.absAverage() : 0;
-	if (pd == 0 && ps == 0)
+
+	const TScalar rd = doDiffuse ? Rd.absAverage() : 0;
+	const TScalar rs = doGlossy ? Rs.absAverage() : 0;
+	const TScalar rtot = rd + rs;
+	if (rtot == 0)
 	{
 		setBlackBsdf(firstOmegaIn, lastOmegaIn, firstValue, firstPdf);
 		return;
 	}
-	pd /= (pd + ps);
-	ps /= (pd + ps);
+
+	const TScalar pd = rd / rtot;
+	const TScalar ps = rs / rtot;
 
 	const TVector3D& k1 = omegaOut;
 	LASS_ASSERT(k1.z > 0);
@@ -236,15 +239,18 @@ void AshikhminShirley::doSampleBsdf(
 
 	const bool doDiffuse = testCaps(allowedCaps, capsReflection | capsDiffuse);
 	const bool doGlossy = testCaps(allowedCaps, capsReflection | capsGlossy);
-	TScalar pd = doDiffuse ? Rd.absAverage() : 0;
-	TScalar ps = doGlossy ? Rs.absAverage() : 0;
-	if (pd == 0 && ps == 0)
+	
+	const TScalar rd = doDiffuse ? Rd.absAverage() : 0;
+	const TScalar rs = doGlossy ? Rs.absAverage() : 0;
+	const TScalar rtot = rd + rs;
+	if (rtot == 0)
 	{
 		setBlackSamples(firstBsdfSample, lastBsdfSample, firstOmegaIn, firstValue, firstPdf);
 		return;
 	}
-	pd /= (pd + ps);
-	ps /= (pd + ps);
+
+	const TScalar pd = rd / rtot;
+	const TScalar ps = rs / rtot;
 
 	const TVector3D& k1 = omegaOut;
 	const TScalar a = doDiffuse ? std::max(TNumTraits::zero, 1 - temp::pow5(1 - k1.z / 2)) : 0;
@@ -254,12 +260,14 @@ void AshikhminShirley::doSampleBsdf(
 	while (firstBsdfSample != lastBsdfSample)
 	{
 		TVector3D h, k2;
+		bool pdfIsDiffuse = false;
 		if (firstBsdfSample->x < pd)
 		{
 			const TPoint2D bsdfSample(firstBsdfSample->x / pd, firstBsdfSample->y);
 			TScalar pdf;
 			k2 = num::cosineHemisphere(bsdfSample, pdf).position();
 			h = (k1 + k2).normal();
+			pdfIsDiffuse = true;
 		}
 		else
 		{
@@ -284,7 +292,14 @@ void AshikhminShirley::doSampleBsdf(
 			const TScalar pdfS = pdfH / (4 * hk);
 
 			*firstValue++ = rhoD + rhoS;
-			*firstPdf++ = pd * pdfD + ps * pdfS;
+			if (pdfIsDiffuse)
+			{
+				*firstPdf++ = pdfD >= pdfS ? (pd * pdfD) : 0;
+			}
+			else
+			{
+				*firstPdf++ = pdfS >= pdfD ? (ps * pdfS) : 0;
+			}
 		}
 		else
 		{

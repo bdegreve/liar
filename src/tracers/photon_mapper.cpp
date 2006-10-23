@@ -563,7 +563,7 @@ void PhotonMapper::tracePhoton(
 	const TScalar cos_thetaOut = omegaIn.z;
 	Spectrum newPower = power * spectrum * (abs(cos_thetaOut) / pdf);
 	const TScalar attenuation = newPower.average() / power.average();
-	LASS_ASSERT(attenuation < 1.01);
+	//LASS_ASSERT(attenuation < 1.1);
 	const TScalar scatterProbability = std::min(TNumTraits::one, attenuation);
 	if (uniform() < scatterProbability)
 	{
