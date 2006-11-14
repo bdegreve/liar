@@ -44,16 +44,20 @@ class LIAR_KERNEL_DLL OutputSample
 public:
 
 	OutputSample();
-	OutputSample(const Sample& sample, const Spectrum& radiance);
+	OutputSample(const Sample& sample, const Spectrum& radiance, TScalar alpha = 1, 
+		TScalar weight = 1);
+	OutputSample(const OutputSample& other, const TPoint2D& screenCoordinate, TScalar weight);
 
 	const Spectrum& radiance() const { return radiance_; }
 	const TPoint2D& screenCoordinate() const { return screenCoordinate_; }
+	const TScalar alpha() const { return alpha_; }
 	const TScalar weight() const { return weight_; }
 
 private:
 
 	Spectrum radiance_;
 	TPoint2D screenCoordinate_;
+	TScalar alpha_;
 	TScalar weight_;
 };
 

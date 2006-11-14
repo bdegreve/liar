@@ -21,47 +21,46 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::shaders::Mirror
- *  @brief very simple shader using lambert's cosine law.
- *  @author Bram de Greve [Bramz]
+/** @class liar::textures::Xyz
+ *  @brief Much like Uv, this texture mixes three textures based.
+ *	@author Bram de Greve (bramz@users.sourceforge.net)
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_MIRROR_H
-#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_MIRROR_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_XYZ_H
+#define LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_XYZ_H
 
-#include "shaders_common.h"
-#include "../kernel/shader.h"
+#include "textures_common.h"
 #include "../kernel/texture.h"
 
 namespace liar
 {
-namespace shaders
+namespace textures
 {
 
-class LIAR_SHADERS_DLL Mirror: public Shader
+class LIAR_TEXTURES_DLL Xyz: public Texture
 {
-    PY_HEADER(Shader)
+	PY_HEADER(Texture)
 public:
 
-	Mirror();
-	Mirror(const TTexturePtr& reflectance);
+	Xyz(const TTexturePtr& a, const TTexturePtr& b, const TTexturePtr& c);
 
-	const TTexturePtr& reflectance() const;
-	void setReflectance(const TTexturePtr& reflectance);
+	const TTexturePtr& textureA() const;
+	const TTexturePtr& textureB() const;
+	const TTexturePtr& textureC() const;
+	void setTextureA(const TTexturePtr& a);
+	void setTextureB(const TTexturePtr& b);
+	void setTextureC(const TTexturePtr& c);
 
 private:
 
-	const unsigned doNumReflectionSamples() const;
-
-	void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const;
-	void doSampleBsdf(const Sample& sample, const IntersectionContext& context,	const TVector3D& omegaIn,
-		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const;
+	const Spectrum doLookUp(const Sample& sample, const IntersectionContext& context) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-	TTexturePtr reflectance_;
+	TTexturePtr a_;
+	TTexturePtr b_;
+	TTexturePtr c_;
 };
 
 }
@@ -71,4 +70,3 @@ private:
 #endif
 
 // EOF
-

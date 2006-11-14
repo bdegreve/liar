@@ -35,6 +35,7 @@ PY_DECLARE_CLASS(SceneObject)
 PY_CLASS_MEMBER_RW(SceneObject, "shader", shader, setShader)
 PY_CLASS_MEMBER_RW(SceneObject, "isOverridingShader", isOverridingShader, setOverridingShader)
 PY_CLASS_MEMBER_RW(SceneObject, "interior", interior, setInterior)
+PY_CLASS_MEMBER_RW(SceneObject, "isOverridingInterior", isOverridingInterior, setOverridingInterior)
 PY_CLASS_METHOD_NAME(SceneObject, reduce, "__reduce__")
 PY_CLASS_METHOD_NAME(SceneObject, getState, "__getstate__")
 PY_CLASS_METHOD_NAME(SceneObject, setState, "__setstate__")
@@ -91,6 +92,20 @@ void SceneObject::setInterior(const TMediumPtr& medium)
 
 
 
+const bool SceneObject::isOverridingInterior() const
+{
+    return isOverridingInterior_;
+}
+
+
+
+void SceneObject::setOverridingInterior(bool enabled)
+{
+    isOverridingInterior_ = enabled;
+}
+
+
+
 const TShaderPtr& SceneObject::defaultShader()
 {
     return defaultShader_;
@@ -134,7 +149,8 @@ void SceneObject::setState(const TPyObjectPtr& state)
 
 SceneObject::SceneObject():
     shader_(defaultShader_),
-	isOverridingShader_(false)
+	isOverridingShader_(false),
+	isOverridingInterior_(false)
 {
 }
 

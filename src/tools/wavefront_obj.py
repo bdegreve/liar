@@ -216,10 +216,10 @@ def load(filename):
 					
 				# make sure either none or all vertices have a normal/uv
 				if numNormals > 0 and numNormals < size:
-					print "WARNING: either none or all face vertices must have normal, forcing to none"
+					#print "WARNING: either none or all face vertices must have normal, forcing to none"
 					face = [(v[0], None, v[2]) for v in face]
 				if numUvs > 0 and numUvs < size:
-					print "WARNING: either none or all face vertices must have uv coord, forcing to none"
+					#print "WARNING: either none or all face vertices must have uv coord, forcing to none"
 					face = [(v[0], v[1], None) for v in face]				
 					
 				# fan-triangulate and add.

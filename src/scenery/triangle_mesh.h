@@ -46,7 +46,7 @@ class LIAR_SCENERY_DLL TriangleMesh: public SceneObject
     PY_HEADER(SceneObject)
 public:
 
-	typedef prim::TriangleMesh3D<TScalar, spat::AabbTree> TMesh;
+	typedef prim::TriangleMesh3D<TScalar, spat::AabpTree, spat::DefaultSplitHeuristics<4> > TMesh;
 	typedef std::vector<TMesh::TPoint> TVertices;
 	typedef std::vector<TMesh::TVector> TNormals;
 	typedef std::vector<TMesh::TUv> TUvs;

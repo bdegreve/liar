@@ -21,47 +21,41 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::shaders::Mirror
- *  @brief very simple shader using lambert's cosine law.
- *  @author Bram de Greve [Bramz]
+/** @class liar::textures::Global
+ *  @brief converts local coordinates to global coordinates
+ *	@author Bram de Greve (bramz@users.sourceforge.net)
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_MIRROR_H
-#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_MIRROR_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_GLOBAL_H
+#define LIAR_GUARDIAN_OF_INCLUSION_GLOBAL_H
 
-#include "shaders_common.h"
-#include "../kernel/shader.h"
+#include "textures_common.h"
 #include "../kernel/texture.h"
 
 namespace liar
 {
-namespace shaders
+namespace textures
 {
 
-class LIAR_SHADERS_DLL Mirror: public Shader
+class LIAR_TEXTURES_DLL Global: public Texture
 {
-    PY_HEADER(Shader)
+	PY_HEADER(Texture)
 public:
 
-	Mirror();
-	Mirror(const TTexturePtr& reflectance);
+	Global(const TTexturePtr& texture);
 
-	const TTexturePtr& reflectance() const;
-	void setReflectance(const TTexturePtr& reflectance);
+	const TTexturePtr& texture() const;
+	void setTexture(const TTexturePtr& texture);
 
 private:
 
-	const unsigned doNumReflectionSamples() const;
-
-	void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const;
-	void doSampleBsdf(const Sample& sample, const IntersectionContext& context,	const TVector3D& omegaIn,
-		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const;
+	const Spectrum doLookUp(const Sample& sample, 
+		const IntersectionContext& context) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-	TTexturePtr reflectance_;
+	TTexturePtr texture_;
 };
 
 }
@@ -71,4 +65,3 @@ private:
 #endif
 
 // EOF
-

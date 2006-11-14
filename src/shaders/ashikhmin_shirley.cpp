@@ -165,148 +165,177 @@ const unsigned AshikhminShirley::doNumReflectionSamples() const
 }
 
 void AshikhminShirley::doBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
-		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn, 
-		Spectrum* firstValue, TScalar* firstPdf, unsigned allowedCaps) const
+		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
+		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
 {
 	const Spectrum Rd = diffuse_->lookUp(sample, context);
 	const Spectrum Rs = specular_->lookUp(sample, context);
 	const TScalar nu = specularPowerU_->lookUp(sample, context).average();
 	const TScalar nv = specularPowerV_->lookUp(sample, context).average();
+	const TScalar rd = Rd.absAverage();
+	const TScalar rs = Rs.absAverage();
 
-	const bool doDiffuse = testCaps(allowedCaps, capsReflection | capsDiffuse);
-	const bool doGlossy = testCaps(allowedCaps, capsReflection | capsGlossy);
-
-	const TScalar rd = doDiffuse ? Rd.absAverage() : 0;
-	const TScalar rs = doGlossy ? Rs.absAverage() : 0;
-	const TScalar rtot = rd + rs;
-	if (rtot == 0)
-	{
-		setBlackBsdf(firstOmegaIn, lastOmegaIn, firstValue, firstPdf);
-		return;
-	}
-
-	const TScalar pd = rd / rtot;
-	const TScalar ps = rs / rtot;
-
-	const TVector3D& k1 = omegaOut;
+	const TVector3D& k1 = omegaIn;
 	LASS_ASSERT(k1.z > 0);
-	const TScalar a = doDiffuse ? std::max(TNumTraits::zero, 1 - temp::pow5(1 - k1.z / 2)) : 0;
+	const TScalar a = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k1.z / 2));
 	const Spectrum rhoA = Rd * (1 - Rs) * (a * 28.f / (23.f * TNumTraits::pi));
-	const TScalar c = doGlossy ? num::sqrt((nu + 1) * (nv + 1)) / (8 * TNumTraits::pi) : 0;
+	const TScalar c = num::sqrt((nu + 1) * (nv + 1)) / (8 * TNumTraits::pi);
 
-	while (firstOmegaIn != lastOmegaIn)
+	while (first != last)
 	{
-		const TVector3D& k2 = *firstOmegaIn++;
-		if (k2.z > 0)
-		{
-			const TScalar b = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k2.z / 2));
-			const Spectrum rhoD = rhoA * b;
-			const TScalar pdfD = k2.z / TNumTraits::pi;
+		const bool doDiffuse = testCaps(first->allowedCaps, capsReflection | capsDiffuse);
+		const bool doGlossy = testCaps(first->allowedCaps, capsReflection | capsGlossy);
+		const TScalar pd = doDiffuse ? rd : 0;
+		const TScalar ps = doGlossy ? rs : 0;
+		const TScalar ptot = pd + ps;
 
-			const TVector3D h = (k1 + k2).normal();
-			const TScalar n = nu * num::sqr(h.x) + nv * num::sqr(h.y);
-			const TScalar nn = h.z == 1 ? 0 : n / (1 - num::sqr(h.z));
-			const TScalar hk = dot(h, k1);
-			const Spectrum F = Rs + (1 - Rs) * temp::pow5(1 - hk);
-			const Spectrum rhoS = F * (c * num::pow(h.z, nn) / (hk * std::max(k1.z, k2.z)));
-			const TScalar pdfH = 4 * c * num::pow(h.z, n);
-			const TScalar pdfS = pdfH / (4 * hk);
-
-			*firstValue++ = rhoD + rhoS;
-			*firstPdf++ = pd * pdfD + ps * pdfS;
-		}
-		else
+		const TVector3D& k2 = first->omegaOut;
+		if (k2.z > 0 && ptot > 0)
 		{
-			*firstValue++ = Spectrum();
-			*firstPdf++ = 0;
+			if (doDiffuse)
+			{
+				const TScalar b = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k2.z / 2));
+				result->value += rhoA * b;
+				result->pdf += (pd * k2.z) / (TNumTraits::pi * ptot);
+			}
+			if (doGlossy)
+			{
+				const TVector3D h = (k1 + k2).normal();
+				const TScalar n = nu * num::sqr(h.x) + nv * num::sqr(h.y);
+				const TScalar nn = h.z == 1 ? 0 : n / (1 - num::sqr(h.z));
+				const TScalar hk = dot(h, k1);
+				const Spectrum F = Rs + (1 - Rs) * temp::pow5(1 - hk);
+				result->value += F * (c * num::pow(h.z, nn) / (hk * std::max(k1.z, k2.z)));
+				const TScalar pdfH = 4 * c * num::pow(h.z, n);
+				result->pdf += (ps * pdfH) / (4 * hk * ptot);
+			}
 		}
+		++first;
+		++result;
 	}
 }
 
+namespace temp
+{
 
+inline TScalar balanceHeuristic(TScalar p1, TScalar p2)
+{
+	return p1 / (p1 + p2);
+}
+
+inline TScalar squareHeuristic(TScalar p1, TScalar p2)
+{
+	const TScalar a = num::sqr(p1);
+	const TScalar b = num::sqr(p2);
+	return balanceHeuristic(a, b);
+}
+
+inline TScalar powerHeuristic(TScalar p1, TScalar p2, TScalar beta)
+{
+	const TScalar a = num::pow(p1, beta);
+	const TScalar b = num::pow(p2, beta);
+	return balanceHeuristic(a, b);
+}
+
+inline TScalar maximumHeuristic(TScalar p1, TScalar p2)
+{
+	return p1 >= p2 ? 1.f : 0.f;
+}
+
+inline TScalar cutoffHeuristic(TScalar p1, TScalar p2, TScalar alpha)
+{
+	const TScalar a = p1 >= alpha * p2 ? p1 : 0;
+	const TScalar b = p2 >= alpha * p1 ? p2 : 0;
+	return balanceHeuristic(a, b);
+}
+
+}
 
 void AshikhminShirley::doSampleBsdf(
-	const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut, 
-	const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
-	TVector3D* firstOmegaIn, Spectrum* firstValue, TScalar* firstPdf,
-	unsigned allowedCaps) const
+		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
+		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
 {	
 	const Spectrum Rd = diffuse_->lookUp(sample, context);
 	const Spectrum Rs = specular_->lookUp(sample, context);
 	const TScalar nu = specularPowerU_->lookUp(sample, context).average();
 	const TScalar nv = specularPowerV_->lookUp(sample, context).average();
+	const TScalar rd = Rd.absAverage();
+	const TScalar rs = Rs.absAverage();
 
-	const bool doDiffuse = testCaps(allowedCaps, capsReflection | capsDiffuse);
-	const bool doGlossy = testCaps(allowedCaps, capsReflection | capsGlossy);
-	
-	const TScalar rd = doDiffuse ? Rd.absAverage() : 0;
-	const TScalar rs = doGlossy ? Rs.absAverage() : 0;
-	const TScalar rtot = rd + rs;
-	if (rtot == 0)
-	{
-		setBlackSamples(firstBsdfSample, lastBsdfSample, firstOmegaIn, firstValue, firstPdf);
-		return;
-	}
-
-	const TScalar pd = rd / rtot;
-	const TScalar ps = rs / rtot;
-
-	const TVector3D& k1 = omegaOut;
-	const TScalar a = doDiffuse ? std::max(TNumTraits::zero, 1 - temp::pow5(1 - k1.z / 2)) : 0;
+	const TVector3D& k1 = omegaIn;
+	LASS_ASSERT(k1.z > 0);
+	const TScalar a = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k1.z / 2));
 	const Spectrum rhoA = Rd * (1 - Rs) * (a * 28.f / (23.f * TNumTraits::pi));
-	const TScalar c = doGlossy ? num::sqrt((nu + 1) * (nv + 1)) / (8 * TNumTraits::pi) : 0;
+	const TScalar c = num::sqrt((nu + 1) * (nv + 1)) / (8 * TNumTraits::pi);
 
-	while (firstBsdfSample != lastBsdfSample)
+	while (first != last)
 	{
-		TVector3D h, k2;
-		bool pdfIsDiffuse = false;
-		if (firstBsdfSample->x < pd)
+		const bool doDiffuse = testCaps(first->allowedCaps, capsReflection | capsDiffuse);
+		const bool doGlossy = testCaps(first->allowedCaps, capsReflection | capsGlossy);
+		TScalar pd = doDiffuse ? rd : 0;
+		TScalar ps = doGlossy ? rs : 0;
+		const TScalar ptot = pd + ps;
+		if (ptot > 0)
 		{
-			const TPoint2D bsdfSample(firstBsdfSample->x / pd, firstBsdfSample->y);
-			TScalar pdf;
-			k2 = num::cosineHemisphere(bsdfSample, pdf).position();
-			h = (k1 + k2).normal();
-			pdfIsDiffuse = true;
-		}
-		else
-		{
-			LASS_ASSERT(ps > 0);
-			const TPoint2D bsdfSample((firstBsdfSample->x - pd) / ps, firstBsdfSample->y);
-			h = sampleH(bsdfSample, nu, nv);
-			k2 = h.reflect(k1);
-		}
-		*firstOmegaIn++ = k2;
-		if (k2.z > 0)
-		{
-			const TScalar b = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k2.z / 2));
-			const Spectrum rhoD = rhoA * b;
-			const TScalar pdfD = k2.z / TNumTraits::pi;
+			pd /= ptot;
+			ps /= ptot;
 
-			const TScalar n = nu * num::sqr(h.x) + nv * num::sqr(h.y);
-			const TScalar nn = h.z == 1 ? 0 : n / (1 - num::sqr(h.z));
-			const TScalar hk = dot(h, k1);
-			const Spectrum F = Rs + (1 - Rs) * temp::pow5(1 - hk);
-			const Spectrum rhoS = F * (c * num::pow(h.z, nn) / (hk * std::max(k1.z, k2.z)));
-			const TScalar pdfH = 4 * c * num::pow(h.z, n);
-			const TScalar pdfS = pdfH / (4 * hk);
-
-			*firstValue++ = rhoD + rhoS;
-			if (pdfIsDiffuse)
+			TVector3D h, k2;
+			bool pdfIsDiffuse = false;
+			TPoint2D bsdfSample = first->sample;
+			if (bsdfSample.x < pd)
 			{
-				*firstPdf++ = pdfD >= pdfS ? (pd * pdfD) : 0;
+				bsdfSample.x /= pd;
+				TScalar pdf;
+				k2 = num::cosineHemisphere(bsdfSample, pdf).position();
+				h = (k1 + k2).normal();
+				pdfIsDiffuse = true;
 			}
 			else
 			{
-				*firstPdf++ = pdfS >= pdfD ? (ps * pdfS) : 0;
+				LASS_ASSERT(ps > 0);
+				bsdfSample.x = (bsdfSample.x - pd) / ps;
+				h = sampleH(bsdfSample, nu, nv);
+				k2 = h.reflect(k1);
+			}
+			result->omegaOut = k2;
+
+			if (k2.z > 0)
+			{
+				TScalar pdfD = 0;
+				if (doDiffuse)
+				{
+					const TScalar b = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k2.z / 2));
+					result->value += rhoA * b;
+					pdfD = k2.z / TNumTraits::pi;
+				}
+				TScalar pdfS = 0;
+				if (doGlossy)
+				{
+					const TScalar n = nu * num::sqr(h.x) + nv * num::sqr(h.y);
+					const TScalar nn = h.z == 1 ? 0 : n / (1 - num::sqr(h.z));
+					const TScalar hk = dot(h, k1);
+					const Spectrum F = Rs + (1 - Rs) * temp::pow5(1 - hk);
+					result->value += F * (c * num::pow(h.z, nn) / (hk * std::max(k1.z, k2.z)));
+					const TScalar pdfH = 4 * c * num::pow(h.z, n);
+					pdfS = pdfH / (4 * hk);
+				}
+				if (pdfIsDiffuse)
+				{
+					result->value *= temp::maximumHeuristic(pdfD, pdfS);
+					result->pdf = pd * pdfD;
+					result->usedCaps = capsReflection | capsDiffuse;
+				}
+				else
+				{
+					result->value *= temp::maximumHeuristic(pdfS, pdfD);
+					result->pdf = ps * pdfS;
+					result->usedCaps = capsReflection | capsGlossy;
+				}
 			}
 		}
-		else
-		{
-			*firstValue++ = Spectrum();
-			*firstPdf++ = 0;
-		}
-		++firstBsdfSample;
+		++first;
+		++result;
 	}
 }
 

@@ -51,16 +51,10 @@ public:
 
 private:
 
-	virtual void doBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
-		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn, 
-		Spectrum* firstValue, TScalar* firstPdf, unsigned allowCaps) const;
-
-	virtual void doSampleBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut, 
-		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
-		TVector3D* firstOmegaIn, Spectrum* firstValue, TScalar* firstPdf,
-		unsigned allowedCaps) const;
+	void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
+		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const;
+	void doSampleBsdf(const Sample& sample, const IntersectionContext& context,	const TVector3D& omegaIn,
+		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);

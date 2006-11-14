@@ -46,7 +46,11 @@ class LIAR_KERNEL_DLL RenderTarget: public python::PyObjectPlus
     PY_HEADER(python::PyObjectPlus)
 public:
 
+    typedef prim::Vector2D<unsigned> TResolution;
+
     virtual ~RenderTarget();
+
+	const TResolution resolution() const;	
 
     void beginRender();
     void writeRender(const OutputSample* first, const OutputSample* last);
@@ -61,11 +65,14 @@ protected:
 
 private:
 
+	virtual const TResolution doResolution() const = 0;
+
     virtual void doBeginRender() = 0;
     virtual void doWriteRender(const OutputSample* first, const OutputSample* last) = 0;
     virtual void doEndRender() = 0;
 	virtual const bool doIsCanceling() const;
 
+	util::CriticalSection lock_;
     bool isRendering_;
 };
 

@@ -100,6 +100,8 @@ public:
 
 	const TMediumPtr& interior() const;
 	void setInterior(const TMediumPtr& medium);
+	const bool isOverridingInterior() const;
+	void setOverridingInterior(bool enabled = true);
 
     static const TShaderPtr& defaultShader();
     static void setDefaultShader(const TShaderPtr& defaultShader);
@@ -117,6 +119,7 @@ private:
     TShaderPtr shader_;
 	TMediumPtr interior_;
 	bool isOverridingShader_;
+	bool isOverridingInterior_;
 
     LASS_UTIL_ACCEPT_VISITOR;
 	virtual void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period);

@@ -34,6 +34,7 @@
 #include "output_common.h"
 #include "../kernel/render_target.h"
 #include "../kernel/rgb_space.h"
+#include <lass/prim/aabb_2d.h>
 #include <lass/util/scoped_ptr.h>
 #include <lass/util/thread.h>
 
@@ -54,53 +55,58 @@ class LIAR_OUTPUT_DLL Display: public RenderTarget, PixelToaster::Listener
     PY_HEADER(RenderTarget)
 public:
 
-	typedef prim::Vector2D<size_t> TSize;
-
-	Display(const std::string& title, const TSize& size);
+	Display(const std::string& title, const TResolution& resolution);
     ~Display();
 
 	const std::string& title() const;
-	const TSize& size() const;
 	const TRgbSpacePtr& rgbSpace() const;
+	const TScalar exposure() const;
+	const TScalar fStops() const;
     const TScalar gamma() const;
-	const TScalar exposureTime() const;
+	const TScalar gain() const;
 
 	void setRgbSpace(const TRgbSpacePtr& rgbSpace);
+	void setExposure(TScalar exposure);
+	void setFStops(TScalar fStops);
     void setGamma(TScalar gammaExponent);
-	void setExposureTime(TScalar time);
+	void setGain(TScalar gain);
 
 private:
 
 	typedef std::vector<PixelToaster::FloatingPointPixel> TBuffer;
-	typedef std::vector<unsigned> TCounter;
+	typedef prim::Aabb2D<unsigned> TDirtyBox;
 
+	const TResolution doResolution() const;
     void doBeginRender();
 	void doWriteRender(const OutputSample* first, const OutputSample* last);
     void doEndRender();
 	const bool doIsCanceling() const;
 		
-	void onKeyPressed(PixelToaster::Key key);
-	void onClose();
+	void onKeyDown(PixelToaster::DisplayInterface& display, PixelToaster::Key key);
+	bool onClose(PixelToaster::DisplayInterface& display);
 
 	void displayLoop();
-	void updateDisplayBuffer();
+	void copyToDisplayBuffer();
+	void shadeDisplayBuffer();
 	void waitForAnyKey();
 
 	PixelToaster::Display display_;
 	Listener listener_;
 	TBuffer renderBuffer_;
 	TBuffer displayBuffer_;
-	TCounter numberOfSamples_;
+	std::vector<TScalar> totalWeight_;
 	util::ScopedPtr<util::Thread> displayLoop_;
-	util::CriticalSection mutex_;
+	util::CriticalSection renderBufferLock_;
 	util::Condition signal_;
 	std::string title_;
-    TSize size_;
+	TDirtyBox renderDirtyBox_;
+	TDirtyBox displayDirtyBox_;
+    TResolution resolution_;
 	TRgbSpacePtr rgbSpace_;
+	TScalar exposure_;
     TScalar gamma_;
-	TScalar exposureTime_;
+	TScalar gain_;
 	bool isQuiting_;
-	bool isDirty_;
 	bool isCanceling_;
 	bool isAnyKeyed_;
 };

@@ -98,34 +98,6 @@ void Shader::setState(const TPyObjectPtr& state)
 
 
 
-/** Helper for shaders that want to return black samples as result of bsdf
- */
-void Shader::setBlackBsdf(const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn, 
-		Spectrum* firstValue, TScalar* firstPdf) const
-{
-	while (firstOmegaIn++ != lastOmegaIn)
-	{
-		*firstValue++ = Spectrum();
-		*firstPdf++ = 0;
-	}
-}
-
-
-
-/** Helper for shaders that want to return black samples as result of sampleBsdf
- */
-void Shader::setBlackSamples(const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
-		TVector3D* firstOmegaIn, Spectrum* firstValue, TScalar* firstPdf) const
-{
-	while (firstBsdfSample++ != lastBsdfSample)
-	{
-		*firstOmegaIn++ = TVector3D(0, 0, 1);
-		*firstValue++ = Spectrum();
-		*firstPdf++ = 0;
-	}
-}
-
-
 // --- private -------------------------------------------------------------------------------------
 
 void Shader::doRequestSamples(const TSamplerPtr& sampler)
@@ -152,6 +124,31 @@ const Spectrum Shader::doEmission(const Sample& sample, const IntersectionContex
 		const TVector3D& dirOut) const
 {
 	return Spectrum();
+}
+
+
+
+void Shader::zeroBsdf(BsdfOut* first, BsdfOut* last) const
+{
+	while (first != last)
+	{
+		first->value = Spectrum();
+		first->pdf = 0;
+		++first;
+	}
+}
+
+
+
+void Shader::zeroSampleBsdf(SampleBsdfOut* first, SampleBsdfOut* last) const
+{
+	while (first != last)
+	{
+		first->omegaOut = TVector3D(0, 0, 1);
+		first->value = Spectrum();
+		first->pdf = 0;
+		++first;
+	}
 }
 
 

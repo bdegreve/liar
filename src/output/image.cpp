@@ -28,24 +28,26 @@ namespace output
 {
 
 PY_DECLARE_CLASS(Image);
-PY_CLASS_CONSTRUCTOR_2(Image, std::string, Image::TSize)
-PY_CLASS_MEMBER_R(Image, "size", size)
+PY_CLASS_CONSTRUCTOR_2(Image, std::string, const Image::TResolution&)
 PY_CLASS_MEMBER_RW(Image, "filename", filename, setFilename)
 PY_CLASS_MEMBER_RW(Image, "rgbSpace", rgbSpace, setRgbSpace)
+PY_CLASS_MEMBER_RW(Image, "exposure", exposure, setExposure)
+PY_CLASS_MEMBER_RW(Image, "fStops", fStops, setFStops)
 PY_CLASS_MEMBER_RW(Image, "gamma", gamma, setGamma)
-PY_CLASS_MEMBER_RW(Image, "exposureTime", exposureTime, setExposureTime)
+PY_CLASS_MEMBER_RW(Image, "gain", gain, setGain)
 
 
 
 // --- public --------------------------------------------------------------------------------------
 
-Image::Image(const std::string& filename, const TSize& size):
+Image::Image(const std::string& filename, const TResolution& resolution):
 	image_(),
     filename_(filename),
-    size_(size),
+    resolution_(resolution),
 	rgbSpace_(RgbSpace::defaultSpace()),
+	exposure_(0.f),
     gamma_(1.f),
-	exposureTime_(-1.f),
+    gain_(1.f),
     isSaved_(true)
 {
 }
@@ -69,16 +71,23 @@ const std::string& Image::filename() const
 
 
 
-const Image::TSize& Image::size() const
+const TRgbSpacePtr& Image::rgbSpace() const
 {
-	return size_;
+	return rgbSpace_;
 }
 
 
 
-const TRgbSpacePtr& Image::rgbSpace() const
+const TScalar Image::exposure() const
 {
-	return rgbSpace_;
+    return exposure_;
+}
+
+
+
+const TScalar Image::fStops() const
+{
+	return num::log2(exposure_);
 }
 
 
@@ -90,9 +99,9 @@ const TScalar Image::gamma() const
 
 
 
-const TScalar Image::exposureTime() const
+const TScalar Image::gain() const
 {
-    return exposureTime_;
+    return gain_;
 }
 
 
@@ -111,6 +120,20 @@ void Image::setRgbSpace(const TRgbSpacePtr& rgbSpace)
 
 
 
+void Image::setExposure(TScalar exposure)
+{
+    exposure_ = exposure;
+}
+
+
+
+void Image::setFStops(TScalar fStops)
+{
+	exposure_ = num::pow(TScalar(2), fStops);
+}
+
+
+
 void Image::setGamma(TScalar gammaExponent)
 {
     gamma_ = gammaExponent;
@@ -118,47 +141,55 @@ void Image::setGamma(TScalar gammaExponent)
 
 
 
-void Image::setExposureTime(TScalar time)
+void Image::setGain(TScalar gain)
 {
-    exposureTime_ = time;
+    gain_ = gain;
 }
 
 
 
 // --- private -------------------------------------------------------------------------------------
 
+const Image::TResolution Image::doResolution() const
+{
+	return resolution_;
+}
+
+
+
 void Image::doBeginRender()
 {
-    image_.reset(size_.y, size_.x);
-	numberOfSamples_.clear();
-	numberOfSamples_.resize(size_.x * size_.y, 0);
+    image_.reset(resolution_.y, resolution_.x);
+	totalWeight_.clear();
+	totalWeight_.resize(resolution_.x * resolution_.y, 0);
 }
 
 
 
 void Image::doWriteRender(const OutputSample* first, const OutputSample* last)
 {
-    LASS_ASSERT(size_.x > 0 && size_.y > 0);
+    LASS_ASSERT(resolution_.x > 0 && resolution_.y > 0);
 
-	while (first != last)
+	LASS_LOCK(lock_)
 	{
-		const TPoint2D& position = first->screenCoordinate();
-		LASS_ASSERT(position.x >= 0 && position.y >= 0 && position.x < 1 && position.y < 1);
-		const unsigned i = static_cast<unsigned>(num::floor(position.x * size_.x));
-		const unsigned j = static_cast<unsigned>(num::floor(position.y * size_.y));
-		if (i < 0 || i >= size_.x || j < 0 || j >= size_.y)
+		while (first != last)
 		{
-			return;
+			const TPoint2D& position = first->screenCoordinate();
+			const int i = static_cast<int>(num::floor(position.x * resolution_.x));
+			const int j = static_cast<int>(num::floor(position.y * resolution_.y));
+			if (i >= 0 && i < resolution_.x && j >= 0 && j < resolution_.y)
+			{
+				const TScalar alpha = first->weight() * first->alpha();
+				const TVector3D xyz = alpha * first->radiance().xyz();
+				
+				prim::ColorRGBA rgba = rgbSpace_->convert(xyz);
+				rgba.a = alpha;
+
+				image_(j, i) += rgba;
+				totalWeight_[j * resolution_.x + i] += first->weight();
+			}
+			++first;
 		}
-		LASS_ASSERT(i < size_.x && j < size_.y);
-
-		TVector3D xyz = first->radiance().xyz();
-		xyz *= first->weight();
-		
-		image_(j, i) += rgbSpace_->convert(xyz);
-		++numberOfSamples_[j * size_.x + i];
-
-		++first;
 	}
 
 	isSaved_ = false;
@@ -168,18 +199,32 @@ void Image::doWriteRender(const OutputSample* first, const OutputSample* last)
 
 void Image::doEndRender()
 {
-	for (unsigned j = 0; j < size_.y; ++j)
+	for (unsigned j = 0; j < resolution_.y; ++j)
 	{
-		for (unsigned i = 0; i < size_.x; ++i)
+		for (unsigned i = 0; i < resolution_.x; ++i)
 		{
-			const unsigned nSamples = numberOfSamples_[j * size_.x + i];
-			image_(j, i) /= static_cast<TScalar>(nSamples ? nSamples : 1);
+			const TScalar w = totalWeight_[j * resolution_.x + i];
+			if (w > 0)
+			{
+				image_(j, i) /= w;
+			}
 		}
 	}
-    image_.filterGamma(gamma_);
-	if (exposureTime_ > 0)
+	if (exposure_ > 0)
 	{
-		image_.filterExposure(exposureTime_);
+		image_.filterExposure(exposure_);
+	}
+	if (gamma_ != 1)
+	{
+		image_.filterGamma(gamma_);
+	}
+	if (gain_ != 1)
+	{
+		const unsigned n = resolution_.x * resolution_.y;
+		for (unsigned i = 0; i < n; ++i)
+		{
+			image_[i] *= gain_;
+		}
 	}
     image_.save(filename_);
     isSaved_ = true;

@@ -30,26 +30,27 @@ namespace output
 {
 
 PY_DECLARE_CLASS(Display);
-PY_CLASS_CONSTRUCTOR_2(Display, const std::string&, Display::TSize)
-PY_CLASS_MEMBER_R(Display, "size", size)
+PY_CLASS_CONSTRUCTOR_2(Display, const std::string&, const Display::TResolution&)
 PY_CLASS_MEMBER_R(Display, "title", title)
 PY_CLASS_MEMBER_RW(Display, "rgbSpace", rgbSpace, setRgbSpace)
+PY_CLASS_MEMBER_RW(Display, "exposure", exposure, setExposure)
+PY_CLASS_MEMBER_RW(Display, "fStops", fStops, setFStops)
 PY_CLASS_MEMBER_RW(Display, "gamma", gamma, setGamma)
-PY_CLASS_MEMBER_RW(Display, "exposureTime", exposureTime, setExposureTime)
+PY_CLASS_MEMBER_RW(Display, "gain", gain, setGain)
 
 
 
 // --- public --------------------------------------------------------------------------------------
 
-Display::Display(const std::string& title, const TSize& size):
+Display::Display(const std::string& title, const TResolution& resolution):
 	display_(),
 	title_(title),
-    size_(size),
+    resolution_(resolution),
 	rgbSpace_(RgbSpace::defaultSpace()),
-    gamma_(1.f),
-	exposureTime_(-1.f),
+	exposure_(1.f),
+    gamma_(2.2f),
+	gain_(1.f),
     isQuiting_(false),
-	isDirty_(false),
 	isCanceling_(false),
 	isAnyKeyed_(false)
 {
@@ -74,16 +75,23 @@ const std::string& Display::title() const
 
 
 
-const Display::TSize& Display::size() const
+const TRgbSpacePtr& Display::rgbSpace() const
 {
-	return size_;
+	return rgbSpace_;
 }
 
 
 
-const TRgbSpacePtr& Display::rgbSpace() const
+const TScalar Display::exposure() const
 {
-	return rgbSpace_;
+    return exposure_;
+}
+
+
+
+const TScalar Display::fStops() const
+{
+	return num::log2(exposure_);
 }
 
 
@@ -95,9 +103,9 @@ const TScalar Display::gamma() const
 
 
 
-const TScalar Display::exposureTime() const
+const TScalar Display::gain() const
 {
-    return exposureTime_;
+    return gain_;
 }
 
 
@@ -109,6 +117,20 @@ void Display::setRgbSpace(const TRgbSpacePtr& rgbSpace)
 
 
 
+void Display::setExposure(TScalar exposure)
+{
+    exposure_ = exposure;
+}
+
+
+
+void Display::setFStops(TScalar fStops)
+{
+	exposure_ = num::pow(TScalar(2), fStops);
+}
+
+
+
 void Display::setGamma(TScalar gammaExponent)
 {
     gamma_ = gammaExponent;
@@ -116,28 +138,36 @@ void Display::setGamma(TScalar gammaExponent)
 
 
 
-void Display::setExposureTime(TScalar time)
+void Display::setGain(TScalar gain)
 {
-    exposureTime_ = time;
+    gain_ = gain;
 }
 
 
 
 // --- private -------------------------------------------------------------------------------------
 
+const Display::TResolution Display::doResolution() const
+{
+	return resolution_;
+}
+
+
+
 void Display::doBeginRender()
 {
-	LASS_LOCK(mutex_)
+	LASS_LOCK(renderBufferLock_)
 	{
-		const std::size_t n = size_.x * size_.y;
+		const unsigned n = resolution_.x * resolution_.y;
 		renderBuffer_.clear();
 		renderBuffer_.resize(n);
 		displayBuffer_.clear();
 		displayBuffer_.resize(n);
-		numberOfSamples_.clear();
-		numberOfSamples_.resize(n, 0);
+		totalWeight_.clear();
+		totalWeight_.resize(n, 0);
+		renderDirtyBox_.clear();
+		displayDirtyBox_.clear();
 		isQuiting_ = false;
-		isDirty_ = false;
 		isCanceling_ = false;
 		isAnyKeyed_ = false;
 	}
@@ -151,36 +181,31 @@ void Display::doBeginRender()
 
 void Display::doWriteRender(const OutputSample* first, const OutputSample* last)
 {
-    LASS_ASSERT(size_.x > 0 && size_.y > 0);
+    LASS_ASSERT(resolution_.x > 0 && resolution_.y > 0);
 
-	LASS_LOCK(mutex_)
+	LASS_LOCK(renderBufferLock_)
 	{
 		while (first != last)
 		{
 			const TPoint2D& position = first->screenCoordinate();
-			LASS_ASSERT(position.x >= 0 && position.y >= 0 && position.x < 1 && position.y < 1);
-			const unsigned i = static_cast<unsigned>(num::floor(position.x * size_.x));
-			const unsigned j = static_cast<unsigned>(num::floor(position.y * size_.y));
-			if (i < 0 || i >= size_.x || j < 0 || j >= size_.y)
+			const int i = static_cast<int>(num::floor(position.x * resolution_.x));
+			const int j = static_cast<int>(num::floor(position.y * resolution_.y));
+			if (i >= 0 && i < resolution_.x && j >= 0 && j < resolution_.y)
 			{
-				return;
+				const TVector3D xyz = first->radiance().xyz();
+				prim::ColorRGBA color = rgbSpace_->convert(xyz);
+				color *= first->alpha() * first->weight();
+				
+				PixelToaster::FloatingPointPixel& pixel = renderBuffer_[j * resolution_.x + i];
+				pixel.a += color.a;
+				pixel.b += color.b;
+				pixel.g += color.g;
+				pixel.r += color.r;
+				
+				totalWeight_[j * resolution_.x + i] += first->weight();
+				renderDirtyBox_ += TDirtyBox::TPoint(i, j);
 			}
-			LASS_ASSERT(i < size_.x && j < size_.y);
-
-			TVector3D xyz = first->radiance().xyz();
-			xyz *= first->weight();
-			
-			const prim::ColorRGBA color = rgbSpace_->convert(xyz);
-			PixelToaster::FloatingPointPixel& pixel = renderBuffer_[j * size_.x + i];
-			pixel.a = color.a;
-			pixel.b = color.b;
-			pixel.g = color.g;
-			pixel.r = color.r;
-			
-			++numberOfSamples_[j * size_.x + i];
-
 			++first;
-			isDirty_ = true;
 		}
 	}
 }
@@ -189,10 +214,7 @@ void Display::doWriteRender(const OutputSample* first, const OutputSample* last)
 
 void Display::doEndRender()
 {
-	LASS_LOCK(mutex_)
-	{
-		isQuiting_ = true;
-	}
+	isQuiting_ = true;
 	displayLoop_->join();
 }
 
@@ -205,30 +227,25 @@ const bool Display::doIsCanceling() const
 
 
 
-void Display::onKeyPressed(PixelToaster::Key key)
+void Display::onKeyDown(PixelToaster::DisplayInterface& display, PixelToaster::Key key)
 {
 	if (key == PixelToaster::Key::Escape)
 	{
-		onClose();
+		onClose(display);
 		return;
 	}
 
-	LASS_LOCK(mutex_)
-	{
-		isAnyKeyed_ = true;
-	}
+	isAnyKeyed_ = true;
 	signal_.signal();
 }
 
 
 
-void Display::onClose()
+bool Display::onClose(PixelToaster::DisplayInterface& display)
 {
-	LASS_LOCK(mutex_)
-	{
-		isCanceling_ = true;
-	}
+	isCanceling_ = true;
 	signal_.signal();
+	return false;
 }
 
 
@@ -236,29 +253,25 @@ void Display::onClose()
 void Display::displayLoop()
 {
 	LASS_ENFORCE(display_.open(
-		title_.c_str(), size_.x, size_.y, PixelToaster::Output::Windowed,
+		title_.c_str(), resolution_.x, resolution_.y, PixelToaster::Output::Windowed,
 		PixelToaster::Mode::FloatingPoint));
 	display_.listener(this);
 
 	bool isRunning = true;
 	while (isRunning)
 	{
-		LASS_LOCK(mutex_)
+		LASS_LOCK(renderBufferLock_)
 		{
 			if (isQuiting_ || isCanceling_)
 			{
 				isRunning = false;
 			}
-
-			if (isDirty_)
-			{
-				updateDisplayBuffer();
-				isDirty_ = false;
-			}
+			copyToDisplayBuffer();
 		}
 
 		if (isRunning)
 		{
+			shadeDisplayBuffer();
 			LASS_ENFORCE(display_.update(displayBuffer_));
 			signal_.wait(250);
 		}
@@ -270,65 +283,106 @@ void Display::displayLoop()
 }
 
 
+/** @internal
+ */
+void Display::copyToDisplayBuffer()
+{
+	if (renderDirtyBox_.isEmpty())
+	{
+		return;
+	}
+
+	const TDirtyBox::TPoint min = renderDirtyBox_.min();
+	const TDirtyBox::TPoint max = renderDirtyBox_.max();
+	const unsigned nx = max.x - min.x + 1;
+	for (unsigned j = min.y; j <= max.y; ++j)
+	{
+		const unsigned kBegin = j * resolution_.x + min.x;
+		const unsigned kEnd = kBegin + nx;
+		for (unsigned k = kBegin; k < kEnd; ++k)
+		{
+			displayBuffer_[k] = renderBuffer_[k];
+			const TScalar w = totalWeight_[k];
+			if (w > 0)
+			{
+				const TScalar invW = num::inv(w);
+				PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+				p.a *= invW;
+				p.r *= invW;
+				p.g *= invW;
+				p.b *= invW;
+			}
+		}
+	}
+
+	displayDirtyBox_ = renderDirtyBox_;
+	renderDirtyBox_.clear();
+}	
+
+
 
 /** @internal
- *  @warning NOT THREAD SAFE, but that's ok since we lock it externaly.
  */
-void Display::updateDisplayBuffer()
+void Display::shadeDisplayBuffer()
 {
-	std::copy(renderBuffer_.begin(), renderBuffer_.end(), displayBuffer_.begin());
+	if (displayDirtyBox_.isEmpty())
+	{
+		return;
+	}
 
-	const std::size_t n = size_.x * size_.y;
+	const TDirtyBox::TPoint min = displayDirtyBox_.min();
+	const TDirtyBox::TPoint max = displayDirtyBox_.max();
+	const unsigned nx = max.x - min.x + 1;
 	const TScalar invGamma = num::inv(gamma_);
 
-	if (exposureTime_ > 0)
+	if (exposure_ > 0)
 	{
-		for (std::size_t i = 0; i < n; ++i)
+		for (unsigned j = min.y; j <= max.y; ++j)
 		{
-			PixelToaster::FloatingPointPixel& p = displayBuffer_[i];
-			const unsigned nSamples = std::max<unsigned>(numberOfSamples_[i], 1);
-			const TScalar scaler = -exposureTime_ / nSamples;
-
-			p.a = num::clamp(p.a, 0.f, 1.f);
-			p.b = num::pow(num::clamp(1.f - num::exp(scaler * p.b), 0.f, 1.f), invGamma);
-			p.g = num::pow(num::clamp(1.f - num::exp(scaler * p.g), 0.f, 1.f), invGamma);
-			p.r = num::pow(num::clamp(1.f - num::exp(scaler * p.r), 0.f, 1.f), invGamma);
+			const unsigned kBegin = j * resolution_.x + min.x;
+			const unsigned kEnd = kBegin + nx;
+			for (unsigned k = kBegin; k < kEnd; ++k)
+			{
+				PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+				p.a = num::clamp(p.a, 0.f, 1.f);
+				p.b = num::pow(num::clamp(gain_ * (1.f - num::exp(-exposure_ * p.b)), 0.f, 1.f), invGamma);
+				p.g = num::pow(num::clamp(gain_ * (1.f - num::exp(-exposure_ * p.g)), 0.f, 1.f), invGamma);
+				p.r = num::pow(num::clamp(gain_ * (1.f - num::exp(-exposure_ * p.r)), 0.f, 1.f), invGamma);
+			}
 		}
 	}
 	else
 	{
-		for (std::size_t i = 0; i < n; ++i)
+		for (unsigned j = min.y; j <= max.y; ++j)
 		{
-			PixelToaster::FloatingPointPixel& p = displayBuffer_[i];
-			const unsigned nSamples = std::max<unsigned>(numberOfSamples_[i], 1);
-			const TScalar scaler = 1.f / nSamples;
-
-			p.a = num::clamp(p.a, 0.f, 1.f);
-			p.b = num::pow(num::clamp(scaler * p.b, 0.f, 1.f), invGamma);
-			p.g = num::pow(num::clamp(scaler * p.g, 0.f, 1.f), invGamma);
-			p.r = num::pow(num::clamp(scaler * p.r, 0.f, 1.f), invGamma);
+			const unsigned kBegin = j * resolution_.x + min.x;
+			const unsigned kEnd = kBegin + nx;
+			for (unsigned k = kBegin; k < kEnd; ++k)
+			{
+				PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+				p.a = num::clamp(p.a, 0.f, 1.f);
+				p.b = num::pow(num::clamp(gain_ * p.b, 0.f, 1.f), invGamma);
+				p.g = num::pow(num::clamp(gain_ * p.g, 0.f, 1.f), invGamma);
+				p.r = num::pow(num::clamp(gain_ * p.r, 0.f, 1.f), invGamma);
+			}
 		}
 	}
+
+	displayDirtyBox_.clear();
 }
 
 
 
 void Display::waitForAnyKey()
 {
-	LASS_LOCK(mutex_);
-	{
-		isAnyKeyed_ = false;
-	}
-
+	isAnyKeyed_ = false;
 	while (true)
 	{
-		LASS_LOCK(mutex_)
+		if (isAnyKeyed_ || isCanceling_)
 		{
-			if (isAnyKeyed_ || isCanceling_)
-			{
-				return;
-			}
+			return;
 		}
+		shadeDisplayBuffer();
 		LASS_ENFORCE(display_.update(displayBuffer_));
 		signal_.wait(250);
 	}

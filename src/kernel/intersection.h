@@ -98,7 +98,7 @@ private:
 			IntersectionInfo,
 			util::AllocatorSingleton<
 				util::AllocatorPerThread<
-					util::AllocatorVariableHybrid<
+					util::AllocatorBinned<
 						util::AllocatorFreeList<>, 
 						256
 					>						

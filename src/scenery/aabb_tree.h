@@ -32,6 +32,7 @@
 #include "scenery_common.h"
 #include "../kernel/scene_object.h"
 #include <lass/spat/aabb_tree.h>
+#include <lass/spat/aabp_tree.h>
 
 namespace liar
 {
@@ -124,10 +125,12 @@ private:
 			TReference t, TParam minT, const TInfo* info)
 		{
 			LASS_ASSERT(info && info->sample && info->intersectionResult);
+			LASS_ASSERT(ray.nearLimit() == minT);
 			Intersection temp;
 			(*object)->intersect(*info->sample, ray, temp);
-			if (temp && temp.t() > minT)
+			if (temp)
 			{
+				LASS_ASSERT(temp.t() > minT);
 				t = temp.t();
 				if (info->intersectionResult->isEmpty() || 
 					temp.t() < info->intersectionResult->t())
@@ -143,6 +146,7 @@ private:
 			TParam minT, TParam maxT, const TInfo* info)
 		{
 			LASS_ASSERT(info && info->sample);
+			LASS_ASSERT(ray.nearLimit() == minT && ray.farLimit() == maxT);
 			return (*object)->isIntersecting(*info->sample, ray);
 		}
 
@@ -160,9 +164,9 @@ private:
 			TReference t, const TParam minT)
 		{
 			TScalar temp;
-			prim::Result hit = 
-				prim::intersect(aabb, ray.unboundedRay(), temp, minT);
-			if (hit == prim::rOne)
+			prim::Result hit = prim::intersect(
+				aabb, ray.unboundedRay(), temp, std::max(ray.nearLimit(), minT));
+			if (hit == prim::rOne && temp < ray.farLimit())
 			{
 				t = temp;
 				return true;
@@ -180,7 +184,7 @@ private:
 		static const TVector reciprocal(const TVector& vector) { return vector.reciprocal();	}
 	};
 
-	typedef spat::AabbTree<TChildren::value_type, ObjectTraits> TTree;
+	typedef spat::AabpTree<TChildren::value_type, ObjectTraits> TTree;
 
     TChildren children_;
 	TTree tree_;

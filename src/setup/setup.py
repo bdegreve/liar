@@ -64,7 +64,7 @@ else:
 	title = 'liar'
 	pyDebug = ''
 	winDebug = ''
-	pdb = []
+	pdb = ['pdb']
 	
 
 from distutils.core import setup,Extension

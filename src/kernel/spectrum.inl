@@ -254,6 +254,24 @@ inline void Spectrum::inpsqrt()
 
 
 
+inline void Spectrum::inpexp()
+{
+	num::inpexp(xyz_.x);
+	num::inpexp(xyz_.y);
+	num::inpexp(xyz_.z);
+}
+
+
+
+inline void Spectrum::inplog()
+{
+	num::inplog(xyz_.x);
+	num::inplog(xyz_.y);
+	num::inplog(xyz_.z);
+}
+
+
+
 inline void Spectrum::swap(Spectrum& other)
 {
 	std::swap(xyz_, other.xyz_);
@@ -512,6 +530,28 @@ inline const Spectrum sqrt(const Spectrum& a)
 {
 	Spectrum result(a);
 	result.inpsqrt();
+	return result;
+}
+
+
+
+/** @relates liar::Spectrum
+ */
+inline const Spectrum exp(const Spectrum& a)
+{
+	Spectrum result(a);
+	result.inpexp();
+	return result;
+}
+
+
+
+/** @relates liar::Spectrum
+ */
+inline const Spectrum log(const Spectrum& a)
+{
+	Spectrum result(a);
+	result.inplog();
 	return result;
 }
 

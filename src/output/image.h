@@ -47,35 +47,39 @@ class LIAR_OUTPUT_DLL Image: public RenderTarget
     PY_HEADER(RenderTarget)
 public:
 
-	typedef prim::Vector2D<size_t> TSize;
-
-	Image(const std::string& filename, const TSize& size);
+	Image(const std::string& filename, const TResolution& resolution);
     ~Image();
 
 	const std::string& filename() const;
-	const TSize& size() const;
 	const TRgbSpacePtr& rgbSpace() const;
+	const TScalar exposure() const;
+	const TScalar fStops() const;
+	const TScalar gain() const;
     const TScalar gamma() const;
-	const TScalar exposureTime() const;
 
 	void setFilename(const std::string& filename);
 	void setRgbSpace(const TRgbSpacePtr& rgbSpace);
+	void setExposure(TScalar exposure);
+	void setFStops(TScalar fStops);
     void setGamma(TScalar gammaExponent);
-	void setExposureTime(TScalar time);
+	void setGain(TScalar gain);
 
 private:
 
-    virtual void doBeginRender();
-	virtual void doWriteRender(const OutputSample* first, const OutputSample* last);
-    virtual void doEndRender();
+	const TResolution doResolution() const;
+    void doBeginRender();
+	void doWriteRender(const OutputSample* first, const OutputSample* last);
+    void doEndRender();
 
     io::Image image_;
-	std::vector<unsigned> numberOfSamples_;
+	std::vector<TScalar> totalWeight_;
     std::string filename_;
-    TSize size_;
+	util::CriticalSection lock_;
+    TResolution resolution_;
 	TRgbSpacePtr rgbSpace_;
+	TScalar exposure_;
     TScalar gamma_;
-	TScalar exposureTime_;
+    TScalar gain_;
 	bool isQuiting_;
 	bool isSaved_;
 };

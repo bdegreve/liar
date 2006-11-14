@@ -70,15 +70,10 @@ private:
 
 	const unsigned doNumReflectionSamples() const;
 
-	void doBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
-		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn, 
-		Spectrum* firstValue, TScalar* firstPdf, unsigned allowedCaps) const;
-	void doSampleBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut, 
-		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
-		TVector3D* firstOmegaIn, Spectrum* firstValue, TScalar* firstPdf,
-		unsigned allowedCaps) const;
+	void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
+		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const;
+	void doSampleBsdf(const Sample& sample, const IntersectionContext& context,	const TVector3D& omegaIn,
+		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const;
 	
 	const TVector3D sampleH(const TPoint2D& sample, TScalar nu, TScalar nv/*, TScalar& pdf*/) const ;
 

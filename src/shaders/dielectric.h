@@ -21,13 +21,13 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::shaders::Mirror
+/** @class liar::shaders::Lambert
  *  @brief very simple shader using lambert's cosine law.
  *  @author Bram de Greve [Bramz]
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_MIRROR_H
-#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_MIRROR_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_DIELECTRIC_H
+#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_DIELECTRIC_H
 
 #include "shaders_common.h"
 #include "../kernel/shader.h"
@@ -38,20 +38,26 @@ namespace liar
 namespace shaders
 {
 
-class LIAR_SHADERS_DLL Mirror: public Shader
+class LIAR_SHADERS_DLL Dielectric: public Shader
 {
     PY_HEADER(Shader)
 public:
 
-	Mirror();
-	Mirror(const TTexturePtr& reflectance);
+	Dielectric();
+	Dielectric(const TTexturePtr& innerRefractionIndex);
+	Dielectric(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex);
 
-	const TTexturePtr& reflectance() const;
-	void setReflectance(const TTexturePtr& reflectance);
+	const TTexturePtr& innerRefractionIndex() const;
+	void setInnerRefractionIndex(const TTexturePtr& refractionIndex);
+	const TTexturePtr& outerRefractionIndex() const;
+	void setOuterRefractionIndex(const TTexturePtr& refractionIndex);
+	const TTexturePtr& colour() const;
+	void setColour(const TTexturePtr& colour);
 
 private:
 
 	const unsigned doNumReflectionSamples() const;
+	const unsigned doNumTransmissionSamples() const;
 
 	void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
 		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const;
@@ -61,7 +67,9 @@ private:
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-	TTexturePtr reflectance_;
+	TTexturePtr innerRefractionIndex_;
+	TTexturePtr outerRefractionIndex_;
+	TTexturePtr colour_;
 };
 
 }

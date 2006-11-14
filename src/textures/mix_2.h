@@ -49,6 +49,7 @@ public:
 
 protected:
 
+	//Mix2();
 	Mix2(const TTexturePtr& a, const TTexturePtr& b);
 
 private:

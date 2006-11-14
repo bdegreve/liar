@@ -143,6 +143,11 @@ inline void SceneObject::localContext(const Sample& sample, const BoundedRay& ra
     {
         result.setShader(shader_);
     }
+	if (!result.interior() || this->isOverridingInterior_)
+	{
+		result.setInterior(interior_);
+		result.setSolidEvent(intersection.solidEvent());
+	}
 	//if (intersection.level() == 0) // top level
 	//{
 	//	result.flipTo(-ray.direction());

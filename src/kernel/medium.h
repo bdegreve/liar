@@ -30,7 +30,9 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_MEDIUM_H
 
 #include "kernel_common.h"
+#include "bounded_ray.h"
 #include "spectrum.h"
+#include "solid_event.h"
 
 namespace liar
 {
@@ -44,19 +46,44 @@ public:
 
     virtual ~Medium();
 
-	TScalar refractiveIndex() const;
-	void setRefractiveIndex(TScalar value);
+	const Spectrum transparency(const BoundedRay& ray) const
+	{
+		return doTransparency(ray); 
+	}
 
 protected:
 
-    Medium();
+	Medium();
 
 private:
 
-	TScalar refractiveIndex_;
+	virtual const Spectrum doTransparency(const BoundedRay& ray) const = 0;
 };
 
 typedef python::PyObjectPtr<Medium>::Type TMediumPtr;
+
+class LIAR_KERNEL_DLL MediumStack
+{
+public:
+	MediumStack(const TMediumPtr& defaultMedium = TMediumPtr());
+	const Spectrum transparency(const BoundedRay& ray) const;
+private:
+	friend class MediumChanger;
+	typedef std::vector<const Medium*> TStack;
+	TStack stack_;
+	TMediumPtr default_;
+};
+
+class LIAR_KERNEL_DLL MediumChanger
+{
+public:
+	MediumChanger(MediumStack& stack, const Medium* medium, SolidEvent solidEvent);
+	~MediumChanger();
+private:
+	MediumStack::TStack& stack_;
+	const Medium* medium_;
+	SolidEvent event_;
+};
 
 }
 

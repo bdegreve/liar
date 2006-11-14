@@ -198,6 +198,99 @@
 				CommandLine="python.exe &quot;$(SolutionDir)setup\build_state.py&quot; $(ProjectName) $(ConfigurationName) end"
 			/>
 		</Configuration>
+		<Configuration
+			Name="Release with Symbols|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="python.exe &quot;$(SolutionDir)setup\build_state.py&quot; $(ProjectName) $(ConfigurationName) begin"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions=""
+				Optimization="3"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="true"
+				EnableFiberSafeOptimizations="true"
+				WholeProgramOptimization="true"
+				PreprocessorDefinitions="LIAR_SHADERS_BUILD_DLL;WIN32;NDEBUG;_USRDLL"
+				RuntimeLibrary="2"
+				DefaultCharIsUnsigned="true"
+				TreatWChar_tAsBuiltInType="true"
+				ForceConformanceInForLoopScope="true"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="shaders_common.h"
+				ProgramDataBaseFileName="$(IntDir)/$(TargetName).pdb"
+				BrowseInformation="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions=""
+				OutputFile="$(OutDir)/$(ProjectName).pyd"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="..\..\bin"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="python.exe &quot;$(SolutionDir)setup\build_state.py&quot; $(ProjectName) $(ConfigurationName) end"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -209,6 +302,14 @@
 			>
 			<File
 				RelativePath=".\ashikhmin_shirley.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\beer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\dielectric.cpp"
 				>
 			</File>
 			<File
@@ -240,6 +341,15 @@
 						UsePrecompiledHeader="1"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release with Symbols|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalOptions=""
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\shaders_init.cpp"
@@ -257,6 +367,14 @@
 			>
 			<File
 				RelativePath=".\ashikhmin_shirley.h"
+				>
+			</File>
+			<File
+				RelativePath=".\beer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\dielectric.h"
 				>
 			</File>
 			<File

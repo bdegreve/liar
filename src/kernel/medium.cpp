@@ -30,7 +30,6 @@ namespace kernel
 {
 
 PY_DECLARE_CLASS(Medium)
-PY_CLASS_MEMBER_RW(Medium, "refractiveIndex", refractiveIndex, setRefractiveIndex)
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -40,24 +39,9 @@ Medium::~Medium()
 
 
 
-TScalar Medium::refractiveIndex() const
-{
-	return refractiveIndex_;
-}
-
-
-
-void Medium::setRefractiveIndex(TScalar value)
-{
-	refractiveIndex_ = value;
-}
-
-
-
 // --- protected -----------------------------------------------------------------------------------
 
-Medium::Medium():
-	refractiveIndex_(TNumTraits::one)
+Medium::Medium()
 {
 }
 
@@ -70,6 +54,81 @@ Medium::Medium():
 // --- free ----------------------------------------------------------------------------------------
 
 
+
+// -------------------------------------------------------------------------------------------------
+
+MediumStack::MediumStack(const TMediumPtr& defaultMedium):
+	stack_(),
+	default_(defaultMedium)
+{
+}
+
+
+
+const Spectrum MediumStack::transparency(const BoundedRay& ray) const
+{
+	if (stack_.empty())
+	{
+		return default_ ? default_->transparency(ray) : Spectrum(1);
+	}
+	LASS_ASSERT(stack_.back());
+	return stack_.back()->transparency(ray);
+}
+
+
+
+// -------------------------------------------------------------------------------------------------
+
+MediumChanger::MediumChanger(MediumStack& stack, const Medium* medium, SolidEvent solidEvent):
+	stack_(stack.stack_),
+	medium_(medium),
+	event_(solidEvent)
+{
+	if (medium_)
+	{
+		switch (event_)
+		{
+		case seEntering:
+			stack_.push_back(medium_);
+			break;
+		case seLeaving:
+			if (stack_.empty())
+			{
+				// our first generation view ray is leaving an object.  Regard this as a nop.
+				event_ = seNoEvent;
+			}
+			else
+			{
+				LASS_ASSERT(stack_.back() == medium_);
+				stack_.pop_back();
+			}
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+
+
+MediumChanger::~MediumChanger()
+{
+	if (medium_)
+	{
+		switch (event_)
+		{
+		case seEntering:
+			LASS_ASSERT(!stack_.empty() && stack_.back() == medium_);
+			stack_.pop_back();
+			break;
+		case seLeaving:
+			stack_.push_back(medium_);
+			break;
+		default:
+			break;
+		};
+	}
+}
 
 }
 

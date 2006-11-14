@@ -53,6 +53,8 @@ IntersectionContext::IntersectionContext(const RayTracer* tracer):
 	t_(),
 	tracer_(tracer),
 	shader_(0),
+	interior_(0),
+	solidEvent_(seNoEvent),
 	shaderToWorld_(),
 	localToWorld_(),
 	hasScreenSpaceDifferentials_(false)
@@ -61,9 +63,10 @@ IntersectionContext::IntersectionContext(const RayTracer* tracer):
 
 
 
-void IntersectionContext::setShader(const TShaderPtr& shader)
+void IntersectionContext::setShader(const Shader* shader)
 {
-	shader_ = shader.get();
+	shader_ = shader;
+	localToWorld_ = shaderToWorld_ = TTransformation3D();
 	generateShaderToWorld();
 }
 

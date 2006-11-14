@@ -133,7 +133,7 @@ void Sphere::doLocalContext(
 	//         [cos theta          ]
 	//
 	const TVector3D R = point - sphere_.center();
-	const TVector3D normal = R * invRadius_;
+	const TVector3D normal = R.normal();
 	result.setNormal(normal);
 
 	// phi = 2pi * u

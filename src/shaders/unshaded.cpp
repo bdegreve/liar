@@ -83,26 +83,16 @@ const Spectrum Unshaded::doEmission(const Sample& sample, const IntersectionCont
 
 
 void Unshaded::doBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
-		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn,
-		Spectrum* firstValue, TScalar* firstPdf, unsigned allowCaps) const
+		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
+		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
 {
-	while (firstOmegaIn != lastOmegaIn)
-	{
-		*firstValue++ = Spectrum();
-		*firstPdf++ = 0;
-		++firstOmegaIn;
-	}
 }
 
 
 void Unshaded::doSampleBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& dirIn,
-		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
-		TVector3D* firstDirOut, Spectrum* firstValue, TScalar* firstPdf,
-		unsigned allowedCaps) const
+		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
+		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
 {
-	setBlackSamples(firstBsdfSample, lastBsdfSample, firstDirOut, firstValue, firstPdf);
 }
 
 

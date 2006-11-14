@@ -26,6 +26,8 @@
 // keep in alphabetical order please! [Bramz]
 //
 #include "ashikhmin_shirley.h"
+#include "beer.h"
+#include "dielectric.h"
 #include "lambert.h"
 #include "mirror.h"
 //#include "simple.h"
@@ -45,6 +47,8 @@ LIAR_SHADERS_DLL void initshaders(void)
 	// keep in alphabetical order please! [Bramz]
 	//
     PY_INJECT_CLASS_IN_MODULE(AshikhminShirley, shaders, "Anisotropic Phong BRDF by Ashikhmin & Shirley (2001)" )
+	PY_INJECT_CLASS_IN_MODULE(Beer, shaders, "Beer's Law")
+    PY_INJECT_CLASS_IN_MODULE(Dielectric, shaders, "dielectric Fresnel material (like glass)")
     PY_INJECT_CLASS_IN_MODULE(Lambert, shaders, "perfect lambert shader")
     PY_INJECT_CLASS_IN_MODULE(Mirror, shaders, "perfect mirror shader")
     //PY_INJECT_CLASS_IN_MODULE(Simple, shaders, "a classic simple shader, Whitted style")

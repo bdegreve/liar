@@ -81,34 +81,30 @@ const unsigned Mirror::doNumReflectionSamples() const
 
 
 void Mirror::doBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
-		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn,
-		Spectrum* firstValue, TScalar* firstPdf, unsigned allowCaps) const
+		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
+		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
 {
-	setBlackBsdf(firstOmegaIn, lastOmegaIn, firstValue, firstPdf);
 }
 
 
 
 void Mirror::doSampleBsdf(
 		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
-		TVector3D* firstOmegaOut, Spectrum* firstValue, TScalar* firstPdf,
-		unsigned allowedCaps) const
+		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
 {
-	if (!testCaps(allowedCaps, caps()))
-	{
-		setBlackSamples(firstBsdfSample, lastBsdfSample, firstOmegaOut, firstValue, firstPdf);
-		return;
-	}
-
 	const Spectrum r = reflectance_->lookUp(sample, context);
 	const TVector3D omegaOut(-omegaIn.x, -omegaIn.y, omegaIn.z);
-	while (firstBsdfSample++ != lastBsdfSample)
+	while (first != last)
 	{
-		*firstOmegaOut++ = omegaOut;
-		*firstValue++ = r;
-		*firstPdf++ = omegaOut.z;
+		if (testCaps(first->allowedCaps, caps()))
+		{
+			result->omegaOut = omegaOut;
+			result->value = r;
+			result->pdf = omegaOut.z;
+			result->usedCaps = caps();
+		}
+		++first;
+		++result;
 	}
 }
 

@@ -43,6 +43,7 @@ PY_CLASS_METHOD_QUALIFIED_0(RenderEngine, render, void)
 PY_CLASS_METHOD_QUALIFIED_1(RenderEngine, render, void, TTime)
 PY_CLASS_METHOD_QUALIFIED_1(RenderEngine, render, void, const RenderEngine::TBucket&)
 PY_CLASS_METHOD_QUALIFIED_2(RenderEngine, render, void, TTime, const RenderEngine::TBucket&)
+PY_CLASS_STATIC_CONST(RenderEngine, "AUTO_NUMBER_OF_THREADS", RenderEngine::autoNumberOfThreads);
 
 
 const RenderEngine::TBucket RenderEngine::bucketBound_(
@@ -52,7 +53,7 @@ const RenderEngine::TBucket RenderEngine::bucketBound_(
 // --- public --------------------------------------------------------------------------------------
 
 RenderEngine::RenderEngine():
-	numberOfThreads_(1),
+	numberOfThreads_(autoNumberOfThreads),
 	isDirty_(false)
 {
 }
@@ -155,7 +156,7 @@ void RenderEngine::setTracer(const TRayTracerPtr& iRayTracer)
 
 void RenderEngine::setNumberOfThreads(unsigned number)
 {
-	numberOfThreads_ = std::max<unsigned>(number, 1);
+	numberOfThreads_ = number;
 }
 
 
@@ -222,7 +223,9 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 	else
 	{
 		typedef util::ThreadPool<Task, Consumer> TThreadPool;
-		TThreadPool pool(numberOfThreads_, 2 * numberOfThreads_, consumer);
+		const unsigned numThreads = 
+			numberOfThreads_ == autoNumberOfThreads ? util::numberOfProcessors() : numberOfThreads_;
+		TThreadPool pool(numThreads, 2 * numThreads, consumer);
 
 		const TResolution::TValue step = 64;
 		TResolution i;
@@ -360,10 +363,13 @@ void RenderEngine::Consumer::operator()(const Task& iTask)
 				}
 
 				sampler_->sample(i, k, timePeriod_, sample);
+				TScalar x = sample.screenCoordinate().x * 400;
+				TScalar y = sample.screenCoordinate().y * 400;
 				const DifferentialRay primaryRay = engine_->camera_->primaryRay(sample, pixelSize_);
-				const Spectrum radiance = rayTracer_->castRay(sample, primaryRay);
+				TScalar alpha;
+				const Spectrum radiance = rayTracer_->castRay(sample, primaryRay, alpha);
 
-				outputSamples[outputIndex++] = OutputSample(sample, radiance);
+				outputSamples[outputIndex++] = OutputSample(sample, radiance, alpha);
 				if (outputIndex == outputSize)
 				{
 					engine_->writeRender(&outputSamples[0], &outputSamples[0] + outputSize, *progress_);
@@ -391,7 +397,7 @@ RenderEngine::Progress::Progress(const std::string& caption, unsigned totalNumbe
 
 RenderEngine::Progress::~Progress()
 {
-	indicator_(1.);
+	//indicator_(1.);
 }
 
 

@@ -32,6 +32,8 @@
 #include "kernel_common.h"
 #include "light_sample.h"
 #include "shader.h"
+#include "medium.h"
+#include "solid_event.h"
 
 namespace liar
 {
@@ -62,6 +64,8 @@ public:
 	const TVector2D& dUv_dJ() const { return dUv_dJ_; }
     const TScalar t() const { return t_; }
     const Shader* const shader() const { return shader_; }
+	const Medium* const interior() const { return interior_; }
+	const SolidEvent solidEvent() const { return solidEvent_; }
 
     void setPoint(const TPoint3D& point) {  LASS_ASSERT(!shader_); point_ = point; }
 	void setDPoint_dU(const TVector3D& dPoint_dU) { LASS_ASSERT(!shader_); dPoint_dU_ = dPoint_dU; }
@@ -75,7 +79,11 @@ public:
 	void setDUv_dI(const TVector2D& dUv_dI) { dUv_dI_ = dUv_dI; }
 	void setDUv_dJ(const TVector2D& dUv_dJ) { dUv_dJ_ = dUv_dJ; }
     void setT(TScalar t) { t_ = t; }
-    void setShader(const TShaderPtr& shader);
+    void setShader(const Shader* shader);
+	void setShader(const TShaderPtr& shader) { setShader(shader.get()); }
+	void setInterior(const Medium* interior) { interior_ = interior; }
+	void setInterior(const TMediumPtr& interior) { setInterior(interior.get()); }
+	void setSolidEvent(SolidEvent solidEvent) { solidEvent_ = solidEvent; }
 
 	void setScreenSpaceDifferentials(const DifferentialRay& ray);
 
@@ -118,11 +126,13 @@ private:
 
 	TScalar t_;				/**< parameter of point_ on ray */
     const Shader* shader_;		/**< shader to be used */
+	const Medium* interior_;
 	const RayTracer* tracer_;	/**< tracer to be used */
 
 	TTransformation3D shaderToWorld_;
 	TTransformation3D localToWorld_;
 
+	SolidEvent solidEvent_;
 	bool hasScreenSpaceDifferentials_;
 };
 

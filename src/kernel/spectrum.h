@@ -81,6 +81,8 @@ public:
 	
 	void inpsqr();
 	void inpsqrt();
+	void inpexp();
+	void inplog();
 
 	void swap(Spectrum& other);
 
@@ -121,8 +123,10 @@ inline const Spectrum clamp(Spectrum::TParam a, const Spectrum& min, const Spect
 
 inline const Spectrum sqr(const Spectrum& a);
 inline const Spectrum sqrt(const Spectrum& a);
+inline const Spectrum exp(const Spectrum& a);
+inline const Spectrum log(const Spectrum& a);
 
-inline const Spectrum blend(const Spectrum& a, const Spectrum& b, Spectrum::TParam iFactor);
+inline const Spectrum blend(const Spectrum& a, const Spectrum& b, Spectrum::TParam factor);
 
 Spectrum xyz(const TVector3D& xyz);
 Spectrum xyz(TScalar x, TScalar y, TScalar z);

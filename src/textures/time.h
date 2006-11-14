@@ -21,7 +21,7 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::textures::Constant
+/** @class liar::textures::Time
  *  @brief evaluates to sampled time
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  */

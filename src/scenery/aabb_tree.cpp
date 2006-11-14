@@ -96,15 +96,14 @@ void AabbTree::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& peri
 
 
 
-void AabbTree::doIntersect(const Sample& sample, const BoundedRay& ray,
-					   Intersection& result) const
+void AabbTree::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
 {
 	Intersection treeResult;
     Info info;
 	info.sample = &sample;
 	info.intersectionResult = &treeResult;
 	TScalar t;
-	if (tree_.intersect(ray, t, ray.nearLimit(), &info) != children_.end())
+	if (tree_.intersect(ray, t, ray.nearLimit(), &info) != children_.end() && t < ray.farLimit())
 	{
 		LASS_ASSERT(treeResult);
         treeResult.push(this);
@@ -118,8 +117,7 @@ void AabbTree::doIntersect(const Sample& sample, const BoundedRay& ray,
 
 
 
-const bool AabbTree::doIsIntersecting(const Sample& sample, 
-								  const BoundedRay& ray) const
+const bool AabbTree::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
 {
     Info info;
 	info.sample = &sample;
@@ -129,9 +127,9 @@ const bool AabbTree::doIsIntersecting(const Sample& sample,
 
 
 
-void AabbTree::doLocalContext(const Sample& sample, const BoundedRay& ray,
-                          const Intersection& intersection,
-                          IntersectionContext& result) const
+void AabbTree::doLocalContext(
+		const Sample& sample, const BoundedRay& ray, 
+		const Intersection& intersection, IntersectionContext& result) const
 {
     IntersectionDescendor descend(intersection);
     intersection.object()->localContext(sample, ray, intersection, result);

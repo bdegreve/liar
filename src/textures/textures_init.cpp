@@ -29,6 +29,7 @@
 #include "checker_board.h"
 #include "checker_volume.h"
 #include "constant.h"
+#include "global.h"
 #include "grid_board.h"
 #include "image.h"
 #include "linear_interpolator.h"
@@ -36,6 +37,7 @@
 #include "product.h"
 #include "time.h"
 #include "uv.h"
+#include "xyz.h"
 
 PY_DECLARE_MODULE(textures)
 
@@ -58,12 +60,14 @@ LIAR_TEXTURES_DLL void inittextures(void)
 	PY_INJECT_CLASS_IN_MODULE(CheckerBoard, textures, "mixes two textures in 2D checkerboard pattern")
 	PY_INJECT_CLASS_IN_MODULE(CheckerVolume, textures, "mixes two textures in 3D checkerboard pattern")
 	PY_INJECT_CLASS_IN_MODULE(Constant, textures, "texture with constant value")
+	PY_INJECT_CLASS_IN_MODULE(Global, textures, "use global texture parameters instead of local")
 	PY_INJECT_CLASS_IN_MODULE(GridBoard, textures, "mixes two textures in 2D grid pattern")
 	PY_INJECT_CLASS_IN_MODULE(Image, textures, "image file")
 	PY_INJECT_CLASS_IN_MODULE(LinearInterpolator, textures, "interpolates textures using gray value of control texture as parameter")
 	PY_INJECT_CLASS_IN_MODULE(Product, textures, "makes product of child textures")
 	PY_INJECT_CLASS_IN_MODULE(Time, textures, "evaluates to sampled time")
 	PY_INJECT_CLASS_IN_MODULE(Uv, textures, "mixes two textures by the u and v context channels")
+	PY_INJECT_CLASS_IN_MODULE(Xyz, textures, "mixes three textures by the x, y and z context channels")
 
 	PyRun_SimpleString("print 'liar.textures imported (v" 
 		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");

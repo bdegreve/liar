@@ -23,6 +23,7 @@
 
 #include "textures_common.h"
 #include "mix_2.h"
+#include "constant.h"
 
 namespace liar
 {
@@ -50,6 +51,14 @@ void Mix2::setTextureB(const TTexturePtr& b)
 
 
 // --- protected -----------------------------------------------------------------------------------
+/*
+Mix2::Mix2():
+	a_(new Constant(rgb(1, 0, 0))),
+	b_(new Constant(rgb(0, 1, 0)))
+{
+}
+*/
+
 
 Mix2::Mix2(const TTexturePtr& a, const TTexturePtr& b):
 	a_(a),

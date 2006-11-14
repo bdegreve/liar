@@ -46,8 +46,14 @@ public:
 
 	PhotonMapper();
 
-	const unsigned requestedMapSize(const std::string& mapType) const;
-	void setRequestedMapSize(const std::string& mapType, unsigned mapSize);
+	const unsigned maxNumberOfPhotons() const;
+	void setMaxNumberOfPhotons(unsigned maxNumberOfPhotons);
+
+	const unsigned globalMapSize() const;
+	void setGlobalMapSize(unsigned mapSize);
+
+	const TScalar causticsQuality() const;
+	void setCausticsQuality(TScalar quality);
 
 	const unsigned estimationSize(const std::string& mapType) const;
 	void setEstimationSize(const std::string& mapType, unsigned size);
@@ -55,8 +61,8 @@ public:
 	const TScalar estimationRadius(const std::string& mapType) const;
 	void setEstimationRadius(const std::string& mapType, TScalar radius);
 
-	const unsigned maxNumberOfPhotons() const;
-	void setMaxNumberOfPhotons(unsigned maxNumberOfPhotons);
+	const TScalar estimationTolerance(const std::string& mapType) const;
+	void setEstimationTolerance(const std::string& mapType, TScalar radius);
 
 	const unsigned numFinalGatherRays() const;
 	void setNumFinalGatherRays(unsigned numFinalGatherRays);
@@ -71,6 +77,8 @@ public:
 	void setRayTracingDirect(bool enabled = true);
     
 private:
+
+	typedef std::vector<Medium*> TMediumStack;
 
 	struct Photon
 	{
@@ -113,8 +121,9 @@ private:
 
 	enum MapType
 	{
-		mtGlobal,
-		mtCaustic,
+		mtNone = -1,
+		mtGlobal = 0,
+		mtCaustics,
 		mtVolume,
 		numMapTypes
 	};
@@ -136,7 +145,7 @@ private:
 	void doRequestSamples(const TSamplerPtr& sampler);
 	void doPreProcess(const TSamplerPtr& sampler, const TimePeriod& period);
 	const Spectrum doCastRay(const Sample& sample, const DifferentialRay& primaryRay,
-		unsigned generation) const;
+		TScalar& alpha, unsigned generation) const;
 	const TLightSamplesRange doSampleLights(const Sample& sample,
 		const TPoint3D& target, const TVector3D& targetNormal) const;
 	const TRayTracerPtr doClone() const;
@@ -144,12 +153,13 @@ private:
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-	void buildPhotonMap(MapType iType, const TLightCdf& iCumulativeLightPower,
-		const TSamplerPtr& sampler, const TimePeriod& period);
-	void emitPhoton(MapType iType, const LightContext& light, TScalar lightPdf, 
-		const Sample& sample, TRandomSecondary::TValue secondarySeed);
+	void fillPhotonMap(const TLightCdf& iCumulativeLightPower, const TSamplerPtr& sampler, 
+		const TimePeriod& period);
+	void emitPhoton(const LightContext& light, TScalar lightPdf, const Sample& sample, 
+		TRandomSecondary::TValue secondarySeed);
 	void tracePhoton(const Sample& sample, const Spectrum& power, const BoundedRay& ray,
-		unsigned geneneration, TUniformSecondary& uniform);
+		unsigned geneneration, TUniformSecondary& uniform, bool isCaustic = false);
+	void buildPhotonMap();
 	void buildIrradianceMap();
 
 	const Spectrum traceDirect(const Sample& sample, const IntersectionContext& context,
@@ -161,16 +171,22 @@ private:
 	const Spectrum estimateIrradiance(const TPoint3D& point, const TVector3D& normal) const;
 	const Spectrum estimateRadiance(const Sample& sample, const IntersectionContext& context, 
 		const TPoint3D& point, const TVector3D& omegaOut, size_t gatherStage = 0) const;
+	const Spectrum estimateCaustics(const Sample& sample, const IntersectionContext& context, 
+		const TPoint3D& point, const TVector3D& omegaOut) const;
 
+	mutable MediumStack mediumStack_;
 	TPhotonBuffer photonBuffer_[numMapTypes];
 	TPhotonMap photonMap_[numMapTypes];
 	TIrradianceBuffer irradianceBuffer_;
 	TIrradianceMap irradianceMap_;
 	mutable TPhotonNeighbourhood photonNeighbourhood_;
 	TScalar estimationRadius_[numMapTypes];
-	unsigned requestedMapSize_[numMapTypes];
+	TScalar estimationTolerance_[numMapTypes];
 	unsigned estimationSize_[numMapTypes];
+
 	unsigned maxNumberOfPhotons_;
+	unsigned globalMapSize_;
+	TScalar causticsQuality_;
 	unsigned numFinalGatherRays_;
 	TScalar ratioPrecomputedIrradiance_;
 	int idFinalGatherSamples_;

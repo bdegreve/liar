@@ -74,51 +74,41 @@ void Lambert::setDiffuse(const TTexturePtr& iDiffuse)
 // --- private -------------------------------------------------------------------------------------
 
 void Lambert::doBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
-		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn,
-		Spectrum* firstValue, TScalar* firstPdf, unsigned allowedCaps) const
+		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
+		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
 {
-	if (!testCaps(allowedCaps, caps()))
-	{
-		setBlackBsdf(firstOmegaIn, lastOmegaIn, firstValue, firstPdf);
-		return;
-	}
-
+	LASS_ASSERT(omegaIn.z > 0);
 	const Spectrum diffuseOverPi = diffuse_->lookUp(sample, context) / TNumTraits::pi;
-	while (firstOmegaIn != lastOmegaIn)
+	while (first != last)
 	{
-		if (firstOmegaIn->z > 0)
+		const TScalar cosTheta = first->omegaOut.z;
+		if (testCaps(first->allowedCaps, caps()) && cosTheta > 0)
 		{
-			*firstValue++ = diffuseOverPi;
-			*firstPdf++ = firstOmegaIn->z / TNumTraits::pi;
+			result->value = diffuseOverPi;
+			result->pdf = cosTheta / TNumTraits::pi;
 		}
-		else
-		{
-			*firstValue++ = Spectrum();
-			*firstPdf++ = 0;
-		}
-		++firstOmegaIn;
+		++first;
+		++result;
 	}
 }
 
 
 void Lambert::doSampleBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& dirIn,
-		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
-		TVector3D* firstDirOut, Spectrum* firstValue, TScalar* firstPdf,
-		unsigned allowedCaps) const
+		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
+		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
 {
-	if (!testCaps(allowedCaps, caps()))
-	{
-		setBlackSamples(firstBsdfSample, lastBsdfSample, firstDirOut, firstValue, firstPdf);
-		return;
-	}
-
+	LASS_ASSERT(omegaIn.z > 0);
 	const Spectrum diffuseOverPi = diffuse_->lookUp(sample, context) / TNumTraits::pi;
-	while (firstBsdfSample != lastBsdfSample)
+	while (first != last)
 	{
-		*firstDirOut++ = num::cosineHemisphere(*firstBsdfSample++, *firstPdf++).position();
-		*firstValue++ = diffuseOverPi;
+		if (testCaps(first->allowedCaps, caps()))
+		{
+			result->omegaOut = num::cosineHemisphere(first->sample, result->pdf).position();
+			result->value = diffuseOverPi;
+			result->usedCaps = caps();
+		}
+		++first;
+		++result;
 	}
 }
 

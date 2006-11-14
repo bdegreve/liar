@@ -49,12 +49,22 @@ RenderTarget::RenderTarget():
 
 
 
+const RenderTarget::TResolution RenderTarget::resolution() const
+{
+	return doResolution();
+}
+
+
+
 void RenderTarget::beginRender()
 {
-	if (!isRendering_)
+	LASS_LOCK(lock_)
 	{
-		doBeginRender();
-		isRendering_ = true;
+		if (!isRendering_)
+		{
+			doBeginRender();
+			isRendering_ = true;
+		}
 	}
 }
 
@@ -62,7 +72,10 @@ void RenderTarget::beginRender()
 
 void RenderTarget::writeRender(const OutputSample* first, const OutputSample* last)
 {
-	beginRender();
+	if (!isRendering_)
+	{
+		beginRender();
+	}
 	doWriteRender(first, last);
 }
 

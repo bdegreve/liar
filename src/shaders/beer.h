@@ -21,47 +21,38 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::shaders::Mirror
- *  @brief very simple shader using lambert's cosine law.
+/** @class liar::shaders::Beer
+ *  @brief Not a "beer" medium, but a "Beer's law medium" ;)
  *  @author Bram de Greve [Bramz]
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_MIRROR_H
-#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_MIRROR_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_BEER_H
+#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_BEER_H
 
 #include "shaders_common.h"
-#include "../kernel/shader.h"
-#include "../kernel/texture.h"
+#include "../kernel/medium.h"
 
 namespace liar
 {
 namespace shaders
 {
 
-class LIAR_SHADERS_DLL Mirror: public Shader
+class LIAR_SHADERS_DLL Beer: public Medium
 {
-    PY_HEADER(Shader)
+    PY_HEADER(Medium)
 public:
 
-	Mirror();
-	Mirror(const TTexturePtr& reflectance);
+	Beer();
+	Beer(const Spectrum& transparency);
 
-	const TTexturePtr& reflectance() const;
-	void setReflectance(const TTexturePtr& reflectance);
+	const Spectrum& transparency() const;
+	void setTransparency(const Spectrum& transparency);
 
 private:
 
-	const unsigned doNumReflectionSamples() const;
+	const Spectrum doTransparency(const BoundedRay& ray) const;
 
-	void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const;
-	void doSampleBsdf(const Sample& sample, const IntersectionContext& context,	const TVector3D& omegaIn,
-		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const;
-
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
-
-	TTexturePtr reflectance_;
+	Spectrum transparency_;
 };
 
 }

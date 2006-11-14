@@ -50,6 +50,37 @@ class LightContext;
 typedef python::PyObjectPtr<Sampler>::Type TSamplerPtr;
 typedef python::PyObjectPtr<SceneObject>::Type TSceneObjectPtr;
 
+struct BsdfIn
+{
+	BsdfIn(): omegaOut(), allowedCaps() {}
+	BsdfIn(const TVector3D& omegaOut, unsigned allowedCaps): 
+		omegaOut(omegaOut), allowedCaps(allowedCaps) {}
+	TVector3D omegaOut;
+	unsigned allowedCaps;
+};
+
+struct BsdfOut
+{
+	Spectrum value;
+	TScalar pdf;
+};
+
+struct SampleBsdfIn
+{
+	SampleBsdfIn(): sample(), allowedCaps() {}
+	SampleBsdfIn(const TPoint2D& sample, unsigned allowedCaps): sample(sample), allowedCaps(allowedCaps) {}
+	TPoint2D sample;
+	unsigned allowedCaps;
+};
+
+struct SampleBsdfOut
+{
+	TVector3D omegaOut;
+	Spectrum value;
+	TScalar pdf;
+	unsigned usedCaps;
+};
+
 class LIAR_KERNEL_DLL Shader: public python::PyObjectPlus
 {
     PY_HEADER(python::PyObjectPlus)
@@ -64,7 +95,15 @@ public:
 		capsDiffuse = 0x08,
 		capsSpecular = 0x10,
 		capsGlossy = 0x20,
-		capsAll = 0xff
+		capsAll = 0xff,
+
+		capsNonDiffuse = capsGlossy | capsSpecular,
+		capsAllReflection = capsReflection | capsDiffuse | capsNonDiffuse,
+		capsAllTransmission = capsTransmission | capsDiffuse | capsNonDiffuse,
+		capsAllDiffuse = capsReflection | capsTransmission | capsDiffuse,
+		capsAllSpecular = capsReflection | capsTransmission | capsSpecular,
+		capsAllGlossy = capsReflection | capsTransmission | capsGlossy,
+		capsAllNonDiffuse = capsReflection | capsTransmission | capsNonDiffuse,
 	};
 
     virtual ~Shader();
@@ -78,23 +117,20 @@ public:
 		return doEmission(sample, context, omegaOut);
 	}
 
-	void bsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
-		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn, 
-		Spectrum* firstValue, TScalar* firstPdf, unsigned allowedCaps) const
+	void bsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
+		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
 	{
-		LASS_ASSERT(omegaOut.z >= 0);
-		doBsdf(sample, context, omegaOut, firstOmegaIn, lastOmegaIn, 
-			firstValue, firstPdf, allowedCaps);
+		LASS_ASSERT(omegaIn.z >= 0);
+		zeroBsdf(result, result + (last - first));
+		doBsdf(sample, context, omegaIn, first, last, result);
 	}
 
-	void sampleBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
-		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
-		TVector3D* firstOmegaIn, Spectrum* firstValue, TScalar* firstPdf,
-		unsigned allowedCaps) const
+	void sampleBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
+		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
 	{
-		LASS_ASSERT(omegaOut.z >= 0);
-		doSampleBsdf(sample, context, omegaOut, firstBsdfSample, lastBsdfSample, 
-			firstOmegaIn, firstValue, firstPdf, allowedCaps);
+		LASS_ASSERT(omegaIn.z >= 0);
+		zeroSampleBsdf(result, result + (last - first));
+		doSampleBsdf(sample, context, omegaIn, first, last, result);
 	}
 
 	void requestSamples(const TSamplerPtr& sampler);
@@ -114,24 +150,14 @@ protected:
 		return (capsUnderTest & wantedCaps) == wantedCaps;
 	}
 
-	void setBlackBsdf(const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn, 
-		Spectrum* firstValue, TScalar* firstPdf) const;
-	void setBlackSamples(const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
-		TVector3D* firstOmegaIn, Spectrum* firstValue, TScalar* firstPdf) const;
-
 private:
 
 	virtual const Spectrum doEmission(const Sample& sample, const IntersectionContext& context,
 		const TVector3D& omegaOut) const;
-
-	virtual void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
-		const TVector3D* firstOmegaIn, const TVector3D* lastOmegaIn, 
-		Spectrum* firstValue, TScalar* firstPdf, unsigned allowedCaps) const = 0;
-
-	virtual void doSampleBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut,
-		const TPoint2D* firstBsdfSample, const TPoint2D* lastBsdfSample,
-		TVector3D* firstOmegaIn, Spectrum* firstValue, TScalar* firstPdf, 
-		unsigned allowedCaps) const = 0;
+	virtual void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
+		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const = 0;
+	virtual void doSampleBsdf(const Sample& sample, const IntersectionContext& context,	const TVector3D& omegaIn,
+		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const = 0;
 	
 	virtual void doRequestSamples(const TSamplerPtr& sampler);
 	virtual const unsigned doNumReflectionSamples() const;
@@ -139,6 +165,9 @@ private:
 
 	virtual const TPyObjectPtr doGetState() const = 0;
 	virtual void doSetState(const TPyObjectPtr& state) = 0;
+
+	void zeroBsdf(BsdfOut* first, BsdfOut* last) const;
+	void zeroSampleBsdf(SampleBsdfOut* first, SampleBsdfOut* last) const;
 
 	unsigned caps_;
 	int idReflectionSamples_;
