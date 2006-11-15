@@ -92,13 +92,15 @@ public:
 	const TVector3D flipTo(const TVector3D& worldOmega);
 
 	const TTransformation3D& shaderToWorld() const { LASS_ASSERT(shader_); return shaderToWorld_; }
-	const TVector3D shaderToWorld(const TVector3D& v) const { return prim::transform(v, shaderToWorld()); }
-
 	const TTransformation3D worldToShader() const { return shaderToWorld().inverse(); }
+	const TVector3D shaderToWorld(const TVector3D& v) const { return prim::transform(v, shaderToWorld()); }
 	const TVector3D worldToShader(const TVector3D& v) const { return prim::transform(v, worldToShader()); }
 
 	const TTransformation3D& localToWorld() const { LASS_ASSERT(shader_); return localToWorld_; }
 	const TTransformation3D worldToLocal() const { return localToWorld().inverse(); }
+	const TVector3D localToWorld(const TVector3D& v) const { return prim::transform(v, localToWorld()); }
+	const TVector3D worldToLocal(const TVector3D& v) const { return prim::transform(v, worldToLocal()); }
+
 
 private:
 

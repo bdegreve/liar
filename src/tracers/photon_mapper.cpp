@@ -330,6 +330,7 @@ const Spectrum PhotonMapper::doCastRay(
 	{
 		result += traceDirect(sample, context, target, targetNormal, omegaIn);
 	}
+	//return result;
 
 	if (shader->hasCaps(Shader::capsDiffuse))
 	{
@@ -771,9 +772,10 @@ const Spectrum PhotonMapper::traceDirect(
 				{
 					//const TScalar weight = isSingularLight ? 
 					//	TNumTraits::one : temp::squaredHeuristic(lightPdf, bsdfPdf);
+					const TScalar cosTheta = omegaOut.z;
 					const TScalar weight = 1;
 					result += out.value * radiance * 
-						(weight * abs(omegaOut.z) / (n * lightPdf));
+						(weight * abs(cosTheta) / (n * lightPdf));
 				}
 			}
 			/*

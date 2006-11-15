@@ -96,6 +96,7 @@ void Parallelogram::doLocalContext(
 	result.setUv(uv);
     result.setDPoint_dU(parallelogram_.sizeU());
     result.setDPoint_dV(parallelogram_.sizeV());
+    result.setGeometricNormal(normal_);
     result.setNormal(normal_);
     result.setDNormal_dU(TVector3D());
     result.setDNormal_dV(TVector3D());

@@ -196,7 +196,7 @@ void IntersectionContext::generateShaderToWorld()
 	if (shader_)
 	{
 		const TVector3D u = dPoint_dU_.normal();
-		const TVector3D v = cross(normal_, u);
+		const TVector3D v = cross(normal_, u).normal();
 		shaderToWorld_ = TTransformation3D(point_, u, v, normal_);
 	}
 }
