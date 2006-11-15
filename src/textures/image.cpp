@@ -383,7 +383,7 @@ void Image::mipMapLevel(TScalar iWidth, size_t iNumLevels,
 						size_t& oLevel0, size_t& oLevel1, TScalar& oDLevel) const
 {
 	const TScalar maxLevel = static_cast<TScalar>(iNumLevels - 1);
-	const TScalar level = maxLevel + num::log(std::max(iWidth, 1e-8f)) / num::log(TScalar(2));
+	const TScalar level = maxLevel + num::log(std::max(iWidth, TScalar(1e-8f))) / num::log(TScalar(2));
 	if (level < TNumTraits::one)
 	{
 		oLevel0 = oLevel1 = 0;
