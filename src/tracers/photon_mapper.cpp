@@ -121,7 +121,7 @@ const unsigned PhotonMapper::globalMapSize() const
 
 void PhotonMapper::setGlobalMapSize(unsigned mapSize)
 {
-	globalMapSize_ = std::max<unsigned>(mapSize, 1000);
+	globalMapSize_ = mapSize;
 }
 
 
@@ -316,6 +316,7 @@ const Spectrum PhotonMapper::doCastRay(
 	const TVector3D omegaIn = context.worldToShader(-primaryRay.direction());
 	LASS_ASSERT(omegaIn.z >= 0);
 
+#pragma LASS_FIXME("reenable this")
 	Spectrum result = estimateCaustics(sample, context, target, omegaIn);
 	if (isVisualizingPhotonMap_)
 	{
@@ -330,7 +331,8 @@ const Spectrum PhotonMapper::doCastRay(
 	{
 		result += traceDirect(sample, context, target, targetNormal, omegaIn);
 	}
-	//return result;
+#pragma LASS_FIXME("remove this")
+	return result;
 
 	if (shader->hasCaps(Shader::capsDiffuse))
 	{
