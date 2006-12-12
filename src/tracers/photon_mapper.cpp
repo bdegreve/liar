@@ -81,7 +81,7 @@ PhotonMapper::PhotonMapper():
 	mediumStack_(),
 	globalMapSize_(10000),
 	causticsQuality_(5),
-	maxNumberOfPhotons_(1000000),
+	maxNumberOfPhotons_(100000000),
 	numFinalGatherRays_(0),
 	ratioPrecomputedIrradiance_(0.25f),
 	isVisualizingPhotonMap_(false),
@@ -316,24 +316,22 @@ const Spectrum PhotonMapper::doCastRay(
 	const TVector3D omegaIn = context.worldToShader(-primaryRay.direction());
 	LASS_ASSERT(omegaIn.z >= 0);
 
-#pragma LASS_FIXME("reenable this")
-	Spectrum result = estimateCaustics(sample, context, target, omegaIn);
 	if (isVisualizingPhotonMap_)
 	{
-		result += estimateIrradiance(target, targetNormal);
+		Spectrum result = estimateIrradiance(target, targetNormal);
 		result *= mediumTransparency;
 		return result;
 	}
 
+	Spectrum result = estimateCaustics(sample, context, target, omegaIn);
 	result += shader->emission(sample, context, omegaIn);
 
 	if (isRayTracingDirect_)
 	{
 		result += traceDirect(sample, context, target, targetNormal, omegaIn);
 	}
-#pragma LASS_FIXME("remove this")
-	return result;
 
+	//*
 	if (shader->hasCaps(Shader::capsDiffuse))
 	{
 		if (isRayTracingDirect_ && numFinalGatherRays_ > 0)
@@ -348,6 +346,7 @@ const Spectrum PhotonMapper::doCastRay(
 			result += estimateRadiance(sample, context, target, omegaIn);
 		}
 	}
+	/**/
 
 	if (shader->hasCaps(Shader::capsSpecular) || shader->hasCaps(Shader::capsGlossy))
 	{
@@ -365,7 +364,7 @@ const Spectrum PhotonMapper::doCastRay(
 			}
 			shader->sampleBsdf(sample, context, omegaIn, &in[0], &in[0] + n, &out[0]);
 
-			const TPoint3D beginCentral = target;
+			const TPoint3D beginCentral = target + 2 * tolerance * targetNormal;
 			const TPoint3D beginI = beginCentral + context.dPoint_dI();
 			const TPoint3D beginJ = beginCentral + context.dPoint_dJ();
 
@@ -419,7 +418,7 @@ const Spectrum PhotonMapper::doCastRay(
 			}
 			shader->sampleBsdf(sample, context, omegaIn, &in[0], &in[0] + n, &out[0]);
 
-			const TPoint3D beginCentral = target;
+			const TPoint3D beginCentral = target - 2 * tolerance * targetNormal;
 
 			for (size_t i = 0; i < n; ++i)
 			{
@@ -660,15 +659,19 @@ void PhotonMapper::tracePhoton(
 		{
 			photonBuffer_[mtCaustics].push_back(photon);
 		}
-		else if ((numFinalGatherRays_ > 0 || generation > 0 || !isRayTracingDirect_) 
-			&& uniform() < num::inv(causticsQuality_))
+		else
 		{
-			photon.power *= causticsQuality_;
-			photonBuffer_[mtGlobal].push_back(photon);
-			if (uniform() < ratioPrecomputedIrradiance_)
+			const bool mayStorePhoton = !isRayTracingDirect_ || 
+				(isRayTracingDirect_ && numFinalGatherRays_ > 0) || generation > 0;
+			if (mayStorePhoton && uniform() < num::inv(causticsQuality_))
 			{
-				const TVector3D worldNormal = context.shaderToWorld(TVector3D(0, 0, 1));
-				irradianceBuffer_.push_back(Irradiance(hitPoint, worldNormal));
+				photon.power *= causticsQuality_;
+				photonBuffer_[mtGlobal].push_back(photon);
+				if (uniform() < ratioPrecomputedIrradiance_)
+				{
+					const TVector3D worldNormal = context.shaderToWorld(TVector3D(0, 0, 1));
+					irradianceBuffer_.push_back(Irradiance(hitPoint, worldNormal));
+				}
 			}
 		}
 	}
@@ -763,7 +766,7 @@ const Spectrum PhotonMapper::traceDirect(
 			BoundedRay shadowRay;
 			TScalar lightPdf;
 			const Spectrum radiance = light->sampleEmission(
-				sample, *lightSample, target, targetNormal, shadowRay, lightPdf);
+				sample, *lightSample, target + 2 * tolerance * targetNormal, targetNormal, shadowRay, lightPdf);
 			if (lightPdf > 0 && radiance)
 			{
 				const TVector3D& omegaOut = context.worldToShader(shadowRay.direction());
@@ -820,17 +823,18 @@ const Spectrum PhotonMapper::gatherIndirect(
 		const TPoint3D& target, const TVector3D& omegaIn,
 		const TPoint2D* firstSample, const TPoint2D* lastSample,
 		size_t gatherStage) const
-{
-	static PerThreadBuffer<SampleBsdfIn> sampleBsdfIns[numGatherStages_];
-	static PerThreadBuffer<SampleBsdfOut> sampleBsdfOuts[numGatherStages_];
-	static PerThreadBuffer<TScalar> pdfsPerStage[numGatherStages_];
-	
-	PerThreadBuffer<SampleBsdfIn>& in = sampleBsdfIns[gatherStage];
-	PerThreadBuffer<SampleBsdfOut>& out = sampleBsdfOuts[gatherStage];
+{		
+	LASS_ASSERT(gatherStage < numGatherStages_);
+	std::vector<SampleBsdfIn>& in = sampleBsdfIns_[gatherStage];
+	std::vector<SampleBsdfOut>& out = sampleBsdfOuts_[gatherStage];
 
 	const int n = static_cast<int>(lastSample - firstSample);
-	in.growTo(n);
-	out.growTo(n);
+	if (n > in.size())
+	{
+		in.resize(n);
+		out.resize(n);
+	}
+
 	for (int i = 0; i < n; ++i)
 	{
 		in[i].sample = firstSample[i];
@@ -838,7 +842,7 @@ const Spectrum PhotonMapper::gatherIndirect(
 	}
 
 	LASS_ASSERT(context.shader());
-	context.shader()->sampleBsdf(sample, context, omegaIn, in.begin(), in.begin() + n, out.begin());
+	context.shader()->sampleBsdf(sample, context, omegaIn, &in[0], &in[0] + n, &out[0]);
 
 	Spectrum result;
 	for (int i = 0; i < n; ++i)
@@ -912,7 +916,6 @@ const Spectrum PhotonMapper::estimateRadiance(
 		return Spectrum();
 	}
 
-	/*
 	if (context.t() < estimationRadius_[mtGlobal] && gatherStage + 1 < numGatherStages_)
 	{
 		static util::ThreadLocalVariable< num::RandomMT19937 > random2nd;
@@ -927,7 +930,6 @@ const Spectrum PhotonMapper::estimateRadiance(
 		return gatherIndirect(sample, context, point, omegaOut, 
 			samples2nd.begin(), samples2nd.begin() + n, gatherStage + 1);
 	}
-	*/
 
 	if (!irradianceMap_.isEmpty())
 	{
@@ -977,48 +979,46 @@ const Spectrum PhotonMapper::estimateCaustics(
 		return Spectrum();
 	}
 
-	static PerThreadBuffer<TPhotonMap::Neighbour> neighbourhood;
-	neighbourhood.growTo(estimationSize_[mtCaustics] + 1);
-	TPhotonMap::Neighbour* const neighbour = neighbourhood.begin();
-	TPhotonMap::Neighbour* const lastNeighbour = photonMap_[mtCaustics].rangeSearch(
-		point, estimationRadius_[mtCaustics], estimationSize_[mtCaustics], neighbour);
-	const int n = lastNeighbour - neighbour;
+	const TPhotonNeighbourhood::const_iterator last = photonMap_[mtCaustics].rangeSearch(
+		point, estimationRadius_[mtCaustics], estimationSize_[mtCaustics], photonNeighbourhood_.begin());
+	const int n = last - photonNeighbourhood_.begin();
 	if (n < 2)
 	{
 		return Spectrum();
 	}
 	
-	static PerThreadBuffer<BsdfIn> ins;
-	static PerThreadBuffer<BsdfOut> outs;
-	ins.growTo(n);
-	outs.growTo(n);
-	BsdfIn* in = ins.begin();
-	BsdfOut* out = outs.begin();
+	if (n > bsdfIns_.size())
+	{
+		bsdfIns_.resize(n);
+		bsdfOuts_.resize(n);
+	}
 	for (int i = 0; i < n; ++i)
 	{
-		const TVector3D omegaPhoton = context.worldToShader(neighbour[i].object()->omegaIn);
-		in[i] = BsdfIn(omegaPhoton, Shader::capsAllDiffuse);
+		const TVector3D omegaPhoton = 
+			context.worldToShader(photonNeighbourhood_[i].object()->omegaIn);
+		bsdfIns_[i] = BsdfIn(omegaPhoton, Shader::capsAllDiffuse);
 	};
 
-	shader->bsdf(sample, context, omegaIn, in, in + n, out);
+	shader->bsdf(sample, context, omegaIn, &bsdfIns_[0], &bsdfIns_[0] + n, &bsdfOuts_[0]);
 
-	const TScalar sqrR = neighbour[0].squaredDistance();
+	const TScalar sqrSize = photonNeighbourhood_[0].squaredDistance();
 	const TScalar alpha = 0.918f;
 	const TScalar beta = 1.953f;
-	const TScalar b1 = -beta / 2 * sqrR;
+	const TScalar b1 = -beta / 2 * sqrSize;
 	const TScalar b2 = num::inv(1 - num::exp(-beta));
 
 	Spectrum result;
 	for (int i = 0; i < n; ++i)
 	{
-		if (out[i].pdf > 0)
+		if (bsdfOuts_[i].pdf > 0)
 		{
-			const TScalar w = alpha * (1 - b2 * (1 - num::exp(b1 * neighbour[i].squaredDistance())));
-			result += w * out[i].value * neighbour[i].object()->power;
+			const TScalar sqrR = photonNeighbourhood_[i].squaredDistance();
+			const TScalar w = alpha * (1 - b2 * (1 - num::exp(b1 * sqrR)));
+			result += w * bsdfOuts_[i].value * photonNeighbourhood_[i].object()->power;
 		}
 	}
 
-	return result / (TNumTraits::pi * sqrR);
+	return result / (TNumTraits::pi * sqrSize);
 }
 
 

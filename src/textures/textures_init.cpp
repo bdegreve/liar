@@ -25,7 +25,7 @@
 
 // keep in alphabetical order please! [Bramz]
 //
-//#include "angular_mapping.h"
+#include "angular_mapping.h"
 #include "checker_board.h"
 #include "checker_volume.h"
 #include "constant.h"
@@ -56,7 +56,7 @@ LIAR_TEXTURES_DLL void inittextures(void)
 	
 	// keep in alphabetical order please! [Bramz]
 	//
-	//PY_INJECT_CLASS_IN_MODULE(AngularMapping, textures, "converts point to angular coordinates as used in light probes")
+	PY_INJECT_CLASS_IN_MODULE(AngularMapping, textures, "converts point to angular coordinates as used in light probes")
 	PY_INJECT_CLASS_IN_MODULE(CheckerBoard, textures, "mixes two textures in 2D checkerboard pattern")
 	PY_INJECT_CLASS_IN_MODULE(CheckerVolume, textures, "mixes two textures in 3D checkerboard pattern")
 	PY_INJECT_CLASS_IN_MODULE(Constant, textures, "texture with constant value")

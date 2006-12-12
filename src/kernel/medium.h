@@ -46,6 +46,12 @@ public:
 
     virtual ~Medium();
 
+	const Spectrum& refractionIndex() const;
+	void setRefractionIndex(const Spectrum& refractionIndex);
+	
+	const unsigned priority() const;
+	void setPriority(unsigned priority);
+
 	const Spectrum transparency(const BoundedRay& ray) const
 	{
 		return doTransparency(ray); 
@@ -58,9 +64,14 @@ protected:
 private:
 
 	virtual const Spectrum doTransparency(const BoundedRay& ray) const = 0;
+
+	Spectrum refractionIndex_;
+	unsigned priority_;
 };
 
 typedef python::PyObjectPtr<Medium>::Type TMediumPtr;
+
+
 
 class LIAR_KERNEL_DLL MediumStack
 {
@@ -70,6 +81,11 @@ public:
 private:
 	friend class MediumChanger;
 	typedef std::vector<const Medium*> TStack;
+	
+	void push(const Medium* medium);
+	void pop(const Medium* medium);
+	const Medium* const top() const;
+
 	TStack stack_;
 	TMediumPtr default_;
 };

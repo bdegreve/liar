@@ -164,9 +164,8 @@ private:
 			TReference t, const TParam minT)
 		{
 			TScalar temp;
-			prim::Result hit = prim::intersect(
-				aabb, ray.unboundedRay(), temp, std::max(ray.nearLimit(), minT));
-			if (hit == prim::rOne && temp < ray.farLimit())
+			prim::Result hit = prim::intersect(aabb, ray.unboundedRay(), temp, minT);
+			if (hit == prim::rOne)
 			{
 				t = temp;
 				return true;

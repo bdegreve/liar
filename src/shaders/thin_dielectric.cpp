@@ -22,77 +22,95 @@
  */
 
 #include "shaders_common.h"
-#include "dielectric.h"
-#include <lass/num/distribution_transformations.h>
+#include "thin_dielectric.h"
 
 namespace liar
 {
 namespace shaders
 {
 
-PY_DECLARE_CLASS(Dielectric)
-PY_CLASS_CONSTRUCTOR_0(Dielectric)
-PY_CLASS_CONSTRUCTOR_1(Dielectric, const TTexturePtr&)
-PY_CLASS_CONSTRUCTOR_2(Dielectric, const TTexturePtr&, const TTexturePtr&)
-PY_CLASS_MEMBER_RW_DOC(Dielectric, "innerRefractionIndex", innerRefractionIndex, setInnerRefractionIndex, 
+PY_DECLARE_CLASS(ThinDielectric)
+PY_CLASS_CONSTRUCTOR_0(ThinDielectric)
+PY_CLASS_CONSTRUCTOR_1(ThinDielectric, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_2(ThinDielectric, const TTexturePtr&, const TTexturePtr&)
+PY_CLASS_MEMBER_RW_DOC(ThinDielectric, "innerRefractionIndex", innerRefractionIndex, setInnerRefractionIndex, 
 	"index of refraction for material on inside")
-PY_CLASS_MEMBER_RW_DOC(Dielectric, "outerRefractionIndex", outerRefractionIndex, setOuterRefractionIndex, 
+PY_CLASS_MEMBER_RW_DOC(ThinDielectric, "outerRefractionIndex", outerRefractionIndex, setOuterRefractionIndex, 
 	"index of refraction for material on outside")
+PY_CLASS_MEMBER_RW(ThinDielectric, "transparency", transparency, setTransparency, 
+	"colour of transparency")
 
 // --- public --------------------------------------------------------------------------------------
 
-Dielectric::Dielectric():
+ThinDielectric::ThinDielectric():
 	Shader(capsReflection | capsTransmission | capsSpecular),
 	innerRefractionIndex_(Texture::white()),
-	outerRefractionIndex_(Texture::white())
+	outerRefractionIndex_(Texture::white()),
+	transparency_(Texture::white())
 {
 }
 
 
 
-Dielectric::Dielectric(const TTexturePtr& innerRefractionIndex):
+ThinDielectric::ThinDielectric(const TTexturePtr& innerRefractionIndex):
 	Shader(capsReflection | capsTransmission | capsSpecular),
 	innerRefractionIndex_(innerRefractionIndex),
-	outerRefractionIndex_(Texture::white())
+	outerRefractionIndex_(Texture::white()),
+	transparency_(Texture::white())
 {
 }
 
 
 
-Dielectric::Dielectric(
+ThinDielectric::ThinDielectric(
 		const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex):
 	Shader(capsReflection | capsTransmission | capsSpecular),
 	innerRefractionIndex_(innerRefractionIndex),
-	outerRefractionIndex_(outerRefractionIndex)
+	outerRefractionIndex_(outerRefractionIndex),
+	transparency_(Texture::white())
 {
 }
 
 
 
-const TTexturePtr& Dielectric::innerRefractionIndex() const
+const TTexturePtr& ThinDielectric::innerRefractionIndex() const
 {
 	return innerRefractionIndex_;
 }
 
 
 
-void Dielectric::setInnerRefractionIndex(const TTexturePtr& innerRefractionIndex)
+void ThinDielectric::setInnerRefractionIndex(const TTexturePtr& innerRefractionIndex)
 {
 	innerRefractionIndex_ = innerRefractionIndex;
 }
 
 
 
-const TTexturePtr& Dielectric::outerRefractionIndex() const
+const TTexturePtr& ThinDielectric::outerRefractionIndex() const
 {
 	return outerRefractionIndex_;
 }
 
 
 
-void Dielectric::setOuterRefractionIndex(const TTexturePtr& outerRefractionIndex)
+void ThinDielectric::setOuterRefractionIndex(const TTexturePtr& outerRefractionIndex)
 {
 	outerRefractionIndex_ = outerRefractionIndex;
+}
+
+
+
+const TTexturePtr& ThinDielectric::transparency() const
+{
+	return transparency_;
+}
+
+
+
+void ThinDielectric::setTransparency(const TTexturePtr& transparency)
+{
+	transparency_ = transparency;
 }
 
 
@@ -103,21 +121,21 @@ void Dielectric::setOuterRefractionIndex(const TTexturePtr& outerRefractionIndex
 
 // --- private -------------------------------------------------------------------------------------
 
-const unsigned Dielectric::doNumReflectionSamples() const
+const unsigned ThinDielectric::doNumReflectionSamples() const
 {
 	return 1;
 }
 
 
 
-const unsigned Dielectric::doNumTransmissionSamples() const
+const unsigned ThinDielectric::doNumTransmissionSamples() const
 {
 	return 1;
 }
 
 
 
-void Dielectric::doBsdf(
+void ThinDielectric::doBsdf(
 		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
 		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
 {
@@ -138,12 +156,13 @@ void Dielectric::doBsdf(
 #define LIAR_WARN_ONCE(x)\
 	LIAR_WARN_ONCE_EX(x, LASS_UNIQUENAME(liarWarnOnce))
 
-void Dielectric::doSampleBsdf(
+void ThinDielectric::doSampleBsdf(
 		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
 		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
 {
 	TScalar ior1 = outerRefractionIndex_->lookUp(sample, context).average();
 	TScalar ior2 = innerRefractionIndex_->lookUp(sample, context).average();
+	const Spectrum transparency = clamp(transparency_->lookUp(sample, context), TNumTraits::zero, TNumTraits::one);
 
 	if (ior1 <= 0)
 	{
@@ -158,46 +177,60 @@ void Dielectric::doSampleBsdf(
 		ior2 = 1;
 	}
 
-	const TVector3D omegaRefl(-omegaIn.x, -omegaIn.y, omegaIn.z);
-
 	// http://users.skynet.be/bdegreve/writings/reflection_transmission.pdf
-	const bool isLeaving = context.solidEvent() == seLeaving;
-	const TScalar ior = isLeaving ? ior2 / ior1 : ior1 / ior2;
+	const TScalar ior = ior1 / ior2; 
 	const TScalar cosI = omegaIn.z;
 	LASS_ASSERT(cosI > 0);
 	const TScalar sinT2 = num::sqr(ior) * (1 - num::sqr(cosI));
-	TScalar r = 1;
-	TVector3D omegaTrans = -omegaIn;
+	Spectrum R(TNumTraits::one);
+	Spectrum T(TNumTraits::zero);
 	if (sinT2 < 1)
 	{
 		const TScalar cosT = num::sqrt(1 - sinT2);
+		LASS_ASSERT(cosT > 0);
 		const TScalar rOrth = (ior1 * cosI - ior2 * cosT) / (ior1 * cosI + ior2 * cosT);
 		const TScalar rPar = (ior2 * cosI - ior1 * cosT) / (ior2 * cosI + ior1 * cosT);
-		r = (num::sqr(rOrth) + num::sqr(rPar)) / 2;
-
-		omegaTrans *= ior;
-		omegaTrans.z += (ior * cosI - cosT);
+		const TScalar r = (num::sqr(rOrth) + num::sqr(rPar)) / 2;
+		LASS_ASSERT(r < 1);
+		const Spectrum t = pow(transparency, num::inv(cosT));
+		
+		R = r * (1 + sqr((1 - r) * t) / (1 - sqr(r * t)));
+		R = clamp(R, TNumTraits::zero, TNumTraits::one);
+		T = num::sqr(1 - r) * t / (1 - sqr(r * t));
+		T = clamp(T, TNumTraits::zero, TNumTraits::one);
+		//LASS_COUT << R << "\n";
 	}
+	else
+	{
+		LASS_COUT << "uhoh: cosI=" << cosI << ", sinT2=" << sinT2 << ", ior=" << ior << "\n";
+	}
+	const TScalar r = R.average();
+	const TScalar t = T.average();
 
 	while (first != last)
 	{
 		const bool doReflection = testCaps(first->allowedCaps, capsReflection | capsSpecular);
 		const bool doTransmission = testCaps(first->allowedCaps, capsTransmission | capsSpecular);
-		const TScalar pr = doReflection ? (doTransmission ? r : 1) : 0;
+		const TScalar sr = doReflection ? (doTransmission ? r : 1) : 0;
+		const TScalar st = doTransmission ? (doReflection ? t : 1) : 0;
+		if (sr > 0 || st > 0)
+		{
+			const TScalar pr = sr / (sr + st);
 
-		if (first->sample.x < pr)
-		{
-			result->omegaOut = omegaRefl;
-			result->value = r;
-			result->pdf = pr;
-			result->usedCaps = capsReflection | capsSpecular;
-		}
-		else
-		{
-			result->omegaOut = omegaTrans;
-			result->value = (1 - r);
-			result->pdf = 1 - pr;
-			result->usedCaps = capsTransmission | capsSpecular;
+			if (first->sample.x < pr)
+			{
+				result->omegaOut = TVector3D(-omegaIn.x, -omegaIn.y, omegaIn.z);
+				result->value = R;
+				result->pdf = pr;
+				result->usedCaps = capsReflection | capsSpecular;
+			}
+			else
+			{
+				result->omegaOut = -omegaIn;
+				result->value = T;
+				result->pdf = 1 - pr;
+				result->usedCaps = capsTransmission | capsSpecular;
+			}
 		}
 		++first;
 		++result;
@@ -206,16 +239,16 @@ void Dielectric::doSampleBsdf(
 
 
 
-const TPyObjectPtr Dielectric::doGetState() const
+const TPyObjectPtr ThinDielectric::doGetState() const
 {
-	return python::makeTuple(outerRefractionIndex_, innerRefractionIndex_);
+	return python::makeTuple(outerRefractionIndex_, innerRefractionIndex_, transparency_);
 }
 
 
 
-void Dielectric::doSetState(const TPyObjectPtr& state)
+void ThinDielectric::doSetState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(state, outerRefractionIndex_, innerRefractionIndex_);
+	python::decodeTuple(state, outerRefractionIndex_, innerRefractionIndex_, transparency_);
 }
 
 

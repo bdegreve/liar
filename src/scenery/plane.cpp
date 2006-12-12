@@ -143,6 +143,7 @@ const bool Plane::doContains(const Sample& sample, const TPoint3D& point) const
 
 const TAabb3D Plane::doBoundingBox() const
 {
+	return TAabb3D();
     const TVector3D normal = plane_.normal();
     TVector3D extent;
     if (normal.x != 0)

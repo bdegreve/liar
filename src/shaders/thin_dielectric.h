@@ -21,13 +21,13 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::shaders::Lambert
- *  @brief very simple shader using lambert's cosine law.
+/** @class liar::shaders::ThinDielectric
+ *  @brief A very thin plate of dielectric material
  *  @author Bram de Greve [Bramz]
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_DIELECTRIC_H
-#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_DIELECTRIC_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_THIN_DIELECTRIC_H
+#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_THIN_DIELECTRIC_H
 
 #include "shaders_common.h"
 #include "../kernel/shader.h"
@@ -38,19 +38,21 @@ namespace liar
 namespace shaders
 {
 
-class LIAR_SHADERS_DLL Dielectric: public Shader
+class LIAR_SHADERS_DLL ThinDielectric: public Shader
 {
     PY_HEADER(Shader)
 public:
 
-	Dielectric();
-	Dielectric(const TTexturePtr& innerRefractionIndex);
-	Dielectric(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex);
+	ThinDielectric();
+	ThinDielectric(const TTexturePtr& innerRefractionIndex);
+	ThinDielectric(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex);
 
 	const TTexturePtr& innerRefractionIndex() const;
 	void setInnerRefractionIndex(const TTexturePtr& refractionIndex);
 	const TTexturePtr& outerRefractionIndex() const;
 	void setOuterRefractionIndex(const TTexturePtr& refractionIndex);
+	const TTexturePtr& transparency() const;
+	void setTransparency(const TTexturePtr& transparency);
 
 private:
 
@@ -67,6 +69,7 @@ private:
 
 	TTexturePtr innerRefractionIndex_;
 	TTexturePtr outerRefractionIndex_;
+	TTexturePtr transparency_;
 };
 
 }

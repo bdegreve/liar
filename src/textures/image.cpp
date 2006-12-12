@@ -440,10 +440,10 @@ io::Image::TPixel Image::bilinear(size_t iLevelU, size_t iLevelV, const TPoint2D
 	const TScalar dx = x - x0;
 	const TScalar dy = y - y0;
 
-	const unsigned i0 = static_cast<unsigned>(x0);
-	const unsigned j0 = static_cast<unsigned>(y0);
-	const unsigned i1 = i0 < (cols - 1) ? (i0 + 1) : 0;
-	const unsigned j1 = j0 < (rows - 1) ? (j0 + 1) : 0;
+	const unsigned i0 = static_cast<unsigned>(x0) % cols;
+	const unsigned j0 = static_cast<unsigned>(y0) % rows;
+	const unsigned i1 = (i0 + 1) % cols;
+	const unsigned j1 = (j0 + 1) % rows;
 
 	return
 		(mipMap(j0, i0) * (TNumTraits::one - dx) + mipMap(j0, i1) * dx) * (TNumTraits::one - dy) +

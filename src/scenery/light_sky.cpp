@@ -25,6 +25,10 @@
 #include "light_sky.h"
 #include <lass/prim/sphere_3d.h>
 #include <lass/num/distribution_transformations.h>
+#include <lass/prim/impl/plane_3d_impl_detail.h>
+
+#include <lass/io/image.h>
+#include "../kernel/rgb_space.h"
 
 namespace liar
 {
@@ -109,28 +113,6 @@ void LightSky::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& peri
 	TMap pdf;
 	buildPdf(pdf, averageRadiance_);
 	buildCdf(pdf, marginalCdfU_, conditionalCdfV_);
-
-	std::ofstream pdfFile("pdf.txt");
-	std::ofstream condCdfVFile("condCdfV.txt");
-	std::ofstream margCdfUFile("margCdfU.txt");
-
-	for (int j = 0; j < resolution_; ++j)
-	{
-		pdfFile << pdf[j];
-		condCdfVFile << conditionalCdfV_[j];
-		for (int i = 1; i < resolution_; ++i)
-		{
-			pdfFile << "\t" << pdf[i * resolution_ + j];
-			condCdfVFile << "\t" << conditionalCdfV_[i * resolution_ + j];
-		}
-		pdfFile << std::endl;
-	}
-
-	margCdfUFile << marginalCdfU_[0];
-	for (int i = 1; i < resolution_; ++i)
-	{
-		margCdfUFile << "\t" << marginalCdfU_[i];
-	}
 }
 
 
@@ -155,8 +137,8 @@ void LightSky::doLocalContext(const Sample& sample, const BoundedRay& ray,
 								const Intersection& intersection, 
 								IntersectionContext& result) const
 {
-	LASS_ASSERT(intersection.t() == TNumTraits::infinity);
-    result.setT(TNumTraits::infinity);
+	LASS_ASSERT(intersection.t() == TNumTraits::max);
+    result.setT(TNumTraits::max);
     result.setPoint(TPoint3D(ray.direction()));
 
 	//         [sin theta * cos phi]
@@ -172,7 +154,8 @@ void LightSky::doLocalContext(const Sample& sample, const BoundedRay& ray,
 	//
 	LASS_ASSERT(normal.z >= -TNumTraits::one && normal.z <= TNumTraits::one);
     const TScalar phi = num::atan2(normal.x, normal.y);
-    const TScalar theta = num::acos(normal.z);
+	const TScalar cosTheta = normal.z;
+    const TScalar theta = num::acos(cosTheta);
 	result.setUv(phi / (2 * TNumTraits::pi), theta / TNumTraits::pi);
 
 	//               [sin theta * -sin phi]               [cos theta * cos phi]
@@ -180,15 +163,15 @@ void LightSky::doLocalContext(const Sample& sample, const BoundedRay& ray,
 	//               [0                   ]               [-sin theta         ]
 	//
 	const TScalar sinTheta = num::sin(theta);
-	const TScalar cosTheta_sinTheta = normal.z / sinTheta;
-	const TVector3D dNormal_dU = 2 * TNumTraits::pi * TVector3D(-normal.y, normal.x, 0);
-	const TVector3D dNormal_dV = TNumTraits::pi * TVector3D(
-		cosTheta_sinTheta * normal.x, cosTheta_sinTheta * normal.y, -sinTheta);
+	const TScalar cosPhi = num::cos(phi);
+	const TScalar sinPhi = num::sin(phi);
+	const TVector3D dNormal_dU = 2 * TNumTraits::pi * TVector3D(-sinTheta * sinPhi, sinTheta * cosPhi, 0);
+	const TVector3D dNormal_dV = TNumTraits::pi * TVector3D(cosTheta * cosPhi, cosTheta * sinPhi, -sinTheta);
 	result.setDNormal_dU(dNormal_dU);
 	result.setDNormal_dV(dNormal_dV);
 	
-	result.setDPoint_dU(-radius_ * dNormal_dU);
-	result.setDPoint_dV(-radius_ * dNormal_dU);
+	result.setDPoint_dU(-dNormal_dU);
+	result.setDPoint_dV(-dNormal_dV);
 }
 
 
@@ -266,20 +249,20 @@ const Spectrum LightSky::doSampleEmission(
 {
 	const prim::Sphere3D<TScalar> worldSphere = boundingSphere(sceneBound);
 
-	TScalar i, j, originPdf;
-	sampleMap(lightSampleA, i, j, originPdf);
-	const TVector3D originDir = direction(i, j);
-	const TPoint3D origin = worldSphere.center() + worldSphere.radius() * originDir;
+	TScalar i, j, pdfA;
+	sampleMap(lightSampleA, i, j, pdfA);
+	const TVector3D dir = -direction(i, j);
 	
-	TScalar targetPdf;
-	const TPoint3D target = worldSphere.center() + 
-		worldSphere.radius() * num::uniformSphere(lightSampleB, targetPdf).position();
-	const TVector3D targetDir = target - origin;
+	TVector3D tangentU, tangentV;
+	lass::prim::impl::Plane3DImplDetail::generateDirections(dir, tangentU, tangentV);
 
-	emissionRay = BoundedRay(origin, target - origin, tolerance);
+	TScalar pdfB;
+	const TPoint2D uv = num::uniformDisk(lightSampleB, pdfB);
+	const TPoint3D begin = worldSphere.center() + 
+		worldSphere.radius() * (tangentU * uv.x + tangentV * uv.y - dir);
 
-	pdf = originPdf * targetPdf * -dot(emissionRay.direction(), originDir);
-	LASS_ASSERT(pdf >= 0);
+	emissionRay = BoundedRay(begin, dir, tolerance);
+	pdf = pdfA * pdfB / num::sqr(worldSphere.radius());
 
 	Sample dummy;
 	return lookUpRadiance(dummy, i, j);
@@ -290,7 +273,7 @@ const Spectrum LightSky::doSampleEmission(
 const Spectrum LightSky::doTotalPower(const TAabb3D& sceneBound) const
 {
 	const prim::Sphere3D<TScalar> worldSphere = boundingSphere(sceneBound);
-	return (TNumTraits::pi * num::sqr(worldSphere.radius())) * averageRadiance_;
+	return (8 * num::sqr(TNumTraits::pi * worldSphere.radius())) * averageRadiance_;
 }
 
 
@@ -327,6 +310,8 @@ void LightSky::buildPdf(TMap& pdf, Spectrum& averageRadiance) const
 {
 	Sample dummy;
 
+	io::Image temp(resolution_, resolution_);
+
 	TMap tempPdf(resolution_ * resolution_);
 	Spectrum totalRadiance;
     for (int i = 0; i < resolution_; ++i)
@@ -335,10 +320,12 @@ void LightSky::buildPdf(TMap& pdf, Spectrum& averageRadiance) const
 		{
 			const Spectrum radiance = lookUpRadiance(
 				dummy, static_cast<TScalar>(i), static_cast<TScalar>(j));
+			temp(j, i) = RgbSpace::defaultSpace()->convert(radiance.xyz());
 			totalRadiance += radiance;
 			tempPdf[i * resolution_ + j] = radiance.average();
 		}
 	}
+	temp.save("temp.hdr");
 	pdf.swap(tempPdf);
 	averageRadiance = totalRadiance / num::sqr(static_cast<TScalar>(resolution_));
 }

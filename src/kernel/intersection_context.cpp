@@ -26,6 +26,7 @@
 #include "differential_ray.h"
 #include "ray_tracer.h"
 #include <lass/num/impl/matrix_solve.h>
+#include <lass/prim/impl/plane_3d_impl_detail.h>
 #include <lass/prim/plane_3d.h>
 
 namespace liar
@@ -195,9 +196,25 @@ void IntersectionContext::generateShaderToWorld()
 {
 	if (shader_)
 	{
-		const TVector3D u = dPoint_dU_.normal();
-		const TVector3D v = cross(normal_, u).normal();
-		shaderToWorld_ = TTransformation3D(point_, u, v, normal_);
+		if (!dPoint_dU_.isZero())
+		{
+			const TVector3D v = cross(normal_, dPoint_dU_).normal();
+			const TVector3D u = cross(v, normal_);
+			shaderToWorld_ = TTransformation3D(point_, u, v, normal_);
+		}
+		else if (!dPoint_dV_.isZero())
+		{
+			const TVector3D u = cross(dPoint_dV_, normal_);
+			const TVector3D v = cross(normal_, u).normal();
+			shaderToWorld_ = TTransformation3D(point_, u, v, normal_);
+		}
+		else
+		{
+			TVector3D u;
+			TVector3D v;
+			prim::impl::Plane3DImplDetail::generateDirections(normal_, u, v);
+			shaderToWorld_ = TTransformation3D(point_, u, v, normal_);
+		}
 	}
 }
 

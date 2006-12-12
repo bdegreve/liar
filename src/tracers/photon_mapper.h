@@ -179,7 +179,6 @@ private:
 	TPhotonMap photonMap_[numMapTypes];
 	TIrradianceBuffer irradianceBuffer_;
 	TIrradianceMap irradianceMap_;
-	mutable TPhotonNeighbourhood photonNeighbourhood_;
 	TScalar estimationRadius_[numMapTypes];
 	TScalar estimationTolerance_[numMapTypes];
 	unsigned estimationSize_[numMapTypes];
@@ -192,6 +191,13 @@ private:
 	int idFinalGatherSamples_;
 	bool isVisualizingPhotonMap_;
 	bool isRayTracingDirect_;
+
+	// buffers
+	mutable TPhotonNeighbourhood photonNeighbourhood_;
+	mutable std::vector<BsdfIn> bsdfIns_;
+	mutable std::vector<BsdfOut> bsdfOuts_;
+	mutable std::vector<SampleBsdfIn> sampleBsdfIns_[numGatherStages_];
+	mutable std::vector<SampleBsdfOut> sampleBsdfOuts_[numGatherStages_];
 
 	static TMapTypeDictionary generateMapTypeDictionary();
 

@@ -1,0 +1,135 @@
+/**	@file
+ *	@author Bram de Greve (bramz@users.sourceforge.net)
+ *
+ *  LiAR isn't a raytracer
+ *  Copyright (C) 2004-2006  Bram de Greve
+ *
+ *	This program is free software; you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation; either version 2 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program; if not, write to the Free Software
+ *	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *  http://liar.sourceforge.net
+ */
+
+#include "textures_common.h"
+#include "angular_mapping.h"
+
+namespace liar
+{
+namespace textures
+{
+
+PY_DECLARE_CLASS(AngularMapping)
+PY_CLASS_CONSTRUCTOR_1(AngularMapping, const TTexturePtr&);
+PY_CLASS_CONSTRUCTOR_2(AngularMapping, const TTexturePtr&, const TPoint3D&);
+PY_CLASS_MEMBER_RW(AngularMapping, "texture", texture, setTexture);
+PY_CLASS_MEMBER_RW(AngularMapping, "center", center, setCenter);
+
+// --- public --------------------------------------------------------------------------------------
+
+AngularMapping::AngularMapping(const TTexturePtr& texture):
+	texture_(texture),
+	center_(0, 0, 0)
+{
+}
+
+
+
+AngularMapping::AngularMapping(const TTexturePtr& texture, const TPoint3D& center):
+	texture_(texture),
+	center_(center)
+{
+}
+
+
+
+const TTexturePtr& AngularMapping::texture() const
+{
+	return texture_;
+}
+
+
+
+void AngularMapping::setTexture(const TTexturePtr& texture)
+{
+	texture_ = texture;
+}
+
+
+
+const TPoint3D& AngularMapping::center() const
+{
+	return center_;
+}
+
+
+
+void AngularMapping::setCenter(const TPoint3D& center)
+{
+	center_ = center;
+}
+
+
+
+// --- protected -----------------------------------------------------------------------------------
+
+
+
+// --- private -------------------------------------------------------------------------------------
+
+const Spectrum AngularMapping::doLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	IntersectionContext temp(context);
+	const TVector3D dir0 = context.point() - center_;
+	const TPoint2D uv0 = uv(dir0);
+	const TVector2D uvI = uv(dir0 + context.dPoint_dI()) - uv0;
+	const TVector2D uvJ = uv(dir0 + context.dPoint_dJ()) - uv0;
+	temp.setUv(uv0);
+	temp.setDUv_dI(uvI);
+	temp.setDUv_dJ(uvJ);
+	return texture_->lookUp(sample, temp);
+}
+
+
+
+const TPyObjectPtr AngularMapping::doGetState() const
+{
+	return python::makeTuple(texture_, center_);
+}
+
+
+
+void AngularMapping::doSetState(const TPyObjectPtr& state)
+{
+	python::decodeTuple(state, texture_, center_);
+}
+
+
+inline const TPoint2D AngularMapping::uv(const TVector3D& dir) const
+{
+	const TVector3D d = dir.normal();
+	const TScalar r = num::acos(d.y) / (TNumTraits::pi * num::sqrt(num::sqr(d.x) + num::sqr(d.z)));
+	const TScalar u = (dir.x * r + 1) / 2;
+	const TScalar v = (dir.z * r + 1) / 2;
+	return TPoint2D(u, v);
+}
+
+
+// --- free ----------------------------------------------------------------------------------------
+
+}
+
+}
+
+// EOF
+

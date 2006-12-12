@@ -39,9 +39,38 @@ Medium::~Medium()
 
 
 
+const Spectrum& Medium::refractionIndex() const
+{
+	return refractionIndex_;
+}
+
+
+
+void Medium::setRefractionIndex(const Spectrum& refractionIndex)
+{
+	refractionIndex_ = refractionIndex;
+}
+
+
+
+const unsigned Medium::priority() const
+{
+	return priority_;
+}
+
+
+
+void Medium::setPriority(unsigned priority)
+{
+	priority_ = priority;
+}
+
+
 // --- protected -----------------------------------------------------------------------------------
 
-Medium::Medium()
+Medium::Medium():
+	refractionIndex_(1),
+	priority_(0)
 {
 }
 
@@ -67,12 +96,35 @@ MediumStack::MediumStack(const TMediumPtr& defaultMedium):
 
 const Spectrum MediumStack::transparency(const BoundedRay& ray) const
 {
-	if (stack_.empty())
+	return top() ? top()->transparency(ray) : Spectrum(1);
+}
+
+
+
+void MediumStack::push(const Medium* medium)
+{
+	struct LessPriority
 	{
-		return default_ ? default_->transparency(ray) : Spectrum(1);
-	}
-	LASS_ASSERT(stack_.back());
-	return stack_.back()->transparency(ray);
+		bool operator()(const Medium* a, const Medium* b) const
+		{
+			return a->priority() < b->priority();
+		}
+	};
+	TStack::iterator i = std::upper_bound(stack_.begin(), stack_.end(), medium);
+	stack_.insert(i, medium);
+}
+
+
+void MediumStack::pop(const Medium* medium)
+{
+	
+}
+
+
+
+const Medium* const MediumStack::top() const
+{
+	return stack_.empty() ? default_.get() : stack_.back();
 }
 
 
