@@ -56,6 +56,10 @@ public:
 		const TUvs& iUvs, const TIndexTriangles& iTriangles);
 
 	void smoothNormals(TScalar iMaxAngleInRadians);
+	void flatFaces();
+	void loopSubdivision(unsigned level);
+	void autoSew();
+	void autoCrease(unsigned level);
 
 private:
 

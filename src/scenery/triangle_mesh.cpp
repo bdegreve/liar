@@ -41,6 +41,10 @@ PY_CLASS_METHOD_DOC(TriangleMesh, smoothNormals,
 	"allowed between the smooth vertex normal and face normal of the triangle.  If the angle "
 	"between both normals is less than this maximum, the vertex normal is used to create the "
 	"illusion of a smooth edge.  If not, the face normal is preserved to keep hard edges.")
+PY_CLASS_METHOD(TriangleMesh, flatFaces)
+PY_CLASS_METHOD(TriangleMesh, loopSubdivision) 
+PY_CLASS_METHOD(TriangleMesh, autoSew) 
+PY_CLASS_METHOD(TriangleMesh, autoCrease) 
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -57,6 +61,33 @@ void TriangleMesh::smoothNormals(TScalar iMaxAngleInRadians)
 	mesh_.smoothNormals(iMaxAngleInRadians);
 }
 
+
+
+void TriangleMesh::flatFaces()
+{
+	mesh_.flatFaces();
+}
+
+
+
+void TriangleMesh::loopSubdivision(unsigned level)
+{
+	mesh_.loopSubdivision(level);
+}
+
+
+
+void TriangleMesh::autoSew()
+{
+	mesh_.autoSew();
+}
+
+
+
+void TriangleMesh::autoCrease(unsigned level)
+{
+	mesh_.autoCrease(level);
+}
 
 
 // --- protected -----------------------------------------------------------------------------------
