@@ -97,4 +97,7 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		AMDCaProjectFile = D:\bram\visual_studio_projects\liar\src\CodeAnalyst\liar.caw
+	EndGlobalSection
 EndGlobal

@@ -380,6 +380,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\transformation_uv.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\uv.cpp"
 				>
 			</File>
@@ -439,6 +443,10 @@
 			</File>
 			<File
 				RelativePath=".\time.h"
+				>
+			</File>
+			<File
+				RelativePath=".\transformation_uv.h"
 				>
 			</File>
 			<File

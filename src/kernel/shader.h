@@ -111,6 +111,11 @@ public:
 	const unsigned caps() const { return caps_; }
 	const bool hasCaps(unsigned wantedCaps) const { return testCaps(caps_, wantedCaps); }
 
+	void shadeContext(const Sample& sample, IntersectionContext& context) const
+	{
+		doShadeContext(sample, context);
+	}
+
 	const Spectrum emission(const Sample& sample, const IntersectionContext& context, 
 		const TVector3D& omegaOut) const
 	{
@@ -134,6 +139,8 @@ public:
 	}
 
 	void requestSamples(const TSamplerPtr& sampler);
+	const unsigned numReflectionSamples() const;
+	const unsigned numTransmissionSamples() const;
 	const int idReflectionSamples() const;
 	const int idTransmissionSamples() const;
 
@@ -145,6 +152,7 @@ protected:
 
     Shader(unsigned capabilityFlags);
 
+	void setCaps(unsigned capabilityFlags);
 	const bool testCaps(unsigned capsUnderTest, unsigned wantedCaps) const
 	{
 		return (capsUnderTest & wantedCaps) == wantedCaps;
@@ -152,6 +160,7 @@ protected:
 
 private:
 
+	virtual void doShadeContext(const Sample& sample, IntersectionContext& context) const;
 	virtual const Spectrum doEmission(const Sample& sample, const IntersectionContext& context,
 		const TVector3D& omegaOut) const;
 	virtual void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,

@@ -21,8 +21,8 @@
  *  http://liar.sourceforge.net
  */
 
-/** @class liar::textures::Constant
- *  @brief texture with constant value
+/** @class liar::textures::Product
+ *  @brief multiplies two or more textures ...
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  */
 

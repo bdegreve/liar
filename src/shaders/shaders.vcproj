@@ -307,6 +307,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\bump_mapping.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\dielectric.cpp"
 				>
 			</File>
@@ -373,6 +377,10 @@
 			</File>
 			<File
 				RelativePath=".\beer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\bump_mapping.h"
 				>
 			</File>
 			<File

@@ -67,7 +67,7 @@ public:
 	const Medium* const interior() const { return interior_; }
 	const SolidEvent solidEvent() const { return solidEvent_; }
 
-    void setPoint(const TPoint3D& point) {  LASS_ASSERT(!shader_); point_ = point; }
+    void setPoint(const TPoint3D& point) { point_ = point; }
 	void setDPoint_dU(const TVector3D& dPoint_dU) { LASS_ASSERT(!shader_); dPoint_dU_ = dPoint_dU; }
 	void setDPoint_dV(const TVector3D& dPoint_dV) { LASS_ASSERT(!shader_); dPoint_dV_ = dPoint_dV; }
 	void setGeometricNormal(const TVector3D& geometricNormal) { geometricNormal_ = geometricNormal; }

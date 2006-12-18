@@ -92,11 +92,12 @@ const Spectrum AngularMapping::doLookUp(const Sample& sample, const Intersection
 	IntersectionContext temp(context);
 	const TVector3D dir0 = context.point() - center_;
 	const TPoint2D uv0 = uv(dir0);
-	const TVector2D uvI = uv(dir0 + context.dPoint_dI()) - uv0;
-	const TVector2D uvJ = uv(dir0 + context.dPoint_dJ()) - uv0;
+	const TPoint2D uvI = uv(dir0 + context.dPoint_dI());
+	const TPoint2D uvJ = uv(dir0 + context.dPoint_dJ());
 	temp.setUv(uv0);
-	temp.setDUv_dI(uvI);
-	temp.setDUv_dJ(uvJ);
+	temp.setDUv_dI(uvI - uv0);
+	temp.setDUv_dJ(uvJ - uv0);
+#pragma LASS_TODO("perhaps we need to transform other Uv dependent quantities as well [Brams]")
 	return texture_->lookUp(sample, temp);
 }
 

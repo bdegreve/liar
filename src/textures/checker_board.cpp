@@ -110,9 +110,9 @@ CheckerBoard::doLookUp(const Sample& sample, const IntersectionContext& context)
 		{
 			const TVector2D dUv = prim::pointwiseMax(
 				context.dUv_dI().transform(num::abs), context.dUv_dJ().transform(num::abs));
-            const TVector2D uvMin = uv - dUv;
-			const TVector2D uvMax = uv + dUv;
-			const TScalar area = 4 * dUv.x * dUv.y;
+            const TVector2D uvMin = uv - dUv / 2;
+			const TVector2D uvMax = uv + dUv / 2;
+			const TScalar area = dUv.x * dUv.y;
 			if (area > 0)
 			{
 				const TScalar areaA = integrate(uvMin, uvMax);

@@ -66,6 +66,7 @@ void Medium::setPriority(unsigned priority)
 }
 
 
+
 // --- protected -----------------------------------------------------------------------------------
 
 Medium::Medium():

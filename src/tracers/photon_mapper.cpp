@@ -311,6 +311,7 @@ const Spectrum PhotonMapper::doCastRay(
 		const DifferentialRay continuedRay = bound(primaryRay, intersection.t() + tolerance);
 		return mediumTransparency * this->castRay(sample, continuedRay, alpha);
 	}
+	shader->shadeContext(sample, context);
 
 	const TVector3D targetNormal = context.shaderToWorld(TVector3D(0, 0, 1));
 	const TVector3D omegaIn = context.worldToShader(-primaryRay.direction());
@@ -651,6 +652,7 @@ void PhotonMapper::tracePhoton(
 		}
 		return;
 	}
+	shader->shadeContext(sample, context);
 
 	if (shader->hasCaps(Shader::capsDiffuse))
 	{

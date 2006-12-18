@@ -36,6 +36,7 @@
 #include "mix_2.h"
 #include "product.h"
 #include "time.h"
+#include "transformation_uv.h"
 #include "uv.h"
 #include "xyz.h"
 
@@ -66,6 +67,7 @@ LIAR_TEXTURES_DLL void inittextures(void)
 	PY_INJECT_CLASS_IN_MODULE(LinearInterpolator, textures, "interpolates textures using gray value of control texture as parameter")
 	PY_INJECT_CLASS_IN_MODULE(Product, textures, "makes product of child textures")
 	PY_INJECT_CLASS_IN_MODULE(Time, textures, "evaluates to sampled time")
+	PY_INJECT_CLASS_IN_MODULE(TransformationUv, textures, "transform Uv coordinates")
 	PY_INJECT_CLASS_IN_MODULE(Uv, textures, "mixes two textures by the u and v context channels")
 	PY_INJECT_CLASS_IN_MODULE(Xyz, textures, "mixes three textures by the x, y and z context channels")
 

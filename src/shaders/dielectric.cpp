@@ -123,20 +123,7 @@ void Dielectric::doBsdf(
 {
 }
 
-#define LIAR_WARN_ONCE_EX(x, uniqueName)\
-	do\
-	{\
-		static bool uniqueName = false;\
-		if (!uniqueName)\
-		{\
-			LASS_WARNING(x);\
-			uniqueName = true;\
-		}\
-	}\
-	while (false)
 
-#define LIAR_WARN_ONCE(x)\
-	LIAR_WARN_ONCE_EX(x, LASS_UNIQUENAME(liarWarnOnce))
 
 void Dielectric::doSampleBsdf(
 		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
@@ -147,13 +134,13 @@ void Dielectric::doSampleBsdf(
 
 	if (ior1 <= 0)
 	{
-		LIAR_WARN_ONCE("detected outerRefractionIndex evaluating to zero or less.  Defaulting to 1."
+		LASS_WARNING_ONCE("detected outerRefractionIndex evaluating to zero or less.  Defaulting to 1."
 			"See documentation");
 		ior1 = 1;
 	}
 	if (ior2 <= 0)
 	{
-		LIAR_WARN_ONCE("detected innerRefractionIndex evaluating to zero or less.  Defaulting to 1."
+		LASS_WARNING_ONCE("detected innerRefractionIndex evaluating to zero or less.  Defaulting to 1."
 			"See documentation");
 		ior2 = 1;
 	}
