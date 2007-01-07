@@ -1,4 +1,6 @@
-# Demonstrates the use of point light
+#! /usr/bin/python
+
+# Demonstrates the use of output.Display
 #
 # LiAR isn't a raytracer
 # Copyright (C) 2004-2006  Bram de Greve
@@ -8,7 +10,6 @@ from liar import *
 width = 400
 height = 300
 super_sampling = 9
-
 
 red = textures.Constant(rgb(1, 0, 0))
 blue = textures.Constant(rgb(0, 0, 1))

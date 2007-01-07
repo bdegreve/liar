@@ -49,18 +49,18 @@ PY_CLASS_MEMBER_RW(PerspectiveCamera, "shutterCloseDelta", shutterCloseDelta, se
 // --- public --------------------------------------------------------------------------------------
 
 PerspectiveCamera::PerspectiveCamera():
-    position_(0, 0, 0),
-    sky_(0, 0, 1),
+	position_(0, 0, 0),
+	sky_(0, 0, 1),
+	shutterOpenDelta_(0),
+	shutterCloseDelta_(0),
 	fovAngle_(TNumTraits::pi / 2),
 	aspectRatio_(0.75f),
 	focalDistance_(TNumTraits::max),
 	lensRadius_(TNumTraits::zero),
 	nearLimit_(TNumTraits::zero),
-	farLimit_(TNumTraits::max),
-	shutterOpenDelta_(0),
-	shutterCloseDelta_(0)
+	farLimit_(TNumTraits::max)
 {
-    lookAt(TPoint3D(0, 1, 0));
+	lookAt(TPoint3D(0, 1, 0));
 }
 
 
@@ -69,7 +69,7 @@ PerspectiveCamera::PerspectiveCamera():
  */
 const TPoint3D& PerspectiveCamera::position() const
 {
-    return position_;
+	return position_;
 }
 
 
@@ -78,16 +78,17 @@ const TPoint3D& PerspectiveCamera::position() const
  */
 void PerspectiveCamera::setPosition(const TPoint3D& iPosition)
 {
-    position_ = iPosition;
+	position_ = iPosition;
 }
 
 
 
 /** sets camera so it looks to @a iLookAt point.
- *  The PerspectiveCamera tilts around the @e sky vector towards @a iLookAt (so that @e position, @a iLookAt and
- *  the @e sky vector are coplanar), and then pitches to line up @e direction with @a iLookAt.
- *  @e right and @e down are reset to be orthogonal to the direction and to fit @e fovAngle and
- *  @e aspectRatio.
+ *  The PerspectiveCamera tilts around the @e sky vector towards @a iLookAt (
+ *  so that @e position, @a iLookAt and the @e sky vector are coplanar), 
+ *  and then pitches to line up @e direction with @a iLookAt.
+ *  @e right and @e down are reset to be orthogonal to the direction and to 
+ *  fit @e fovAngle and @e aspectRatio.
  *
  *  - @e direction = @a iLookAt - @e position
  *  - @e right = @e direction cross @e sky, and scaled to fit @e fovAngle
@@ -95,7 +96,7 @@ void PerspectiveCamera::setPosition(const TPoint3D& iPosition)
  */
 void PerspectiveCamera::lookAt(const TPoint3D& iLookAt)
 {
-    setDirection(iLookAt - position_);
+	setDirection(iLookAt - position_);
 	focalDistance_ = prim::distance(position_, iLookAt);
 }
 
@@ -105,7 +106,7 @@ void PerspectiveCamera::lookAt(const TPoint3D& iLookAt)
  */
 const TScalar PerspectiveCamera::fovAngle() const
 {
-    return fovAngle_;
+	return fovAngle_;
 }
 
 
@@ -117,10 +118,10 @@ const TScalar PerspectiveCamera::fovAngle() const
  */
 void PerspectiveCamera::setFovAngle(TScalar fov)
 {
-    fovAngle_ = fov;
-    right_ *= 2 * num::tan(fovAngle_ / 2) * direction_.norm() / direction_.reject(right_).norm();
-    setAspectRatio(aspectRatio_);
-    initTransformation();
+	fovAngle_ = fov;
+	right_ *= 2 * num::tan(fovAngle_ / 2) * direction_.norm() / direction_.reject(right_).norm();
+	setAspectRatio(aspectRatio_);
+	initTransformation();
 }
 
 
@@ -129,7 +130,7 @@ void PerspectiveCamera::setFovAngle(TScalar fov)
  */
 const TScalar PerspectiveCamera::aspectRatio() const
 {
-    return aspectRatio_;
+	return aspectRatio_;
 }
 
 
@@ -138,9 +139,9 @@ const TScalar PerspectiveCamera::aspectRatio() const
  */
 void PerspectiveCamera::setAspectRatio(TScalar iAspect)
 {
-    aspectRatio_ = iAspect;
-    down_ *= aspectRatio_ * direction_.reject(right_).norm() / direction_.reject(down_).norm();
-    initTransformation();
+	aspectRatio_ = iAspect;
+	down_ *= aspectRatio_ * direction_.reject(right_).norm() / direction_.reject(down_).norm();
+	initTransformation();
 }
 
 
@@ -150,7 +151,7 @@ void PerspectiveCamera::setAspectRatio(TScalar iAspect)
  */
 const TVector3D& PerspectiveCamera::direction() const
 {
-    return direction_;
+	return direction_;
 }
 
 
@@ -159,98 +160,98 @@ const TVector3D& PerspectiveCamera::direction() const
  */
 void PerspectiveCamera::setDirection(const TVector3D& direction) 
 {
-    direction_ = direction;
-    right_ = prim::cross(direction_, sky_);
-    down_ = prim::cross(direction_, right_);
+	direction_ = direction;
+	right_ = prim::cross(direction_, sky_);
+	down_ = prim::cross(direction_, right_);
 	rightNormal_ = right_.normal();
 	downNormal_ = down_.normal();
-    setFovAngle(fovAngle_);
-    initTransformation();
+	setFovAngle(fovAngle_);
+	initTransformation();
 }
 
 
 
 const TVector3D& PerspectiveCamera::right() const
 {
-    return right_;
+	return right_;
 }
 
 
 
 void PerspectiveCamera::setRight(const TVector3D& iRight)
 {
-    right_ = iRight;
+	right_ = iRight;
 	rightNormal_ = right_.normal();
-
-    const TVector3D orthoRight = direction_.reject(right_);
-    const TVector3D orthoDown = direction_.reject(down_);
-    fovAngle_ = 2 * num::atan(orthoRight.norm() / (2 * direction_.norm()));
-    aspectRatio_ = orthoRight.norm() / orthoDown.norm();
-
-    initTransformation();
+	
+	const TVector3D orthoRight = direction_.reject(right_);
+	const TVector3D orthoDown = direction_.reject(down_);
+	fovAngle_ = 2 * num::atan(orthoRight.norm() / (2 * direction_.norm()));
+	aspectRatio_ = orthoRight.norm() / orthoDown.norm();
+	
+	initTransformation();
 }
 
 
 
 const TVector3D& PerspectiveCamera::down() const
 {
-    return down_;
+	return down_;
 }
 
 
 
 void PerspectiveCamera::setDown(const TVector3D& down)
 {
-    down_ = down;
+	down_ = down;
 	downNormal_ = down_.normal();
-
-    const TVector3D orthoRight = direction_.reject(down_);
-    const TVector3D orthoDown = direction_.reject(right_);
-    aspectRatio_ = orthoRight.norm() / orthoDown.norm();
-
-    initTransformation();
+	
+	const TVector3D orthoRight = direction_.reject(down_);
+	const TVector3D orthoDown = direction_.reject(right_);
+	aspectRatio_ = orthoRight.norm() / orthoDown.norm();
+	
+	initTransformation();
 }
 
 
 
 const TVector3D& PerspectiveCamera::sky() const
 {
-    return sky_;
+	return sky_;
 }
 
 
 
 void PerspectiveCamera::setSky(const TVector3D& sky)
 {
-    sky_ = sky;
+	sky_ = sky;
 }
 
 
 
 const TTime PerspectiveCamera::shutterOpenDelta() const
 {
-    return shutterOpenDelta_;
+	return shutterOpenDelta_;
 }
 
 
 
 const TTime PerspectiveCamera::shutterCloseDelta() const
 {
-    return shutterCloseDelta_;
+	return shutterCloseDelta_;
 }
 
 
 
 void PerspectiveCamera::setShutterOpenDelta(TTimeDelta shutterOpenDelta)
 {
-    shutterOpenDelta_ = shutterOpenDelta;
+	shutterOpenDelta_ = shutterOpenDelta;
 }
 
 
 
 void PerspectiveCamera::setShutterCloseDelta(TTimeDelta shutterCloseDelta)
 {
-    shutterCloseDelta_ = shutterCloseDelta;
+	shutterCloseDelta_ = shutterCloseDelta;
 }
 
 
@@ -271,14 +272,14 @@ TScalar PerspectiveCamera::lensRadius() const
 
 void PerspectiveCamera::setFocalDistance(TScalar distance)
 {
-    focalDistance_ = distance;
+	focalDistance_ = distance;
 }
 
 
 
 void PerspectiveCamera::setLensRadius(TScalar radius)
 {
-    lensRadius_ = radius;
+	lensRadius_ = radius;
 }
 
 
@@ -360,7 +361,7 @@ const TimePeriod PerspectiveCamera::doShutterDelta() const
 
 void PerspectiveCamera::initTransformation()
 {
-    directionBase_ = direction_ - (down_ + right_) / 2;
+	directionBase_ = direction_ - (down_ + right_) / 2;
 }
 
 
@@ -368,21 +369,21 @@ void PerspectiveCamera::initTransformation()
 const TPyObjectPtr PerspectiveCamera::doGetState() const
 {
 	return python::makeTuple(
-			position_,
-			right_,
-			down_,
-			direction_,
-			sky_,
-			rightNormal_,
-			downNormal_,
-			shutterOpenDelta_,
- 			shutterCloseDelta_,
-			fovAngle_,
-			aspectRatio_,
-			nearLimit_,
-			farLimit_,
-			focalDistance_,
-			lensRadius_);
+		position_,
+		right_,
+		down_,
+		direction_,
+		sky_,
+		rightNormal_,
+		downNormal_,
+		shutterOpenDelta_,
+		shutterCloseDelta_,
+		fovAngle_,
+		aspectRatio_,
+		nearLimit_,
+		farLimit_,
+		focalDistance_,
+		lensRadius_);
 }
 
 

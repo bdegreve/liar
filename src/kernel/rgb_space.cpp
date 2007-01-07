@@ -55,12 +55,12 @@ TRgbSpacePtr RgbSpace::defaultSpace_ = TRgbSpacePtr(new RgbSpace(
 
 
 RgbSpace::RgbSpace(const TVector3D& red, const TVector3D& green, const TVector3D& blue):
-	red_(red),
-	green_(green),
-	blue_(blue),
 	x_(1, 0, 0),
 	y_(0, 1, 0),
-	z_(0, 0, 1)
+	z_(0, 0, 1),
+	red_(red),
+	green_(green),
+	blue_(blue)
 {
 	TScalar rgb2xyz[9] =
 	{

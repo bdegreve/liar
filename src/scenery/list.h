@@ -39,26 +39,23 @@ namespace scenery
 
 class LIAR_SCENERY_DLL List: public SceneObject
 {
-    PY_HEADER(SceneObject)
+	PY_HEADER(SceneObject)
 public:
 
-    typedef std::vector<TSceneObjectPtr> TChildren;
+	typedef std::vector<TSceneObjectPtr> TChildren;
 
-    List();
-    List(const TChildren& children); // for python
-
-    template <typename InputIterator> List(InputIterator first, InputIterator last):
-        SceneComposite(&Type)
-    {
-        add(first, last);
-    }
-
-    void add(const TSceneObjectPtr& child);
+	List();
+	List(const TChildren& children); // for python
+	template <typename InputIterator> List(InputIterator begin, InputIterator end):
+	{
+		add(begin, end);
+	}
+	void add(const TSceneObjectPtr& child);
 	void add(const TChildren& children); // for python
-
+	
 	template <typename InputIterator> void add(InputIterator first, InputIterator last)
 	{
-        while (first != last)
+        	while (first != last)
 		{
 			this->add(*first++);
 		}
@@ -66,7 +63,7 @@ public:
 
 private:
 
-    void doAccept(lass::util::VisitorBase& visitor);
+    	void doAccept(lass::util::VisitorBase& visitor);
 
 	void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
 	void doIntersect(const Sample& sample, const BoundedRay& ray, 
@@ -81,7 +78,7 @@ private:
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-    TChildren children_;
+	TChildren children_;
 };
 
 

@@ -26,7 +26,9 @@
 
 // keep in alphabetical order please! [Bramz]
 //
-#include "display.h"
+#if HAVE_PIXELTOASTER_H
+#	include "display.h"
+#endif
 #include "filter_mitchell.h"
 #include "image.h"
 #include "splitter.h"
@@ -43,7 +45,9 @@ LIAR_OUTPUT_DLL void initoutput(void)
 	
 	// keep in alphabetical order please! [Bramz]
 	//
+#if HAVE_PIXELTOASTER_H
     PY_INJECT_CLASS_IN_MODULE(Display, output, "render target in a window (PixelToaster)")
+#endif
     PY_INJECT_CLASS_IN_MODULE(FilterMitchell, output, "Mitchell reconstruction filter")
     PY_INJECT_CLASS_IN_MODULE(Image, output, "simple image render target")
     PY_INJECT_CLASS_IN_MODULE(Splitter, output, "splits output stream to several render targets")

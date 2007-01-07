@@ -47,8 +47,8 @@ PY_CLASS_STATIC_CONST(RenderEngine, "AUTO_NUMBER_OF_THREADS", RenderEngine::auto
 
 
 const RenderEngine::TBucket RenderEngine::bucketBound_(
-    RenderEngine::TBucket::TPoint(TNumTraits::zero, TNumTraits::zero),
-    RenderEngine::TBucket::TPoint(TNumTraits::one, TNumTraits::one));
+	RenderEngine::TBucket::TPoint(TNumTraits::zero, TNumTraits::zero),
+	RenderEngine::TBucket::TPoint(TNumTraits::one, TNumTraits::one));
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -62,62 +62,62 @@ RenderEngine::RenderEngine():
 
 RenderEngine::~RenderEngine()
 {
-    try
-    {
-        renderTarget_->endRender();
-    }
-    catch(...)
-    {
-    }
+	try
+	{
+		renderTarget_->endRender();
+	}
+	catch(...)
+	{
+	}
 }
 
 
 
 const TCameraPtr& RenderEngine::camera() const
 {
-    return camera_;
+	return camera_;
 }
 
 
 
 const TSamplerPtr& RenderEngine::sampler() const
 {
-    return sampler_;
+	return sampler_;
 }
 
 
 
 const TSceneObjectPtr& RenderEngine::scene() const
 {
-    return rayTracer_->scene();
+	return rayTracer_->scene();
 }
 
 
 
 const TRenderTargetPtr& RenderEngine::target() const
 {
-    return renderTarget_;
+	return renderTarget_;
 }
 
 
 
 const TRayTracerPtr& RenderEngine::tracer() const
 {
-    return rayTracer_;
+	return rayTracer_;
 }
 
 
 
 const unsigned RenderEngine::numberOfThreads() const
 {
-    return numberOfThreads_;
+	return numberOfThreads_;
 }
 
 
 
 void RenderEngine::setCamera(const TCameraPtr& camera)
 {
-    camera_ = camera;
+	camera_ = camera;
 	isDirty_ = true;
 }
 
@@ -125,7 +125,7 @@ void RenderEngine::setCamera(const TCameraPtr& camera)
 
 void RenderEngine::setSampler(const TSamplerPtr& sampler)
 {
-    sampler_ = sampler;
+	sampler_ = sampler;
 	isDirty_ = true;
 }
 
@@ -133,7 +133,7 @@ void RenderEngine::setSampler(const TSamplerPtr& sampler)
 
 void RenderEngine::setScene(const TSceneObjectPtr& scene)
 {
-    scene_ = scene;
+	scene_ = scene;
 	isDirty_ = true;
 }
 
@@ -141,14 +141,14 @@ void RenderEngine::setScene(const TSceneObjectPtr& scene)
 
 void RenderEngine::setTarget(const TRenderTargetPtr& renderTarget)
 {
-    renderTarget_ = renderTarget;
+	renderTarget_ = renderTarget;
 }
 
 
 
 void RenderEngine::setTracer(const TRayTracerPtr& iRayTracer)
 {
-    rayTracer_ = iRayTracer;
+	rayTracer_ = iRayTracer;
 	isDirty_ = true;
 }
 
@@ -163,44 +163,47 @@ void RenderEngine::setNumberOfThreads(unsigned number)
 
 void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 {
-    if (!camera_)
-    {
-        LASS_THROW("can't render - no camera attached to engine.");
-    }
-    if (!rayTracer_)
-    {
-        LASS_THROW("can't render - no ray tracer attached to engine.");
-    }
-    if (!scene_)
-    {
-        LASS_THROW("can't render - no scene attached to engine.");
-    }
-    if (!sampler_)
-    {
-        LASS_THROW("can't render - no sampler attached to engine.");
-    }
-    if (!renderTarget_)
-    {
-        LASS_THROW("can't render - no render target attached to engine.");
-    }
-    if (!bucketBound_.contains(bucket))
-    {
-        LASS_THROW("can't render - render bucket '" << bucket << "' goes outside valid boundary '"
-            << bucketBound_ << "'.");
-    }
+	if (!camera_)
+	{
+		LASS_THROW("can't render - no camera attached to engine.");
+	}
+	if (!rayTracer_)
+	{
+		LASS_THROW("can't render - no ray tracer attached to engine.");
+	}
+	if (!scene_)
+	{
+		LASS_THROW("can't render - no scene attached to engine.");
+	}
+	if (!sampler_)
+	{
+		LASS_THROW("can't render - no sampler attached to engine.");
+	}
+	if (!renderTarget_)
+	{
+		LASS_THROW("can't render - no render target attached to engine.");
+	}
+	if (!bucketBound_.contains(bucket))
+	{
+		LASS_THROW("can't render - render bucket '" << bucket 
+			<< "' goes outside valid boundary '" << bucketBound_ << "'.");
+	}
 	
-    typedef Sampler::TResolution TResolution;
-
-    const TResolution resolution = sampler_->resolution();
-    const TVector2D pixelSize = TVector2D(resolution).reciprocal();
-    const unsigned samplesPerPixel = sampler_->samplesPerPixel();
+	typedef Sampler::TResolution TResolution;
+	
+	const TResolution resolution = sampler_->resolution();
+	const TVector2D pixelSize = TVector2D(resolution).reciprocal();
+	const unsigned samplesPerPixel = sampler_->samplesPerPixel();
 	const TimePeriod timePeriod = iFrameTime + camera_->shutterDelta();
 
-    const TResolution min(num::round(bucket.min().x * resolution.x), num::round(bucket.min().y * resolution.y));
-    const TResolution max(num::round(bucket.max().x * resolution.x), num::round(bucket.max().y * resolution.y));
+	const TResolution min(
+		num::round(bucket.min().x * resolution.x), 
+		num::round(bucket.min().y * resolution.y));
+	const TResolution max(
+		num::round(bucket.max().x * resolution.x), 
+		num::round(bucket.max().y * resolution.y));
 	const unsigned numberOfPixels = (max.x - min.x) * (max.y - min.y);
 	const unsigned numberOfSamples = numberOfPixels * samplesPerPixel;
-
 
 	if (isDirty_)
 	{		
@@ -223,8 +226,8 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 	else
 	{
 		typedef util::ThreadPool<Task, Consumer> TThreadPool;
-		const unsigned numThreads = 
-			numberOfThreads_ == autoNumberOfThreads ? util::numberOfProcessors() : numberOfThreads_;
+		const unsigned numThreads = numberOfThreads_ == autoNumberOfThreads ? 
+			util::numberOfProcessors() : numberOfThreads_;
 		TThreadPool pool(numThreads, 2 * numThreads, consumer);
 
 		const TResolution::TValue step = 64;
@@ -235,7 +238,8 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 			{
 				if (isCanceling())
 				{
-					pool.clearQueue();
+#pragma LASS_FIXME("put clear queue back!")
+					//pool.clearQueue();
 					return;
 				}
 

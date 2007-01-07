@@ -20,6 +20,9 @@
  */
 
 #include "output_common.h"
+
+#if HAVE_PIXELTOASTER_H
+
 #include "display.h"
 #include <lass/util/callback_0.h>
 #include <lass/util/thread_fun.h>
@@ -402,5 +405,7 @@ void Display::waitForAnyKey()
 }
 
 }
+
+#endif
 
 // EOF

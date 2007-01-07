@@ -19,10 +19,11 @@
  *	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#if !defined(NDEBUG)
-#	define D3D_DEBUG_INFO
+#if HAVE_PIXELTOASTER_H
+#	if !defined(NDEBUG)
+#		define D3D_DEBUG_INFO
+#	endif
+#	include <PixelToaster.cpp>
 #endif
-
-#include <pixeltoaster.cpp>
 
 // EOF

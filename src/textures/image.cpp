@@ -131,7 +131,7 @@ const Spectrum Image::doLookUp(const Sample& sample, const IntersectionContext& 
 	const TVector2D& dUv_dI = context.dUv_dI();
 	const TVector2D& dUv_dJ = context.dUv_dJ();
 
-	unsigned levelU0 = 0, levelU1 = 0, levelV0 = 0, levelV1 = 0;
+	size_t levelU0 = 0, levelU1 = 0, levelV0 = 0, levelV1 = 0;
 	TScalar dLevelU = TNumTraits::zero, dLevelV = TNumTraits::zero;
 	switch (mipMapping_)
 	{
@@ -139,11 +139,11 @@ const Spectrum Image::doLookUp(const Sample& sample, const IntersectionContext& 
 		break;
 	case mmIsotropic:
 		mipMapLevel(std::max(
-			std::max(num::abs(dUv_dI.x), num::abs(dUv_dJ.x)),
-			std::max(num::abs(dUv_dI.y), num::abs(dUv_dJ.y))),
-            numLevelsU_, levelU0, levelU1, dLevelU);
+				std::max(num::abs(dUv_dI.x), num::abs(dUv_dJ.x)),
+				std::max(num::abs(dUv_dI.y), num::abs(dUv_dJ.y))),
+			numLevelsU_, levelU0, levelU1, dLevelU);
 		break;
-    case mmAnisotropic:
+	case mmAnisotropic:
 		mipMapLevel(std::max(num::abs(dUv_dI.x), num::abs(dUv_dJ.x)), 
 			numLevelsU_, levelU0, levelU1, dLevelU);
 		mipMapLevel(std::max(num::abs(dUv_dI.y), num::abs(dUv_dJ.y)), 
@@ -380,7 +380,7 @@ Image::TImagePtr Image::makeMipMapOdd(const TImagePtr iOldImagePtr, prim::XY iCo
 
 
 void Image::mipMapLevel(TScalar iWidth, size_t iNumLevels, 
-						size_t& oLevel0, size_t& oLevel1, TScalar& oDLevel) const
+		size_t& oLevel0, size_t& oLevel1, TScalar& oDLevel) const
 {
 	const TScalar maxLevel = static_cast<TScalar>(iNumLevels - 1);
 	const TScalar level = maxLevel + num::log(std::max(iWidth, TScalar(1e-8f))) / num::log(TScalar(2));

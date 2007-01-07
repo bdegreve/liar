@@ -109,10 +109,10 @@ private:
  	TTime shutterCloseDelta_;
 	TScalar fovAngle_;
     TScalar aspectRatio_;
-	TScalar nearLimit_;
-	TScalar farLimit_;
 	TScalar focalDistance_;
 	TScalar lensRadius_;
+	TScalar nearLimit_;
+	TScalar farLimit_;
 
     TVector3D directionBase_;
 };

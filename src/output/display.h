@@ -56,19 +56,19 @@ class LIAR_OUTPUT_DLL Display: public RenderTarget, PixelToaster::Listener
 public:
 
 	Display(const std::string& title, const TResolution& resolution);
-    ~Display();
+	~Display();
 
 	const std::string& title() const;
 	const TRgbSpacePtr& rgbSpace() const;
 	const TScalar exposure() const;
 	const TScalar fStops() const;
-    const TScalar gamma() const;
+	const TScalar gamma() const;
 	const TScalar gain() const;
 
 	void setRgbSpace(const TRgbSpacePtr& rgbSpace);
 	void setExposure(TScalar exposure);
 	void setFStops(TScalar fStops);
-    void setGamma(TScalar gammaExponent);
+	void setGamma(TScalar gammaExponent);
 	void setGain(TScalar gain);
 
 private:
@@ -77,9 +77,9 @@ private:
 	typedef prim::Aabb2D<unsigned> TDirtyBox;
 
 	const TResolution doResolution() const;
-    void doBeginRender();
+	void doBeginRender();
 	void doWriteRender(const OutputSample* first, const OutputSample* last);
-    void doEndRender();
+	void doEndRender();
 	const bool doIsCanceling() const;
 		
 	void onKeyDown(PixelToaster::DisplayInterface& display, PixelToaster::Key key);
@@ -101,10 +101,10 @@ private:
 	std::string title_;
 	TDirtyBox renderDirtyBox_;
 	TDirtyBox displayDirtyBox_;
-    TResolution resolution_;
+	TResolution resolution_;
 	TRgbSpacePtr rgbSpace_;
 	TScalar exposure_;
-    TScalar gamma_;
+	TScalar gamma_;
 	TScalar gain_;
 	bool isQuiting_;
 	bool isCanceling_;

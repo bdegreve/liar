@@ -474,7 +474,7 @@ SpectrumFormat::TXyzSpline SpectrumFormat::loadStandardObserver()
 		TVector3D(0.0000e000f, 0.0000e000f, 0.0000e000f),
 	};
 
-	return TXyzSpline(w, w + sizeof w / sizeof TScalar, xyz);
+	return TXyzSpline(w, w + sizeof w / sizeof(TScalar), xyz);
 }
 
 

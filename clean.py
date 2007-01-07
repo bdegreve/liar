@@ -1,3 +1,5 @@
+#! /usr/bin/python
+
 # deletes all builded files of all projects
 
 import os
