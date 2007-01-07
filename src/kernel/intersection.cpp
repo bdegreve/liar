@@ -39,8 +39,8 @@ Intersection Intersection::empty_;
 // --- public --------------------------------------------------------------------------------------
 
 Intersection::Intersection():
-	solidEvent_(seNoEvent),
-	currentLevel_(0)
+	currentLevel_(0),
+	solidEvent_(seNoEvent)
 {
 	intersectionStack_.reserve(4);
 }
@@ -48,8 +48,8 @@ Intersection::Intersection():
 
 
 Intersection::Intersection(const SceneObject* object, TScalar t, SolidEvent event, TSpecialField special):
-	solidEvent_(event),
-	currentLevel_(0)
+	currentLevel_(0),
+	solidEvent_(event)
 {
 	intersectionStack_.reserve(4);
 	push(object, t, special);
@@ -60,7 +60,7 @@ Intersection::Intersection(const SceneObject* object, TScalar t, SolidEvent even
 void Intersection::push(const SceneObject* object, TScalar t, TSpecialField special)
 {
 	LASS_ASSERT(t > 0);
-    intersectionStack_.push_back(IntersectionInfo(object, t, special));
+	intersectionStack_.push_back(IntersectionInfo(object, t, special));
 	currentLevel_ = intersectionStack_.size() - 1;
 	LASS_ASSERT(intersectionStack_[currentLevel_].t == t);
 }
@@ -69,7 +69,7 @@ void Intersection::push(const SceneObject* object, TScalar t, TSpecialField spec
 
 const SceneObject* const Intersection::object() const
 {
-    return intersectionStack_[currentLevel_].object;
+	return intersectionStack_[currentLevel_].object;
 }
 
 
@@ -77,14 +77,14 @@ const SceneObject* const Intersection::object() const
 const TScalar Intersection::t() const
 {
 	LASS_ASSERT(intersectionStack_[currentLevel_].t > 0);
-    return intersectionStack_[currentLevel_].t;
+	return intersectionStack_[currentLevel_].t;
 }
 
 
 
 const Intersection::TSpecialField Intersection::specialField() const
 {
-    return intersectionStack_[currentLevel_].special;
+	return intersectionStack_[currentLevel_].special;
 }
 
 
@@ -98,7 +98,7 @@ const size_t Intersection::level() const
 const bool Intersection::isEmpty() const
 {
 	LASS_ASSERT(intersectionStack_.empty() || intersectionStack_[currentLevel_].t > 0);
-    return intersectionStack_.empty();
+	return intersectionStack_.empty();
 }
 
 
@@ -107,7 +107,7 @@ const bool Intersection::isEmpty() const
  */
 const Intersection& Intersection::empty()
 {
-    return empty_;
+	return empty_;
 }
 
 
@@ -116,8 +116,8 @@ const Intersection& Intersection::empty()
  */
 void Intersection::swap(Intersection& other)
 {
-    std::swap(intersectionStack_, other.intersectionStack_);
-    std::swap(currentLevel_, other.currentLevel_);
+	std::swap(intersectionStack_, other.intersectionStack_);
+	std::swap(currentLevel_, other.currentLevel_);
 	std::swap(solidEvent_, other.solidEvent_);
 }
 
@@ -133,8 +133,8 @@ void Intersection::swap(Intersection& other)
  */
 void Intersection::descend() const
 {
-    LASS_ASSERT(currentLevel_ > 0);
-    --currentLevel_;
+	LASS_ASSERT(currentLevel_ > 0);
+	--currentLevel_;
 }
 
 
@@ -143,8 +143,8 @@ void Intersection::descend() const
  */
 void Intersection::ascend() const
 {
-    ++currentLevel_;
-    LASS_ASSERT(currentLevel_ != intersectionStack_.size());
+	++currentLevel_;
+	LASS_ASSERT(currentLevel_ != intersectionStack_.size());
 }
 
 

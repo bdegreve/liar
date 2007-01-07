@@ -26,7 +26,6 @@
  *  @author Bram de Greve [Bramz]
  */
 
-#pragma once
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_TRACERS_PHOTON_MAPPER_H
 #define LIAR_GUARDIAN_OF_INCLUSION_TRACERS_PHOTON_MAPPER_H
 
@@ -147,7 +146,7 @@ private:
 	void doRequestSamples(const TSamplerPtr& sampler);
 	void doPreProcess(const TSamplerPtr& sampler, const TimePeriod& period);
 	const Spectrum doCastRay(const Sample& sample, const DifferentialRay& primaryRay,
-		TScalar& alpha, unsigned generation) const;
+		TScalar& alpha, int generation) const;
 	const TLightSamplesRange doSampleLights(const Sample& sample,
 		const TPoint3D& target, const TVector3D& targetNormal) const;
 	const TRayTracerPtr doClone() const;
@@ -160,7 +159,7 @@ private:
 	void emitPhoton(const LightContext& light, TScalar lightPdf, const Sample& sample, 
 		TRandomSecondary::TValue secondarySeed);
 	void tracePhoton(const Sample& sample, const Spectrum& power, const BoundedRay& ray,
-		unsigned geneneration, TUniformSecondary& uniform, bool isCaustic = false);
+		int geneneration, TUniformSecondary& uniform, bool isCaustic = false);
 	void buildPhotonMap();
 	void buildIrradianceMap();
 

@@ -55,12 +55,12 @@ public:
 
 	typedef std::size_t TSpecialField;
 
-    Intersection();
-    Intersection(const SceneObject* object, TScalar t, SolidEvent event, 
+	Intersection();
+	Intersection(const SceneObject* object, TScalar t, SolidEvent event, 
 		TSpecialField special = 0);
 
 	void push(const SceneObject* object) { push(object, t(), 0); }
-    void push(const SceneObject* object, TScalar t, TSpecialField special = 0);
+	void push(const SceneObject* object, TScalar t, TSpecialField special = 0);
 	const SceneObject* const object() const;
 	const TScalar t() const;
 	const TSpecialField specialField() const;
@@ -70,17 +70,17 @@ public:
 	void setSolidEvent(SolidEvent event) { solidEvent_ = event; }
 	void flipSolidEvent() { solidEvent_ = flip(solidEvent_); }
 
-    const bool isEmpty() const;
+	const bool isEmpty() const;
 	const bool operator!() const { return isEmpty(); }
 	operator num::SafeBool() const { return isEmpty() ? num::safeFalse : num::safeTrue; }
 
-    void swap(Intersection& other);
+	void swap(Intersection& other);
 
-    static const Intersection& empty();
+	static const Intersection& empty();
 
 private:
 
-    friend class IntersectionDescendor;
+	friend class IntersectionDescendor;
 
 	struct IntersectionInfo
 	{
@@ -109,14 +109,14 @@ private:
 
 	typedef std::vector<IntersectionInfo, TIntersectionInfoAllocator> TIntersectionStack;
 
-    void descend() const;
-    void ascend() const;
-
-    TIntersectionStack intersectionStack_;
-    mutable size_t currentLevel_;
+	void descend() const;
+	void ascend() const;
+	
+	TIntersectionStack intersectionStack_;
+	mutable size_t currentLevel_;
 	SolidEvent solidEvent_;
-
-    static Intersection empty_;
+	
+	static Intersection empty_;
 };
 
 
@@ -124,16 +124,17 @@ private:
 class LIAR_KERNEL_DLL IntersectionDescendor: public util::NonCopyable
 {
 public:
-    IntersectionDescendor(const Intersection& intersection): intersection_(intersection) 
-    { 
-        intersection_.descend(); 
-    }
-    ~IntersectionDescendor()
-    {
-        intersection_.ascend();
-    }
+	IntersectionDescendor(const Intersection& intersection): 
+		intersection_(intersection) 
+	{ 
+		intersection_.descend(); 
+	}
+	~IntersectionDescendor()
+	{
+		intersection_.ascend();
+	}
 private:
-    const Intersection& intersection_;
+	const Intersection& intersection_;
 };
 
 

@@ -238,13 +238,12 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 			{
 				if (isCanceling())
 				{
-#pragma LASS_FIXME("put clear queue back!")
-					//pool.clearQueue();
+					pool.clearQueue();
 					return;
 				}
 
 				TResolution end(std::min(i.x + step, max.x), std::min(i.y + step, max.y));
-				pool.add(Task(i, end));
+				pool.addTask(Task(i, end));
 			}
 		}
 

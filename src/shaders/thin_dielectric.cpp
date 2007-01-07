@@ -37,7 +37,7 @@ PY_CLASS_MEMBER_RW_DOC(ThinDielectric, "innerRefractionIndex", innerRefractionIn
 	"index of refraction for material on inside")
 PY_CLASS_MEMBER_RW_DOC(ThinDielectric, "outerRefractionIndex", outerRefractionIndex, setOuterRefractionIndex, 
 	"index of refraction for material on outside")
-PY_CLASS_MEMBER_RW(ThinDielectric, "transparency", transparency, setTransparency, 
+PY_CLASS_MEMBER_RW_DOC(ThinDielectric, "transparency", transparency, setTransparency, 
 	"colour of transparency")
 
 // --- public --------------------------------------------------------------------------------------

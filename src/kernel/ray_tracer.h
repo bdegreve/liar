@@ -50,32 +50,32 @@ typedef python::PyObjectPtr<SceneObject>::Type TSceneObjectPtr;
 
 class LIAR_KERNEL_DLL RayTracer: public python::PyObjectPlus
 {
-    PY_HEADER(python::PyObjectPlus)
+	PY_HEADER(python::PyObjectPlus)
 public:
 
     virtual ~RayTracer();
 
-    const TSceneObjectPtr& scene() const;
-	const unsigned maxRayGeneration() const;
+	const TSceneObjectPtr& scene() const;
+	const int maxRayGeneration() const;
 
-    void setScene(const TSceneObjectPtr& scene);
-	void setMaxRayGeneration(const unsigned rayGeneration);
+	void setScene(const TSceneObjectPtr& scene);
+	void setMaxRayGeneration(const int rayGeneration);
 
 	void requestSamples(const TSamplerPtr& sampler);
 	void preProcess(const TSamplerPtr& sampler, const TimePeriod& period);
 
 	/** @warning castRay is NOT THREAD SAFE!
 	 */
-    const Spectrum castRay(const Sample& sample, const DifferentialRay& primaryRay, 
+	const Spectrum castRay(const Sample& sample, const DifferentialRay& primaryRay, 
 			TScalar& alpha) const
-    { 
+	{ 
 		RayGenerationIncrementor incrementor(*this);
 		if (rayGeneration_ < maxRayGeneration_)
 		{
 			return doCastRay(sample, primaryRay, alpha, rayGeneration_);
 		}
 		return Spectrum();
-    }
+	}
 
 	/** @warning sampleLights is NOT THREAD SAFE!
 	 */
@@ -93,16 +93,16 @@ public:
 
 protected:
 
-    RayTracer();
+	RayTracer();
 
 	const TLightContexts& lights() const { return lights_; }
 
 private:
 
 	virtual void doRequestSamples(const TSamplerPtr& sampler) = 0;
-    virtual void doPreProcess(const TSamplerPtr& samper, const TimePeriod& period) = 0;
-    virtual const Spectrum doCastRay(const Sample& sample, 
-		const DifferentialRay& primaryRay, TScalar& alpha, unsigned generation) const = 0;
+	virtual void doPreProcess(const TSamplerPtr& samper, const TimePeriod& period) = 0;
+	virtual const Spectrum doCastRay(const Sample& sample, 
+		const DifferentialRay& primaryRay, TScalar& alpha, int generation) const = 0;
 	virtual const TLightSamplesRange doSampleLights(const Sample& sample, 
 		const TPoint3D& target, const TVector3D& targetNormal) const = 0;
 	virtual const TRayTracerPtr doClone() const = 0;
@@ -128,10 +128,10 @@ private:
 	
 	friend class RayGenerationIncrementor;
 
-    TSceneObjectPtr scene_;
+	TSceneObjectPtr scene_;
 	TLightContexts lights_;
-	unsigned maxRayGeneration_;
-	mutable unsigned rayGeneration_;
+	int maxRayGeneration_;
+	mutable int rayGeneration_;
 };
 
 }

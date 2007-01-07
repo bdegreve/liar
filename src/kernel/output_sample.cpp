@@ -35,8 +35,8 @@ namespace kernel
 OutputSample::OutputSample():
 	radiance_(),
 	screenCoordinate_(),
-	weight_(),
-	alpha_()
+	alpha_(),
+	weight_()
 {
 }
 

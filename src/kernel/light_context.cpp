@@ -38,10 +38,10 @@ LightContext::LightContext(const TObjectPath& objectPathToLight, const SceneLigh
 	timeOfTransformation_(num::NumTraits<TTime>::qNaN),
 	objectPath_(objectPathToLight),
 	light_(&light),
-	hasMotion_(false),
 	idLightSamples_(-1),
 	idBsdfSamples_(-1),
-	idBsdfComponentSamples_(-1)
+	idBsdfComponentSamples_(-1),
+	hasMotion_(false)
 {
 	LASS_ASSERT(!objectPath_.empty());
 	LASS_ASSERT(objectPath_.back().get() == light_);

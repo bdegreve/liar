@@ -50,12 +50,12 @@ PY_CLASS_MEMBER_RW(Display, "gain", gain, setGain)
 Display::Display(const std::string& title, const TResolution& resolution):
 	display_(),
 	title_(title),
-    resolution_(resolution),
+	resolution_(resolution),
 	rgbSpace_(RgbSpace::defaultSpace()),
 	exposure_(1.f),
-    gamma_(2.2f),
+	gamma_(2.2f),
 	gain_(1.f),
-    isQuiting_(false),
+	isQuiting_(false),
 	isCanceling_(false),
 	isAnyKeyed_(false)
 {
@@ -65,10 +65,10 @@ Display::Display(const std::string& title, const TResolution& resolution):
 
 Display::~Display()
 {
-    if (!isQuiting_)
-    {
-        endRender();
-    }
+	if (!isQuiting_)
+	{
+		endRender();
+	}
 }
 
 
@@ -89,7 +89,7 @@ const TRgbSpacePtr& Display::rgbSpace() const
 
 const TScalar Display::exposure() const
 {
-    return exposure_;
+	return exposure_;
 }
 
 
@@ -103,14 +103,14 @@ const TScalar Display::fStops() const
 
 const TScalar Display::gamma() const
 {
-    return gamma_;
+	return gamma_;
 }
 
 
 
 const TScalar Display::gain() const
 {
-    return gain_;
+	return gain_;
 }
 
 
@@ -124,7 +124,7 @@ void Display::setRgbSpace(const TRgbSpacePtr& rgbSpace)
 
 void Display::setExposure(TScalar exposure)
 {
-    exposure_ = exposure;
+	exposure_ = exposure;
 }
 
 
@@ -138,14 +138,14 @@ void Display::setFStops(TScalar fStops)
 
 void Display::setGamma(TScalar gammaExponent)
 {
-    gamma_ = gammaExponent;
+	gamma_ = gammaExponent;
 }
 
 
 
 void Display::setGain(TScalar gain)
 {
-    gain_ = gain;
+	gain_ = gain;
 }
 
 
@@ -186,7 +186,7 @@ void Display::doBeginRender()
 
 void Display::doWriteRender(const OutputSample* first, const OutputSample* last)
 {
-    LASS_ASSERT(resolution_.x > 0 && resolution_.y > 0);
+	LASS_ASSERT(static_cast<int>(resolution_.x) > 0 && static_cast<int>(resolution_.y) > 0);
 
 	LASS_LOCK(renderBufferLock_)
 	{
@@ -195,13 +195,15 @@ void Display::doWriteRender(const OutputSample* first, const OutputSample* last)
 			const TPoint2D& position = first->screenCoordinate();
 			const int i = static_cast<int>(num::floor(position.x * resolution_.x));
 			const int j = static_cast<int>(num::floor(position.y * resolution_.y));
-			if (i >= 0 && i < resolution_.x && j >= 0 && j < resolution_.y)
+			if (i >= 0 && i < static_cast<int>(resolution_.x) &&
+				j >= 0 && j < static_cast<int>(resolution_.y))
 			{
 				const TVector3D xyz = first->radiance().xyz();
 				prim::ColorRGBA color = rgbSpace_->convert(xyz);
 				color *= first->alpha() * first->weight();
 				
-				PixelToaster::FloatingPointPixel& pixel = renderBuffer_[j * resolution_.x + i];
+				PixelToaster::FloatingPointPixel& pixel = 
+					renderBuffer_[j * resolution_.x + i];
 				pixel.a += color.a;
 				pixel.b += color.b;
 				pixel.g += color.g;
@@ -350,9 +352,15 @@ void Display::shadeDisplayBuffer()
 			{
 				PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
 				p.a = num::clamp(p.a, 0.f, 1.f);
-				p.b = num::pow(num::clamp(gain_ * (1.f - num::exp(-exposure_ * p.b)), 0.f, 1.f), invGamma);
-				p.g = num::pow(num::clamp(gain_ * (1.f - num::exp(-exposure_ * p.g)), 0.f, 1.f), invGamma);
-				p.r = num::pow(num::clamp(gain_ * (1.f - num::exp(-exposure_ * p.r)), 0.f, 1.f), invGamma);
+				p.b = num::pow(
+					num::clamp(gain_ * (1.f - num::exp(-exposure_ * p.b)), 0.f, 1.f),
+					invGamma);
+				p.g = num::pow(
+					num::clamp(gain_ * (1.f - num::exp(-exposure_ * p.g)), 0.f, 1.f),
+					invGamma);
+				p.r = num::pow(
+					num::clamp(gain_ * (1.f - num::exp(-exposure_ * p.r)), 0.f, 1.f),
+					invGamma);
 			}
 		}
 	}

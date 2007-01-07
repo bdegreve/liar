@@ -46,7 +46,7 @@ public:
 
 	List();
 	List(const TChildren& children); // for python
-	template <typename InputIterator> List(InputIterator begin, InputIterator end):
+	template <typename InputIterator> List(InputIterator begin, InputIterator end)
 	{
 		add(begin, end);
 	}

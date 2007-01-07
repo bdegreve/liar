@@ -48,7 +48,7 @@ public:
 
 	AabbTree();
 	AabbTree(const TChildren& children); // for python
-	template <typename InputIterator> AabbTree(InputIterator begin, InputIterator end):
+	template <typename InputIterator> AabbTree(InputIterator begin, InputIterator end)
 	{
 		add(begin, end);
 	}
