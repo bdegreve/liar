@@ -2,7 +2,8 @@
 # a wavefront OBJ file
 #
 # LiAR isn't a raytracer
-# Copyright (C) 2004-2005  Bram de Greve
+# Copyright (C) 2004-2007  Bram de Greve (bramz@users.sourceforge.net)
+# http://liar.sourceforge.net
 
 from liar import *
 from liar.tools import wavefront_obj

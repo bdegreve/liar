@@ -1,7 +1,8 @@
 # Demonstrates the use of point light
 #
 # LiAR isn't a raytracer
-# Copyright (C) 2004-2006  Bram de Greve
+# Copyright (C) 2004-2007  Bram de Greve (bramz@users.sourceforge.net)
+# http://liar.sourceforge.net
 
 from liar import *
 
