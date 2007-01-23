@@ -358,10 +358,6 @@ void RenderEngine::Consumer::operator()(const Task& iTask)
 	{
 		for (i.x = begin.x; i.x < end.x; ++i.x)
 		{
-			if (i.x == 381 && i.y == 526)
-			{
-				int a = 5;
-			}
 			for (unsigned k = 0; k < samplesPerPixel; ++k)
 			{
 				if (engine_->isCanceling())
