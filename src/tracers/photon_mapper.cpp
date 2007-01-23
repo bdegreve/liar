@@ -920,6 +920,7 @@ const Spectrum PhotonMapper::estimateIrradiance(
 		}
 	}
 
+	LASS_ASSERT(photonNeighbourhood_.size() > estimationSize_[mtGlobal]);
 	const TPhotonNeighbourhood::const_iterator last = photonMap_[mtGlobal].rangeSearch(
 		point, estimationRadius_[mtGlobal], estimationSize_[mtGlobal], 
 		photonNeighbourhood_.begin());
@@ -937,7 +938,8 @@ const Spectrum PhotonMapper::estimateIrradiance(
 		}
 	}
 
-	return result / (TNumTraits::pi * photonNeighbourhood_.front().squaredDistance());
+	const TScalar sqrRad = photonNeighbourhood_.front().squaredDistance();
+	return sqrRad > 0 ? result / (TNumTraits::pi * sqrRad) : Spectrum();
 }
 
 
@@ -971,6 +973,8 @@ const Spectrum PhotonMapper::estimateRadiance(
 	if (!irradianceMap_.isEmpty())
 	{
 		const Irradiance& nearest = *irradianceMap_.nearestNeighbour(point);
+		const TScalar sqrDist = prim::squaredDistance(nearest.position, point);
+		if (sqrDist < num::sqr(estimationRadius_[mtGlobal]))
 		//if (dot(normal, nearest.normal) > 0.9)
 		{
 			BsdfIn in(context.worldToShader(nearest.normal), Shader::capsAll);
@@ -980,10 +984,13 @@ const Spectrum PhotonMapper::estimateRadiance(
 		}
 	}
 
+	LASS_ASSERT(photonNeighbourhood_.size() > estimationSize_[mtGlobal]);
 	const TPhotonNeighbourhood::const_iterator last = photonMap_[mtGlobal].rangeSearch(
 		point, estimationRadius_[mtGlobal], estimationSize_[mtGlobal], 
 		photonNeighbourhood_.begin());
-	if (last == photonNeighbourhood_.begin())
+	
+	const int n = last - photonNeighbourhood_.begin();
+	if (n < 2)
 	{
 		return Spectrum();
 	}
@@ -1016,6 +1023,7 @@ const Spectrum PhotonMapper::estimateCaustics(
 		return Spectrum();
 	}
 
+	LASS_ASSERT(photonNeighbourhood_.size() > estimationSize_[mtGlobal]);
 	const TPhotonNeighbourhood::const_iterator last = photonMap_[mtCaustics].rangeSearch(
 		point, estimationRadius_[mtCaustics], estimationSize_[mtCaustics],
 		photonNeighbourhood_.begin());

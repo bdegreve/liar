@@ -26,6 +26,7 @@
 // keep in alphabetical order please! [Bramz]
 //
 #include "aabb_tree.h"
+#include "clip_map.h"
 #include "csg.h"
 #include "light_area.h"
 #include "light_directional.h"
@@ -62,6 +63,7 @@ LIAR_SCENERY_DLL void initscenery(void)
 	// keep in alphabetical order please! [Bramz]
 	//
 	PY_INJECT_CLASS_IN_MODULE(AabbTree, scenery, "AABB tree of child objects")
+	PY_INJECT_CLASS_IN_MODULE(ClipMap, scenery, "Applies clip map to child object")
 	PY_INJECT_CLASS_IN_MODULE(Csg, scenery, "Constructive Solid Geometry")
 	PY_INJECT_CLASS_IN_MODULE(LightArea, scenery, "area light")
 	PY_INJECT_CLASS_IN_MODULE(LightDirectional, scenery, "directional light")

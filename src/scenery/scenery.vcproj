@@ -313,6 +313,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\clip_map.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\csg.cpp"
 				>
 			</File>
@@ -416,6 +420,10 @@
 			>
 			<File
 				RelativePath=".\aabb_tree.h"
+				>
+			</File>
+			<File
+				RelativePath=".\clip_map.h"
 				>
 			</File>
 			<File
