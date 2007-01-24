@@ -6,7 +6,7 @@ import os.path
 import copy
 
 lib_lass = "Lass", "lass-%s", ["1.0"]
-lib_pixeltoaster = "PixelToaster", "PixelToaster-%s", ["1.%s" % i for i in range(3, 10)]
+lib_pixeltoaster = "PixelToaster", "PixelToaster-%s", ["1.%s" % i for i in range(4, 10)]
 
 ignore_files = {
 	"shaders": ["simple.cpp"],
@@ -106,9 +106,14 @@ def get_config_nt():
 	config = {
 		'include_dirs': [root],
 		'library_dirs': [os.path.join(root, 'lib')],
-		'libraries': ['d3d9', 'user32', 'gdi32'],
+		'libraries': [
+			'd3d9', 
+			'user32', 
+			'gdi32'],
 		#'lass_%s_win32_vc71' % p for p in ('io', 'num', 'prim', 'util')],
-		'extra_compile_args': ['/GR /DHAVE_PIXELTOASTER_H=%s' % have_pixeltoaster_h],
+		'extra_compile_args': [
+			'/GR', 
+			'/DHAVE_PIXELTOASTER_H=%s' % have_pixeltoaster_h],
 		'extra_link_args': [],
 		'data_files': [('lib/site-packages',[system+'msvcr71.dll',system+'msvcp71.dll'])]
 	}
@@ -125,7 +130,7 @@ def get_config_posix():
 	else:
 		have_pixeltoaster_h = 0
 	
-	library_dirs = extract_fields(pc_lass, 'Libs', 'L') + extract_fields(pc_pixeltoaster, 'Libs', 'L') 
+	library_dirs = extract_fields(pc_lass, 'Libs', 'L') + extract_fields(pc_pixeltoaster, 'Libs', 'L')
 	config = {
 		'include_dirs': extract_fields(pc_lass, 'Cflags', 'I') + 
 			extract_fields(pc_pixeltoaster, 'Cflags', 'I'),
