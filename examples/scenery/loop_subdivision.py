@@ -8,8 +8,8 @@ from liar import *
 import math
 
 if True:
-	width = 800
-	height = 600
+	width = 1600
+	height = 1200
 	super_sampling = 9
 else:
 	width = 400
@@ -86,7 +86,7 @@ photonMapper.globalMapSize = 0
 photonMapper.isRayTracingDirect = True
 
 image = output.Image("loop_subdivision.hdr", (width, height))
-display = output.Display("Loop Subdivision Surfaces", (width, height))
+display = output.Display("Loop Subdivision Surfaces", (400, 300))
 
 engine = RenderEngine()
 engine.tracer = photonMapper
