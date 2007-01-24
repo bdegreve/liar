@@ -45,7 +45,7 @@ List::List()
 
 
 List::List(const TChildren& children):
-    children_(children)
+	children_(children)
 {
 }
 
@@ -53,14 +53,14 @@ List::List(const TChildren& children):
 
 void List::add(const TSceneObjectPtr& child)
 {
-    children_.push_back(child);
+	children_.push_back(child);
 }
 
 
 
 void List::add(const TChildren& children)
 {
-    children_.insert(children_.end(), children.begin(), children.end());
+	children_.insert(children_.end(), children.begin(), children.end());
 }
 
 
@@ -75,10 +75,10 @@ void List::doAccept(util::VisitorBase& visitor)
 {
 	doVisit(*this, visitor);
 	const TChildren::const_iterator end = children_.end();
-    for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
-    {
-        (*i)->accept(visitor);
-    }
+	for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
+	{
+		(*i)->accept(visitor);
+	}
 	doVisitOnExit(*this, visitor);
 }
 
@@ -87,52 +87,50 @@ void List::doAccept(util::VisitorBase& visitor)
 void List::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period)
 {
 	const TChildren::const_iterator end = children_.end();
-    for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
-    {
-        (*i)->preProcess(scene, period);
-    }
+	for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
+	{
+		(*i)->preProcess(scene, period);
+	}
 }
 
 
 
-void List::doIntersect(const Sample& sample, const BoundedRay& ray,
-					   Intersection& result) const
+void List::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
 {
-    Intersection listResult = Intersection::empty();
+	Intersection listResult = Intersection::empty();
 	const TChildren::const_iterator end = children_.end();
-    for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
-    {
-        Intersection temp;
+	for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
+	{
+		Intersection temp;
 		const SceneObject* child = i->get();
 		LASS_ASSERT(child);
-        child->intersect(sample, ray, temp);
-        if (temp)
-        {
-            if (!listResult)
-            {
-                listResult.swap(temp);
-            }
-            else if (temp.t() < listResult.t())
-            {
-                listResult.swap(temp);
-            }
-        }
-    }
-    if (listResult)
-    {
-        listResult.push(this);
-    }
-    result.swap(listResult);
+		child->intersect(sample, ray, temp);
+		if (temp)
+		{
+			if (!listResult)
+			{
+				listResult.swap(temp);
+			}
+			else if (temp.t() < listResult.t())
+			{
+				listResult.swap(temp);
+			}
+		}
+	}
+	if (listResult)
+	{
+		listResult.push(this);
+	}
+	result.swap(listResult);
 }
 
 
 
-const bool List::doIsIntersecting(const Sample& sample, 
-								  const BoundedRay& ray) const
+const bool List::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
 {
 	const TChildren::const_iterator end = children_.end();
-    for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
-    {
+	for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
+	{
 		const SceneObject* child = i->get();
 		LASS_ASSERT(child);
 		if (child->isIntersecting(sample, ray))
@@ -145,12 +143,12 @@ const bool List::doIsIntersecting(const Sample& sample,
 
 
 
-void List::doLocalContext(const Sample& sample, const BoundedRay& ray,
-                          const Intersection& intersection,
-                          IntersectionContext& result) const
+void List::doLocalContext(
+		const Sample& sample, const BoundedRay& ray, const Intersection& intersection,
+		IntersectionContext& result) const
 {
-    IntersectionDescendor descend(intersection);
-    intersection.object()->localContext(sample, ray, intersection, result);
+	IntersectionDescendor descend(intersection);
+	intersection.object()->localContext(sample, ray, intersection, result);
 }
 
 
@@ -158,8 +156,8 @@ void List::doLocalContext(const Sample& sample, const BoundedRay& ray,
 const bool List::doContains(const Sample& sample, const TPoint3D& point) const
 {
 	const TChildren::const_iterator end = children_.end();
-    for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
-    {
+	for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
+	{
 		const SceneObject* child = i->get();
 		LASS_ASSERT(child);
 		if (child->contains(sample, point))
@@ -176,8 +174,8 @@ const TAabb3D List::doBoundingBox() const
 {
 	TAabb3D result;
 	const TChildren::const_iterator end = children_.end();
-    for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
-    {
+	for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
+	{
 		const SceneObject* child = i->get();
 		LASS_ASSERT(child);
 		result += child->boundingBox();

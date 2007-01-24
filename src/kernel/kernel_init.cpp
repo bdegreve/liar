@@ -133,7 +133,6 @@ void LIAR_KERNEL_DLL initkernel(void)
 	PyRun_SimpleString( std::string("print \"" + header.str() + "\"\n").c_str());
 	PyRun_SimpleString("print 'liar.kernel imported (v" 
 		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");
-
 }
 
 }

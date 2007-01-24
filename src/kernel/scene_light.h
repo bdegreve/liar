@@ -41,7 +41,7 @@ class Intersection;
 
 class LIAR_KERNEL_DLL SceneLight: public SceneObject
 {
-    PY_HEADER(SceneObject)
+	PY_HEADER(SceneObject)
 public:
 
 	const Spectrum emission(const Sample& sample, const TRay3D& ray,
@@ -82,11 +82,11 @@ public:
 
 protected:
 
-    SceneLight();
+	SceneLight();
 
 private:
-    
-	LASS_UTIL_ACCEPT_VISITOR
+
+	LASS_UTIL_ACCEPT_VISITOR;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);

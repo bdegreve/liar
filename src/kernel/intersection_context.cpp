@@ -52,12 +52,12 @@ IntersectionContext::IntersectionContext(const RayTracer* tracer):
 	dUv_dI_(),
 	dUv_dJ_(),
 	t_(),
-	tracer_(tracer),
 	shader_(0),
 	interior_(0),
-	solidEvent_(seNoEvent),
+	tracer_(tracer),
 	shaderToWorld_(),
 	localToWorld_(),
+	solidEvent_(seNoEvent),
 	hasScreenSpaceDifferentials_(false)
 {
 }

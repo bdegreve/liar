@@ -6,7 +6,7 @@ import os.path
 import copy
 
 lib_lass = "Lass", "lass-%s", ["1.0"]
-lib_pixeltoaster = "PixelToaster", "PixelToaster-%s", ["1.%s" % i for i in range(9, -1, -1)]
+lib_pixeltoaster = "PixelToaster", "PixelToaster-%s", ["1.%s" % i for i in range(3, 10)]
 
 ignore_files = {
 	"shaders": ["simple.cpp"],
@@ -81,7 +81,7 @@ def extract_fields(config, key, prefix):
 def check_for_library(library):
 	name, mask, versions = library
 	print "checking for %s..." % name,
-	for version in versions:
+	for version in versions[::-1]: # reversed order =)
 		config = pkgconfig(mask % version)
 		if config:
 			print version
@@ -125,7 +125,7 @@ def get_config_posix():
 	else:
 		have_pixeltoaster_h = 0
 	
-	library_dirs = extract_fields(pc_lass, 'Libs', 'L') + extract_fields(pc_pixeltoaster, 'Libs', 'L')
+	library_dirs = extract_fields(pc_lass, 'Libs', 'L') + extract_fields(pc_pixeltoaster, 'Libs', 'L') 
 	config = {
 		'include_dirs': extract_fields(pc_lass, 'Cflags', 'I') + 
 			extract_fields(pc_pixeltoaster, 'Cflags', 'I'),
@@ -139,7 +139,9 @@ def get_config_posix():
 		'extra_link_args': [
 			'-Wl,-no-undefined', 
 			'-Wl,-warn-once', 
-			'-Wl,-v'] + 
+			'-Wl,-v',
+			'-Wl,-rpath,.',
+			'-Wl,-E'] +
 			['-Wl,-rpath,%s' % libdir for libdir in library_dirs],
 		'data_files': []
 	}
@@ -166,9 +168,9 @@ def make_extension(name, config):
 	if name == 'kernel':
 		sources = filter(lambda x: 'kernel_init.cpp' in x, sources)
 	libs = copy.copy(config['libraries'])
-	libs.append('kernel')
+	#libs.append('kernel') (get this one through build_clib)
 	return  Extension(
-		'liar.' + name,
+		name,
 		sources,
 		include_dirs = config['include_dirs'], 
 		library_dirs = config['library_dirs'], 
@@ -181,7 +183,18 @@ from distutils.command.build_clib import build_clib
 from types import *
 from distutils import log
 
-class build_dynamic_clib(build_clib):
+class build_shared_clib(build_clib):
+	def initialize_options(self):
+		self.build_lib = None
+		self.package = None
+		build_clib.initialize_options(self)
+		
+	def finalize_options(self):
+		self.set_undefined_options('build', ('build_lib', 'build_lib'))
+		if self.package is None:
+			self.package = self.distribution.ext_package or ""
+		build_clib.finalize_options(self)
+		
 	def build_libraries(self, libraries):
 		for lib_name, build_info in libraries:
 			self.build_library(lib_name, build_info)
@@ -198,9 +211,6 @@ class build_dynamic_clib(build_clib):
 		
 		log.info("building '%s' library", lib_name)
 		
-		# First, compile the source code to object files in the library
-		# directory.  (This should probably change to putting object
-		# files in a temporary build directory.)
 		macros = build_info.get('macros')
 		include_dirs = build_info.get('include_dirs')
 		extra_args = build_info.get('extra_compile_args')
@@ -211,16 +221,42 @@ class build_dynamic_clib(build_clib):
 			include_dirs=include_dirs,
 			extra_postargs=extra_args,
 			debug=self.debug)
-		
-		# Now "link" the object files together into a static library.
-		# (On Unix at least, this isn't really linking -- it just
-		# builds an archive.  Whatever.)
-		self.compiler.create_static_lib(
+				
+		output_dir = self.build_lib
+		if self.package:
+			output_dir = os.path.join(output_dir, self.package)
+		extra_args = build_info.get('extra_link_args')
+		language = build_info.get('language') or self.compiler.detect_language(sources)
+		self.compiler.link_shared_lib(
 			objects, lib_name,
-			output_dir=self.build_clib,
-			debug=self.debug)
+			output_dir=output_dir,
+			libraries=build_info.get('libraries'),
+			library_dirs=build_info.get('library_dirs'),
+			runtime_library_dirs=None,
+			extra_postargs=extra_args,
+			export_symbols=0,
+			debug=self.debug,
+			build_temp=self.build_temp,
+			target_lang=language)
+			
+
+from distutils.command.build_ext import build_ext
+class liar_build_ext(build_ext):
+	def initialize_options(self):
+		self.package = None
+		build_ext.initialize_options(self)
 		
+	def finalize_options(self):
+		if self.package is None:
+			self.package = self.distribution.ext_package
+		build_ext.finalize_options(self)
 		
+	def build_extension(self, ext):
+		extra_dir = self.build_lib
+		if self.package:
+			extra_dir = os.path.join(extra_dir, self.package)
+		ext.library_dirs.append(extra_dir)
+		build_ext.build_extension(self, ext)
 # ------------------------------------------------------------------------------------------
 
 config = get_config()
@@ -247,11 +283,13 @@ setup(
 	maintainer = "Bram de Greve",
 	maintainer_email = "bramz@users.sourceforge.net",
 	package_dir = {'liar': 'src'},
-	packages = ['liar'],
+	packages = ['liar', 'liar.tools'],
 	libraries = [libkernel],
+	ext_package = 'liar',
 	ext_modules = component_extensions,
 	cmdclass = {
-		"build_clib": build_dynamic_clib
+		"build_clib": build_shared_clib,
+		"build_ext": liar_build_ext
 		}
 	)
 

@@ -47,25 +47,27 @@ namespace kernel
 
 namespace impl
 {
-template <typename VisitableType>
-struct TryParent
-{
-	static void onUnknownVisitor(VisitableType& iVisited, util::VisitorBase& iVisitor)
+	template <typename VisitableType>
+	struct TryParent
 	{
-		VisitableType::doVisit(
-			static_cast<typename VisitableType::TPyParent&>(iVisited), iVisitor);
-	}
-	static void onUnknownVisitorOnExit(VisitableType& iVisited, util::VisitorBase& iVisitor)
+		static void onUnknownVisitor(VisitableType& iVisited, util::VisitorBase& iVisitor)
+		{
+			VisitableType::doVisit(
+				static_cast<typename VisitableType::TPyParent&>(iVisited), iVisitor);
+		}
+		static void onUnknownVisitorOnExit(VisitableType& iVisited, util::VisitorBase& iVisitor)
+		{
+			VisitableType::doVisitOnExit(
+				static_cast<typename VisitableType::TPyParent&>(iVisited), iVisitor);
+		}
+	};
+	
+	template <> 
+	struct TryParent<SceneObject>
 	{
-		VisitableType::doVisitOnExit(
-			static_cast<typename VisitableType::TPyParent&>(iVisited), iVisitor);
-	}
-};
-
-template <> 
-struct TryParent<SceneObject>: public util::VisitNonStrict<SceneObject>
-{
-};	template <typename VisitableType> struct TryParent;
+		static void onUnknownVisitor(SceneObject&, util::VisitorBase&) {}
+		static void onUnknownVisitorOnExit(SceneObject&, util::VisitorBase&) {}
+	};
 }
 
 class SceneObject;
@@ -76,7 +78,9 @@ typedef python::PyObjectPtr<SceneObject>::Type TSceneObjectPtr;
 
 
 
-class LIAR_KERNEL_DLL SceneObject: public python::PyObjectPlus, public lass::util::VisitableBase<impl::TryParent>
+class LIAR_KERNEL_DLL SceneObject: 
+	public python::PyObjectPlus, 
+	public lass::util::VisitableBase<impl::TryParent>
 {
 	PY_HEADER(python::PyObjectPlus)
 public:
@@ -135,6 +139,7 @@ protected:
 private:
 
 	LASS_UTIL_ACCEPT_VISITOR;
+	
 	virtual void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
 	virtual void doIntersect(const Sample& sample, const BoundedRay& ray, 
 		Intersection& result) const = 0;
@@ -168,18 +173,10 @@ private:
 	static TShaderPtr defaultShader_;
 };
 
-/** Applies a function to all objects in the tree.
- *  @relates SceneObject
- *  @param objectTree [in] the root object of the tree to be visited.
- *  @param functor [in] the callback to be invoked
- *
- *  If an SceneObject is instantiated more than once in @a objectTree (i.e. it occurs more than
- *	once in the tree), then @a functor is applied to each instance
- */
-template <typename Functor>
-void forAllObjects(const TSceneObjectPtr& objectTree, Functor functor)
+namespace impl
 {
-	class InstanceVisitor: public util::VisitorBase, public util::Visitor<SceneObject>
+	template <typename Functor>
+	class ForAllVisitor: public util::VisitorBase, public util::Visitor<SceneObject>
 	{
 	public:
 		InstanceVisitor(Functor fun): functor_(fun) {}
@@ -187,22 +184,9 @@ void forAllObjects(const TSceneObjectPtr& objectTree, Functor functor)
 		void doVisit(SceneObject& object) { functor_(object); }
 		Functor functor_;
 	};
-	InstanceVisitor visitor(functor);
-	objectTree->accept(visitor);
-}
-
-/** Applies a function to eeach unique object in the tree.
- *  @relates SceneObject
- *  @param objectTree [in] the root object of the tree to be visited.
- *  @param functor [in] the callback to be invoked
- *
- *  If an SceneObject is instantiated more than once in @a objectTree (i.e. it occurs more than
- *	once in the tree), then @a functor is applied to each instance
- */
-template <typename Functor>
-void forUniqueObjects(const TSceneObjectPtr& objectTree, Functor functor)
-{
-	class InstanceVisitor: public util::VisitorBase, public util::Visitor<SceneObject>
+	
+	template <typename Functor>
+	class ForUniqueVisitor: public util::VisitorBase, public util::Visitor<SceneObject>
 	{
 	public:
 		InstanceVisitor(Functor fun): functor_(fun) {}
@@ -218,7 +202,35 @@ void forUniqueObjects(const TSceneObjectPtr& objectTree, Functor functor)
 		Functor functor_;
 		std::set<SceneObject*> visited_;
 	};
-	InstanceVisitor visitor(functor);
+}
+
+/** Applies a function to all objects in the tree.
+ *  @relates SceneObject
+ *  @param objectTree [in] the root object of the tree to be visited.
+ *  @param functor [in] the callback to be invoked
+ *
+ *  If an SceneObject is instantiated more than once in @a objectTree (i.e. it occurs more than
+ *	once in the tree), then @a functor is applied to each instance
+ */
+template <typename Functor>
+void forAllObjects(const TSceneObjectPtr& objectTree, Functor functor)
+{
+	impl::ForAllVisitor<Functor> visitor(functor);
+	objectTree->accept(visitor);
+}
+
+/** Applies a function to eeach unique object in the tree.
+ *  @relates SceneObject
+ *  @param objectTree [in] the root object of the tree to be visited.
+ *  @param functor [in] the callback to be invoked
+ *
+ *  If an SceneObject is instantiated more than once in @a objectTree (i.e. it occurs more than
+ *	once in the tree), then @a functor is applied to each instance
+ */
+template <typename Functor>
+void forUniqueObjects(const TSceneObjectPtr& objectTree, Functor functor)
+{
+	impl::ForUniqueVisitor<Functor> visitor(functor);
 	objectTree->accept(visitor);
 }
 

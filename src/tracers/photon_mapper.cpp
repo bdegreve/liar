@@ -256,16 +256,18 @@ void PhotonMapper::doPreProcess(const kernel::TSamplerPtr& sampler, const TimePe
 	const unsigned maxSize = *std::max_element(estimationSize_, estimationSize_ + numMapTypes);
 	photonNeighbourhood_.resize(maxSize + 1);
 
-	TLightCdf lightCdf;
-	for (TLightContexts::const_iterator i = lights().begin(); i != lights().end(); ++i)
+	if (!lights().empty())
 	{
-		lightCdf.push_back(i->totalPower().average());
+		TLightCdf lightCdf;
+		for (TLightContexts::const_iterator i = lights().begin(); i != lights().end(); ++i)
+		{
+			lightCdf.push_back(i->totalPower().average());
+		}
+		std::partial_sum(lightCdf.begin(), lightCdf.end(), lightCdf.begin());
+		std::transform(lightCdf.begin(), lightCdf.end(), lightCdf.begin(), 
+			std::bind2nd(std::divides<TScalar>(), lightCdf.back()));
+		fillPhotonMap(lightCdf, sampler, period);
 	}
-	std::partial_sum(lightCdf.begin(), lightCdf.end(), lightCdf.begin());
-	std::transform(lightCdf.begin(), lightCdf.end(), lightCdf.begin(), 
-		std::bind2nd(std::divides<TScalar>(), lightCdf.back()));
-
-	fillPhotonMap(lightCdf, sampler, period);
 	buildPhotonMap();
 	buildIrradianceMap();
 }

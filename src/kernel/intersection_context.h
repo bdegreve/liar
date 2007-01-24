@@ -48,13 +48,13 @@ public:
 
 	IntersectionContext(const RayTracer* tracer = 0);
 
-    const TPoint3D& point() const { return point_; }
+	const TPoint3D& point() const { return point_; }
 	const TVector3D& dPoint_dU() const { return dPoint_dU_; }
 	const TVector3D& dPoint_dV() const { return dPoint_dV_; }
 	const TVector3D& dPoint_dI() const { return dPoint_dI_; }
 	const TVector3D& dPoint_dJ() const { return dPoint_dJ_; }
 	const TVector3D& geometricNormal() const { return geometricNormal_; }
-    const TVector3D& normal() const { return normal_; }
+	const TVector3D& normal() const { return normal_; }
 	const TVector3D& dNormal_dU() const { return dNormal_dU_; }
 	const TVector3D& dNormal_dV() const { return dNormal_dV_; }
 	const TVector3D& dNormal_dI() const { return dNormal_dI_; }
@@ -62,24 +62,24 @@ public:
 	const TPoint2D& uv() const { return uv_; }
 	const TVector2D& dUv_dI() const { return dUv_dI_; }
 	const TVector2D& dUv_dJ() const { return dUv_dJ_; }
-    const TScalar t() const { return t_; }
-    const Shader* const shader() const { return shader_; }
+	const TScalar t() const { return t_; }
+	const Shader* const shader() const { return shader_; }
 	const Medium* const interior() const { return interior_; }
 	const SolidEvent solidEvent() const { return solidEvent_; }
 
-    void setPoint(const TPoint3D& point) { point_ = point; }
+	void setPoint(const TPoint3D& point) { point_ = point; }
 	void setDPoint_dU(const TVector3D& dPoint_dU) { LASS_ASSERT(!shader_); dPoint_dU_ = dPoint_dU; }
 	void setDPoint_dV(const TVector3D& dPoint_dV) { LASS_ASSERT(!shader_); dPoint_dV_ = dPoint_dV; }
 	void setGeometricNormal(const TVector3D& geometricNormal) { geometricNormal_ = geometricNormal; }
-    void setNormal(const TVector3D& normal) { normal_ = normal; }
+	void setNormal(const TVector3D& normal) { normal_ = normal; }
 	void setDNormal_dU(const TVector3D& dNormal_dU) { dNormal_dU_ = dNormal_dU; }
 	void setDNormal_dV(const TVector3D& dNormal_dV) { dNormal_dV_ = dNormal_dV; }
 	void setUv(const TPoint2D& uv) { uv_ = uv; }
 	void setUv(const TScalar u, const TScalar iV) { uv_.x = u; uv_.y = iV; }
 	void setDUv_dI(const TVector2D& dUv_dI) { dUv_dI_ = dUv_dI; }
 	void setDUv_dJ(const TVector2D& dUv_dJ) { dUv_dJ_ = dUv_dJ; }
-    void setT(TScalar t) { t_ = t; }
-    void setShader(const Shader* shader);
+	void setT(TScalar t) { t_ = t; }
+	void setShader(const Shader* shader);
 	void setShader(const TShaderPtr& shader) { setShader(shader.get()); }
 	void setInterior(const Medium* interior) { interior_ = interior; }
 	void setInterior(const TMediumPtr& interior) { setInterior(interior.get()); }
@@ -108,14 +108,14 @@ private:
 		TVector3D& oDNormal, TVector2D& oDUv);
 	void generateShaderToWorld();
 
-    TPoint3D point_;		/**< world space coordinate */
+	TPoint3D point_;		/**< world space coordinate */
 	TVector3D dPoint_dU_;	/**< partial derivative of point_ to surface coordinate u */
 	TVector3D dPoint_dV_;	/**< partial derivative of point_ to surface coordinate v */
 	TVector3D dPoint_dI_;	/**< partial derivative of point_ to screen space coordinate i */
 	TVector3D dPoint_dJ_;	/**< partial derivative of point_ to screen space coordinate j */
 
 	TVector3D geometricNormal_;	/**< normal of underlying geometry.  Do we need it?  Yes, think 
-									triangle normal in triangle meshes ...*/
+			triangle normal in triangle meshes ...*/
 	TVector3D normal_;		/**< normal of surface in world space */
 	TVector3D dNormal_dU_;	/**< partial derivative of normal_ to surface coordinate u */
 	TVector3D dNormal_dV_;	/**< partial derivative of normal_ to surface coordinate v */
@@ -127,7 +127,7 @@ private:
 	TVector2D dUv_dJ_;		/**< partial derivative of uv_ to screen space coordinate j */
 
 	TScalar t_;				/**< parameter of point_ on ray */
-    const Shader* shader_;		/**< shader to be used */
+	const Shader* shader_;		/**< shader to be used */
 	const Medium* interior_;
 	const RayTracer* tracer_;	/**< tracer to be used */
 

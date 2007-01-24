@@ -195,17 +195,17 @@ namespace impl
 			TSceneObjectPtr objectPtr(python::PyPlus_INCREF(&object));
 			objectPath_.push_back(objectPtr);
 		}
-		void doVisit(SceneLight& iSceneLight)
+		void doVisit(SceneLight& light)
 		{
-			TSceneObjectPtr objectPtr(python::PyPlus_INCREF(&iSceneLight));
+			TSceneObjectPtr objectPtr(python::PyPlus_INCREF(&light));
 			objectPath_.push_back(objectPtr);
-			lights_.push_back(LightContext(objectPath_, iSceneLight));
+			lights_.push_back(LightContext(objectPath_, light));
 		}
 		void doVisitOnExit(SceneObject& object)
 		{
 			objectPath_.pop_back();
 		}
-		void doVisitOnExit(SceneLight& iSceneLight)
+		void doVisitOnExit(SceneLight& light)
 		{
 			objectPath_.pop_back();
 		}

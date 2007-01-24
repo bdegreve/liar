@@ -17,6 +17,31 @@
 #
 # http://liar.sourceforge.net
 
+
+
+# adjust dlopen flags so we can share symbols across extension modules
+#
+# see:
+# - http://gcc.gnu.org/faq.html#dso
+# - http://docs.python.org/lib/module-sys.html
+# - http://mail.python.org/pipermail/c++-sig/2005-April/008829.html
+#
+import sys
+try:
+	oldflags = sys.getdlopenflags()
+	try:
+		import dl
+	except:
+		try:
+			import DLFCN as dl
+		except:
+			pass
+	sys.setdlopenflags(dl.RTLD_NOW | dl.RTLD_GLOBAL)
+except:
+	pass	
+
+
+
 from kernel import *
 import cameras
 import scenery

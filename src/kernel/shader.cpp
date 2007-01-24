@@ -89,9 +89,9 @@ const int Shader::idTransmissionSamples() const
 // --- protected -----------------------------------------------------------------------------------
 
 Shader::Shader(unsigned capabilityFlags):
+	caps_(capabilityFlags),
 	idReflectionSamples_(-1),
-	idTransmissionSamples_(-1),
-	caps_(capabilityFlags)
+	idTransmissionSamples_(-1)
 {
 }
 

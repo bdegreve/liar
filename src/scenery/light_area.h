@@ -58,7 +58,7 @@ public:
 
 private:
 
-    LASS_UTIL_ACCEPT_VISITOR;
+	LASS_UTIL_ACCEPT_VISITOR;
 
 	void doIntersect(const Sample& sample, const BoundedRay& ray, 
 		Intersection& result) const;
@@ -85,9 +85,9 @@ private:
 	const TPyObjectPtr doGetLightState() const;
 	void doSetLightState(const TPyObjectPtr& state);
 
-    TSceneObjectPtr surface_;
+	TSceneObjectPtr surface_;
 	Spectrum radiance_;
-    TAttenuationPtr attenuation_;
+	TAttenuationPtr attenuation_;
 	unsigned numberOfEmissionSamples_;
 	bool isSingleSided_;
 };
