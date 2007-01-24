@@ -124,28 +124,27 @@ void ClipMap::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& perio
 void ClipMap::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
 {
 	BoundedRay boundedRay = ray;
+	Intersection intersection;
 	while (true)
 	{
-		Intersection temp;
-		child_->intersect(sample, boundedRay, temp);
-		if (!temp)
+		child_->intersect(sample, boundedRay, intersection);
+		if (!intersection)
 		{
-			result.swap(temp);
+			result.swap(intersection);
 			return;
 		}
 
 		IntersectionContext context;
-		child_->localContext(sample, boundedRay, temp, context);
+		child_->localContext(sample, boundedRay, intersection, context);
 		if (clipMap_->lookUp(sample, context).average() >= threshold_)
 		{
-			result.push(this);
-			result.swap(temp);
+			intersection.push(this);
+			result.swap(intersection);
 			return;
 		}
 
-		boundedRay = bound(boundedRay, temp.t(), boundedRay.farLimit());
+		boundedRay = bound(boundedRay, intersection.t(), boundedRay.farLimit());
 	}
-	result = Intersection::empty();
 }
 
 
@@ -163,6 +162,8 @@ void ClipMap::doLocalContext(
 		const Sample& sample, const BoundedRay& ray, const Intersection& intersection, 
 		IntersectionContext& result) const
 {
+	IntersectionDescendor descendor(intersection);
+	LASS_ASSERT(intersection.object() == child_.get());
 	child_->localContext(sample, ray, intersection, result);
 }
 
