@@ -179,7 +179,7 @@ namespace impl
 	class ForAllVisitor: public util::VisitorBase, public util::Visitor<SceneObject>
 	{
 	public:
-		InstanceVisitor(Functor fun): functor_(fun) {}
+		ForAllVisitor(Functor fun): functor_(fun) {}
 	private:
 		void doVisit(SceneObject& object) { functor_(object); }
 		Functor functor_;
@@ -189,7 +189,7 @@ namespace impl
 	class ForUniqueVisitor: public util::VisitorBase, public util::Visitor<SceneObject>
 	{
 	public:
-		InstanceVisitor(Functor fun): functor_(fun) {}
+		ForUniqueVisitor(Functor fun): functor_(fun) {}
 	private:
 		void doVisit(SceneObject& object)
 		{
