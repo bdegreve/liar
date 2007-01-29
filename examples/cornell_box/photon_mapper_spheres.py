@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 # Demonstration of a photon mapped Cornell box with some spheres ...
 #
 # LiAR isn't a raytracer

@@ -1,3 +1,5 @@
+#! /usr/bin/python
+
 # demonstrates the use of subdivision surfaces (and crease levels) on the TriangleMesh
 #
 # LiAR isn't a raytracer

@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 # Demonstrates the use module liar.tools.wavefront_obj to load
 # a wavefront OBJ file
 #

@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 # Demonstrates the use of textures.LinearInterpolator to blend
 # between textures using textures.Time as parameter
 #

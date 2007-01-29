@@ -1,9 +1,14 @@
-#! /usr/bin/python
+#! /usr/bin/env python
 
-from distutils.core import setup, Extension, Command
 import os
 import os.path
 import copy
+
+from distutils.core import setup, Extension, Command
+from distutils.command.build_clib import build_clib
+from distutils.command.build_ext import build_ext
+from distutils import log
+from types import *
 
 lib_lass = "Lass", "lass-%s", ["1.0"]
 lib_pixeltoaster = "PixelToaster", "PixelToaster-%s", ["1.%s" % i for i in range(4, 10)]
@@ -183,12 +188,16 @@ def make_extension(name, config):
 		extra_compile_args = config['extra_compile_args'],
 		extra_link_args = config['extra_link_args']
 		)
-	
-from distutils.command.build_clib import build_clib
-from types import *
-from distutils import log
 
-class build_shared_clib(build_clib):
+def force_no_optimisation(compiler):
+	for i in range(4):
+		try: compiler.compiler_so.remove("-O%s" % i)
+		except:	pass
+	compiler.compiler_so.append("-O0")
+	
+# http://liar.sourceforge.net/blog/2007/01/27/the-bumpy-road-to-the-linux-build/
+#		
+class liar_build_shared_lib(build_clib):
 	def initialize_options(self):
 		self.build_lib = None
 		self.package = None
@@ -205,6 +214,7 @@ class build_shared_clib(build_clib):
 			self.build_library(lib_name, build_info)
 	
 	def build_library(self, lib_name, build_info):
+		#force_no_optimisation(self.compiler)
 		print lib_name, build_info
 		sources = build_info.get('sources')
 		if sources is None or type(sources) not in (ListType, TupleType):
@@ -244,8 +254,7 @@ class build_shared_clib(build_clib):
 			build_temp=self.build_temp,
 			target_lang=language)
 			
-
-from distutils.command.build_ext import build_ext
+			
 class liar_build_ext(build_ext):
 	def initialize_options(self):
 		self.package = None
@@ -257,6 +266,7 @@ class liar_build_ext(build_ext):
 		build_ext.finalize_options(self)
 		
 	def build_extension(self, ext):
+		#force_no_optimisation(self.compiler)
 		extra_dir = self.build_lib
 		if self.package:
 			extra_dir = os.path.join(extra_dir, self.package)
@@ -293,8 +303,7 @@ setup(
 	ext_package = 'liar',
 	ext_modules = component_extensions,
 	cmdclass = {
-		"build_clib": build_shared_clib,
+		"build_clib": liar_build_shared_lib,
 		"build_ext": liar_build_ext
 		}
 	)
-

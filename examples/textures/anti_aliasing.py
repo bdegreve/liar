@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 # Demonstrates the use of texture anti aliasing to improve render quality.
 #
 # The result is that the color of the sphere changes in time.

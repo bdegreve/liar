@@ -1,3 +1,5 @@
+#! /usr/bin/python
+
 # demonstrates the use of LightSky and AngularMaping to do images based lighting using a light probe
 #
 # LiAR isn't a raytracer

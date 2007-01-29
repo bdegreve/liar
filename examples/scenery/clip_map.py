@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/env python
 
 # Demonstrates the use of ClipMap
 #
@@ -62,7 +62,6 @@ image = output.Image("clip_map.hdr", (width, height))
 display = output.Display("Fun with Clip Mapping", (400, 300))
 
 engine = RenderEngine()
-engine.numberOfThreads = 2
 engine.tracer = photonMapper
 engine.sampler = samplers.Stratifier((width, height), super_sampling)
 engine.scene = scenery.List([clipped_sphere, floor, wall1, wall2, light])

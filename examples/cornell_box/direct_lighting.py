@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 # cornell box with direct lighting only
 #
 # LiAR isn't a raytracer

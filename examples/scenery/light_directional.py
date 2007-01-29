@@ -1,3 +1,5 @@
+#! /usr/bin/python
+
 # Demonstrates the use of point light
 #
 # LiAR isn't a raytracer

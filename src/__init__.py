@@ -20,11 +20,7 @@
 
 
 # adjust dlopen flags so we can share symbols across extension modules
-#
-# see:
-# - http://gcc.gnu.org/faq.html#dso
-# - http://docs.python.org/lib/module-sys.html
-# - http://mail.python.org/pipermail/c++-sig/2005-April/008829.html
+# http://liar.sourceforge.net/blog/2007/01/28/shared-libraries-dlopen-and-rtti/
 #
 import sys
 try:

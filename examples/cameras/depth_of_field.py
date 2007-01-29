@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 # Demonstrates the use of depth of field
 #
 # LiAR isn't a raytracer

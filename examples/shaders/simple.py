@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 # Demonstrates the use of shaders.Simple
 #
 # shaders.Simple can be seen as the traditional raytrace shader.

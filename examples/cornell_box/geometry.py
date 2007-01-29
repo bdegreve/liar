@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 # geometry of cornell box.
 # used by cornell box examples
 #
