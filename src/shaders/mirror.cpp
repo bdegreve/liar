@@ -33,7 +33,7 @@ namespace shaders
 PY_DECLARE_CLASS(Mirror)
 PY_CLASS_CONSTRUCTOR_0(Mirror)
 PY_CLASS_CONSTRUCTOR_1(Mirror, const TTexturePtr&)
-PY_CLASS_MEMBER_RW_DOC(Mirror, "reflectance", reflectance, setReflectance, "texture for reflectance component")
+PY_CLASS_MEMBER_RW_DOC(Mirror, reflectance, setReflectance, "texture for reflectance component")
 
 // --- public --------------------------------------------------------------------------------------
 

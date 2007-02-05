@@ -33,8 +33,8 @@ namespace output
 PY_DECLARE_CLASS(FilterMitchell);
 PY_CLASS_CONSTRUCTOR_1(FilterMitchell, const TRenderTargetPtr&)
 PY_CLASS_CONSTRUCTOR_2(FilterMitchell, const TRenderTargetPtr&, TScalar)
-PY_CLASS_MEMBER_RW(FilterMitchell, "target", target, setTarget)
-PY_CLASS_MEMBER_RW(FilterMitchell, "b", b, setB)
+PY_CLASS_MEMBER_RW(FilterMitchell, target, setTarget)
+PY_CLASS_MEMBER_RW(FilterMitchell, b, setB)
 
 // --- public --------------------------------------------------------------------------------------
 

@@ -36,7 +36,7 @@ PY_CLASS_CONSTRUCTOR_3(SpectrumFormat, unsigned, TScalar, TScalar);
 PY_CLASS_CONSTRUCTOR_1(SpectrumFormat, const SpectrumFormat::TWavelengths&);
 PY_CLASS_CONSTRUCTOR_2(SpectrumFormat, const SpectrumFormat::TWavelengths&,
 					   const SpectrumFormat::TXyzWeights&);
-PY_CLASS_MEMBER_R(SpectrumFormat, "numberOfBands", numberOfBands);
+PY_CLASS_MEMBER_R(SpectrumFormat, numberOfBands);
 PY_CLASS_METHOD(SpectrumFormat, beginWavelength);
 PY_CLASS_METHOD(SpectrumFormat, endWavelength);
 PY_CLASS_METHOD(SpectrumFormat, centerWavelength);

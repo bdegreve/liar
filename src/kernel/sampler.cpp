@@ -31,8 +31,8 @@ namespace kernel
 {
 
 PY_DECLARE_CLASS(Sampler)
-PY_CLASS_MEMBER_RW(Sampler, "resolution", resolution, setResolution)
-PY_CLASS_MEMBER_RW(Sampler, "samplesPerPixel", samplesPerPixel, setSamplesPerPixel)
+PY_CLASS_MEMBER_RW(Sampler, resolution, setResolution)
+PY_CLASS_MEMBER_RW(Sampler, samplesPerPixel, setSamplesPerPixel)
 PY_CLASS_METHOD(Sampler, seed)
 PY_CLASS_METHOD_NAME(Sampler, reduce, "__reduce__")
 PY_CLASS_METHOD_NAME(Sampler, getState, "__getstate__")

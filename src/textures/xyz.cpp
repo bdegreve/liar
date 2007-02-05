@@ -31,9 +31,9 @@ namespace textures
 
 PY_DECLARE_CLASS(Xyz)
 PY_CLASS_CONSTRUCTOR_3(Xyz, const TTexturePtr&, const TTexturePtr&, const TTexturePtr&);
-PY_CLASS_MEMBER_RW_DOC(Xyz, "textureA", textureA, setTextureA, "first texture")
-PY_CLASS_MEMBER_RW_DOC(Xyz, "textureB", textureB, setTextureB, "second texture")
-PY_CLASS_MEMBER_RW_DOC(Xyz, "textureC", textureC, setTextureC, "third texture")
+PY_CLASS_MEMBER_RW_DOC(Xyz, textureA, setTextureA, "first texture")
+PY_CLASS_MEMBER_RW_DOC(Xyz, textureB, setTextureB, "second texture")
+PY_CLASS_MEMBER_RW_DOC(Xyz, textureC, setTextureC, "third texture")
 
 // --- public --------------------------------------------------------------------------------------
 

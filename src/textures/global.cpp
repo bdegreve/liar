@@ -31,7 +31,7 @@ namespace textures
 
 PY_DECLARE_CLASS(Global)
 PY_CLASS_CONSTRUCTOR_1(Global, const TTexturePtr&);
-PY_CLASS_MEMBER_RW(Global, "texture", texture, setTexture);
+PY_CLASS_MEMBER_RW(Global, texture, setTexture);
 
 // --- public --------------------------------------------------------------------------------------
 

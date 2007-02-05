@@ -34,9 +34,9 @@ PY_DECLARE_CLASS(Dielectric)
 PY_CLASS_CONSTRUCTOR_0(Dielectric)
 PY_CLASS_CONSTRUCTOR_1(Dielectric, const TTexturePtr&)
 PY_CLASS_CONSTRUCTOR_2(Dielectric, const TTexturePtr&, const TTexturePtr&)
-PY_CLASS_MEMBER_RW_DOC(Dielectric, "innerRefractionIndex", innerRefractionIndex, setInnerRefractionIndex, 
+PY_CLASS_MEMBER_RW_DOC(Dielectric, innerRefractionIndex, setInnerRefractionIndex, 
 	"index of refraction for material on inside")
-PY_CLASS_MEMBER_RW_DOC(Dielectric, "outerRefractionIndex", outerRefractionIndex, setOuterRefractionIndex, 
+PY_CLASS_MEMBER_RW_DOC(Dielectric, outerRefractionIndex, setOuterRefractionIndex, 
 	"index of refraction for material on outside")
 
 // --- public --------------------------------------------------------------------------------------

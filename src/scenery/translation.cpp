@@ -31,9 +31,9 @@ namespace scenery
 
 PY_DECLARE_CLASS(Translation)
 PY_CLASS_CONSTRUCTOR_2(Translation, const TSceneObjectPtr&, const TVector3D&)
-PY_CLASS_MEMBER_RW(Translation, "child", child, setChild)
-PY_CLASS_MEMBER_RW(Translation, "localToWorld", localToWorld, setLocalToWorld)
-PY_CLASS_MEMBER_R(Translation, "worldToLocal", worldToLocal)
+PY_CLASS_MEMBER_RW(Translation, child, setChild)
+PY_CLASS_MEMBER_RW(Translation, localToWorld, setLocalToWorld)
+PY_CLASS_MEMBER_R(Translation, worldToLocal)
 
 
 // --- public --------------------------------------------------------------------------------------

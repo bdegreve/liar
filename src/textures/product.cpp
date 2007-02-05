@@ -32,7 +32,7 @@ namespace textures
 PY_DECLARE_CLASS(Product)
 PY_CLASS_CONSTRUCTOR_0(Product);
 PY_CLASS_CONSTRUCTOR_1(Product, const Product::TFactors&)
-PY_CLASS_MEMBER_RW(Product, "factors", factors, setFactors);
+PY_CLASS_MEMBER_RW(Product, factors, setFactors);
 
 // --- public --------------------------------------------------------------------------------------
 

@@ -33,7 +33,7 @@ namespace shaders
 PY_DECLARE_CLASS(Lambert)
 PY_CLASS_CONSTRUCTOR_0(Lambert)
 PY_CLASS_CONSTRUCTOR_1(Lambert, const TTexturePtr&)
-PY_CLASS_MEMBER_RW_DOC(Lambert, "diffuse", diffuse, setDiffuse, "texture for diffuse component")
+PY_CLASS_MEMBER_RW_DOC(Lambert, diffuse, setDiffuse, "texture for diffuse component")
 
 // --- public --------------------------------------------------------------------------------------
 

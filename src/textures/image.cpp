@@ -33,8 +33,8 @@ namespace textures
 PY_DECLARE_CLASS(Image)
 PY_CLASS_CONSTRUCTOR_1(Image, const std::string&);
 PY_CLASS_CONSTRUCTOR_3(Image, const std::string&, const std::string&, const std::string&);
-PY_CLASS_MEMBER_RW(Image, "antiAliasing", antiAliasing, setAntiAliasing);
-PY_CLASS_MEMBER_RW(Image, "mipMapping", mipMapping, setMipMapping);
+PY_CLASS_MEMBER_RW(Image, antiAliasing, setAntiAliasing);
+PY_CLASS_MEMBER_RW(Image, mipMapping, setMipMapping);
 PY_CLASS_STATIC_METHOD(Image, setDefaultAntiAliasing);
 PY_CLASS_STATIC_METHOD(Image, setDefaultMipMapping);
 PY_CLASS_STATIC_CONST(Image, "AA_NONE", "none");

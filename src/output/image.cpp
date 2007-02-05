@@ -31,12 +31,12 @@ namespace output
 
 PY_DECLARE_CLASS(Image);
 PY_CLASS_CONSTRUCTOR_2(Image, std::string, const Image::TResolution&)
-PY_CLASS_MEMBER_RW(Image, "filename", filename, setFilename)
-PY_CLASS_MEMBER_RW(Image, "rgbSpace", rgbSpace, setRgbSpace)
-PY_CLASS_MEMBER_RW(Image, "exposure", exposure, setExposure)
-PY_CLASS_MEMBER_RW(Image, "fStops", fStops, setFStops)
-PY_CLASS_MEMBER_RW(Image, "gamma", gamma, setGamma)
-PY_CLASS_MEMBER_RW(Image, "gain", gain, setGain)
+PY_CLASS_MEMBER_RW(Image, filename, setFilename)
+PY_CLASS_MEMBER_RW(Image, rgbSpace, setRgbSpace)
+PY_CLASS_MEMBER_RW(Image, exposure, setExposure)
+PY_CLASS_MEMBER_RW(Image, fStops, setFStops)
+PY_CLASS_MEMBER_RW(Image, gamma, setGamma)
+PY_CLASS_MEMBER_RW(Image, gain, setGain)
 
 
 

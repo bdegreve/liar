@@ -31,8 +31,8 @@ namespace textures
 
 PY_DECLARE_CLASS(TransformationUv)
 PY_CLASS_CONSTRUCTOR_2(TransformationUv, const TTexturePtr&, const TTransformation2D&);
-PY_CLASS_MEMBER_RW(TransformationUv, "texture", texture, setTexture);
-PY_CLASS_MEMBER_RW(TransformationUv, "transformation", transformation, setTransformation);
+PY_CLASS_MEMBER_RW(TransformationUv, texture, setTexture);
+PY_CLASS_MEMBER_RW(TransformationUv, transformation, setTransformation);
 
 // --- public --------------------------------------------------------------------------------------
 

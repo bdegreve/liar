@@ -34,15 +34,15 @@ namespace shaders
 PY_DECLARE_CLASS(AshikhminShirley)
 PY_CLASS_CONSTRUCTOR_0(AshikhminShirley)
 PY_CLASS_CONSTRUCTOR_2(AshikhminShirley, const TTexturePtr&, const TTexturePtr&)
-PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, "diffuse", diffuse, setDiffuse, 
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, diffuse, setDiffuse, 
 	"texture for diffuse component")
-PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, "specular", specular, setSpecular, 
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specular, setSpecular, 
 	"texture for specular component")
-PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, "specularPowerU", specularPowerU, setSpecularPowerU, 
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specularPowerU, setSpecularPowerU, 
 	"texture for rollof power of specular component in U direction")
-PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, "specularPowerV", specularPowerV, setSpecularPowerV, 
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specularPowerV, setSpecularPowerV, 
 	"texture for rollof power of specular component in V direction")
-PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, "numberOfSamples", numberOfSamples, setNumberOfSamples, 
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, numberOfSamples, setNumberOfSamples, 
 	"set number of samples for Monte Carlo simulations")
 
 // --- public --------------------------------------------------------------------------------------

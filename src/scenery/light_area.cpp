@@ -33,12 +33,11 @@ namespace scenery
 
 PY_DECLARE_CLASS(LightArea)
 PY_CLASS_CONSTRUCTOR_1(LightArea, const TSceneObjectPtr&)
-PY_CLASS_MEMBER_R(LightArea, "surface", surface)
-PY_CLASS_MEMBER_RW(LightArea, "radiance", radiance, setRadiance)
-PY_CLASS_MEMBER_RW(LightArea, "attenuation", attenuation, setAttenuation)
-PY_CLASS_MEMBER_RW(LightArea, "numberOfEmissionSamples", numberOfEmissionSamples, 
-	setNumberOfEmissionSamples)
-PY_CLASS_MEMBER_RW(LightArea, "isDoubleSided", isDoubleSided, setDoubleSided)
+PY_CLASS_MEMBER_R(LightArea, surface)
+PY_CLASS_MEMBER_RW(LightArea, radiance, setRadiance)
+PY_CLASS_MEMBER_RW(LightArea, attenuation, setAttenuation)
+PY_CLASS_MEMBER_RW(LightArea, numberOfEmissionSamples, setNumberOfEmissionSamples)
+PY_CLASS_MEMBER_RW(LightArea, isDoubleSided, setDoubleSided)
 
 
 

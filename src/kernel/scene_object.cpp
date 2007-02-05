@@ -32,10 +32,10 @@ namespace kernel
 {
 
 PY_DECLARE_CLASS(SceneObject)
-PY_CLASS_MEMBER_RW(SceneObject, "shader", shader, setShader)
-PY_CLASS_MEMBER_RW(SceneObject, "isOverridingShader", isOverridingShader, setOverridingShader)
-PY_CLASS_MEMBER_RW(SceneObject, "interior", interior, setInterior)
-PY_CLASS_MEMBER_RW(SceneObject, "isOverridingInterior", isOverridingInterior, setOverridingInterior)
+PY_CLASS_MEMBER_RW(SceneObject, shader, setShader)
+PY_CLASS_MEMBER_RW(SceneObject, isOverridingShader, setOverridingShader)
+PY_CLASS_MEMBER_RW(SceneObject, interior, setInterior)
+PY_CLASS_MEMBER_RW(SceneObject, isOverridingInterior, setOverridingInterior)
 PY_CLASS_METHOD_NAME(SceneObject, reduce, "__reduce__")
 PY_CLASS_METHOD_NAME(SceneObject, getState, "__getstate__")
 PY_CLASS_METHOD_NAME(SceneObject, setState, "__setstate__")

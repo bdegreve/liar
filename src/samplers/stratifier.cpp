@@ -34,7 +34,7 @@ PY_DECLARE_CLASS(Stratifier);
 PY_CLASS_CONSTRUCTOR_0(Stratifier)
 PY_CLASS_CONSTRUCTOR_1(Stratifier, const Stratifier::TResolution&)
 PY_CLASS_CONSTRUCTOR_2(Stratifier, const Stratifier::TResolution&, unsigned)
-PY_CLASS_MEMBER_RW(Stratifier, "jittered", jittered, setJittered)
+PY_CLASS_MEMBER_RW(Stratifier, jittered, setJittered)
 
 // --- public --------------------------------------------------------------------------------------
 

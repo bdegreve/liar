@@ -31,8 +31,8 @@ namespace textures
 {
 
 PY_DECLARE_CLASS(Mix2)
-PY_CLASS_MEMBER_RW_DOC(Mix2, "textureA", textureA, setTextureA, "first texture")
-PY_CLASS_MEMBER_RW_DOC(Mix2, "textureB", textureB, setTextureB, "second texture")
+PY_CLASS_MEMBER_RW_DOC(Mix2, textureA, setTextureA, "first texture")
+PY_CLASS_MEMBER_RW_DOC(Mix2, textureB, setTextureB, "second texture")
 
 // --- public --------------------------------------------------------------------------------------
 

@@ -31,7 +31,7 @@ namespace scenery
 
 PY_DECLARE_CLASS(MotionTranslation)
 PY_CLASS_CONSTRUCTOR_3(MotionTranslation, const TSceneObjectPtr&, const TVector3D&, const TVector3D&)
-PY_CLASS_MEMBER_RW(MotionTranslation, "child", child, setChild)
+PY_CLASS_MEMBER_RW(MotionTranslation, child, setChild)
 
 // --- public --------------------------------------------------------------------------------------
 

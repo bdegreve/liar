@@ -30,7 +30,7 @@ namespace kernel
 {
 
 PY_DECLARE_CLASS(SceneLight)
-PY_CLASS_MEMBER_RW_DOC(SceneLight, "isShadowless", isShadowless, setShadowless,
+PY_CLASS_MEMBER_RW_DOC(SceneLight, isShadowless, setShadowless,
 	"True or False\n"
 	"determines if light can be blocked to cause shadows.  By default it's false which "
 	"means shadows will be casted\n")

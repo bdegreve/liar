@@ -32,9 +32,9 @@ namespace kernel
 
 PY_DECLARE_CLASS(RgbSpace);
 PY_CLASS_CONSTRUCTOR_3(RgbSpace, const TVector3D&, const TVector3D&, const TVector3D&);
-PY_CLASS_MEMBER_R(RgbSpace, "red", red);
-PY_CLASS_MEMBER_R(RgbSpace, "green", green);
-PY_CLASS_MEMBER_R(RgbSpace, "blue", blue);
+PY_CLASS_MEMBER_R(RgbSpace, red);
+PY_CLASS_MEMBER_R(RgbSpace, green);
+PY_CLASS_MEMBER_R(RgbSpace, blue);
 PY_CLASS_STATIC_METHOD(RgbSpace, defaultSpace);
 PY_CLASS_STATIC_METHOD(RgbSpace, setDefaultSpace);
 

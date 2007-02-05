@@ -34,8 +34,8 @@ namespace scenery
 PY_DECLARE_CLASS(Sphere)
 PY_CLASS_CONSTRUCTOR_0(Sphere)
 PY_CLASS_CONSTRUCTOR_2(Sphere, TPoint3D, TScalar)
-PY_CLASS_MEMBER_RW(Sphere, "center", center, setCenter)
-PY_CLASS_MEMBER_RW(Sphere, "radius", radius, setRadius)
+PY_CLASS_MEMBER_RW(Sphere, center, setCenter)
+PY_CLASS_MEMBER_RW(Sphere, radius, setRadius)
 
 
 

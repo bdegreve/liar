@@ -32,9 +32,9 @@ namespace scenery
 PY_DECLARE_CLASS(ClipMap)
 PY_CLASS_CONSTRUCTOR_2(ClipMap, const TSceneObjectPtr&, const TTexturePtr&)
 PY_CLASS_CONSTRUCTOR_3(ClipMap, const TSceneObjectPtr&, const TTexturePtr&, TScalar)
-PY_CLASS_MEMBER_RW(ClipMap, "child", child, setChild)
-PY_CLASS_MEMBER_RW(ClipMap, "clipMap", clipMap, setClipMap)
-PY_CLASS_MEMBER_RW(ClipMap, "threshold", threshold, setThreshold)
+PY_CLASS_MEMBER_RW(ClipMap, child, setChild)
+PY_CLASS_MEMBER_RW(ClipMap, clipMap, setClipMap)
+PY_CLASS_MEMBER_RW(ClipMap, threshold, setThreshold)
 
 // --- public --------------------------------------------------------------------------------------
 

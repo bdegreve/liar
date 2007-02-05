@@ -33,9 +33,9 @@ namespace scenery
 PY_DECLARE_CLASS(LightPoint)
 PY_CLASS_CONSTRUCTOR_0(LightPoint)
 PY_CLASS_CONSTRUCTOR_2(LightPoint, const TPoint3D&, const Spectrum&)
-PY_CLASS_MEMBER_RW(LightPoint, "position", position, setPosition)
-PY_CLASS_MEMBER_RW(LightPoint, "intensity", intensity, setIntensity)
-PY_CLASS_MEMBER_RW(LightPoint, "attenuation", attenuation, setAttenuation)
+PY_CLASS_MEMBER_RW(LightPoint, position, setPosition)
+PY_CLASS_MEMBER_RW(LightPoint, intensity, setIntensity)
+PY_CLASS_MEMBER_RW(LightPoint, attenuation, setAttenuation)
 
 
 // --- public --------------------------------------------------------------------------------------

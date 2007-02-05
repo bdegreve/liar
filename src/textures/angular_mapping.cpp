@@ -32,8 +32,8 @@ namespace textures
 PY_DECLARE_CLASS(AngularMapping)
 PY_CLASS_CONSTRUCTOR_1(AngularMapping, const TTexturePtr&);
 PY_CLASS_CONSTRUCTOR_2(AngularMapping, const TTexturePtr&, const TPoint3D&);
-PY_CLASS_MEMBER_RW(AngularMapping, "texture", texture, setTexture);
-PY_CLASS_MEMBER_RW(AngularMapping, "center", center, setCenter);
+PY_CLASS_MEMBER_RW(AngularMapping, texture, setTexture);
+PY_CLASS_MEMBER_RW(AngularMapping, center, setCenter);
 
 // --- public --------------------------------------------------------------------------------------
 

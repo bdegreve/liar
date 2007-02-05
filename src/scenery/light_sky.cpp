@@ -38,10 +38,9 @@ namespace scenery
 PY_DECLARE_CLASS(LightSky)
 PY_CLASS_CONSTRUCTOR_0(LightSky)
 PY_CLASS_CONSTRUCTOR_1(LightSky, const TTexturePtr&)
-PY_CLASS_MEMBER_RW(LightSky, "radiance", radiance, setRadiance)
-PY_CLASS_MEMBER_RW(LightSky, "numberOfEmissionSamples", numberOfEmissionSamples, 
-	setNumberOfEmissionSamples)
-PY_CLASS_MEMBER_RW(LightSky, "samplingResolution", samplingResolution, setSamplingResolution)
+PY_CLASS_MEMBER_RW(LightSky, radiance, setRadiance)
+PY_CLASS_MEMBER_RW(LightSky, numberOfEmissionSamples, setNumberOfEmissionSamples)
+PY_CLASS_MEMBER_RW(LightSky, samplingResolution, setSamplingResolution)
 
 
 // --- public --------------------------------------------------------------------------------------

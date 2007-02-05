@@ -39,13 +39,13 @@ namespace tracers
 
 PY_DECLARE_CLASS(PhotonMapper)
 PY_CLASS_CONSTRUCTOR_0(PhotonMapper)
-PY_CLASS_MEMBER_RW_DOC(PhotonMapper, "maxNumberOfPhotons", maxNumberOfPhotons, setMaxNumberOfPhotons,
+PY_CLASS_MEMBER_RW_DOC(PhotonMapper, maxNumberOfPhotons, setMaxNumberOfPhotons,
 	"The maximum number of photons being emitted by the light sources.\n"
 	"Set this to a very high number (at least globalMapSize * causticsQuality) to prevent the "
 	"first pass to end without sufficient photons in the global photon map.\n")
-PY_CLASS_MEMBER_RW_DOC(PhotonMapper, "globalMapSize", globalMapSize, setGlobalMapSize,
+PY_CLASS_MEMBER_RW_DOC(PhotonMapper, globalMapSize, setGlobalMapSize,
 	"the requested number of photons in the global photon map.\n")
-PY_CLASS_MEMBER_RW_DOC(PhotonMapper, "causticsQuality", causticsQuality, setCausticsQuality,
+PY_CLASS_MEMBER_RW_DOC(PhotonMapper, causticsQuality, setCausticsQuality,
 	"the quality ratio of the caustics photon map versus global photon map. "
 	"Increase if more photons in the caustics map are wanted for higher quality rendering.\n")
 PY_CLASS_METHOD(PhotonMapper, estimationRadius)
@@ -54,22 +54,22 @@ PY_CLASS_METHOD(PhotonMapper, estimationTolerance)
 PY_CLASS_METHOD(PhotonMapper, setEstimationTolerance)
 PY_CLASS_METHOD(PhotonMapper, estimationSize)
 PY_CLASS_METHOD(PhotonMapper, setEstimationSize)
-PY_CLASS_MEMBER_RW_DOC(PhotonMapper, "numFinalGatherRays", numFinalGatherRays, setNumFinalGatherRays,
+PY_CLASS_MEMBER_RW_DOC(PhotonMapper, numFinalGatherRays, setNumFinalGatherRays,
 	"- if numFinalGatherRays > 0 and isRayTracingDirect == True, a final gather step with "
 	"numFinalGatherRays gather rays is used to estimate the indirect lighting.\n"
 	"- else, the indirect lighting is estimated by a direct query of the photon map.\n"
 	"\n"
 	"Set to zero to disable the final gather step\n")
-PY_CLASS_MEMBER_RW_DOC(PhotonMapper, "ratioPrecomputedIrradiance", ratioPrecomputedIrradiance, setRatioPrecomputedIrradiance,
+PY_CLASS_MEMBER_RW_DOC(PhotonMapper, ratioPrecomputedIrradiance, setRatioPrecomputedIrradiance,
 	"- if ratioPrecomputedIrradiance > 0 and numFinalGatherRays > 0 and isRayTracingDirect == True, "
 	"the final gather step is optimized by precomputing irradiances. "
 	"- else, a full radiance estimation is done for each gather ray.\n"
 	"\n"
 	"Set to zero to disable precomputed irradiance estimations.\n")
-PY_CLASS_MEMBER_RW_DOC(PhotonMapper, "isVisualizingPhotonMap", isVisualizingPhotonMap, setVisualizePhotonMap,
+PY_CLASS_MEMBER_RW_DOC(PhotonMapper, isVisualizingPhotonMap, setVisualizePhotonMap,
 	"if True, the content of the photon map is directly visualized (without applying material properties)\n"
 	"if False, a proper render is done =)\n")
-PY_CLASS_MEMBER_RW_DOC(PhotonMapper, "isRayTracingDirect", isRayTracingDirect, setRayTracingDirect,
+PY_CLASS_MEMBER_RW_DOC(PhotonMapper, isRayTracingDirect, setRayTracingDirect,
 	"if True, the direct lighting is estimated by sampling the scene lights\n"
 	"if False, the direct lighting is estimated by a direct query of the photon map\n")
 	

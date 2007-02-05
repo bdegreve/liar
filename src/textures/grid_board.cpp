@@ -31,7 +31,7 @@ namespace textures
 
 PY_DECLARE_CLASS(GridBoard)
 PY_CLASS_CONSTRUCTOR_2(GridBoard, TTexturePtr, TTexturePtr);
-PY_CLASS_MEMBER_RW(GridBoard, "thickness", thickness, setThickness);
+PY_CLASS_MEMBER_RW(GridBoard, thickness, setThickness);
 
 // --- public --------------------------------------------------------------------------------------
 

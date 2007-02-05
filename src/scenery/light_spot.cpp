@@ -33,12 +33,12 @@ namespace scenery
 
 PY_DECLARE_CLASS(LightSpot)
 PY_CLASS_CONSTRUCTOR_0(LightSpot)
-PY_CLASS_MEMBER_RW(LightSpot, "position", position, setPosition)
-PY_CLASS_MEMBER_RW(LightSpot, "direction", direction, setDirection)
-PY_CLASS_MEMBER_RW(LightSpot, "intensity", intensity, setIntensity)
-PY_CLASS_MEMBER_RW(LightSpot, "attenuation", attenuation, setAttenuation)
-PY_CLASS_MEMBER_RW(LightSpot, "outerAngle", outerAngle, setOuterAngle)
-PY_CLASS_MEMBER_RW(LightSpot, "innerAngle", innerAngle, setInnerAngle)
+PY_CLASS_MEMBER_RW(LightSpot, position, setPosition)
+PY_CLASS_MEMBER_RW(LightSpot, direction, setDirection)
+PY_CLASS_MEMBER_RW(LightSpot, intensity, setIntensity)
+PY_CLASS_MEMBER_RW(LightSpot, attenuation, setAttenuation)
+PY_CLASS_MEMBER_RW(LightSpot, outerAngle, setOuterAngle)
+PY_CLASS_MEMBER_RW(LightSpot, innerAngle, setInnerAngle)
 PY_CLASS_METHOD(LightSpot, lookAt);
 
 // --- public --------------------------------------------------------------------------------------

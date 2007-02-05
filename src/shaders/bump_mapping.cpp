@@ -31,8 +31,8 @@ namespace shaders
 
 PY_DECLARE_CLASS(BumpMapping)
 PY_CLASS_CONSTRUCTOR_2(BumpMapping, const TShaderPtr&, const TTexturePtr&)
-PY_CLASS_MEMBER_RW_DOC(BumpMapping, "shader", shader, setShader, "mapped shader")
-PY_CLASS_MEMBER_RW_DOC(BumpMapping, "displacement", displacement, setDisplacement, "displacement function")
+PY_CLASS_MEMBER_RW_DOC(BumpMapping, shader, setShader, "mapped shader")
+PY_CLASS_MEMBER_RW_DOC(BumpMapping, displacement, setDisplacement, "displacement function")
 
 // --- public --------------------------------------------------------------------------------------
 

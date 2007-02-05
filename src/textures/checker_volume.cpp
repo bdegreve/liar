@@ -31,7 +31,7 @@ namespace textures
 
 PY_DECLARE_CLASS(CheckerVolume)
 PY_CLASS_CONSTRUCTOR_2(CheckerVolume, const TTexturePtr&, const TTexturePtr&);
-PY_CLASS_MEMBER_RW(CheckerVolume, "split", split, setSplit);
+PY_CLASS_MEMBER_RW(CheckerVolume, split, setSplit);
 
 // --- public --------------------------------------------------------------------------------------
 

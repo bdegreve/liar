@@ -32,8 +32,8 @@ namespace textures
 
 PY_DECLARE_CLASS(CheckerBoard)
 PY_CLASS_CONSTRUCTOR_2(CheckerBoard, TTexturePtr, TTexturePtr);
-PY_CLASS_MEMBER_RW(CheckerBoard, "split", split, setSplit);
-PY_CLASS_MEMBER_RW(CheckerBoard, "antiAliasing", antiAliasing, setAntiAliasing);
+PY_CLASS_MEMBER_RW(CheckerBoard, split, setSplit);
+PY_CLASS_MEMBER_RW(CheckerBoard, antiAliasing, setAntiAliasing);
 PY_CLASS_STATIC_METHOD(CheckerBoard, setDefaultAntiAliasing);
 PY_CLASS_STATIC_CONST(CheckerBoard, "AA_NONE", "none");
 PY_CLASS_STATIC_CONST(CheckerBoard, "AA_BILINEAR", "bilinear");

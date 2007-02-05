@@ -30,7 +30,7 @@ namespace kernel
 {
 
 PY_DECLARE_CLASS(RayTracer)
-PY_CLASS_MEMBER_RW(RayTracer, "maxRayGeneration", maxRayGeneration, setMaxRayGeneration)
+PY_CLASS_MEMBER_RW(RayTracer, maxRayGeneration, setMaxRayGeneration)
 PY_CLASS_METHOD_NAME(RayTracer, reduce, "__reduce__")
 PY_CLASS_METHOD_NAME(RayTracer, getState, "__getstate__")
 PY_CLASS_METHOD_NAME(RayTracer, setState, "__setstate__")

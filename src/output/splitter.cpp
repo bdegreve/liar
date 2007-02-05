@@ -32,7 +32,7 @@ namespace output
 PY_DECLARE_CLASS(Splitter);
 PY_CLASS_CONSTRUCTOR_0(Splitter)
 PY_CLASS_CONSTRUCTOR_1(Splitter, const Splitter::TChildren&)
-PY_CLASS_MEMBER_RW(Splitter, "children", children, setChildren)
+PY_CLASS_MEMBER_RW(Splitter, children, setChildren)
 PY_CLASS_METHOD_QUALIFIED_1(Splitter, add, void, const TRenderTargetPtr&)
 PY_CLASS_METHOD_QUALIFIED_1(Splitter, add, void, const Splitter::TChildren&)
 

@@ -32,7 +32,7 @@ namespace shaders
 PY_DECLARE_CLASS(Beer)
 PY_CLASS_CONSTRUCTOR_0(Beer)
 PY_CLASS_CONSTRUCTOR_1(Beer, const Spectrum&)
-PY_CLASS_MEMBER_RW(Beer, "transparency", transparency, setTransparency)
+PY_CLASS_MEMBER_RW(Beer, transparency, setTransparency)
 
 // --- public --------------------------------------------------------------------------------------
 

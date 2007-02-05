@@ -32,8 +32,8 @@ namespace scenery
 PY_DECLARE_CLASS(Plane)
 PY_CLASS_CONSTRUCTOR_0(Plane)
 PY_CLASS_CONSTRUCTOR_2(Plane, TVector3D, TScalar)
-PY_CLASS_MEMBER_RW(Plane, "normal", normal, setNormal)
-PY_CLASS_MEMBER_RW(Plane, "d", d, setD)
+PY_CLASS_MEMBER_RW(Plane, normal, setNormal)
+PY_CLASS_MEMBER_RW(Plane, d, setD)
 
 // --- public --------------------------------------------------------------------------------------
 

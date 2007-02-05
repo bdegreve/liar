@@ -33,11 +33,11 @@ PY_DECLARE_CLASS(ThinDielectric)
 PY_CLASS_CONSTRUCTOR_0(ThinDielectric)
 PY_CLASS_CONSTRUCTOR_1(ThinDielectric, const TTexturePtr&)
 PY_CLASS_CONSTRUCTOR_2(ThinDielectric, const TTexturePtr&, const TTexturePtr&)
-PY_CLASS_MEMBER_RW_DOC(ThinDielectric, "innerRefractionIndex", innerRefractionIndex, setInnerRefractionIndex, 
+PY_CLASS_MEMBER_RW_DOC(ThinDielectric, innerRefractionIndex, setInnerRefractionIndex, 
 	"index of refraction for material on inside")
-PY_CLASS_MEMBER_RW_DOC(ThinDielectric, "outerRefractionIndex", outerRefractionIndex, setOuterRefractionIndex, 
+PY_CLASS_MEMBER_RW_DOC(ThinDielectric, outerRefractionIndex, setOuterRefractionIndex, 
 	"index of refraction for material on outside")
-PY_CLASS_MEMBER_RW_DOC(ThinDielectric, "transparency", transparency, setTransparency, 
+PY_CLASS_MEMBER_RW_DOC(ThinDielectric, transparency, setTransparency, 
 	"colour of transparency")
 
 // --- public --------------------------------------------------------------------------------------

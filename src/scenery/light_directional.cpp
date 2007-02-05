@@ -35,8 +35,8 @@ namespace scenery
 PY_DECLARE_CLASS(LightDirectional)
 PY_CLASS_CONSTRUCTOR_0(LightDirectional)
 PY_CLASS_CONSTRUCTOR_2(LightDirectional, const TVector3D&, const Spectrum&)
-PY_CLASS_MEMBER_RW(LightDirectional, "direction", direction, setDirection)
-PY_CLASS_MEMBER_RW(LightDirectional, "radiance", radiance, setRadiance)
+PY_CLASS_MEMBER_RW(LightDirectional, direction, setDirection)
+PY_CLASS_MEMBER_RW(LightDirectional, radiance, setRadiance)
 
 
 // --- public --------------------------------------------------------------------------------------

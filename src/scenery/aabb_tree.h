@@ -32,7 +32,6 @@
 #include "scenery_common.h"
 #include "../kernel/scene_object.h"
 #include <lass/spat/aabb_tree.h>
-#include <lass/spat/aabp_tree.h>
 
 namespace liar
 {
@@ -180,7 +179,7 @@ private:
 		static const TVector reciprocal(const TVector& vector) { return vector.reciprocal();	}
 	};
 
-	typedef spat::AabpTree<TChildren::value_type, ObjectTraits> TTree;
+	typedef spat::AabbTree<TChildren::value_type, ObjectTraits> TTree;
 
 	TChildren children_;
 	TTree tree_;

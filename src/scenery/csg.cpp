@@ -33,9 +33,9 @@ namespace scenery
 PY_DECLARE_CLASS(Csg)
 PY_CLASS_CONSTRUCTOR_2(Csg, const TSceneObjectPtr&, const TSceneObjectPtr&)
 PY_CLASS_CONSTRUCTOR_3(Csg, const TSceneObjectPtr&, const TSceneObjectPtr&, const std::string&)
-PY_CLASS_MEMBER_RW(Csg, "childA", childA, setChildA)
-PY_CLASS_MEMBER_RW(Csg, "childB", childB, setChildB)
-PY_CLASS_MEMBER_RW(Csg, "operation", operation, setOperation)
+PY_CLASS_MEMBER_RW(Csg, childA, setChildA)
+PY_CLASS_MEMBER_RW(Csg, childB, setChildB)
+PY_CLASS_MEMBER_RW(Csg, operation, setOperation)
 PY_CLASS_STATIC_CONST(Csg, "UNION", "union");
 PY_CLASS_STATIC_CONST(Csg, "INTERSECTION", "intersection");
 PY_CLASS_STATIC_CONST(Csg, "DIFFERENCE", "difference");

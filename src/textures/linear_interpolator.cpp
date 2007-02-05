@@ -33,8 +33,8 @@ namespace textures
 PY_DECLARE_CLASS(LinearInterpolator)
 PY_CLASS_CONSTRUCTOR_0(LinearInterpolator)
 PY_CLASS_CONSTRUCTOR_2(LinearInterpolator, const LinearInterpolator::TKeyTextures&, const TTexturePtr&)
-PY_CLASS_MEMBER_RW(LinearInterpolator, "keys", keys, setKeys)
-PY_CLASS_MEMBER_RW(LinearInterpolator, "control", control, setControl)
+PY_CLASS_MEMBER_RW(LinearInterpolator, keys, setKeys)
+PY_CLASS_MEMBER_RW(LinearInterpolator, control, setControl)
 PY_CLASS_METHOD(LinearInterpolator, addKey)
 
 // --- public --------------------------------------------------------------------------------------
