@@ -133,15 +133,15 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions=""
-				Optimization="3"
+				Optimization="4"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				OmitFramePointers="true"
-				EnableFiberSafeOptimizations="true"
+				WholeProgramOptimization="true"
 				PreprocessorDefinitions="LIAR_SHADERS_BUILD_DLL;WIN32;NDEBUG;_USRDLL"
 				RuntimeLibrary="2"
 				EnableEnhancedInstructionSet="2"
+				FloatingPointModel="2"
 				DefaultCharIsUnsigned="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="shaders_common.h"
@@ -169,6 +169,7 @@
 				AdditionalLibraryDirectories="..\..\bin"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
+				LinkTimeCodeGeneration="1"
 			/>
 			<Tool
 				Name="VCALinkTool"

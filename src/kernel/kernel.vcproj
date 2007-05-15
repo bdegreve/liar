@@ -129,15 +129,15 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
+				Optimization="4"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				OmitFramePointers="true"
-				EnableFiberSafeOptimizations="true"
+				WholeProgramOptimization="true"
 				PreprocessorDefinitions="LIAR_KERNEL_BUILD_DLL;WIN32;NDEBUG;_USRDLL"
 				RuntimeLibrary="2"
 				EnableEnhancedInstructionSet="2"
+				FloatingPointModel="2"
 				DefaultCharIsUnsigned="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="kernel_common.h"
@@ -163,6 +163,7 @@
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
+				LinkTimeCodeGeneration="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
