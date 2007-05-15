@@ -36,7 +36,7 @@ namespace output
 
 PY_DECLARE_CLASS(Display);
 PY_CLASS_CONSTRUCTOR_2(Display, const std::string&, const Display::TResolution&)
-PY_CLASS_MEMBER_R(Display, "title", title)
+PY_CLASS_MEMBER_R(Display, title)
 PY_CLASS_MEMBER_RW(Display, rgbSpace, setRgbSpace)
 PY_CLASS_MEMBER_RW(Display, exposure, setExposure)
 PY_CLASS_MEMBER_RW(Display, fStops, setFStops)
