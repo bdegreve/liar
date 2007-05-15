@@ -52,7 +52,7 @@ public:
 
     typedef prim::Aabb2D<TScalar> TBucket;
 
-	enum { autoNumberOfThreads = 0 };
+	enum { autoNumberOfThreads = util::ThreadPool<>::autoNumberOfThreads };
 
     RenderEngine();
     ~RenderEngine();

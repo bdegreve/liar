@@ -226,9 +226,7 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 	else
 	{
 		typedef util::ThreadPool<Task, Consumer> TThreadPool;
-		const unsigned numThreads = numberOfThreads_ == autoNumberOfThreads ? 
-			util::numberOfProcessors() : numberOfThreads_;
-		TThreadPool pool(numThreads, 2 * numThreads, consumer);
+		TThreadPool pool(numberOfThreads_, TThreadPool::unlimitedNumberOfTasks, consumer);
 
 		const TResolution::TValue step = 64;
 		TResolution i;
