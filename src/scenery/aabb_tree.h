@@ -105,19 +105,19 @@ private:
 		
 		enum { dimension = TPoint::dimension };
 
-		static const TAabb aabb(TObjectIterator object)
+		static const TAabb objectAabb(TObjectIterator object)
 		{
 			return (*object)->boundingBox();
 		}
 
-		static const bool contains(TObjectIterator object, const TPoint& point, 
+		static const bool objectContains(TObjectIterator object, const TPoint& point, 
 			const TInfo* info)
 		{
 			LASS_ASSERT(info && info->sample);
 			return (*object)->contains(*info->sample, point);
 		}
 
-		static const bool intersect(TObjectIterator object, const TRay& ray, 
+		static const bool objectIntersect(TObjectIterator object, const TRay& ray, 
 			TReference t, TParam minT, const TInfo* info)
 		{
 			LASS_ASSERT(info && info->sample && info->intersectionResult);
@@ -138,7 +138,7 @@ private:
 			return false;
 		}
 
-		static const bool intersects(TObjectIterator object, const TRay& ray, 
+		static const bool objectIntersects(TObjectIterator object, const TRay& ray, 
 			TParam minT, TParam maxT, const TInfo* info)
 		{
 			LASS_ASSERT(info && info->sample);
@@ -146,17 +146,17 @@ private:
 			return (*object)->isIntersecting(*info->sample, ray);
 		}
 
-		static TAabb emptyAabb()
+		static TAabb aabbEmpty()
 		{
 			return TAabb();
 		}
 
-		static const bool contains(const TAabb& aabb, const TPoint& point) 
+		static const bool aabbContains(const TAabb& aabb, const TPoint& point) 
 		{ 
 			return aabb.contains(point); 
 		}
 
-		static const bool intersect(const TAabb& aabb, const TRay& ray, 
+		static const bool aabbIntersect(const TAabb& aabb, const TRay& ray, 
 			TReference t, const TParam minT)
 		{
 			TScalar temp;
@@ -169,14 +169,14 @@ private:
 			return false;
 		}
 
-		static const TAabb join(const TAabb& a, const TAabb& b) { return a + b; }
-		static const TPoint min(const TAabb& aabb) { return aabb.min(); }
-		static const TPoint max(const TAabb& aabb) { return aabb.max(); }
-		static const TPoint support(const TRay& ray) { return ray.support();	}
-		static const TVector direction(const TRay& ray) {	return ray.direction(); }
-		static const TValue coordinate(const TPoint& point, size_t axis) { return point[axis]; }
-		static const TValue component(const TVector& vector, size_t axis) { return vector[axis]; }
-		static const TVector reciprocal(const TVector& vector) { return vector.reciprocal();	}
+		static const TAabb aabbJoin(const TAabb& a, const TAabb& b) { return a + b; }
+		static const TPoint aabbMin(const TAabb& aabb) { return aabb.min(); }
+		static const TPoint aabbMax(const TAabb& aabb) { return aabb.max(); }
+		static const TPoint raySupport(const TRay& ray) { return ray.support();	}
+		static const TVector rayDirection(const TRay& ray) {	return ray.direction(); }
+		static const TValue pointCoordinate(const TPoint& point, size_t axis) { return point[axis]; }
+		static const TValue pointComponent(const TVector& vector, size_t axis) { return vector[axis]; }
+		static const TVector vectorReciprocal(const TVector& vector) { return vector.reciprocal();	}
 	};
 
 	typedef spat::AabbTree<TChildren::value_type, ObjectTraits> TTree;
