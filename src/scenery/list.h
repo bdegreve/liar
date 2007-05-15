@@ -55,7 +55,7 @@ public:
 	
 	template <typename InputIterator> void add(InputIterator first, InputIterator last)
 	{
-        	while (first != last)
+		while (first != last)
 		{
 			this->add(*first++);
 		}

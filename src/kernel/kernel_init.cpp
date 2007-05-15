@@ -68,7 +68,7 @@ PY_MODULE_FUNCTION(kernel, setTolerance)
 
 using lass::util::setProcessPriority;
 PY_MODULE_FUNCTION_QUALIFIED_DOC_1(kernel, setProcessPriority, void, const std::string&,
-	"setProcessPriority({low, belownormal, normal, abovenormal, high}\n")
+	"setProcessPriority('low' | 'belownormal' | 'normal' | 'abovenormal' | 'high')\n")
 
 using liar::TScalar;
 using liar::TVector3D;
