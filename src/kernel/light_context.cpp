@@ -192,13 +192,11 @@ namespace impl
 	  
 		void doVisit(SceneObject& object)
 		{
-			TSceneObjectPtr objectPtr(python::PyPlus_INCREF(&object));
-			objectPath_.push_back(objectPtr);
+			objectPath_.push_back(python::fromNakedToSharedPtrCast<SceneObject>(&object));
 		}
 		void doVisit(SceneLight& light)
 		{
-			TSceneObjectPtr objectPtr(python::PyPlus_INCREF(&light));
-			objectPath_.push_back(objectPtr);
+			objectPath_.push_back(python::fromNakedToSharedPtrCast<SceneObject>(&light));
 			lights_.push_back(LightContext(objectPath_, light));
 		}
 		void doVisitOnExit(SceneObject& object)
