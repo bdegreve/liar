@@ -23,6 +23,9 @@ import liar.textures
 import math
 
 def load(filename):
+	return decode(file(filename))
+
+def decode(lines):
 	vertices = []
 	normals = []
 	uvs = []
@@ -127,7 +130,7 @@ def load(filename):
 			
 	print "loading Wavefront OBJ file %s ..." % filename
 	
-	for line in file(filename):
+	for line in lines:
 		fields = line.split()
 		if len(fields) > 0:
 			
