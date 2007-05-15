@@ -106,9 +106,9 @@ private:
 	TScalar exposure_;
 	TScalar gamma_;
 	TScalar gain_;
-	bool isQuiting_;
-	bool isCanceling_;
-	bool isAnyKeyed_;
+	volatile bool isQuiting_;
+	volatile bool isCanceling_;
+	volatile bool isAnyKeyed_;
 };
 
 
