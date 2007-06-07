@@ -960,13 +960,13 @@ const Spectrum PhotonMapper::estimateRadiance(
 	if (context.t() < estimationRadius_[mtGlobal] && gatherStage + 1 < numGatherStages_)
 	{
 		static util::ThreadLocalVariable< num::RandomMT19937 > random2nd;
-		static util::ThreadLocalVariable< num::DistributionUniform<TScalar, num::RandomMT19937> > uniform2nd(*random2nd);
+		num::DistributionUniform<TScalar, num::RandomMT19937> uniform2nd(*random2nd);
 		static PerThreadBuffer<TPoint2D> samples2nd;
 		const size_t n = 8;
 		samples2nd.growTo(n);
 		for (size_t i = 0; i < n; ++i)
 		{
-			samples2nd[i] = TPoint2D((*uniform2nd)(), (*uniform2nd)());
+			samples2nd[i] = TPoint2D(uniform2nd(), uniform2nd());
 		}
 		return gatherIndirect(sample, context, point, omegaOut, 
 			samples2nd.begin(), samples2nd.begin() + n, gatherStage + 1);

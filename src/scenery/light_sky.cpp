@@ -309,8 +309,6 @@ void LightSky::buildPdf(TMap& pdf, Spectrum& averageRadiance) const
 {
 	Sample dummy;
 
-	io::Image temp(resolution_, resolution_);
-
 	TMap tempPdf(resolution_ * resolution_);
 	Spectrum totalRadiance;
     for (int i = 0; i < resolution_; ++i)
@@ -319,12 +317,10 @@ void LightSky::buildPdf(TMap& pdf, Spectrum& averageRadiance) const
 		{
 			const Spectrum radiance = lookUpRadiance(
 				dummy, static_cast<TScalar>(i), static_cast<TScalar>(j));
-			temp(j, i) = RgbSpace::defaultSpace()->convert(radiance.xyz());
 			totalRadiance += radiance;
 			tempPdf[i * resolution_ + j] = radiance.average();
 		}
 	}
-	temp.save("temp.hdr");
 	pdf.swap(tempPdf);
 	averageRadiance = totalRadiance / num::sqr(static_cast<TScalar>(resolution_));
 }

@@ -4,10 +4,10 @@ import os
 import os.path
 import copy
 
+from distutils import log, sysconfig
 from distutils.core import setup, Extension, Command
 from distutils.command.build_clib import build_clib
 from distutils.command.build_ext import build_ext
-from distutils import log
 from types import *
 
 lib_lass = "Lass", "lass-%s", ["1.0"]
@@ -229,6 +229,13 @@ class liar_build_shared_lib(build_clib):
 		macros = build_info.get('macros')
 		include_dirs = build_info.get('include_dirs')
 		extra_args = build_info.get('extra_compile_args')
+		
+		py_include = sysconfig.get_python_inc()
+		plat_py_include = sysconfig.get_python_inc(plat_specific=1)
+		for include in [py_include, plat_py_include]:
+			if not include in include_dirs:
+				include_dirs.append(include)
+		
 		objects = self.compiler.compile(
 			sources,
 			output_dir=self.build_temp,
@@ -286,6 +293,7 @@ libkernel = ('kernel', {
 	'include_dirs': config['include_dirs'], 
 	'library_dirs': config['library_dirs'], 
 	'libraries': config['libraries'],
+	'macros': [('LIAR_KERNEL_BUILD_DLL', 1)],
 	'extra_compile_args': config['extra_compile_args'],
 	'extra_link_args': config['extra_link_args']})
 	

@@ -15,9 +15,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# http://liar.sourceforge.net
+# http://liar.bramz.org
 
 modules = ['kernel', 'cameras', 'output', 'samplers', 'scenery', 'shaders', 'textures', 'tracers']
+codecs = [] #['open_exr']
 
 import os
 import os.path
@@ -66,7 +67,9 @@ else:
 	
 
 from distutils.core import setup,Extension
-sys.argv = [sys.argv[0], 'bdist_wininst']
+sys.argv = [sys.argv[0], 'bdist_wininst', '--bitmap=../../data/logo/liar_wininst.bmp']
+
+extensions = []
 
 setup(name = title,
 	version = "0.2.0",
@@ -74,7 +77,7 @@ setup(name = title,
 	author_email = "bramz@sourceforge.net",
 	maintainer = "Bram de Greve",
 	maintainer_email = "bramz@sourceforge.net",
-	url = "http://liar.sourceforge.net",
+	url = "http://liar.bramz.org",
 	description = "LiAR isn't a raytracer",
 	long_description = """     
 LiAR isn't a raytracer
@@ -94,12 +97,15 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """,
-	download_url = "http://liar.sourceforge.net",
-	packages=['liar', 'liar.tools'],
-	package_dir={'liar': '..'},      
+	download_url = "http://liar.bramz.org",
+	packages=['liar', 'liar.tools', 'liar.codecs'],
+	package_dir={'liar': '..'},
+	ext_modules=extensions,
 	data_files = [
 		('lib/site-packages/liar',[r'..\..\bin\%s%s.pyd' % (x, pyDebug) for x in modules]),
 		('lib/site-packages/liar',[r'..\..\bin\%s%s.%s' % (x, pyDebug, y) for x in modules for y in pdb]),
+		('lib/site-packages/liar/codecs',[r'..\..\bin\codecs\%s%s.pyd' % (x, pyDebug) for x in codecs]),
+		('lib/site-packages/liar/codecs',[r'..\..\bin\codecs\%s%s.%s' % (x, pyDebug, y) for x in codecs for y in pdb]),
 		('lib/site-packages/liar',[r'..\..\doc\gpl.txt']),
 		('lib/site-packages/liar',[r'%sbin\lass_win32_vc8%s.dll' % (lassRoot, pyDebug)]),
 		('lib/site-packages/liar',[r'%sbin\lass_win32_vc8%s.%s' % (lassRoot, pyDebug, y) for y in pdb]),

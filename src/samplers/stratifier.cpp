@@ -32,8 +32,8 @@ namespace samplers
 
 PY_DECLARE_CLASS(Stratifier);
 PY_CLASS_CONSTRUCTOR_0(Stratifier)
-PY_CLASS_CONSTRUCTOR_1(Stratifier, const Stratifier::TResolution&)
-PY_CLASS_CONSTRUCTOR_2(Stratifier, const Stratifier::TResolution&, unsigned)
+PY_CLASS_CONSTRUCTOR_1(Stratifier, const TResolution2D&)
+PY_CLASS_CONSTRUCTOR_2(Stratifier, const TResolution2D&, unsigned)
 PY_CLASS_MEMBER_RW(Stratifier, jittered, setJittered)
 
 // --- public --------------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ Stratifier::Stratifier():
 
 
 
-Stratifier::Stratifier(const TResolution& resolution):
+Stratifier::Stratifier(const TResolution2D& resolution):
 	jitterGenerator_(numberGenerator_),
 	isJittered_(true)
 {
@@ -56,7 +56,7 @@ Stratifier::Stratifier(const TResolution& resolution):
 
 
 
-Stratifier::Stratifier(const TResolution& resolution, unsigned numberOfSamplesPerPixel):
+Stratifier::Stratifier(const TResolution2D& resolution, unsigned numberOfSamplesPerPixel):
 	jitterGenerator_(numberGenerator_),
 	isJittered_(true)
 {
@@ -86,7 +86,7 @@ void Stratifier::setJittered(bool enabled)
 
 // --- private -------------------------------------------------------------------------------------
 
-void Stratifier::init(const TResolution& resolution, unsigned numberOfSamplesPerPixel)
+void Stratifier::init(const TResolution2D& resolution, unsigned numberOfSamplesPerPixel)
 {
 	setResolution(resolution);
 	setSamplesPerPixel(numberOfSamplesPerPixel);
@@ -94,7 +94,7 @@ void Stratifier::init(const TResolution& resolution, unsigned numberOfSamplesPer
 
 
 
-const Stratifier::TResolution& Stratifier::doResolution() const
+const TResolution2D& Stratifier::doResolution() const
 {
     return resolution_;
 }
@@ -108,7 +108,7 @@ const unsigned Stratifier::doSamplesPerPixel() const
 
 
 
-void Stratifier::doSetResolution(const TResolution& resolution)
+void Stratifier::doSetResolution(const TResolution2D& resolution)
 {
     LASS_ASSERT(resolution.x > 0 && resolution.y > 0);
     resolution_ = resolution;
@@ -154,7 +154,7 @@ void Stratifier::doSeed(unsigned randomSeed)
 
 
 
-void Stratifier::doSampleScreen(const TResolution& pixel, unsigned subPixel, 
+void Stratifier::doSampleScreen(const TResolution2D& pixel, unsigned subPixel, 
 								TSample2D& oScreenCoordinate)
 {
     LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
@@ -173,7 +173,7 @@ void Stratifier::doSampleScreen(const TResolution& pixel, unsigned subPixel,
 
 
 
-void Stratifier::doSampleLens(const TResolution& pixel, unsigned subPixel, 
+void Stratifier::doSampleLens(const TResolution2D& pixel, unsigned subPixel, 
 							  TSample2D& oLensCoordinate)
 {
     LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
@@ -193,7 +193,7 @@ void Stratifier::doSampleLens(const TResolution& pixel, unsigned subPixel,
 
 
 
-void Stratifier::doSampleTime(const TResolution& pixel, unsigned subPixel, 
+void Stratifier::doSampleTime(const TResolution2D& pixel, unsigned subPixel, 
 							  const TimePeriod& period, TTime& oTime)
 {
     LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
@@ -210,7 +210,7 @@ void Stratifier::doSampleTime(const TResolution& pixel, unsigned subPixel,
 
 
 
-void Stratifier::doSampleSubSequence1D(const TResolution& pixel, unsigned subPixel, 
+void Stratifier::doSampleSubSequence1D(const TResolution2D& pixel, unsigned subPixel, 
 									   TSample1D* oBegin, TSample1D* oEnd)
 {
 	const ptrdiff_t size = oEnd - oBegin;
@@ -224,7 +224,7 @@ void Stratifier::doSampleSubSequence1D(const TResolution& pixel, unsigned subPix
 
 
 
-void Stratifier::doSampleSubSequence2D(const TResolution& pixel, unsigned subPixel, 
+void Stratifier::doSampleSubSequence2D(const TResolution2D& pixel, unsigned subPixel, 
 									   TSample2D* oBegin, TSample2D* oEnd)
 {
 	const size_t size = oEnd - oBegin;
@@ -284,7 +284,7 @@ const TPyObjectPtr Stratifier::doGetState() const
 void Stratifier::doSetState(const TPyObjectPtr& state)
 {
 	std::vector<TNumberGenerator::TValue> numGenState;
-	TResolution resolution;
+	TResolution2D resolution;
 	unsigned strataPerPixel;
 	TStrata2D lensStrata;
 	TStrata1D timeStrata;

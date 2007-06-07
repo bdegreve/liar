@@ -34,15 +34,17 @@
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_KERNEL_COMMON_H
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_KERNEL_COMMON_H
 
+#ifdef NDEBUG
+#	define LIAR_LIB_SUFFIX ""
+#else
+#	define LIAR_LIB_SUFFIX "_d"
+#endif
+
 #if defined(LIAR_KERNEL_BUILD_DLL)
 #   define LIAR_KERNEL_DLL LASS_DLL_EXPORT
 #else
 #   define LIAR_KERNEL_DLL LASS_DLL_IMPORT
-#   if defined(_DEBUG)
-#       pragma comment(lib, "kernel_d.lib")
-#   else
-#       pragma comment(lib, "kernel.lib")
-#   endif
+#   pragma comment(lib, "kernel" LIAR_LIB_SUFFIX ".lib")
 #endif
 
 // maybe Bill Gates likes to global lock iterator operations, but I don't.
@@ -56,11 +58,12 @@
 #include <lass/num/basic_ops.h>
 #include <lass/num/floating_point_comparison.h>
 #include <lass/prim/vector_2d.h>
-#include <lass/prim/point_2d.h>
 #include <lass/prim/vector_3d.h>
+#include <lass/prim/point_2d.h>
 #include <lass/prim/point_3d.h>
-#include <lass/prim/ray_3d.h>
+#include <lass/prim/aabb_2d.h>
 #include <lass/prim/aabb_3d.h>
+#include <lass/prim/ray_3d.h>
 #include <lass/prim/color_rgba.h>
 #include <lass/prim/transformation_3d.h>
 #include <lass/util/python_api.h>
@@ -92,6 +95,9 @@ typedef prim::Point3D<TScalar> TPoint3D;
 typedef prim::Ray3D<TScalar, prim::Normalized, prim::Unbounded> TRay3D;
 typedef prim::Aabb3D<TScalar> TAabb3D;
 typedef prim::Transformation3D<TScalar> TTransformation3D;
+
+typedef prim::Vector2D<size_t> TResolution2D;
+typedef prim::Aabb2D<size_t> TRange2D;
 
 typedef python::PyObjectPtr<PyObject>::Type TPyObjectPtr;
 

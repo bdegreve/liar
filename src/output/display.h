@@ -55,28 +55,30 @@ class LIAR_OUTPUT_DLL Display: public RenderTarget, PixelToaster::Listener
     PY_HEADER(RenderTarget)
 public:
 
-	Display(const std::string& title, const TResolution& resolution);
+	Display(const std::string& title, const TResolution2D& resolution);
 	~Display();
 
 	const std::string& title() const;
 	const TRgbSpacePtr& rgbSpace() const;
 	const TScalar exposure() const;
 	const TScalar fStops() const;
-	const TScalar gamma() const;
 	const TScalar gain() const;
 
 	void setRgbSpace(const TRgbSpacePtr& rgbSpace);
 	void setExposure(TScalar exposure);
 	void setFStops(TScalar fStops);
-	void setGamma(TScalar gammaExponent);
 	void setGain(TScalar gain);
+
+	void testGammut();
 
 private:
 
-	typedef std::vector<PixelToaster::FloatingPointPixel> TBuffer;
+	typedef std::vector<TVector3D> TRenderBuffer;
+	typedef std::vector<TScalar> TWeightBuffer;
+	typedef std::vector<PixelToaster::FloatingPointPixel> TDisplayBuffer;
 	typedef prim::Aabb2D<unsigned> TDirtyBox;
 
-	const TResolution doResolution() const;
+	const TResolution2D doResolution() const;
 	void doBeginRender();
 	void doWriteRender(const OutputSample* first, const OutputSample* last);
 	void doEndRender();
@@ -87,24 +89,22 @@ private:
 
 	void displayLoop();
 	void copyToDisplayBuffer();
-	void shadeDisplayBuffer();
 	void waitForAnyKey();
 
 	PixelToaster::Display display_;
 	Listener listener_;
-	TBuffer renderBuffer_;
-	TBuffer displayBuffer_;
-	std::vector<TScalar> totalWeight_;
+	TRenderBuffer renderBuffer_;
+	TWeightBuffer totalWeight_;
+	TDisplayBuffer displayBuffer_;
 	util::ScopedPtr<util::Thread> displayLoop_;
 	util::CriticalSection renderBufferLock_;
 	util::Condition signal_;
 	std::string title_;
 	TDirtyBox renderDirtyBox_;
 	TDirtyBox displayDirtyBox_;
-	TResolution resolution_;
+	TResolution2D resolution_;
 	TRgbSpacePtr rgbSpace_;
 	TScalar exposure_;
-	TScalar gamma_;
 	TScalar gain_;
 	volatile bool isQuiting_;
 	volatile bool isCanceling_;

@@ -27,6 +27,7 @@
 //
 #include "attenuation.h"
 #include "camera.h"
+#include "image_codec.h"
 #include "sampler.h"
 #include "scene_light.h"
 #include "scene_object.h"
@@ -91,6 +92,9 @@ PY_MODULE_FUNCTION_QUALIFIED_2(kernel, rgb, Spectrum, const ColorRGBA&, const TR
 PY_MODULE_FUNCTION_QUALIFIED_3(kernel, rgb, Spectrum, TScalar, TScalar, TScalar)
 PY_MODULE_FUNCTION_QUALIFIED_4(kernel, rgb, Spectrum, TScalar, TScalar, TScalar, const TRgbSpacePtr&)
 
+using liar::kernel::imageCodecs;
+PY_MODULE_FUNCTION(kernel, imageCodecs)
+
 extern "C"
 {
 void LIAR_KERNEL_DLL initkernel(void)
@@ -109,6 +113,10 @@ void LIAR_KERNEL_DLL initkernel(void)
 	//
 	PY_INJECT_CLASS_IN_MODULE(Attenuation, kernel, "Attenuation constants")
 	PY_INJECT_CLASS_IN_MODULE(Camera, kernel, "Abstract base class of render viewports")
+	PY_INJECT_CLASS_IN_MODULE(ImageCodec, kernel, "Abstract base class of image codecs")
+	PY_INJECT_CLASS_IN_MODULE(ImageCodecLassLDR, kernel, "Lass based image codec for LDR images")
+	PY_INJECT_CLASS_IN_MODULE(ImageCodecLassHDR, kernel, "Lass based image codec for HDR images")
+	PY_INJECT_CLASS_IN_MODULE(RgbSpace, kernel, "XYZ-RGB convertor")
 	PY_INJECT_CLASS_IN_MODULE(RayTracer, kernel, "Abstract base class of ray tracers")
 	PY_INJECT_CLASS_IN_MODULE(RenderEngine, kernel, "Render engine")
 	PY_INJECT_CLASS_IN_MODULE(RenderTarget, kernel, "Abstract base class of render targets")

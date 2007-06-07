@@ -189,17 +189,15 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 			<< "' goes outside valid boundary '" << bucketBound_ << "'.");
 	}
 	
-	typedef Sampler::TResolution TResolution;
-	
-	const TResolution resolution = sampler_->resolution();
+	const TResolution2D resolution = sampler_->resolution();
 	const TVector2D pixelSize = TVector2D(resolution).reciprocal();
 	const unsigned samplesPerPixel = sampler_->samplesPerPixel();
 	const TimePeriod timePeriod = iFrameTime + camera_->shutterDelta();
 
-	const TResolution min(
+	const TResolution2D min(
 		num::round(bucket.min().x * resolution.x), 
 		num::round(bucket.min().y * resolution.y));
-	const TResolution max(
+	const TResolution2D max(
 		num::round(bucket.max().x * resolution.x), 
 		num::round(bucket.max().y * resolution.y));
 	const unsigned numberOfPixels = (max.x - min.x) * (max.y - min.y);
@@ -228,8 +226,8 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 		typedef util::ThreadPool<Task, Consumer> TThreadPool;
 		TThreadPool pool(numberOfThreads_, TThreadPool::unlimitedNumberOfTasks, consumer);
 
-		const TResolution::TValue step = 64;
-		TResolution i;
+		const TResolution2D::TValue step = 64;
+		TResolution2D i;
 		for (i.y = min.y; i.y < max.y; i.y += step)
 		{
 			for (i.x = min.x; i.x < max.x; i.x += step)
@@ -240,7 +238,7 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 					return;
 				}
 
-				TResolution end(std::min(i.x + step, max.x), std::min(i.y + step, max.y));
+				TResolution2D end(std::min(i.x + step, max.x), std::min(i.y + step, max.y));
 				pool.addTask(Task(i, end));
 			}
 		}
@@ -340,10 +338,8 @@ RenderEngine::Consumer& RenderEngine::Consumer::operator=(const Consumer& other)
 
 void RenderEngine::Consumer::operator()(const Task& iTask)
 {
-	typedef Sampler::TResolution TResolution;
-
-	const TResolution begin = iTask.begin();
-	const TResolution end = iTask.end();
+	const TResolution2D begin = iTask.begin();
+	const TResolution2D end = iTask.end();
 	const unsigned samplesPerPixel = sampler_->samplesPerPixel();
 
 	const unsigned outputSize = 1024;
@@ -351,7 +347,7 @@ void RenderEngine::Consumer::operator()(const Task& iTask)
 	unsigned outputIndex = 0;
 
 	Sample sample;
-	TResolution i;
+	TResolution2D i;
 	for (i.y = begin.y; i.y < end.y; ++i.y)
 	{
 		for (i.x = begin.x; i.x < end.x; ++i.x)

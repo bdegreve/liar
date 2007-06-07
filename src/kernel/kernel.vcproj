@@ -307,6 +307,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\image_codec.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\intersection.cpp"
 				>
 			</File>
@@ -442,6 +446,10 @@
 			</File>
 			<File
 				RelativePath=".\differential_ray.h"
+				>
+			</File>
+			<File
+				RelativePath=".\image_codec.h"
 				>
 			</File>
 			<File

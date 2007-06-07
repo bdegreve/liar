@@ -49,7 +49,7 @@ RenderTarget::RenderTarget():
 
 
 
-const RenderTarget::TResolution RenderTarget::resolution() const
+const TResolution2D RenderTarget::resolution() const
 {
 	return doResolution();
 }

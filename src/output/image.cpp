@@ -23,6 +23,8 @@
 
 #include "output_common.h"
 #include "image.h"
+#include "../kernel/image_codec.h"
+#include <lass/io/file_attribute.h>
 
 namespace liar
 {
@@ -30,25 +32,22 @@ namespace output
 {
 
 PY_DECLARE_CLASS(Image);
-PY_CLASS_CONSTRUCTOR_2(Image, std::string, const Image::TResolution&)
+PY_CLASS_CONSTRUCTOR_2(Image, std::string, const TResolution2D&)
 PY_CLASS_MEMBER_RW(Image, filename, setFilename)
 PY_CLASS_MEMBER_RW(Image, rgbSpace, setRgbSpace)
 PY_CLASS_MEMBER_RW(Image, exposure, setExposure)
 PY_CLASS_MEMBER_RW(Image, fStops, setFStops)
-PY_CLASS_MEMBER_RW(Image, gamma, setGamma)
 PY_CLASS_MEMBER_RW(Image, gain, setGain)
 
 
 
 // --- public --------------------------------------------------------------------------------------
 
-Image::Image(const std::string& filename, const TResolution& resolution):
-	image_(),
+Image::Image(const std::string& filename, const TResolution2D& resolution):
     filename_(filename),
     resolution_(resolution),
 	rgbSpace_(RgbSpace::defaultSpace()),
 	exposure_(0.f),
-    gamma_(1.f),
     gain_(1.f),
     isSaved_(true)
 {
@@ -94,13 +93,6 @@ const TScalar Image::fStops() const
 
 
 
-const TScalar Image::gamma() const
-{
-    return gamma_;
-}
-
-
-
 const TScalar Image::gain() const
 {
     return gain_;
@@ -136,13 +128,6 @@ void Image::setFStops(TScalar fStops)
 
 
 
-void Image::setGamma(TScalar gammaExponent)
-{
-    gamma_ = gammaExponent;
-}
-
-
-
 void Image::setGain(TScalar gain)
 {
     gain_ = gain;
@@ -152,7 +137,7 @@ void Image::setGain(TScalar gain)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Image::TResolution Image::doResolution() const
+const TResolution2D Image::doResolution() const
 {
 	return resolution_;
 }
@@ -161,9 +146,13 @@ const Image::TResolution Image::doResolution() const
 
 void Image::doBeginRender()
 {
-    image_.reset(resolution_.y, resolution_.x);
+	const unsigned n = resolution_.x * resolution_.y;
+	renderBuffer_.clear();
+	renderBuffer_.resize(n);
 	totalWeight_.clear();
-	totalWeight_.resize(resolution_.x * resolution_.y, 0);
+	totalWeight_.resize(n);
+	alphaBuffer_.clear();
+	alphaBuffer_.resize(n);
 }
 
 
@@ -181,14 +170,11 @@ void Image::doWriteRender(const OutputSample* first, const OutputSample* last)
 			const int j = static_cast<int>(num::floor(position.y * resolution_.y));
 			if (i >= 0 && i < resolution_.x && j >= 0 && j < resolution_.y)
 			{
+				const int k = j * resolution_.x + i;
 				const TScalar alpha = first->weight() * first->alpha();
-				const TVector3D xyz = alpha * first->radiance().xyz();
-				
-				prim::ColorRGBA rgba = rgbSpace_->convert(xyz);
-				rgba.a = alpha;
-
-				image_(j, i) += rgba;
-				totalWeight_[j * resolution_.x + i] += first->weight();
+				renderBuffer_[k] += first->radiance().xyz() * alpha;
+				alphaBuffer_[k] += alpha;
+				totalWeight_[k] += first->weight();
 			}
 			++first;
 		}
@@ -201,34 +187,50 @@ void Image::doWriteRender(const OutputSample* first, const OutputSample* last)
 
 void Image::doEndRender()
 {
-	for (unsigned j = 0; j < resolution_.y; ++j)
+	if (isSaved_)
 	{
-		for (unsigned i = 0; i < resolution_.x; ++i)
+		return;
+	}
+
+	if (exposure_ > 0) 
+	{
+		for (unsigned j = 0; j < resolution_.y; ++j)
 		{
-			const TScalar w = totalWeight_[j * resolution_.x + i];
-			if (w > 0)
+			for (unsigned i = 0; i < resolution_.x; ++i)
 			{
-				image_(j, i) /= w;
+				const unsigned k = j * resolution_.x + i;
+				const TScalar w = totalWeight_[j * resolution_.x + i];
+				if (w > 0)
+				{
+					TVector3D& xyz = renderBuffer_[k];
+					xyz *= gain_ / w;
+					xyz.x = 1 - num::exp(-exposure_ * xyz.x);
+					xyz.y = 1 - num::exp(-exposure_ * xyz.y);
+					xyz.z = 1 - num::exp(-exposure_ * xyz.z);
+					alphaBuffer_[k] /= w;
+				}
 			}
 		}
 	}
-	if (exposure_ > 0)
+	else
 	{
-		image_.filterExposure(exposure_);
-	}
-	if (gamma_ != 1)
-	{
-		image_.filterGamma(gamma_);
-	}
-	if (gain_ != 1)
-	{
-		const unsigned n = resolution_.x * resolution_.y;
-		for (unsigned i = 0; i < n; ++i)
+		for (unsigned j = 0; j < resolution_.y; ++j)
 		{
-			image_[i] *= gain_;
+			for (unsigned i = 0; i < resolution_.x; ++i)
+			{
+				const unsigned k = j * resolution_.x + i;
+				const TScalar w = totalWeight_[j * resolution_.x + i];
+				if (w > 0)
+				{
+					renderBuffer_[k] *= gain_ / w;
+					alphaBuffer_[k] /= w;
+				}
+			}
 		}
 	}
-    image_.save(filename_);
+
+	ImageWriter writer(filename_, ImageCodec::lmSingleLevel, resolution_, rgbSpace_, "");
+	writer.write(TResolution2D(), resolution_, &renderBuffer_[0], &alphaBuffer_[0]);
     isSaved_ = true;
 }
 

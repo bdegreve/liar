@@ -95,10 +95,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\setup.cfg"
-				>
-			</File>
-			<File
 				RelativePath=".\setup.py"
 				>
 				<FileConfiguration

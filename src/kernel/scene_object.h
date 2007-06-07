@@ -53,12 +53,12 @@ namespace impl
 		static void onUnknownVisitor(VisitableType& iVisited, util::VisitorBase& iVisitor)
 		{
 			VisitableType::doVisit(
-				static_cast<typename VisitableType::TPyParent&>(iVisited), iVisitor);
+				static_cast<typename VisitableType::_lassPyParentType&>(iVisited), iVisitor);
 		}
 		static void onUnknownVisitorOnExit(VisitableType& iVisited, util::VisitorBase& iVisitor)
 		{
 			VisitableType::doVisitOnExit(
-				static_cast<typename VisitableType::TPyParent&>(iVisited), iVisitor);
+				static_cast<typename VisitableType::_lassPyParentType&>(iVisited), iVisitor);
 		}
 	};
 	

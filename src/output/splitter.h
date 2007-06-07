@@ -54,7 +54,7 @@ public:
 
 private:
 
-	const TResolution doResolution() const;
+	const TResolution2D doResolution() const;
     void doBeginRender();
 	void doWriteRender(const OutputSample* first, const OutputSample* last);
     void doEndRender();

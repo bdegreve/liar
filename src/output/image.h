@@ -35,7 +35,6 @@
 #include "output_common.h"
 #include "../kernel/render_target.h"
 #include "../kernel/rgb_space.h"
-#include <lass/io/image.h>
 
 namespace liar
 {
@@ -47,7 +46,7 @@ class LIAR_OUTPUT_DLL Image: public RenderTarget
     PY_HEADER(RenderTarget)
 public:
 
-	Image(const std::string& filename, const TResolution& resolution);
+	Image(const std::string& filename, const TResolution2D& resolution);
     ~Image();
 
 	const std::string& filename() const;
@@ -66,19 +65,22 @@ public:
 
 private:
 
-	const TResolution doResolution() const;
+	typedef std::vector<TVector3D> TRenderBuffer;
+	typedef std::vector<TScalar> TWeightBuffer;
+
+	const TResolution2D doResolution() const;
     void doBeginRender();
 	void doWriteRender(const OutputSample* first, const OutputSample* last);
     void doEndRender();
 
-    io::Image image_;
-	std::vector<TScalar> totalWeight_;
+	TRenderBuffer renderBuffer_;
+	TWeightBuffer totalWeight_;
+	TWeightBuffer alphaBuffer_;
     std::string filename_;
 	util::CriticalSection lock_;
-    TResolution resolution_;
+    TResolution2D resolution_;
 	TRgbSpacePtr rgbSpace_;
 	TScalar exposure_;
-    TScalar gamma_;
     TScalar gain_;
 	bool isQuiting_;
 	bool isSaved_;

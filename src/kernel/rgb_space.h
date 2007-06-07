@@ -46,30 +46,49 @@ class LIAR_KERNEL_DLL RgbSpace: public python::PyObjectPlus
 	PY_HEADER(python::PyObjectPlus)
 public:
 
-	RgbSpace();
-	RgbSpace(const TVector3D& red, const TVector3D& green, const TVector3D& blue);
+	RgbSpace(const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, const TPoint2D& white, TScalar gamma);
 	
 	const TVector3D convert(const prim::ColorRGBA& rgb) const;
+	const TVector3D convert(const prim::ColorRGBA& rgb, TScalar& alpha) const;
 	const prim::ColorRGBA convert(const TVector3D& xyz) const;
+	const prim::ColorRGBA convert(const TVector3D& xyz, TScalar alpha) const;
+	const TVector3D convertGamma(const prim::ColorRGBA& rgb) const;
+	const TVector3D convertGamma(const prim::ColorRGBA& rgb, TScalar& alpha) const;
+	const prim::ColorRGBA convertGamma(const TVector3D& xyz) const;
+	const prim::ColorRGBA convertGamma(const TVector3D& xyz, TScalar alpha) const;
 
-	const TVector3D& red() const;
-	const TVector3D& green() const;
-	const TVector3D& blue() const;
+	const TPoint2D& red() const;
+	const TPoint2D& green() const;
+	const TPoint2D& blue() const;
+	const TPoint2D& white() const;
+	const TScalar gamma() const;
+
+	bool operator==(const RgbSpace& other) const;
+	bool operator!=(const RgbSpace& other) const;
 
 	static const TRgbSpacePtr& defaultSpace();
 	static void setDefaultSpace(const TRgbSpacePtr& defaultSpace);
+
+	std::string doPyRepr() const;
 
 private:
 
 	prim::ColorRGBA x_;
 	prim::ColorRGBA y_;
 	prim::ColorRGBA z_;
-	TVector3D red_;
-	TVector3D green_;
-	TVector3D blue_;
+	TVector3D r_;
+	TVector3D g_;
+	TVector3D b_;
+	TPoint2D red_;
+	TPoint2D green_;
+	TPoint2D blue_;
+	TPoint2D white_;
+	TScalar gamma_;
+	TScalar invGamma_;
 
 	static TRgbSpacePtr defaultSpace_;
 };
+
 
 Spectrum rgb(const prim::ColorRGBA& rgb);
 Spectrum rgb(const prim::ColorRGBA& rgb, const TRgbSpacePtr& rgbSpace);
@@ -91,17 +110,21 @@ Spectrum rgb(TScalar red, TScalar green, TScalar blue, const TRgbSpacePtr& rgbSp
 
 /** @relates RgbSpace
  */
-const RgbSpace rgbSpaceIdentity(
-	TVector3D(1, 0, 0), 
-	TVector3D(0, 1, 0), 
-	TVector3D(0, 0, 1));
+const TRgbSpacePtr CIEXYZ = TRgbSpacePtr(new RgbSpace(
+	TPoint2D(1, 0), // red primary 
+	TPoint2D(0, 1), // green primary
+	TPoint2D(0, 0), // blue primary
+	TPoint2D(TScalar(1) / 3, TScalar(1) / 3), // white point
+	1)); // gamma
 
 /** @relates RgbSpace
  */
-const RgbSpace rgbSpaceCie(
-	TVector3D(0.490, 0.177, 0.000),
-	TVector3D(0.310, 0.812, 0.010), 
-	TVector3D(0.200, 0.011, 0.990));
+const TRgbSpacePtr sRGB = TRgbSpacePtr(new RgbSpace(
+	TPoint2D(0.6400f, 0.3300f), // red primary 
+	TPoint2D(0.3000f, 0.6000f), // green primary
+	TPoint2D(0.1500f, 0.0600f), // blue primary
+	TPoint2D(0.3127f, 0.3290f), // white point
+	2.2f)); // gamma
 
 }
 

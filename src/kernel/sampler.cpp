@@ -99,7 +99,7 @@ void Sampler::clearSubSequenceRequests()
 
 
 
-void Sampler::sample(const TResolution& pixel, unsigned subPixel, const TimePeriod& period, 
+void Sampler::sample(const TResolution2D& pixel, unsigned subPixel, const TimePeriod& period, 
 					 Sample& sample)
 {
 	sample.sampler_ = this;
@@ -134,7 +134,7 @@ void Sampler::sample(const TResolution& pixel, unsigned subPixel, const TimePeri
 void Sampler::sample(const TimePeriod& period, Sample& sample)
 {
 	// make up a pixel and subpixel =)
-	TResolution pixel(0, 0);
+	TResolution2D pixel(0, 0);
 	unsigned subPixel = 0;
 
 	Sampler::sample(pixel, subPixel, period, sample);
@@ -154,7 +154,7 @@ const TSamplerPtr Sampler::clone() const
 const TPyObjectPtr Sampler::reduce() const
 {
 	return python::makeTuple(
-		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->GetType())), 
+		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->_lassPyGetType())), 
 		python::makeTuple(), this->getState());
 }
 

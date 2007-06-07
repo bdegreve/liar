@@ -53,11 +53,9 @@ class LIAR_KERNEL_DLL Sampler: public python::PyObjectPlus
     PY_HEADER(python::PyObjectPlus)
 public:
 
-    typedef prim::Vector2D<unsigned> TResolution;
-
-    const TResolution& resolution() const { return doResolution(); }
+    const TResolution2D& resolution() const { return doResolution(); }
     const unsigned samplesPerPixel() const { return doSamplesPerPixel(); }
-    void setResolution(const TResolution& resolution) { doSetResolution(resolution); }
+    void setResolution(const TResolution2D& resolution) { doSetResolution(resolution); }
     void setSamplesPerPixel(unsigned samplesPerPixel) { doSetSamplesPerPixel(samplesPerPixel); }
 	void seed(unsigned randomSeed) { doSeed(randomSeed); }
 
@@ -65,7 +63,7 @@ public:
     const int requestSubSequence2D(unsigned requestedSize);
 	void clearSubSequenceRequests();
 
-    void sample(const TResolution& pixel, unsigned subPixel, const TimePeriod& period, 
+    void sample(const TResolution2D& pixel, unsigned subPixel, const TimePeriod& period, 
 		Sample& sample);
 	void sample(const TimePeriod& period, Sample& sample);
 
@@ -90,21 +88,21 @@ private:
 
 	typedef std::vector<unsigned> TSubSequenceSizes;
 
-    virtual const TResolution& doResolution() const = 0;
+    virtual const TResolution2D& doResolution() const = 0;
     virtual const unsigned doSamplesPerPixel() const = 0;
-    virtual void doSetResolution(const TResolution& resolution) = 0;
+    virtual void doSetResolution(const TResolution2D& resolution) = 0;
     virtual void doSetSamplesPerPixel(unsigned samplesPerPixel) = 0;
 	virtual void doSeed(unsigned randomSeed) = 0;
     
-	virtual void doSampleScreen(const TResolution& pixel, unsigned subPixel, 
+	virtual void doSampleScreen(const TResolution2D& pixel, unsigned subPixel, 
 		TSample2D& oScreenCoordinate) = 0;
-	virtual void doSampleLens(const TResolution& pixel, unsigned subPixel, 
+	virtual void doSampleLens(const TResolution2D& pixel, unsigned subPixel, 
 		TSample2D& oLensCoordinate) = 0;
-	virtual void doSampleTime(const TResolution& pixel, unsigned subPixel, 
+	virtual void doSampleTime(const TResolution2D& pixel, unsigned subPixel, 
 		const TimePeriod& period, TTime& oTime) = 0;
-	virtual void doSampleSubSequence1D(const TResolution& pixel, unsigned subPixel, 
+	virtual void doSampleSubSequence1D(const TResolution2D& pixel, unsigned subPixel, 
 		TSample1D* oBegin, TSample1D* oEnd) = 0;
-	virtual void doSampleSubSequence2D(const TResolution& pixel, unsigned subPixel, 
+	virtual void doSampleSubSequence2D(const TResolution2D& pixel, unsigned subPixel, 
 		TSample2D* oBegin, TSample2D* oEnd) = 0;
 
 	virtual const unsigned doRoundSize1D(unsigned requestedSize) const;

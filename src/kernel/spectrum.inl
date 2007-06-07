@@ -87,6 +87,13 @@ inline Spectrum::TReference Spectrum::operator[](size_t band)
 
 
 
+inline const Spectrum::TValue Spectrum::luminance() const
+{
+	return xyz_.y;
+}
+
+
+
 inline const Spectrum::TValue Spectrum::average() const
 {
 	return total() / numberOfBands_;

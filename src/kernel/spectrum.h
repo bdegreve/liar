@@ -56,6 +56,7 @@ public:
 	TReference operator[](size_t band);
 	const size_t numberOfBands() const { return numberOfBands_; }
 	
+	const TValue luminance() const;
 	const TValue average() const;
 	const TValue total() const;
 	const TValue absAverage() const;
@@ -128,8 +129,8 @@ inline const Spectrum log(const Spectrum& a);
 
 inline const Spectrum blend(const Spectrum& a, const Spectrum& b, Spectrum::TParam factor);
 
-Spectrum xyz(const TVector3D& xyz);
-Spectrum xyz(TScalar x, TScalar y, TScalar z);
+LIAR_KERNEL_DLL Spectrum LASS_CALL xyz(const TVector3D& xyz);
+LIAR_KERNEL_DLL Spectrum LASS_CALL xyz(TScalar x, TScalar y, TScalar z);
 
 //Spectrum xyz(const TVector3D& xyz, const TSpectrumFormatPtr& iFormat);
 //Spectrum xyz(TScalar x, TScalar y, TScalar z, const TSpectrumFormatPtr& iFormat);

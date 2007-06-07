@@ -64,7 +64,7 @@ const DifferentialRay Camera::primaryRay(const Sample& sample, const TVector2D& 
 const TPyObjectPtr Camera::reduce() const
 {
 	return python::makeTuple(
-		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->GetType())), 
+		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->_lassPyGetType())), 
 		python::makeTuple(), this->getState());
 }
 

@@ -31,7 +31,7 @@
 
 #include "textures_common.h"
 #include "../kernel/texture.h"
-#include <lass/io/image.h>
+#include "../kernel/rgb_space.h"
 #include <lass/prim/xy.h>
 #include <lass/util/dictionary.h>
 #include <lass/util/thread.h>
@@ -47,15 +47,21 @@ class LIAR_TEXTURES_DLL Image: public Texture
 public:
 
 	explicit Image(const std::string& filename);
+	Image(const std::string& filename, const TRgbSpacePtr& rgbSpace);
 	Image(const std::string& filename, const std::string& antiAliasing, 
 		const std::string& mipMapping);
+	Image(const std::string& filename, const std::string& antiAliasing, 
+		const std::string& mipMapping, const TRgbSpacePtr& rgbSpace);
+
+	void loadFile(const std::string& filename);
+	void loadFile(const std::string& filename, const TRgbSpacePtr& rgbSpace);
+
+	const TResolution2D& resolution() const;
 
 	const std::string antiAliasing() const;
 	const std::string mipMapping() const;
 	void setAntiAliasing(const std::string& mode);
 	void setMipMapping(const std::string& mode);
-
-	void loadFile(const std::string& filename);
 
 	static void setDefaultAntiAliasing(const std::string& mode);
 	static void setDefaultMipMapping(const std::string& mode);
@@ -69,6 +75,7 @@ private:
 		aaTrilinear,
 		numAntiAliasing
 	};
+	typedef util::Dictionary<std::string, AntiAliasing> TAntiAliasingDictionary;
 
 	enum MipMapping
 	{
@@ -78,12 +85,38 @@ private:
 		numMipMapping,
 		mmUninitialized = numMipMapping
 	};
-
-	typedef util::SharedPtr<io::Image> TImagePtr;
-	typedef std::vector<TImagePtr> THorizontalMipMaps;
-	typedef std::vector<THorizontalMipMaps> TMipMaps;
-	typedef util::Dictionary<std::string, AntiAliasing> TAntiAliasingDictionary;
 	typedef util::Dictionary<std::string, MipMapping> TMipMappingDictionary;
+
+	typedef TVector3D TPixel;
+	typedef util::SharedPtr<TPixel, util::ArrayStorage> TPixels;
+
+	class MipMapLevel
+	{
+	public:
+		MipMapLevel(const TPixels& pixels, const TResolution2D& resolution): 
+			pixels_(pixels), 
+			resolution_(resolution) 
+		{
+		}
+		MipMapLevel(const TResolution2D& resolution):
+			pixels_(new TPixel[resolution.x * resolution.y]),
+			resolution_(resolution)
+		{
+		}
+		TPixel& operator()(unsigned x, unsigned y)
+		{ 
+			return pixels_[y * resolution_.x + x]; 
+		}
+		const TPixel& operator()(unsigned x, unsigned y) const 
+		{ 
+			return pixels_[y * resolution_.x + x]; 
+		}
+		const TResolution2D& resolution() const { return resolution_; }
+	private:
+		TPixels pixels_;
+		TResolution2D resolution_;
+	};		
+	typedef std::vector<MipMapLevel> TMipMaps;
 
 	const Spectrum doLookUp(const Sample& sample, 
 		const IntersectionContext& context) const;
@@ -92,26 +125,27 @@ private:
 	void doSetState(const TPyObjectPtr& state);
 
 	void makeMipMaps(MipMapping mode) const;
-	TImagePtr makeMipMap(const TImagePtr iOldImagePtr, prim::XY iCompressionAxis) const;
-	TImagePtr makeMipMapEven(const TImagePtr iOldImagePtr, prim::XY iCompressionAxis) const;
-	TImagePtr makeMipMapOdd(const TImagePtr iOldImagePtr, prim::XY iCompressionAxis) const;
+	MipMapLevel makeMipMap(const MipMapLevel& parent, prim::XY compressionAxis, unsigned newSize) const;
+	MipMapLevel makeMipMapEven(const MipMapLevel& parent, prim::XY compressionAxis, unsigned newSize) const;
+	MipMapLevel makeMipMapOdd(const MipMapLevel& parent, prim::XY compressionAxis, unsigned newSize) const;
 
-	void mipMapLevel(TScalar iWidth, size_t iNumLevels, 
-		size_t& oLevel0, size_t& oLevel1, TScalar& oDLevel) const;
+	void mipMapLevel(TScalar width, size_t numLevels, 
+		unsigned& level0, unsigned& level1, TScalar& dLevel) const;
 
-	io::Image::TPixel nearest(size_t iLevelU, size_t iLevelV, const TPoint2D& uv) const;
-	io::Image::TPixel bilinear(size_t iLevelU, size_t iLevelV, const TPoint2D& uv) const;
+	const TPixel nearest(unsigned levelU, unsigned levelV, const TPoint2D& uv) const;
+	const TPixel bilinear(unsigned levelU, unsigned levelV, const TPoint2D& uv) const;
 
 	static TAntiAliasingDictionary makeAntiAliasingDictionary();
 	static TMipMappingDictionary makeMipMappingDictionary();
 
-	TImagePtr image_;
+	TPixels image_;
+	TResolution2D resolution_;
 	AntiAliasing antiAliasing_;
 	MipMapping mipMapping_;
 	mutable MipMapping currentMipMapping_;
 	mutable TMipMaps mipMaps_;
-	mutable size_t numLevelsU_;
-	mutable size_t numLevelsV_;
+	mutable unsigned numLevelsU_;
+	mutable unsigned numLevelsV_;
 	mutable util::CriticalSection mutex_;
 
 	static TAntiAliasingDictionary antiAliasingDictionary_;

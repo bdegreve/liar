@@ -84,7 +84,7 @@ void FilterMitchell::setB(TScalar b)
 
 // --- private -------------------------------------------------------------------------------------
 
-const FilterMitchell::TResolution FilterMitchell::doResolution() const
+const TResolution2D FilterMitchell::doResolution() const
 {
 	return target_->resolution();
 }

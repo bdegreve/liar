@@ -82,12 +82,12 @@ void Splitter::add(const TChildren& children)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Splitter::TResolution Splitter::doResolution() const
+const TResolution2D Splitter::doResolution() const
 {
-	TResolution maxResolution(0, 0);
+	TResolution2D maxResolution(0, 0);
 	for (TChildren::const_iterator i = children_.begin(); i != children_.end(); ++i)
 	{
-		for (int k = 0; k < TResolution::dimension; ++k)
+		for (int k = 0; k < TResolution2D::dimension; ++k)
 		{
 			maxResolution[k] = std::max(maxResolution[k], (*i)->resolution()[k]);
 		}

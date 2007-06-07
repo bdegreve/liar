@@ -93,14 +93,13 @@ private:
 	class Task
 	{
 	public:
-		typedef Sampler::TResolution TResolution;
 		Task() {}
-		Task(const TResolution& begin, const TResolution& end): begin_(begin), end_(end) {}
-		const TResolution& begin() const { return begin_; }
-		const TResolution& end() const { return end_; }
+		Task(const TResolution2D& begin, const TResolution2D& end): begin_(begin), end_(end) {}
+		const TResolution2D& begin() const { return begin_; }
+		const TResolution2D& end() const { return end_; }
 	private:
-		TResolution begin_;
-		TResolution end_;
+		TResolution2D begin_;
+		TResolution2D end_;
 	};
 
 	class Consumer

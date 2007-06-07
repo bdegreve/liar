@@ -46,5 +46,6 @@ import samplers
 import shaders
 import tracers
 import textures
+import codecs
 
 # EOF
