@@ -565,14 +565,15 @@ inline const Spectrum log(const Spectrum& a)
 
 
 /** @relates liar::Spectrum
- *  Blend between to spectra by a factor.
- *  @return @a a * ( 1 - @a iFactor ) + @a b * @a iFactor
+ *  linear interpolation of two spectra.
+ *  @return @a a * ( 1 - @a t ) + @a b * @a t
  */
-inline const Spectrum blend(const Spectrum& a, const Spectrum& b, Spectrum::TParam iFactor)
+inline const Spectrum lerp(const Spectrum& a, const Spectrum& b, Spectrum::TParam t)
 {
-	Spectrum result(a);
-	result *= (TNumTraits::one - iFactor);
-	result += iFactor * b;
+	Spectrum result(b);
+	result -= a;
+	result *= t;
+	result += a;
 	return result;
 }
 

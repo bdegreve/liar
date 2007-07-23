@@ -134,12 +134,12 @@ LinearInterpolator::doLookUp(const Sample& sample, const IntersectionContext& co
 	TKeyTextures::const_iterator prevI = stde::prior(i);
 	LASS_ASSERT(prevI->first != i->first); // due to lower_bound
 
-	const TScalar blendFactor = (keyValue - prevI->first) / (i->first - prevI->first);
+	const TScalar t = (keyValue - prevI->first) / (i->first - prevI->first);
 	
-	return blend(
+	return lerp(
 		prevI->second->lookUp(sample, context),
 		i->second->lookUp(sample, context),
-		blendFactor);
+		t);
 }
 
 

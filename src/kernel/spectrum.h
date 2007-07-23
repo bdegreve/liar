@@ -127,7 +127,7 @@ inline const Spectrum sqrt(const Spectrum& a);
 inline const Spectrum exp(const Spectrum& a);
 inline const Spectrum log(const Spectrum& a);
 
-inline const Spectrum blend(const Spectrum& a, const Spectrum& b, Spectrum::TParam factor);
+inline const Spectrum lerp(const Spectrum& a, const Spectrum& b, Spectrum::TParam t);
 
 LIAR_KERNEL_DLL Spectrum LASS_CALL xyz(const TVector3D& xyz);
 LIAR_KERNEL_DLL Spectrum LASS_CALL xyz(TScalar x, TScalar y, TScalar z);
