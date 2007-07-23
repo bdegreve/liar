@@ -291,15 +291,17 @@ namespace temp
 
 const Spectrum PhotonMapper::doCastRay(
 		const kernel::Sample& sample, const kernel::DifferentialRay& primaryRay,
-		TScalar& alpha, int generation) const
+		TScalar& tIntersection, TScalar& alpha, int generation) const
 {
 	Intersection intersection;
 	scene()->intersect(sample, primaryRay, intersection);
 	if (!intersection)
 	{
+		tIntersection = TNumTraits::infinity;
 		alpha = 0;
 		return Spectrum();
 	}
+	tIntersection = intersection.t();
 	alpha = 1;
 	const TPoint3D target = primaryRay.point(intersection.t());
 	const Spectrum mediumTransparency = mediumStack_.transparency(BoundedRay(
@@ -316,7 +318,7 @@ const Spectrum PhotonMapper::doCastRay(
 		// leaving or entering something
 		MediumChanger mediumChanger(mediumStack_, context.interior(), context.solidEvent());
 		const DifferentialRay continuedRay = bound(primaryRay, intersection.t() + tolerance);
-		return mediumTransparency * this->castRay(sample, continuedRay, alpha);
+		return mediumTransparency * this->castRay(sample, continuedRay, tIntersection, alpha);
 	}
 	shader->shadeContext(sample, context);
 
@@ -412,8 +414,8 @@ const Spectrum PhotonMapper::doCastRay(
 						BoundedRay(beginCentral, directionCentral, tolerance),
 						TRay3D(beginI, directionI),
 						TRay3D(beginJ, directionJ));
-					TScalar a;
-					const Spectrum reflected = castRay(sample, reflectedRay, a);
+					TScalar t, a;
+					const Spectrum reflected = castRay(sample, reflectedRay, t, a);
 					result += out[i].value * reflected * 
 						(a * num::abs(out[i].omegaOut.z) / (n * out[i].pdf));
 				}
@@ -453,8 +455,8 @@ const Spectrum PhotonMapper::doCastRay(
 						BoundedRay(beginCentral, directionCentral, tolerance),
 						TRay3D(beginCentral, directionCentral),
 						TRay3D(beginCentral, directionCentral));
-					TScalar a;
-					const Spectrum transmitted = castRay(sample, transmittedRay, a);
+					TScalar t, a;
+					const Spectrum transmitted = castRay(sample, transmittedRay, t, a);
 					result += out[i].value * transmitted * 
 						(a * num::abs(out[i].omegaOut.z) / (n * out[i].pdf));
 				}
@@ -463,7 +465,6 @@ const Spectrum PhotonMapper::doCastRay(
 		/**/
 	}
 
-	alpha = 1;
 	return mediumTransparency * result;
 }
 

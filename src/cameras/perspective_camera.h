@@ -92,6 +92,7 @@ private:
     const BoundedRay doGenerateRay(const Sample& sample, 
 		const TVector2D& screenSpaceDelta) const;
 	const TimePeriod doShutterDelta() const;
+	const TScalar doAsDepth(const TRay3D& ray, TScalar t) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);

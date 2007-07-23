@@ -361,10 +361,11 @@ void RenderEngine::Consumer::operator()(const Task& iTask)
 
 				sampler_->sample(i, k, timePeriod_, sample);
 				const DifferentialRay primaryRay = engine_->camera_->primaryRay(sample, pixelSize_);
-				TScalar alpha;
-				const Spectrum radiance = rayTracer_->castRay(sample, primaryRay, alpha);
+				TScalar alpha, tIntersection;
+				const Spectrum radiance = rayTracer_->castRay(sample, primaryRay, tIntersection, alpha);
+				const TScalar depth = engine_->camera_->asDepth(primaryRay, tIntersection);
 
-				outputSamples[outputIndex++] = OutputSample(sample, radiance, alpha);
+				outputSamples[outputIndex++] = OutputSample(sample, radiance, depth, alpha);
 				if (outputIndex == outputSize)
 				{
 					engine_->writeRender(&outputSamples[0], &outputSamples[0] + outputSize, *progress_);

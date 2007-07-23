@@ -67,12 +67,12 @@ public:
 	/** @warning castRay is NOT THREAD SAFE!
 	 */
 	const Spectrum castRay(const Sample& sample, const DifferentialRay& primaryRay, 
-			TScalar& alpha) const
+			TScalar& tIntersection, TScalar& alpha) const
 	{ 
 		RayGenerationIncrementor incrementor(*this);
 		if (rayGeneration_ < maxRayGeneration_)
 		{
-			return doCastRay(sample, primaryRay, alpha, rayGeneration_);
+			return doCastRay(sample, primaryRay, tIntersection, alpha, rayGeneration_);
 		}
 		return Spectrum();
 	}
@@ -102,7 +102,8 @@ private:
 	virtual void doRequestSamples(const TSamplerPtr& sampler) = 0;
 	virtual void doPreProcess(const TSamplerPtr& samper, const TimePeriod& period) = 0;
 	virtual const Spectrum doCastRay(const Sample& sample, 
-		const DifferentialRay& primaryRay, TScalar& alpha, int generation) const = 0;
+		const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, 
+		int generation) const = 0;
 	virtual const TLightSamplesRange doSampleLights(const Sample& sample, 
 		const TPoint3D& target, const TVector3D& targetNormal) const = 0;
 	virtual const TRayTracerPtr doClone() const = 0;

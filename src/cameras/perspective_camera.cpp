@@ -359,6 +359,13 @@ const TimePeriod PerspectiveCamera::doShutterDelta() const
 
 
 
+const TScalar PerspectiveCamera::doAsDepth(const TRay3D& ray, TScalar t) const
+{
+	return t * prim::dot(ray.direction(), direction_.normal());
+}
+
+
+
 void PerspectiveCamera::initTransformation()
 {
 	directionBase_ = direction_ - (down_ + right_) / 2;

@@ -22,10 +22,16 @@
  */
 
 #include "output_common.h"
+
+#if LIAR_HAVE_CONFIG_H
+#	include "../config.h"
+#endif
+
 #include <lass/io/proxy_man.h>
 
 // keep in alphabetical order please! [Bramz]
 //
+#include "depth_channel.h"
 #if HAVE_PIXELTOASTER_H
 #	include "display.h"
 #endif
@@ -45,6 +51,7 @@ LIAR_OUTPUT_DLL void initoutput(void)
 	
 	// keep in alphabetical order please! [Bramz]
 	//
+    PY_INJECT_CLASS_IN_MODULE(DepthChannel, output, "converts depth channel to color information")
 #if HAVE_PIXELTOASTER_H
     PY_INJECT_CLASS_IN_MODULE(Display, output, "render target in a window (PixelToaster)")
 #endif

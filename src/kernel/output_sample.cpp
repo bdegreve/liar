@@ -35,6 +35,7 @@ namespace kernel
 OutputSample::OutputSample():
 	radiance_(),
 	screenCoordinate_(),
+	depth_(),
 	alpha_(),
 	weight_()
 {
@@ -43,9 +44,11 @@ OutputSample::OutputSample():
 
 
 OutputSample::OutputSample(
-		const Sample& sample, const Spectrum& radiance, TScalar alpha, TScalar weight):
+		const Sample& sample, const Spectrum& radiance, TScalar depth, TScalar alpha, 
+		TScalar weight):
 	radiance_(radiance),
 	screenCoordinate_(sample.screenCoordinate()),
+	depth_(depth),
 	alpha_(alpha),
 	weight_(weight)
 {
@@ -57,6 +60,7 @@ OutputSample::OutputSample(
 		const OutputSample& other, const TPoint2D& screenCoordinate, TScalar weight):
 	radiance_(other.radiance_),
 	screenCoordinate_(screenCoordinate),
+	depth_(other.depth_),
 	alpha_(other.alpha_),
 	weight_(other.weight_ * weight)
 {
