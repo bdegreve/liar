@@ -23,7 +23,11 @@
 
 #include "output_common.h"
 
-#if HAVE_PIXELTOASTER_H
+#if LIAR_HAVE_CONFIG_H
+#	include "../config.h"
+#endif
+
+#if LIAR_HAVE_PIXELTOASTER_H
 
 #include "display.h"
 #include <lass/util/callback_0.h>

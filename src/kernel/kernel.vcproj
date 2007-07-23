@@ -25,7 +25,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="python.exe &quot;$(SolutionDir)setup\build_state.py&quot; $(ProjectName) $(ConfigurationName) begin"
+				CommandLine="python.exe &quot;$(SolutionDir)..\config.py&quot; --enforce-existance&#x0D;&#x0A;python.exe &quot;$(SolutionDir)setup\build_state.py&quot; $(ProjectName) $(ConfigurationName) begin&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -43,7 +43,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				OmitFramePointers="false"
-				PreprocessorDefinitions="LIAR_KERNEL_BUILD_DLL;WIN32;_DEBUG;_USRDLL"
+				PreprocessorDefinitions="LIAR_KERNEL_BUILD_DLL;LIAR_HAVE_CONFIG_H;WIN32;_DEBUG;_USRDLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="3"
@@ -113,7 +113,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="python.exe &quot;$(SolutionDir)setup\build_state.py&quot; $(ProjectName) $(ConfigurationName) begin"
+				CommandLine="python.exe &quot;$(SolutionDir)..\config.py&quot; --enforce-existance&#x0D;&#x0A;python.exe &quot;$(SolutionDir)setup\build_state.py&quot; $(ProjectName) $(ConfigurationName) begin&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -134,7 +134,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				PreprocessorDefinitions="LIAR_KERNEL_BUILD_DLL;WIN32;NDEBUG;_USRDLL"
+				PreprocessorDefinitions="LIAR_KERNEL_BUILD_DLL;LIAR_HAVE_CONFIG_H;WIN32;NDEBUG;_USRDLL"
 				RuntimeLibrary="2"
 				EnableEnhancedInstructionSet="2"
 				FloatingPointModel="2"
@@ -202,7 +202,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="python.exe &quot;$(SolutionDir)setup\build_state.py&quot; $(ProjectName) $(ConfigurationName) begin"
+				CommandLine="python.exe &quot;$(SolutionDir)..\config.py&quot; --enforce-existance&#x0D;&#x0A;python.exe &quot;$(SolutionDir)setup\build_state.py&quot; $(ProjectName) $(ConfigurationName) begin&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"

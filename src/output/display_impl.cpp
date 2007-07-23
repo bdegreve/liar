@@ -21,7 +21,11 @@
  *  http://liar.sourceforge.net
  */
 
-#if HAVE_PIXELTOASTER_H
+#if LIAR_HAVE_CONFIG_H
+#	include "../config.h"
+#endif
+
+#if LIAR_HAVE_PIXELTOASTER_H
 #	if !defined(NDEBUG)
 #		define D3D_DEBUG_INFO
 #	endif
