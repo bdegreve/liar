@@ -65,6 +65,12 @@ else:
 	winDebug = ''
 	pdb = ['pdb']
 	
+def list_files(module, extension):
+	dirname = os.path.join("..", module)
+	file_filter = lambda f: os.path.splitext(f)[1] == extension
+	files = filter(file_filter, os.listdir(dirname))
+	return [os.path.join(dirname, f) for f in files]
+
 
 from distutils.core import setup,Extension
 sys.argv = [sys.argv[0], 'bdist_wininst', '--bitmap=../../data/logo/liar_wininst.bmp']
@@ -101,6 +107,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 	packages=['liar', 'liar.tools', 'liar.codecs'],
 	package_dir={'liar': '..'},
 	ext_modules=extensions,
+	headers = list_files('kernel', '.h') + list_files('kernel', '.inl'),
 	data_files = [
 		('lib/site-packages/liar',[r'..\..\bin\%s%s.pyd' % (x, pyDebug) for x in modules]),
 		('lib/site-packages/liar',[r'..\..\bin\%s%s.%s' % (x, pyDebug, y) for x in modules for y in pdb]),

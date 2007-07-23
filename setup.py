@@ -286,7 +286,8 @@ config = get_config()
 component_names = ('kernel', 'cameras', 'output', 'samplers', 'scenery', 'shaders', 'textures', 'tracers')
 component_extensions = [make_extension(name, config) for name in component_names]
 
-libkernel_sources = list_files(os.path.join('kernel'), '.cpp')
+libkernel_headers = list_files('kernel', '.h') + list_files('kernel', '.inl')
+libkernel_sources = list_files('kernel', '.cpp')
 libkernel_sources = filter(lambda x: not 'kernel_init.cpp' in x, libkernel_sources)
 libkernel = ('kernel', {
 	'sources': libkernel_sources,
@@ -308,6 +309,7 @@ setup(
 	package_dir = {'liar': 'src'},
 	packages = ['liar', 'liar.tools'],
 	libraries = [libkernel],
+	headers = libkernel_headers,
 	ext_package = 'liar',
 	ext_modules = component_extensions,
 	cmdclass = {
