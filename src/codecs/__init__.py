@@ -20,7 +20,7 @@
 import os
 import os.path
 
-for filename in os.listdir('.'):
+for filename in os.listdir(os.path.dirname(__file__)):
 	module, ext = os.path.splitext(filename)
 	if module != '__init__' and ext in ['.py', '.so', '.dll', '.pyd']:
 		try:
