@@ -23,7 +23,6 @@
 
 #include "output_common.h"
 #include "filter_mitchell.h"
-#include "../kernel/per_thread_buffer.h"
 
 namespace liar
 {
@@ -103,13 +102,13 @@ void FilterMitchell::doWriteRender(const OutputSample* first, const OutputSample
 	const TVector2D res(resolution());
 	const TVector2D invRes = res.reciprocal();
 	
-	static PerThreadBuffer<OutputSample> perThreadBuffer;
-	perThreadBuffer.growTo(bufferSize_);
-	OutputSample* buffer = perThreadBuffer.begin();
+	outputBuffer_.growTo(bufferSize_);
+	OutputSample* begin = outputBuffer_.begin();
+	OutputSample* end = begin + bufferSize_;
 
 	LASS_ASSERT(bufferSize_ % filterFootprint_ == 0);
 
-	size_t current = 0;
+	OutputSample* output = begin;
 	while (first != last)
 	{
 		const Spectrum radiance = first->radiance();
@@ -131,21 +130,21 @@ void FilterMitchell::doWriteRender(const OutputSample* first, const OutputSample
 			{
 				const TScalar x = (p0.x + i - filterWidth_) * invRes.x;
 				const TScalar w = f[i].x * f[j].y;
-				LASS_ASSERT(current < bufferSize_);
-				buffer[current++] = OutputSample(*first, TPoint2D(x, y), w);
+				LASS_ASSERT(output != end);
+				*output++ = OutputSample(*first, TPoint2D(x, y), w);
 			}
 		}
 
-		if (current == bufferSize_)
+		if (output == end)
 		{
-			target_->writeRender(buffer, buffer + current);
-			current = 0;
+			target_->writeRender(begin, end);
+			output = begin;
 		}
 		++first;
 	}
-	if (current > 0)
+	if (output != begin)
 	{
-		target_->writeRender(buffer, buffer + current);
+		target_->writeRender(begin, output);
 	}
 }
 

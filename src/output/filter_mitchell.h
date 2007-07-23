@@ -35,6 +35,7 @@
 
 #include "output_common.h"
 #include "../kernel/render_target.h"
+#include "../kernel/per_thread_buffer.h"
 
 namespace liar
 {
@@ -56,14 +57,7 @@ public:
 
 private:
 
-	const TResolution2D doResolution() const;
-    void doBeginRender();
-	void doWriteRender(const OutputSample* first, const OutputSample* last);
-    void doEndRender();
-	const bool doIsCanceling() const;
-
-	const TScalar filterKernel(TScalar x) const;
-	const TVector2D filterKernel(const TVector2D& p) const;
+	typedef PerThreadBuffer<OutputSample> TOutputBuffer;
 
 	enum 
 	{
@@ -73,6 +67,16 @@ private:
 		bufferSize_ = filterFootprint_ * 16 
 	};
 
+	const TResolution2D doResolution() const;
+    void doBeginRender();
+	void doWriteRender(const OutputSample* first, const OutputSample* last);
+    void doEndRender();
+	const bool doIsCanceling() const;
+
+	const TScalar filterKernel(TScalar x) const;
+	const TVector2D filterKernel(const TVector2D& p) const;
+
+	TOutputBuffer outputBuffer_;
 	TRenderTargetPtr target_;
 	TScalar b_;
 };
