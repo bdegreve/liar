@@ -12,9 +12,140 @@
 
 \kw{cameras} is the module dealing with the \emph{point of view} part of the render.  It is where you'll find all cameras and related stuff.
 
-\[
-\left[\begin{array}{cc}
-	d_1x & d_2x \\
-	d_1y & d_2y
-\end{array}\right]
-\]
+\section{Cameras}
+
+\subsection{PerspectiveCamera}\label{cameras.PerspectiveCamera}
+
+This camera resembles like a real photo- or filmcamera, but with ideal characteristics.  No real life imperfections such as chromatic abrrations are simulated.
+
+\subsubsection*{attribute precedences}
+
+When different attributes are associated to a physical property, the ones that relate to the world of photography take precedence.  For example, both the attributes \kw{lensRadius} and \kw{fNumber} determine the real lens radius.  However, they are related through the \kw{focalLength} attribute by the following equation:
+
+\begin{eqnarray}
+	\kw{lensRadius} &=& \frac{\kw{focalLength}}{2 \cdot \kw{fNumber}}
+\end{eqnarray}
+
+When you change \kw{focalLength}, the \kw{fNumber} is kept fixed because it's the property you would set on a real camera.  \kw{lensRadius} is thus recomputed.
+
+The attribute precedences are:
+
+\begin{itemize}
+  \item \kw{fNubmer} takes precedence over \kw{lensRadius} when \kw{focalLength} is changed.
+	\item \kw{focalLength} takes precedence over \kw{fovAngle} when \kw{width} is changed.
+	\item \kw{width} takes precence over \kw{height} when \kw{aspectRatio} is changed
+\end{itemize}
+
+\subsubsection*{constructors}
+\begin{itemize}
+	\item \kw{PerspectiveCamera()}: 
+		creates a default camera positioned in the origin $\left(0,0,0\right)$, looking in the direction of the $\mathbf{y}$ axis, and a horizontal field of view of 90 degrees.
+\end{itemize}
+
+\subsubsection*{members}
+\begin{itemize}
+	\item \kw{position}:
+		get and set the position of the camera.  In terms of real life cameras, this is the point at the focal length distance before the actual film.
+		
+ 	\item \kw{sky}:
+ 	  get and set the sky vector of the camera.  This is a bit of an odd attribute, as it does not change any properties of the camera directly.  It is merely used to determine what's ``up'' when changing the direction of the camera.
+ 	  
+	\item \kw{direction}:
+		get and set the view direction of the camera.  It will always be normalized.  To change the zoom factor, use \kw{focalLength} or \kw{fovAngle} instead.\\
+		It is important to know that when the camera is redirected, the right and down vectors are recomputed using the sky vector to form an orthonormal basis with the direction vector.  If you want to set the right or down vector explicitely, should should do so after setting the direction vector.  However, this should normally not be necessary.
+	  \begin{eqnarray}
+	  	\kw{right} &=& \kw{direction} \times \kw{sky}\\
+	  	\kw{down} &=& \kw{direction} \times \kw{right}
+	  \end{eqnarray}
+	  
+	\item \kw{lookAt(target)}:
+	  rotate the camera to look at a target point, and focus at the target point as well.
+	  \begin{eqnarray}
+	  	\kw{direction} &=& \kw{target} - \kw{position}\\
+	  	\kw{focusDistance} &=& \left\|\kw{target} - \kw{position}\right\|
+	  \end{eqnarray}
+		
+ 	\item \kw{right}:
+ 	  get and set the right vector of the camera.  It will always be normalized.  To change the film width, use \kw{width} instead.  It is important to know that this vector is recomputed when \kw{direction} is changed.
+		
+ 	\item \kw{down}:
+ 	  get and set the down vector of the camera.  It will always be normalized.  To change the film height, use \kw{height} instead.  It is important to know that this vector is recomputed when \kw{direction} is changed.
+		
+ 	\item \kw{width}:
+ 	  get and set the film width of the camera.  Setting this also alters the aspect ratio and the field of view.
+	  \begin{eqnarray}
+	  	\kw{aspectRatio} &=& \frac{\kw{width}}{\kw{height}}\\
+	  	\kw{fovAngle} &=& 2 \arctan \frac{\kw{width}}{2 \cdot \kw{focalLength}}
+	  \end{eqnarray}
+		
+ 	\item \kw{height}:
+ 	  get and set the film height of the camera.  Setting this also alters the aspect ratio.
+	  \begin{eqnarray}
+	  	\kw{aspectRatio} &=& \frac{\kw{width}}{\kw{height}}
+	  \end{eqnarray}
+		
+ 	\item \kw{aspectRatio}:
+ 	  get and set the film aspect ratio of the camera.  Setting this also alters the film height.
+	  \begin{eqnarray}
+	  	\kw{height} &=& \frac{\kw{width}}{\kw{aspectRatio}}
+	  \end{eqnarray}
+		
+ 	\item \kw{focalLength}:
+ 	  get and set the effective focal length of the camera lens.  Setting this also alters the field of view and the lens radius.
+	  \begin{eqnarray}
+	  	\kw{fovAngle} &=& 2 \arctan \left(\frac{\kw{width}}{2 \cdot \kw{focalLength}}\right)\\
+	  	\kw{lensRadius} &=& \frac{\kw{focalLength}}{2 \cdot \kw{fNumber}}
+	  \end{eqnarray}
+		
+ 	\item \kw{fovAngle}:
+ 	  get and set the horizontal angle of view.  Setting this also alters the focal length and the lens radius.
+	  \begin{eqnarray}
+	  	\kw{focalLength} &=& \frac{\kw{width}}{2 \tan \left(\frac{\kw{fovAngle}}{2}\right)}\\
+	  	\kw{lensRadius} &=& \frac{\kw{focalLength}}{2 \cdot \kw{fNumber}}
+	  \end{eqnarray}
+		
+ 	\item \kw{nearLimit}:
+ 	  get and set the near limit of the camera.  This is the distance between the camera position and the near clipping plane.
+		
+ 	\item \kw{farLimit}:
+ 	  get and set the near limit of the camera.  This is the distance between the camera position and the far clipping plane.
+ 	  
+	\item \kw{focusDistance}:
+ 	  get and set the near focus distance of the camera.  This is the distance between the camera position and the focus plane.  All points on this plane will appear to be in focus when a lens radius larger than zero is used.
+ 	  
+	\item \kw{focusAt(target)}:
+ 	  set the focus distance by enforcing a target point to be in focus.
+	  \begin{eqnarray}
+	  	\kw{focusDistance} &=& \left\|\kw{target} - \kw{position}\right\|
+	  \end{eqnarray}
+		
+ 	\item \kw{fNumber}:
+ 	  get and set the f-number of the lens.  Setting this also alters the absolute lens radius.
+	  \begin{eqnarray}
+	  	\kw{lensRadius} &=& \frac{\kw{focalLength}}{2 \cdot \kw{fNumber}}
+	  \end{eqnarray}
+		
+ 	\item \kw{lensRadius}:
+ 	  get and set the absolute lens radius.  Setting this also alters the absolute lens radius.
+	  \begin{eqnarray}
+	  	\kw{fNumber} &=& \frac{\kw{focalLength}}{2 \cdot \kw{lensRadius}}
+	  \end{eqnarray}
+		
+ 	\item \kw{shutterOpenDelta}:
+ 	  get and set the time, relative to the frame time, when the camera shutter is opened.
+		
+ 	\item \kw{shutterCloseDelta}:
+ 	  get and set the time, relative to the frame time, when the camera shutter is closed.  Setting this also alters the shutter time.
+	  \begin{eqnarray}
+	  	\kw{shutterTime} &=& \kw{shutterCloseDelta} - \kw{shutterOpenDelta}
+	  \end{eqnarray}
+		
+ 	\item \kw{shutterTime}:
+ 	  get and set the duration the shutter is opened.  Setting this also alters the shutter close delta.
+	  \begin{eqnarray}
+	  	\kw{shutterCloseDelta} &=& \kw{shutterOpenDelta} + \kw{shutterTime}
+	  \end{eqnarray}
+	  
+	 
+
+\end{itemize}

@@ -48,44 +48,56 @@ public:
     const TPoint3D& position() const;
     void setPosition(const TPoint3D& iPosition);
 
-    void lookAt(const TPoint3D&);
-
-    const TScalar fovAngle() const;
-    void setFovAngle(TScalar fov);
-
-    const TScalar aspectRatio() const;
-    void setAspectRatio(TScalar ratio);
-
-    void tilt(TScalar angle);
-    void pitch(TScalar angle);
-    void roll(TScalar angle);
-
     const TVector3D& direction() const;
     void setDirection(const TVector3D& direction);
-
-    const TVector3D& down() const;
-    void setDown(const TVector3D& down);
-
-    const TVector3D& right() const;
-    void setRight(const TVector3D& iRight);
+    void lookAt(const TPoint3D& target);
 
 	const TVector3D& sky() const;
 	void setSky(const TVector3D& sky);
 
-	const TTime shutterOpenDelta() const;
-	const TTime shutterCloseDelta() const;
-	void setShutterOpenDelta(TTime shutterOpenDelta);
-	void setShutterCloseDelta(TTime shutterCloseDelta);
+	/*
+    void tilt(TScalar angle);
+    void pitch(TScalar angle);
+    void roll(TScalar angle);
+	*/
 
-	TScalar focalDistance() const;
-	TScalar lensRadius() const;
-	void setFocalDistance(TScalar distance);
-	void setLensRadius(TScalar radius);
+    const TVector3D& down() const;
+    const TVector3D& right() const;
+    void setDown(const TVector3D& down);
+    void setRight(const TVector3D& right);
 
-	TScalar nearLimit() const;
-	TScalar farLimit() const;
+    const TScalar width() const;
+	const TScalar height() const;
+	const TScalar aspectRatio() const;
+	void setWidth(TScalar width);
+	void setHeight(TScalar height);
+    void setAspectRatio(TScalar ratio);
+
+	const TScalar focalLength() const;
+    const TScalar fovAngle() const;
+	void setFocalLength(TScalar length);
+    void setFovAngle(TScalar fov);
+
+	const TScalar nearLimit() const;
+	const TScalar farLimit() const;
 	void setNearLimit(TScalar distance);
 	void setFarLimit(TScalar distance);
+
+	const TScalar focusDistance() const;
+	void setFocusDistance(TScalar distance);
+	void focusAt(const TPoint3D& target);
+
+	const TScalar fNumber() const;
+	const TScalar lensRadius() const;
+	void setFNumber(TScalar fNumber);
+	void setLensRadius(TScalar radius);
+
+	const TTime shutterOpenDelta() const;
+	const TTime shutterCloseDelta() const;
+	const TTime shutterTime() const;
+	void setShutterOpenDelta(TTime shutterOpenDelta);
+	void setShutterCloseDelta(TTime shutterCloseDelta);
+	void setShutterTime(TTime shutterTime);
 
 private:
 
@@ -104,16 +116,21 @@ private:
     TVector3D down_;         /**< j unit */
     TVector3D direction_;    /**< k unit */
     TVector3D sky_;
+	TVector3D directionNormal_;
 	TVector3D rightNormal_;
 	TVector3D downNormal_;
 	TTime shutterOpenDelta_;
  	TTime shutterCloseDelta_;
-	TScalar fovAngle_;
+	TScalar width_;
+	TScalar height_;
     TScalar aspectRatio_;
-	TScalar focalDistance_;
-	TScalar lensRadius_;
+	TScalar focalLength_;
+	TScalar fovAngle_;
 	TScalar nearLimit_;
 	TScalar farLimit_;
+	TScalar focusDistance_;
+	TScalar fNumber_;
+	TScalar lensRadius_;
 
     TVector3D directionBase_;
 };
