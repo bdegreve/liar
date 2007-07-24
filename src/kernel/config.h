@@ -18,7 +18,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *  http://liar.sourceforge.net
+ *  http://liar.bramz.org
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_CONFIG_H
@@ -30,7 +30,8 @@
 #define LIAR_VERSION_MINOR 2
 #define LIAR_VERSION_REVISION 0
 #define LIAR_AUTHORS "Bram de Greve"
-#define LIAR_WEBSITE "http://liar.sourceforge.net"
+#define LIAR_EMAIL "liar@bramz.org"
+#define LIAR_WEBSITE "http://liar.bramz.org"
 
 #define LIAR_SCALAR float
 #define LIAR_TIME double
