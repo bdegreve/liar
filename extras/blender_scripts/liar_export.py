@@ -27,7 +27,7 @@ Tooltip: 'Exports Blender scene to LiAR script (.py)'
 """
 
 __author__ = "Bram de Greve (bramz@users.sourceforge.net)"
-__url__ = ("Project homepage, http://liar.sourceforge.net")
+__url__ = ("Project homepage, http://liar.bramz.org")
 __version__ = "0.0"
 __bpydoc__ = """\
 Exports Blender scene to LiAR script.
@@ -36,26 +36,73 @@ Usage: run the script from the menu or inside Blender.
 """
 
 import Blender
-import os.path
+import sys
 import math
 
+try:
+	import os
+except ImportError:
+	# we're running Blender without an corresponding Python installation
+	# maybe we do have a Python installation, but not the same version
+	# anyway, we shall have to rely on builtin modules only.
+	# so here goes our poor man's os module
+	for name in ('posix', 'nt', 'os2', 'mac', 'ce', 'riscos'):
+		if name in sys.builtin_module_names:
+			os = __import__(name, globals(), locals(), [])
+			sys.modules['os'] = os
+			os.name = name
+			break
+
+try:
+	import os.path
+except ImportError:
+	# again, we're running Blender without Python installation,
+	# use replacements from Blender.sys or devise your own
+	import Blender.sys
+	os.path = Blender.sys
+	sys.modules['os.path'] = os.path
+	def _isdir(path):
+		try:
+			s = os.stat(path)
+		except os.error:
+			return False
+		return stat.S_ISDIR(s.st_mode)
+	os.path.isdir = _isdir
+	if os.name in ('nt', 'os2', 'ce'):
+		def _split(path):
+			if path[1:2] == ':':
+				drive, path = path[:2], path[2:]
+			else:
+				drive = ''
+			i = len(path) - 1
+			while i >= 0 and not path[i] in '\\/':
+				i -= 1
+			i += 1
+			parent, child = path[:i], path[i:]
+			if parent:
+				i = len(parent) - 1
+				while i >= 0 and parent[i] in '\\/':
+					i -= 1
+				i += 1
+				if i > 0:
+					parent = parent[:i]
+			return drive + parent, child
+	else:
+		def _split(path):
+			i = path.rfind('/') + 1
+			parent, child = path[:i], path[i:]
+			if parent and parent != '/' * len(parent):
+				parent = parent.rstrip('/')
+			return parent, child
+	os.path.split = _split
+	
 precision = 7
 
-lamps = {}
-meshes = {}
-materials = {}
-textures = {}
-images = {}
 
 
 
 def escape(x):
 	return x.replace('\\', '\\\\')
-
-
-
-def matrix_to_list(matrix):
-	return [[matrix[i][j] for i in range(4)] for j in range(4)]
 
 
 
@@ -72,8 +119,17 @@ def str_no_none(i):
 
 
 
-def script_to_zip_path(script_path):
-	return os.path.splitext(script_path)[0] + os.extsep + "zip"
+def matrix_to_list(matrix):
+	return [[matrix[i][j] for i in range(4)] for j in range(4)]
+
+
+
+def make_dir(dirname):
+	print "MAKE DIR", dirname
+	if not os.path.exists(dirname):
+		parent, child = os.path.split(dirname)
+		make_dir(parent)
+		os.mkdir(dirname)
 
 
 
@@ -99,19 +155,82 @@ def compress_mesh(vertices, normals, uvs, face_groups):
 	# done!
 	return compressed_components + [rebuilt_face_groups]
 
+
+
+def encode_mesh_to_obj(vertices, normals, uvs, face_groups):
+	vertices, normals, uvs, face_groups = compress_mesh(vertices, normals, uvs, face_groups)
+
+	lines = ["# --- vertices ---"]
+	for vert in vertices:
+		lines += ["v %s" % ' '.join(map(str_float, vert))]
+	
+	lines += ["", "# --- normals ---"]
+	for normal in normals:
+		lines += ["vn %s" % ' '.join(map(str_float, normal))]
+	
+	lines += ["", "# --- uvs ---"]
+	for uv in uvs:
+		lines += ["vt %s" % ' '.join(map(str_float, uv))]
+	
+	lines += ["", "# --- face groups ---"]
+	for face_group in face_groups:
+		lines += ["g"]
+		for face in face_group:
+			lines += ["f %s" % ' '.join(map(str_no_none, face))]
 			
-
-def write_none(out, script_path, obj):
-	pass
+	return '\n'.join(lines)
 
 
 
-def write_image(out, script_path, texture):
-	assert(texture.getType() == 'Image')
-	image_name = texture.image.getName()
-	image_filename = texture.image.getFilename()
-	if not image_name in images:
-		images[image_name] = True
+
+class LiarExporter(object):
+	def __init__(self, script_path):
+		self.script_path = script_path
+		self.archive_name = os.path.splitext(script_path)[0]
+		self.is_compressing_archive = True
+
+		self.lamps = {}
+		self.meshes = {}
+		self.materials = {}
+		self.textures = {}
+		self.images = {}
+
+
+
+	def write_to_archive(self, filename, content):        
+		if self.is_compressing_archive:
+			try:
+				import zipfile
+				if isset(self.zip_file):
+					zip_name = self.archive_name + ".zip"
+					if os.path.exists(self.zip_name):
+						os.remove(self.zip_name)
+					self.zip_file = zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED)
+				self.zip_file.writestr(filename, content)
+				return
+			except ImportError:
+				pass
+		
+		make_dir(self.archive_name)
+		f = file(os.path.join(self.archive_name, filename), 'w')
+		f.write(content)
+		f.close()           
+		
+
+
+	def write_none(self, obj):
+		pass
+
+
+
+	def write_image(self, texture):
+		assert(texture.getType() == 'Image')
+		image_name = texture.image.getName()
+		if image_name in self.images:
+			return
+		self.images[image_name] = True
+		
+		filename = texture.image.getFilename()
 		if texture.mipmap:
 			anti_aliasing = 'AA_TRILINEAR'
 			mip_mapping = 'MM_ANISOTROPIC'
@@ -121,21 +240,26 @@ def write_image(out, script_path, texture):
 		if not texture.interpol:
 			anti_aliasing = 'AA_NONE'
 		
-		out.write("""
+		self.script_file.write("""
 # --- image IM:%s ---
 
 image = liar.textures.Image(fix_path(r"%s"))
 image.antiAliasing = liar.textures.Image.%s
 image.mipMapping = liar.textures.Image.%s
 images['IM:%s'] = image
-""" % (image_name, image_filename, anti_aliasing, mip_mapping, image_name))
+""" % (image_name, filename, anti_aliasing, mip_mapping, image_name))
 
-def write_texture(out, script_path, texture):
-	if not texture.name in textures:
+
+
+	def write_texture(self, texture):
+		if texture.name in self.textures:
+			return
+		self.textures[texture.name] = True
+		
 		tex_type = texture.getType()
 		if tex_type == 'Image':
-			write_image(out, script_path, texture)		
-			out.write("""
+			self.write_image(texture)		
+			self.script_file.write("""
 # --- texture TE:%s ---
 
 textures['TE:%s'] = images['IM:%s']
@@ -144,7 +268,7 @@ textures['TE:%s'] = images['IM:%s']
 		else:
 			if tex_type != 'None':
 				print "WARNING: Cannot handle %s textures!" % tex_type
-			out.write("""
+			self.script_file.write("""
 # --- texture TE:%s ---
 
 textures['TE:%s'] = liar.Texture.black()
@@ -152,10 +276,11 @@ textures['TE:%s'] = liar.Texture.black()
 
 
 
-def write_material(out, script_path, material):
-	if not material.name in materials:
-		materials[material.name] = True
-		
+	def write_material(self, material):
+		if material.name in self.materials:
+			return
+		self.materials[material.name] = True
+			
 		diffuse = "liar.textures.Constant(liar.rgb%s)" % (tuple([x * material.ref for x in material.rgbCol]),)
 		specular = "liar.textures.Constant(liar.rgb%s)" % (tuple([x * material.spec for x in material.specCol]),)
 		specular_power = "liar.textures.Constant(%s)" % material.hard
@@ -163,7 +288,7 @@ def write_material(out, script_path, material):
 
 		for texture in material.getTextures():
 			if texture:
-				write_texture(out, script_path, texture.tex)
+				self.write_texture(texture.tex)
 				s = "textures['TE:%s']" % texture.tex.name
 				if texture.mapto & Blender.Texture.MapTo['COL']:
 					diffuse = s
@@ -174,7 +299,7 @@ def write_material(out, script_path, material):
 				if texture.mapto & Blender.Texture.MapTo['CMIR']:
 					reflectance = s
 
-		out.write(r"""
+		self.script_file.write(r"""
 # --- mesh MA:%s ---
 
 material = liar.shaders.Simple()
@@ -184,49 +309,22 @@ material.specularPower = %s
 material.reflectance = %s
 materials['MA:%s'] = material
 """ % (material.name, diffuse, specular, specular_power, reflectance, material.name))
-	
+				
 
 
-def write_mesh_to_zip(script_path, mesh_name, vertices, normals, uvs, face_groups):
-	obj = "# %s\n" % mesh_name
-	vertices, normals, uvs, face_groups = compress_mesh(vertices, normals, uvs, face_groups)
-
-	obj += "\n# --- vertices ---\n"
-	for vert in vertices:
-		obj += "v %s\n" % ' '.join(map(str_float, vert))
-	
-	obj += "\n# --- normals ---\n"
-	for normal in normals:
-		obj += "vn %s\n" % ' '.join(map(str_float, normal))
-	
-	obj += "\n# --- uvs ---\n"
-	for uv in uvs:
-		obj += "vt %s\n" % ' '.join(map(str_float, uv))
-	
-	obj += "\n# --- face_groups ---"
-	for face_group in face_groups:
-		obj += "\ng\n"
-		for face in face_group:
-			obj += "f %s\n" % ' '.join(map(str_no_none, face))
-			
-	zip_path = script_to_zip_path(script_path)
-	mode = ('w', 'a')[os.path.exists(zip_path)]
-	import zipfile
-	zip = zipfile.ZipFile(zip_path, mode, zipfile.ZIP_DEFLATED)
-	zip.writestr(mesh_name + os.extsep + "obj", obj)
-		
-
-
-def write_mesh(out, script_path, obj):
-	mesh = obj.getData(False, True)
-	
-	if not mesh.name in meshes:
-		meshes[mesh.name] = True
+	def write_mesh(self, obj):
+		mesh = obj.getData(False, True)
+		if mesh.name in self.meshes:
+			return
+		self.meshes[mesh.name] = True
 
 		num_materials = len(mesh.materials)
 		if num_materials == 0:
 			print 'WARNING: no material assigned to mesh, skipping mesh'
 			return
+		
+		for k, v in mesh.properties.iteritems():
+			print "property %s: %s" % (k, v)
 		
 		# extract vertices, normals and uvs
 		vertices = [tuple([mvert.co[k] for k in range(3)]) for mvert in mesh.verts]
@@ -275,24 +373,25 @@ def write_mesh(out, script_path, obj):
 				
 		# write used materials
 		for i in used_groups:
-			write_material(out, script_path, mesh.materials[i])
+			self.write_material(mesh.materials[i])
 		
 		# write groups to zip
-		write_mesh_to_zip(script_path, mesh.name, vertices, normals, uvs, [face_groups[i] for i in used_groups])
-			
-		out.write("""
+		file_name = mesh.name + ".obj"
+		content = encode_mesh_to_obj(vertices, normals, uvs, [face_groups[i] for i in used_groups])
+		self.write_to_archive(file_name, "# --- %s ---\n\n%s" % (mesh.name, content))
+		
+		self.script_file.write("""
 # --- mesh ME:%s ---
 
-face_groups = load_from_zip("%s", "%s")
-""" % (mesh.name, escape(script_to_zip_path(script_path)), mesh.name + os.extsep + "obj"))
+face_groups = load_face_groups_from_archive("%s")
+""" % (mesh.name, file_name))
 
 		for i in used_groups:
-			out.write("face_groups[%d].shader = materials['MA:%s']\n" % (i, mesh.materials[i].name))
-		out.write("meshes['ME:%s'] = group_scenery(face_groups)\n" % mesh.name)
+			self.script_file.write("face_groups[%d].shader = materials['MA:%s']\n" % (i, mesh.materials[i].name))
+		self.script_file.write("meshes['ME:%s'] = group_scenery(face_groups)\n" % mesh.name)
 
-
-	obj_matrix = matrix_to_list(obj.matrix)
-	out.write(r"""
+		obj_matrix = matrix_to_list(obj.matrix)
+		self.script_file.write(r"""
 # --- object OB:%s ---
 
 matrix = %s
@@ -301,12 +400,14 @@ objects['OB:%s'] = liar.scenery.Transformation(meshes['ME:%s'], matrix)
 
 
 
-def write_lamp(out, script_path, obj):
-	lamp = obj.getData()
-	if not lamp.name in lamps:
-		lamps[lamp.name] = True
+	def write_lamp(self, obj):
+		lamp = obj.getData()
+		if lamp.name in self.lamps:
+			return
+		self.lamps[lamp.name] = True
+		
 		intensity = (lamp.energy * lamp.R, lamp.energy * lamp.G, lamp.energy * lamp.B)
-		out.write("""
+		self.script_file.write("""
 # --- lamp LA:%s ---
 """ % lamp.name)
 
@@ -317,7 +418,7 @@ def write_lamp(out, script_path, obj):
 			else:
 				attLin = 0
 				attSqr = 1
-			out.write(r"""
+			self.script_file.write(r"""
 light = liar.scenery.LightPoint()
 light.position = (0, 0, 0)
 light.intensity = liar.rgb%s
@@ -326,7 +427,7 @@ lamps['LA:%s'] = light
 """ % (intensity, attLin, attSqr, lamp.name))
 
 		elif lamp.type == 1: # sun
-			out.write(r"""
+			self.script_file.write(r"""
 light = liar.scenery.LightDirectional()
 light.direction = (0, 0, -1)
 light.radiance = liar.rgb%s
@@ -342,7 +443,7 @@ lamps['LA:%s'] = light
 				attSqr = 1
 			outer_angle = lamp.spotSize / 2.0
 			inner_angle = outer_angle * (1 - lamp.spotBlend)
-			out.write(r"""
+			self.script_file.write(r"""
 light = liar.scenery.LightSpot()
 light.position = (0, 0, 0)
 light.direction = (0, 0, -1)
@@ -363,7 +464,7 @@ lamps['LA:%s'] = light
 			samples_x = lamp.raySamplesX
 			samples_y = (lamp.raySamplesY, 1)[is_square]
 			number_of_samples = samples_x * samples_y
-			out.write(r"""
+			self.script_file.write(r"""
 sizeX = %s
 sizeY = %s
 surface = liar.scenery.Parallelogram((-sizeX / 2., sizeY / 2., 0), (sizeX, 0, 0), (0, -sizeY, 0))
@@ -377,8 +478,8 @@ lamps['LA:%s'] = light
 			print "WARNING: Did not recognize lamp type '%s'" % lamp.type
 			return
 		
-	obj_matrix = matrix_to_list(obj.matrix)
-	out.write(r"""
+		obj_matrix = matrix_to_list(obj.matrix)
+		self.script_file.write(r"""
 # --- object OB:%s ---
 
 matrix = %s
@@ -387,16 +488,16 @@ objects['OB:%s'] = liar.scenery.Transformation(lamps['LA:%s'], matrix)
 
 
 
-def write_camera(out, script_path, obj):
-	camera = obj.getData()
-	type = ('PerspectiveCamera', 'OrthographicCamera')[camera.getType()]
-	position = obj.getLocation()
-	matrix = obj.matrix
-	direction = [-matrix[2][k] for k in range(3)]
-	right = [matrix[0][k] for k in range(3)]
-	down = [-matrix[1][k] for k in range(3)]
-	fov = 2. * math.atan(16. / camera.lens)
-	out.write(r"""
+	def write_camera(self, obj):
+		camera = obj.getData()
+		type = ('PerspectiveCamera', 'OrthographicCamera')[camera.getType()]
+		position = obj.getLocation()
+		matrix = obj.matrix
+		direction = [-matrix[2][k] for k in range(3)]
+		right = [matrix[0][k] for k in range(3)]
+		down = [-matrix[1][k] for k in range(3)]
+		fov = 2. * math.atan(16. / camera.lens)
+		self.script_file.write(r"""
 # --- camera ---
 
 camera = liar.cameras.%s()
@@ -409,13 +510,13 @@ camera.fovAngle = %s
 
 
 
-def write_context(out, script_path, context):
-	width = context.imageSizeX()
-	height = context.imageSizeY()
-	aspect_ratio = float(height * context.aspectRatioY()) / (width * context.aspectRatioX())
-	samples_per_pixel = 1
-	out_file = os.path.splitext(script_path)[0] + os.extsep + "hdr"	
-	out.write(r"""
+	def write_context(self, context):
+		width = context.imageSizeX()
+		height = context.imageSizeY()
+		aspect_ratio = float(height * context.aspectRatioY()) / (width * context.aspectRatioX())
+		samples_per_pixel = 1
+		out_file = os.path.splitext(self.script_path)[0] + ".hdr"	
+		self.script_file.write(r"""
 width = %s
 height = %s
 samples_per_pixel = %s
@@ -429,8 +530,8 @@ target = liar.output.Image(out_file, (width, height))
 
 
 
-def write_header(out, script_path):
-	out.write(r"""
+	def write_header(self):
+		self.script_file.write(r"""
 #! /usr/bin/python
 
 # Exported from Blender by liar_export
@@ -445,11 +546,25 @@ materials = {}
 textures = {}
 images = {}
 
-zip_path = "%s"
+archive_dir = "%s"
+zip_path = archive_dir + ".zip"
 if os.path.exists(zip_path):
 	import ziplib
-	import liar.tools.wavefront_obj
-	zip = zipfile.ZipFile(zip_path, 'r')
+	zip_file = zipfile.ZipFile(zip_path, 'r')
+else:
+	zip_file = None
+
+def load_from_archive(file_name):
+	file_path = os.path.join(archive_dir, file_name)
+	if os.path.exists(file_path):
+		return file(file_path).read()
+	if zip_file:
+		return zip_file.read(file_name)
+	raise IOError, "file '%s' not found, nor in archive directory '%s', nor in zip file '%'" % (file_name, archive_dir, zip_path)
+
+def load_face_groups_from_archive(mesh_file):
+	obj = load_from_archive(mesh_file).splitlines()
+	return liar.tools.wavefront_obj.decode(obj)
 
 def int_or_none(s):
 	try:
@@ -464,59 +579,55 @@ def fix_path(path):
 		path = path.replace(os.path.altsep, os.path.sep)
 	return path
 
-def load_face_groups_from_zip(mesh_file):
-	obj = zip.read(mesh_file).splitlines()
-	return liar.tools.wavefront_obj.decode(obj)
-
 def group_scenery(scenery_objects):
 	assert len(scenery_objects) > 0
 	if len(scenery_objects) == 1:
 		return scenery_objects[0]
 	else:
 		return liar.scenery.AabpTree(scenery_objects)
-""")
+""" % self.archive_name)
 
 
 
-def write_body(out, script_path):
-	object_writers = {
-		'Mesh': write_mesh,
-		'Lamp': write_lamp,
-		'Camera': write_camera
-		}
-		
-	scene = Blender.Scene.GetCurrent()
-	children = scene.getChildren()
-	num_children = len(children)
-	
-	for obj, i in zip(children, range(num_children)):
-		obj_type = obj.getType()
-		obj_name = obj.getName()
-		print "- object '%s' of type '%s'" % (obj_name, obj_type)
-		obj_materials = obj.getMaterials()
-		if obj_type in object_writers:              
-			object_writers[obj_type](out, script_path, obj)
-		else:
-			print "WARNING: Did not recognize object type '%s'" % obj_type
+	def write_body(self):
+		object_writers = {
+			'Mesh': LiarExporter.write_mesh,
+			'Lamp': LiarExporter.write_lamp,
+			'Camera': LiarExporter.write_camera
+			}
 			
-		ipo = obj.getIpo()
-		if ipo:
-			print ipo
-			print ipo.getName()
-			for curve in ipo.getCurves():
-				print curve
-				print curve.getPoints()
+		scene = Blender.Scene.GetCurrent()
+		children = scene.getChildren()
+		num_children = len(children)
+		
+		for obj, i in zip(children, range(num_children)):
+			obj_type = obj.getType()
+			obj_name = obj.getName()
+			print "- object '%s' of type '%s'" % (obj_name, obj_type)
+			obj_materials = obj.getMaterials()
+			if obj_type in object_writers:              
+				object_writers[obj_type](self, obj)
+			else:
+				print "WARNING: Did not recognize object type '%s'" % obj_type
 				
-		draw_progress(float(i+1) / num_children)
+			ipo = obj.getIpo()
+			if ipo:
+				print ipo
+				print ipo.getName()
+				for curve in ipo.getCurves():
+					print curve
+					print curve.getPoints()
+					
+			self.draw_progress(float(i+1) / num_children)
+
+				
+		context = scene.getRenderingContext()
+		self.write_context(context)
+			
 
 			
-	context = scene.getRenderingContext()
-	write_context(out, script_path, context)
-		
-
-		
-def write_footer(out, script_path):
-	out.write('''
+	def write_footer(self):
+		self.script_file.write('''
 engine = liar.RenderEngine()
 engine.tracer = liar.tracers.DirectLighting()
 engine.sampler = sampler
@@ -530,36 +641,37 @@ if __name__ == "__main__":
 
 
 
-def draw_progress(progress):
-	Blender.Window.DrawProgressBar(float(progress), "Exporting scene to LiAR [%3d%%]" % int(100 * progress))
-
-
-def export(script_path, zip_path):
-	print "Exporting to LiAR '%s' ..." % script_path
-	draw_progress(0)
-	
-	if os.path.exists(zip_path):
-		os.remove(zip_path)
-
-	out = open(script_path, 'w')
-	write_header(out, script_path)
-	write_body(out, script_path)
-	write_footer(out, script_path)
-	out.close()
-
-	draw_progress(1)
-	print "Done ..."
+	def draw_progress(self, progress):
+		Blender.Window.DrawProgressBar(float(progress), "Exporting scene to LiAR [%3d%%]" % int(100 * progress))
 
 
 
-def export_callback(script_path):
-	zip_path = os.path.splitext(script_path)[0] + os.extsep + "zip"
-	if os.path.exists(script_path) or os.path.exists(zip_path):
-		if not Blender.Draw.PupMenu("Overwrite File %s and/or %s?%%t|Yes%%x1|No%%x0" % (script_path, zip_path)):
-			return
-	export(script_path, zip_path)
+	def export(self):
+		if os.path.exists(self.script_path):
+			if not Blender.Draw.PupMenu("Overwrite File?%t|Yes%x1|No%x0"):
+				return
+			
+		print "Exporting to LiAR '%s' ..." % self.script_path
+		self.draw_progress(0)
+		
+		self.script_file = file(self.script_path, 'w')
+		self.write_header()
+		self.write_body()
+		self.write_footer()
+		self.script_file.close()
+
+		self.draw_progress(1)
+		print "Done ..."
 
 
 
-suggested_filename = os.path.splitext(Blender.Get('filename'))[0] + os.extsep + "liar" + os.extsep + "py"
+def export_callback(script_path):   
+	exporter = LiarExporter(script_path)
+	exporter.export()
+
+
+suggested_basename = os.path.splitext(Blender.Get('filename'))[0]
+if suggested_basename == '<memory>':
+	suggested_basename = 'untitled'
+suggested_filename = suggested_basename + ".liar.py"
 Blender.Window.FileSelector(export_callback, "Export to LiAR", suggested_filename)
