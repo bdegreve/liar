@@ -35,6 +35,8 @@
 #include "../kernel/render_target.h"
 #include "../kernel/rgb_space.h"
 #include <lass/prim/aabb_2d.h>
+#include <lass/stde/extended_string.h>
+#include <lass/util/dictionary.h>
 #include <lass/util/scoped_ptr.h>
 #include <lass/util/thread.h>
 
@@ -60,14 +62,18 @@ public:
 
 	const std::string& title() const;
 	const TRgbSpacePtr& rgbSpace() const;
+	const std::string toneMapping() const;
 	const TScalar exposure() const;
-	const TScalar fStops() const;
-	const TScalar gain() const;
+	const TScalar exposureCorrection() const;
+	const bool autoExposure() const;
+	const TScalar middleGrey() const;
 
 	void setRgbSpace(const TRgbSpacePtr& rgbSpace);
-	void setExposure(TScalar exposure);
-	void setFStops(TScalar fStops);
-	void setGain(TScalar gain);
+	void setToneMapping(const std::string& mode);
+	void setExposure(TScalar fStops);
+	void setExposureCorrection(TScalar stops);
+	void setAutoExposure(bool enable = true);
+	void setMiddleGrey(TScalar grey);
 
 	void testGammut();
 
@@ -77,6 +83,16 @@ private:
 	typedef std::vector<TScalar> TWeightBuffer;
 	typedef std::vector<PixelToaster::FloatingPointPixel> TDisplayBuffer;
 	typedef prim::Aabb2D<unsigned> TDirtyBox;
+
+	enum ToneMapping
+	{
+		tmLinear = 0,
+		tmCompressY,
+		tmExponentialY,
+		tmExponentialXYZ,
+		numToneMapping
+	};
+	typedef util::Dictionary<std::string, ToneMapping> TToneMappingDictionary;
 
 	const TResolution2D doResolution() const;
 	void doBeginRender();
@@ -89,9 +105,10 @@ private:
 
 	void displayLoop();
 	void copyToDisplayBuffer();
-	void waitForAnyKey();
+	const std::string makeTitle() const;
 
-	PixelToaster::Display display_;
+	static TToneMappingDictionary makeToneMappingDictionary();
+
 	Listener listener_;
 	TRenderBuffer renderBuffer_;
 	TWeightBuffer totalWeight_;
@@ -102,13 +119,22 @@ private:
 	std::string title_;
 	TDirtyBox renderDirtyBox_;
 	TDirtyBox displayDirtyBox_;
+	TDirtyBox allTimeDirtyBox_;
 	TResolution2D resolution_;
 	TRgbSpacePtr rgbSpace_;
-	TScalar exposure_;
+	TScalar totalLogSceneLuminance_;
+	int sceneLuminanceCoverage_;
 	TScalar gain_;
+	TScalar middleGrey_;
+	int exposure_;
+	int exposureCorrection_;
+	ToneMapping toneMapping_;
+	bool autoExposure_;
+	bool refreshTitle_;
 	volatile bool isQuiting_;
 	volatile bool isCanceling_;
-	volatile bool isAnyKeyed_;
+
+	static TToneMappingDictionary toneMappingDictionary_;
 };
 
 

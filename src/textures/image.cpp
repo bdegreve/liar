@@ -284,7 +284,7 @@ void Image::makeMipMaps(MipMapping mode) const
 
 		case mmIsotropic:
 			numLevelsU = static_cast<unsigned>(num::floor(num::log2(
-				static_cast<TScalar>(std::max(resolution_.x, resolution_.y)))));
+				static_cast<TScalar>(std::max(resolution_.x, resolution_.y))))) + 1;
 			numLevelsV = 1;
 			for (unsigned i = 1; i < numLevelsU; ++i)
 			{
@@ -404,7 +404,7 @@ Image::MipMapLevel Image::makeMipMapOdd(
 	{
 		const unsigned k0 = 2 * k;
 		const unsigned k1 = k0 + 1;
-		const unsigned k2 = k1 + 2;
+		const unsigned k2 = k0 + 2;
 		const TScalar w0 = scale * (newSize - k);
 		const TScalar w1 = scale * newSize; 
 		const TScalar w2 = scale * (k + 1);

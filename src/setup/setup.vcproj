@@ -59,28 +59,6 @@
 				CommandLine="python.exe &quot;$(ProjectDir)setup.py&quot; $(ConfigurationName)&#x0D;&#x0A;mkdir &quot;$(ProjectDir)..\..\dist&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)dist\liar-0.2.0.win32.exe&quot; &quot;$(ProjectDir)..\..\dist&quot; /Y&#x0D;&#x0A;&quot;$(ProjectDir)..\..\dist\liar-0.2.0.win32.exe&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
-		<Configuration
-			Name="Release with Symbols|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="10"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="python.exe &quot;$(ProjectDir)setup.py&quot; $(ConfigurationName)&#x0D;&#x0A;mkdir &quot;$(ProjectDir)..\..\dist&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)dist\liar-0.2.0.win32.exe&quot; &quot;$(ProjectDir)..\..\dist&quot; /Y&#x0D;&#x0A;&quot;$(ProjectDir)..\..\dist\liar-0.2.0.win32.exe&quot;&#x0D;&#x0A;"
-			/>
-		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -108,15 +86,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine=""
-						Outputs=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release with Symbols|Win32"
 					>
 					<Tool
 						Name="VCCustomBuildTool"

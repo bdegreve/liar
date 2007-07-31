@@ -21,8 +21,8 @@
  *  http://liar.bramz.org
  */
 
-#if LIAR_HAVE_CONFIG_H
-#	include "../config.h"
+#if LIAR_HAVE_LOCAL_CONFIG_H
+#	include "../local_config.h"
 #endif
 
 #if LIAR_HAVE_PIXELTOASTER_H

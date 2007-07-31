@@ -23,9 +23,9 @@ import liar.textures
 import math
 
 def load(filename):
-	return decode(file(filename))
+	return decode(file(filename), filename)
 
-def decode(lines):
+def decode(lines, filename = ""):
 	vertices = []
 	normals = []
 	uvs = []
