@@ -127,6 +127,13 @@ const bool Display::autoExposure() const
 
 
 
+const TScalar Display::middleGrey() const
+{
+	return middleGrey_;
+}
+
+
+
 void Display::setRgbSpace(const TRgbSpacePtr& rgbSpace)
 {
 	rgbSpace_ = rgbSpace;
@@ -210,6 +217,13 @@ void Display::setAutoExposure(bool enable)
 	}
 	autoExposure_ = enable;
 	refreshTitle_ = true;
+}
+
+
+
+void Display::setMiddleGrey(TScalar level)
+{
+	middleGrey_ = level;
 }
 
 

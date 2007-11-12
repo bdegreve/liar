@@ -47,26 +47,27 @@ namespace kernel
 
 namespace impl
 {
-	template <typename VisitableType>
 	struct TryParent
 	{
-		static void onUnknownVisitor(VisitableType& iVisited, util::VisitorBase& iVisitor)
+		template <typename VisitableType>
+		static void onUnknownPreVisit(util::VisitorBase& visitor, VisitableType& visited)
 		{
-			VisitableType::doVisit(
-				static_cast<typename VisitableType::_lassPyParentType&>(iVisited), iVisitor);
+			VisitableType::preAccept(
+				visitor, static_cast<typename VisitableType::_lassPyParentType&>(visited));
 		}
-		static void onUnknownVisitorOnExit(VisitableType& iVisited, util::VisitorBase& iVisitor)
+		static void onUnknownPreVisit(util::VisitorBase&, SceneObject&) 
 		{
-			VisitableType::doVisitOnExit(
-				static_cast<typename VisitableType::_lassPyParentType&>(iVisited), iVisitor);
 		}
-	};
-	
-	template <> 
-	struct TryParent<SceneObject>
-	{
-		static void onUnknownVisitor(SceneObject&, util::VisitorBase&) {}
-		static void onUnknownVisitorOnExit(SceneObject&, util::VisitorBase&) {}
+
+		template <typename VisitableType>
+		static void onUnknownPostVisit(util::VisitorBase& visitor, VisitableType& visited)
+		{
+			VisitableType::postAccept(
+				visitor, static_cast<typename VisitableType::_lassPyParentType&>(visited));
+		}
+		static void onUnknownPostVisit(util::VisitorBase&, SceneObject&) 
+		{
+		}
 	};
 }
 
@@ -138,7 +139,7 @@ protected:
 
 private:
 
-	LASS_UTIL_ACCEPT_VISITOR;
+	LASS_UTIL_VISITOR_DO_ACCEPT;
 	
 	virtual void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
 	virtual void doIntersect(const Sample& sample, const BoundedRay& ray, 
@@ -181,7 +182,7 @@ namespace impl
 	public:
 		ForAllVisitor(Functor fun): functor_(fun) {}
 	private:
-		void doVisit(SceneObject& object) { functor_(object); }
+		void doPreVisit(SceneObject& object) { functor_(object); }
 		Functor functor_;
 	};
 	
@@ -191,7 +192,7 @@ namespace impl
 	public:
 		ForUniqueVisitor(Functor fun): functor_(fun) {}
 	private:
-		void doVisit(SceneObject& object)
+		void doPreVisit(SceneObject& object)
 		{
 			if (visited_.count(&object) == 0)
 			{

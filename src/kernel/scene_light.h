@@ -86,7 +86,7 @@ protected:
 
 private:
 
-	LASS_UTIL_ACCEPT_VISITOR;
+	LASS_UTIL_VISITOR_DO_ACCEPT;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);

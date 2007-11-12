@@ -44,7 +44,7 @@
 #   define LIAR_KERNEL_DLL LASS_DLL_EXPORT
 #else
 #   define LIAR_KERNEL_DLL LASS_DLL_IMPORT
-#   pragma comment(lib, "kernel" LIAR_LIB_SUFFIX ".lib")
+#   pragma comment(lib, "libkernel" LIAR_LIB_SUFFIX ".lib")
 #endif
 
 // maybe Bill Gates likes to global lock iterator operations, but I don't.

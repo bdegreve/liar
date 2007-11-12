@@ -73,13 +73,13 @@ void AabbTree::add(const TChildren& children)
 
 void AabbTree::doAccept(util::VisitorBase& visitor)
 {
-	doVisit(*this, visitor);
+	preAccept(visitor, *this);
 	const TChildren::const_iterator end = children_.end();
     for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
     {
         (*i)->accept(visitor);
     }
-	doVisitOnExit(*this, visitor);
+	postAccept(visitor, *this);
 }
 
 

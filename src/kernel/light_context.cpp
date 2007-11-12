@@ -190,20 +190,20 @@ namespace impl
 		}
 	private:
 	  
-		void doVisit(SceneObject& object)
+		void doPreVisit(SceneObject& object)
 		{
 			objectPath_.push_back(python::fromNakedToSharedPtrCast<SceneObject>(&object));
 		}
-		void doVisit(SceneLight& light)
+		void doPreVisit(SceneLight& light)
 		{
 			objectPath_.push_back(python::fromNakedToSharedPtrCast<SceneObject>(&light));
 			lights_.push_back(LightContext(objectPath_, light));
 		}
-		void doVisitOnExit(SceneObject& object)
+		void doPostVisit(SceneObject& object)
 		{
 			objectPath_.pop_back();
 		}
-		void doVisitOnExit(SceneLight& light)
+		void doPostVisit(SceneLight& light)
 		{
 			objectPath_.pop_back();
 		}

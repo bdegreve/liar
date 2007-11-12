@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="kernel"
-	ProjectGUID="{7EDECEE0-95E0-4A42-ABFB-FF389886DA2F}"
+	Name="libkernel"
+	ProjectGUID="{31EB0390-3F85-4299-A397-403500E543FA}"
 	RootNamespace="kernel"
 	Keyword="Win32Proj"
 	>
@@ -43,7 +43,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				OmitFramePointers="false"
-				PreprocessorDefinitions="LIAR_HAVE_LOCAL_CONFIG_H;WIN32;_DEBUG;_USRDLL"
+				PreprocessorDefinitions="LIAR_KERNEL_BUILD_DLL;LIAR_HAVE_LOCAL_CONFIG_H;WIN32;_DEBUG;_USRDLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="3"
@@ -52,6 +52,8 @@
 				TreatWChar_tAsBuiltInType="true"
 				ForceConformanceInForLoopScope="true"
 				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="kernel_common.h"
 				ProgramDataBaseFileName="$(IntDir)/$(TargetName).pdb"
 				BrowseInformation="1"
 				WarningLevel="3"
@@ -69,7 +71,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/$(ProjectName)_d.pyd"
+				OutputFile="$(OutDir)/$(ProjectName)_d.dll"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)\$(TargetName).pdb"
@@ -132,11 +134,13 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				PreprocessorDefinitions="LIAR_HAVE_LOCAL_CONFIG_H;WIN32;NDEBUG;_USRDLL"
+				PreprocessorDefinitions="LIAR_KERNEL_BUILD_DLL;LIAR_HAVE_LOCAL_CONFIG_H;WIN32;NDEBUG;_USRDLL"
 				RuntimeLibrary="2"
 				EnableEnhancedInstructionSet="2"
 				FloatingPointModel="2"
 				DefaultCharIsUnsigned="true"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="kernel_common.h"
 				ProgramDataBaseFileName="$(IntDir)/$(TargetName).pdb"
 				BrowseInformation="0"
 				WarningLevel="3"
@@ -154,7 +158,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/$(ProjectName).pyd"
+				OutputFile="$(OutDir)/$(ProjectName).dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
@@ -197,7 +201,123 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\kernel_init.cpp"
+				RelativePath=".\attenuation.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\bounded_ray.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\camera.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\differential_ray.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\image_codec.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\intersection.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\intersection_context.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\kernel_common.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\light_context.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\light_sample.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\medium.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\output_sample.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ray_tracer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\render_engine.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\render_target.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\rgb_space.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\sample.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\sampler.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\scene_light.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\scene_object.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\scene_object.inl"
+				>
+			</File>
+			<File
+				RelativePath=".\shader.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\spectrum.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\spectrum.inl"
+				>
+			</File>
+			<File
+				RelativePath=".\spectrum_format.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\texture.cpp"
 				>
 			</File>
 		</Filter>
@@ -206,6 +326,114 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\attenuation.h"
+				>
+			</File>
+			<File
+				RelativePath=".\bounded_ray.h"
+				>
+			</File>
+			<File
+				RelativePath=".\camera.h"
+				>
+			</File>
+			<File
+				RelativePath=".\config.h"
+				>
+			</File>
+			<File
+				RelativePath=".\differential_ray.h"
+				>
+			</File>
+			<File
+				RelativePath=".\image_codec.h"
+				>
+			</File>
+			<File
+				RelativePath=".\intersection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\intersection_context.h"
+				>
+			</File>
+			<File
+				RelativePath=".\kernel_common.h"
+				>
+			</File>
+			<File
+				RelativePath=".\light_context.h"
+				>
+			</File>
+			<File
+				RelativePath=".\light_sample.h"
+				>
+			</File>
+			<File
+				RelativePath=".\medium.h"
+				>
+			</File>
+			<File
+				RelativePath=".\output_sample.h"
+				>
+			</File>
+			<File
+				RelativePath=".\per_thread_buffer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ray_tracer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\render_engine.h"
+				>
+			</File>
+			<File
+				RelativePath=".\render_target.h"
+				>
+			</File>
+			<File
+				RelativePath=".\rgb_space.h"
+				>
+			</File>
+			<File
+				RelativePath=".\sample.h"
+				>
+			</File>
+			<File
+				RelativePath=".\sampler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\scene_light.h"
+				>
+			</File>
+			<File
+				RelativePath=".\scene_object.h"
+				>
+			</File>
+			<File
+				RelativePath=".\shader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\solid_event.h"
+				>
+			</File>
+			<File
+				RelativePath=".\spectrum.h"
+				>
+			</File>
+			<File
+				RelativePath=".\texture.h"
+				>
+			</File>
+			<File
+				RelativePath=".\time_period.h"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

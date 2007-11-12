@@ -97,7 +97,7 @@ PY_MODULE_FUNCTION(kernel, imageCodecs)
 
 extern "C"
 {
-void LIAR_KERNEL_DLL initkernel(void)
+void LASS_DLL_EXPORT initkernel(void)
 {
 	lass::util::setProcessPriority(lass::util::ppBelowNormal);
 #ifndef _DEBUG

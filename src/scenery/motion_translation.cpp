@@ -69,9 +69,9 @@ void MotionTranslation::setChild(const TSceneObjectPtr& child)
 
 void MotionTranslation::doAccept(util::VisitorBase& visitor)
 {
-    doVisit(*this, visitor);
+    preAccept(visitor, *this);
     child_->accept(visitor);
-	doVisitOnExit(*this, visitor);
+	postAccept(visitor, *this);
 }
 
 

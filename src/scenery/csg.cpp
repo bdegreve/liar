@@ -114,10 +114,10 @@ void Csg::setOperation(const std::string& iOperation)
 
 void Csg::doAccept(util::VisitorBase& visitor)
 {
-    doVisit(*this, visitor);
+    preAccept(visitor, *this);
     childA_->accept(visitor);
     childB_->accept(visitor);
-	doVisitOnExit(*this, visitor);
+	postAccept(visitor, *this);
 }
 
 

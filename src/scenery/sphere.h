@@ -57,7 +57,7 @@ private:
 
     typedef prim::Sphere3D<TScalar> TSphere3D;
 
-    LASS_UTIL_ACCEPT_VISITOR
+    LASS_UTIL_VISITOR_DO_ACCEPT
     
 	void doIntersect(const Sample& sample, const BoundedRay& ray, 
 		Intersection& result) const;

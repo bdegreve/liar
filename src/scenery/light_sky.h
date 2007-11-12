@@ -60,7 +60,7 @@ private:
 
 	typedef std::vector<TScalar> TMap;
 
-    LASS_UTIL_ACCEPT_VISITOR;
+    LASS_UTIL_VISITOR_DO_ACCEPT;
 
 	void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
 

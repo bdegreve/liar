@@ -174,8 +174,8 @@ private:
 		static const TPoint aabbMax(const TAabb& aabb) { return aabb.max(); }
 		static const TPoint raySupport(const TRay& ray) { return ray.support();	}
 		static const TVector rayDirection(const TRay& ray) {	return ray.direction(); }
-		static const TValue pointCoordinate(const TPoint& point, size_t axis) { return point[axis]; }
-		static const TValue pointComponent(const TVector& vector, size_t axis) { return vector[axis]; }
+		static const TValue coord(const TPoint& point, size_t axis) { return point[axis]; }
+		static const TValue coord(const TVector& vector, size_t axis) { return vector[axis]; }
 		static const TVector vectorReciprocal(const TVector& vector) { return vector.reciprocal();	}
 	};
 

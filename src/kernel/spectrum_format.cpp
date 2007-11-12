@@ -238,7 +238,7 @@ SpectrumFormat::centresFromBoundaries(const TWavelengths& iBoundaries) const
 	}
 
 	TWavelengths result;
-	const TWavelengths::const_iterator end = stde::prior(iBoundaries.end());
+	const TWavelengths::const_iterator end = stde::prev(iBoundaries.end());
 	for (TWavelengths::const_iterator i = iBoundaries.begin(); i != end; ++i)
 	{
 		result.push_back(((*i) + (*stde::next(i))) / 2);
@@ -260,7 +260,7 @@ SpectrumFormat::xyzWeightsFromBoundaries(const TWavelengths& iBoundaries) const
 	}
 
 	TXyzWeights result;
-	const TWavelengths::const_iterator end = stde::prior(iBoundaries.end());
+	const TWavelengths::const_iterator end = stde::prev(iBoundaries.end());
 	for (TWavelengths::const_iterator i = iBoundaries.begin(); i != end; ++i)
 	{
 		result.push_back(standardObserver_.integral(*i, *stde::next(i)));
@@ -277,7 +277,7 @@ const bool SpectrumFormat::isValidWavelengthSequence(const TWavelengths& iSequen
 		return false;
 	}
 
-	const TWavelengths::const_iterator end = stde::prior(iSequence.end());
+	const TWavelengths::const_iterator end = stde::prev(iSequence.end());
 	for (TWavelengths::const_iterator i = iSequence.begin(); i != end; ++i)
 	{
 		if (*i <= TNumTraits::zero)

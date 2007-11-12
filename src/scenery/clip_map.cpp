@@ -107,9 +107,9 @@ void ClipMap::setThreshold(TScalar threshold)
 
 void ClipMap::doAccept(util::VisitorBase& visitor)
 {
-    doVisit(*this, visitor);
+    preAccept(visitor, *this);
     child_->accept(visitor);
-	doVisitOnExit(*this, visitor);
+	postAccept(visitor, *this);
 }
 
 
