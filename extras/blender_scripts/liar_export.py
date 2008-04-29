@@ -27,13 +27,16 @@ Tooltip: 'Exports Blender scene to LiAR script (.py)'
 """
 
 __author__ = "Bram de Greve (bramz@users.sourceforge.net)"
-__url__ = ("Project homepage, http://liar.bramz.org")
+__url__ = ("Project homepage, http://liar.bramz.net")
 __version__ = "0.0"
 __bpydoc__ = """\
 Exports Blender scene to LiAR script.
 
 Usage: run the script from the menu or inside Blender.  
 """
+
+precision = 7
+
 
 import Blender
 import sys
@@ -96,7 +99,6 @@ except ImportError:
 			return parent, child
 	os.path.split = _split
 	
-precision = 7
 
 
 
@@ -112,10 +114,10 @@ def str_float(f):
 
 
 
-def str_no_none(i):
+def str_index(i):
 	if i == None:
 		return ''
-	return str(i)
+	return str(i + 1)
 
 
 
@@ -124,8 +126,19 @@ def matrix_to_list(matrix):
 
 
 
+def is_identity_matrix(matrix):
+	for i in range(4):
+		for j in range(4):
+			if i == j:
+				if matrix[i][j] != 1:
+					return False
+			else:
+				if matrix[i][j] != 0:
+					return False
+	return True
+
+
 def make_dir(dirname):
-	print "MAKE DIR", dirname
 	if not os.path.exists(dirname):
 		parent, child = os.path.split(dirname)
 		make_dir(parent)
@@ -133,50 +146,49 @@ def make_dir(dirname):
 
 
 
-def compress_mesh(vertices, normals, uvs, face_groups):
-	components = [vertices, normals, uvs]
+def compress_mesh(vertices, uvs, normals, face_groups):
+	components = [vertices, uvs, normals]
 	# determine used components
-	used_components = [{}, {}, {}]
+	used_indices = [{}, {}, {}]
 	for face_group in face_groups:
 		for face in face_group:
 			for vertex in face:
-				for k in range(3):
-					if vertex[k] != None and not vertex[k] in used_components[k]:
-						used_components[k][vertex[k]] = len(used_components[k])
+				for i, UIs in zip(vertex, used_indices):
+					if i != None and not i in UIs:
+						UIs[i] = len(UIs)
 	# compress components
-	sorted_indices = [[(used_components[k][index], index) for index in used_components[k]] for k in range(3)]
-	for k in range(3):
-		sorted_indices[k].sort()
-	compressed_components = [[components[k][index[1]] for index in sorted_indices[k]] for k in range(3)]
+	sorted_indices = [sorted(zip(UIs.values(), UIs.keys())) for UIs in used_indices]
+	compressed_components = [[Cs[j] for i, j in SIs] for Cs, SIs in zip(components, sorted_indices)]
 	# rebuild faces
-	for k in range(3):
-		used_components[k][None] = None
-	rebuilt_face_groups = [[tuple([tuple([used_components[k][vertex[k]] for k in range(3)]) for vertex in face]) for face in face_group] for face_group in face_groups]
+	for UIs in used_indices:
+		UIs[None] = None
+	rebuilt_face_groups = [[[[UIs[i] for i, UIs in zip(v, used_indices)] for v in F] for F in FG] for FG in face_groups]
 	# done!
 	return compressed_components + [rebuilt_face_groups]
 
 
 
 def encode_mesh_to_obj(vertices, normals, uvs, face_groups):
-	vertices, normals, uvs, face_groups = compress_mesh(vertices, normals, uvs, face_groups)
+	vertices, uvs, normals, face_groups = compress_mesh(vertices, normals, uvs, face_groups)
 
 	lines = ["# --- vertices ---"]
 	for vert in vertices:
 		lines += ["v %s" % ' '.join(map(str_float, vert))]
 	
-	lines += ["", "# --- normals ---"]
-	for normal in normals:
-		lines += ["vn %s" % ' '.join(map(str_float, normal))]
-	
 	lines += ["", "# --- uvs ---"]
 	for uv in uvs:
 		lines += ["vt %s" % ' '.join(map(str_float, uv))]
+	
+	lines += ["", "# --- normals ---"]
+	for normal in normals:
+		lines += ["vn %s" % ' '.join(map(str_float, normal))]
 	
 	lines += ["", "# --- face groups ---"]
 	for face_group in face_groups:
 		lines += ["g"]
 		for face in face_group:
-			lines += ["f %s" % ' '.join(map(str_no_none, face))]
+			verts = ['/'.join(map(str_index, vert)).rstrip('/') for vert in face]
+			lines += ["f %s" % ' '.join(verts)]
 			
 	return '\n'.join(lines)
 
@@ -197,11 +209,12 @@ class LiarExporter(object):
 
 
 
-	def write_to_archive(self, filename, content):        
+	def write_to_archive(self, filename, content): 
+		print "ARCHIVE NAME", self.archive_name
 		if self.is_compressing_archive:
 			try:
 				import zipfile
-				if isset(self.zip_file):
+				if not isset(self.zip_file):
 					zip_name = self.archive_name + ".zip"
 					if os.path.exists(self.zip_name):
 						os.remove(self.zip_name)
@@ -281,34 +294,50 @@ textures['TE:%s'] = liar.Texture.black()
 			return
 		self.materials[material.name] = True
 			
-		diffuse = "liar.textures.Constant(liar.rgb%s)" % (tuple([x * material.ref for x in material.rgbCol]),)
-		specular = "liar.textures.Constant(liar.rgb%s)" % (tuple([x * material.spec for x in material.specCol]),)
-		specular_power = "liar.textures.Constant(%s)" % material.hard
-		reflectance = "liar.textures.Constant(liar.rgb%s)" % (tuple([x * material.spec for x in material.mirCol]),)
+		diffuse = tuple([x * material.ref for x in material.rgbCol])
+		specular = tuple([x * material.spec for x in material.specCol])
+		specular_power = material.hard
+		reflectance = tuple([x * material.spec for x in material.mirCol])
+		
+		diffuse_tex = "liar.textures.Constant(liar.rgb%s)" % (diffuse,)
+		if max(specular) > 0:
+			specular_tex = "liar.textures.Constant(liar.rgb%s)" % (specular,)
+		else:
+			specular_tex = None
+		specular_power_tex = "liar.textures.Constant(%s)" %specular_power
+		#reflectance_tex = "liar.textures.Constant(liar.rgb%s)" % (reflectance,)
 
 		for texture in material.getTextures():
 			if texture:
 				self.write_texture(texture.tex)
 				s = "textures['TE:%s']" % texture.tex.name
 				if texture.mapto & Blender.Texture.MapTo['COL']:
-					diffuse = s
+					diffuse_tex = s
 				if texture.mapto & Blender.Texture.MapTo['CSP']:
-					specular = s
+					specular_tex = s
 				if texture.mapto & Blender.Texture.MapTo['HARD']:
-					specular_power = s
+					specular_power_tex = s
 				if texture.mapto & Blender.Texture.MapTo['CMIR']:
-					reflectance = s
+					reflectance_tex = s
 
-		self.script_file.write(r"""
-# --- mesh MA:%s ---
+		if specular_tex:
+			self.script_file.write(r"""
+# --- material MA:%s ---
 
-material = liar.shaders.Simple()
+material = liar.shaders.AshikhminShirley()
 material.diffuse = %s
 material.specular = %s
-material.specularPower = %s
-material.reflectance = %s
+material.specularPowerU = material.specularPowerV = %s
 materials['MA:%s'] = material
-""" % (material.name, diffuse, specular, specular_power, reflectance, material.name))
+""" % (material.name, diffuse_tex, specular_tex, specular_power_tex, material.name))
+		else:
+			self.script_file.write(r"""
+# --- material MA:%s ---
+
+material = liar.shaders.Lambert()
+material.diffuse = %s
+materials['MA:%s'] = material
+""" % (material.name, diffuse_tex, material.name))		
 				
 
 
@@ -316,6 +345,7 @@ materials['MA:%s'] = material
 		mesh = obj.getData(False, True)
 		if mesh.name in self.meshes:
 			return
+		print dir(mesh)
 		self.meshes[mesh.name] = True
 
 		num_materials = len(mesh.materials)
@@ -328,11 +358,11 @@ materials['MA:%s'] = material
 		
 		# extract vertices, normals and uvs
 		vertices = [tuple([mvert.co[k] for k in range(3)]) for mvert in mesh.verts]
-		normals = [tuple([mvert.no[k] for k in range(3)]) for mvert in mesh.verts]
 		if mesh.vertexUV:
 			uvs = [tuple([mvert.uvco[k] for k in range(3)]) for mvert in mesh.verts]
 		else:
 			uvs = []
+		normals = [tuple([mvert.no[k] for k in range(3)]) for mvert in mesh.verts]
 		
 		# extract faces per material
 		face_groups = [[] for i in xrange(num_materials)]
@@ -341,13 +371,7 @@ materials['MA:%s'] = material
 			assert(size == 3 or size == 4)
 			
 			faceVerts = [mvert.index for mvert in face.verts]
-			
-			if face.smooth:
-				faceNormals = faceVerts
-			else:
-				normals.append(tuple([face.no[k] for k in range(3)]))
-				faceNormals = size * [len(normals) - 1]
-			
+						
 			if mesh.vertexUV:
 				faceUvs = faceVerts
 			elif mesh.faceUV:
@@ -358,8 +382,14 @@ materials['MA:%s'] = material
 					faceUvs.append(len(uvs) - 1)
 			else:
 				faceUvs = size * [None]
+
+			if face.smooth:
+				faceNormals = faceVerts
+			else:
+				normals.append(tuple([face.no[k] for k in range(3)]))
+				faceNormals = size * [len(normals) - 1]
 			
-			indices = zip(faceVerts, faceNormals, faceUvs)
+			indices = zip(faceVerts, faceUvs, faceNormals)
 			
 			assert(face.mat >= 0 and face.mat < num_materials)
 			for k in range(size - 2):
@@ -377,7 +407,7 @@ materials['MA:%s'] = material
 		
 		# write groups to zip
 		file_name = mesh.name + ".obj"
-		content = encode_mesh_to_obj(vertices, normals, uvs, [face_groups[i] for i in used_groups])
+		content = encode_mesh_to_obj(vertices, uvs, normals, [face_groups[i] for i in used_groups])
 		self.write_to_archive(file_name, "# --- %s ---\n\n%s" % (mesh.name, content))
 		
 		self.script_file.write("""
@@ -391,7 +421,14 @@ face_groups = load_face_groups_from_archive("%s")
 		self.script_file.write("meshes['ME:%s'] = group_scenery(face_groups)\n" % mesh.name)
 
 		obj_matrix = matrix_to_list(obj.matrix)
-		self.script_file.write(r"""
+		if is_identity_matrix(obj_matrix):
+			self.script_file.write(r"""
+# --- object OB:%s ---
+
+objects['OB:%s'] = meshes['ME:%s']
+""" % (obj.name, obj.name, mesh.name))
+		else:
+			self.script_file.write(r"""
 # --- object OB:%s ---
 
 matrix = %s
@@ -422,7 +459,7 @@ objects['OB:%s'] = liar.scenery.Transformation(meshes['ME:%s'], matrix)
 light = liar.scenery.LightPoint()
 light.position = (0, 0, 0)
 light.intensity = liar.rgb%s
-light.attenuation = liar.scenery.Attenuation(0, %s, %s)
+light.attenuation = liar.Attenuation(0, %s, %s)
 lamps['LA:%s'] = light
 """ % (intensity, attLin, attSqr, lamp.name))
 
@@ -448,7 +485,7 @@ light = liar.scenery.LightSpot()
 light.position = (0, 0, 0)
 light.direction = (0, 0, -1)
 light.intensity = liar.rgb%s
-light.attenuation = liar.scenery.Attenuation(0, %s, %s)
+light.attenuation = liar.Attenuation(0, %s, %s)
 light.outerAngle = liar.radians(%s)
 light.innerAngle = liar.radians(%s)
 lamps['LA:%s'] = light
@@ -493,12 +530,14 @@ objects['OB:%s'] = liar.scenery.Transformation(lamps['LA:%s'], matrix)
 		type = ('PerspectiveCamera', 'OrthographicCamera')[camera.getType()]
 		position = obj.getLocation()
 		matrix = obj.matrix
-		direction = [-matrix[2][k] for k in range(3)]
-		right = [matrix[0][k] for k in range(3)]
-		down = [-matrix[1][k] for k in range(3)]
-		fov = 2. * math.atan(16. / camera.lens)
+		direction = tuple([-matrix[2][k] for k in range(3)])
+		right = tuple([matrix[0][k] for k in range(3)])
+		down = tuple([-matrix[1][k] for k in range(3)])
+		fov = camera.angle * math.pi / 180
+		focus_dist = camera.dofDist
+		f_stop = 5 # when will this be available from the Python API?
 		self.script_file.write(r"""
-# --- camera ---
+# --- camera CA:%s ---
 
 camera = liar.cameras.%s()
 camera.position = %s
@@ -506,14 +545,17 @@ camera.direction = %s
 camera.right = %s
 camera.down = %s
 camera.fovAngle = %s
-""" % (type, position, direction, right, down, fov))
+camera.focusDistance = %s
+camera.fNumber = %s
+cameras['CA:%s'] = camera
+""" % (camera.name, type, position, direction, right, down, fov, focus_dist, f_stop, camera.name))
 
 
 
 	def write_context(self, context):
 		width = context.imageSizeX()
 		height = context.imageSizeY()
-		aspect_ratio = float(height * context.aspectRatioY()) / (width * context.aspectRatioX())
+		aspect_ratio = float(width * context.aspectRatioX()) / (height * context.aspectRatioY())
 		samples_per_pixel = 1
 		out_file = os.path.splitext(self.script_path)[0] + ".hdr"	
 		self.script_file.write(r"""
@@ -523,16 +565,26 @@ samples_per_pixel = %s
 aspect_ratio = %s
 out_file = fix_path(r"%s")
 
-camera.aspectRatio = aspect_ratio
+for cam in cameras.values():
+	cam.aspectRatio = aspect_ratio
 sampler = liar.samplers.Stratifier((width, height), samples_per_pixel)
 target = liar.output.Image(out_file, (width, height))
+
+try:
+	Display = liar.output.Display
+except:
+	print "no display output possible, unsupported by liar installation"
+else:
+	w = min(width, 400)
+	h = int(w * height / float(width))
+	display = Display(out_file, (w, h))
+	target = liar.output.Splitter([target, display])
 """ % (width, height, samples_per_pixel, aspect_ratio, out_file))
 
 
 
 	def write_header(self):
-		self.script_file.write(r"""
-#! /usr/bin/python
+		self.script_file.write(r"""#! /usr/bin/python
 
 # Exported from Blender by liar_export
 import liar
@@ -546,7 +598,7 @@ materials = {}
 textures = {}
 images = {}
 
-archive_dir = "%s"
+archive_dir = r"%s"
 zip_path = archive_dir + ".zip"
 if os.path.exists(zip_path):
 	import ziplib
@@ -560,9 +612,10 @@ def load_from_archive(file_name):
 		return file(file_path).read()
 	if zip_file:
 		return zip_file.read(file_name)
-	raise IOError, "file '%s' not found, nor in archive directory '%s', nor in zip file '%'" % (file_name, archive_dir, zip_path)
+	raise IOError, "file '%%s' not found, nor in archive directory '%%s', nor in zip file '%%s'" %% (file_name, archive_dir, zip_path)
 
 def load_face_groups_from_archive(mesh_file):
+	import liar.tools.wavefront_obj
 	obj = load_from_archive(mesh_file).splitlines()
 	return liar.tools.wavefront_obj.decode(obj)
 
@@ -597,6 +650,7 @@ def group_scenery(scenery_objects):
 			}
 			
 		scene = Blender.Scene.GetCurrent()
+		print dir(scene)
 		children = scene.getChildren()
 		num_children = len(children)
 		
@@ -627,17 +681,19 @@ def group_scenery(scenery_objects):
 
 			
 	def write_footer(self):
+		scene = Blender.Scene.GetCurrent()
+		active_camera = scene.objects.camera.getData().name
 		self.script_file.write('''
 engine = liar.RenderEngine()
 engine.tracer = liar.tracers.DirectLighting()
 engine.sampler = sampler
 engine.scene = liar.scenery.AabpTree(objects.values())
-engine.camera = camera
+engine.camera = cameras['CA:%s']
 engine.target = target
 
 if __name__ == "__main__":
 	engine.render()
-''')
+''' % active_camera)
 
 
 
@@ -673,5 +729,5 @@ def export_callback(script_path):
 suggested_basename = os.path.splitext(Blender.Get('filename'))[0]
 if suggested_basename == '<memory>':
 	suggested_basename = 'untitled'
-suggested_filename = suggested_basename + ".liar.py"
+suggested_filename = suggested_basename + "_liar.py"
 Blender.Window.FileSelector(export_callback, "Export to LiAR", suggested_filename)
