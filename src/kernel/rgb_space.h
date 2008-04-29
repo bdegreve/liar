@@ -66,12 +66,19 @@ public:
 	bool operator==(const RgbSpace& other) const;
 	bool operator!=(const RgbSpace& other) const;
 
+	const TPyObjectPtr reduce() const;
+	const TPyObjectPtr getState() const;
+	void setState(const TPyObjectPtr& state);
+
 	static const TRgbSpacePtr& defaultSpace();
 	static void setDefaultSpace(const TRgbSpacePtr& defaultSpace);
 
+private:
+
 	std::string doPyRepr() const;
 
-private:
+	void init(const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, const TPoint2D& white, TScalar gamma);
+	void enforceChromaticity(const TPoint2D& c, const char* name) const;
 
 	prim::ColorRGBA x_;
 	prim::ColorRGBA y_;
@@ -90,19 +97,19 @@ private:
 };
 
 
-Spectrum rgb(const prim::ColorRGBA& rgb);
-Spectrum rgb(const prim::ColorRGBA& rgb, const TRgbSpacePtr& rgbSpace);
-Spectrum rgb(TScalar red, TScalar green, TScalar blue);
-Spectrum rgb(TScalar red, TScalar green, TScalar blue, const TRgbSpacePtr& rgbSpace);
+LIAR_KERNEL_DLL Spectrum rgb(const prim::ColorRGBA& rgb);
+LIAR_KERNEL_DLL Spectrum rgb(const prim::ColorRGBA& rgb, const TRgbSpacePtr& rgbSpace);
+LIAR_KERNEL_DLL Spectrum rgb(TScalar red, TScalar green, TScalar blue);
+LIAR_KERNEL_DLL Spectrum rgb(TScalar red, TScalar green, TScalar blue, const TRgbSpacePtr& rgbSpace);
 
 /*
-Spectrum rgb(const prim::ColorRGBA& rgb, 
+LIAR_KERNEL_DLL Spectrum rgb(const prim::ColorRGBA& rgb, 
 	const TSpectrumFormatPtr& iSpectrumFormat);
-Spectrum rgb(const prim::ColorRGBA& rgb, const TRgbSpacePtr& rgbSpace, 
+LIAR_KERNEL_DLL Spectrum rgb(const prim::ColorRGBA& rgb, const TRgbSpacePtr& rgbSpace, 
 	const TSpectrumFormatPtr& iSpectrumFormat);
-Spectrum rgb(TScalar red, TScalar green, TScalar blue, 
+LIAR_KERNEL_DLL Spectrum rgb(TScalar red, TScalar green, TScalar blue, 
 	const TSpectrumFormatPtr& iSpectrumFormat);
-Spectrum rgb(TScalar red, TScalar green, TScalar blue, const TRgbSpacePtr& rgbSpace, 
+LIAR_KERNEL_DLL Spectrum rgb(TScalar red, TScalar green, TScalar blue, const TRgbSpacePtr& rgbSpace, 
 	const TSpectrumFormatPtr& iSpectrumFormat);
 */
 

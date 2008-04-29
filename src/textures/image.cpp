@@ -111,13 +111,17 @@ void Image::loadFile(const std::string& filename)
 
 void Image::loadFile(const std::string& filename, const TRgbSpacePtr& rgbSpace)
 {
-	mipMaps_.clear();
-	currentMipMapping_ = mmUninitialized;
-
 	ImageReader reader(filename, rgbSpace, "");
-	resolution_ = reader.resolution();
-	image_.reset(new TVector3D[resolution_.x * resolution_.y]);
-	reader.read(TResolution2D(), resolution_, image_.get(), 0);
+	TResolution2D resolution = reader.resolution();
+	TPixels image(new TVector3D[resolution.x * resolution.y]);
+	reader.read(TResolution2D(), resolution, image.get(), 0);
+
+	filename_ = filename;
+	rgbSpace_ = rgbSpace;
+	image_.swap(image);
+	resolution_ = resolution;
+	currentMipMapping_ = mmUninitialized;
+	mipMaps_.clear();
 }
 
 
@@ -244,15 +248,20 @@ const Spectrum Image::doLookUp(const Sample& sample, const IntersectionContext& 
 
 const TPyObjectPtr Image::doGetState() const
 {
-	LASS_THROW("not implemented yet");
-	return TPyObjectPtr();
+	return python::makeTuple(filename_, rgbSpace_, antiAliasing(), mipMapping());
 }
 
 
 
 void Image::doSetState(const TPyObjectPtr& state)
 {
-	LASS_THROW("not implemented yet");
+	std::string filename, antiAliasing, mipMapping;
+	TRgbSpacePtr rgbSpace;
+	python::decodeTuple(state, filename, rgbSpace, antiAliasing, mipMapping);
+
+	loadFile(filename, rgbSpace);
+	setAntiAliasing(antiAliasing);
+	setMipMapping(mipMapping);
 }
 
 

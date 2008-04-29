@@ -39,6 +39,9 @@ PY_CLASS_MEMBER_R(RgbSpace, white);
 PY_CLASS_MEMBER_R(RgbSpace, gamma);
 PY_CLASS_METHOD_NAME(RgbSpace, operator==, "__eq__");
 PY_CLASS_METHOD_NAME(RgbSpace, operator!=, "__ne__");
+PY_CLASS_METHOD_NAME(RgbSpace, reduce, "__reduce__")
+PY_CLASS_METHOD_NAME(RgbSpace, getState, "__getstate__")
+PY_CLASS_METHOD_NAME(RgbSpace, setState, "__setstate__")
 PY_CLASS_STATIC_METHOD(RgbSpace, defaultSpace);
 PY_CLASS_STATIC_METHOD(RgbSpace, setDefaultSpace);
 
@@ -61,61 +64,9 @@ TRgbSpacePtr RgbSpace::defaultSpace_ = sRGB;
 
 RgbSpace::RgbSpace(
 		const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, 
-		const TPoint2D& white, TScalar gamma):
-	r_(red.x , red.y, 1 - red.x - red.y),
-	g_(green.x , green.y, 1 - green.x - green.y),
-	b_(blue.x , blue.y, 1 - blue.x - blue.y),
-	red_(red),
-	green_(green),
-	blue_(blue),
-	white_(white),
-	gamma_(gamma),
-	invGamma_(num::inv(gamma))
+		const TPoint2D& white, TScalar gamma)
 {
-	// rescale for white
-
-	TScalar primaries[9] =
-	{
-		r_.x, g_.x, b_.x,
-		r_.y, g_.y, b_.y,
-		r_.z, g_.z, b_.z
-	};
-	TScalar w[9] =
-	{
-		white.x / white.y,
-		1,
-		(1 - white.x - white.y) / white.y
-	};
-	if (!num::impl::cramer3<TScalar>(primaries, w, w + 3))
-	{
-		LASS_THROW("RGB primaries form a singular matrix, cannot solve.");
-	}
-	
-	r_ *= w[0];
-	g_ *= w[1];
-	b_ *= w[2];
-
-	// invert matrix
-
-	TScalar rgb2xyz[9] =
-	{
-		r_.x, g_.x, b_.x,
-		r_.y, g_.y, b_.y,
-		r_.z, g_.z, b_.z
-	};
-	TScalar xyz2rgb[9] =
-	{
-		1, 0, 0,
-		0, 1, 0,
-		0, 0, 1
-	};
-	if (!num::impl::cramer3<TScalar>(rgb2xyz, xyz2rgb, xyz2rgb + 9))
-	{
-		LASS_THROW("RGB space forms a singular matrix, cannot invert.");
-	}
-	x_ = prim::ColorRGBA(xyz2rgb[0], xyz2rgb[1], xyz2rgb[2]);
-	y_ = prim::ColorRGBA(xyz2rgb[3], xyz2rgb[4], xyz2rgb[5]);
-	z_ = prim::ColorRGBA(xyz2rgb[6], xyz2rgb[7], xyz2rgb[8]);
+	init(red, green, blue, white, gamma);
 }
 
 
@@ -238,6 +189,33 @@ bool RgbSpace::operator!=(const RgbSpace& other) const
 }
 
 
+
+const TPyObjectPtr RgbSpace::reduce() const
+{
+	return python::makeTuple(
+		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->_lassPyGetType())), 
+		python::makeTuple(), this->getState());
+}
+
+
+
+const TPyObjectPtr RgbSpace::getState() const
+{
+	return python::makeTuple(red_, green_, blue_, white_, gamma_);
+}
+
+
+
+void RgbSpace::setState(const TPyObjectPtr& state)
+{
+	TPoint2D red, green, blue, white;
+	TScalar gamma;
+	LASS_ENFORCE(python::decodeTuple(state, red, green, blue, white, gamma));
+	init(red, green, blue, white, gamma);
+}
+
+
+
 const TRgbSpacePtr& RgbSpace::defaultSpace()
 {
 	return defaultSpace_;
@@ -263,6 +241,96 @@ std::string RgbSpace::doPyRepr() const
 	buffer << "liar.RgbSpace(" << red_ << ", " << green_ << ", " << blue_ << ", " 
 		<< white_ << ", " << gamma_ << ")";
 	return buffer.str();
+}
+
+
+
+void RgbSpace::init(
+		const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, const TPoint2D& white,
+		TScalar gamma)
+{
+	enforceChromaticity(red, "red");
+	enforceChromaticity(green, "green");
+	enforceChromaticity(blue, "blue");
+	enforceChromaticity(white, "white");
+	if (white.y == 0)
+	{
+		LASS_THROW("y component of white point should not be zero.");
+	}
+	if (gamma <= 0)
+	{
+		LASS_THROW("Invalid gamma: " << gamma << ". Must be strictly positive.");
+	}
+
+	// see:
+	// http://www.babelcolor.com/download/A%20comparison%20of%20four%20multimedia%20RGB%20spaces.pdf
+	// http://www.polybytes.com/misc/Meet_CIECAM02.pdf
+
+	const TScalar zero = 0;
+	const TScalar z_r = std::max(1 - red.x - red.y, zero);
+	const TScalar z_g = std::max(1 - green.x - green.y, zero);
+	const TScalar z_b = std::max(1 - blue.x - blue.y, zero);
+
+	TScalar chromaticities[16] =
+	{
+		red.x, green.x, blue.x, 0,
+		red.y, green.y, blue.y, 0,
+		z_r, z_g, z_b, 0,
+		0, 0, 0, 1
+	};
+	const TTransformation3D M_xyz(chromaticities, chromaticities + 16);
+
+	const TVector3D w(
+		white.x / white.y,
+		1,
+		(1 - white.x - white.y) / white.y
+	);
+	const TVector3D s = transform(w, M_xyz.inverse());
+	const TTransformation3D M_XYZ = concatenate(TTransformation3D::scaler(s), M_xyz);
+
+	TScalar bradford[16] =
+	{
+		 0.8951f,  0.2664f, -0.1614f, 0,
+		-0.7502f,  1.7135f,  0.0367f, 0,
+		 0.0389f, -0.0685f,  1.0296f, 0,
+		 0, 0, 0, 1
+	};
+	const TTransformation3D M_BFD(bradford, bradford + 16);
+	const TVector3D cw = transform(w, M_BFD);
+
+	const TTransformation3D M_CAT = concatenate(
+		M_BFD.inverse(),
+		concatenate(TTransformation3D::scaler(cw.reciprocal()), M_BFD));
+
+	const TTransformation3D M = concatenate(M_CAT, M_XYZ);
+
+	const TScalar* mat = M.matrix();
+	r_ = TVector3D(mat[0], mat[4], mat[8]);
+	g_ = TVector3D(mat[1], mat[5], mat[9]);
+	b_ = TVector3D(mat[2], mat[6], mat[10]);
+
+	const TScalar* invMat = M.inverse().matrix();
+	x_ = prim::ColorRGBA(invMat[0], invMat[4], invMat[8]);
+	y_ = prim::ColorRGBA(invMat[1], invMat[5], invMat[9]);
+	z_ = prim::ColorRGBA(invMat[2], invMat[6], invMat[10]);
+
+	red_ = red;
+	green_ = green;
+	blue_ = blue;
+	white_ = white;
+	gamma_ = gamma;
+	invGamma_ = num::inv(gamma);
+}
+
+
+
+void RgbSpace::enforceChromaticity(const TPoint2D& c, const char* name) const
+{
+	if (c.x < 0 || c.y < 0 || (c.x + c.y) > 1.001)
+	{
+		LASS_THROW("invalid chromaticity for " << name << ": " << c
+			<< ". Must have x >= 0, y >= 0 and x + y <= 1.");
+	}
 }
 
 

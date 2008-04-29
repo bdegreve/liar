@@ -108,21 +108,18 @@ def decode(lines, filename = ""):
 		used_components = [{}, {}, {}]
 		for face in faces:
 			for vertex in face:
-				for k in range(3):
-					i = vertex[k]
-					if i != None and not i in used_components[k]:
-						used_components[k][i] = len(used_components[k])
+				for i, UCs in zip(vertex, used_components):
+					if i != None and not i in UCs:
+						UCs[i] = len(UCs)
 		
 		# build new (compressed) lists of vertices, uvs and normals
-		sorted_components = [[(used_comps[i], i) for i in used_comps] for used_comps in used_components]
-		for k in range(3):
-			sorted_components[k].sort()	
-		compressed_components = [[components[k][x[1]] for x in sorted_components[k]] for k in range(3)]
+		sorted_components = [sorted(zip(UCs.values(), UCs.keys())) for UCs in used_components]
+		compressed_components = [[Cs[j] for i, j in SCs] for Cs, SCs in zip(components, sorted_components)]
 						
 		# replace old indices by new ones
-		for k in range(3):
-			used_components[k][None] = None
-		faces = [[tuple([used_components[k][vertex[k]] for k in range(3)]) for vertex in face] for face in faces]
+		for UCs in used_components:
+			UCs[None] = None
+		faces = [[[UCs[i] for i, UCs in zip(vertex, used_components)] for vertex in face] for face in faces]
 		
 		group = liar.scenery.TriangleMesh(compressed_components[0], compressed_components[1], compressed_components[2], faces)
 		group.shader = material

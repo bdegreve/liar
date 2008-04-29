@@ -25,7 +25,7 @@
 
 // keep in alphabetical order please! [Bramz]
 //
-#include "aabb_tree.h"
+//#include "aabb_tree.h"
 #include "clip_map.h"
 #include "csg.h"
 #include "light_area.h"
@@ -35,6 +35,7 @@
 #include "light_spot.h"
 #include "list.h"
 #include "motion_translation.h"
+#include "object_trees.h"
 #include "parallelogram.h"
 #include "plane.h"
 #include "sphere.h"
@@ -63,6 +64,7 @@ LIAR_SCENERY_DLL void initscenery(void)
 	// keep in alphabetical order please! [Bramz]
 	//
 	PY_INJECT_CLASS_IN_MODULE(AabbTree, scenery, "AABB tree of child objects")
+	PY_INJECT_CLASS_IN_MODULE(AabpTree, scenery, "AABP tree of child objects")
 	PY_INJECT_CLASS_IN_MODULE(ClipMap, scenery, "Applies clip map to child object")
 	PY_INJECT_CLASS_IN_MODULE(Csg, scenery, "Constructive Solid Geometry")
 	PY_INJECT_CLASS_IN_MODULE(LightArea, scenery, "area light")
@@ -72,6 +74,7 @@ LIAR_SCENERY_DLL void initscenery(void)
 	PY_INJECT_CLASS_IN_MODULE(LightSpot, scenery, "spot light")
     PY_INJECT_CLASS_IN_MODULE(List, scenery, "flat list of child objects")
 	PY_INJECT_CLASS_IN_MODULE(MotionTranslation, scenery, "time-dependent translation")
+	PY_INJECT_CLASS_IN_MODULE(OctTree, scenery, "octtree of child objects")
     PY_INJECT_CLASS_IN_MODULE(Parallelogram, scenery, "finite parallelogram")
     PY_INJECT_CLASS_IN_MODULE(Plane, scenery, "infinite plane")
     PY_INJECT_CLASS_IN_MODULE(Sphere, scenery, "a nice sphere")

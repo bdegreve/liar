@@ -30,6 +30,8 @@ namespace kernel
 {
 
 PY_DECLARE_CLASS(Texture)
+PY_CLASS_STATIC_METHOD(Texture, black)
+PY_CLASS_STATIC_METHOD(Texture, white)
 PY_CLASS_METHOD_NAME(Texture, reduce, "__reduce__")
 PY_CLASS_METHOD_NAME(Texture, getState, "__getstate__")
 PY_CLASS_METHOD_NAME(Texture, setState, "__setstate__")

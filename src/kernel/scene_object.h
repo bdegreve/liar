@@ -47,26 +47,42 @@ namespace kernel
 
 namespace impl
 {
+	template <typename VisitableType>
+	struct TryParentHelper
+	{
+		typedef typename VisitableType::_lassPyParentType TParent;
+		static void onUnknownPreVisit(util::VisitorBase& visitor, VisitableType& visited)
+		{
+			VisitableType::preAccept(visitor, static_cast<TParent&>(visited));
+		}
+		static void onUnknownPostVisit(util::VisitorBase& visitor, VisitableType& visited)
+		{
+			VisitableType::postAccept(visitor, static_cast<TParent&>(visited));
+		}
+	};
+	template <>
+	struct TryParentHelper<SceneObject>
+	{
+		static void onUnknownPreVisit(util::VisitorBase&, SceneObject&) {}
+		static void onUnknownPostVisit(util::VisitorBase&, SceneObject&) {}
+	};
+	template <>
+	struct TryParentHelper<python::PyObjectPlus>
+	{
+		static void onUnknownPreVisit(util::VisitorBase&, python::PyObjectPlus&) {}
+		static void onUnknownPostVisit(util::VisitorBase&, python::PyObjectPlus&) {}
+	};
 	struct TryParent
 	{
 		template <typename VisitableType>
 		static void onUnknownPreVisit(util::VisitorBase& visitor, VisitableType& visited)
 		{
-			VisitableType::preAccept(
-				visitor, static_cast<typename VisitableType::_lassPyParentType&>(visited));
+			TryParentHelper<VisitableType>::onUnknownPreVisit(visitor, visited);
 		}
-		static void onUnknownPreVisit(util::VisitorBase&, SceneObject&) 
-		{
-		}
-
 		template <typename VisitableType>
 		static void onUnknownPostVisit(util::VisitorBase& visitor, VisitableType& visited)
 		{
-			VisitableType::postAccept(
-				visitor, static_cast<typename VisitableType::_lassPyParentType&>(visited));
-		}
-		static void onUnknownPostVisit(util::VisitorBase&, SceneObject&) 
-		{
+			TryParentHelper<VisitableType>::onUnknownPostVisit(visitor, visited);
 		}
 	};
 }

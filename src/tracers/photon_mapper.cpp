@@ -766,7 +766,7 @@ void PhotonMapper::buildIrradianceMap()
 
 namespace temp
 {
-	TScalar squaredHeuristic(TScalar pdfA, TScalar pdfB)
+	inline TScalar squaredHeuristic(TScalar pdfA, TScalar pdfB)
 	{
 		return num::sqr(pdfA) / (num::sqr(pdfA) + num::sqr(pdfB));
 	}

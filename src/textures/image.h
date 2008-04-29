@@ -138,6 +138,8 @@ private:
 	static TAntiAliasingDictionary makeAntiAliasingDictionary();
 	static TMipMappingDictionary makeMipMappingDictionary();
 
+	std::string filename_;
+	TRgbSpacePtr rgbSpace_;
 	TPixels image_;
 	TResolution2D resolution_;
 	AntiAliasing antiAliasing_;

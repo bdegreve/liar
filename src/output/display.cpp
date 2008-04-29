@@ -62,7 +62,7 @@ Display::Display(const std::string& title, const TResolution2D& resolution):
 	rgbSpace_(RgbSpace::defaultSpace()),
 	totalLogSceneLuminance_(0),
 	sceneLuminanceCoverage_(0),
-	middleGrey_(.18),
+	middleGrey_(.13),
 	toneMapping_(tmExponentialY),
 	autoExposure_(true),
 	refreshTitle_(false),

@@ -109,7 +109,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 	ext_modules=extensions,
 	headers = list_files('kernel', '.h') + list_files('kernel', '.inl'),
 	data_files = [
-		('lib/site-packages/liar',[r'..\..\bin\libkernel%s.pyd' % pyDebug]),
+		('lib/site-packages/liar',[r'..\..\bin\libkernel%s.dll' % pyDebug]),
 		('lib/site-packages/liar',[r'..\..\bin\libkernel%s.%s' % (pyDebug, y) for y in pdb]),
 		('lib/site-packages/liar',[r'..\..\bin\%s%s.pyd' % (x, pyDebug) for x in modules]),
 		('lib/site-packages/liar',[r'..\..\bin\%s%s.%s' % (x, pyDebug, y) for x in modules for y in pdb]),

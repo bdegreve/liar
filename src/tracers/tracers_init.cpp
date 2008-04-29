@@ -25,7 +25,7 @@
 
 // keep in alphabetical order please! [Bramz]
 //
-//#include "direct_lighting.h"
+#include "direct_lighting.h"
 #include "photon_mapper.h"
 
 #include <lass/io/proxy_man.h>
@@ -42,7 +42,7 @@ LIAR_TRACERS_DLL void inittracers(void)
 
 	// keep in alphabetical order please! [Bramz]
 	//
-	//PY_INJECT_CLASS_IN_MODULE(DirectLighting, tracers, "simple ray tracer")
+	PY_INJECT_CLASS_IN_MODULE(DirectLighting, tracers, "simple ray tracer")
 	PY_INJECT_CLASS_IN_MODULE(PhotonMapper, tracers, "ray tracer with photon mapper")
 
 	PyRun_SimpleString("print 'liar.tracers imported (v" 

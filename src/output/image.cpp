@@ -231,7 +231,7 @@ void Image::doEndRender()
 
 	ImageWriter writer(filename_, ImageCodec::lmSingleLevel, resolution_, rgbSpace_, "");
 	writer.write(TResolution2D(), resolution_, &renderBuffer_[0], &alphaBuffer_[0]);
-    isSaved_ = true;
+	isSaved_ = true;
 }
 
 

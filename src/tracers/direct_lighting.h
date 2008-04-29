@@ -45,22 +45,28 @@ public:
 	DirectLighting();
     
 private:
-	
 
 	void doPreprocess();
 	void doRequestSamples(const TSamplerPtr& sampler);
-	const Spectrum doCastRay(const Sample& sample,
-		const DifferentialRay& primaryRay) const;
-	const TLightSamplesRange doSampleLights(const Sample& sample,
-		const TPoint3D& target, const TVector3D& targetNormal) const;
+	void DirectLighting::doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period);
+	const Spectrum doCastRay(const Sample& sample, const DifferentialRay& primaryRay, 
+		TScalar& tIntersection, TScalar& alpha, int generation) const;
+	const TLightSamplesRange doSampleLights(const Sample& sample, const TPoint3D& target, 
+		const TVector3D& targetNormal) const;
 	const TRayTracerPtr doClone() const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-	mutable TLightSamples lightSamples_;
-	mutable size_t rayGeneration_;
-	size_t maxRayGeneration_;
+	const Spectrum traceDirect(const Sample& sample, 
+		const IntersectionContext& context,	const TPoint3D& target, const TVector3D& targetNormal,
+		const TVector3D& omegaIn) const;
+	const Spectrum traceSpecularAndGlossy(
+		const Sample& sample, const IntersectionContext& context, const kernel::DifferentialRay& primaryRay,
+		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn, bool singleSample) const;
+
+
+	mutable MediumStack mediumStack_;
 };
 
 }
