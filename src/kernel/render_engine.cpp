@@ -43,7 +43,7 @@ PY_CLASS_METHOD_QUALIFIED_0(RenderEngine, render, void)
 PY_CLASS_METHOD_QUALIFIED_1(RenderEngine, render, void, TTime)
 PY_CLASS_METHOD_QUALIFIED_1(RenderEngine, render, void, const RenderEngine::TBucket&)
 PY_CLASS_METHOD_QUALIFIED_2(RenderEngine, render, void, TTime, const RenderEngine::TBucket&)
-PY_CLASS_STATIC_CONST(RenderEngine, "AUTO_NUMBER_OF_THREADS", RenderEngine::autoNumberOfThreads);
+PY_CLASS_STATIC_CONST(RenderEngine, "AUTO_NUMBER_OF_THREADS", int(RenderEngine::autoNumberOfThreads));
 
 
 const RenderEngine::TBucket RenderEngine::bucketBound_(
