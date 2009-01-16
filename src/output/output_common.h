@@ -30,17 +30,9 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_OUTPUT_OUTPUT_COMMON_H
 
 #include "../kernel/kernel_common.h"
+#include "output_config.h"
 
-#if defined(LIAR_OUTPUT_BUILD_DLL)
-#   define LIAR_OUTPUT_DLL LASS_DLL_EXPORT
-#else
-#   define LIAR_OUTPUT_DLL LASS_DLL_IMPORT
-#   if defined(_DEBUG)
-#       pragma comment(lib, "output_d.lib")
-#   else
-#       pragma comment(lib, "output.lib")
-#   endif
-#endif
+#define LIAR_OUTPUT_DLL LASS_DLL_EXPORT
 
 namespace liar
 {

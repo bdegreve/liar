@@ -34,12 +34,12 @@ PY_DECLARE_CLASS(Simple)
 PY_CLASS_CONSTRUCTOR_0(Simple)
 PY_CLASS_CONSTRUCTOR_1(Simple, const TTexturePtr&)
 PY_CLASS_CONSTRUCTOR_2(Simple, const TTexturePtr&, const TTexturePtr&)
-PY_CLASS_MEMBER_RW_DOC(Simple, "diffuse", diffuse, setDiffuse, "texture for diffuse component")
-PY_CLASS_MEMBER_RW_DOC(Simple, "specular", specular, setSpecular, "texture for specular component")
-PY_CLASS_MEMBER_RW_DOC(Simple, "specularPower", specularPower, setSpecularPower, "texture for rollof power of specular component")
-PY_CLASS_MEMBER_RW_DOC(Simple, "reflectance", reflectance, setReflectance, "texture for reflective componont")
-PY_CLASS_MEMBER_RW_DOC(Simple, "transmittance", transmittance, setTransmittance, "texture for transmittance componont")
-PY_CLASS_MEMBER_RW_DOC(Simple, "refractionIndex", refractionIndex, setRefractionIndex, "texture for refraction index")
+PY_CLASS_MEMBER_RW_DOC(Simple, diffuse, setDiffuse, "texture for diffuse component")
+PY_CLASS_MEMBER_RW_DOC(Simple, specular, setSpecular, "texture for specular component")
+PY_CLASS_MEMBER_RW_DOC(Simple, specularPower, setSpecularPower, "texture for rollof power of specular component")
+PY_CLASS_MEMBER_RW_DOC(Simple, reflectance, setReflectance, "texture for reflective componont")
+PY_CLASS_MEMBER_RW_DOC(Simple, transmittance, setTransmittance, "texture for transmittance componont")
+PY_CLASS_MEMBER_RW_DOC(Simple, refractionIndex, setRefractionIndex, "texture for refraction index")
 
 // --- public --------------------------------------------------------------------------------------
 

@@ -31,16 +31,7 @@
 
 #include "../kernel/kernel_common.h"
 
-#if defined(LIAR_CAMERAS_BUILD_DLL)
-#   define LIAR_CAMERAS_DLL LASS_DLL_EXPORT
-#else
-#   define LIAR_CAMERAS_DLL LASS_DLL_IMPORT
-#   if defined(_DEBUG)
-#       pragma comment(lib, "cameras_d.lib")
-#   else
-#       pragma comment(lib, "cameras.lib")
-#   endif
-#endif
+#define LIAR_CAMERAS_DLL LASS_DLL_EXPORT
 
 namespace liar
 {

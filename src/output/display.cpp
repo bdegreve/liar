@@ -23,11 +23,7 @@
 
 #include "output_common.h"
 
-#if LIAR_HAVE_LOCAL_CONFIG_H
-#	include "../local_config.h"
-#endif
-
-#if LIAR_HAVE_PIXELTOASTER_H
+#if LIAR_OUTPUT_HAVE_PIXELTOASTER_H
 
 #include "display.h"
 #include <lass/util/callback_0.h>
@@ -509,7 +505,7 @@ void Display::displayLoop()
 			display.title(makeTitle().c_str());
 		}
 
-#if LIAR_HAVE_PIXELTOASTER_DIRTYBOX
+#if LIAR_OUTPUT_HAVE_PIXELTOASTER_DIRTYBOX
 		PixelToaster::Rectangle box;
 		if (!displayDirtyBox_.isEmpty())
 		{

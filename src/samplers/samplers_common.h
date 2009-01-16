@@ -31,16 +31,7 @@
 
 #include "../kernel/kernel_common.h"
 
-#if defined(LIAR_SAMPLERS_BUILD_DLL)
-#   define LIAR_SAMPLERS_DLL LASS_DLL_EXPORT
-#else
-#   define LIAR_SAMPLERS_DLL LASS_DLL_IMPORT
-#   if defined(_DEBUG)
-#       pragma comment(lib, "samplers_d.lib")
-#   else
-#       pragma comment(lib, "samplers.lib")
-#   endif
-#endif
+#define LIAR_SAMPLERS_DLL LASS_DLL_EXPORT
 
 namespace liar
 {

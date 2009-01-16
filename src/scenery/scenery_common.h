@@ -31,16 +31,7 @@
 
 #include "../kernel/kernel_common.h"
 
-#if defined(LIAR_SCENERY_BUILD_DLL)
-#   define LIAR_SCENERY_DLL LASS_DLL_EXPORT
-#else
-#   define LIAR_SCENERY_DLL LASS_DLL_IMPORT
-#   if defined(_DEBUG)
-#       pragma comment(lib, "scenery_d.lib")
-#   else
-#       pragma comment(lib, "scenery.lib")
-#   endif
-#endif
+#define LIAR_SCENERY_DLL LASS_DLL_EXPORT
 
 namespace liar
 {

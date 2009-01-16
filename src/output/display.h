@@ -40,6 +40,8 @@
 #include <lass/util/scoped_ptr.h>
 #include <lass/util/thread.h>
 
+#if LIAR_OUTPUT_HAVE_PIXELTOASTER_H
+
 #include <PixelToaster.h>
 
 #if LASS_COMPILER_TYPE == LASS_COMPILER_TYPE_MSVC
@@ -51,6 +53,7 @@ namespace liar
 {
 namespace output
 {
+
 
 class LIAR_OUTPUT_DLL Display: public RenderTarget, PixelToaster::Listener
 {
@@ -145,6 +148,8 @@ private:
 
 #if LASS_COMPILER_TYPE == LASS_COMPILER_TYPE_MSVC
 #	pragma warning(pop)
+#endif
+
 #endif
 
 #endif

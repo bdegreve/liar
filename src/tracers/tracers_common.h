@@ -31,16 +31,7 @@
 
 #include "../kernel/kernel_common.h"
 
-#if defined(LIAR_TRACERS_BUILD_DLL)
-#   define LIAR_TRACERS_DLL LASS_DLL_EXPORT
-#else
-#   define LIAR_TRACERS_DLL LASS_DLL_IMPORT
-#   if defined(_DEBUG)
-#       pragma comment(lib, "tracers_d.lib")
-#   else
-#       pragma comment(lib, "tracers.lib")
-#   endif
-#endif
+#define LIAR_TRACERS_DLL LASS_DLL_EXPORT
 
 namespace liar
 {

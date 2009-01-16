@@ -21,11 +21,9 @@
  *  http://liar.bramz.org
  */
 
-#if LIAR_HAVE_LOCAL_CONFIG_H
-#	include "../local_config.h"
-#endif
+#include "output_config.h"
 
-#if LIAR_HAVE_PIXELTOASTER_H
+#if LIAR_OUTPUT_HAVE_PIXELTOASTER_H
 #	if !defined(NDEBUG)
 #		define D3D_DEBUG_INFO
 #	endif

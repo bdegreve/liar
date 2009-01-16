@@ -31,16 +31,7 @@
 
 #include "../kernel/kernel_common.h"
 
-#if defined(LIAR_SHADERS_BUILD_DLL)
-#   define LIAR_SHADERS_DLL LASS_DLL_EXPORT
-#else
-#   define LIAR_SHADERS_DLL LASS_DLL_IMPORT
-#   if defined(_DEBUG)
-#       pragma comment(lib, "shaders_d.lib")
-#   else
-#       pragma comment(lib, "shaders.lib")
-#   endif
-#endif
+#define LIAR_SHADERS_DLL LASS_DLL_EXPORT
 
 namespace liar
 {

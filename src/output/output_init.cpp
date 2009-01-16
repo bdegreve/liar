@@ -23,18 +23,12 @@
 
 #include "output_common.h"
 
-#if LIAR_HAVE_LOCAL_CONFIG_H
-#	include "../local_config.h"
-#endif
-
 #include <lass/io/proxy_man.h>
 
 // keep in alphabetical order please! [Bramz]
 //
 #include "depth_channel.h"
-#if LIAR_HAVE_PIXELTOASTER_H
-#	include "display.h"
-#endif
+#include "display.h"
 #include "filter_mitchell.h"
 #include "image.h"
 #include "splitter.h"
@@ -52,7 +46,7 @@ LIAR_OUTPUT_DLL void initoutput(void)
 	// keep in alphabetical order please! [Bramz]
 	//
     PY_INJECT_CLASS_IN_MODULE(DepthChannel, output, "converts depth channel to color information")
-#if LIAR_HAVE_PIXELTOASTER_H
+#if LIAR_OUTPUT_HAVE_PIXELTOASTER_H
     PY_INJECT_CLASS_IN_MODULE(Display, output, "render target in a window (PixelToaster)")
 #endif
     PY_INJECT_CLASS_IN_MODULE(FilterMitchell, output, "Mitchell reconstruction filter")

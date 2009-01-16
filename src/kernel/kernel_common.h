@@ -34,26 +34,12 @@
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_KERNEL_COMMON_H
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_KERNEL_COMMON_H
 
-#ifdef NDEBUG
-#	define LIAR_LIB_SUFFIX ""
-#else
-#	define LIAR_LIB_SUFFIX "_d"
-#endif
-
-#if defined(LIAR_KERNEL_BUILD_DLL)
-#   define LIAR_KERNEL_DLL LASS_DLL_EXPORT
-#else
-#   define LIAR_KERNEL_DLL LASS_DLL_IMPORT
-#   pragma comment(lib, "libkernel" LIAR_LIB_SUFFIX ".lib")
-#endif
-
 // maybe Bill Gates likes to global lock iterator operations, but I don't.
 #ifdef _MSC_VER
 #	define _SECURE_SCL 0
 #	define _HAS_ITERATOR_DEBUGGING 0
 #endif
 
-#define LASS_USE_DLL
 #include <lass/num/num_traits.h>
 #include <lass/num/basic_ops.h>
 #include <lass/num/floating_point_comparison.h>
@@ -69,6 +55,12 @@
 #include <lass/util/python_api.h>
 
 #include "config.h"
+
+#ifdef kernel_lib_EXPORTS
+#	define LIAR_KERNEL_DLL LASS_DLL_EXPORT
+#else
+#	define LIAR_KERNEL_DLL LASS_DLL_IMPORT
+#endif
 
 #define LIAR_VERSION_FULL LASS_STRINGIFY(LIAR_VERSION_MAJOR) "."\
 	LASS_STRINGIFY(LIAR_VERSION_MINOR) "." LASS_STRINGIFY(LIAR_VERSION_REVISION)
