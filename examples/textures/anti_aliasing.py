@@ -5,8 +5,8 @@
 # The result is that the color of the sphere changes in time.
 #
 # LiAR isn't a raytracer
-# Copyright (C) 2004-2007  Bram de Greve (bramz@users.sourceforge.net)
-# http://liar.sourceforge.net
+# Copyright (C) 2004-2009  Bram de Greve (bramz@users.sourceforge.net)
+# http://liar.bramz.net/
 
 from liar import *
 

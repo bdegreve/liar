@@ -1,5 +1,5 @@
 # LiAR isn't a raytracer
-# Copyright (C) 2004-2007  Bram de Greve (bramz@users.sourceforge.net)
+# Copyright (C) 2004-2009  Bram de Greve (bramz@users.sourceforge.net)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,12 +15,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# http://liar.sourceforge.net
+# http://liar.bramz.net/
 
 
 
 # adjust dlopen flags so we can share symbols across extension modules
-# http://liar.sourceforge.net/blog/2007/01/28/shared-libraries-dlopen-and-rtti/
+# http://liar.bramz.net//blog/2007/01/28/shared-libraries-dlopen-and-rtti/
 #
 import sys
 try:

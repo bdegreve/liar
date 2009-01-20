@@ -3,8 +3,8 @@
 # demonstrates the use of LightSky and AngularMaping to do images based lighting using a light probe
 #
 # LiAR isn't a raytracer
-# Copyright (C) 2004-2007  Bram de Greve (bramz@users.sourceforge.net)
-# http://liar.sourceforge.net
+# Copyright (C) 2004-2009  Bram de Greve (bramz@users.sourceforge.net)
+# http://liar.bramz.net/
 
 # specify URL of light probe:
 probe_url = "http://www.debevec.org/Probes/grace_probe.hdr"

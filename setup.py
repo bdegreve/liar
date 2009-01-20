@@ -195,7 +195,7 @@ def force_no_optimisation(compiler):
 		except:	pass
 	compiler.compiler_so.append("-O0")
 	
-# http://liar.sourceforge.net/blog/2007/01/27/the-bumpy-road-to-the-linux-build/
+# http://liar.bramz.net//blog/2007/01/27/the-bumpy-road-to-the-linux-build/
 #		
 class liar_build_shared_lib(build_clib):
 	def initialize_options(self):
