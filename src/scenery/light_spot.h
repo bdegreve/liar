@@ -32,7 +32,6 @@
 #include "scenery_common.h"
 #include "../kernel/attenuation.h"
 #include "../kernel/scene_light.h"
-#include <lass/util/pyshadow_object.h>
 
 namespace liar
 {

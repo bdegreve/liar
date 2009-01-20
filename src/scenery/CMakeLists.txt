@@ -1,5 +1,3 @@
-file(GLOB scenery_HDRS *.h *.inl)
-file(GLOB scenery_SRCS *.cpp)
-list_remove_regex(scenery_SRCS "aabb_tree.cpp$")
-add_library(scenery MODULE ${scenery_HDRS} ${scenery_SRCS})
-target_link_libraries(scenery kernel_lib)
+add_liar_module(scenery 
+	IGNORE "aabb_tree.cpp$"
+	)

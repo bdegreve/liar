@@ -52,11 +52,11 @@
 #include <lass/prim/ray_3d.h>
 #include <lass/prim/color_rgba.h>
 #include <lass/prim/transformation_3d.h>
-#include <lass/util/python_api.h>
+#include <lass/python/python_api.h>
 
 #include "config.h"
 
-#ifdef kernel_lib_EXPORTS
+#ifdef kernelshared_EXPORTS
 #	define LIAR_KERNEL_DLL LASS_DLL_EXPORT
 #else
 #	define LIAR_KERNEL_DLL LASS_DLL_IMPORT

@@ -1,5 +1,3 @@
-file(GLOB shaders_HDRS *.h *.inl)
-file(GLOB shaders_SRCS *.cpp)
-list_remove_regex(shaders_SRCS "simple.cpp$")
-add_library(shaders MODULE ${shaders_HDRS} ${shaders_SRCS})
-target_link_libraries(shaders kernel_lib)
+add_liar_module(shaders 
+	IGNORE "simple.cpp$"
+	)
