@@ -154,7 +154,7 @@ const TSamplerPtr Sampler::clone() const
 const TPyObjectPtr Sampler::reduce() const
 {
 	return python::makeTuple(
-		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->_lassPyGetType())), 
+		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->_lassPyGetClassDef()->type())), 
 		python::makeTuple(), this->getState());
 }
 

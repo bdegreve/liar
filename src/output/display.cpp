@@ -58,7 +58,7 @@ Display::Display(const std::string& title, const TResolution2D& resolution):
 	rgbSpace_(RgbSpace::defaultSpace()),
 	totalLogSceneLuminance_(0),
 	sceneLuminanceCoverage_(0),
-	middleGrey_(.13),
+	middleGrey_(.13f),
 	toneMapping_(tmExponentialY),
 	autoExposure_(true),
 	refreshTitle_(false),
@@ -150,7 +150,7 @@ void Display::setToneMapping(const std::string& toneMapping)
 
 void Display::setExposure(TScalar fStops)
 {
-	const int thirdStops = num::round(fStops * 3);
+	const int thirdStops = static_cast<int>(num::round(fStops * 3));
 	if (thirdStops != exposure_)
 	{
 		LASS_LOCK(renderBufferLock_)
@@ -167,7 +167,7 @@ void Display::setExposure(TScalar fStops)
 
 void Display::setExposureCorrection(TScalar fStops)
 {
-	const int thirdStops = num::round(fStops * 3);
+	const int thirdStops = static_cast<int>(num::round(fStops * 3));
 	if (thirdStops != exposureCorrection_)
 	{
 		LASS_LOCK(renderBufferLock_)
@@ -233,7 +233,7 @@ void Display::testGammut()
 	setToneMapping("linear");
 	setExposure(0);
 	const size_t n = 500;
-	const size_t m = n * num::sqrt(3.) / 2;
+	const size_t m = static_cast<size_t>(n * num::sqrt(3.) / 2);
 	resolution_ = TResolution2D(n, m + 200);
 	beginRender();
 
@@ -278,7 +278,7 @@ void Display::testGammut()
 		{
 			for (size_t i = n - 150; i < n; ++i)
 			{
-				const TScalar f = (i + j) % 2;
+				const TScalar f = static_cast<TScalar>((i + j) % 2);
 				renderBuffer_[j * resolution_.x + i] = TVector3D(f, f, f);
 				renderDirtyBox_ += TDirtyBox::TPoint(i, j);
 			}

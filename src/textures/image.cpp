@@ -306,8 +306,8 @@ void Image::makeMipMaps(MipMapping mode) const
 			break;
 
 		case mmAnisotropic:
-			numLevelsU = num::floor(num::log2(static_cast<TScalar>(resolution_.x))) + 1;
-			numLevelsV = num::floor(num::log2(static_cast<TScalar>(resolution_.y))) + 1;
+			numLevelsU = static_cast<unsigned>(num::floor(num::log2(static_cast<TScalar>(resolution_.x))) + 1);
+			numLevelsV = static_cast<unsigned>(num::floor(num::log2(static_cast<TScalar>(resolution_.y))) + 1);
 			for (unsigned j = 0; j < numLevelsV; ++j)
 			{
 				if (j > 0)

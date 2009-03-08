@@ -62,7 +62,7 @@ void setTolerance(liar::TScalar iTolerance)
 	liar::tolerance = iTolerance;
 }
 
-PY_DECLARE_MODULE(kernel)
+PY_DECLARE_MODULE_NAME_DOC(kernel, "liar.kernel", "LiAR isn't a raytracer")
 PY_MODULE_FUNCTION(kernel, license)
 PY_MODULE_FUNCTION(kernel, tolerance)
 PY_MODULE_FUNCTION(kernel, setTolerance)
@@ -104,14 +104,13 @@ void LASS_DLL_EXPORT initkernel(void)
 	lass::io::proxyMan()->clog()->remove(&std::clog);
 #endif
 
-	using namespace liar;
 	using namespace liar::kernel;
 
-	PY_INJECT_MODULE_EX(kernel, "liar.kernel", "LiAR isn't a raytracer")
+	PY_INJECT_MODULE(kernel)
 
 	// keep in alphabetical order please! [Bramz]
 	//
-	PY_INJECT_CLASS_IN_MODULE(Attenuation, kernel, "Attenuation constants")
+	PY_INJECT_CLASS_IN_MODULE(Attenuation, kernel, 0)
 	PY_INJECT_CLASS_IN_MODULE(Camera, kernel, "Abstract base class of render viewports")
 	PY_INJECT_CLASS_IN_MODULE(ImageCodec, kernel, "Abstract base class of image codecs")
 	PY_INJECT_CLASS_IN_MODULE(ImageCodecLassLDR, kernel, "Lass based image codec for LDR images")

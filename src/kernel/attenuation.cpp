@@ -29,7 +29,7 @@ namespace liar
 namespace kernel
 {
 
-PY_DECLARE_CLASS(Attenuation)
+PY_DECLARE_CLASS_DOC(Attenuation, "Attenuation constants")
 PY_CLASS_CONSTRUCTOR_0(Attenuation)
 PY_CLASS_CONSTRUCTOR_3(Attenuation, TScalar, TScalar, TScalar)
 PY_CLASS_MEMBER_RW(Attenuation, constant, setConstant)
@@ -131,7 +131,7 @@ TAttenuationPtr Attenuation::defaultAttenuation()
 const TPyObjectPtr Attenuation::reduce() const
 {
 	return python::makeTuple(
-		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->_lassPyGetType())), 
+		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->_lassPyGetClassDef()->type())), 
 		python::makeTuple(), this->getState());
 }
 

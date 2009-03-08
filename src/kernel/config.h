@@ -30,7 +30,7 @@
 #define LIAR_VERSION_MINOR 2
 #define LIAR_VERSION_REVISION 0
 #define LIAR_AUTHORS "Bram de Greve"
-#define LIAR_EMAIL "liar@bramz.org"
+#define LIAR_EMAIL "bramz@users.sourceforge.net"
 #define LIAR_WEBSITE "http://liar.bramz.net/"
 
 #define LIAR_SCALAR float
