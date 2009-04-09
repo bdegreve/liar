@@ -31,7 +31,7 @@ namespace liar
 namespace scenery
 {
 
-PY_DECLARE_CLASS(LightArea)
+PY_DECLARE_CLASS_DOC(LightArea, "area light")
 PY_CLASS_CONSTRUCTOR_1(LightArea, const TSceneObjectPtr&)
 PY_CLASS_MEMBER_R(LightArea, surface)
 PY_CLASS_MEMBER_RW(LightArea, radiance, setRadiance)
@@ -247,7 +247,7 @@ const Spectrum LightArea::doTotalPower(const TAabb3D& sceneBound) const
 
 
 
-const unsigned LightArea::doNumberOfEmissionSamples() const
+const size_t LightArea::doNumberOfEmissionSamples() const
 {
 	return numberOfEmissionSamples_;
 }

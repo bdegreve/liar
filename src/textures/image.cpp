@@ -32,7 +32,7 @@ namespace liar
 namespace textures
 {
 
-PY_DECLARE_CLASS(Image)
+PY_DECLARE_CLASS_DOC(Image, "image file")
 PY_CLASS_CONSTRUCTOR_1(Image, const std::string&);
 PY_CLASS_CONSTRUCTOR_2(Image, const std::string&, const TRgbSpacePtr&);
 PY_CLASS_CONSTRUCTOR_3(Image, const std::string&, const std::string&, const std::string&);

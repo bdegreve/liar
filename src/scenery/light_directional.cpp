@@ -32,7 +32,7 @@ namespace liar
 namespace scenery
 {
 
-PY_DECLARE_CLASS(LightDirectional)
+PY_DECLARE_CLASS_DOC(LightDirectional, "directional light")
 PY_CLASS_CONSTRUCTOR_0(LightDirectional)
 PY_CLASS_CONSTRUCTOR_2(LightDirectional, const TVector3D&, const Spectrum&)
 PY_CLASS_MEMBER_RW(LightDirectional, direction, setDirection)
@@ -192,7 +192,7 @@ const Spectrum LightDirectional::doTotalPower(const TAabb3D& sceneBound) const
 
 
 
-const unsigned LightDirectional::doNumberOfEmissionSamples() const
+const size_t LightDirectional::doNumberOfEmissionSamples() const
 {
 	return 1;
 }

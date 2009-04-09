@@ -30,7 +30,7 @@ namespace liar
 namespace shaders
 {
 
-PY_DECLARE_CLASS(Simple)
+PY_DECLARE_CLASS_DOC(Simple, "a classic simple shader, Whitted style")
 PY_CLASS_CONSTRUCTOR_0(Simple)
 PY_CLASS_CONSTRUCTOR_1(Simple, const TTexturePtr&)
 PY_CLASS_CONSTRUCTOR_2(Simple, const TTexturePtr&, const TTexturePtr&)

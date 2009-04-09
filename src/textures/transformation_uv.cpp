@@ -29,7 +29,7 @@ namespace liar
 namespace textures
 {
 
-PY_DECLARE_CLASS(TransformationUv)
+PY_DECLARE_CLASS_DOC(TransformationUv, "transform Uv coordinates")
 PY_CLASS_CONSTRUCTOR_2(TransformationUv, const TTexturePtr&, const TTransformation2D&);
 PY_CLASS_MEMBER_RW(TransformationUv, texture, setTexture);
 PY_CLASS_MEMBER_RW(TransformationUv, transformation, setTransformation);

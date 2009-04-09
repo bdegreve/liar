@@ -129,7 +129,7 @@ private:
 	MipMapLevel makeMipMapEven(const MipMapLevel& parent, prim::XY compressionAxis, unsigned newSize) const;
 	MipMapLevel makeMipMapOdd(const MipMapLevel& parent, prim::XY compressionAxis, unsigned newSize) const;
 
-	void mipMapLevel(TScalar width, size_t numLevels, 
+	void mipMapLevel(TScalar width, unsigned numLevels, 
 		unsigned& level0, unsigned& level1, TScalar& dLevel) const;
 
 	const TPixel nearest(unsigned levelU, unsigned levelV, const TPoint2D& uv) const;

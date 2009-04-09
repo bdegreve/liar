@@ -139,8 +139,8 @@ public:
 	}
 
 	void requestSamples(const TSamplerPtr& sampler);
-	const unsigned numReflectionSamples() const;
-	const unsigned numTransmissionSamples() const;
+	const size_t numReflectionSamples() const;
+	const size_t numTransmissionSamples() const;
 	const int idReflectionSamples() const;
 	const int idTransmissionSamples() const;
 
@@ -169,8 +169,8 @@ private:
 		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const = 0;
 	
 	virtual void doRequestSamples(const TSamplerPtr& sampler);
-	virtual const unsigned doNumReflectionSamples() const;
-	virtual const unsigned doNumTransmissionSamples() const;
+	virtual const size_t doNumReflectionSamples() const;
+	virtual const size_t doNumTransmissionSamples() const;
 
 	virtual const TPyObjectPtr doGetState() const = 0;
 	virtual void doSetState(const TPyObjectPtr& state) = 0;

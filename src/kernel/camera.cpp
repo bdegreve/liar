@@ -29,7 +29,7 @@ namespace liar
 namespace kernel
 {
 
-PY_DECLARE_CLASS(Camera)
+PY_DECLARE_CLASS_DOC(Camera, "Abstract base class of render viewports")
 PY_CLASS_METHOD_NAME(Camera, reduce, "__reduce__")
 PY_CLASS_METHOD_NAME(Camera, getState, "__getstate__")
 PY_CLASS_METHOD_NAME(Camera, setState, "__setstate__")

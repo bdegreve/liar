@@ -34,7 +34,7 @@ namespace liar
 namespace output
 {
 
-PY_DECLARE_CLASS(Display);
+PY_DECLARE_CLASS_DOC(Display, "render target in a window (PixelToaster)");
 PY_CLASS_CONSTRUCTOR_2(Display, const std::string&, const TResolution2D&)
 PY_CLASS_MEMBER_R(Display, title)
 PY_CLASS_MEMBER_RW(Display, rgbSpace, setRgbSpace)

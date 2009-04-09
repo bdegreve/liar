@@ -44,7 +44,7 @@ class LIAR_SAMPLERS_DLL Stratifier: public Sampler
 public:
 
     Stratifier();
-    Stratifier(const TResolution2D& resolution, unsigned numberOfSamplesPerPixel);
+    Stratifier(const TResolution2D& resolution, size_t numberOfSamplesPerPixel);
     Stratifier(const TResolution2D& resolution);
 
 	const bool jittered() const;
@@ -58,27 +58,27 @@ private:
     typedef num::RandomMT19937 TNumberGenerator;
     typedef num::DistributionUniform<TScalar, TNumberGenerator, num::rtRightOpen> TJitterGenerator;
 
-	void init(const TResolution2D& resolution = TResolution2D(320, 240), unsigned iNumberOfSamples = 1);
+	void init(const TResolution2D& resolution = TResolution2D(320, 240), size_t iNumberOfSamples = 1);
 
 	virtual const TResolution2D& doResolution() const;
-    virtual const unsigned doSamplesPerPixel() const;
+    virtual const size_t doSamplesPerPixel() const;
     virtual void doSetResolution(const TResolution2D& resolution);
-    virtual void doSetSamplesPerPixel(unsigned samplesPerPixel);
-	virtual void doSeed(unsigned randomSeed);
+    virtual void doSetSamplesPerPixel(size_t samplesPerPixel);
+	virtual void doSeed(size_t randomSeed);
 
-	virtual void doSampleScreen(const TResolution2D& pixel, unsigned subPixel, 
+	virtual void doSampleScreen(const TResolution2D& pixel, size_t subPixel, 
 		TSample2D& oScreenCoordinate);
-	virtual void doSampleLens(const TResolution2D& pixel, unsigned subPixel, 
+	virtual void doSampleLens(const TResolution2D& pixel, size_t subPixel, 
 		TSample2D& oScreenCoordinate);
-	virtual void doSampleTime(const TResolution2D& pixel, unsigned subPixel, 
+	virtual void doSampleTime(const TResolution2D& pixel, size_t subPixel, 
 		const TimePeriod& period, TTime& oTime);
-	virtual void doSampleSubSequence1D(const TResolution2D& pixel, unsigned subPixel, 
+	virtual void doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, 
 		TSample1D* oBegin, TSample1D* oEnd);
-	virtual void doSampleSubSequence2D(const TResolution2D& pixel, unsigned subPixel, 
+	virtual void doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, 
 		TSample2D* oBegin, TSample2D* oEnd);
 
-	virtual const unsigned doRoundSize1D(unsigned requestedSize) const;
-	virtual const unsigned doRoundSize2D(unsigned requestedSize) const;
+	virtual const size_t doRoundSize1D(size_t requestedSize) const;
+	virtual const size_t doRoundSize2D(size_t requestedSize) const;
 
 	virtual const TSamplerPtr doClone() const;
 
@@ -97,7 +97,7 @@ private:
     TStrata2D screenStrata_;
     TStrata2D lensStrata_;
 	TStrata1D timeStrata_;
-    unsigned strataPerPixel_;
+    size_t strataPerPixel_;
 	bool isJittered_;
 };
 

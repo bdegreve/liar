@@ -38,7 +38,7 @@ namespace liar
 namespace tracers
 {
 
-PY_DECLARE_CLASS(DirectLighting)
+PY_DECLARE_CLASS_DOC(DirectLighting, "simple ray tracer")
 PY_CLASS_CONSTRUCTOR_0(DirectLighting)
 
 

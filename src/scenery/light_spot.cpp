@@ -31,7 +31,7 @@ namespace liar
 namespace scenery
 {
 
-PY_DECLARE_CLASS(LightSpot)
+PY_DECLARE_CLASS_DOC(LightSpot, "spot light")
 PY_CLASS_CONSTRUCTOR_0(LightSpot)
 PY_CLASS_MEMBER_RW(LightSpot, position, setPosition)
 PY_CLASS_MEMBER_RW(LightSpot, direction, setDirection)
@@ -261,7 +261,7 @@ const Spectrum LightSpot::doTotalPower(const TAabb3D& sceneBound) const
 }
 
 
-const unsigned LightSpot::doNumberOfEmissionSamples() const
+const size_t LightSpot::doNumberOfEmissionSamples() const
 {
 	return 1;
 }

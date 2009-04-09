@@ -40,41 +40,40 @@
 #include "uv.h"
 #include "xyz.h"
 
-PY_DECLARE_MODULE(textures)
+using namespace liar::textures;
 
-extern "C"
+PY_DECLARE_MODULE_DOC(textures, "textures for LiAR")
+
+// some base classes, keep in keep in alphabetical order please! [Bramz]
+//
+PY_MODULE_CLASS(textures, Mix2, textures)
+
+// keep in alphabetical order please! [Bramz]
+//
+PY_MODULE_CLASS(textures, AngularMapping, textures)
+PY_MODULE_CLASS(textures, CheckerBoard, textures)
+PY_MODULE_CLASS(textures, CheckerVolume, textures)
+PY_MODULE_CLASS(textures, Constant, textures)
+PY_MODULE_CLASS(textures, Global, textures)
+PY_MODULE_CLASS(textures, GridBoard, textures)
+PY_MODULE_CLASS(textures, Image, textures)
+PY_MODULE_CLASS(textures, LinearInterpolator, textures)
+PY_MODULE_CLASS(textures, Product, textures)
+PY_MODULE_CLASS(textures, Time, textures)
+PY_MODULE_CLASS(textures, TransformationUv, textures)
+PY_MODULE_CLASS(textures, Uv, textures)
+PY_MODULE_CLASS(textures, Xyz, textures)
+
+void texturesPostInject(PyObject*)
 {
-
-LIAR_TEXTURES_DLL void inittextures(void)
-{
-    using namespace liar::textures;
-
-	PY_INJECT_MODULE_EX(textures, "liar.textures", "textures for LiAR")
-
-	// some base classes, keep in keep in alphabetical order please! [Bramz]
-	//
-	PY_INJECT_CLASS_IN_MODULE(Mix2, textures, "base class of textures mixing two input textures")
-	
-	// keep in alphabetical order please! [Bramz]
-	//
-	PY_INJECT_CLASS_IN_MODULE(AngularMapping, textures, "converts point to angular coordinates as used in light probes")
-	PY_INJECT_CLASS_IN_MODULE(CheckerBoard, textures, "mixes two textures in 2D checkerboard pattern")
-	PY_INJECT_CLASS_IN_MODULE(CheckerVolume, textures, "mixes two textures in 3D checkerboard pattern")
-	PY_INJECT_CLASS_IN_MODULE(Constant, textures, "texture with constant value")
-	PY_INJECT_CLASS_IN_MODULE(Global, textures, "use global texture parameters instead of local")
-	PY_INJECT_CLASS_IN_MODULE(GridBoard, textures, "mixes two textures in 2D grid pattern")
-	PY_INJECT_CLASS_IN_MODULE(Image, textures, "image file")
-	PY_INJECT_CLASS_IN_MODULE(LinearInterpolator, textures, "interpolates textures using gray value of control texture as parameter")
-	PY_INJECT_CLASS_IN_MODULE(Product, textures, "makes product of child textures")
-	PY_INJECT_CLASS_IN_MODULE(Time, textures, "evaluates to sampled time")
-	PY_INJECT_CLASS_IN_MODULE(TransformationUv, textures, "transform Uv coordinates")
-	PY_INJECT_CLASS_IN_MODULE(Uv, textures, "mixes two textures by the u and v context channels")
-	PY_INJECT_CLASS_IN_MODULE(Xyz, textures, "mixes three textures by the x, y and z context channels")
-
-	PyRun_SimpleString("print 'liar.textures imported (v" 
-		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");
+	PyRun_SimpleString("import sys");
+	PyRun_SimpleString("sys.stdout.write('''liar.textures imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n''')\n");
 }
 
-}
+LASS_EXECUTE_BEFORE_MAIN(
+	textures.setPostInject(texturesPostInject);
+	)
+
+PY_MODULE_ENTRYPOINT(textures)
 
 // EOF

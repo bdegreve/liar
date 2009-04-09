@@ -54,8 +54,8 @@ public:
 
 private:
 
-	const unsigned doNumReflectionSamples() const;
-	const unsigned doNumTransmissionSamples() const;
+	const size_t doNumReflectionSamples() const;
+	const size_t doNumTransmissionSamples() const;
 
 	void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
 		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const;

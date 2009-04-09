@@ -20,11 +20,11 @@
 
 
 # adjust dlopen flags so we can share symbols across extension modules
-# http://liar.bramz.net//blog/2007/01/28/shared-libraries-dlopen-and-rtti/
+# http://liar.bramz.net/2007/01/28/shared-libraries-dlopen-and-rtti/
 #
 import sys
 try:
-	oldflags = sys.getdlopenflags()
+	_oldflags = sys.getdlopenflags()
 	try:
 		import dl
 	except:
@@ -36,16 +36,14 @@ try:
 except:
 	pass	
 
-
-
-from kernel import *
-import cameras
-import scenery
-import output
-import samplers
-import shaders
-import tracers
-import textures
-import codecs
+from liar.kernel import *
+import liar.cameras
+import liar.scenery
+import liar.output
+import liar.samplers
+import liar.shaders
+import liar.tracers
+import liar.textures
+#import liar.codecs
 
 # EOF

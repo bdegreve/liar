@@ -29,7 +29,7 @@ namespace liar
 namespace textures
 {
 
-PY_DECLARE_CLASS(Time)
+PY_DECLARE_CLASS_DOC(Time, "evaluates to sampled time")
 PY_CLASS_CONSTRUCTOR_0(Time);
 
 // --- public --------------------------------------------------------------------------------------

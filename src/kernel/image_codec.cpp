@@ -33,16 +33,16 @@ namespace liar
 namespace kernel
 {
 
-PY_DECLARE_CLASS(ImageCodec)
+PY_DECLARE_CLASS_DOC(ImageCodec, "Abstract base class of image codecs")
 
-PY_DECLARE_CLASS(ImageCodecLassLDR)
+PY_DECLARE_CLASS_DOC(ImageCodecLassLDR, "Lass based image codec for Low Dynamic Range images")
 PY_CLASS_CONSTRUCTOR_0(ImageCodecLassLDR)
 LASS_EXECUTE_BEFORE_MAIN_EX(ImageCodecLassLDR,
 	TImageCodecMap& map = imageCodecs();
 	map["tga"] = map["targa"] = TImageCodecPtr(new ImageCodecLassLDR);
 )
 
-PY_DECLARE_CLASS(ImageCodecLassHDR)
+PY_DECLARE_CLASS_DOC(ImageCodecLassHDR, "Lass based image codec for High Dynamic Range images")
 PY_CLASS_CONSTRUCTOR_0(ImageCodecLassHDR)
 LASS_EXECUTE_BEFORE_MAIN_EX(ImageCodecLassHDR,
 	TImageCodecMap& map = imageCodecs();
@@ -135,6 +135,8 @@ const ImageCodec::TImageHandle ImageCodecLassCommon::doCreate(
 		const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, 
 		const std::string& options) const
 {
+	typedef io::Image::TChromaticity TChromaticity;
+
 	if (levelMode != lmSingleLevel)
 	{
 		LASS_THROW("ImageCodecLass only supports single level images");
@@ -152,10 +154,10 @@ const ImageCodec::TImageHandle ImageCodecLassCommon::doCreate(
 	RgbSpace& space = *pimpl->rgbSpace;
 	LASS_COUT << "RGB create: " << space.red() << " " << space.green() << " " << space.blue() << " " << space.white() << "\n";
 	io::Image::ColorSpace& colorSpace = pimpl->image.colorSpace();
-	colorSpace.red = space.red();
-	colorSpace.green = space.green();
-	colorSpace.blue = space.blue();
-	colorSpace.white = space.white();
+	colorSpace.red = TChromaticity(space.red());
+	colorSpace.green = TChromaticity(space.green());
+	colorSpace.blue = TChromaticity(space.blue());
+	colorSpace.white = TChromaticity(space.white());
 	colorSpace.gamma = space.gamma(); // may be forced to one later.
 	return pimpl.release();
 }
@@ -172,10 +174,10 @@ const ImageCodec::TImageHandle ImageCodecLassCommon::doOpen(
 	{
 		io::Image::ColorSpace& colorSpace = pimpl->image.colorSpace();
 		pimpl->rgbSpace.reset(new RgbSpace(
-			colorSpace.red, 
-			colorSpace.green, 
-			colorSpace.blue, 
-			colorSpace.white, 
+			TPoint2D(colorSpace.red), 
+			TPoint2D(colorSpace.green), 
+			TPoint2D(colorSpace.blue), 
+			TPoint2D(colorSpace.white), 
 			colorSpace.gamma));
 	}
 	RgbSpace& space = *pimpl->rgbSpace;

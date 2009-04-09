@@ -29,7 +29,7 @@ namespace liar
 namespace textures
 {
 
-PY_DECLARE_CLASS(Constant)
+PY_DECLARE_CLASS_DOC(Constant, "texture with constant value")
 PY_CLASS_CONSTRUCTOR_1(Constant, TScalar);
 PY_CLASS_CONSTRUCTOR_1(Constant, const Spectrum&);
 //PY_CLASS_CONSTRUCTOR_2(Constant, const std::vector<TScalar>&, const TSpectrumFormatPtr&);

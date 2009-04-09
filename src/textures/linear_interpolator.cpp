@@ -30,7 +30,7 @@ namespace liar
 namespace textures
 {
 
-PY_DECLARE_CLASS(LinearInterpolator)
+PY_DECLARE_CLASS_DOC(LinearInterpolator, "interpolates textures using gray value of control texture as parameter")
 PY_CLASS_CONSTRUCTOR_0(LinearInterpolator)
 PY_CLASS_CONSTRUCTOR_2(LinearInterpolator, const LinearInterpolator::TKeyTextures&, const TTexturePtr&)
 PY_CLASS_MEMBER_RW(LinearInterpolator, keys, setKeys)

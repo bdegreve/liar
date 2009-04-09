@@ -30,7 +30,7 @@ namespace liar
 namespace shaders
 {
 
-PY_DECLARE_CLASS(Lambert)
+PY_DECLARE_CLASS_DOC(Lambert, "perfect lambert shader")
 PY_CLASS_CONSTRUCTOR_0(Lambert)
 PY_CLASS_CONSTRUCTOR_1(Lambert, const TTexturePtr&)
 PY_CLASS_MEMBER_RW_DOC(Lambert, diffuse, setDiffuse, "texture for diffuse component")

@@ -29,7 +29,7 @@ namespace liar
 namespace textures
 {
 
-PY_DECLARE_CLASS(Xyz)
+PY_DECLARE_CLASS_DOC(Xyz, "mixes three textures by the x, y and z context channels")
 PY_CLASS_CONSTRUCTOR_3(Xyz, const TTexturePtr&, const TTexturePtr&, const TTexturePtr&);
 PY_CLASS_MEMBER_RW_DOC(Xyz, textureA, setTextureA, "first texture")
 PY_CLASS_MEMBER_RW_DOC(Xyz, textureB, setTextureB, "second texture")

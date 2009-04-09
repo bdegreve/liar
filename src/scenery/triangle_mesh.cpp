@@ -29,7 +29,7 @@ namespace liar
 namespace scenery
 {
 
-PY_DECLARE_CLASS(TriangleMesh)
+PY_DECLARE_CLASS_DOC(TriangleMesh, "a simple triangle mesh")
 PY_CLASS_CONSTRUCTOR_4(TriangleMesh, 
 					   const TriangleMesh::TVertices&, 
 					   const TriangleMesh::TNormals&, 

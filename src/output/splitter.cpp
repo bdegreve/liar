@@ -29,7 +29,7 @@ namespace liar
 namespace output
 {
 
-PY_DECLARE_CLASS(Splitter);
+PY_DECLARE_CLASS_DOC(Splitter, "splits output stream to several render targets");
 PY_CLASS_CONSTRUCTOR_0(Splitter)
 PY_CLASS_CONSTRUCTOR_1(Splitter, const Splitter::TChildren&)
 PY_CLASS_MEMBER_RW(Splitter, children, setChildren)

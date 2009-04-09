@@ -29,7 +29,7 @@ namespace liar
 namespace scenery
 {
 
-PY_DECLARE_CLASS(Parallelogram)
+PY_DECLARE_CLASS_DOC(Parallelogram, "finite parallelogram")
 PY_CLASS_CONSTRUCTOR_3(Parallelogram, const TPoint3D&, const TVector3D&, const TVector3D&)
 
 // --- public --------------------------------------------------------------------------------------

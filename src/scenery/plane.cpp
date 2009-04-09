@@ -29,7 +29,7 @@ namespace liar
 namespace scenery
 {
 
-PY_DECLARE_CLASS(Plane)
+PY_DECLARE_CLASS_DOC(Plane, "infinite plane")
 PY_CLASS_CONSTRUCTOR_0(Plane)
 PY_CLASS_CONSTRUCTOR_2(Plane, TVector3D, TScalar)
 PY_CLASS_MEMBER_RW(Plane, normal, setNormal)

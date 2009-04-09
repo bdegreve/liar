@@ -29,7 +29,7 @@ namespace liar
 namespace kernel
 {
 
-PY_DECLARE_CLASS(Texture)
+PY_DECLARE_CLASS_DOC(Texture, "Abstract base class of textures")
 PY_CLASS_STATIC_METHOD(Texture, black)
 PY_CLASS_STATIC_METHOD(Texture, white)
 PY_CLASS_METHOD_NAME(Texture, reduce, "__reduce__")

@@ -29,7 +29,7 @@ namespace liar
 namespace scenery
 {
 
-PY_DECLARE_CLASS(MotionTranslation)
+PY_DECLARE_CLASS_DOC(MotionTranslation, "time-dependent translation")
 PY_CLASS_CONSTRUCTOR_3(MotionTranslation, const TSceneObjectPtr&, const TVector3D&, const TVector3D&)
 PY_CLASS_MEMBER_RW(MotionTranslation, child, setChild)
 

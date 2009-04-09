@@ -29,7 +29,7 @@ namespace liar
 namespace kernel
 {
 
-PY_DECLARE_CLASS(Medium)
+PY_DECLARE_CLASS_DOC(Medium, "Volumetric shader")
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -53,14 +53,14 @@ void Medium::setRefractionIndex(const Spectrum& refractionIndex)
 
 
 
-const unsigned Medium::priority() const
+const size_t Medium::priority() const
 {
 	return priority_;
 }
 
 
 
-void Medium::setPriority(unsigned priority)
+void Medium::setPriority(size_t priority)
 {
 	priority_ = priority;
 }

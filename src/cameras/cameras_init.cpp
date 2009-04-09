@@ -26,24 +26,18 @@
 #include <lass/io/proxy_man.h>
 
 PY_DECLARE_MODULE(cameras)
+PY_MODULE_CLASS(cameras, liar::cameras::PerspectiveCamera)
 
-extern "C"
+void camerasPostInject(PyObject*)
 {
-LIAR_CAMERAS_DLL void initcameras(void)
-{
-#ifndef _DEBUG
-	//lass::io::proxyMan()->clog()->remove(&std::clog);
-#endif
-
-    using namespace liar::cameras;
-
-	PY_INJECT_MODULE_EX(cameras, "liar.cameras", "LiAR cameras")
-    PY_INJECT_CLASS_IN_MODULE(PerspectiveCamera, cameras, "plain old perspective photo camera")
-
-	PyRun_SimpleString("print 'liar.cameras imported (v" 
-		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");
+	PyRun_SimpleString( "import sys" );
+	PyRun_SimpleString("sys.stdout.write('''liar.cameras imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n''')\n");
 }
 
-}
+LASS_EXECUTE_BEFORE_MAIN(
+	cameras.setPostInject(camerasPostInject);
+	)
+
+PY_MODULE_ENTRYPOINT(cameras)
 
 // EOF

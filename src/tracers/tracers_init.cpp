@@ -30,25 +30,25 @@
 
 #include <lass/io/proxy_man.h>
 
-PY_DECLARE_MODULE(tracers)
+using namespace liar::tracers;
 
-extern "C"
+PY_DECLARE_MODULE_DOC(tracers, "LiAR ray- and path tracers")
+
+// keep in alphabetical order please! [Bramz]
+//
+PY_MODULE_CLASS(tracers, DirectLighting)
+PY_MODULE_CLASS(tracers, PhotonMapper)
+
+void tracersPostInject(PyObject*)
 {
-LIAR_TRACERS_DLL void inittracers(void)
-{
-    using namespace liar::tracers;
-
-	PY_INJECT_MODULE_EX(tracers, "liar.tracers", "LiAR ray tracers")
-
-	// keep in alphabetical order please! [Bramz]
-	//
-	PY_INJECT_CLASS_IN_MODULE(DirectLighting, tracers, "simple ray tracer")
-	PY_INJECT_CLASS_IN_MODULE(PhotonMapper, tracers, "ray tracer with photon mapper")
-
-	PyRun_SimpleString("print 'liar.tracers imported (v" 
-		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");
+	PyRun_SimpleString("import sys");
+	PyRun_SimpleString("sys.stdout.write('''liar.tracers imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n''')\n");
 }
 
-}
+LASS_EXECUTE_BEFORE_MAIN(
+	tracers.setPostInject(tracersPostInject);
+	)
+
+PY_MODULE_ENTRYPOINT(tracers)
 
 // EOF

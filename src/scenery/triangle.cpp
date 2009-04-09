@@ -29,7 +29,7 @@ namespace liar
 namespace scenery
 {
 
-PY_DECLARE_CLASS(Triangle)
+PY_DECLARE_CLASS_DOC(Triangle, "a single triangle")
 PY_CLASS_CONSTRUCTOR_3(Triangle, TPoint3D, TPoint3D, TPoint3D)
 
 

@@ -1,8 +1,34 @@
 project(liar)
 cmake_minimum_required(VERSION 2.6)
 
+set(CMAKE_DEBUG_POSTFIX _d)
+
 find_package(lass REQUIRED)
 include_directories(${lass_INCLUDE_DIRS})
+foreach(_config RELEASE DEBUG MINSIZEREL RELWITHDEBINFO)
+	get_target_property(_location lass IMPORTED_LOCATION_${_config})
+	install(
+		FILES "${_location}"
+		DESTINATION .
+		CONFIGURATIONS ${_config}
+		)
+endforeach()
+
+set (CMAKE_INSTALL_DEBUG_LIBRARIES 1)
+set (CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP 1)
+include(InstallRequiredSystemLibraries)
+if (CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
+	install(
+		PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+		DESTINATION .
+		)
+endif()
+if (CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_DEBUG)
+	install(
+		PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_DEBUG}
+		DESTINATION .
+		)
+endif()
 
 macro(list_remove_regex listvar regex)
 	set(_to_be_removed)
@@ -34,6 +60,13 @@ macro(add_liar_module name)
 		${${name}_HDRS} 
 		${${name}_SRCS}
 		)
+	if (WIN32)
+		set_target_properties(
+			${name}
+			PROPERTIES 
+			SUFFIX ".pyd"
+			)
+	endif()
 	target_link_libraries(${name} 
 		${${name}_LIBS}
 		)

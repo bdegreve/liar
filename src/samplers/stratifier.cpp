@@ -30,10 +30,10 @@ namespace liar
 namespace samplers
 {
 
-PY_DECLARE_CLASS(Stratifier);
+PY_DECLARE_CLASS_DOC(Stratifier, "(jittered) stratified sampler");
 PY_CLASS_CONSTRUCTOR_0(Stratifier)
 PY_CLASS_CONSTRUCTOR_1(Stratifier, const TResolution2D&)
-PY_CLASS_CONSTRUCTOR_2(Stratifier, const TResolution2D&, unsigned)
+PY_CLASS_CONSTRUCTOR_2(Stratifier, const TResolution2D&, size_t)
 PY_CLASS_MEMBER_RW(Stratifier, jittered, setJittered)
 
 // --- public --------------------------------------------------------------------------------------
@@ -56,7 +56,7 @@ Stratifier::Stratifier(const TResolution2D& resolution):
 
 
 
-Stratifier::Stratifier(const TResolution2D& resolution, unsigned numberOfSamplesPerPixel):
+Stratifier::Stratifier(const TResolution2D& resolution, size_t numberOfSamplesPerPixel):
 	jitterGenerator_(numberGenerator_),
 	isJittered_(true)
 {
@@ -86,7 +86,7 @@ void Stratifier::setJittered(bool enabled)
 
 // --- private -------------------------------------------------------------------------------------
 
-void Stratifier::init(const TResolution2D& resolution, unsigned numberOfSamplesPerPixel)
+void Stratifier::init(const TResolution2D& resolution, size_t numberOfSamplesPerPixel)
 {
 	setResolution(resolution);
 	setSamplesPerPixel(numberOfSamplesPerPixel);
@@ -101,7 +101,7 @@ const TResolution2D& Stratifier::doResolution() const
 
 
 
-const unsigned Stratifier::doSamplesPerPixel() const
+const size_t Stratifier::doSamplesPerPixel() const
 {
     return strataPerPixel_;
 }
@@ -117,9 +117,9 @@ void Stratifier::doSetResolution(const TResolution2D& resolution)
 
 
 
-void Stratifier::doSetSamplesPerPixel(unsigned samplesPerPixel)
+void Stratifier::doSetSamplesPerPixel(size_t samplesPerPixel)
 {
-    const unsigned strataPerAxis = static_cast<unsigned>(num::ceil(
+    const size_t strataPerAxis = static_cast<size_t>(num::ceil(
         num::sqrt(static_cast<TScalar>(samplesPerPixel))));
     
     strataPerPixel_ = strataPerAxis * strataPerAxis;
@@ -130,14 +130,14 @@ void Stratifier::doSetSamplesPerPixel(unsigned samplesPerPixel)
     screenStrata_.resize(strataPerPixel_);
     lensStrata_.resize(strataPerPixel_);
 
-	for (unsigned i = 0; i < strataPerPixel_; ++i)
+	for (size_t i = 0; i < strataPerPixel_; ++i)
 	{
 		timeStrata_[i] = static_cast<TScalar>(i);
 	}
 
-    for (unsigned j = 0; j < strataPerAxis; ++j)
+    for (size_t j = 0; j < strataPerAxis; ++j)
     {
-        for (unsigned i = 0; i < strataPerAxis; ++i)
+        for (size_t i = 0; i < strataPerAxis; ++i)
         {
             screenStrata_[j * strataPerAxis + i] = TVector2D(i, j);
 			lensStrata_[j * strataPerAxis + i] = TVector2D(i, j);
@@ -147,14 +147,14 @@ void Stratifier::doSetSamplesPerPixel(unsigned samplesPerPixel)
 
 
 
-void Stratifier::doSeed(unsigned randomSeed)
+void Stratifier::doSeed(size_t randomSeed)
 {
 	numberGenerator_.seed(randomSeed);
 }
 
 
 
-void Stratifier::doSampleScreen(const TResolution2D& pixel, unsigned subPixel, 
+void Stratifier::doSampleScreen(const TResolution2D& pixel, size_t subPixel, 
 								TSample2D& oScreenCoordinate)
 {
     LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
@@ -173,7 +173,7 @@ void Stratifier::doSampleScreen(const TResolution2D& pixel, unsigned subPixel,
 
 
 
-void Stratifier::doSampleLens(const TResolution2D& pixel, unsigned subPixel, 
+void Stratifier::doSampleLens(const TResolution2D& pixel, size_t subPixel, 
 							  TSample2D& oLensCoordinate)
 {
     LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
@@ -193,7 +193,7 @@ void Stratifier::doSampleLens(const TResolution2D& pixel, unsigned subPixel,
 
 
 
-void Stratifier::doSampleTime(const TResolution2D& pixel, unsigned subPixel, 
+void Stratifier::doSampleTime(const TResolution2D& pixel, size_t subPixel, 
 							  const TimePeriod& period, TTime& oTime)
 {
     LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
@@ -210,7 +210,7 @@ void Stratifier::doSampleTime(const TResolution2D& pixel, unsigned subPixel,
 
 
 
-void Stratifier::doSampleSubSequence1D(const TResolution2D& pixel, unsigned subPixel, 
+void Stratifier::doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, 
 									   TSample1D* oBegin, TSample1D* oEnd)
 {
 	const ptrdiff_t size = oEnd - oBegin;
@@ -224,7 +224,7 @@ void Stratifier::doSampleSubSequence1D(const TResolution2D& pixel, unsigned subP
 
 
 
-void Stratifier::doSampleSubSequence2D(const TResolution2D& pixel, unsigned subPixel, 
+void Stratifier::doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, 
 									   TSample2D* oBegin, TSample2D* oEnd)
 {
 	const size_t size = oEnd - oBegin;
@@ -246,18 +246,18 @@ void Stratifier::doSampleSubSequence2D(const TResolution2D& pixel, unsigned subP
 
 
 
-const unsigned Stratifier::doRoundSize1D(unsigned requestedSize) const
+const size_t Stratifier::doRoundSize1D(size_t requestedSize) const
 {
 	return requestedSize;
 }
 
 
 
-const unsigned Stratifier::doRoundSize2D(unsigned requestedSize) const
+const size_t Stratifier::doRoundSize2D(size_t requestedSize) const
 {
 	const TScalar realSqrt = num::sqrt(static_cast<TScalar>(requestedSize));
-	const unsigned lowSqrt = static_cast<unsigned>(num::floor(realSqrt));
-	const unsigned highSqrt = lowSqrt + 1;
+	const size_t lowSqrt = static_cast<size_t>(num::floor(realSqrt));
+	const size_t highSqrt = lowSqrt + 1;
 
 	return (realSqrt - lowSqrt) < (highSqrt - requestedSize) ? num::sqr(lowSqrt) : num::sqr(highSqrt);
 }
@@ -285,7 +285,7 @@ void Stratifier::doSetState(const TPyObjectPtr& state)
 {
 	std::vector<TNumberGenerator::TValue> numGenState;
 	TResolution2D resolution;
-	unsigned strataPerPixel;
+	size_t strataPerPixel;
 	TStrata2D lensStrata;
 	TStrata1D timeStrata;
 
@@ -302,11 +302,11 @@ void Stratifier::doSetState(const TPyObjectPtr& state)
 
 void Stratifier::shuffleTimeStrata()
 {
-	typedef num::DistributionUniform<unsigned, TNumberGenerator, num::rtRightOpen> TRandomSelector;
+	typedef num::DistributionUniform<size_t, TNumberGenerator, num::rtRightOpen> TRandomSelector;
 
 	// shuffle strata in linear time guaranteed.
 	//
-	for (unsigned i = 0; i < strataPerPixel_; ++i)
+	for (size_t i = 0; i < strataPerPixel_; ++i)
 	{
 		TRandomSelector selector(numberGenerator_, i, strataPerPixel_);
 		std::swap(timeStrata_[i], timeStrata_[selector()]);

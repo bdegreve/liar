@@ -29,7 +29,7 @@ namespace liar
 namespace output
 {
 
-PY_DECLARE_CLASS(DepthChannel);
+PY_DECLARE_CLASS_DOC(DepthChannel, "converts depth channel to color information");
 PY_CLASS_CONSTRUCTOR_2(DepthChannel, const TRenderTargetPtr&, TScalar)
 PY_CLASS_MEMBER_RW(DepthChannel, target, setTarget)
 PY_CLASS_MEMBER_RW(DepthChannel, unit, setUnit)

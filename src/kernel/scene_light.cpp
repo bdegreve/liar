@@ -29,7 +29,7 @@ namespace liar
 namespace kernel
 {
 
-PY_DECLARE_CLASS(SceneLight)
+PY_DECLARE_CLASS_DOC(SceneLight, "Abstract base class of scene lights")
 PY_CLASS_MEMBER_RW_DOC(SceneLight, isShadowless, setShadowless,
 	"True or False\n"
 	"determines if light can be blocked to cause shadows.  By default it's false which "

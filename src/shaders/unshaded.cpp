@@ -31,7 +31,7 @@ namespace liar
 namespace shaders
 {
 
-PY_DECLARE_CLASS(Unshaded)
+PY_DECLARE_CLASS_DOC(Unshaded, "a shader that doesn't shade :)")
 PY_CLASS_CONSTRUCTOR_0(Unshaded)
 PY_CLASS_CONSTRUCTOR_1(Unshaded, const TTexturePtr&)
 PY_CLASS_MEMBER_RW_DOC(Unshaded, colour, setColour, "texture")

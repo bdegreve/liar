@@ -31,7 +31,7 @@ namespace liar
 namespace shaders
 {
 
-PY_DECLARE_CLASS(AshikhminShirley)
+PY_DECLARE_CLASS_DOC(AshikhminShirley, "Anisotropic Phong BRDF by Ashikhmin & Shirley (2001)")
 PY_CLASS_CONSTRUCTOR_0(AshikhminShirley)
 PY_CLASS_CONSTRUCTOR_2(AshikhminShirley, const TTexturePtr&, const TTexturePtr&)
 PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, diffuse, setDiffuse, 
@@ -127,16 +127,16 @@ void AshikhminShirley::setSpecularPowerV(const TTexturePtr& iSpecularPower)
 
 
 
-const unsigned AshikhminShirley::numberOfSamples() const
+const size_t AshikhminShirley::numberOfSamples() const
 {
 	return numberOfSamples_;
 }
 
 
 
-void AshikhminShirley::setNumberOfSamples(unsigned iNumber)
+void AshikhminShirley::setNumberOfSamples(size_t iNumber)
 {
-	numberOfSamples_ = std::max<unsigned>(iNumber, 1);
+	numberOfSamples_ = std::max<size_t>(iNumber, 1);
 }
 
 
@@ -159,7 +159,7 @@ namespace temp
 	}
 }
 
-const unsigned AshikhminShirley::doNumReflectionSamples() const
+const size_t AshikhminShirley::doNumReflectionSamples() const
 {
 	return numberOfSamples_;
 }

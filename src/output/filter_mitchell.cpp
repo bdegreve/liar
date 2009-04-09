@@ -29,7 +29,7 @@ namespace liar
 namespace output
 {
 
-PY_DECLARE_CLASS(FilterMitchell);
+PY_DECLARE_CLASS_DOC(FilterMitchell, "Mitchell reconstruction filter");
 PY_CLASS_CONSTRUCTOR_1(FilterMitchell, const TRenderTargetPtr&)
 PY_CLASS_CONSTRUCTOR_2(FilterMitchell, const TRenderTargetPtr&, TScalar)
 PY_CLASS_MEMBER_RW(FilterMitchell, target, setTarget)
@@ -121,7 +121,7 @@ void FilterMitchell::doWriteRender(const OutputSample* first, const OutputSample
 		TVector2D f[filterExtent_];
 		for (int i = 0; i < filterExtent_; ++i)
 		{
-			f[i] = filterKernel(dp + (i - filterWidth_));
+			f[i] = filterKernel(dp + (static_cast<TScalar>(i) - filterWidth_));
 		}
 		for (int j = 0; j < filterExtent_; ++j)
 		{

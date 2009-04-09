@@ -36,8 +36,8 @@
 
 // maybe Bill Gates likes to global lock iterator operations, but I don't.
 #ifdef _MSC_VER
-#	define _SECURE_SCL 0
-#	define _HAS_ITERATOR_DEBUGGING 0
+//#	define _SECURE_SCL 0
+//#	define _HAS_ITERATOR_DEBUGGING 0
 #endif
 
 #include <lass/num/num_traits.h>
@@ -87,6 +87,8 @@ typedef prim::Point3D<TScalar> TPoint3D;
 typedef prim::Ray3D<TScalar, prim::Normalized, prim::Unbounded> TRay3D;
 typedef prim::Aabb3D<TScalar> TAabb3D;
 typedef prim::Transformation3D<TScalar> TTransformation3D;
+
+typedef prim::Vector3D<float> TXYZ;
 
 typedef prim::Vector2D<size_t> TResolution2D;
 typedef prim::Aabb2D<size_t> TRange2D;

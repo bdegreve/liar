@@ -29,7 +29,7 @@ namespace liar
 namespace textures
 {
 
-PY_DECLARE_CLASS(GridBoard)
+PY_DECLARE_CLASS_DOC(GridBoard, "mixes two textures in 2D grid pattern")
 PY_CLASS_CONSTRUCTOR_2(GridBoard, TTexturePtr, TTexturePtr);
 PY_CLASS_MEMBER_RW(GridBoard, thickness, setThickness);
 

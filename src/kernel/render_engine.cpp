@@ -31,7 +31,7 @@ namespace liar
 namespace kernel
 {
 
-PY_DECLARE_CLASS(RenderEngine)
+PY_DECLARE_CLASS_DOC(RenderEngine, "Render engine")
 PY_CLASS_CONSTRUCTOR_0(RenderEngine)
 PY_CLASS_MEMBER_RW(RenderEngine, camera, setCamera)
 PY_CLASS_MEMBER_RW(RenderEngine, tracer, setTracer)
@@ -108,7 +108,7 @@ const TRayTracerPtr& RenderEngine::tracer() const
 
 
 
-const unsigned RenderEngine::numberOfThreads() const
+const size_t RenderEngine::numberOfThreads() const
 {
 	return numberOfThreads_;
 }
@@ -154,7 +154,7 @@ void RenderEngine::setTracer(const TRayTracerPtr& iRayTracer)
 
 
 
-void RenderEngine::setNumberOfThreads(unsigned number)
+void RenderEngine::setNumberOfThreads(size_t number)
 {
 	numberOfThreads_ = number;
 }
@@ -191,7 +191,7 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 	
 	const TResolution2D resolution = sampler_->resolution();
 	const TVector2D pixelSize = TVector2D(resolution).reciprocal();
-	const unsigned samplesPerPixel = sampler_->samplesPerPixel();
+	const size_t samplesPerPixel = sampler_->samplesPerPixel();
 	const TimePeriod timePeriod = iFrameTime + camera_->shutterDelta();
 
 	const TResolution2D min(
@@ -200,8 +200,8 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 	const TResolution2D max(
 		num::round(bucket.max().x * resolution.x), 
 		num::round(bucket.max().y * resolution.y));
-	const unsigned numberOfPixels = (max.x - min.x) * (max.y - min.y);
-	const unsigned numberOfSamples = numberOfPixels * samplesPerPixel;
+	const size_t numberOfPixels = (max.x - min.x) * (max.y - min.y);
+	const size_t numberOfSamples = numberOfPixels * samplesPerPixel;
 
 	if (isDirty_)
 	{		
@@ -340,11 +340,11 @@ void RenderEngine::Consumer::operator()(const Task& iTask)
 {
 	const TResolution2D begin = iTask.begin();
 	const TResolution2D end = iTask.end();
-	const unsigned samplesPerPixel = sampler_->samplesPerPixel();
+	const size_t samplesPerPixel = sampler_->samplesPerPixel();
 
-	const unsigned outputSize = 1024;
+	const size_t outputSize = 1024;
 	TOutputSamples outputSamples(outputSize);
-	unsigned outputIndex = 0;
+	size_t outputIndex = 0;
 
 	Sample sample;
 	TResolution2D i;
@@ -352,7 +352,7 @@ void RenderEngine::Consumer::operator()(const Task& iTask)
 	{
 		for (i.x = begin.x; i.x < end.x; ++i.x)
 		{
-			for (unsigned k = 0; k < samplesPerPixel; ++k)
+			for (size_t k = 0; k < samplesPerPixel; ++k)
 			{
 				if (engine_->isCanceling())
 				{
@@ -382,7 +382,7 @@ void RenderEngine::Consumer::operator()(const Task& iTask)
 
 // --- Progress ------------------------------------------------------------------------------------
 
-RenderEngine::Progress::Progress(const std::string& caption, unsigned totalNumberOfSamples):
+RenderEngine::Progress::Progress(const std::string& caption, size_t totalNumberOfSamples):
 	indicator_(caption),
 	numSamplesWritten_(0),
 	totalNumSamples_(totalNumberOfSamples)
@@ -398,7 +398,7 @@ RenderEngine::Progress::~Progress()
 
 
 
-RenderEngine::Progress& RenderEngine::Progress::operator+=(unsigned numNewSamplesWritten)
+RenderEngine::Progress& RenderEngine::Progress::operator+=(size_t numNewSamplesWritten)
 {
 	numSamplesWritten_ += numNewSamplesWritten;
 	indicator_(static_cast<double>(numSamplesWritten_) / totalNumSamples_);

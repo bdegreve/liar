@@ -30,7 +30,7 @@ namespace liar
 namespace shaders
 {
 
-PY_DECLARE_CLASS(Dielectric)
+PY_DECLARE_CLASS_DOC(Dielectric, "dielectric Fresnel material (like glass)")
 PY_CLASS_CONSTRUCTOR_0(Dielectric)
 PY_CLASS_CONSTRUCTOR_1(Dielectric, const TTexturePtr&)
 PY_CLASS_CONSTRUCTOR_2(Dielectric, const TTexturePtr&, const TTexturePtr&)
@@ -103,14 +103,14 @@ void Dielectric::setOuterRefractionIndex(const TTexturePtr& outerRefractionIndex
 
 // --- private -------------------------------------------------------------------------------------
 
-const unsigned Dielectric::doNumReflectionSamples() const
+const size_t Dielectric::doNumReflectionSamples() const
 {
 	return 1;
 }
 
 
 
-const unsigned Dielectric::doNumTransmissionSamples() const
+const size_t Dielectric::doNumTransmissionSamples() const
 {
 	return 1;
 }

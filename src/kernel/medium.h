@@ -49,8 +49,8 @@ public:
 	const Spectrum& refractionIndex() const;
 	void setRefractionIndex(const Spectrum& refractionIndex);
 	
-	const unsigned priority() const;
-	void setPriority(unsigned priority);
+	const size_t priority() const;
+	void setPriority(size_t priority);
 
 	const Spectrum transparency(const BoundedRay& ray) const
 	{
@@ -66,7 +66,7 @@ private:
 	virtual const Spectrum doTransparency(const BoundedRay& ray) const = 0;
 
 	Spectrum refractionIndex_;
-	unsigned priority_;
+	size_t priority_;
 };
 
 typedef python::PyObjectPtr<Medium>::Type TMediumPtr;

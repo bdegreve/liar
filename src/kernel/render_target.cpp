@@ -29,7 +29,7 @@ namespace liar
 namespace kernel
 {
 
-PY_DECLARE_CLASS(RenderTarget)
+PY_DECLARE_CLASS_DOC(RenderTarget, "Abstract base class of render targets")
 
 // --- public --------------------------------------------------------------------------------------
 

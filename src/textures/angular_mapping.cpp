@@ -29,7 +29,7 @@ namespace liar
 namespace textures
 {
 
-PY_DECLARE_CLASS(AngularMapping)
+PY_DECLARE_CLASS_DOC(AngularMapping, "converts point to angular coordinates as used in light probes")
 PY_CLASS_CONSTRUCTOR_1(AngularMapping, const TTexturePtr&);
 PY_CLASS_CONSTRUCTOR_2(AngularMapping, const TTexturePtr&, const TPoint3D&);
 PY_CLASS_MEMBER_RW(AngularMapping, texture, setTexture);

@@ -30,15 +30,15 @@ namespace liar
 namespace kernel
 {
 
-PY_DECLARE_CLASS(RgbSpace);
+PY_DECLARE_CLASS_DOC(RgbSpace, "XYZ-RGB convertor");
 PY_CLASS_CONSTRUCTOR_5(RgbSpace, const TPoint2D&, const TPoint2D&, const TPoint2D&, const TPoint2D&, TScalar);
 PY_CLASS_MEMBER_R(RgbSpace, red);
 PY_CLASS_MEMBER_R(RgbSpace, green);
 PY_CLASS_MEMBER_R(RgbSpace, blue);
 PY_CLASS_MEMBER_R(RgbSpace, white);
 PY_CLASS_MEMBER_R(RgbSpace, gamma);
-PY_CLASS_METHOD_NAME(RgbSpace, operator==, "__eq__");
-PY_CLASS_METHOD_NAME(RgbSpace, operator!=, "__ne__");
+PY_CLASS_METHOD_NAME(RgbSpace, operator==, python::methods::_eq_);
+PY_CLASS_METHOD_NAME(RgbSpace, operator!=, python::methods::_ne_);
 PY_CLASS_METHOD_NAME(RgbSpace, reduce, "__reduce__")
 PY_CLASS_METHOD_NAME(RgbSpace, getState, "__getstate__")
 PY_CLASS_METHOD_NAME(RgbSpace, setState, "__setstate__")

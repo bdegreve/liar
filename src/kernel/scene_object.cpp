@@ -31,7 +31,7 @@ namespace liar
 namespace kernel
 {
 
-PY_DECLARE_CLASS(SceneObject)
+PY_DECLARE_CLASS_DOC(SceneObject, "Abstract base class of scene objects")
 PY_CLASS_MEMBER_RW(SceneObject, shader, setShader)
 PY_CLASS_MEMBER_RW(SceneObject, isOverridingShader, setOverridingShader)
 PY_CLASS_MEMBER_RW(SceneObject, interior, setInterior)

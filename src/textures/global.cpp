@@ -29,7 +29,7 @@ namespace liar
 namespace textures
 {
 
-PY_DECLARE_CLASS(Global)
+PY_DECLARE_CLASS_DOC(Global, "use global texture parameters instead of local")
 PY_CLASS_CONSTRUCTOR_1(Global, const TTexturePtr&);
 PY_CLASS_MEMBER_RW(Global, texture, setTexture);
 

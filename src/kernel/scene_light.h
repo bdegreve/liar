@@ -67,7 +67,7 @@ public:
 	{
 		return doTotalPower(sceneBound);
 	}
-	const unsigned numberOfEmissionSamples() const 
+	const size_t numberOfEmissionSamples() const 
 	{ 
 		return doNumberOfEmissionSamples(); 
 	}
@@ -100,7 +100,7 @@ private:
 		const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, const TAabb3D& sceneBound, 
 		BoundedRay& emissionRay, TScalar& pdf) const = 0;
 	virtual const Spectrum doTotalPower(const TAabb3D& sceneBound) const = 0;
-	virtual const unsigned doNumberOfEmissionSamples() const = 0;
+	virtual const size_t doNumberOfEmissionSamples() const = 0;
 	virtual const bool doIsSingular() const = 0;
 	
 	virtual const TPyObjectPtr doGetLightState() const = 0;

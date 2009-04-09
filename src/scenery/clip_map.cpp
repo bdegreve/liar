@@ -29,7 +29,7 @@ namespace liar
 namespace scenery
 {
 
-PY_DECLARE_CLASS(ClipMap)
+PY_DECLARE_CLASS_DOC(ClipMap, "Applies clip map to child object")
 PY_CLASS_CONSTRUCTOR_2(ClipMap, const TSceneObjectPtr&, const TTexturePtr&)
 PY_CLASS_CONSTRUCTOR_3(ClipMap, const TSceneObjectPtr&, const TTexturePtr&, TScalar)
 PY_CLASS_MEMBER_RW(ClipMap, child, setChild)

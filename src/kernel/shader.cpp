@@ -30,7 +30,7 @@ namespace liar
 namespace kernel
 {
 
-PY_DECLARE_CLASS(Shader)
+PY_DECLARE_CLASS_DOC(Shader, "Abstract base class of shaders")
 PY_CLASS_METHOD_NAME(Shader, reduce, "__reduce__")
 PY_CLASS_METHOD_NAME(Shader, getState, "__getstate__")
 PY_CLASS_METHOD_NAME(Shader, setState, "__setstate__")
@@ -58,14 +58,14 @@ void Shader::requestSamples(const TSamplerPtr& sampler)
 
 
 
-const unsigned Shader::numReflectionSamples() const
+const size_t Shader::numReflectionSamples() const
 {
 	return doNumReflectionSamples();
 }
 
 
 
-const unsigned Shader::numTransmissionSamples() const
+const size_t Shader::numTransmissionSamples() const
 {
 	return doNumTransmissionSamples();
 }
@@ -135,14 +135,14 @@ void Shader::doRequestSamples(const TSamplerPtr& sampler)
 
 
 
-const unsigned Shader::doNumReflectionSamples() const
+const size_t Shader::doNumReflectionSamples() const
 {
 	return 0;
 }
 
 
 
-const unsigned Shader::doNumTransmissionSamples() const
+const size_t Shader::doNumTransmissionSamples() const
 {
 	return 0;
 }

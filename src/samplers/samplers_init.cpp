@@ -26,33 +26,30 @@
 #include "../kernel/sampler.h"
 #include <lass/io/proxy_man.h>
 
-void setDefaultSampler(const liar::kernel::TSamplerPtr& iDefaultSampler)
+using namespace liar::samplers;
+
+void setDefaultSampler(const liar::kernel::TSamplerPtr& defaultSampler)
 {
-	liar::kernel::Sampler::defaultSampler() = iDefaultSampler;
+	liar::kernel::Sampler::defaultSampler() = defaultSampler;
 }
 
-PY_DECLARE_MODULE(samplers)
+PY_DECLARE_MODULE_DOC(samplers, "LiAR sample generators")
+
+PY_MODULE_CLASS(samplers, Stratifier)
+
 PY_MODULE_FUNCTION(samplers, setDefaultSampler)
 
-extern "C"
+void samplersPostInject(PyObject*)
 {
-LIAR_SAMPLERS_DLL void initsamplers(void)
-{
-#ifndef _DEBUG
-	//lass::io::proxyMan()->clog()->remove(&std::clog);
-#endif
-
-    using namespace liar::samplers;
-
-	PY_INJECT_MODULE_EX(samplers, "liar.samplers", "LiAR sample generators")
-    PY_INJECT_CLASS_IN_MODULE(Stratifier, samplers, "(jittered) stratified sampler")
-        
 	setDefaultSampler(liar::kernel::TSamplerPtr(new Stratifier));
-
-	PyRun_SimpleString("print 'liar.samplers imported (v" 
-		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");
+	PyRun_SimpleString( "import sys" );
+	PyRun_SimpleString("sys.stdout.write('''liar.samplers imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n''')\n");
 }
 
-}
+LASS_EXECUTE_BEFORE_MAIN(
+	samplers.setPostInject(samplersPostInject);
+	)
+
+PY_MODULE_ENTRYPOINT(samplers)
 
 // EOF

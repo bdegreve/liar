@@ -30,7 +30,7 @@ namespace liar
 namespace textures
 {
 
-PY_DECLARE_CLASS(Mix2)
+PY_DECLARE_CLASS_DOC(Mix2, "base class of textures mixing two input textures")
 PY_CLASS_MEMBER_RW_DOC(Mix2, textureA, setTextureA, "first texture")
 PY_CLASS_MEMBER_RW_DOC(Mix2, textureB, setTextureB, "second texture")
 

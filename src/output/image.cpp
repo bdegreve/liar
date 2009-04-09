@@ -31,7 +31,7 @@ namespace liar
 namespace output
 {
 
-PY_DECLARE_CLASS(Image);
+PY_DECLARE_CLASS_DOC(Image, "simple image render target");
 PY_CLASS_CONSTRUCTOR_2(Image, std::string, const TResolution2D&)
 PY_CLASS_MEMBER_RW(Image, filename, setFilename)
 PY_CLASS_MEMBER_RW(Image, rgbSpace, setRgbSpace)

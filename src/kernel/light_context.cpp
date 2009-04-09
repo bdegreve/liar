@@ -67,7 +67,7 @@ void LightContext::setSceneBound(const TAabb3D& bound, const TimePeriod& period)
 
 void LightContext::requestSamples(const TSamplerPtr& sampler)
 {
-	const int n = light_->numberOfEmissionSamples();
+	const size_t n = light_->numberOfEmissionSamples();
 	idLightSamples_ = sampler->requestSubSequence2D(n);
 	idBsdfSamples_ = sampler->requestSubSequence2D(n);
 	idBsdfComponentSamples_ = sampler->requestSubSequence1D(n);

@@ -29,7 +29,7 @@ namespace liar
 namespace scenery
 {
 
-PY_DECLARE_CLASS(List)
+PY_DECLARE_CLASS_DOC(List, "flat list of child objects")
 PY_CLASS_CONSTRUCTOR_0(List)
 PY_CLASS_CONSTRUCTOR_1(List, const List::TChildren&)
 PY_CLASS_METHOD_QUALIFIED_1(List, add, void, const TSceneObjectPtr&)

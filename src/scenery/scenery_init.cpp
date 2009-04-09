@@ -47,47 +47,43 @@
 
 #include <lass/io/proxy_man.h>
 
-PY_DECLARE_MODULE(scenery)
+using namespace liar::scenery;
 
-extern "C"
+PY_DECLARE_MODULE_DOC(scenery, "LiAR scene objects")
+
+// keep in alphabetical order please! [Bramz]
+//
+PY_MODULE_CLASS(scenery, AabbTree)
+PY_MODULE_CLASS(scenery, AabpTree)
+PY_MODULE_CLASS(scenery, ClipMap)
+PY_MODULE_CLASS(scenery, Csg)
+PY_MODULE_CLASS(scenery, LightArea)
+PY_MODULE_CLASS(scenery, LightDirectional)
+PY_MODULE_CLASS(scenery, LightPoint)
+PY_MODULE_CLASS(scenery, LightSky)
+PY_MODULE_CLASS(scenery, LightSpot)
+PY_MODULE_CLASS(scenery, List)
+PY_MODULE_CLASS(scenery, MotionTranslation)
+PY_MODULE_CLASS(scenery, OctTree)
+PY_MODULE_CLASS(scenery, Parallelogram)
+PY_MODULE_CLASS(scenery, Plane)
+PY_MODULE_CLASS(scenery, Sphere)
+PY_MODULE_CLASS(scenery, Sky)
+PY_MODULE_CLASS(scenery, Transformation)
+PY_MODULE_CLASS(scenery, Translation)
+PY_MODULE_CLASS(scenery, Triangle)
+PY_MODULE_CLASS(scenery, TriangleMesh)
+
+void sceneryPostInject(PyObject*)
 {
-LIAR_SCENERY_DLL void initscenery(void)
-{
-#ifndef _DEBUG
-	//lass::io::proxyMan()->clog()->remove(&std::clog);
-#endif
-
-    using namespace liar::scenery;
-
-	PY_INJECT_MODULE_EX(scenery, "liar.scenery", "LiAR scene objects")
-
-	// keep in alphabetical order please! [Bramz]
-	//
-	PY_INJECT_CLASS_IN_MODULE(AabbTree, scenery, "AABB tree of child objects")
-	PY_INJECT_CLASS_IN_MODULE(AabpTree, scenery, "AABP tree of child objects")
-	PY_INJECT_CLASS_IN_MODULE(ClipMap, scenery, "Applies clip map to child object")
-	PY_INJECT_CLASS_IN_MODULE(Csg, scenery, "Constructive Solid Geometry")
-	PY_INJECT_CLASS_IN_MODULE(LightArea, scenery, "area light")
-	PY_INJECT_CLASS_IN_MODULE(LightDirectional, scenery, "directional light")
-	PY_INJECT_CLASS_IN_MODULE(LightPoint, scenery, "point light")
-	PY_INJECT_CLASS_IN_MODULE(LightSky, scenery, "infinite sky light")
-	PY_INJECT_CLASS_IN_MODULE(LightSpot, scenery, "spot light")
-    PY_INJECT_CLASS_IN_MODULE(List, scenery, "flat list of child objects")
-	PY_INJECT_CLASS_IN_MODULE(MotionTranslation, scenery, "time-dependent translation")
-	PY_INJECT_CLASS_IN_MODULE(OctTree, scenery, "octtree of child objects")
-    PY_INJECT_CLASS_IN_MODULE(Parallelogram, scenery, "finite parallelogram")
-    PY_INJECT_CLASS_IN_MODULE(Plane, scenery, "infinite plane")
-    PY_INJECT_CLASS_IN_MODULE(Sphere, scenery, "a nice sphere")
-    PY_INJECT_CLASS_IN_MODULE(Sky, scenery, "sky sphere")
-    PY_INJECT_CLASS_IN_MODULE(Transformation, scenery, "transformation of local space")
-    PY_INJECT_CLASS_IN_MODULE(Translation, scenery, "translation of local space")
-    PY_INJECT_CLASS_IN_MODULE(Triangle, scenery, "a single triangle")
-    PY_INJECT_CLASS_IN_MODULE(TriangleMesh, scenery, "a simple triangle mesh")
-
-	PyRun_SimpleString("print 'liar.scenery imported (v" 
-		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");
+	PyRun_SimpleString("import sys");
+	PyRun_SimpleString("sys.stdout.write('''liar.scenery imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n''')\n");
 }
 
-}
+LASS_EXECUTE_BEFORE_MAIN(
+	scenery.setPostInject(sceneryPostInject);
+	)
+
+PY_MODULE_ENTRYPOINT(scenery)
 
 // EOF

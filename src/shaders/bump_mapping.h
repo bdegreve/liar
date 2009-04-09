@@ -53,8 +53,8 @@ public:
 private:
 
 	void doRequestSamples(const TSamplerPtr& sampler);
-	const unsigned doNumReflectionSamples() const;
-	const unsigned doNumTransmissionSamples() const;
+	const size_t doNumReflectionSamples() const;
+	const size_t doNumTransmissionSamples() const;
 
 	void doShadeContext(const Sample& sample, IntersectionContext& context) const;
 	const Spectrum doEmission(const Sample& sample, const IntersectionContext& context,

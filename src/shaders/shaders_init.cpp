@@ -36,34 +36,33 @@
 #include "thin_dielectric.h"
 #include "unshaded.h"
 
-PY_DECLARE_MODULE(shaders)
+using namespace liar::shaders;
 
-extern "C"
+PY_DECLARE_MODULE_DOC(shaders, "surface and volume shaders for LiAR")
+
+// keep in alphabetical order please! [Bramz]
+//
+PY_MODULE_CLASS(shaders, AshikhminShirley)
+PY_MODULE_CLASS(shaders, Beer)
+PY_MODULE_CLASS(shaders, BumpMapping)
+PY_MODULE_CLASS(shaders, Dielectric)
+PY_MODULE_CLASS(shaders, Lambert)
+PY_MODULE_CLASS(shaders, Mirror)
+//PY_MODULE_CLASS(shaders, NullShader)
+//PY_MODULE_CLASS(shaders, Simple)
+PY_MODULE_CLASS(shaders, ThinDielectric)
+PY_MODULE_CLASS(shaders, Unshaded)
+
+void shadersPostInject(PyObject*)
 {
-
-LIAR_SHADERS_DLL void initshaders(void)
-{
-	using namespace liar::shaders;
-
-	PY_INJECT_MODULE_EX(shaders, "liar.shaders", "surface and volume shaders for LiAR")
-
-	// keep in alphabetical order please! [Bramz]
-	//
-    PY_INJECT_CLASS_IN_MODULE(AshikhminShirley, shaders, "Anisotropic Phong BRDF by Ashikhmin & Shirley (2001)" )
-	PY_INJECT_CLASS_IN_MODULE(Beer, shaders, "Beer's Law")
-	PY_INJECT_CLASS_IN_MODULE(BumpMapping, shaders, "Applies bump mapping to shader")
-    PY_INJECT_CLASS_IN_MODULE(Dielectric, shaders, "dielectric Fresnel material (like glass)")
-    PY_INJECT_CLASS_IN_MODULE(Lambert, shaders, "perfect lambert shader")
-    PY_INJECT_CLASS_IN_MODULE(Mirror, shaders, "perfect mirror shader")
-    //PY_INJECT_CLASS_IN_MODULE(NullShader, shaders, "full transmission ...")
-    //PY_INJECT_CLASS_IN_MODULE(Simple, shaders, "a classic simple shader, Whitted style")
-	PY_INJECT_CLASS_IN_MODULE(ThinDielectric, shaders, "thin dielectric material")
-	PY_INJECT_CLASS_IN_MODULE(Unshaded, shaders, "a shader that doesn't shade :)")
-
-	PyRun_SimpleString("print 'liar.shaders imported (v" 
-		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");
+	PyRun_SimpleString("import sys");
+	PyRun_SimpleString("sys.stdout.write('''liar.shaders imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n''')\n");
 }
 
-}
+LASS_EXECUTE_BEFORE_MAIN(
+	shaders.setPostInject(shadersPostInject);
+	)
+
+PY_MODULE_ENTRYPOINT(shaders)
 
 // EOF

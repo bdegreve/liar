@@ -29,7 +29,7 @@ namespace liar
 namespace textures
 {
 
-PY_DECLARE_CLASS(Uv)
+PY_DECLARE_CLASS_DOC(Uv, "mixes two textures by the u and v context channels")
 PY_CLASS_CONSTRUCTOR_2(Uv, TTexturePtr, TTexturePtr);
 
 // --- public --------------------------------------------------------------------------------------

@@ -28,6 +28,7 @@
 #include "attenuation.h"
 #include "camera.h"
 #include "image_codec.h"
+#include "medium.h"
 #include "sampler.h"
 #include "scene_light.h"
 #include "scene_object.h"
@@ -62,7 +63,26 @@ void setTolerance(liar::TScalar iTolerance)
 	liar::tolerance = iTolerance;
 }
 
-PY_DECLARE_MODULE_NAME_DOC(kernel, "liar.kernel", "LiAR isn't a raytracer")
+PY_DECLARE_MODULE_DOC(kernel, "LiAR isn't a raytracer")
+
+// keep in alphabetical order please! [Bramz]
+//
+PY_MODULE_CLASS(kernel, liar::kernel::Attenuation)
+PY_MODULE_CLASS(kernel, liar::kernel::Camera)
+PY_MODULE_CLASS(kernel, liar::kernel::ImageCodec)
+PY_MODULE_CLASS(kernel, liar::kernel::ImageCodecLassLDR)
+PY_MODULE_CLASS(kernel, liar::kernel::ImageCodecLassHDR)
+PY_MODULE_CLASS(kernel, liar::kernel::Medium)
+PY_MODULE_CLASS(kernel, liar::kernel::RgbSpace)
+PY_MODULE_CLASS(kernel, liar::kernel::RayTracer)
+PY_MODULE_CLASS(kernel, liar::kernel::RenderEngine)
+PY_MODULE_CLASS(kernel, liar::kernel::RenderTarget)
+PY_MODULE_CLASS(kernel, liar::kernel::Sampler)
+PY_MODULE_CLASS(kernel, liar::kernel::SceneObject)
+	PY_MODULE_CLASS(kernel, liar::kernel::SceneLight)
+PY_MODULE_CLASS(kernel, liar::kernel::Shader)
+PY_MODULE_CLASS(kernel, liar::kernel::Texture)
+
 PY_MODULE_FUNCTION(kernel, license)
 PY_MODULE_FUNCTION(kernel, tolerance)
 PY_MODULE_FUNCTION(kernel, setTolerance)
@@ -95,53 +115,36 @@ PY_MODULE_FUNCTION_QUALIFIED_4(kernel, rgb, Spectrum, TScalar, TScalar, TScalar,
 using liar::kernel::imageCodecs;
 PY_MODULE_FUNCTION(kernel, imageCodecs)
 
-extern "C"
-{
-void LASS_DLL_EXPORT initkernel(void)
+void kernelPreInject()
 {
 	lass::util::setProcessPriority(lass::util::ppBelowNormal);
 #ifndef _DEBUG
 	lass::io::proxyMan()->clog()->remove(&std::clog);
 #endif
+}
 
-	using namespace liar::kernel;
-
-	PY_INJECT_MODULE(kernel)
-
-	// keep in alphabetical order please! [Bramz]
-	//
-	PY_INJECT_CLASS_IN_MODULE(Attenuation, kernel, 0)
-	PY_INJECT_CLASS_IN_MODULE(Camera, kernel, "Abstract base class of render viewports")
-	PY_INJECT_CLASS_IN_MODULE(ImageCodec, kernel, "Abstract base class of image codecs")
-	PY_INJECT_CLASS_IN_MODULE(ImageCodecLassLDR, kernel, "Lass based image codec for LDR images")
-	PY_INJECT_CLASS_IN_MODULE(ImageCodecLassHDR, kernel, "Lass based image codec for HDR images")
-	PY_INJECT_CLASS_IN_MODULE(RgbSpace, kernel, "XYZ-RGB convertor")
-	PY_INJECT_CLASS_IN_MODULE(RayTracer, kernel, "Abstract base class of ray tracers")
-	PY_INJECT_CLASS_IN_MODULE(RenderEngine, kernel, "Render engine")
-	PY_INJECT_CLASS_IN_MODULE(RenderTarget, kernel, "Abstract base class of render targets")
-	PY_INJECT_CLASS_IN_MODULE(Sampler, kernel, "Abstract base class of samplers")
-	PY_INJECT_CLASS_IN_MODULE(SceneObject, kernel, "Abstract base class of scene objects")
-	PY_INJECT_CLASS_IN_MODULE(Shader, kernel, "Abstract base class of shaders")
-	PY_INJECT_CLASS_IN_MODULE(Texture, kernel, "Abstract base class of textures")
-
-	// must be injected after SceneObject
-	//
-	PY_INJECT_CLASS_IN_MODULE(SceneLight, kernel, "Abstract base class of scene lights")
-
+void kernelPostInject(PyObject*)
+{
 	std::ostringstream header;
 	header << liar::name << " v" << liar::version << " ("
-		<< LASS_LIB_PLATFORM "_" LASS_LIB_COMPILER LASS_LIB_DEBUG << ")\\n"
-		<< "authors: " << liar::authors << "\\n"
-		<< "website: " << liar::website << "\\n"
-		<< liar::name << " comes with ABSOLUTELY NO WARRANTY.\\n"
-		<< "This is free software, and you are welcome to redistribute it \\n"
-		<< "under certain conditions.  Call license() for details.\\n";
+		<< LASS_LIB_PLATFORM "_" LASS_LIB_COMPILER LASS_LIB_DEBUG << ")\n"
+		<< "authors: " << liar::authors << "\n"
+		<< "website: " << liar::website << "\n"
+		<< liar::name << " comes with ABSOLUTELY NO WARRANTY.\n"
+		<< "This is free software, and you are welcome to redistribute it \n"
+		<< "under certain conditions.  Call license() for details.\n";
 		
-	PyRun_SimpleString( std::string("print \"" + header.str() + "\"\n").c_str());
-	PyRun_SimpleString("print 'liar.kernel imported (v" 
-		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");
+	PyRun_SimpleString( "import sys" );
+	PyRun_SimpleString( std::string("sys.stdout.write('''" + header.str() + "''')\n").c_str());
+	PyRun_SimpleString("sys.stdout.write('''liar.kernel imported (v" 
+		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n''')\n");
 }
 
-}
+LASS_EXECUTE_BEFORE_MAIN(
+	kernel.setPreInject(kernelPreInject);
+	kernel.setPostInject(kernelPostInject);
+	)
+
+PY_MODULE_ENTRYPOINT(kernel)
 
 // EOF

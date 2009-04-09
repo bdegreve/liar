@@ -30,7 +30,7 @@ namespace liar
 namespace scenery
 {
 
-PY_DECLARE_CLASS(Csg)
+PY_DECLARE_CLASS_DOC(Csg, "Constructive Solid Geometry")
 PY_CLASS_CONSTRUCTOR_2(Csg, const TSceneObjectPtr&, const TSceneObjectPtr&)
 PY_CLASS_CONSTRUCTOR_3(Csg, const TSceneObjectPtr&, const TSceneObjectPtr&, const std::string&)
 PY_CLASS_MEMBER_RW(Csg, childA, setChildA)

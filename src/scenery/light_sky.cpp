@@ -35,7 +35,7 @@ namespace liar
 namespace scenery
 {
 
-PY_DECLARE_CLASS(LightSky)
+PY_DECLARE_CLASS_DOC(LightSky, "infinite sky light")
 PY_CLASS_CONSTRUCTOR_0(LightSky)
 PY_CLASS_CONSTRUCTOR_1(LightSky, const TTexturePtr&)
 PY_CLASS_MEMBER_RW(LightSky, radiance, setRadiance)
@@ -277,7 +277,7 @@ const Spectrum LightSky::doTotalPower(const TAabb3D& sceneBound) const
 
 
 
-const unsigned LightSky::doNumberOfEmissionSamples() const
+const size_t LightSky::doNumberOfEmissionSamples() const
 {
 	return numberOfSamples_;
 }

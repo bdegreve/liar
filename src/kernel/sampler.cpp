@@ -30,7 +30,7 @@ namespace liar
 namespace kernel
 {
 
-PY_DECLARE_CLASS(Sampler)
+PY_DECLARE_CLASS_DOC(Sampler, "Abstract base class of samplers")
 PY_CLASS_MEMBER_RW(Sampler, resolution, setResolution)
 PY_CLASS_MEMBER_RW(Sampler, samplesPerPixel, setSamplesPerPixel)
 PY_CLASS_METHOD(Sampler, seed)
@@ -50,13 +50,13 @@ TSamplerPtr& Sampler::defaultSampler()
 
 
 
-const int Sampler::requestSubSequence1D(unsigned requestedSize)
+const int Sampler::requestSubSequence1D(size_t requestedSize)
 {
 	if (requestedSize == 0)
 	{
 		return -1;
 	}
-	const unsigned size = doRoundSize1D(requestedSize);
+	const size_t size = doRoundSize1D(requestedSize);
 	totalSubSequenceSize1D_ += size;
 	subSequenceSize1D_.push_back(size);
 	subSequenceOffset1D_.push_back(subSequenceOffset1D_.back() + size);
@@ -67,13 +67,13 @@ const int Sampler::requestSubSequence1D(unsigned requestedSize)
 
 
 
-const int Sampler::requestSubSequence2D(unsigned requestedSize)
+const int Sampler::requestSubSequence2D(size_t requestedSize)
 {
 	if (requestedSize == 0)
 	{
 		return -1;
 	}
-	const unsigned size = doRoundSize2D(requestedSize);
+	const size_t size = doRoundSize2D(requestedSize);
 	totalSubSequenceSize2D_ += size;
 	subSequenceSize2D_.push_back(size);
 	subSequenceOffset2D_.push_back(subSequenceOffset2D_.back() + size);
@@ -99,7 +99,7 @@ void Sampler::clearSubSequenceRequests()
 
 
 
-void Sampler::sample(const TResolution2D& pixel, unsigned subPixel, const TimePeriod& period, 
+void Sampler::sample(const TResolution2D& pixel, size_t subPixel, const TimePeriod& period, 
 					 Sample& sample)
 {
 	sample.sampler_ = this;
@@ -112,8 +112,8 @@ void Sampler::sample(const TResolution2D& pixel, unsigned subPixel, const TimePe
 	const size_t n1D = subSequenceSize1D_.size();
 	for (size_t k = 0; k < n1D; ++k)
 	{
-		const unsigned offset = subSequenceOffset1D_[k];
-		const unsigned size = subSequenceSize1D_[k];
+		const size_t offset = subSequenceOffset1D_[k];
+		const size_t size = subSequenceSize1D_[k];
 		doSampleSubSequence1D(pixel, subPixel, &sample.subSequences1D_[offset],
 			&sample.subSequences1D_[offset] + size);
 	}
@@ -122,8 +122,8 @@ void Sampler::sample(const TResolution2D& pixel, unsigned subPixel, const TimePe
 	const size_t n2D = subSequenceSize2D_.size();
 	for (size_t k = 0; k < n2D; ++k)
 	{
-		const unsigned offset = subSequenceOffset2D_[k];
-		const unsigned size = subSequenceSize2D_[k];
+		const size_t offset = subSequenceOffset2D_[k];
+		const size_t size = subSequenceSize2D_[k];
 		doSampleSubSequence2D(pixel, subPixel, &sample.subSequences2D_[offset],
 			&sample.subSequences2D_[offset] + size);
 	}
@@ -135,7 +135,7 @@ void Sampler::sample(const TimePeriod& period, Sample& sample)
 {
 	// make up a pixel and subpixel =)
 	TResolution2D pixel(0, 0);
-	unsigned subPixel = 0;
+	size_t subPixel = 0;
 
 	Sampler::sample(pixel, subPixel, period, sample);
 }
@@ -205,14 +205,14 @@ Sampler::Sampler():
 
 // --- private -------------------------------------------------------------------------------------
 
-const unsigned Sampler::doRoundSize1D(unsigned requestedSize) const
+const size_t Sampler::doRoundSize1D(size_t requestedSize) const
 {
 	return requestedSize;
 }
 
 
 
-const unsigned Sampler::doRoundSize2D(unsigned requestedSize) const
+const size_t Sampler::doRoundSize2D(size_t requestedSize) const
 {
 	return requestedSize;
 }

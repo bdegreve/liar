@@ -37,7 +37,7 @@ namespace liar
 namespace tracers
 {
 
-PY_DECLARE_CLASS(PhotonMapper)
+PY_DECLARE_CLASS_DOC(PhotonMapper, "ray tracer with photon mapper")
 PY_CLASS_CONSTRUCTOR_0(PhotonMapper)
 PY_CLASS_MEMBER_RW_DOC(PhotonMapper, maxNumberOfPhotons, setMaxNumberOfPhotons,
 	"The maximum number of photons being emitted by the light sources.\n"
@@ -718,6 +718,11 @@ void PhotonMapper::tracePhoton(
 	LASS_ASSERT(generation < maxRayGeneration());
 
 	const TVector3D omegaIn = context.worldToShader(-ray.direction());
+	if (omegaIn.z < 0)
+	{
+		return;
+	}
+
 	const TPoint2D sampleBsdf(uniform(), uniform());
 	const SampleBsdfIn in(sampleBsdf, Shader::capsAll);
 	SampleBsdfOut out;

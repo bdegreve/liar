@@ -29,7 +29,7 @@ namespace liar
 namespace scenery
 {
 
-PY_DECLARE_CLASS(Translation)
+PY_DECLARE_CLASS_DOC(Translation, "translation of local space")
 PY_CLASS_CONSTRUCTOR_2(Translation, const TSceneObjectPtr&, const TVector3D&)
 PY_CLASS_MEMBER_RW(Translation, child, setChild)
 PY_CLASS_MEMBER_RW(Translation, localToWorld, setLocalToWorld)

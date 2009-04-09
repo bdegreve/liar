@@ -33,7 +33,7 @@
 #define LIAR_EMAIL "bramz@users.sourceforge.net"
 #define LIAR_WEBSITE "http://liar.bramz.net/"
 
-#define LIAR_SCALAR float
+#define LIAR_SCALAR double
 #define LIAR_TIME double
 #define LIAR_TIME_DELTA double
 

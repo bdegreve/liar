@@ -62,14 +62,14 @@ public:
     const TSceneObjectPtr& scene() const;
     const TRenderTargetPtr& target() const;
     const TRayTracerPtr& tracer() const;
-	const unsigned numberOfThreads() const;
+	const size_t numberOfThreads() const;
 
     void setCamera(const TCameraPtr& camera);
     void setSampler(const TSamplerPtr& sampler);
     void setScene(const TSceneObjectPtr& scene);
     void setTarget(const TRenderTargetPtr& renderTarget);
     void setTracer(const TRayTracerPtr& iRayTracer);
-	void setNumberOfThreads(unsigned number);
+	void setNumberOfThreads(size_t number);
 
     void render(TTime time, const TBucket& bucket);
     void render(TTime time);
@@ -81,13 +81,13 @@ private:
 	class Progress
 	{
 	public:
-		Progress(const std::string& caption, unsigned totalNumberOfSamples);
+		Progress(const std::string& caption, size_t totalNumberOfSamples);
 		~Progress();
-		Progress& operator+=(unsigned numNewSamplesWritten);
+		Progress& operator+=(size_t numNewSamplesWritten);
 	private:
 		util::ProgressIndicator indicator_;
-		unsigned numSamplesWritten_;
-		unsigned totalNumSamples_;
+		size_t numSamplesWritten_;
+		size_t totalNumSamples_;
 	};
 
 	class Task
@@ -132,7 +132,7 @@ private:
     TSceneObjectPtr scene_;
 	util::Semaphore lock_;
 	util::Condition signal_;
-	unsigned numberOfThreads_;
+	size_t numberOfThreads_;
 	bool isDirty_;
 
     static const TBucket bucketBound_;

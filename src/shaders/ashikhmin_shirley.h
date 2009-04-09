@@ -63,12 +63,12 @@ public:
 	const TTexturePtr& specularPowerV() const;
 	void setSpecularPowerV(const TTexturePtr& iSpecularPower);
 
-	const unsigned numberOfSamples() const;
-	void setNumberOfSamples(unsigned number);
+	const size_t numberOfSamples() const;
+	void setNumberOfSamples(size_t number);
 
 private:
 
-	const unsigned doNumReflectionSamples() const;
+	const size_t doNumReflectionSamples() const;
 
 	void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
 		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const;
@@ -84,7 +84,7 @@ private:
 	TTexturePtr specular_;
 	TTexturePtr specularPowerU_;
 	TTexturePtr specularPowerV_;
-	unsigned numberOfSamples_;
+	size_t numberOfSamples_;
 };
 
 }

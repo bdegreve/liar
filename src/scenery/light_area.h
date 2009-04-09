@@ -79,7 +79,7 @@ private:
 		const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, const TAabb3D& sceneBound, 
 		BoundedRay& emissionRay, TScalar& pdf) const;
 	const Spectrum doTotalPower(const TAabb3D& sceneBound) const;
-	const unsigned doNumberOfEmissionSamples() const;
+	const size_t doNumberOfEmissionSamples() const;
 	const bool doIsSingular() const;
 
 	const TPyObjectPtr doGetLightState() const;

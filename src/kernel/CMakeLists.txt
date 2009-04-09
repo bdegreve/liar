@@ -19,6 +19,13 @@ target_link_libraries(kernelshared
 add_library(kernel MODULE 
 	kernel_init.cpp
 	)
+if (WIN32)
+	set_target_properties(
+		kernel
+		PROPERTIES 
+		SUFFIX ".pyd"
+		)
+endif()
 target_link_libraries(kernel 
 	kernelshared
 	)

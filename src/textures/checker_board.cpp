@@ -30,7 +30,7 @@ namespace liar
 namespace textures
 {
 
-PY_DECLARE_CLASS(CheckerBoard)
+PY_DECLARE_CLASS_DOC(CheckerBoard, "mixes two textures in 2D checkerboard pattern")
 PY_CLASS_CONSTRUCTOR_2(CheckerBoard, TTexturePtr, TTexturePtr);
 PY_CLASS_MEMBER_RW(CheckerBoard, split, setSplit);
 PY_CLASS_MEMBER_RW(CheckerBoard, antiAliasing, setAntiAliasing);

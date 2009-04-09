@@ -29,7 +29,7 @@ namespace liar
 namespace shaders
 {
 
-PY_DECLARE_CLASS(ThinDielectric)
+PY_DECLARE_CLASS_DOC(ThinDielectric, "thin dielectric material")
 PY_CLASS_CONSTRUCTOR_0(ThinDielectric)
 PY_CLASS_CONSTRUCTOR_1(ThinDielectric, const TTexturePtr&)
 PY_CLASS_CONSTRUCTOR_2(ThinDielectric, const TTexturePtr&, const TTexturePtr&)
@@ -121,14 +121,14 @@ void ThinDielectric::setTransparency(const TTexturePtr& transparency)
 
 // --- private -------------------------------------------------------------------------------------
 
-const unsigned ThinDielectric::doNumReflectionSamples() const
+const size_t ThinDielectric::doNumReflectionSamples() const
 {
 	return 1;
 }
 
 
 
-const unsigned ThinDielectric::doNumTransmissionSamples() const
+const size_t ThinDielectric::doNumTransmissionSamples() const
 {
 	return 1;
 }

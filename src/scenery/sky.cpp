@@ -29,7 +29,7 @@ namespace liar
 namespace scenery
 {
 
-PY_DECLARE_CLASS(Sky)
+PY_DECLARE_CLASS_DOC(Sky, "sky sphere")
 PY_CLASS_CONSTRUCTOR_0(Sky)
 
 

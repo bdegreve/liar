@@ -31,7 +31,7 @@ namespace liar
 namespace scenery
 {
 
-PY_DECLARE_CLASS(Sphere)
+PY_DECLARE_CLASS_DOC(Sphere, "a nice sphere")
 PY_CLASS_CONSTRUCTOR_0(Sphere)
 PY_CLASS_CONSTRUCTOR_2(Sphere, TPoint3D, TScalar)
 PY_CLASS_MEMBER_RW(Sphere, center, setCenter)

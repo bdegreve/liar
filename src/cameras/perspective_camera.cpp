@@ -31,7 +31,7 @@ namespace cameras
 {
 
 
-PY_DECLARE_CLASS(PerspectiveCamera)
+PY_DECLARE_CLASS_DOC(PerspectiveCamera, "plain old perspective photo camera")
 PY_CLASS_CONSTRUCTOR_0(PerspectiveCamera)
 PY_CLASS_MEMBER_RW(PerspectiveCamera, position, setPosition)
 PY_CLASS_MEMBER_RW(PerspectiveCamera, sky, setSky)

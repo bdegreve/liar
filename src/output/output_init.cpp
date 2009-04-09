@@ -33,30 +33,30 @@
 #include "image.h"
 #include "splitter.h"
 
-PY_DECLARE_MODULE(output)
+using namespace liar::output;
 
-extern "C"
-{
-LIAR_OUTPUT_DLL void initoutput(void)
-{
-    using namespace liar::output;
+PY_DECLARE_MODULE_DOC(output, "LiAR output devices")
 
-	PY_INJECT_MODULE_EX(output, "liar.output", "LiAR output devices")
-	
-	// keep in alphabetical order please! [Bramz]
-	//
-    PY_INJECT_CLASS_IN_MODULE(DepthChannel, output, "converts depth channel to color information")
+// keep in alphabetical order please! [Bramz]
+//
+PY_MODULE_CLASS(output, DepthChannel)
 #if LIAR_OUTPUT_HAVE_PIXELTOASTER_H
-    PY_INJECT_CLASS_IN_MODULE(Display, output, "render target in a window (PixelToaster)")
+PY_MODULE_CLASS(output, Display)
 #endif
-    PY_INJECT_CLASS_IN_MODULE(FilterMitchell, output, "Mitchell reconstruction filter")
-    PY_INJECT_CLASS_IN_MODULE(Image, output, "simple image render target")
-    PY_INJECT_CLASS_IN_MODULE(Splitter, output, "splits output stream to several render targets")
+PY_MODULE_CLASS(output, FilterMitchell)
+PY_MODULE_CLASS(output, Image)
+PY_MODULE_CLASS(output, Splitter)
 
-	PyRun_SimpleString("print 'liar.output imported (v" 
-		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")'\n");
+void outputPostInject(PyObject*)
+{
+	PyRun_SimpleString( "import sys" );
+	PyRun_SimpleString("sys.stdout.write('''liar.output imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n''')\n");
 }
 
-}
+LASS_EXECUTE_BEFORE_MAIN(
+	output.setPostInject(outputPostInject);
+	)
+
+PY_MODULE_ENTRYPOINT(output)
 
 // EOF
