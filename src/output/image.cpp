@@ -168,11 +168,11 @@ void Image::doWriteRender(const OutputSample* first, const OutputSample* last)
 			const TPoint2D& position = first->screenCoordinate();
 			const int i = static_cast<int>(num::floor(position.x * resolution_.x));
 			const int j = static_cast<int>(num::floor(position.y * resolution_.y));
-			if (i >= 0 && i < resolution_.x && j >= 0 && j < resolution_.y)
+			if (i >= 0 && static_cast<size_t>(i) < resolution_.x && j >= 0 && static_cast<size_t>(j) < resolution_.y)
 			{
-				const int k = j * resolution_.x + i;
+				const size_t k = j * resolution_.x + i;
 				const TScalar alpha = first->weight() * first->alpha();
-				renderBuffer_[k] += first->radiance().xyz() * alpha;
+				renderBuffer_[k] += first->radiance() * alpha;
 				alphaBuffer_[k] += alpha;
 				totalWeight_[k] += first->weight();
 			}
@@ -202,7 +202,7 @@ void Image::doEndRender()
 				const TScalar w = totalWeight_[j * resolution_.x + i];
 				if (w > 0)
 				{
-					TVector3D& xyz = renderBuffer_[k];
+					XYZ& xyz = renderBuffer_[k];
 					xyz *= gain_ / w;
 					xyz.x = 1 - num::exp(-exposure_ * xyz.x);
 					xyz.y = 1 - num::exp(-exposure_ * xyz.y);

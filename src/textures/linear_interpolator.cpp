@@ -114,10 +114,10 @@ void LinearInterpolator::addKey(const TScalar keyValue,
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum 
+const XYZ 
 LinearInterpolator::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
-	const TScalar keyValue = control_->lookUp(sample, context).average();
+	const TScalar keyValue = average(control_->lookUp(sample, context));
 
 	TKeyTexture sentinel(keyValue, TTexturePtr());
 	TKeyTextures::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), sentinel, LesserKey());

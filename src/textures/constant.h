@@ -42,21 +42,21 @@ class LIAR_TEXTURES_DLL Constant: public Texture
 	PY_HEADER(Texture)
 public:
 
-	explicit Constant(const Spectrum& value);
+	explicit Constant(const XYZ& value);
 	explicit Constant(TScalar scalar);
 
-	const Spectrum& value() const;
-	void setValue(const Spectrum& value);
+	const XYZ& value() const;
+	void setValue(const XYZ& value);
 
 private:
 
-	const Spectrum doLookUp(const Sample& sample, 
+	const XYZ doLookUp(const Sample& sample, 
 		const IntersectionContext& context) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-	Spectrum value_;
+	XYZ value_;
 };
 
 }

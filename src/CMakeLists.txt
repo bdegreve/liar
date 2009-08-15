@@ -1,3 +1,11 @@
+#if (MSVC)
+#	set (_cflags "/Ox")
+#	foreach(_config RELEASE RELWITHDEBINFO)
+#		set(CMAKE_C_FLAGS_${_config} "${CMAKE_C_FLAGS_${_config}} ${_cflags}")
+#		set(CMAKE_CXX_FLAGS_${_config} "${CMAKE_CXX_FLAGS_${_config}} ${_cflags}")
+#	endforeach()
+#endif()
+
 add_subdirectory(kernel)
 
 add_subdirectory(cameras)

@@ -31,13 +31,15 @@ namespace textures
 
 PY_DECLARE_CLASS_DOC(Constant, "texture with constant value")
 PY_CLASS_CONSTRUCTOR_1(Constant, TScalar);
-PY_CLASS_CONSTRUCTOR_1(Constant, const Spectrum&);
+PY_CLASS_CONSTRUCTOR_1(Constant, const XYZ&);
+PY_CLASS_CONVERTOR(Constant, TScalar);
+PY_CLASS_CONVERTOR(Constant, XYZ);
 //PY_CLASS_CONSTRUCTOR_2(Constant, const std::vector<TScalar>&, const TSpectrumFormatPtr&);
 PY_CLASS_MEMBER_RW(Constant, value, setValue);
 
 // --- public --------------------------------------------------------------------------------------
 
-Constant::Constant(const Spectrum& iSpectrum):
+Constant::Constant(const XYZ& iSpectrum):
 	value_(iSpectrum)
 {
 }
@@ -45,7 +47,7 @@ Constant::Constant(const Spectrum& iSpectrum):
 
 
 Constant::Constant(TScalar value):
-	value_(value)
+	value_(value, value, value)
 {
 }
 
@@ -69,14 +71,14 @@ Constant::Constant(const std::vector<TScalar>& iPowerDensities,
 
 
 
-const Spectrum& Constant::value() const
+const XYZ& Constant::value() const
 {
 	return value_;
 }
 
 
 
-void Constant::setValue(const Spectrum& value)
+void Constant::setValue(const XYZ& value)
 {
 	value_ = value;
 }
@@ -89,7 +91,7 @@ void Constant::setValue(const Spectrum& value)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum Constant::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const XYZ Constant::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	return value_;
 }

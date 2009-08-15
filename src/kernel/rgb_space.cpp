@@ -71,7 +71,7 @@ RgbSpace::RgbSpace(
 
 
 
-const TVector3D RgbSpace::convert(const prim::ColorRGBA& rgb) const
+const XYZ RgbSpace::convert(const prim::ColorRGBA& rgb) const
 {
 	TScalar dummy;
 	return convert(rgb, dummy);
@@ -79,7 +79,7 @@ const TVector3D RgbSpace::convert(const prim::ColorRGBA& rgb) const
 
 
 
-const TVector3D RgbSpace::convert(const prim::ColorRGBA& rgb, TScalar& alpha) const
+const XYZ RgbSpace::convert(const prim::ColorRGBA& rgb, TScalar& alpha) const
 {
 	alpha = rgb.a;
 	return r_ * rgb.r + g_ * rgb.g + b_ * rgb.b;
@@ -87,25 +87,25 @@ const TVector3D RgbSpace::convert(const prim::ColorRGBA& rgb, TScalar& alpha) co
 
 
 
-const prim::ColorRGBA RgbSpace::convert(const TVector3D& xyz) const
+const prim::ColorRGBA RgbSpace::convert(const XYZ& xyz) const
 {
 	return convert(xyz, TScalar(1));
 }
 
 
 
-const prim::ColorRGBA RgbSpace::convert(const TVector3D& xyz, TScalar alpha) const
+const prim::ColorRGBA RgbSpace::convert(const XYZ& xyz, TScalar alpha) const
 {
 	return prim::ColorRGBA(
-		x_.r * xyz.x + y_.r * xyz.y + z_.r * xyz.z,
-		x_.g * xyz.x + y_.g * xyz.y + z_.g * xyz.z,
-		x_.b * xyz.x + y_.b * xyz.y + z_.b * xyz.z,
-		alpha);
+		static_cast<RGBA::TValue>(x_.r * xyz.x + y_.r * xyz.y + z_.r * xyz.z),
+		static_cast<RGBA::TValue>(x_.g * xyz.x + y_.g * xyz.y + z_.g * xyz.z),
+		static_cast<RGBA::TValue>(x_.b * xyz.x + y_.b * xyz.y + z_.b * xyz.z),
+		static_cast<RGBA::TValue>(alpha));
 }
 
 
 
-const TVector3D RgbSpace::convertGamma(const prim::ColorRGBA& rgb) const
+const XYZ RgbSpace::convertGamma(const prim::ColorRGBA& rgb) const
 {
 	TScalar dummy;
 	return convertGamma(rgb, dummy);
@@ -113,7 +113,7 @@ const TVector3D RgbSpace::convertGamma(const prim::ColorRGBA& rgb) const
 
 
 
-const TVector3D RgbSpace::convertGamma(const prim::ColorRGBA& rgb, TScalar& alpha) const
+const XYZ RgbSpace::convertGamma(const prim::ColorRGBA& rgb, TScalar& alpha) const
 {
 	alpha = num::clamp<TScalar>(rgb.a, 0, 1);
 	return r_ * num::pow(num::clamp<TScalar>(rgb.r, 0, 1), gamma_) 
@@ -123,20 +123,20 @@ const TVector3D RgbSpace::convertGamma(const prim::ColorRGBA& rgb, TScalar& alph
 
 
 
-const prim::ColorRGBA RgbSpace::convertGamma(const TVector3D& xyz) const
+const prim::ColorRGBA RgbSpace::convertGamma(const XYZ& xyz) const
 {
-	return convertGamma(xyz, TScalar(1));
+	return convertGamma(xyz, 1);
 }
 
 
 
-const prim::ColorRGBA RgbSpace::convertGamma(const TVector3D& xyz, TScalar alpha) const
+const prim::ColorRGBA RgbSpace::convertGamma(const XYZ& xyz, TScalar alpha) const
 {
-	return prim::ColorRGBA(
-		num::pow(num::clamp<TScalar>(x_.r * xyz.x + y_.r * xyz.y + z_.r * xyz.z, 0, 1), invGamma_),
-		num::pow(num::clamp<TScalar>(x_.g * xyz.x + y_.g * xyz.y + z_.g * xyz.z, 0, 1), invGamma_),
-		num::pow(num::clamp<TScalar>(x_.b * xyz.x + y_.b * xyz.y + z_.b * xyz.z, 0, 1), invGamma_),
-		num::clamp<TScalar>(alpha, 0, 1));
+	return RGBA(
+		num::pow(num::clamp<RGBA::TValue>(static_cast<RGBA::TValue>(x_.r * xyz.x + y_.r * xyz.y + z_.r * xyz.z), 0, 1), invGamma_),
+		num::pow(num::clamp<RGBA::TValue>(static_cast<RGBA::TValue>(x_.g * xyz.x + y_.g * xyz.y + z_.g * xyz.z), 0, 1), invGamma_),
+		num::pow(num::clamp<RGBA::TValue>(static_cast<RGBA::TValue>(x_.b * xyz.x + y_.b * xyz.y + z_.b * xyz.z), 0, 1), invGamma_),
+		num::clamp<RGBA::TValue>(static_cast<RGBA::TValue>(alpha), 0, 1));
 }
 
 
@@ -305,21 +305,21 @@ void RgbSpace::init(
 	const TTransformation3D M = concatenate(M_CAT, M_XYZ);
 
 	const TScalar* mat = M.matrix();
-	r_ = TVector3D(mat[0], mat[4], mat[8]);
-	g_ = TVector3D(mat[1], mat[5], mat[9]);
-	b_ = TVector3D(mat[2], mat[6], mat[10]);
+	r_ = XYZ(mat[0], mat[4], mat[8]);
+	g_ = XYZ(mat[1], mat[5], mat[9]);
+	b_ = XYZ(mat[2], mat[6], mat[10]);
 
 	const TScalar* invMat = M.inverse().matrix();
-	x_ = prim::ColorRGBA(invMat[0], invMat[4], invMat[8]);
-	y_ = prim::ColorRGBA(invMat[1], invMat[5], invMat[9]);
-	z_ = prim::ColorRGBA(invMat[2], invMat[6], invMat[10]);
+	x_ = RGBA(static_cast<RGBA::TValue>(invMat[0]), static_cast<RGBA::TValue>(invMat[4]), static_cast<RGBA::TValue>(invMat[8]));
+	y_ = RGBA(static_cast<RGBA::TValue>(invMat[1]), static_cast<RGBA::TValue>(invMat[5]), static_cast<RGBA::TValue>(invMat[9]));
+	z_ = RGBA(static_cast<RGBA::TValue>(invMat[2]), static_cast<RGBA::TValue>(invMat[6]), static_cast<RGBA::TValue>(invMat[10]));
 
 	red_ = red;
 	green_ = green;
 	blue_ = blue;
 	white_ = white;
 	gamma_ = gamma;
-	invGamma_ = num::inv(gamma);
+	invGamma_ = static_cast<RGBA::TValue>(num::inv(gamma));
 }
 
 
@@ -337,46 +337,25 @@ void RgbSpace::enforceChromaticity(const TPoint2D& c, const char* name) const
 
 // --- free ----------------------------------------------------------------------------------------
 
-Spectrum rgb(const prim::ColorRGBA& rgba)
+XYZ rgb(const prim::ColorRGBA& rgba)
 {
-	return xyz(RgbSpace::defaultSpace()->convert(rgba));
+	return RgbSpace::defaultSpace()->convert(rgba);
 }
 
-Spectrum rgb(const prim::ColorRGBA& rgba, const TRgbSpacePtr& rgbSpace)
+XYZ rgb(const prim::ColorRGBA& rgba, const TRgbSpacePtr& rgbSpace)
 {
-	return xyz(rgbSpace->convert(rgba));
+	return rgbSpace->convert(rgba);
 }
 
-Spectrum rgb(TScalar red, TScalar green, TScalar blue)
+XYZ rgb(prim::ColorRGBA::TValue red, prim::ColorRGBA::TValue green, prim::ColorRGBA::TValue blue)
 {
-	return xyz(RgbSpace::defaultSpace()->convert(prim::ColorRGBA(red, green, blue)));
+	return RgbSpace::defaultSpace()->convert(prim::ColorRGBA(red, green, blue));
 }
 
-Spectrum rgb(TScalar red, TScalar green, TScalar blue, const TRgbSpacePtr& rgbSpace)
+XYZ rgb(prim::ColorRGBA::TValue red, prim::ColorRGBA::TValue green, prim::ColorRGBA::TValue blue, const TRgbSpacePtr& rgbSpace)
 {
-	return xyz(rgbSpace->convert(prim::ColorRGBA(red, green, blue)));
+	return rgbSpace->convert(prim::ColorRGBA(red, green, blue));
 }
-/*
-Spectrum rgb(const prim::ColorRGBA& iColor, const TSpectrumFormatPtr& iFormat)
-{
-	return xyz(RgbSpace::defaultSpace()->convert(iColor), iFormat);
-}
-
-Spectrum rgb(const prim::ColorRGBA& iColor, const TRgbSpacePtr& iSpace, const TSpectrumFormatPtr& iFormat)
-{
-	return xyz(iSpace->convert(iColor), iFormat);
-}
-
-Spectrum rgb(TScalar red, TScalar green, TScalar blue, const TSpectrumFormatPtr& iFormat)
-{
-	return xyz(RgbSpace::defaultSpace()->convert(prim::ColorRGBA(red, green, blue)), iFormat);
-}
-
-Spectrum rgb(TScalar red, TScalar green, TScalar blue, const TRgbSpacePtr& iSpace, const TSpectrumFormatPtr& iFormat)
-{
-	return xyz(iSpace->convert(prim::ColorRGBA(red, green, blue)), iFormat);
-}
-*/
 
 }
 }

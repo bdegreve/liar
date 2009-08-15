@@ -32,7 +32,7 @@
 #include "kernel_common.h"
 #include "intersection_context.h"
 #include "sample.h"
-#include "spectrum.h"
+#include "xyz.h"
 
 namespace liar
 {
@@ -48,7 +48,7 @@ class LIAR_KERNEL_DLL Texture: public python::PyObjectPlus
 public:
 
     virtual ~Texture();
-    const Spectrum lookUp(const Sample& sample, const IntersectionContext& context) const 
+    const XYZ lookUp(const Sample& sample, const IntersectionContext& context) const 
 	{ 
 		return doLookUp(sample, context); 
 	}
@@ -66,7 +66,7 @@ protected:
 
 private:
 
-	virtual const Spectrum doLookUp(const Sample& sample, 
+	virtual const XYZ doLookUp(const Sample& sample, 
 		const IntersectionContext& context) const = 0;
 
 	virtual const TPyObjectPtr doGetState() const = 0;
@@ -86,9 +86,9 @@ namespace impl
 	public:
 		TextureBlack() {}
 	private:
-		const Spectrum doLookUp(const Sample&, const IntersectionContext&) const 
+		const XYZ doLookUp(const Sample&, const IntersectionContext&) const 
 		{ 
-			return Spectrum(TNumTraits::zero); 
+			return XYZ(0, 0, 0); 
 		}
 		const TPyObjectPtr doGetState() const { return python::makeTuple(); }
 		void doSetState(const TPyObjectPtr& state) {}
@@ -100,9 +100,9 @@ namespace impl
 	public:
 		TextureWhite() {}
 	private:
-		const Spectrum doLookUp(const Sample&, const IntersectionContext&) const 
+		const XYZ doLookUp(const Sample&, const IntersectionContext&) const 
 		{ 
-			return Spectrum(TNumTraits::one); 
+			return XYZ(1, 1, 1); 
 		}
 		const TPyObjectPtr doGetState() const { return python::makeTuple(); }
 		void doSetState(const TPyObjectPtr& state) {}

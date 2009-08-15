@@ -44,7 +44,7 @@ OutputSample::OutputSample():
 
 
 OutputSample::OutputSample(
-		const Sample& sample, const Spectrum& radiance, TScalar depth, TScalar alpha, 
+		const Sample& sample, const XYZ& radiance, TScalar depth, TScalar alpha, 
 		TScalar weight):
 	radiance_(radiance),
 	screenCoordinate_(sample.screenCoordinate()),

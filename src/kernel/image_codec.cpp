@@ -158,7 +158,7 @@ const ImageCodec::TImageHandle ImageCodecLassCommon::doCreate(
 	colorSpace.green = TChromaticity(space.green());
 	colorSpace.blue = TChromaticity(space.blue());
 	colorSpace.white = TChromaticity(space.white());
-	colorSpace.gamma = space.gamma(); // may be forced to one later.
+	colorSpace.gamma = static_cast<num::Tfloat32>(space.gamma()); // may be forced to one later.
 	return pimpl.release();
 }
 
@@ -235,14 +235,14 @@ const TRgbSpacePtr ImageCodecLassCommon::doRgbSpace(TImageHandle handle) const
 
 void ImageCodecLassLDR::doRead(
 		TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 
-		const TResolution2D& end, TVector3D* xyz, TScalar* alpha) const
+		const TResolution2D& end, XYZ* xyz, TScalar* alpha) const
 {
 	const impl::LassImage* impl = static_cast<impl::LassImage*>(handle);
 	const io::Image& image = impl->image;
 	const RgbSpace& space = *impl->rgbSpace;
-	for (unsigned y = begin.y; y < end.y; ++y)
+	for (size_t y = begin.y; y < end.y; ++y)
 	{
-		for (unsigned x = begin.x; x < end.x; ++x)
+		for (size_t x = begin.x; x < end.x; ++x)
 		{
 			TScalar a;
 			*xyz++ = space.convertGamma(image(y, x), a);
@@ -253,14 +253,14 @@ void ImageCodecLassLDR::doRead(
 
 void ImageCodecLassLDR::doWrite(
 		TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 
-		const TResolution2D& end, const TVector3D* xyz, const TScalar* alpha) const
+		const TResolution2D& end, const XYZ* xyz, const TScalar* alpha) const
 {
 	impl::LassImage* impl = static_cast<impl::LassImage*>(handle);
 	io::Image& image = impl->image;
 	const RgbSpace& space = *impl->rgbSpace;
-	for (unsigned y = begin.y; y < end.y; ++y)
+	for (size_t y = begin.y; y < end.y; ++y)
 	{
-		for (unsigned x = begin.x; x < end.x; ++x)
+		for (size_t x = begin.x; x < end.x; ++x)
 		{
 			const TScalar a = alpha ? *alpha++ : 1;
 			image(y, x) = space.convertGamma(*xyz++, a);
@@ -274,14 +274,14 @@ void ImageCodecLassLDR::doWrite(
 
 void ImageCodecLassHDR::doRead(
 		TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 
-		const TResolution2D& end, TVector3D* xyz, TScalar* alpha) const
+		const TResolution2D& end, XYZ* xyz, TScalar* alpha) const
 {
 	const impl::LassImage* impl = static_cast<impl::LassImage*>(handle);
 	const io::Image& image = impl->image;
 	const RgbSpace& space = *impl->rgbSpace;
-	for (unsigned y = begin.y; y < end.y; ++y)
+	for (size_t y = begin.y; y < end.y; ++y)
 	{
-		for (unsigned x = begin.x; x < end.x; ++x)
+		for (size_t x = begin.x; x < end.x; ++x)
 		{
 			TScalar a;
 			*xyz++ = space.convert(image(y, x), a);
@@ -292,15 +292,15 @@ void ImageCodecLassHDR::doRead(
 
 void ImageCodecLassHDR::doWrite(
 		TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 
-		const TResolution2D& end, const TVector3D* xyz, const TScalar* alpha) const
+		const TResolution2D& end, const XYZ* xyz, const TScalar* alpha) const
 {
 	impl::LassImage* impl = static_cast<impl::LassImage*>(handle);
 	io::Image& image = impl->image;
 	image.colorSpace().gamma = 1.f; // force gamma to one.
 	const RgbSpace& space = *impl->rgbSpace;
-	for (unsigned y = begin.y; y < end.y; ++y)
+	for (size_t y = begin.y; y < end.y; ++y)
 	{
-		for (unsigned x = begin.x; x < end.x; ++x)
+		for (size_t x = begin.x; x < end.x; ++x)
 		{
 			const TScalar a = alpha ? *alpha++ : 1;
 			image(y, x) = space.convert(*xyz++, a);

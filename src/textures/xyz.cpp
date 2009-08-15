@@ -94,7 +94,7 @@ const TTexturePtr& Xyz::textureC() const
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum Xyz::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const XYZ Xyz::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	const TScalar x = num::abs(context.normal().x);
 	const TScalar y = num::abs(context.normal().y);

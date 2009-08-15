@@ -155,10 +155,10 @@ void Shader::doShadeContext(const Sample& sample, IntersectionContext& context) 
 
 
 
-const Spectrum Shader::doEmission(const Sample& sample, const IntersectionContext& context, 
+const XYZ Shader::doEmission(const Sample& sample, const IntersectionContext& context, 
 		const TVector3D& dirOut) const
 {
-	return Spectrum();
+	return XYZ();
 }
 
 
@@ -167,7 +167,7 @@ void Shader::zeroBsdf(BsdfOut* first, BsdfOut* last) const
 {
 	while (first != last)
 	{
-		first->value = Spectrum();
+		first->value = XYZ();
 		first->pdf = 0;
 		++first;
 	}
@@ -180,7 +180,7 @@ void Shader::zeroSampleBsdf(SampleBsdfOut* first, SampleBsdfOut* last) const
 	while (first != last)
 	{
 		first->omegaOut = TVector3D(0, 0, 1);
-		first->value = Spectrum();
+		first->value = XYZ();
 		first->pdf = 0;
 		++first;
 	}

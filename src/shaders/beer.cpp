@@ -31,33 +31,33 @@ namespace shaders
 
 PY_DECLARE_CLASS_DOC(Beer, "Beer's Law")
 PY_CLASS_CONSTRUCTOR_0(Beer)
-PY_CLASS_CONSTRUCTOR_1(Beer, const Spectrum&)
+PY_CLASS_CONSTRUCTOR_1(Beer, const XYZ&)
 PY_CLASS_MEMBER_RW(Beer, transparency, setTransparency)
 
 // --- public --------------------------------------------------------------------------------------
 
 Beer::Beer():
-	transparency_(1)
+	transparency_(XYZ(1, 1, 1))
 {
 }
 
 
 
-Beer::Beer(const Spectrum& transparency):
+Beer::Beer(const XYZ& transparency):
 	transparency_(transparency)
 {
 }
 
 
 
-const Spectrum& Beer::transparency() const
+const XYZ& Beer::transparency() const
 {
 	return transparency_;
 }
 
 
 
-void Beer::setTransparency(const Spectrum& transparency)
+void Beer::setTransparency(const XYZ& transparency)
 {
 	transparency_ = transparency;
 }
@@ -70,7 +70,7 @@ void Beer::setTransparency(const Spectrum& transparency)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum Beer::doTransparency(const BoundedRay& ray) const
+const XYZ Beer::doTransparency(const BoundedRay& ray) const
 {
 	const TScalar t = ray.farLimit() - ray.nearLimit();
 	LASS_ASSERT(t >= 0);

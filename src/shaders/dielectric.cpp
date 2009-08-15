@@ -129,8 +129,8 @@ void Dielectric::doSampleBsdf(
 		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
 		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
 {
-	TScalar ior1 = outerRefractionIndex_->lookUp(sample, context).average();
-	TScalar ior2 = innerRefractionIndex_->lookUp(sample, context).average();
+	TScalar ior1 = average(outerRefractionIndex_->lookUp(sample, context));
+	TScalar ior2 = average(innerRefractionIndex_->lookUp(sample, context));
 
 	if (ior1 <= 0)
 	{
@@ -175,14 +175,15 @@ void Dielectric::doSampleBsdf(
 		if (first->sample.x < pr)
 		{
 			result->omegaOut = omegaRefl;
-			result->value = r;
+			result->value = XYZ(r, r, r);
 			result->pdf = pr;
 			result->usedCaps = capsReflection | capsSpecular;
 		}
 		else
 		{
+			const TScalar t = 1 - r;
 			result->omegaOut = omegaTrans;
-			result->value = (1 - r);
+			result->value = XYZ(t, t, t);
 			result->pdf = 1 - pr;
 			result->usedCaps = capsTransmission | capsSpecular;
 		}

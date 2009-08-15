@@ -23,6 +23,7 @@
 
 #include "samplers_common.h"
 #include "stratifier.h"
+#include "../kernel/xyz.h"
 #include <lass/stde/range_algorithm.h>
 
 namespace liar
@@ -127,20 +128,22 @@ void Stratifier::doSetSamplesPerPixel(size_t samplesPerPixel)
 	stratum2DSize_ = 
 		TVector2D(TNumTraits::one, TNumTraits::one) / static_cast<TScalar>(strataPerAxis);
     timeStrata_.resize(strataPerPixel_);
+	frequencyStrata_.resize(strataPerPixel_);
     screenStrata_.resize(strataPerPixel_);
     lensStrata_.resize(strataPerPixel_);
 
 	for (size_t i = 0; i < strataPerPixel_; ++i)
 	{
-		timeStrata_[i] = static_cast<TScalar>(i);
+		timeStrata_[i] = static_cast<TSample1D>(i);
+		frequencyStrata_[i] = static_cast<TSample1D>(i);
 	}
 
     for (size_t j = 0; j < strataPerAxis; ++j)
     {
         for (size_t i = 0; i < strataPerAxis; ++i)
         {
-            screenStrata_[j * strataPerAxis + i] = TVector2D(i, j);
-			lensStrata_[j * strataPerAxis + i] = TVector2D(i, j);
+            screenStrata_[j * strataPerAxis + i] = TSample2D(i, j);
+			lensStrata_[j * strataPerAxis + i] = TSample2D(i, j);
         }
     }
 }
@@ -155,93 +158,79 @@ void Stratifier::doSeed(size_t randomSeed)
 
 
 void Stratifier::doSampleScreen(const TResolution2D& pixel, size_t subPixel, 
-								TSample2D& oScreenCoordinate)
+								TSample2D& screenCoordinate)
 {
     LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
-    LASS_ASSERT(subPixel < strataPerPixel_);
-
-	TVector2D position = screenStrata_[subPixel];
-	position.x += isJittered_ ? jitterGenerator_() : .5f;
-	position.y += isJittered_ ? jitterGenerator_() : .5f;
-	position *= stratum2DSize_;
-
+	TVector2D position = sampleStratum(subPixel, screenStrata_).position();
 	position += TVector2D(pixel);
 	position *= reciprocalResolution_;
-
-	oScreenCoordinate = TPoint2D(position);
+	screenCoordinate = TSample2D(position);
 }
 
 
 
 void Stratifier::doSampleLens(const TResolution2D& pixel, size_t subPixel, 
-							  TSample2D& oLensCoordinate)
+							  TSample2D& lensCoordinate)
 {
     LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
-    LASS_ASSERT(subPixel < strataPerPixel_);
-
-	if (subPixel == 0)
-	{
-		stde::random_shuffle_r(lensStrata_, numberGenerator_);	
-	}
-	TVector2D position = lensStrata_[subPixel];
-	position.x += isJittered_ ? jitterGenerator_() : .5f;
-	position.y += isJittered_ ? jitterGenerator_() : .5f;
-	position *= stratum2DSize_;
-
-	oLensCoordinate = TSample2D(position);
+	lensCoordinate = sampleStratum(subPixel, lensStrata_);
 }
 
 
 
 void Stratifier::doSampleTime(const TResolution2D& pixel, size_t subPixel, 
-							  const TimePeriod& period, TTime& oTime)
+							  const TimePeriod& period, TTime& time)
 {
     LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
-    LASS_ASSERT(subPixel < strataPerPixel_);
+	const TScalar tau = sampleStratum(subPixel, timeStrata_);
+	time = period.interpolate(tau);
+}
 
-	if (subPixel == 0)
-	{
-		stde::random_shuffle_r(timeStrata_, numberGenerator_);	
-	}
-	const TScalar tau = 
-		(timeStrata_[subPixel] + (isJittered_ ? jitterGenerator_() : 0.5f)) * stratum1DSize_;
-	oTime = period.interpolate(tau);
+
+
+void Stratifier::doSampleFrequency(const TResolution2D& pixel, size_t subPixel, TScalar& frequency)
+{
+    LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
+	const TScalar phi = sampleStratum(subPixel, frequencyStrata_);
+	XYZ xyz;
+	TScalar pdf;
+	frequency = standardObserver().sample(XYZ(1, 1, 1), phi, xyz, pdf);
 }
 
 
 
 void Stratifier::doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, 
-									   TSample1D* oBegin, TSample1D* oEnd)
+									   TSample1D* first, TSample1D* last)
 {
-	const ptrdiff_t size = oEnd - oBegin;
+	const ptrdiff_t size = last - first;
 	const TScalar scale = 1.f / size;
-	for (ptrdiff_t k = 0; k < size; ++k, ++oBegin)
+	for (ptrdiff_t k = 0; k < size; ++k, ++first)
 	{
-		*oBegin = (k + jitterGenerator_()) * scale;
+		*first = (k + jitterGenerator_()) * scale;
 	}
-	LASS_ASSERT(oBegin == oEnd);
+	LASS_ASSERT(first == last);
 }
 
 
 
 void Stratifier::doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, 
-									   TSample2D* oBegin, TSample2D* oEnd)
+									   TSample2D* first, TSample2D* last)
 {
-	const size_t size = oEnd - oBegin;
+	const size_t size = last - first;
 	const size_t sqrtSize = static_cast<size_t>(num::sqrt(static_cast<double>(size)));
 	LASS_ASSERT(sqrtSize * sqrtSize == size);
 
 	const TScalar scale = TNumTraits::one / sqrtSize;
 	for (size_t i = 0; i < sqrtSize; ++i)
 	{
-		for (size_t j = 0; j < sqrtSize; ++j, ++oBegin)
+		for (size_t j = 0; j < sqrtSize; ++j, ++first)
 		{
-			oBegin->x = (i + jitterGenerator_()) * scale;
-			oBegin->y = (j + jitterGenerator_()) * scale;
+			first->x = (i + jitterGenerator_()) * scale;
+			first->y = (j + jitterGenerator_()) * scale;
 		}
 	}
 
-	LASS_ASSERT(oBegin == oEnd);
+	LASS_ASSERT(first == last);
 }
 
 
@@ -300,17 +289,31 @@ void Stratifier::doSetState(const TPyObjectPtr& state)
 }
 
 
-void Stratifier::shuffleTimeStrata()
-{
-	typedef num::DistributionUniform<size_t, TNumberGenerator, num::rtRightOpen> TRandomSelector;
 
-	// shuffle strata in linear time guaranteed.
-	//
-	for (size_t i = 0; i < strataPerPixel_; ++i)
+const Stratifier::TSample1D Stratifier::sampleStratum(size_t subPixel, TStrata1D& strata)
+{
+    LASS_ASSERT(subPixel < strataPerPixel_);
+	if (subPixel == 0)
 	{
-		TRandomSelector selector(numberGenerator_, i, strataPerPixel_);
-		std::swap(timeStrata_[i], timeStrata_[selector()]);
+		stde::random_shuffle_r(strata, numberGenerator_);	
 	}
+	return (strata[subPixel] + (isJittered_ ? jitterGenerator_() : 0.5f)) * stratum1DSize_;
+}
+
+
+
+const Stratifier::TSample2D Stratifier::sampleStratum(size_t subPixel, TStrata2D& strata)
+{
+    LASS_ASSERT(subPixel < strataPerPixel_);
+	if (subPixel == 0)
+	{
+		stde::random_shuffle_r(strata, numberGenerator_);	
+	}
+	TVector2D position = strata[subPixel].position();
+	position.x += isJittered_ ? jitterGenerator_() : .5f;
+	position.y += isJittered_ ? jitterGenerator_() : .5f;
+	position *= stratum2DSize_;
+	return TSample2D(position);
 }
 
 

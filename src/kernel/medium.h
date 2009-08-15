@@ -31,7 +31,7 @@
 
 #include "kernel_common.h"
 #include "bounded_ray.h"
-#include "spectrum.h"
+#include "xyz.h"
 #include "solid_event.h"
 
 namespace liar
@@ -46,13 +46,13 @@ public:
 
     virtual ~Medium();
 
-	const Spectrum& refractionIndex() const;
-	void setRefractionIndex(const Spectrum& refractionIndex);
+	const XYZ& refractionIndex() const;
+	void setRefractionIndex(const XYZ& refractionIndex);
 	
 	const size_t priority() const;
 	void setPriority(size_t priority);
 
-	const Spectrum transparency(const BoundedRay& ray) const
+	const XYZ transparency(const BoundedRay& ray) const
 	{
 		return doTransparency(ray); 
 	}
@@ -63,9 +63,9 @@ protected:
 
 private:
 
-	virtual const Spectrum doTransparency(const BoundedRay& ray) const = 0;
+	virtual const XYZ doTransparency(const BoundedRay& ray) const = 0;
 
-	Spectrum refractionIndex_;
+	XYZ refractionIndex_;
 	size_t priority_;
 };
 
@@ -77,7 +77,7 @@ class LIAR_KERNEL_DLL MediumStack
 {
 public:
 	MediumStack(const TMediumPtr& defaultMedium = TMediumPtr());
-	const Spectrum transparency(const BoundedRay& ray) const;
+	const XYZ transparency(const BoundedRay& ray) const;
 private:
 	friend class MediumChanger;
 	typedef std::vector<const Medium*> TStack;

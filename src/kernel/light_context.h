@@ -59,15 +59,15 @@ public:
 
     void requestSamples(const TSamplerPtr& sampler);
 
-	const Spectrum emission(const Sample& cameraSample, const TRay3D& ray,
+	const XYZ emission(const Sample& cameraSample, const TRay3D& ray,
 		BoundedRay& shadowRay, TScalar& pdf) const;
-	const Spectrum sampleEmission(const Sample& cameraSample, const TPoint2D& sample,  
+	const XYZ sampleEmission(const Sample& cameraSample, const TPoint2D& sample,  
 		const TPoint3D& target, const TVector3D& targetNormal, BoundedRay& shadowRay, 
 		TScalar& pdf) const;
-	const Spectrum sampleEmission(const Sample& cameraSample, const TPoint2D& lightSampleA, 
+	const XYZ sampleEmission(const Sample& cameraSample, const TPoint2D& lightSampleA, 
 		const TPoint2D& lightSampleB, BoundedRay& emissionRay, TScalar& pdf) const;
 
-	const Spectrum totalPower() const;
+	const XYZ totalPower() const;
 	const bool isSingular() const;
 
 private:

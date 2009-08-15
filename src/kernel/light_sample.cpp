@@ -31,7 +31,7 @@ namespace kernel
 
 // --- public --------------------------------------------------------------------------------------
 
-LightSample::LightSample(const Spectrum& radiance, const TVector3D& direction/*, TScalar iPdf*/):
+LightSample::LightSample(const XYZ& radiance, const TVector3D& direction/*, TScalar iPdf*/):
 	radiance_(radiance),
 	direction_(direction)
 	//pdf_(iPdf)

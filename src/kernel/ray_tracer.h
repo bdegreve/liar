@@ -66,7 +66,7 @@ public:
 
 	/** @warning castRay is NOT THREAD SAFE!
 	 */
-	const Spectrum castRay(const Sample& sample, const DifferentialRay& primaryRay, 
+	const XYZ castRay(const Sample& sample, const DifferentialRay& primaryRay, 
 			TScalar& tIntersection, TScalar& alpha) const
 	{ 
 		RayGenerationIncrementor incrementor(*this);
@@ -74,7 +74,7 @@ public:
 		{
 			return doCastRay(sample, primaryRay, tIntersection, alpha, rayGeneration_);
 		}
-		return Spectrum();
+		return XYZ();
 	}
 
 	/** @warning sampleLights is NOT THREAD SAFE!
@@ -101,7 +101,7 @@ private:
 
 	virtual void doRequestSamples(const TSamplerPtr& sampler) = 0;
 	virtual void doPreProcess(const TSamplerPtr& samper, const TimePeriod& period) = 0;
-	virtual const Spectrum doCastRay(const Sample& sample, 
+	virtual const XYZ doCastRay(const Sample& sample, 
 		const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, 
 		int generation) const = 0;
 	virtual const TLightSamplesRange doSampleLights(const Sample& sample, 

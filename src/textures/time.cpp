@@ -46,9 +46,10 @@ Time::Time()
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum Time::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const XYZ Time::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
-	return Spectrum(static_cast<TScalar>(sample.time()));
+	const TScalar t = static_cast<TScalar>(sample.time());
+	return XYZ(t, t, t);
 }
 
 

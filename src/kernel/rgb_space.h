@@ -30,8 +30,9 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_RGB_SPACE_H
 
 #include "kernel_common.h"
-#include "spectrum.h"
-#include "spectrum_format.h"
+#include "xyz.h"
+//#include "spectrum_format.h"
+#include "xyz.h"
 
 namespace liar
 {
@@ -46,16 +47,18 @@ class LIAR_KERNEL_DLL RgbSpace: public python::PyObjectPlus
 	PY_HEADER(python::PyObjectPlus)
 public:
 
+	typedef prim::ColorRGBA RGBA;
+
 	RgbSpace(const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, const TPoint2D& white, TScalar gamma);
 	
-	const TVector3D convert(const prim::ColorRGBA& rgb) const;
-	const TVector3D convert(const prim::ColorRGBA& rgb, TScalar& alpha) const;
-	const prim::ColorRGBA convert(const TVector3D& xyz) const;
-	const prim::ColorRGBA convert(const TVector3D& xyz, TScalar alpha) const;
-	const TVector3D convertGamma(const prim::ColorRGBA& rgb) const;
-	const TVector3D convertGamma(const prim::ColorRGBA& rgb, TScalar& alpha) const;
-	const prim::ColorRGBA convertGamma(const TVector3D& xyz) const;
-	const prim::ColorRGBA convertGamma(const TVector3D& xyz, TScalar alpha) const;
+	const XYZ convert(const prim::ColorRGBA& rgb) const;
+	const XYZ convert(const prim::ColorRGBA& rgb, TScalar& alpha) const;
+	const prim::ColorRGBA convert(const XYZ& xyz) const;
+	const prim::ColorRGBA convert(const XYZ& xyz, TScalar alpha) const;
+	const XYZ convertGamma(const prim::ColorRGBA& rgb) const;
+	const XYZ convertGamma(const prim::ColorRGBA& rgb, TScalar& alpha) const;
+	const prim::ColorRGBA convertGamma(const XYZ& xyz) const;
+	const prim::ColorRGBA convertGamma(const XYZ& xyz, TScalar alpha) const;
 
 	const TPoint2D& red() const;
 	const TPoint2D& green() const;
@@ -83,33 +86,33 @@ private:
 	prim::ColorRGBA x_;
 	prim::ColorRGBA y_;
 	prim::ColorRGBA z_;
-	TVector3D r_;
-	TVector3D g_;
-	TVector3D b_;
+	XYZ r_;
+	XYZ g_;
+	XYZ b_;
 	TPoint2D red_;
 	TPoint2D green_;
 	TPoint2D blue_;
 	TPoint2D white_;
 	TScalar gamma_;
-	TScalar invGamma_;
+	RGBA::TValue invGamma_;
 
 	static TRgbSpacePtr defaultSpace_;
 };
 
 
-LIAR_KERNEL_DLL Spectrum rgb(const prim::ColorRGBA& rgb);
-LIAR_KERNEL_DLL Spectrum rgb(const prim::ColorRGBA& rgb, const TRgbSpacePtr& rgbSpace);
-LIAR_KERNEL_DLL Spectrum rgb(TScalar red, TScalar green, TScalar blue);
-LIAR_KERNEL_DLL Spectrum rgb(TScalar red, TScalar green, TScalar blue, const TRgbSpacePtr& rgbSpace);
+LIAR_KERNEL_DLL XYZ rgb(const prim::ColorRGBA& rgb);
+LIAR_KERNEL_DLL XYZ rgb(const prim::ColorRGBA& rgb, const TRgbSpacePtr& rgbSpace);
+LIAR_KERNEL_DLL XYZ rgb(prim::ColorRGBA::TValue red, prim::ColorRGBA::TValue green, prim::ColorRGBA::TValue blue);
+LIAR_KERNEL_DLL XYZ rgb(prim::ColorRGBA::TValue red, prim::ColorRGBA::TValue green, prim::ColorRGBA::TValue blue, const TRgbSpacePtr& rgbSpace);
 
 /*
-LIAR_KERNEL_DLL Spectrum rgb(const prim::ColorRGBA& rgb, 
+LIAR_KERNEL_DLL XYZ rgb(const prim::ColorRGBA& rgb, 
 	const TSpectrumFormatPtr& iSpectrumFormat);
-LIAR_KERNEL_DLL Spectrum rgb(const prim::ColorRGBA& rgb, const TRgbSpacePtr& rgbSpace, 
+LIAR_KERNEL_DLL XYZ rgb(const prim::ColorRGBA& rgb, const TRgbSpacePtr& rgbSpace, 
 	const TSpectrumFormatPtr& iSpectrumFormat);
-LIAR_KERNEL_DLL Spectrum rgb(TScalar red, TScalar green, TScalar blue, 
+LIAR_KERNEL_DLL XYZ rgb(TScalar red, TScalar green, TScalar blue, 
 	const TSpectrumFormatPtr& iSpectrumFormat);
-LIAR_KERNEL_DLL Spectrum rgb(TScalar red, TScalar green, TScalar blue, const TRgbSpacePtr& rgbSpace, 
+LIAR_KERNEL_DLL XYZ rgb(TScalar red, TScalar green, TScalar blue, const TRgbSpacePtr& rgbSpace, 
 	const TSpectrumFormatPtr& iSpectrumFormat);
 */
 

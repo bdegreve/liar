@@ -30,7 +30,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_LIGHT_SAMPLE_H
 
 #include "kernel_common.h"
-#include "spectrum.h"
+#include "xyz.h"
 
 #include <lass/stde/iterator_range.h>
 
@@ -43,15 +43,15 @@ class LIAR_KERNEL_DLL LightSample
 {
 public:
 
-	LightSample(const Spectrum& radiance, const TVector3D& direction/*, TScalar iPdf*/);
+	LightSample(const XYZ& radiance, const TVector3D& direction/*, TScalar iPdf*/);
 
-	const Spectrum& radiance() const { return radiance_; }
+	const XYZ& radiance() const { return radiance_; }
 	const TVector3D& direction() const { return direction_; }
 	//const TScalar pdf() const { return pdf_; }
 
 private:
 
-	Spectrum radiance_;
+	XYZ radiance_;
 	TVector3D direction_;
 	//TScalar pdf_;
 };

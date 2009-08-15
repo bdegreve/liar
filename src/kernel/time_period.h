@@ -46,7 +46,7 @@ public:
 	const TTime end() const { return end_; }
 	const TTime duration() const { return end_ - begin_; }
 
-	const TTime interpolate(TScalar tau) const { return begin_ + tau * duration(); }
+	const TTime interpolate(TScalar tau) const { return num::lerp(begin_, end_, tau); }
 
 	TimePeriod& operator+=(TTime offset) 
 	{ 

@@ -168,17 +168,17 @@ void AshikhminShirley::doBsdf(
 		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
 		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
 {
-	const Spectrum Rd = diffuse_->lookUp(sample, context);
-	const Spectrum Rs = specular_->lookUp(sample, context);
-	const TScalar nu = specularPowerU_->lookUp(sample, context).average();
-	const TScalar nv = specularPowerV_->lookUp(sample, context).average();
-	const TScalar rd = Rd.absAverage();
-	const TScalar rs = Rs.absAverage();
+	const XYZ Rd = diffuse_->lookUp(sample, context);
+	const XYZ Rs = specular_->lookUp(sample, context);
+	const TScalar nu = positiveAverage(specularPowerU_->lookUp(sample, context));
+	const TScalar nv = positiveAverage(specularPowerV_->lookUp(sample, context));
+	const TScalar rd = positiveAverage(Rd);
+	const TScalar rs = positiveAverage(Rs);
 
 	const TVector3D& k1 = omegaIn;
 	LASS_ASSERT(k1.z > 0);
 	const TScalar a = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k1.z / 2));
-	const Spectrum rhoA = Rd * (1 - Rs) * (a * 28.f / (23.f * TNumTraits::pi));
+	const XYZ rhoA = Rd * (1 - Rs) * (a * 28.f / (23.f * TNumTraits::pi));
 	const TScalar c = num::sqrt((nu + 1) * (nv + 1)) / (8 * TNumTraits::pi);
 
 	while (first != last)
@@ -204,7 +204,7 @@ void AshikhminShirley::doBsdf(
 				const TScalar n = nu * num::sqr(h.x) + nv * num::sqr(h.y);
 				const TScalar nn = h.z == 1 ? 0 : n / (1 - num::sqr(h.z));
 				const TScalar hk = dot(h, k1);
-				const Spectrum F = Rs + (1 - Rs) * temp::pow5(1 - hk);
+				const XYZ F = Rs + (1 - Rs) * temp::pow5(1 - hk);
 				result->value += F * (c * num::pow(h.z, nn) / (hk * std::max(k1.z, k2.z)));
 				const TScalar pdfH = 4 * c * num::pow(h.z, n);
 				result->pdf += (ps * pdfH) / (4 * hk * ptot);
@@ -255,17 +255,17 @@ void AshikhminShirley::doSampleBsdf(
 		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
 		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
 {	
-	const Spectrum Rd = diffuse_->lookUp(sample, context);
-	const Spectrum Rs = specular_->lookUp(sample, context);
-	const TScalar nu = specularPowerU_->lookUp(sample, context).average();
-	const TScalar nv = specularPowerV_->lookUp(sample, context).average();
-	const TScalar rd = Rd.absAverage();
-	const TScalar rs = Rs.absAverage();
+	const XYZ Rd = diffuse_->lookUp(sample, context);
+	const XYZ Rs = specular_->lookUp(sample, context);
+	const TScalar nu = positiveAverage(specularPowerU_->lookUp(sample, context));
+	const TScalar nv = positiveAverage(specularPowerV_->lookUp(sample, context));
+	const TScalar rd = positiveAverage(Rd);
+	const TScalar rs = positiveAverage(Rs);
 
 	const TVector3D& k1 = omegaIn;
 	LASS_ASSERT(k1.z > 0);
 	const TScalar a = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k1.z / 2));
-	const Spectrum rhoA = Rd * (1 - Rs) * (a * 28.f / (23.f * TNumTraits::pi));
+	const XYZ rhoA = Rd * (1 - Rs) * (a * 28.f / (23.f * TNumTraits::pi));
 	const TScalar c = num::sqrt((nu + 1) * (nv + 1)) / (8 * TNumTraits::pi);
 
 	while (first != last)
@@ -315,7 +315,7 @@ void AshikhminShirley::doSampleBsdf(
 					const TScalar n = nu * num::sqr(h.x) + nv * num::sqr(h.y);
 					const TScalar nn = h.z == 1 ? 0 : n / (1 - num::sqr(h.z));
 					const TScalar hk = dot(h, k1);
-					const Spectrum F = Rs + (1 - Rs) * temp::pow5(1 - hk);
+					const XYZ F = Rs + (1 - Rs) * temp::pow5(1 - hk);
 					result->value += F * (c * num::pow(h.z, nn) / (hk * std::max(k1.z, k2.z)));
 					const TScalar pdfH = 4 * c * num::pow(h.z, n);
 					pdfS = pdfH / (4 * hk);

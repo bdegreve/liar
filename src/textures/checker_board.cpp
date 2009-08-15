@@ -94,7 +94,7 @@ void CheckerBoard::setDefaultAntiAliasing(const std::string& mode)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum 
+const XYZ 
 CheckerBoard::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 #pragma LASS_FIXME("points need transform too [Bramz]")
@@ -131,7 +131,7 @@ CheckerBoard::doLookUp(const Sample& sample, const IntersectionContext& context)
 		LASS_ASSERT_UNREACHABLE;
 	}
 
-	return Spectrum();
+	return XYZ();
 }
 
 

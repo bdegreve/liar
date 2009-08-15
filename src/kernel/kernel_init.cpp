@@ -37,8 +37,7 @@
 #include "render_engine.h"
 #include "render_target.h"
 #include "rgb_space.h"
-#include "spectrum.h"
-#include "spectrum_format.h"
+#include "xyz.h"
 #include "texture.h"
 
 #include <lass/io/proxy_man.h>
@@ -91,26 +90,18 @@ using lass::util::setProcessPriority;
 PY_MODULE_FUNCTION_QUALIFIED_DOC_1(kernel, setProcessPriority, void, const std::string&,
 	"setProcessPriority('low' | 'belownormal' | 'normal' | 'abovenormal' | 'high')\n")
 
-using liar::TScalar;
-using liar::TVector3D;
-using liar::kernel::xyz;
-using liar::kernel::Spectrum;
-using liar::kernel::TSpectrumFormatPtr;
-PY_MODULE_FUNCTION_QUALIFIED_DOC_1(kernel, xyz, Spectrum, const TVector3D&,
-	"xyz({<X>, <Y>, <Z>} | <(X, Y, Z)>} [, <spectrumFormat>]\n"
-	"Create a spectrum from XYZ tristimulus value\n");
-PY_MODULE_FUNCTION_QUALIFIED_3(kernel, xyz, Spectrum, TScalar, TScalar, TScalar)
-
+/*
 using lass::prim::ColorRGBA;
 using liar::kernel::rgb;
 using liar::kernel::RgbSpace;
 using liar::kernel::TRgbSpacePtr;
-PY_MODULE_FUNCTION_QUALIFIED_DOC_1(kernel, rgb, Spectrum, const ColorRGBA&,
+PY_MODULE_FUNCTION_QUALIFIED_DOC_1(kernel, rgb, XYZ, const ColorRGBA&,
 	"rgb({<R>, <G>, <B>} | <(R, G, B)>} [, <RgbSpace>] [, <SpectrumFormat>]\n"
-	"Create a spectrum from RGB color value\n");
-PY_MODULE_FUNCTION_QUALIFIED_2(kernel, rgb, Spectrum, const ColorRGBA&, const TRgbSpacePtr&)
-PY_MODULE_FUNCTION_QUALIFIED_3(kernel, rgb, Spectrum, TScalar, TScalar, TScalar)
-PY_MODULE_FUNCTION_QUALIFIED_4(kernel, rgb, Spectrum, TScalar, TScalar, TScalar, const TRgbSpacePtr&)
+	"Create an XYZ from RGB color value\n");
+PY_MODULE_FUNCTION_QUALIFIED_2(kernel, rgb, XYZ, const ColorRGBA&, const TRgbSpacePtr&)
+PY_MODULE_FUNCTION_QUALIFIED_3(kernel, rgb, XYZ, TScalar, TScalar, TScalar)
+PY_MODULE_FUNCTION_QUALIFIED_4(kernel, rgb, XYZ, TScalar, TScalar, TScalar, const TRgbSpacePtr&)
+*/
 
 using liar::kernel::imageCodecs;
 PY_MODULE_FUNCTION(kernel, imageCodecs)

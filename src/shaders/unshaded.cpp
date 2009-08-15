@@ -74,7 +74,7 @@ void Unshaded::setColour(const TTexturePtr& iColour)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum Unshaded::doEmission(const Sample& sample, const IntersectionContext& context,
+const XYZ Unshaded::doEmission(const Sample& sample, const IntersectionContext& context,
 		const TVector3D& omegaOut) const
 {
 	return colour_->lookUp(sample, context);

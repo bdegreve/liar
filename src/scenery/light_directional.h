@@ -43,13 +43,13 @@ class LIAR_SCENERY_DLL LightDirectional: public SceneLight
 public:
 
 	LightDirectional();
-	LightDirectional(const TVector3D& direction, const Spectrum& radiance);
+	LightDirectional(const TVector3D& direction, const XYZ& radiance);
 
 	const TVector3D& direction() const;
-	const Spectrum& radiance() const;
+	const XYZ& radiance() const;
 
 	void setDirection(const TVector3D& direction);
-	void setRadiance(const Spectrum& radiance);
+	void setRadiance(const XYZ& radiance);
 
 private:
 
@@ -65,15 +65,15 @@ private:
 	const TAabb3D doBoundingBox() const;
 	const TScalar doArea() const;
 
-	const Spectrum doEmission(const Sample& sample, const TRay3D& ray, 
+	const XYZ doEmission(const Sample& sample, const TRay3D& ray, 
 		BoundedRay& shadowRay, TScalar& pdf) const;
-	const Spectrum doSampleEmission(const Sample& sample, const TPoint2D& lightSample, 
+	const XYZ doSampleEmission(const Sample& sample, const TPoint2D& lightSample, 
 		const TPoint3D& target, const TVector3D& targetNormal, 
 		BoundedRay& shadowRay, TScalar& pdf) const;
-	const Spectrum doSampleEmission(const Sample& cameraSample, 
+	const XYZ doSampleEmission(const Sample& cameraSample, 
 		const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, const TAabb3D& sceneBound, 
 		BoundedRay& emissionRay, TScalar& pdf) const;
-	const Spectrum doTotalPower(const TAabb3D& sceneBound) const;
+	const XYZ doTotalPower(const TAabb3D& sceneBound) const;
 	const size_t doNumberOfEmissionSamples() const;
 	const bool doIsSingular() const;
 
@@ -83,7 +83,7 @@ private:
     TVector3D direction_;
 	TVector3D tangentU_;
 	TVector3D tangentV_;
-	Spectrum radiance_;
+	XYZ radiance_;
 };
 
 }

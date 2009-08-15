@@ -203,7 +203,7 @@ void Display::setAutoExposure(bool enable)
 					const TScalar w = totalWeight_[k];
 					if (w > 0)
 					{
-						TVector3D xyz = renderBuffer_[k] / w;
+						XYZ xyz = renderBuffer_[k] / w;
 						totalLogSceneLuminance_ += num::log(std::max(xyz.y, minY));
 						++sceneLuminanceCoverage_;
 					}
@@ -245,13 +245,13 @@ void Display::testGammut()
 		{
 			for (size_t i = 0; i < n; ++i)
 			{
-				TVector3D xyz;
+				XYZ xyz;
 				xyz.y = 1.f - static_cast<TScalar>(j) / (m - 1);
 				xyz.x = static_cast<TScalar>(i) / (n - 1) - (xyz.y / 2);
 				xyz.z = 1.f - xyz.x - xyz.y;
 				if (xyz.x < 0 || xyz.z < 0)
 				{
-					xyz = TVector3D();
+					xyz = 0;
 				}
 				renderBuffer_[j * resolution_.x + i] = xyz;
 				renderDirtyBox_ += TDirtyBox::TPoint(i, j);
@@ -265,8 +265,7 @@ void Display::testGammut()
 		{
 			for (size_t i = 0; i < n; ++i)
 			{
-				const TScalar f = static_cast<TScalar>(i) / (n - 1);
-				renderBuffer_[j * resolution_.x + i] = TVector3D(f, f, f);
+				renderBuffer_[j * resolution_.x + i] = static_cast<TScalar>(i) / (n - 1);
 				renderDirtyBox_ += TDirtyBox::TPoint(i, j);
 			}
 		}
@@ -278,8 +277,7 @@ void Display::testGammut()
 		{
 			for (size_t i = n - 150; i < n; ++i)
 			{
-				const TScalar f = static_cast<TScalar>((i + j) % 2);
-				renderBuffer_[j * resolution_.x + i] = TVector3D(f, f, f);
+				renderBuffer_[j * resolution_.x + i] = static_cast<TScalar>((i + j) % 2);
 				renderDirtyBox_ += TDirtyBox::TPoint(i, j);
 			}
 		}
@@ -290,8 +288,7 @@ void Display::testGammut()
 		{
 			for (size_t i = n - 100; i < n - 50; ++i)
 			{
-				const TScalar f = .5f;
-				renderBuffer_[j * resolution_.x + i] = TVector3D(f, f, f);
+				renderBuffer_[j * resolution_.x + i] = .5f;
 				renderDirtyBox_ += TDirtyBox::TPoint(i, j);
 			}
 		}
@@ -349,11 +346,11 @@ void Display::doWriteRender(const OutputSample* first, const OutputSample* last)
 			if (i >= 0 && i < static_cast<int>(resolution_.x) &&
 				j >= 0 && j < static_cast<int>(resolution_.y))
 			{
-				TVector3D& xyz = renderBuffer_[j * resolution_.x + i];
+				XYZ& xyz = renderBuffer_[j * resolution_.x + i];
 				TScalar& w = totalWeight_[j * resolution_.x + i];
 				const TScalar oldY = xyz.y;
 				const TScalar oldW = w;
-				xyz += first->radiance().xyz() * first->alpha() * first->weight();
+				xyz += first->radiance() * first->alpha() * first->weight();
 				w += first->weight();
 				renderDirtyBox_ += TDirtyBox::TPoint(i, j);
 
@@ -578,7 +575,7 @@ void Display::copyToDisplayBuffer()
 				for (unsigned k = kBegin; k < kEnd; ++k)
 				{
 					const TScalar w = totalWeight_[k];
-					TVector3D xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : TVector3D();
+					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
 					const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
 					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
 					p.a = 1;
@@ -597,7 +594,7 @@ void Display::copyToDisplayBuffer()
 				for (unsigned k = kBegin; k < kEnd; ++k)
 				{
 					const TScalar w = totalWeight_[k];
-					TVector3D xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : TVector3D();
+					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
 					xyz /= 1 + xyz.y;
 					const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
 					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
@@ -617,7 +614,7 @@ void Display::copyToDisplayBuffer()
 				for (unsigned k = kBegin; k < kEnd; ++k)
 				{
 					const TScalar w = totalWeight_[k];
-					TVector3D xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : TVector3D();
+					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
 					xyz *= (1 - num::exp(-xyz.y)) / xyz.y;
 					const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
 					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
@@ -637,7 +634,7 @@ void Display::copyToDisplayBuffer()
 				for (unsigned k = kBegin; k < kEnd; ++k)
 				{
 					const TScalar w = totalWeight_[k];
-					TVector3D xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : TVector3D();
+					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
 					xyz.x = 1 - num::exp(-xyz.x);
 					xyz.y = 1 - num::exp(-xyz.y);
 					xyz.z = 1 - num::exp(-xyz.z);

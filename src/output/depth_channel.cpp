@@ -104,7 +104,7 @@ void DepthChannel::doWriteRender(const OutputSample* first, const OutputSample* 
 	while (first != last)
 	{
 		*output = *first++;
-		output->setRadiance(Spectrum(output->depth() * invUnit_));
+		output->setRadiance(XYZ(output->depth() * invUnit_));
 		if (++output == end)
 		{
 			target_->writeRender(begin, end);

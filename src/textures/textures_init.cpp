@@ -29,6 +29,7 @@
 #include "checker_board.h"
 #include "checker_volume.h"
 #include "constant.h"
+#include "frequency.h"
 #include "global.h"
 #include "grid_board.h"
 #include "image.h"
@@ -46,23 +47,24 @@ PY_DECLARE_MODULE_DOC(textures, "textures for LiAR")
 
 // some base classes, keep in keep in alphabetical order please! [Bramz]
 //
-PY_MODULE_CLASS(textures, Mix2, textures)
+PY_MODULE_CLASS(textures, Mix2)
 
 // keep in alphabetical order please! [Bramz]
 //
-PY_MODULE_CLASS(textures, AngularMapping, textures)
-PY_MODULE_CLASS(textures, CheckerBoard, textures)
-PY_MODULE_CLASS(textures, CheckerVolume, textures)
-PY_MODULE_CLASS(textures, Constant, textures)
-PY_MODULE_CLASS(textures, Global, textures)
-PY_MODULE_CLASS(textures, GridBoard, textures)
-PY_MODULE_CLASS(textures, Image, textures)
-PY_MODULE_CLASS(textures, LinearInterpolator, textures)
-PY_MODULE_CLASS(textures, Product, textures)
-PY_MODULE_CLASS(textures, Time, textures)
-PY_MODULE_CLASS(textures, TransformationUv, textures)
-PY_MODULE_CLASS(textures, Uv, textures)
-PY_MODULE_CLASS(textures, Xyz, textures)
+PY_MODULE_CLASS(textures, AngularMapping)
+PY_MODULE_CLASS(textures, CheckerBoard)
+PY_MODULE_CLASS(textures, CheckerVolume)
+PY_MODULE_CLASS(textures, Constant)
+PY_MODULE_CLASS(textures, Frequency)
+PY_MODULE_CLASS(textures, Global)
+PY_MODULE_CLASS(textures, GridBoard)
+PY_MODULE_CLASS(textures, Image)
+PY_MODULE_CLASS(textures, LinearInterpolator)
+PY_MODULE_CLASS(textures, Product)
+PY_MODULE_CLASS(textures, Time)
+PY_MODULE_CLASS(textures, TransformationUv)
+PY_MODULE_CLASS(textures, Uv)
+PY_MODULE_CLASS(textures, Xyz)
 
 void texturesPostInject(PyObject*)
 {

@@ -103,7 +103,7 @@ const size_t BumpMapping::doNumTransmissionSamples() const
 
 void BumpMapping::doShadeContext(const Sample& sample, IntersectionContext& context) const
 {
-	const TScalar d = displacement_->lookUp(sample, context).average();
+	const TScalar d = average(displacement_->lookUp(sample, context));
 	const TVector2D dD_dUv = dDisplacement_dUv(sample, context);
 
 	const TVector3D dP_dU = context.dPoint_dU() + dD_dUv.x * context.normal() + d * context.dNormal_dU();
@@ -120,7 +120,7 @@ void BumpMapping::doShadeContext(const Sample& sample, IntersectionContext& cont
 
 
 
-const Spectrum BumpMapping::doEmission(const Sample& sample, const IntersectionContext& context,
+const XYZ BumpMapping::doEmission(const Sample& sample, const IntersectionContext& context,
 		const TVector3D& omegaOut) const
 {
 	return shader_->emission(sample, context, omegaOut);
@@ -176,22 +176,22 @@ const TVector2D BumpMapping::dDisplacement_dUv(
 	context.setPoint(p + dUv_2.x * context.dPoint_dU());
 	context.setNormal(n + dUv_2.x * context.dNormal_dU());
 	context.setUv(uv.x + dUv_2.x, uv.y);
-	dD_dUv.x = displacement_->lookUp(sample, context).average();
+	dD_dUv.x = average(displacement_->lookUp(sample, context));
 
 	context.setPoint(p - dUv_2.x * context.dPoint_dU());
 	context.setNormal(n - dUv_2.x * context.dNormal_dU());
 	context.setUv(uv.x - dUv_2.x, uv.y);
-	dD_dUv.x -= displacement_->lookUp(sample, context).average();
+	dD_dUv.x -= average(displacement_->lookUp(sample, context));
 
 	context.setPoint(p + dUv_2.y * context.dPoint_dV());
 	context.setNormal(n + dUv_2.y * context.dNormal_dV());
 	context.setUv(uv.x, uv.y + dUv_2.y);
-	dD_dUv.y = displacement_->lookUp(sample, context).average();;
+	dD_dUv.y = average(displacement_->lookUp(sample, context));
 
 	context.setPoint(p - dUv_2.y * context.dPoint_dV());
 	context.setNormal(n - dUv_2.y * context.dNormal_dV());
 	context.setUv(uv.x, uv.y - dUv_2.y);
-	dD_dUv.y -= displacement_->lookUp(sample, context).average();
+	dD_dUv.y -= average(displacement_->lookUp(sample, context));
 
 	context.setPoint(p);
 	context.setNormal(n);

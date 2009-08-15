@@ -46,7 +46,7 @@ PY_CLASS_METHOD(LightSpot, lookAt);
 LightSpot::LightSpot():
 	position_(TPoint3D()),
 	direction_(TVector3D(0, 0, -1)),
-	intensity_(Spectrum(1)),
+	intensity_(XYZ(1, 1, 1)),
 	attenuation_(Attenuation::defaultAttenuation()),
 	cosOuterAngle_(num::cos(TNumTraits::pi / 4)),
 	cosInnerAngle_(num::cos(TNumTraits::pi / 6))
@@ -69,7 +69,7 @@ const TVector3D& LightSpot::direction() const
 
 
 
-const Spectrum& LightSpot::intensity() const
+const XYZ& LightSpot::intensity() const
 {
 	return intensity_;
 }
@@ -113,7 +113,7 @@ void LightSpot::setDirection(const TVector3D& direction)
 
 
 
-void LightSpot::setIntensity(const Spectrum& iIntensity)
+void LightSpot::setIntensity(const XYZ& iIntensity)
 {
 	intensity_ = iIntensity;
 }
@@ -201,7 +201,7 @@ const TScalar LightSpot::doArea() const
 
 
 
-const Spectrum LightSpot::doSampleEmission(
+const XYZ LightSpot::doSampleEmission(
 		const Sample& sample,
 		const TPoint2D& lightSample, 
 		const TPoint3D& target,
@@ -219,7 +219,7 @@ const Spectrum LightSpot::doSampleEmission(
 	if (multiplier == TNumTraits::zero)
 	{
 		pdf = TNumTraits::zero;
-		return Spectrum(TNumTraits::zero);
+		return XYZ();
 	}
 	multiplier /= attenuation_->attenuation(distance, squaredDistance);
 	
@@ -231,17 +231,17 @@ const Spectrum LightSpot::doSampleEmission(
 
 
 
-const Spectrum LightSpot::doEmission(
+const XYZ LightSpot::doEmission(
 		const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	shadowRay = ray;
 	pdf = 0;
-	return Spectrum();
+	return XYZ();
 }
 
 
 
-const Spectrum LightSpot::doSampleEmission(
+const XYZ LightSpot::doSampleEmission(
 		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
 		const TAabb3D& sceneBound, BoundedRay& emissionRay, TScalar& pdf) const
 {
@@ -254,7 +254,7 @@ const Spectrum LightSpot::doSampleEmission(
 
 
 
-const Spectrum LightSpot::doTotalPower(const TAabb3D& sceneBound) const
+const XYZ LightSpot::doTotalPower(const TAabb3D& sceneBound) const
 {
 	const TScalar factor = ((1 - cosInnerAngle_) + (cosInnerAngle_ - cosOuterAngle_) / 4);
 	return (2 * TNumTraits::pi * factor) * intensity_;

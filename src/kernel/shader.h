@@ -30,7 +30,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SHADER_H
 
 #include "kernel_common.h"
-#include "spectrum.h"
+#include "xyz.h"
 #include <lass/util/bit_manip.h>
 
 namespace liar
@@ -61,7 +61,7 @@ struct BsdfIn
 
 struct BsdfOut
 {
-	Spectrum value;
+	XYZ value;
 	TScalar pdf;
 };
 
@@ -76,7 +76,7 @@ struct SampleBsdfIn
 struct SampleBsdfOut
 {
 	TVector3D omegaOut;
-	Spectrum value;
+	XYZ value;
 	TScalar pdf;
 	unsigned usedCaps;
 };
@@ -116,7 +116,7 @@ public:
 		doShadeContext(sample, context);
 	}
 
-	const Spectrum emission(const Sample& sample, const IntersectionContext& context, 
+	const XYZ emission(const Sample& sample, const IntersectionContext& context, 
 		const TVector3D& omegaOut) const
 	{
 		return doEmission(sample, context, omegaOut);
@@ -161,7 +161,7 @@ protected:
 private:
 
 	virtual void doShadeContext(const Sample& sample, IntersectionContext& context) const;
-	virtual const Spectrum doEmission(const Sample& sample, const IntersectionContext& context,
+	virtual const XYZ doEmission(const Sample& sample, const IntersectionContext& context,
 		const TVector3D& omegaOut) const;
 	virtual void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
 		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const = 0;

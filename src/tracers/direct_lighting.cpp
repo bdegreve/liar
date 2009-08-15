@@ -80,7 +80,7 @@ namespace temp
 	class custom_stl_allocator: public stde::lass_allocator<T, CustomAllocator> {};
 }
 
-const Spectrum DirectLighting::doCastRay(
+const XYZ DirectLighting::doCastRay(
 		const kernel::Sample& sample, const kernel::DifferentialRay& primaryRay,
 		TScalar& tIntersection, TScalar& alpha, int generation) const
 {
@@ -90,12 +90,12 @@ const Spectrum DirectLighting::doCastRay(
 	{
 		tIntersection = TNumTraits::infinity;
 		alpha = 0;
-		return Spectrum();
+		return XYZ();
 	}
 	tIntersection = intersection.t();
 	alpha = 1;
 	const TPoint3D target = primaryRay.point(intersection.t());
-	const Spectrum mediumTransparency = mediumStack_.transparency(BoundedRay(
+	const XYZ mediumTransparency = mediumStack_.transparency(BoundedRay(
 		primaryRay.centralRay().unboundedRay(), primaryRay.centralRay().nearLimit(),
 		intersection.t()));
 
@@ -117,7 +117,7 @@ const Spectrum DirectLighting::doCastRay(
 	const TVector3D omegaIn = context.worldToShader(-primaryRay.direction());
 	LASS_ASSERT(omegaIn.z >= 0);
 
-	Spectrum result = shader->emission(sample, context, omegaIn);
+	XYZ result = shader->emission(sample, context, omegaIn);
 
 	result += traceDirect(sample, context, target, targetNormal, omegaIn);
 
@@ -162,7 +162,7 @@ namespace temp
 	}
 }
 
-const Spectrum DirectLighting::traceDirect(
+const XYZ DirectLighting::traceDirect(
 		const Sample& sample, const IntersectionContext& context,
 		const TPoint3D& target, const TVector3D& targetNormal, 
 		const TVector3D& omegaIn) const
@@ -170,7 +170,7 @@ const Spectrum DirectLighting::traceDirect(
 	const Shader* const shader = context.shader();
 	LASS_ASSERT(shader);
 
-	Spectrum result;
+	XYZ result;
 	const TLightContexts::const_iterator end = lights().end();
 	for (TLightContexts::const_iterator light = lights().begin(); light != end; ++light)
 	{
@@ -192,7 +192,7 @@ const Spectrum DirectLighting::traceDirect(
 		{
 			BoundedRay shadowRay;
 			TScalar lightPdf;
-			const Spectrum radiance = light->sampleEmission(
+			const XYZ radiance = light->sampleEmission(
 				sample, *lightSample, target + 2 * tolerance * targetNormal,
 				targetNormal, shadowRay, lightPdf);
 			if (lightPdf > 0 && radiance)
@@ -215,7 +215,7 @@ const Spectrum DirectLighting::traceDirect(
 			if (!isSingularLight)
 			{
 				TVector3D omegaIn;
-				Spectrum bsdf;
+				XYZ bsdf;
 				TScalar bsdfPdf;
 				shader->sampleBsdf(sample, context, omegaOut, bsdfSample.begin(), bsdfSample.begin() + 1, 
 					&omegaIn, &bsdf, &bsdfPdf, Shader::capsAll & ~Shader::capsSpecular);
@@ -224,7 +224,7 @@ const Spectrum DirectLighting::traceDirect(
 					TRay3D ray(target, context.shaderToWorld(omegaIn));
 					BoundedRay shadowRay;
 					TScalar lightPdf;
-					const Spectrum radiance = light->emission(sample, ray, shadowRay, lightPdf);
+					const XYZ radiance = light->emission(sample, ray, shadowRay, lightPdf);
 					if (lightPdf > 0 && !scene()->isIntersecting(sample, shadowRay))
 					{
 						const TScalar weight = temp::squaredHeuristic(bsdfPdf, lightPdf);
@@ -246,7 +246,7 @@ const Spectrum DirectLighting::traceDirect(
 
 
 
-const Spectrum DirectLighting::traceSpecularAndGlossy(
+const XYZ DirectLighting::traceSpecularAndGlossy(
 		const Sample& sample, const IntersectionContext& context, const kernel::DifferentialRay& primaryRay,
 		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn, bool singleSample) const
 {
@@ -255,10 +255,10 @@ const Spectrum DirectLighting::traceSpecularAndGlossy(
 
 	if (!(shader->hasCaps(Shader::capsSpecular) || shader->hasCaps(Shader::capsGlossy)))
 	{
-		return Spectrum();
+		return XYZ();
 	}
 
-	Spectrum result;
+	XYZ result;
 	if (shader->hasCaps(Shader::capsReflection) && shader->idReflectionSamples() != -1)
 	{
 		Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idReflectionSamples());
@@ -304,7 +304,7 @@ const Spectrum DirectLighting::traceSpecularAndGlossy(
 					TRay3D(beginI, directionI),
 					TRay3D(beginJ, directionJ));
 				TScalar t, a;
-				const Spectrum reflected = castRay(sample, reflectedRay, t, a);
+				const XYZ reflected = castRay(sample, reflectedRay, t, a);
 				result += out[i].value * reflected * (a * num::abs(out[i].omegaOut.z) / (n * out[i].pdf));
 			}
 		}
@@ -340,7 +340,7 @@ const Spectrum DirectLighting::traceSpecularAndGlossy(
 					TRay3D(beginCentral, directionCentral),
 					TRay3D(beginCentral, directionCentral));
 				TScalar t, a;
-				const Spectrum transmitted = castRay(sample, transmittedRay, t, a);
+				const XYZ transmitted = castRay(sample, transmittedRay, t, a);
 				result += out[i].value * transmitted * 
 					(a * num::abs(out[i].omegaOut.z) / (n * out[i].pdf));
 			}

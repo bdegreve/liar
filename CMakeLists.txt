@@ -77,3 +77,9 @@ macro(add_liar_module name)
 endmacro()
 
 add_subdirectory(src)
+
+set(BUILD_TESTING "ON" CACHE BOOL "build test")
+if(BUILD_TESTING)
+	enable_testing()
+	add_subdirectory(test)
+endif()

@@ -30,6 +30,10 @@
 #include <lass/io/image.h>
 #include "../kernel/rgb_space.h"
 
+#if LASS_COMPILER_TYPE == LASS_COMPILER_TYPE_MSVC
+#	pragma warning(disable: 4996) // std::copy may be unsafe
+#endif
+
 namespace liar
 {
 namespace scenery
@@ -197,7 +201,7 @@ const TScalar LightSky::doArea() const
 
 
 
-const Spectrum LightSky::doEmission(
+const XYZ LightSky::doEmission(
 		const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	const TVector3D dir = ray.direction();
@@ -222,7 +226,7 @@ const Spectrum LightSky::doEmission(
 
 
 
-const Spectrum LightSky::doSampleEmission(
+const XYZ LightSky::doSampleEmission(
 		const Sample& sample,
 		const TPoint2D& lightSample, 
 		const TPoint3D& target,
@@ -242,7 +246,7 @@ const Spectrum LightSky::doSampleEmission(
 
 
 
-const Spectrum LightSky::doSampleEmission(
+const XYZ LightSky::doSampleEmission(
 		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
 		const TAabb3D& sceneBound, BoundedRay& emissionRay, TScalar& pdf) const
 {
@@ -269,7 +273,7 @@ const Spectrum LightSky::doSampleEmission(
 
 
 
-const Spectrum LightSky::doTotalPower(const TAabb3D& sceneBound) const
+const XYZ LightSky::doTotalPower(const TAabb3D& sceneBound) const
 {
 	const prim::Sphere3D<TScalar> worldSphere = boundingSphere(sceneBound);
 	return (8 * num::sqr(TNumTraits::pi * worldSphere.radius())) * averageRadiance_;
@@ -305,20 +309,20 @@ void LightSky::doSetLightState(const TPyObjectPtr& state)
 
 
 
-void LightSky::buildPdf(TMap& pdf, Spectrum& averageRadiance) const
+void LightSky::buildPdf(TMap& pdf, XYZ& averageRadiance) const
 {
 	Sample dummy;
 
 	TMap tempPdf(resolution_ * resolution_);
-	Spectrum totalRadiance;
+	XYZ totalRadiance;
     for (int i = 0; i < resolution_; ++i)
 	{
 		for (int j = 0; j < resolution_; ++j)
 		{
-			const Spectrum radiance = lookUpRadiance(
+			const XYZ radiance = lookUpRadiance(
 				dummy, static_cast<TScalar>(i), static_cast<TScalar>(j));
 			totalRadiance += radiance;
-			tempPdf[i * resolution_ + j] = radiance.average();
+			tempPdf[i * resolution_ + j] = average(radiance);
 		}
 	}
 	pdf.swap(tempPdf);
@@ -391,7 +395,7 @@ const TVector3D LightSky::direction(TScalar i, TScalar j) const
 
 
 
-const Spectrum LightSky::lookUpRadiance(const Sample& sample, TScalar i, TScalar j) const
+const XYZ LightSky::lookUpRadiance(const Sample& sample, TScalar i, TScalar j) const
 {
 	const TPoint3D origin;
 	const BoundedRay centralRay(origin, direction(i, j));

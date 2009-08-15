@@ -21,18 +21,22 @@
  *  http://liar.bramz.net/
  */
 
-#include "kernel_common.h"
-#include "spectrum.h"
-#include <lass/stde/extended_iterator.h>
+#include "textures_common.h"
+#include "frequency.h"
 
 namespace liar
 {
-namespace kernel
+namespace textures
 {
 
-PY_DECLARE_CLASS_NAME(PySpectrum, "Spectrum")
+PY_DECLARE_CLASS_DOC(Frequency, "evaluates to sampled electromagnetic frequency")
+PY_CLASS_CONSTRUCTOR_0(Frequency);
 
 // --- public --------------------------------------------------------------------------------------
+
+Frequency::Frequency()
+{
+}
 
 
 
@@ -42,31 +46,32 @@ PY_DECLARE_CLASS_NAME(PySpectrum, "Spectrum")
 
 // --- private -------------------------------------------------------------------------------------
 
+const XYZ Frequency::doLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	const TScalar f = static_cast<TScalar>(sample.frequency());
+	return XYZ(f, f, f);
+}
+
+
+
+const TPyObjectPtr Frequency::doGetState() const
+{
+	return python::makeTuple();
+}
+
+
+
+void Frequency::doSetState(const TPyObjectPtr& state)
+{
+}
+
 
 
 // --- free ----------------------------------------------------------------------------------------
-
-/** Make a spectrum from CIE xyz values using the default spectrum format
- */
-Spectrum xyz(TScalar x, TScalar y, TScalar z)
-{
-	return Spectrum(TVector3D(x, y, z));
-}
-
-
-
-/** Make a spectrum from CIE xyz values using the default spectrum format
- */
-Spectrum xyz(const TVector3D& xyz)
-{
-	return Spectrum(xyz);
-}
-
-
-
 
 }
 
 }
 
 // EOF
+

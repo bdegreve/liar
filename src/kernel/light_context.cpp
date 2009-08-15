@@ -75,7 +75,7 @@ void LightContext::requestSamples(const TSamplerPtr& sampler)
 
 
 
-const Spectrum LightContext::sampleEmission(
+const XYZ LightContext::sampleEmission(
 		const Sample& cameraSample, const TPoint2D& lightSample, 
 		const TPoint3D& target,	const TVector3D& targetNormal,		
 		BoundedRay& shadowRay, TScalar& pdf) const
@@ -86,7 +86,7 @@ const Spectrum LightContext::sampleEmission(
 	const TVector3D localNormal = normalTransform(targetNormal, localToWorld_.inverse()).normal();
 	
 	BoundedRay localRay;
-	const Spectrum radiance = light_->sampleEmission(
+	const XYZ radiance = light_->sampleEmission(
 		cameraSample, lightSample, localTarget, localNormal, localRay, pdf);
 
 	// we must transform back to world space.  But we already do know the starting point, so don't rely
@@ -99,14 +99,14 @@ const Spectrum LightContext::sampleEmission(
 
 
 
-const Spectrum LightContext::sampleEmission(
+const XYZ LightContext::sampleEmission(
 		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 		BoundedRay& emissionRay, TScalar& pdf) const
 {
 	setTime(cameraSample.time());
 
 	BoundedRay localRay;
-	const Spectrum radiance = light_->sampleEmission(
+	const XYZ radiance = light_->sampleEmission(
 		cameraSample, lightSampleA, lightSampleB, localBound_, localRay, pdf);
 	
 	emissionRay = transform(localRay, localToWorld_);
@@ -115,7 +115,7 @@ const Spectrum LightContext::sampleEmission(
 
 
 
-const Spectrum LightContext::emission(
+const XYZ LightContext::emission(
 		const Sample& cameraSample, const TRay3D& ray,
 		BoundedRay& shadowRay, TScalar& pdf) const
 {
@@ -124,7 +124,7 @@ const Spectrum LightContext::emission(
 	const TRay3D localRay = prim::transform(ray, localToWorld_.inverse(), scale);
 
 	BoundedRay localShadowRay;
-	const Spectrum radiance = light_->emission(cameraSample, localRay, localShadowRay, pdf);
+	const XYZ radiance = light_->emission(cameraSample, localRay, localShadowRay, pdf);
 
 	shadowRay = BoundedRay(
 		ray, localShadowRay.nearLimit() / scale, localShadowRay.farLimit() / scale);
@@ -133,7 +133,7 @@ const Spectrum LightContext::emission(
 
 
 
-const Spectrum LightContext::totalPower() const
+const XYZ LightContext::totalPower() const
 {
 	return light_->totalPower(localBound_);
 }

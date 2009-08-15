@@ -34,7 +34,7 @@ namespace scenery
 
 PY_DECLARE_CLASS_DOC(LightDirectional, "directional light")
 PY_CLASS_CONSTRUCTOR_0(LightDirectional)
-PY_CLASS_CONSTRUCTOR_2(LightDirectional, const TVector3D&, const Spectrum&)
+PY_CLASS_CONSTRUCTOR_2(LightDirectional, const TVector3D&, const XYZ&)
 PY_CLASS_MEMBER_RW(LightDirectional, direction, setDirection)
 PY_CLASS_MEMBER_RW(LightDirectional, radiance, setRadiance)
 
@@ -42,14 +42,14 @@ PY_CLASS_MEMBER_RW(LightDirectional, radiance, setRadiance)
 // --- public --------------------------------------------------------------------------------------
 
 LightDirectional::LightDirectional():
-	radiance_(Spectrum(1))
+	radiance_(XYZ(1, 1, 1))
 {
 	setDirection(TVector3D(0, 0, -1));
 }
 
 
 
-LightDirectional::LightDirectional(const TVector3D& direction, const Spectrum& radiance):
+LightDirectional::LightDirectional(const TVector3D& direction, const XYZ& radiance):
 	radiance_(radiance)
 {
 	setDirection(direction);
@@ -64,7 +64,7 @@ const TVector3D& LightDirectional::direction() const
 
 
 
-const Spectrum& LightDirectional::radiance() const
+const XYZ& LightDirectional::radiance() const
 {
 	return radiance_;
 }
@@ -80,7 +80,7 @@ void LightDirectional::setDirection(const TVector3D& direction)
 
 
 
-void LightDirectional::setRadiance(const Spectrum& radiance)
+void LightDirectional::setRadiance(const XYZ& radiance)
 {
 	radiance_ = radiance;
 }
@@ -147,17 +147,17 @@ const TScalar LightDirectional::doArea() const
 
 
 
-const Spectrum LightDirectional::doEmission(
+const XYZ LightDirectional::doEmission(
 		const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	shadowRay = ray;
 	pdf = 0;
-	return Spectrum();
+	return XYZ();
 }
 
 
 
-const Spectrum LightDirectional::doSampleEmission(
+const XYZ LightDirectional::doSampleEmission(
 		const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
 		const TVector3D& targetNormal, BoundedRay& shadowRay, TScalar& pdf) const
 {
@@ -169,7 +169,7 @@ const Spectrum LightDirectional::doSampleEmission(
 
 
 
-const Spectrum LightDirectional::doSampleEmission(
+const XYZ LightDirectional::doSampleEmission(
 		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
 		const TAabb3D& sceneBound, BoundedRay& emissionRay, TScalar& pdf) const
 {
@@ -184,7 +184,7 @@ const Spectrum LightDirectional::doSampleEmission(
 
 
 
-const Spectrum LightDirectional::doTotalPower(const TAabb3D& sceneBound) const
+const XYZ LightDirectional::doTotalPower(const TAabb3D& sceneBound) const
 {
 	const prim::Sphere3D<TScalar> worldSphere = boundingSphere(sceneBound);
 	return (2 * TNumTraits::pi * num::sqr(worldSphere.radius())) * radiance_;

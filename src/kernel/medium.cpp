@@ -39,14 +39,14 @@ Medium::~Medium()
 
 
 
-const Spectrum& Medium::refractionIndex() const
+const XYZ& Medium::refractionIndex() const
 {
 	return refractionIndex_;
 }
 
 
 
-void Medium::setRefractionIndex(const Spectrum& refractionIndex)
+void Medium::setRefractionIndex(const XYZ& refractionIndex)
 {
 	refractionIndex_ = refractionIndex;
 }
@@ -70,7 +70,7 @@ void Medium::setPriority(size_t priority)
 // --- protected -----------------------------------------------------------------------------------
 
 Medium::Medium():
-	refractionIndex_(1),
+	refractionIndex_(1, 1, 1),
 	priority_(0)
 {
 }
@@ -95,9 +95,9 @@ MediumStack::MediumStack(const TMediumPtr& defaultMedium):
 
 
 
-const Spectrum MediumStack::transparency(const BoundedRay& ray) const
+const XYZ MediumStack::transparency(const BoundedRay& ray) const
 {
-	return top() ? top()->transparency(ray) : Spectrum(1);
+	return top() ? top()->transparency(ray) : XYZ(1, 1, 1);
 }
 
 

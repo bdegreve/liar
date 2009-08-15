@@ -88,12 +88,12 @@ public:
 	}
 
 	void read(TImageHandle handle, const TLevel& level, const TResolution2D& begin, 
-		const TResolution2D& end, TVector3D* xyz, TScalar* alpha) const
+		const TResolution2D& end, XYZ* xyz, TScalar* alpha) const
 	{
 		doRead(handle, level, begin, end, xyz, alpha);
 	}
 	void write(TImageHandle handle, const TLevel& level, const TResolution2D& begin, 
-		const TResolution2D& end, const TVector3D* xyz, const TScalar* alpha) const
+		const TResolution2D& end, const XYZ* xyz, const TScalar* alpha) const
 	{
 		doWrite(handle, level, begin, end, xyz, alpha);
 	}
@@ -112,9 +112,9 @@ private:
 	virtual const TRgbSpacePtr doRgbSpace(TImageHandle handle) const = 0;
 	
 	virtual void doRead(TImageHandle handle, const TLevel& level, const TResolution2D& begin, 
-		const TResolution2D& end, TVector3D* xyz, TScalar* alpha) const = 0;	
+		const TResolution2D& end, XYZ* xyz, TScalar* alpha) const = 0;	
 	virtual void doWrite(TImageHandle handle, const TLevel& level, const TResolution2D& begin, 
-		const TResolution2D& end, const TVector3D* xyz, const TScalar* alpha) const = 0;
+		const TResolution2D& end, const XYZ* xyz, const TScalar* alpha) const = 0;
 };
 
 typedef python::PyObjectPtr<ImageCodec>::Type TImageCodecPtr;
@@ -145,13 +145,13 @@ public:
 
 	void read(
 			const TResolution2D& begin, const TResolution2D& end, 
-			TVector3D* xyz, TScalar* alpha) const
+			XYZ* xyz, TScalar* alpha) const
 	{
 		codec_->read(handle_, TLevel(), begin, end, xyz, alpha);
 	}
 	void read(
 			const TLevel& level, const TResolution2D& begin, const TResolution2D& end, 
-			TVector3D* xyz, TScalar* alpha) const
+			XYZ* xyz, TScalar* alpha) const
 	{
 		codec_->read(handle_, level, begin, end, xyz, alpha);
 	}
@@ -182,13 +182,13 @@ public:
 
 	void write(
 			const TResolution2D& level, const TResolution2D& begin, 
-			const TResolution2D& end, const TVector3D* xyz, const TScalar* alpha) const
+			const TResolution2D& end, const XYZ* xyz, const TScalar* alpha) const
 	{
 		codec_->write(handle_, level, begin, end, xyz, alpha);
 	}
 	void write(
 			const TResolution2D& begin, const TResolution2D& end, 
-			const TVector3D* xyz, const TScalar* alpha) const
+			const XYZ* xyz, const TScalar* alpha) const
 	{
 		codec_->write(handle_, TLevel(), begin, end, xyz, alpha);
 	}
@@ -222,9 +222,9 @@ class LIAR_KERNEL_DLL ImageCodecLassLDR: public ImageCodecLassCommon
 	PY_HEADER(ImageCodec)
 private:
 	virtual void doRead(TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 
-		const TResolution2D& end, TVector3D* xyz, TScalar* alpha) const;	
+		const TResolution2D& end, XYZ* xyz, TScalar* alpha) const;	
 	virtual void doWrite(TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 
-		const TResolution2D& end, const TVector3D* xyz, const TScalar* alpha) const;
+		const TResolution2D& end, const XYZ* xyz, const TScalar* alpha) const;
 };
 
 
@@ -234,9 +234,9 @@ class LIAR_KERNEL_DLL ImageCodecLassHDR: public ImageCodecLassCommon
 	PY_HEADER(ImageCodec)
 private:
 	virtual void doRead(TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 
-		const TResolution2D& end, TVector3D* xyz, TScalar* alpha) const;	
+		const TResolution2D& end, XYZ* xyz, TScalar* alpha) const;	
 	virtual void doWrite(TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 
-		const TResolution2D& end, const TVector3D* xyz, const TScalar* alpha) const;
+		const TResolution2D& end, const XYZ* xyz, const TScalar* alpha) const;
 };
 
 

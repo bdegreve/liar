@@ -94,16 +94,12 @@ private:
     virtual void doSetSamplesPerPixel(size_t samplesPerPixel) = 0;
 	virtual void doSeed(size_t randomSeed) = 0;
     
-	virtual void doSampleScreen(const TResolution2D& pixel, size_t subPixel, 
-		TSample2D& oScreenCoordinate) = 0;
-	virtual void doSampleLens(const TResolution2D& pixel, size_t subPixel, 
-		TSample2D& oLensCoordinate) = 0;
-	virtual void doSampleTime(const TResolution2D& pixel, size_t subPixel, 
-		const TimePeriod& period, TTime& oTime) = 0;
-	virtual void doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, 
-		TSample1D* oBegin, TSample1D* oEnd) = 0;
-	virtual void doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, 
-		TSample2D* oBegin, TSample2D* oEnd) = 0;
+	virtual void doSampleScreen(const TResolution2D& pixel, size_t subPixel, TSample2D& screenCoordinate) = 0;
+	virtual void doSampleLens(const TResolution2D& pixel, size_t subPixel, TSample2D& lensCoordinate) = 0;
+	virtual void doSampleTime(const TResolution2D& pixel, size_t subPixel, const TimePeriod& period, TTime& time) = 0;
+	virtual void doSampleFrequency(const TResolution2D& pixel, size_t subPixel, TScalar& frequency) = 0;
+	virtual void doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, TSample1D* first, TSample1D* last) = 0;
+	virtual void doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, TSample2D* first, TSample2D* last) = 0;
 
 	virtual const size_t doRoundSize1D(size_t requestedSize) const;
 	virtual const size_t doRoundSize2D(size_t requestedSize) const;

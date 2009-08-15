@@ -63,7 +63,7 @@ void GridBoard::setThickness(const TVector2D& iThickness)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum GridBoard::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const XYZ GridBoard::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	const TScalar u = num::fractional(context.uv().x);
 	const TScalar v = num::fractional(context.uv().y);

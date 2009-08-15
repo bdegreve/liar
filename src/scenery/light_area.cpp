@@ -45,7 +45,7 @@ PY_CLASS_MEMBER_RW(LightArea, isDoubleSided, setDoubleSided)
 
 LightArea::LightArea(const TSceneObjectPtr& iSurface):
 	surface_(LASS_ENFORCE_POINTER(iSurface)),
-	radiance_(Spectrum(1)),
+	radiance_(XYZ(1, 1, 1)),
 	attenuation_(Attenuation::defaultAttenuation()),
 	numberOfEmissionSamples_(9),
 	isSingleSided_(true)
@@ -68,7 +68,7 @@ const TSceneObjectPtr& LightArea::surface() const
 
 
 
-const Spectrum& LightArea::radiance() const
+const XYZ& LightArea::radiance() const
 {
 	return radiance_;
 }
@@ -89,7 +89,7 @@ const bool LightArea::isDoubleSided() const
 
 
 
-void LightArea::setRadiance(const Spectrum& radiance)
+void LightArea::setRadiance(const XYZ& radiance)
 {
 	radiance_ = radiance;
 }
@@ -181,18 +181,18 @@ const TScalar LightArea::doArea() const
 
 
 
-const Spectrum LightArea::doEmission(
+const XYZ LightArea::doEmission(
 		const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	surface_->fun(ray, shadowRay, pdf);
 	shadowRay = ray;
 	pdf = 0;
-	return Spectrum();
+	return XYZ();
 }
 
 
 
-const Spectrum LightArea::doSampleEmission(
+const XYZ LightArea::doSampleEmission(
 		const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target,
 		const TVector3D& normalTarget, BoundedRay& shadowRay, TScalar& pdf) const
 {
@@ -208,7 +208,7 @@ const Spectrum LightArea::doSampleEmission(
 	if ((dot(normalTarget, toLight) <= 0) || (isSingleSided_ && dot(normalLight, toLight) > 0))
 	{
 		pdf = 0;
-		return Spectrum();
+		return XYZ();
 	}
 
 	shadowRay = BoundedRay(target, toLight, tolerance, distance, prim::IsAlreadyNormalized());
@@ -217,7 +217,7 @@ const Spectrum LightArea::doSampleEmission(
 
 
 
-const Spectrum LightArea::doSampleEmission(
+const XYZ LightArea::doSampleEmission(
 		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 		const TAabb3D& sceneBound, BoundedRay& emissionRay, TScalar& pdf) const
 {
@@ -240,7 +240,7 @@ const Spectrum LightArea::doSampleEmission(
 
 
 
-const Spectrum LightArea::doTotalPower(const TAabb3D& sceneBound) const
+const XYZ LightArea::doTotalPower(const TAabb3D& sceneBound) const
 {
 	return (TNumTraits::pi * surface_->area()) * radiance_;
 }

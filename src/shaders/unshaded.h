@@ -51,7 +51,7 @@ public:
 
 private:
 
-	const Spectrum doEmission(const Sample& sample, const IntersectionContext& context,
+	const XYZ doEmission(const Sample& sample, const IntersectionContext& context,
 		const TVector3D& omegaOut) const;
 	void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
 		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const;

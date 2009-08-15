@@ -62,7 +62,7 @@ void Global::setTexture(const TTexturePtr& texture)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum Global::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const XYZ Global::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	IntersectionContext global(context);
 	global.setShader(0);

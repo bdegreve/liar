@@ -63,7 +63,7 @@ void CheckerVolume::setSplit(const TVector3D& split)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum 
+const XYZ 
 CheckerVolume::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	const TScalar x = num::fractional(context.point().x);

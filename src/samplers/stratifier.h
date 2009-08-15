@@ -52,8 +52,8 @@ public:
 
 private:
 
-	typedef std::vector<TVector2D> TStrata2D;
-	typedef std::vector<TScalar> TStrata1D;
+	typedef std::vector<TSample2D> TStrata2D;
+	typedef std::vector<TSample1D> TStrata1D;
 
     typedef num::RandomMT19937 TNumberGenerator;
     typedef num::DistributionUniform<TScalar, TNumberGenerator, num::rtRightOpen> TJitterGenerator;
@@ -66,16 +66,12 @@ private:
     virtual void doSetSamplesPerPixel(size_t samplesPerPixel);
 	virtual void doSeed(size_t randomSeed);
 
-	virtual void doSampleScreen(const TResolution2D& pixel, size_t subPixel, 
-		TSample2D& oScreenCoordinate);
-	virtual void doSampleLens(const TResolution2D& pixel, size_t subPixel, 
-		TSample2D& oScreenCoordinate);
-	virtual void doSampleTime(const TResolution2D& pixel, size_t subPixel, 
-		const TimePeriod& period, TTime& oTime);
-	virtual void doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, 
-		TSample1D* oBegin, TSample1D* oEnd);
-	virtual void doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, 
-		TSample2D* oBegin, TSample2D* oEnd);
+	virtual void doSampleScreen(const TResolution2D& pixel, size_t subPixel, TSample2D& screenCoordinate);
+	virtual void doSampleLens(const TResolution2D& pixel, size_t subPixel, TSample2D& lensCoordinate);
+	virtual void doSampleTime(const TResolution2D& pixel, size_t subPixel, const TimePeriod& period, TTime& time);
+	virtual void doSampleFrequency(const TResolution2D& pixel, size_t subPixel, TScalar& frequency);
+	virtual void doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, TSample1D* first, TSample1D* last);
+	virtual void doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, TSample2D* first, TSample2D* last);
 
 	virtual const size_t doRoundSize1D(size_t requestedSize) const;
 	virtual const size_t doRoundSize2D(size_t requestedSize) const;
@@ -85,7 +81,8 @@ private:
 	virtual const TPyObjectPtr doGetState() const;
 	virtual void doSetState(const TPyObjectPtr& state);
 
-	void shuffleTimeStrata();
+	const TSample1D sampleStratum(size_t subPixel, TStrata1D& strata);
+	const TSample2D sampleStratum(size_t subPixel, TStrata2D& strata);
 
     TNumberGenerator numberGenerator_;
     TJitterGenerator jitterGenerator_;
@@ -97,6 +94,7 @@ private:
     TStrata2D screenStrata_;
     TStrata2D lensStrata_;
 	TStrata1D timeStrata_;
+	TStrata1D frequencyStrata_;
     size_t strataPerPixel_;
 	bool isJittered_;
 };

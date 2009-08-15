@@ -83,11 +83,11 @@ private:
 
 	struct Photon
 	{
-		Photon(const TPoint3D& position, const TVector3D& omegaIn, const Spectrum& power):
+		Photon(const TPoint3D& position, const TVector3D& omegaIn, const XYZ& power):
 			position(position), omegaIn(omegaIn), power(power) {}
 		TPoint3D position;
 		TVector3D omegaIn;
-		Spectrum power;
+		XYZ power;
 	};
 	typedef std::vector<Photon> TPhotonBuffer;
 
@@ -97,7 +97,7 @@ private:
 			position(position), normal(normal), irradiance() {}
 		TPoint3D position;
 		TVector3D normal;
-		Spectrum irradiance;
+		XYZ irradiance;
 	};
 	typedef std::vector<Irradiance> TIrradianceBuffer;
 
@@ -145,7 +145,7 @@ private:
 
 	void doRequestSamples(const TSamplerPtr& sampler);
 	void doPreProcess(const TSamplerPtr& sampler, const TimePeriod& period);
-	const Spectrum doCastRay(const Sample& sample, const DifferentialRay& primaryRay,
+	const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay,
 		TScalar& depth, TScalar& alpha, int generation) const;
 	const TLightSamplesRange doSampleLights(const Sample& sample,
 		const TPoint3D& target, const TVector3D& targetNormal) const;
@@ -158,21 +158,21 @@ private:
 		const TimePeriod& period);
 	void emitPhoton(const LightContext& light, TScalar lightPdf, const Sample& sample, 
 		TRandomSecondary::TValue secondarySeed);
-	void tracePhoton(const Sample& sample, const Spectrum& power, const BoundedRay& ray,
+	void tracePhoton(const Sample& sample, const XYZ& power, const BoundedRay& ray,
 		int geneneration, TUniformSecondary& uniform, bool isCaustic = false);
 	void buildPhotonMap();
 	void buildIrradianceMap();
 
-	const Spectrum traceDirect(const Sample& sample, const IntersectionContext& context,
+	const XYZ traceDirect(const Sample& sample, const IntersectionContext& context,
 		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaOut) const;
-	const Spectrum gatherIndirect(const Sample& sample, const IntersectionContext& context,
+	const XYZ gatherIndirect(const Sample& sample, const IntersectionContext& context,
 		const TPoint3D& target, const TVector3D& omegaOut, const TPoint2D* firstSample, 
 		const TPoint2D* lastSample, size_t gatherStage = 0) const;
 
-	const Spectrum estimateIrradiance(const TPoint3D& point, const TVector3D& normal) const;
-	const Spectrum estimateRadiance(const Sample& sample, const IntersectionContext& context, 
+	const XYZ estimateIrradiance(const TPoint3D& point, const TVector3D& normal) const;
+	const XYZ estimateRadiance(const Sample& sample, const IntersectionContext& context, 
 		const TPoint3D& point, const TVector3D& omegaOut, size_t gatherStage = 0) const;
-	const Spectrum estimateCaustics(const Sample& sample, const IntersectionContext& context, 
+	const XYZ estimateCaustics(const Sample& sample, const IntersectionContext& context, 
 		const TPoint3D& point, const TVector3D& omegaOut) const;
 
 	mutable MediumStack mediumStack_;

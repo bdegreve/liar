@@ -33,7 +33,7 @@
 #include "differential_ray.h"
 #include "output_sample.h"
 #include "sample.h"
-#include "spectrum.h"
+#include "xyz.h"
 #include <lass/prim/vector_2d.h>
 
 namespace liar

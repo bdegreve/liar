@@ -62,6 +62,12 @@ const TTime Sample::time() const
 }
 
 
+const TScalar Sample::frequency() const
+{
+	return frequency_;
+}
+
+
 
 const TScalar Sample::weight() const
 {

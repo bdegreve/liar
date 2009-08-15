@@ -92,7 +92,7 @@ void Mirror::doSampleBsdf(
 		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
 		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
 {
-	const Spectrum r = reflectance_->lookUp(sample, context);
+	const XYZ r = reflectance_->lookUp(sample, context);
 	const TVector3D omegaOut(-omegaIn.x, -omegaIn.y, omegaIn.z);
 	while (first != last)
 	{

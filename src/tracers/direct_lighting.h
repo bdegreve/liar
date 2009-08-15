@@ -49,7 +49,7 @@ private:
 	void doPreprocess();
 	void doRequestSamples(const TSamplerPtr& sampler);
 	void DirectLighting::doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period);
-	const Spectrum doCastRay(const Sample& sample, const DifferentialRay& primaryRay, 
+	const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, 
 		TScalar& tIntersection, TScalar& alpha, int generation) const;
 	const TLightSamplesRange doSampleLights(const Sample& sample, const TPoint3D& target, 
 		const TVector3D& targetNormal) const;
@@ -58,10 +58,10 @@ private:
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-	const Spectrum traceDirect(const Sample& sample, 
+	const XYZ traceDirect(const Sample& sample, 
 		const IntersectionContext& context,	const TPoint3D& target, const TVector3D& targetNormal,
 		const TVector3D& omegaIn) const;
-	const Spectrum traceSpecularAndGlossy(
+	const XYZ traceSpecularAndGlossy(
 		const Sample& sample, const IntersectionContext& context, const kernel::DifferentialRay& primaryRay,
 		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn, bool singleSample) const;
 

@@ -79,7 +79,7 @@ void TransformationUv::setTransformation(const TTransformation2D& transformation
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum TransformationUv::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const XYZ TransformationUv::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	IntersectionContext temp(context);
 	temp.setUv(prim::transform(context.uv(), transformation_));

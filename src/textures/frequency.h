@@ -21,64 +21,36 @@
  *  http://liar.bramz.net/
  */
 
-/** @class liar::textures::CheckerBoard
- *  @brief mixes two textures in checker board style
+/** @class liar::textures::Frequency
+ *  @brief evaluates to sampled electromagnetic frequency
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_CHECKER_BOARD_H
-#define LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_CHECKER_BOARD_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_FREQUENCY_H
+#define LIAR_GUARDIAN_OF_INCLUSION_FREQUENCY_H
 
 #include "textures_common.h"
-#include "mix_2.h"
-#include <lass/util/dictionary.h>
+#include "../kernel/texture.h"
 
 namespace liar
 {
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL CheckerBoard: public Mix2
+class LIAR_TEXTURES_DLL Frequency: public Texture
 {
-	PY_HEADER(Mix2)
+	PY_HEADER(Texture)
 public:
 
-	CheckerBoard(const TTexturePtr& a, const TTexturePtr& b);
-
-	const std::string antiAliasing() const;
-	void setAntiAliasing(const std::string& mode);
-
-	const TVector2D& split() const;
-	void setSplit(const TVector2D& split);
-
-	static void setDefaultAntiAliasing(const std::string& mode);
+	Frequency();
 
 private:
-
-	enum AntiAliasing
-	{
-		aaNone = 0,
-		aaBilinear,
-		numAntiAliasing
-	};
-
-	typedef util::Dictionary<std::string, AntiAliasing> TAntiAliasingDictionary;
 
 	const XYZ doLookUp(const Sample& sample, 
 		const IntersectionContext& context) const;
 
-	const TPyObjectPtr doGetMixState() const;
-	void doSetMixState(const TPyObjectPtr& state);
-
-	const TScalar integrate(const TVector2D& min, const TVector2D& max) const;
-
-	static TAntiAliasingDictionary makeAntiAliasingDictionary();
-
-	TVector2D split_;
-	AntiAliasing antiAliasing_;
-
-	static TAntiAliasingDictionary antiAliasingDictionary_;
-	static AntiAliasing defaultAntiAliasing_;
+	const TPyObjectPtr doGetState() const;
+	void doSetState(const TPyObjectPtr& state);
 };
 
 }

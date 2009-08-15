@@ -87,7 +87,7 @@ private:
 	};
 	typedef util::Dictionary<std::string, MipMapping> TMipMappingDictionary;
 
-	typedef TVector3D TPixel;
+	typedef XYZ TPixel;
 	typedef util::SharedPtr<TPixel, util::ArrayStorage> TPixels;
 
 	class MipMapLevel
@@ -118,7 +118,7 @@ private:
 	};		
 	typedef std::vector<MipMapLevel> TMipMaps;
 
-	const Spectrum doLookUp(const Sample& sample, 
+	const XYZ doLookUp(const Sample& sample, 
 		const IntersectionContext& context) const;
 
 	const TPyObjectPtr doGetState() const;

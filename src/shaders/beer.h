@@ -43,16 +43,16 @@ class LIAR_SHADERS_DLL Beer: public Medium
 public:
 
 	Beer();
-	Beer(const Spectrum& transparency);
+	Beer(const XYZ& transparency);
 
-	const Spectrum& transparency() const;
-	void setTransparency(const Spectrum& transparency);
+	const XYZ& transparency() const;
+	void setTransparency(const XYZ& transparency);
 
 private:
 
-	const Spectrum doTransparency(const BoundedRay& ray) const;
+	const XYZ doTransparency(const BoundedRay& ray) const;
 
-	Spectrum transparency_;
+	XYZ transparency_;
 };
 
 }

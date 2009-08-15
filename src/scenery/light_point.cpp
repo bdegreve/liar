@@ -32,7 +32,7 @@ namespace scenery
 
 PY_DECLARE_CLASS_DOC(LightPoint, "point light")
 PY_CLASS_CONSTRUCTOR_0(LightPoint)
-PY_CLASS_CONSTRUCTOR_2(LightPoint, const TPoint3D&, const Spectrum&)
+PY_CLASS_CONSTRUCTOR_2(LightPoint, const TPoint3D&, const XYZ&)
 PY_CLASS_MEMBER_RW(LightPoint, position, setPosition)
 PY_CLASS_MEMBER_RW(LightPoint, intensity, setIntensity)
 PY_CLASS_MEMBER_RW(LightPoint, attenuation, setAttenuation)
@@ -42,14 +42,14 @@ PY_CLASS_MEMBER_RW(LightPoint, attenuation, setAttenuation)
 
 LightPoint::LightPoint():
 	position_(TPoint3D()),
-	intensity_(Spectrum(1)),
+	intensity_(XYZ(1, 1, 1)),
 	attenuation_(Attenuation::defaultAttenuation())
 {
 }
 
 
 
-LightPoint::LightPoint(const TPoint3D& iPosition, const Spectrum& iIntensity):
+LightPoint::LightPoint(const TPoint3D& iPosition, const XYZ& iIntensity):
     position_(iPosition),
 	intensity_(iIntensity),
 	attenuation_(Attenuation::defaultAttenuation())
@@ -65,7 +65,7 @@ const TPoint3D& LightPoint::position() const
 
 
 
-const Spectrum& LightPoint::intensity() const
+const XYZ& LightPoint::intensity() const
 {
 	return intensity_;
 }
@@ -86,7 +86,7 @@ void LightPoint::setPosition(const TPoint3D& iPosition)
 
 
 
-void LightPoint::setIntensity(const Spectrum& iIntensity)
+void LightPoint::setIntensity(const XYZ& iIntensity)
 {
 	intensity_ = iIntensity;
 }
@@ -153,16 +153,16 @@ const TScalar LightPoint::doArea() const
 
 
 
-const Spectrum LightPoint::doEmission(
+const XYZ LightPoint::doEmission(
 		const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	shadowRay = ray;
 	pdf = 0;
-	return Spectrum();
+	return XYZ();
 }
 
 
-const Spectrum LightPoint::doSampleEmission(
+const XYZ LightPoint::doSampleEmission(
 		const Sample& sample, const TPoint2D& lightSample, 
 		const TPoint3D& target,	const TVector3D& targetNormal,
 		BoundedRay& shadowRay, TScalar& pdf) const
@@ -181,7 +181,7 @@ const Spectrum LightPoint::doSampleEmission(
 
 
 
-const Spectrum LightPoint::doSampleEmission(
+const XYZ LightPoint::doSampleEmission(
 		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
 		const TAabb3D& sceneBound, BoundedRay& emissionRay, TScalar& pdf) const
 {
@@ -192,7 +192,7 @@ const Spectrum LightPoint::doSampleEmission(
 
 
 
-const Spectrum LightPoint::doTotalPower(const TAabb3D& sceneBound) const
+const XYZ LightPoint::doTotalPower(const TAabb3D& sceneBound) const
 {
 	return (4 * TNumTraits::pi) * intensity_;
 }

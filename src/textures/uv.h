@@ -46,7 +46,7 @@ public:
 
 private:
 
-	const Spectrum doLookUp(const Sample& sample, 
+	const XYZ doLookUp(const Sample& sample, 
 		const IntersectionContext& context) const;
 
 	const TPyObjectPtr doGetMixState() const;

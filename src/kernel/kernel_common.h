@@ -77,6 +77,7 @@ using namespace lass;
 typedef LIAR_SCALAR TScalar;
 typedef LIAR_TIME TTime;
 typedef LIAR_TIME_DELTA TTimeDelta;
+typedef TScalar TFrequency;
 
 typedef num::NumTraits<TScalar> TNumTraits;
 
@@ -87,8 +88,6 @@ typedef prim::Point3D<TScalar> TPoint3D;
 typedef prim::Ray3D<TScalar, prim::Normalized, prim::Unbounded> TRay3D;
 typedef prim::Aabb3D<TScalar> TAabb3D;
 typedef prim::Transformation3D<TScalar> TTransformation3D;
-
-typedef prim::Vector3D<float> TXYZ;
 
 typedef prim::Vector2D<size_t> TResolution2D;
 typedef prim::Aabb2D<size_t> TRange2D;

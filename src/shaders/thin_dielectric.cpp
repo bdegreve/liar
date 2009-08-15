@@ -160,9 +160,9 @@ void ThinDielectric::doSampleBsdf(
 		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
 		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
 {
-	TScalar ior1 = outerRefractionIndex_->lookUp(sample, context).average();
-	TScalar ior2 = innerRefractionIndex_->lookUp(sample, context).average();
-	const Spectrum transparency = clamp(transparency_->lookUp(sample, context), TNumTraits::zero, TNumTraits::one);
+	TScalar ior1 = average(outerRefractionIndex_->lookUp(sample, context));
+	TScalar ior2 = average(innerRefractionIndex_->lookUp(sample, context));
+	const XYZ transparency = clamp(transparency_->lookUp(sample, context), TNumTraits::zero, TNumTraits::one);
 
 	if (ior1 <= 0)
 	{
@@ -182,8 +182,8 @@ void ThinDielectric::doSampleBsdf(
 	const TScalar cosI = omegaIn.z;
 	LASS_ASSERT(cosI > 0);
 	const TScalar sinT2 = num::sqr(ior) * (1 - num::sqr(cosI));
-	Spectrum R(TNumTraits::one);
-	Spectrum T(TNumTraits::zero);
+	XYZ R(TNumTraits::one);
+	XYZ T(TNumTraits::zero);
 	if (sinT2 < 1)
 	{
 		const TScalar cosT = num::sqrt(1 - sinT2);
@@ -192,7 +192,7 @@ void ThinDielectric::doSampleBsdf(
 		const TScalar rPar = (ior2 * cosI - ior1 * cosT) / (ior2 * cosI + ior1 * cosT);
 		const TScalar r = (num::sqr(rOrth) + num::sqr(rPar)) / 2;
 		LASS_ASSERT(r < 1);
-		const Spectrum t = pow(transparency, num::inv(cosT));
+		const XYZ t = pow(transparency, num::inv(cosT));
 		
 		R = r * (1 + sqr((1 - r) * t) / (1 - sqr(r * t)));
 		R = clamp(R, TNumTraits::zero, TNumTraits::one);
@@ -204,8 +204,8 @@ void ThinDielectric::doSampleBsdf(
 	{
 		LASS_COUT << "uhoh: cosI=" << cosI << ", sinT2=" << sinT2 << ", ior=" << ior << "\n";
 	}
-	const TScalar r = R.average();
-	const TScalar t = T.average();
+	const TScalar r = average(R);
+	const TScalar t = average(T);
 
 	while (first != last)
 	{

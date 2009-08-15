@@ -78,7 +78,7 @@ void Lambert::doBsdf(
 		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
 {
 	LASS_ASSERT(omegaIn.z > 0);
-	const Spectrum diffuseOverPi = diffuse_->lookUp(sample, context) / TNumTraits::pi;
+	const XYZ diffuseOverPi = diffuse_->lookUp(sample, context) / TNumTraits::pi;
 	while (first != last)
 	{
 		const TScalar cosTheta = first->omegaOut.z;
@@ -98,7 +98,7 @@ void Lambert::doSampleBsdf(
 		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
 {
 	LASS_ASSERT(omegaIn.z > 0);
-	const Spectrum diffuseOverPi = diffuse_->lookUp(sample, context) / TNumTraits::pi;
+	const XYZ diffuseOverPi = diffuse_->lookUp(sample, context) / TNumTraits::pi;
 	while (first != last)
 	{
 		if (testCaps(first->allowedCaps, caps()))

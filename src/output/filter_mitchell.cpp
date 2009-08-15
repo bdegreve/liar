@@ -111,7 +111,7 @@ void FilterMitchell::doWriteRender(const OutputSample* first, const OutputSample
 	OutputSample* output = begin;
 	while (first != last)
 	{
-		const Spectrum radiance = first->radiance();
+		const XYZ radiance = first->radiance();
 		const TScalar alpha = first->alpha();
 
 		const TVector2D p = res * first->screenCoordinate().position();

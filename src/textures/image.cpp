@@ -113,7 +113,7 @@ void Image::loadFile(const std::string& filename, const TRgbSpacePtr& rgbSpace)
 {
 	ImageReader reader(filename, rgbSpace, "");
 	TResolution2D resolution = reader.resolution();
-	TPixels image(new TVector3D[resolution.x * resolution.y]);
+	TPixels image(new TPixel[resolution.x * resolution.y]);
 	reader.read(TResolution2D(), resolution, image.get(), 0);
 
 	filename_ = filename;
@@ -180,7 +180,7 @@ void Image::setDefaultMipMapping(const std::string& mode)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum Image::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const XYZ Image::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	if (mipMapping_ != currentMipMapping_)
 	{
@@ -241,7 +241,7 @@ const Spectrum Image::doLookUp(const Sample& sample, const IntersectionContext& 
 		LASS_ASSERT_UNREACHABLE;
 	}
 
-	return xyz(result);
+	return result;
 }
 
 

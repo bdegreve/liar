@@ -65,7 +65,7 @@ public:
 
 private:
 
-	typedef std::vector<TVector3D> TRenderBuffer;
+	typedef std::vector<XYZ> TRenderBuffer;
 	typedef std::vector<TScalar> TWeightBuffer;
 
 	const TResolution2D doResolution() const;
