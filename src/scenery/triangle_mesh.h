@@ -46,7 +46,7 @@ class LIAR_SCENERY_DLL TriangleMesh: public SceneObject
     PY_HEADER(SceneObject)
 public:
 
-	typedef prim::TriangleMesh3D<TScalar, spat::AabpTree, spat::DefaultSplitHeuristics<4> > TMesh;
+	typedef prim::TriangleMesh3D<TScalar, spat::AabbTree, spat::DefaultSplitHeuristics<4> > TMesh;
 	typedef std::vector<TMesh::TPoint> TVertices;
 	typedef std::vector<TMesh::TVector> TNormals;
 	typedef std::vector<TMesh::TUv> TUvs;
@@ -60,6 +60,11 @@ public:
 	void loopSubdivision(unsigned level);
 	void autoSew();
 	void autoCrease(unsigned level);
+
+	const TVertices& vertices() const;
+	const TNormals& normals() const;
+	const TUvs& uvs() const;
+	const TIndexTriangles triangles() const;
 
 private:
 

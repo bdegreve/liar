@@ -123,7 +123,7 @@ typedef std::map<std::string, TImageCodecPtr> TImageCodecMap;
 LIAR_KERNEL_DLL TImageCodecMap& LASS_CALL imageCodecs();
 LIAR_KERNEL_DLL const TImageCodecPtr& LASS_CALL imageCodec(const std::string& extension);
 
-
+LIAR_KERNEL_DLL void transcodeImage(const std::string& source, const std::string& dest, const TRgbSpacePtr& destSpace);
 
 class LIAR_KERNEL_DLL ImageReader: util::NonCopyable
 {
@@ -131,8 +131,8 @@ public:
 
 	typedef ImageCodec::TLevel TLevel;
 
-	ImageReader(const std::string& filename, const TRgbSpacePtr& rgbSpace, 
-		const std::string& options);
+	ImageReader(const std::string& filename, const TRgbSpacePtr& rgbSpace = TRgbSpacePtr(), 
+		const std::string& options = "");
 	~ImageReader();
 
 	const ImageCodec::LevelMode levelMode() const { return codec_->levelMode(handle_); }
@@ -169,7 +169,7 @@ public:
 	typedef ImageCodec::TLevel TLevel;
 
 	ImageWriter(const std::string& filename, ImageCodec::LevelMode levelMode, 
-		const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string& options);
+		const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace = TRgbSpacePtr(), const std::string& options = "");
 	~ImageWriter();
 
 	const ImageCodec::LevelMode levelMode() const { return codec_->levelMode(handle_); }
@@ -202,6 +202,10 @@ private:
 
 class LIAR_KERNEL_DLL ImageCodecLassCommon: public ImageCodec
 {
+public:
+	ImageCodecLassCommon(const TRgbSpacePtr& defaultSpace = TRgbSpacePtr());
+protected:
+	TRgbSpacePtr selectRgbSpace(const TRgbSpacePtr& defaultCodecSpace = TRgbSpacePtr()) const;
 private:
 	virtual const TImageHandle doCreate(const std::string& filename, LevelMode levelMode, 
 		const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string& options) const;
@@ -213,6 +217,8 @@ private:
 	virtual const TLevel doLevels(TImageHandle handle) const;
 	virtual const TResolution2D doResolution(TImageHandle handle, const TLevel& level) const;
 	virtual const TRgbSpacePtr doRgbSpace(TImageHandle handle) const;
+
+	TRgbSpacePtr defaultCodecSpace_;
 };
 
 
@@ -220,6 +226,8 @@ private:
 class LIAR_KERNEL_DLL ImageCodecLassLDR: public ImageCodecLassCommon
 {
 	PY_HEADER(ImageCodec)
+public:
+	ImageCodecLassLDR(const TRgbSpacePtr& defaultSpace = TRgbSpacePtr());
 private:
 	virtual void doRead(TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 
 		const TResolution2D& end, XYZ* xyz, TScalar* alpha) const;	
@@ -232,6 +240,8 @@ private:
 class LIAR_KERNEL_DLL ImageCodecLassHDR: public ImageCodecLassCommon
 {
 	PY_HEADER(ImageCodec)
+public:
+	ImageCodecLassHDR(const TRgbSpacePtr& defaultSpace = TRgbSpacePtr());
 private:
 	virtual void doRead(TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 
 		const TResolution2D& end, XYZ* xyz, TScalar* alpha) const;	

@@ -340,7 +340,7 @@ void Image::makeMipMaps(MipMapping mode) const
 
 
 Image::MipMapLevel Image::makeMipMap(
-		const MipMapLevel& parent, prim::XY compressionAxis, unsigned newSize) const
+		const MipMapLevel& parent, prim::XY compressionAxis, size_t newSize) const
 {
 	if (2 * newSize == parent.resolution()[compressionAxis])
 	{
@@ -355,7 +355,7 @@ Image::MipMapLevel Image::makeMipMap(
 
 
 Image::MipMapLevel Image::makeMipMapEven(
-		const MipMapLevel& parent, prim::XY compressionAxis, unsigned newSize) const
+		const MipMapLevel& parent, prim::XY compressionAxis, size_t newSize) const
 {
 	TResolution2D resolution = parent.resolution();
 	resolution[compressionAxis] = newSize;
@@ -393,10 +393,10 @@ Image::MipMapLevel Image::makeMipMapEven(
 }
 
 Image::MipMapLevel Image::makeMipMapOdd(
-		const MipMapLevel& parent, prim::XY compressionAxis, unsigned newSize) const
+		const MipMapLevel& parent, prim::XY compressionAxis, size_t newSize) const
 {
 	TResolution2D resolution = parent.resolution();
-	const unsigned oldSize = resolution[compressionAxis];
+	const size_t oldSize = resolution[compressionAxis];
 	LASS_ASSERT(2 * newSize + 1 == oldSize);
 	resolution[compressionAxis] = newSize;
 

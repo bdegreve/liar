@@ -125,9 +125,9 @@ private:
 	void doSetState(const TPyObjectPtr& state);
 
 	void makeMipMaps(MipMapping mode) const;
-	MipMapLevel makeMipMap(const MipMapLevel& parent, prim::XY compressionAxis, unsigned newSize) const;
-	MipMapLevel makeMipMapEven(const MipMapLevel& parent, prim::XY compressionAxis, unsigned newSize) const;
-	MipMapLevel makeMipMapOdd(const MipMapLevel& parent, prim::XY compressionAxis, unsigned newSize) const;
+	MipMapLevel makeMipMap(const MipMapLevel& parent, prim::XY compressionAxis, size_t newSize) const;
+	MipMapLevel makeMipMapEven(const MipMapLevel& parent, prim::XY compressionAxis, size_t newSize) const;
+	MipMapLevel makeMipMapOdd(const MipMapLevel& parent, prim::XY compressionAxis, size_t newSize) const;
 
 	void mipMapLevel(TScalar width, unsigned numLevels, 
 		unsigned& level0, unsigned& level1, TScalar& dLevel) const;

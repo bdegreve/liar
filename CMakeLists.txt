@@ -2,9 +2,11 @@ project(liar)
 cmake_minimum_required(VERSION 2.6)
 
 set(CMAKE_DEBUG_POSTFIX _d)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${liar_BINARY_DIR}/bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${liar_BINARY_DIR}/bin")
 
 find_package(lass REQUIRED)
-include_directories(${lass_INCLUDE_DIRS})
+include_directories(${Lass_INCLUDE_DIRS})
 foreach(_config RELEASE DEBUG MINSIZEREL RELWITHDEBINFO)
 	get_target_property(_location lass IMPORTED_LOCATION_${_config})
 	install(
@@ -29,6 +31,15 @@ if (CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_DEBUG)
 		DESTINATION .
 		)
 endif()
+
+if (Lass_PYTHON_EXECUTABLE AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+	execute_process(
+		COMMAND "${Lass_PYTHON_EXECUTABLE}" -c "from distutils import sysconfig; print sysconfig.get_python_lib(True)" 
+		OUTPUT_VARIABLE _python_site_packages
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+	set (CMAKE_INSTALL_PREFIX "${_python_site_packages}/liar" CACHE PATH "liar install prefix" FORCE)
+endif ()
 
 macro(list_remove_regex listvar regex)
 	set(_to_be_removed)

@@ -28,6 +28,7 @@
 #include "display.h"
 #include <lass/util/callback_0.h>
 #include <lass/util/thread_fun.h>
+#include <lass/num/num_cast.h>
 
 namespace liar
 {
@@ -143,6 +144,7 @@ void Display::setToneMapping(const std::string& toneMapping)
 	{
 		toneMapping_ = toneMappingDictionary_[stde::tolower(toneMapping)];
 		renderDirtyBox_ = allTimeDirtyBox_;
+		refreshTitle_ = true;
 	}
 }
 
@@ -190,15 +192,15 @@ void Display::setAutoExposure(bool enable)
 		{
 			const TDirtyBox::TPoint min = allTimeDirtyBox_.min();
 			const TDirtyBox::TPoint max = allTimeDirtyBox_.max();
-			const unsigned nx = max.x - min.x + 1;
+			const size_t nx = max.x - min.x + 1;
 			const TScalar minY = 1e-10f;
 			totalLogSceneLuminance_ = 0;
 			sceneLuminanceCoverage_ = 0;
-			for (unsigned j = min.y; j <= max.y; ++j)
+			for (size_t j = min.y; j <= max.y; ++j)
 			{
-				const unsigned kBegin = j * resolution_.x + min.x;
-				const unsigned kEnd = kBegin + nx;
-				for (unsigned k = kBegin; k < kEnd; ++k)
+				const size_t kBegin = j * resolution_.x + min.x;
+				const size_t kEnd = kBegin + nx;
+				for (size_t k = kBegin; k < kEnd; ++k)
 				{
 					const TScalar w = totalWeight_[k];
 					if (w > 0)
@@ -310,7 +312,7 @@ void Display::doBeginRender()
 {
 	LASS_LOCK(renderBufferLock_)
 	{
-		const unsigned n = resolution_.x * resolution_.y;
+		const size_t n = resolution_.x * resolution_.y;
 		renderBuffer_.clear();
 		renderBuffer_.resize(n);
 		displayBuffer_.clear();
@@ -485,9 +487,9 @@ const std::string Display::makeTitle() const
 void Display::displayLoop()
 {
 	PixelToaster::Display display;
- 	LASS_ENFORCE(display.open(
-		makeTitle().c_str(), resolution_.x, resolution_.y, 
-		PixelToaster::Output::Windowed,	PixelToaster::Mode::FloatingPoint));
+	const int width = num::numCast<int>(resolution_.x);
+	const int height = num::numCast<int>(resolution_.y);
+ 	LASS_ENFORCE(display.open(makeTitle().c_str(), width, height, PixelToaster::Output::Windowed,	PixelToaster::Mode::FloatingPoint));
 	display.listener(this);
 
 	LASS_ENFORCE(display.update(displayBuffer_)); // full update of initial buffer
@@ -506,10 +508,10 @@ void Display::displayLoop()
 		PixelToaster::Rectangle box;
 		if (!displayDirtyBox_.isEmpty())
 		{
-			box.xBegin = displayDirtyBox_.min().x;
-			box.yBegin = displayDirtyBox_.min().y;
-			box.xEnd = displayDirtyBox_.max().x + 1;
-			box.yEnd = displayDirtyBox_.max().y + 1;
+			box.xBegin = num::numCast<int>(displayDirtyBox_.min().x);
+			box.yBegin = num::numCast<int>(displayDirtyBox_.min().y);
+			box.xEnd = num::numCast<int>(displayDirtyBox_.max().x + 1);
+			box.yEnd = num::numCast<int>(displayDirtyBox_.max().y + 1);
 		}
 		LASS_ENFORCE(display.update(displayBuffer_, &box));
 		displayDirtyBox_.clear();
@@ -563,16 +565,16 @@ void Display::copyToDisplayBuffer()
 
 		const TDirtyBox::TPoint min = renderDirtyBox_.min();
 		const TDirtyBox::TPoint max = renderDirtyBox_.max();
-		const unsigned nx = max.x - min.x + 1;
+		const size_t nx = max.x - min.x + 1;
 
 		switch (toneMapping_)
 		{
 		case tmLinear:
-			for (unsigned j = min.y; j <= max.y; ++j)
+			for (size_t j = min.y; j <= max.y; ++j)
 			{
-				const unsigned kBegin = j * resolution_.x + min.x;
-				const unsigned kEnd = kBegin + nx;
-				for (unsigned k = kBegin; k < kEnd; ++k)
+				const size_t kBegin = j * resolution_.x + min.x;
+				const size_t kEnd = kBegin + nx;
+				for (size_t k = kBegin; k < kEnd; ++k)
 				{
 					const TScalar w = totalWeight_[k];
 					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
@@ -587,11 +589,11 @@ void Display::copyToDisplayBuffer()
 			break;
 
 		case tmCompressY:
-			for (unsigned j = min.y; j <= max.y; ++j)
+			for (size_t j = min.y; j <= max.y; ++j)
 			{
-				const unsigned kBegin = j * resolution_.x + min.x;
-				const unsigned kEnd = kBegin + nx;
-				for (unsigned k = kBegin; k < kEnd; ++k)
+				const size_t kBegin = j * resolution_.x + min.x;
+				const size_t kEnd = kBegin + nx;
+				for (size_t k = kBegin; k < kEnd; ++k)
 				{
 					const TScalar w = totalWeight_[k];
 					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
@@ -607,11 +609,11 @@ void Display::copyToDisplayBuffer()
 			break;
 
 		case tmExponentialY:
-			for (unsigned j = min.y; j <= max.y; ++j)
+			for (size_t j = min.y; j <= max.y; ++j)
 			{
-				const unsigned kBegin = j * resolution_.x + min.x;
-				const unsigned kEnd = kBegin + nx;
-				for (unsigned k = kBegin; k < kEnd; ++k)
+				const size_t kBegin = j * resolution_.x + min.x;
+				const size_t kEnd = kBegin + nx;
+				for (size_t k = kBegin; k < kEnd; ++k)
 				{
 					const TScalar w = totalWeight_[k];
 					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
@@ -627,11 +629,11 @@ void Display::copyToDisplayBuffer()
 			break;
 
 		case tmExponentialXYZ:
-			for (unsigned j = min.y; j <= max.y; ++j)
+			for (size_t j = min.y; j <= max.y; ++j)
 			{
-				const unsigned kBegin = j * resolution_.x + min.x;
-				const unsigned kEnd = kBegin + nx;
-				for (unsigned k = kBegin; k < kEnd; ++k)
+				const size_t kBegin = j * resolution_.x + min.x;
+				const size_t kEnd = kBegin + nx;
+				for (size_t k = kBegin; k < kEnd; ++k)
 				{
 					const TScalar w = totalWeight_[k];
 					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;

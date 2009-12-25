@@ -46,6 +46,11 @@ PY_CLASS_METHOD(TriangleMesh, loopSubdivision)
 PY_CLASS_METHOD(TriangleMesh, autoSew) 
 PY_CLASS_METHOD(TriangleMesh, autoCrease) 
 
+PY_CLASS_METHOD(TriangleMesh, vertices)
+PY_CLASS_METHOD(TriangleMesh, normals)
+PY_CLASS_METHOD(TriangleMesh, uvs)
+PY_CLASS_METHOD(TriangleMesh, triangles)
+
 // --- public --------------------------------------------------------------------------------------
 
 TriangleMesh::TriangleMesh(const TVertices& iVertices, const TNormals& iNormals,
@@ -88,6 +93,37 @@ void TriangleMesh::autoCrease(unsigned level)
 {
 	mesh_.autoCrease(level);
 }
+
+
+
+const TriangleMesh::TVertices& TriangleMesh::vertices() const
+{
+	return mesh_.vertices();
+}
+
+
+
+const TriangleMesh::TNormals& TriangleMesh::normals() const
+{
+	return mesh_.normals();
+}
+
+
+
+const TriangleMesh::TUvs& TriangleMesh::uvs() const
+{
+	return mesh_.uvs();
+}
+
+
+
+const TriangleMesh::TIndexTriangles TriangleMesh::triangles() const
+{
+	TIndexTriangles triangles;
+	mesh_.indexTriangles(std::back_inserter(triangles));
+	return triangles;
+}
+
 
 
 // --- protected -----------------------------------------------------------------------------------

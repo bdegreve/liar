@@ -145,8 +145,8 @@ const TVector3D IntersectionContext::flipTo(const TVector3D& worldOmega)
 	normal_ = -normal_;
 	dNormal_dU_ = -dNormal_dU_;
 	dNormal_dV_ = -dNormal_dV_;
-	//shaderToWorld_ = prim::concatenate(TTransformation3D::scaler(TVector3D(1, 1, -1)), shaderToWorld_);
-	shaderToWorld_ = prim::concatenate(shaderToWorld_, TTransformation3D::scaler(TVector3D(1, 1, -1)));
+	shaderToWorld_ = prim::concatenate(TTransformation3D::scaler(TVector3D(1, 1, -1)), shaderToWorld_);
+	//shaderToWorld_ = prim::concatenate(shaderToWorld_, TTransformation3D::scaler(TVector3D(1, 1, -1)));
 	return -worldNormal;
 }
 

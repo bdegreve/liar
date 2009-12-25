@@ -22,10 +22,11 @@ import liar.shaders
 import liar.textures
 import math
 
-def load(filename):
-	return decode(file(filename), filename)
+def load(filename, *args, **kwargs):
+	return decode(open(filename), filename, *args, **kwargs)
 
-def decode(lines, filename = ""):
+def decode(lines, filename="", material=liar.shaders.AshikhminShirley, initial_materials=None):
+	from liar.tools import geometry
 	vertices = []
 	normals = []
 	uvs = []
@@ -33,7 +34,9 @@ def decode(lines, filename = ""):
 	faces = []
 	numFaces = 0
 	groups = []
-	materials = {'': liar.shaders.Lambert(liar.textures.Constant(liar.rgb(1, 1, 1)))}
+	materials = (initial_materials or {}).copy()
+	if not '' in materials:
+		materials[''] = liar.shaders.Lambert(liar.textures.Constant(liar.rgb(1, 1, 1)))
 	currentMaterial = materials['']
 	
 	def _int_or_none(x):
@@ -54,14 +57,21 @@ def decode(lines, filename = ""):
 			return n
 		return tuple([x / norm for x in n])
 		
-	def _loadMaterials(filename):
+	def _loadMaterials(filename, materials):
 		currentMaterial = None
-		materials = {}
-		for line in file(filename):
+		for line in open(filename):
 			def _enforceFields(iSuccess):
-				if not iSuccess:
-					raise "material libary %s has syntax error: %s" % (filename, line)
-				
+				assert iSuccess, "material libary %s has syntax error: %s" % (filename, line)
+			def _setSpecularPower(material, texture):
+				try:
+					material.specularPower = texture
+				except AttributeError:
+					try:
+						material.specularPowerU = texture
+						material.specularPowerV = texture
+					except AttributeError:
+						pass
+						
 			fields = line.split()
 			if len(fields) > 0:
 				command, fields = fields[0], fields[1:]
@@ -71,33 +81,53 @@ def decode(lines, filename = ""):
 						name = fields[0]
 					except:
 						name = ''
-					currentMaterial = liar.shaders.Simple()
-					materials[name] = currentMaterial
+					if not name in materials:
+						currentMaterial = material()
+						materials[name] = currentMaterial
+					else:
+						currentMaterial = None # respect the one that's already there ...
 				elif command == 'Kd':
 					_enforceFields(len(fields) == 3)
-					currentMaterial.diffuse = liar.textures.Constant(liar.rgb(_floatTuple(fields)))
+					if currentMaterial:
+						try:
+							currentMaterial.diffuse = liar.textures.Constant(liar.rgb(_floatTuple(fields)))
+						except AttributeError:
+							pass
 				elif command == 'Ks':
 					_enforceFields(len(fields) == 3)
-					currentMaterial.specular = liar.textures.Constant(liar.rgb(_floatTuple(fields)))
+					if currentMaterial:
+						try:
+							currentMaterial.specular = liar.textures.Constant(liar.rgb(_floatTuple(fields)))
+						except AttributeError:
+							pass
 				elif command == 'Ka':
 					_enforceFields(len(fields) == 3)
 					pass
 				elif command == 'Ns':
 					_enforceFields(len(fields) == 1)
-					currentMaterial.specularPower = liar.textures.Constant(float(fields[0]))
+					if currentMaterial:
+						_setSpecularPower(currentMaterial, liar.textures.Constant(float(fields[0])))
 				elif command == 'map_Kd':
 					_enforceFields(len(fields) == 1)
-					currentMaterial.diffuse = liar.textures.Image(fields[0])
+					if currentMaterial:
+						try:
+							currentMaterial.diffuse = liar.textures.Image(fields[0])
+						except AttributeError:
+							pass				
 				elif command == 'map_Ks':
 					_enforceFields(len(fields) == 1)
-					currentMaterial.specular = liar.textures.Image(fields[0])
+					if currentMaterial:
+						try:
+							currentMaterial.specular = liar.textures.Image(fields[0])
+						except AttributeError:
+							pass
 				elif command == 'map_Ka':
 					_enforceFields(len(fields) == 1)
 					pass
 				elif command == 'map_Ns':
 					_enforceFields(len(fields) == 1)
-					currentMaterial.specularPower = liar.textures.Image(fields[0])
-		return materials
+					if currentMaterial:
+						_setSpecularPower(currentMaterial = liar.textures.Image(fields[0]))
 	
 	def _makeGroup(vertices, normals, uvs, faces, material):
 		components = (vertices, normals, uvs)
@@ -115,7 +145,7 @@ def decode(lines, filename = ""):
 		# build new (compressed) lists of vertices, uvs and normals
 		sorted_components = [sorted(zip(UCs.values(), UCs.keys())) for UCs in used_components]
 		compressed_components = [[Cs[j] for i, j in SCs] for Cs, SCs in zip(components, sorted_components)]
-						
+		
 		# replace old indices by new ones
 		for UCs in used_components:
 			UCs[None] = None
@@ -125,15 +155,19 @@ def decode(lines, filename = ""):
 		group.shader = material
 		return group
 			
-	print "loading Wavefront OBJ file %s ..." % filename
+	print ("loading Wavefront OBJ file %s ..." % filename)
 	
 	for line in lines:
+		
+		# python 3.0 compatibility:
+		if not isinstance(line, str):
+			line = line.decode()
+		
 		fields = line.split()
 		if len(fields) > 0:
 			
 			def _enforceFields(iSuccess):
-				if not iSuccess:
-					raise "obj file %s has syntax error: %s" % (filename, line)
+				assert iSuccess, "obj file %s has syntax error: %s" % (filename, line)
 			
 			command = fields[0]
 			fields = fields[1:]
@@ -143,7 +177,7 @@ def decode(lines, filename = ""):
 			if command == 'mtllib':
 				_enforceFields(len(fields) > 0)
 				for mtl in fields:
-					materials.update(_loadMaterials(mtl))
+					_loadMaterials(mtl, materials)
 			
 			elif command == 'usemtl':
 				_enforceFields(len(fields) < 2)
@@ -152,7 +186,7 @@ def decode(lines, filename = ""):
 				except:
 					name = ''
 				if name not in materials.keys():
-					print "obj file %s uses unknown material '%s', using default instead: %s" % (filename, name, line)
+					print ("obj file %s uses unknown material '%s', using default instead: %s" % (filename, name, line))
 					name = ''
 				currentMaterial = materials[name]
 			
@@ -171,8 +205,8 @@ def decode(lines, filename = ""):
 				normals.append(_normalize(_floatTuple(fields)))
 			
 			elif command == 'vt':
-				_enforceFields(len(fields) == 2)
-				uvs.append(_floatTuple(fields))
+				_enforceFields(len(fields) == 2 or len(fields) == 3)
+				uvs.append(_floatTuple(fields)[:2])
 			
 			elif command == 'f':
 				_enforceFields(len(fields) >= 3)
@@ -188,14 +222,14 @@ def decode(lines, filename = ""):
 							elif vertex[k] < 0:
 								vertex[k] += len(vectors[k])
 							else:
-								raise "obj file %s has 0 index on line: %s" % (filename, line)
+								raise AssertionError("obj file %s has 0 index on line: %s" % (filename, line))
 				
 				# reformat vertex data to (v, vn, vt) and make sure its of length 3 
 				# (use None to fill missing values)
 				size = len(face)
 				numNormals = 0
 				numUvs = 0
-				for i in xrange(size):
+				for i in range(size):
 					vertex = face[i]
 					v = vertex[0]
 					vt = None
@@ -220,17 +254,19 @@ def decode(lines, filename = ""):
 					#print "WARNING: either none or all face vertices must have uv coord, forcing to none"
 					face = [(v[0], v[1], None) for v in face]				
 					
-				# fan-triangulate and add.
-				for i in xrange(1, len(face) - 1):
-					faces.append((face[0], face[i], face[i + 1]))
+				try:
+					triangles = geometry.triangulate_3d(*[vertices[v[0]] for v in face])
+				except AssertionError, error:
+					raise AssertionError("failed to triangulate %(face)r: %(error)s" % vars())
+				faces += [(face[a], face[b], face[c]) for a, b, c in triangles]
 	
 	if len(faces) > 0:
 		numFaces += len(faces)
 		groups.append(_makeGroup(vertices, normals, uvs, faces, currentMaterial))
 		faces = []
 	
-	print "%s vertices, %s normals, %s uvs, %s faces" % (len(vertices), len(normals), len(uvs), numFaces)
+	print ("%s vertices, %s normals, %s uvs, %s faces" % (len(vertices), len(normals), len(uvs), numFaces))
 	
-	return groups
+	return groups, materials
 
 # EOF

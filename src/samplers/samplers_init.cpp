@@ -23,6 +23,7 @@
 
 #include "samplers_common.h"
 #include "stratifier.h"
+#include "latin_hypercube.h"
 #include "../kernel/sampler.h"
 #include <lass/io/proxy_man.h>
 
@@ -36,12 +37,13 @@ void setDefaultSampler(const liar::kernel::TSamplerPtr& defaultSampler)
 PY_DECLARE_MODULE_DOC(samplers, "LiAR sample generators")
 
 PY_MODULE_CLASS(samplers, Stratifier)
+PY_MODULE_CLASS(samplers, LatinHypercube)
 
 PY_MODULE_FUNCTION(samplers, setDefaultSampler)
 
 void samplersPostInject(PyObject*)
 {
-	setDefaultSampler(liar::kernel::TSamplerPtr(new Stratifier));
+	setDefaultSampler(liar::kernel::TSamplerPtr(new LatinHypercube));
 	PyRun_SimpleString( "import sys" );
 	PyRun_SimpleString("sys.stdout.write('''liar.samplers imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n''')\n");
 }

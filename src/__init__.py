@@ -44,6 +44,6 @@ import liar.samplers
 import liar.shaders
 import liar.tracers
 import liar.textures
-#import liar.codecs
+import liar.codecs
 
 # EOF

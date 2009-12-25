@@ -90,7 +90,7 @@ const XYZ DirectLighting::doCastRay(
 	{
 		tIntersection = TNumTraits::infinity;
 		alpha = 0;
-		return XYZ();
+		return 0;
 	}
 	tIntersection = intersection.t();
 	alpha = 1;
@@ -121,6 +121,68 @@ const XYZ DirectLighting::doCastRay(
 
 	result += traceDirect(sample, context, target, targetNormal, omegaIn);
 
+	if (shader->hasCaps(Shader::capsSpecular) || shader->hasCaps(Shader::capsGlossy))
+	{
+		//*
+		if (shader->hasCaps(Shader::capsReflection) && shader->idReflectionSamples() != -1)
+		{
+			Sample::TSubSequence2D bsdfSample =
+				sample.subSequence2D(shader->idReflectionSamples());
+			const size_t n = generation == 0 ? bsdfSample.size() : 1;
+			std::vector<SampleBsdfIn, temp::custom_stl_allocator<SampleBsdfIn> > in(n);
+			std::vector<SampleBsdfOut, temp::custom_stl_allocator<SampleBsdfOut> > out(n);
+			for (size_t i = 0; i < n; ++i)
+			{
+				in[i].sample = bsdfSample[i];
+				in[i].allowedCaps = Shader::capsReflection | Shader::capsSpecular |
+					Shader::capsGlossy;
+			}
+			shader->sampleBsdf(sample, context, omegaIn, &in[0], &in[0] + n, &out[0]);
+
+			const TPoint3D beginCentral = target + 2 * tolerance * targetNormal;
+			const TPoint3D beginI = beginCentral + context.dPoint_dI();
+			const TPoint3D beginJ = beginCentral + context.dPoint_dJ();
+
+			const TVector3D incident = primaryRay.centralRay().direction();
+			const TVector3D normal = context.normal();
+			const TScalar cosTheta = -dot(incident, normal);
+
+			const TVector3D dIncident_dI = primaryRay.differentialI().direction() - incident;
+			const TScalar dCosTheta_dI = -dot(dIncident_dI, normal) - 
+				dot(incident, context.dNormal_dI());
+			const TVector3D dReflected_dI = dIncident_dI + 
+				2 * (dCosTheta_dI * normal + cosTheta * context.dNormal_dI());
+
+			const TVector3D dIncident_dJ = primaryRay.differentialJ().direction() - incident;
+			const TScalar dCosTheta_dJ = -dot(dIncident_dJ, normal) - 
+				dot(incident, context.dNormal_dJ());
+			const TVector3D dReflected_dJ = dIncident_dJ +
+				2 * (dCosTheta_dJ * normal + cosTheta * context.dNormal_dJ());
+
+			for (size_t i = 0; i < n; ++i)
+			{
+				if (out[i].pdf > 0 && out[i].value)
+				{
+					LASS_ASSERT(out[i].omegaOut.z > 0);
+					const TVector3D directionCentral =
+						context.shaderToWorld(out[i].omegaOut);
+					LASS_ASSERT(dot(normal, directionCentral) > 0);
+					LASS_ASSERT(dot(normal, incident) < 0);
+					const TVector3D directionI = directionCentral + dReflected_dI;
+					const TVector3D directionJ = directionCentral + dReflected_dJ;
+
+					const DifferentialRay reflectedRay(
+						BoundedRay(beginCentral, directionCentral, tolerance),
+						TRay3D(beginI, directionI),
+						TRay3D(beginJ, directionJ));
+					TScalar t, a;
+					const XYZ reflected = castRay(sample, reflectedRay, t, a);
+					result += out[i].value * reflected * 
+						(a * num::abs(out[i].omegaOut.z) / (n * out[i].pdf));
+				}
+			}
+		}
+	}
 
 	return mediumTransparency * result;
 }

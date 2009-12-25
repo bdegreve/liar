@@ -234,7 +234,7 @@ private:
 			return (*object)->isIntersecting(*info->sample, ray);
 		}
 
-		static const bool objectOverlaps(TObjectIterator it, const TAabb& aabb)
+		static const bool objectIntersects(TObjectIterator it, const TAabb& aabb, const TInfo* /*info*/)
 		{
 			return objectAabb(it).intersects(aabb);
 		}

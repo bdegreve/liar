@@ -17,19 +17,19 @@
 #
 # http://liar.bramz.net/
 
-import os.path
+import liar.kernel
+import liar.tools.colors
 
-for filename in os.listdir(os.path.dirname(__file__)):
-	module, ext = os.path.splitext(filename)
-	if not ext in ('.py', '.so', '.pyd'):
-		continue
-	if module == '__init__' or module.startswith('lib'):
-		continue
-	if module.endswith('_d'):
-		module = module[:-2]
-	try:
-		__import__(module, globals(), locals(), [])
-	except ImportError:
-		print 'Failed to import "liar.codecs.%s"' % module
+def _setDefaultSpaceWrapper(cls, rgbSpace):
+	_oldDefaultSpace(cls, rgbSpace)
+	_makeColors()
+	
+def _makeColors():
+	colors = {
+		'RED': rgb(1, 0, 0)
+		}
+	liar.tools.colors.__dict__.update(colors)
 
-# EOF
+_oldDefaultSpace = liar.kernel.RgbSpace.setDefaultSpace
+liar.kernel.RgbSpace.setDefaultSpace = _setDefaultSpaceWrapper
+_makeColors()

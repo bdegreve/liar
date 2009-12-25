@@ -85,7 +85,7 @@ private:
 	typedef std::vector<XYZ> TRenderBuffer;
 	typedef std::vector<TScalar> TWeightBuffer;
 	typedef std::vector<PixelToaster::FloatingPointPixel> TDisplayBuffer;
-	typedef prim::Aabb2D<unsigned> TDirtyBox;
+	typedef prim::Aabb2D<size_t> TDirtyBox;
 
 	enum ToneMapping
 	{

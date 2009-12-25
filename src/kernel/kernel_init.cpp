@@ -90,21 +90,23 @@ using lass::util::setProcessPriority;
 PY_MODULE_FUNCTION_QUALIFIED_DOC_1(kernel, setProcessPriority, void, const std::string&,
 	"setProcessPriority('low' | 'belownormal' | 'normal' | 'abovenormal' | 'high')\n")
 
-/*
-using lass::prim::ColorRGBA;
+
 using liar::kernel::rgb;
-using liar::kernel::RgbSpace;
+using liar::kernel::XYZ;
+using lass::prim::ColorRGBA;
 using liar::kernel::TRgbSpacePtr;
 PY_MODULE_FUNCTION_QUALIFIED_DOC_1(kernel, rgb, XYZ, const ColorRGBA&,
 	"rgb({<R>, <G>, <B>} | <(R, G, B)>} [, <RgbSpace>] [, <SpectrumFormat>]\n"
 	"Create an XYZ from RGB color value\n");
 PY_MODULE_FUNCTION_QUALIFIED_2(kernel, rgb, XYZ, const ColorRGBA&, const TRgbSpacePtr&)
-PY_MODULE_FUNCTION_QUALIFIED_3(kernel, rgb, XYZ, TScalar, TScalar, TScalar)
-PY_MODULE_FUNCTION_QUALIFIED_4(kernel, rgb, XYZ, TScalar, TScalar, TScalar, const TRgbSpacePtr&)
-*/
+PY_MODULE_FUNCTION_QUALIFIED_3(kernel, rgb, XYZ, ColorRGBA::TValue, ColorRGBA::TValue, ColorRGBA::TValue)
+PY_MODULE_FUNCTION_QUALIFIED_4(kernel, rgb, XYZ, ColorRGBA::TValue, ColorRGBA::TValue, ColorRGBA::TValue, const TRgbSpacePtr&)
+
 
 using liar::kernel::imageCodecs;
+using liar::kernel::transcodeImage;
 PY_MODULE_FUNCTION(kernel, imageCodecs)
+PY_MODULE_FUNCTION(kernel, transcodeImage)
 
 void kernelPreInject()
 {
@@ -116,6 +118,9 @@ void kernelPreInject()
 
 void kernelPostInject(PyObject*)
 {
+	PY_INJECT_OBJECT_IN_MODULE_EX(liar::kernel::CIEXYZ, kernel, "CIEXYZ")
+	PY_INJECT_OBJECT_IN_MODULE_EX(liar::kernel::sRGB, kernel, "sRGB")
+
 	std::ostringstream header;
 	header << liar::name << " v" << liar::version << " ("
 		<< LASS_LIB_PLATFORM "_" LASS_LIB_COMPILER LASS_LIB_DEBUG << ")\n"

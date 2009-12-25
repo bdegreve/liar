@@ -9,6 +9,7 @@
 add_subdirectory(kernel)
 
 add_subdirectory(cameras)
+add_subdirectory(codecs)
 add_subdirectory(output)
 add_subdirectory(samplers)
 add_subdirectory(scenery)

@@ -17,19 +17,13 @@
 #
 # http://liar.bramz.net/
 
-import os.path
-
-for filename in os.listdir(os.path.dirname(__file__)):
-	module, ext = os.path.splitext(filename)
-	if not ext in ('.py', '.so', '.pyd'):
-		continue
-	if module == '__init__' or module.startswith('lib'):
-		continue
-	if module.endswith('_d'):
-		module = module[:-2]
-	try:
-		__import__(module, globals(), locals(), [])
-	except ImportError:
-		print 'Failed to import "liar.codecs.%s"' % module
+def download(url, fname=None):
+	import os
+	import urllib
+	fname = fname or os.path.basename(url)
+	if not os.path.exists(fname):
+		print("Downloading '%s' ..." % url)
+		open(fname, 'wb').write(urllib.urlopen(url).read())
+	return fname
 
 # EOF

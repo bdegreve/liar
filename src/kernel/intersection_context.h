@@ -68,8 +68,10 @@ public:
 	const SolidEvent solidEvent() const { return solidEvent_; }
 
 	void setPoint(const TPoint3D& point) { point_ = point; }
-	void setDPoint_dU(const TVector3D& dPoint_dU) { LASS_ASSERT(!shader_); dPoint_dU_ = dPoint_dU; }
-	void setDPoint_dV(const TVector3D& dPoint_dV) { LASS_ASSERT(!shader_); dPoint_dV_ = dPoint_dV; }
+	void setDPoint_dU(const TVector3D& dPoint_dU) { dPoint_dU_ = dPoint_dU; }
+	void setDPoint_dV(const TVector3D& dPoint_dV) { dPoint_dV_ = dPoint_dV; }
+	void setDPoint_dI(const TVector3D& dPoint_dI) { dPoint_dI_ = dPoint_dI; }
+	void setDPoint_dJ(const TVector3D& dPoint_dJ) { dPoint_dJ_ = dPoint_dJ; }
 	void setGeometricNormal(const TVector3D& geometricNormal) { geometricNormal_ = geometricNormal; }
 	void setNormal(const TVector3D& normal) { normal_ = normal; }
 	void setDNormal_dU(const TVector3D& dNormal_dU) { dNormal_dU_ = dNormal_dU; }

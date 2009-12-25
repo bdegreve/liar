@@ -29,6 +29,9 @@
 #include <lass/stde/range_algorithm.h>
 #include <lass/stde/extended_iterator.h>
 #include <lass/util/thread.h>
+#include <lass/util/callback_0.h>
+#include <lass/util/thread_fun.h>
+#include <lass/util/thread_pool.h>
 
 #define EVAL(x) LASS_COUT << LASS_STRINGIFY(x) << ": " << (x) << std::endl
 
@@ -322,8 +325,8 @@ const XYZ PhotonMapper::doCastRay(
 	}
 	shader->shadeContext(sample, context);
 
-	const TVector3D targetNormal = context.shaderToWorld(TVector3D(0, 0, 1));
-	const TVector3D omegaIn = context.worldToShader(-primaryRay.direction());
+	const TVector3D targetNormal = context.shaderToWorld(TVector3D(0, 0, 1)).normal();
+	const TVector3D omegaIn = context.worldToShader(-primaryRay.direction()).normal();
 	LASS_ASSERT(omegaIn.z >= 0);
 
 	if (isVisualizingPhotonMap_)
@@ -404,7 +407,7 @@ const XYZ PhotonMapper::doCastRay(
 				{
 					LASS_ASSERT(out[i].omegaOut.z > 0);
 					const TVector3D directionCentral =
-						context.shaderToWorld(out[i].omegaOut);
+						context.shaderToWorld(out[i].omegaOut).normal();
 					LASS_ASSERT(dot(normal, directionCentral) > 0);
 					LASS_ASSERT(dot(normal, incident) < 0);
 					const TVector3D directionI = directionCentral + dReflected_dI;
@@ -449,7 +452,7 @@ const XYZ PhotonMapper::doCastRay(
 				{
 					LASS_ASSERT(out[i].omegaOut.z < 0);
 					const TVector3D directionCentral =
-						context.shaderToWorld(out[i].omegaOut);
+						context.shaderToWorld(out[i].omegaOut).normal();
 
 					const DifferentialRay transmittedRay(
 						BoundedRay(beginCentral, directionCentral, tolerance),
@@ -518,6 +521,33 @@ void PhotonMapper::doSetState(const TPyObjectPtr& state)
 	std::copy(size.begin(), size.end(), estimationSize_);
 }
 
+
+namespace experimental
+{
+	template <typename Function>
+	void runWorkers(Function worker, size_t numThreads = 0, util::ThreadKind threadKind = util::threadJoinable)
+	{
+		if (numThreads == 0)
+		{
+			numThreads = util::numberOfAvailableProcessors();
+		}
+		std::vector<util::Thread*> workers;
+		for (size_t i = 0; i < numThreads; ++i)
+		{
+			workers.push_back(threadFun(worker, threadKind));
+			workers.back()->run();
+		}
+		if (threadKind == util::threadDetached)
+		{
+			return;
+		}
+		for (size_t i = 0; i < workers.size(); ++i)
+		{
+			workers[i]->join();
+			delete workers[i];
+		}
+	}
+}
 
 
 void PhotonMapper::fillPhotonMap(
@@ -703,7 +733,7 @@ void PhotonMapper::tracePhoton(
 				if (uniform() < ratioPrecomputedIrradiance_)
 				{
 					const TVector3D worldNormal = 
-						context.shaderToWorld(TVector3D(0, 0, 1));
+						context.shaderToWorld(TVector3D(0, 0, 1)).normal();
 					irradianceBuffer_.push_back(Irradiance(hitPoint, worldNormal));
 				}
 			}
@@ -717,7 +747,7 @@ void PhotonMapper::tracePhoton(
 	}
 	LASS_ASSERT(generation < maxRayGeneration());
 
-	const TVector3D omegaIn = context.worldToShader(-ray.direction());
+	const TVector3D omegaIn = context.worldToShader(-ray.direction()).normal();
 	if (omegaIn.z < 0)
 	{
 		return;
@@ -740,9 +770,9 @@ void PhotonMapper::tracePhoton(
 	if (uniform() < scatterProbability)
 	{
 		newPower /= scatterProbability;
-		const BoundedRay newRay(hitPoint, context.shaderToWorld(out.omegaOut), tolerance);
-		const bool newIsCaustic = 
-			(out.usedCaps & (Shader::capsSpecular | Shader::capsGlossy)) > 0;
+		const BoundedRay newRay(hitPoint, context.shaderToWorld(out.omegaOut).normal(), tolerance);
+		const bool isSpecular = (out.usedCaps & (Shader::capsSpecular | Shader::capsGlossy)) > 0;
+		const bool newIsCaustic = isSpecular && (isCaustic || generation == 0);
 		MediumChanger mediumChanger(mediumStack_, context.interior(), 
 			out.omegaOut.z < 0 ? context.solidEvent() : seNoEvent);
 		tracePhoton(sample, newPower, newRay, generation + 1, uniform, newIsCaustic);
@@ -812,7 +842,7 @@ const XYZ PhotonMapper::traceDirect(
 				targetNormal, shadowRay, lightPdf);
 			if (lightPdf > 0 && radiance)
 			{
-				const TVector3D& omegaOut = context.worldToShader(shadowRay.direction());
+				const TVector3D& omegaOut = context.worldToShader(shadowRay.direction()).normal();
 				BsdfIn in(omegaOut, caps);
 				BsdfOut out;
 				shader->bsdf(sample, context, omegaIn, &in, &in + 1, &out);
@@ -836,7 +866,7 @@ const XYZ PhotonMapper::traceDirect(
 					&omegaIn, &bsdf, &bsdfPdf, Shader::capsAll & ~Shader::capsSpecular);
 				if (bsdfPdf > 0 && bsdf)
 				{
-					TRay3D ray(target, context.shaderToWorld(omegaIn));
+					TRay3D ray(target, context.shaderToWorld(omegaIn).normal());
 					BoundedRay shadowRay;
 					TScalar lightPdf;
 					const XYZ radiance = light->emission(sample, ray, shadowRay, lightPdf);
@@ -893,7 +923,7 @@ const XYZ PhotonMapper::gatherIndirect(
 	{
 		if (out[i].pdf > 0 && out[i].value)
 		{
-			const TVector3D direction = context.shaderToWorld(out[i].omegaOut);
+			const TVector3D direction = context.shaderToWorld(out[i].omegaOut).normal();
 			const BoundedRay ray(target, direction, tolerance);
 			Intersection intersection;
 			scene()->intersect(sample, ray, intersection);
@@ -902,8 +932,8 @@ const XYZ PhotonMapper::gatherIndirect(
 				const TPoint3D hitPoint = ray.point(intersection.t());
 				IntersectionContext hitContext(this);
 				scene()->localContext(sample, ray, intersection, hitContext);
-				hitContext.flipTo(-ray.direction());
-				const TVector3D hitOmega = hitContext.worldToShader(-direction);
+				hitContext.flipTo(-direction);
+				const TVector3D hitOmega = hitContext.worldToShader(-direction).normal();
 				const XYZ radiance = estimateRadiance(
 					sample, hitContext, hitPoint, hitOmega, gatherStage);
 				result += out[i].value * radiance * num::abs(out[i].omegaOut.z) / 
@@ -985,7 +1015,7 @@ const XYZ PhotonMapper::estimateRadiance(
 		if (sqrDist < num::sqr(estimationRadius_[mtGlobal]))
 		//if (dot(normal, nearest.normal) > 0.9)
 		{
-			BsdfIn in(context.worldToShader(nearest.normal), Shader::capsAll);
+			BsdfIn in(context.worldToShader(nearest.normal).normal(), Shader::capsAll);
 			BsdfOut out;
 			shader->bsdf(sample, context, omegaOut, &in, &in + 1, &out);
 			return out.pdf > 0 && out.value ? out.value * nearest.irradiance : XYZ();
@@ -997,7 +1027,7 @@ const XYZ PhotonMapper::estimateRadiance(
 		point, estimationRadius_[mtGlobal], estimationSize_[mtGlobal], 
 		photonNeighbourhood_.begin());
 	
-	const int n = last - photonNeighbourhood_.begin();
+	const TPhotonNeighbourhood::difference_type n = last - photonNeighbourhood_.begin();
 	if (n < 2)
 	{
 		return XYZ();
@@ -1006,7 +1036,7 @@ const XYZ PhotonMapper::estimateRadiance(
 	XYZ result;
 	for (TPhotonNeighbourhood::const_iterator i = photonNeighbourhood_.begin(); i != last; ++i)
 	{
-		const TVector3D omegaPhoton = context.worldToShader(i->object()->omegaIn);
+		const TVector3D omegaPhoton = context.worldToShader(i->object()->omegaIn).normal();
 		BsdfIn in(omegaPhoton, Shader::capsAll & ~Shader::capsSpecular & ~Shader::capsGlossy);
 		BsdfOut out;
 		shader->bsdf(sample, context, omegaOut, &in, &in + 1, &out);
@@ -1035,7 +1065,7 @@ const XYZ PhotonMapper::estimateCaustics(
 	const TPhotonNeighbourhood::const_iterator last = photonMap_[mtCaustics].rangeSearch(
 		point, estimationRadius_[mtCaustics], estimationSize_[mtCaustics],
 		photonNeighbourhood_.begin());
-	const int n = last - photonNeighbourhood_.begin();
+	const TPhotonNeighbourhood::difference_type n = last - photonNeighbourhood_.begin();
 	LASS_ASSERT(n >= 0);
 	if (n < 2)
 	{
@@ -1050,7 +1080,7 @@ const XYZ PhotonMapper::estimateCaustics(
 	for (int i = 0; i < n; ++i)
 	{
 		const TVector3D omegaPhoton = 
-			context.worldToShader(photonNeighbourhood_[i].object()->omegaIn);
+			context.worldToShader(photonNeighbourhood_[i].object()->omegaIn).normal();
 		bsdfIns_[i] = BsdfIn(omegaPhoton, Shader::capsAllDiffuse);
 	};
 

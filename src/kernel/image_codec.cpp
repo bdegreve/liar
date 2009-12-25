@@ -46,8 +46,8 @@ PY_DECLARE_CLASS_DOC(ImageCodecLassHDR, "Lass based image codec for High Dynamic
 PY_CLASS_CONSTRUCTOR_0(ImageCodecLassHDR)
 LASS_EXECUTE_BEFORE_MAIN_EX(ImageCodecLassHDR,
 	TImageCodecMap& map = imageCodecs();
-	map["lass"] = map["hdr"] = map["pic"] = map["rgbe"] = map["igi"] = 
-		TImageCodecPtr(new ImageCodecLassHDR);
+	map["lass"] = map["hdr"] = map["pic"] = map["rgbe"] = TImageCodecPtr(new ImageCodecLassHDR);
+	map["igi"] = TImageCodecPtr(new ImageCodecLassHDR(CIEXYZ));
 )
 
 // --- ImageCodec ----------------------------------------------------------------------------------
@@ -76,6 +76,21 @@ const TImageCodecPtr& imageCodec(const std::string& extension)
 	return candidate->second;
 }
 
+
+void transcodeImage(const std::string& source, const std::string& dest, const TRgbSpacePtr& destSpace)
+{
+	ImageReader reader(source);
+	const size_t n = reader.resolution().x * reader.resolution().y;
+	if (n == 0)
+	{
+		return;
+	}
+	ImageWriter writer(dest, ImageCodec::lmSingleLevel, reader.resolution(), destSpace);
+	std::vector<XYZ> xyz(n);
+	std::vector<TScalar> alpha(n);
+	reader.read(TResolution2D(), reader.resolution(), &xyz[0], &alpha[0]);
+	writer.write(TResolution2D(), reader.resolution(), &xyz[0], &alpha[0]);		
+}
 
 
 // --- ImageReader ---------------------------------------------------------------------------------
@@ -130,6 +145,28 @@ namespace impl
 
 
 
+ImageCodecLassCommon::ImageCodecLassCommon(const TRgbSpacePtr& defaultCodecSpace):
+	defaultCodecSpace_(defaultCodecSpace)
+{
+}
+
+
+
+TRgbSpacePtr ImageCodecLassCommon::selectRgbSpace(const TRgbSpacePtr& customSpace) const
+{
+	if (customSpace)
+	{
+		return customSpace;
+	}
+	if (defaultCodecSpace_)
+	{
+		return defaultCodecSpace_;
+	}
+	return RgbSpace::defaultSpace();
+}
+
+
+
 const ImageCodec::TImageHandle ImageCodecLassCommon::doCreate(
 		const std::string& filename, ImageCodec::LevelMode levelMode,
 		const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, 
@@ -144,13 +181,9 @@ const ImageCodec::TImageHandle ImageCodecLassCommon::doCreate(
 
 	std::auto_ptr<impl::LassImage> pimpl(new impl::LassImage);
 	pimpl->image.reset(resolution.y, resolution.x);
-	pimpl->rgbSpace = rgbSpace;
+	pimpl->rgbSpace = selectRgbSpace(rgbSpace);
 	pimpl->filename = filename;
 	pimpl->saveOnClose = true;
-	if (!pimpl->rgbSpace)
-	{
-		pimpl->rgbSpace = RgbSpace::defaultSpace();
-	}
 	RgbSpace& space = *pimpl->rgbSpace;
 	LASS_COUT << "RGB create: " << space.red() << " " << space.green() << " " << space.blue() << " " << space.white() << "\n";
 	io::Image::ColorSpace& colorSpace = pimpl->image.colorSpace();
@@ -233,6 +266,13 @@ const TRgbSpacePtr ImageCodecLassCommon::doRgbSpace(TImageHandle handle) const
 
 // --- ImageCodecLassLDR ---------------------------------------------------------------------------
 
+ImageCodecLassLDR::ImageCodecLassLDR(const TRgbSpacePtr& defaultCodecSpace):
+	ImageCodecLassCommon(defaultCodecSpace)
+{
+}
+
+
+
 void ImageCodecLassLDR::doRead(
 		TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 
 		const TResolution2D& end, XYZ* xyz, TScalar* alpha) const
@@ -271,6 +311,13 @@ void ImageCodecLassLDR::doWrite(
 
 
 // --- ImageCodecLassHDR ---------------------------------------------------------------------------
+
+ImageCodecLassHDR::ImageCodecLassHDR(const TRgbSpacePtr& defaultCodecSpace):
+	ImageCodecLassCommon(defaultCodecSpace)
+{
+}
+
+
 
 void ImageCodecLassHDR::doRead(
 		TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 

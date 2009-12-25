@@ -239,6 +239,11 @@ stde::access_iterator_t< It, cdf_accessor_t<It> > cdf_iterator(It i, const XYZ& 
 
 }
 
+namespace 
+{
+	const TFrequency c0 = 299792458; // speed of light in vacuum
+}
+
 void Observer::init()
 {
 	nodes_.front().cdf = XYZ();
@@ -246,35 +251,35 @@ void Observer::init()
 	{
 		Node& node = *i;
 		const Node& prev = *stde::prev(i);
-		node.cdf = prev.cdf + prev.xyz * (node.f - prev.f);
+		node.cdf = prev.cdf + prev.xyz * (node.wavelength - prev.wavelength);
 	}
 	for (TNodes::iterator i = nodes_.begin(); i != stde::prev(nodes_.end()); ++i)
 	{
 		Node& node = *i;
 		const Node& next = *stde::next(i);
-		node.dxyz_df = (next.xyz - node.xyz) / (next.f - node.f);
+		node.dxyz_dw = (next.xyz - node.xyz) / (next.wavelength - node.wavelength);
 	}
-	nodes_.back().dxyz_df = XYZ();
+	nodes_.back().dxyz_dw = XYZ();
 }
 
 const Observer::TFrequencyRange Observer::frequencyRange() const
 {
-	return std::make_pair(nodes_.front().f, nodes_.back().f);
+	return std::make_pair(c0 / nodes_.front().wavelength, c0 / nodes_.back().wavelength);
 }
 
-const XYZ Observer::tristimulus(TScalar frequency) const
+const XYZ Observer::tristimulus(TFrequency frequency) const
 {
+	const TScalar wavelength = c0 / frequency;
 	typedef const Node TConstNode;
 	const TNodes::const_iterator i = std::lower_bound(
-		stde::const_member_iterator(nodes_.begin(), &Node::f),
-		stde::const_member_iterator(nodes_.end(), &Node::f),
-		frequency).base();
+		stde::const_member_iterator(nodes_.begin(), &Node::wavelength),
+		stde::const_member_iterator(nodes_.end(), &Node::wavelength),
+		wavelength).base();
 	const Node& node = *(i == nodes_.begin() ? i : stde::prev(i));
-	const TFrequency df = frequency - node.f;
-	return node.xyz + node.dxyz_df * (frequency - node.f);
+	return node.xyz + node.dxyz_dw * (wavelength - node.wavelength);
 }
 
-const XYZ Observer::chromaticity(TScalar frequency) const
+const XYZ Observer::chromaticity(TFrequency frequency) const
 {
 	return kernel::chromaticity(tristimulus(frequency));
 }
@@ -288,15 +293,15 @@ TFrequency Observer::sample(const XYZ& weight, TScalar sample, XYZ& chromaticity
 		sample).base();
 	const Node& node = *(i == nodes_.begin() ? i : stde::prev(i));
 	const TScalar p = dot(node.xyz, w);
-	LASS_ASSERT(p > 0);
+	LASS_ASSERT(p >= 0);
 	const TScalar c = dot(node.cdf, w);
-	LASS_ASSERT(c < sample);
-	const TFrequency df = (sample - c) / p;
-	const TFrequency f = node.f + df;
-	const XYZ xyz = node.xyz + node.dxyz_df * df;
+	LASS_ASSERT(c <= sample);
+	const TScalar dWavelength = p > 0 ? (sample - c) / p : 0;
+	const TScalar wavelength = node.wavelength + dWavelength;
+	const XYZ xyz = node.xyz + node.dxyz_dw * dWavelength;
 	chromaticity = kernel::chromaticity(xyz);	
 	pdf = p;
-	return f;
+	return c0 / wavelength;
 }
 
 const XYZ chromaticity(const XYZ& xyz)
@@ -327,7 +332,7 @@ const XYZ tristimulus(TFrequency frequency)
 	return standardObserver().tristimulus(frequency);
 }
 
-TScalar sampleFrequency(const XYZ& power, TScalar sample, XYZ& chromaticity, TScalar& pdf)
+TFrequency sampleFrequency(const XYZ& power, TScalar sample, XYZ& chromaticity, TScalar& pdf)
 {
 	return standardObserver().sample(power, sample, chromaticity, pdf);
 }
