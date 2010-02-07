@@ -1,6 +1,6 @@
-macro(add_liar_codec name libraries)
+macro(add_liar_codec name)
 	file(GLOB ${name}_SRCS ${name}.cpp)
-	set(${name}_LIBS kernelshared ${libraries})
+	set(${name}_LIBS kernelshared ${ARGN})
 	add_library(${name} MODULE 
 		${${name}_SRCS}
 		)
@@ -20,16 +20,39 @@ macro(add_liar_codec name libraries)
 		)
 endmacro()
 
-include(FindJPEG)
+# jpeglib: http://www.ijg.org/
+find_package(JPEG)
 mark_as_advanced(CLEAR JPEG_INCLUDE_DIR JPEG_LIBRARY)
 if (JPEG_FOUND)
 	include_directories(
 		${JPEG_INCLUDE_DIR}
 		)
-	add_liar_codec(jpeg ${JPEG_LIBRARIES})
+	add_liar_codec(jpeglib ${JPEG_LIBRARIES})
 	if (WIN32)
 	endif()
 endif()
+
+# openexr 1.6.1: http://www.openexr.com/
+find_package(OpenEXR COMPONENTS Half Iex IlmImf IlmThread)
+if (OPENEXR_FOUND)
+	include_directories(
+		${OpenEXR_INCLUDE_DIR}
+		)
+	add_definitions(
+		${OpenEXR_DEFINITIONS}
+		)
+	add_liar_codec(openexr ${OpenEXR_LIBRARIES})
+	install(
+		FILES ${OpenEXR_REDIST}
+		DESTINATION codecs
+		CONFIGURATIONS RELEASE MINSIZEREL RELWITHDEBINFO
+		)
+	install(
+		FILES ${OpenEXR_DEBUG_REDIST}
+		DESTINATION codecs
+		CONFIGURATIONS DEBUG 
+		)
+ENDIF()
 
 file(GLOB pyfiles "*.py")
 install(

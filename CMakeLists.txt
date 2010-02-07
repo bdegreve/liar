@@ -1,5 +1,6 @@
 project(liar)
 cmake_minimum_required(VERSION 2.6)
+list(APPEND CMAKE_MODULE_PATH "${liar_SOURCE_DIR}/cmake")
 
 set(CMAKE_DEBUG_POSTFIX _d)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${liar_BINARY_DIR}/bin")

@@ -114,7 +114,7 @@ void Image::loadFile(const std::string& filename, const TRgbSpacePtr& rgbSpace)
 	ImageReader reader(filename, rgbSpace, "");
 	TResolution2D resolution = reader.resolution();
 	TPixels image(new TPixel[resolution.x * resolution.y]);
-	reader.read(TResolution2D(), resolution, image.get(), 0);
+	reader.readFull(image.get());
 
 	filename_ = filename;
 	rgbSpace_ = rgbSpace;

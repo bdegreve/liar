@@ -46,7 +46,7 @@ PY_CLASS_MEMBER_RW(Image, gain, setGain)
 Image::Image(const std::string& filename, const TResolution2D& resolution):
     filename_(filename),
     resolution_(resolution),
-	rgbSpace_(RgbSpace::defaultSpace()),
+	rgbSpace_(),
 	exposure_(0.f),
     gain_(1.f),
     isSaved_(true)
@@ -146,7 +146,7 @@ const TResolution2D Image::doResolution() const
 
 void Image::doBeginRender()
 {
-	const unsigned n = resolution_.x * resolution_.y;
+	const size_t n = resolution_.x * resolution_.y;
 	renderBuffer_.clear();
 	renderBuffer_.resize(n);
 	totalWeight_.clear();
@@ -194,11 +194,11 @@ void Image::doEndRender()
 
 	if (exposure_ > 0) 
 	{
-		for (unsigned j = 0; j < resolution_.y; ++j)
+		for (size_t j = 0; j < resolution_.y; ++j)
 		{
-			for (unsigned i = 0; i < resolution_.x; ++i)
+			for (size_t i = 0; i < resolution_.x; ++i)
 			{
-				const unsigned k = j * resolution_.x + i;
+				const size_t k = j * resolution_.x + i;
 				const TScalar w = totalWeight_[j * resolution_.x + i];
 				if (w > 0)
 				{
@@ -214,11 +214,11 @@ void Image::doEndRender()
 	}
 	else
 	{
-		for (unsigned j = 0; j < resolution_.y; ++j)
+		for (size_t j = 0; j < resolution_.y; ++j)
 		{
-			for (unsigned i = 0; i < resolution_.x; ++i)
+			for (size_t i = 0; i < resolution_.x; ++i)
 			{
-				const unsigned k = j * resolution_.x + i;
+				const size_t k = j * resolution_.x + i;
 				const TScalar w = totalWeight_[j * resolution_.x + i];
 				if (w > 0)
 				{
@@ -229,8 +229,8 @@ void Image::doEndRender()
 		}
 	}
 
-	ImageWriter writer(filename_, ImageCodec::lmSingleLevel, resolution_, rgbSpace_, "");
-	writer.write(TResolution2D(), resolution_, &renderBuffer_[0], &alphaBuffer_[0]);
+	ImageWriter writer(filename_, resolution_, rgbSpace_, "");
+	writer.writeFull(&renderBuffer_[0], &alphaBuffer_[0]);
 	isSaved_ = true;
 }
 

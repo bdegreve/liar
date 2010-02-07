@@ -190,6 +190,13 @@ bool RgbSpace::operator!=(const RgbSpace& other) const
 
 
 
+const RgbSpace RgbSpace::withGamma(TScalar gamma) const
+{
+	return RgbSpace(red_, green_, blue_, white_, gamma);
+}
+
+
+
 const TPyObjectPtr RgbSpace::reduce() const
 {
 	return python::makeTuple(

@@ -30,6 +30,6 @@ for filename in os.listdir(os.path.dirname(__file__)):
 	try:
 		__import__(module, globals(), locals(), [])
 	except ImportError:
-		print 'Failed to import "liar.codecs.%s"' % module
+		print('Failed to import "liar.codecs.%s"' % module)
 
 # EOF

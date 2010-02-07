@@ -40,24 +40,14 @@ class LIAR_KERNEL_DLL ImageCodec: public python::PyObjectPlus
 	PY_HEADER(python::PyObjectPlus)
 public:
 
-	enum LevelMode
-	{
-		lmSingleLevel,
-		lmIsotropicMipMapping,
-		lmAnisotropicMipMapping,
-		numLevelModes
-	};
-
 	typedef void* TImageHandle;
-	typedef TResolution2D TLevel;
-
 	virtual ~ImageCodec();
 
 	const TImageHandle create(
-			const std::string& filename, LevelMode levelMode, const TResolution2D& resolution, 
+			const std::string& filename, const TResolution2D& resolution, 
 			const TRgbSpacePtr& rgbSpace, const std::string& options) const 
 	{
-		return doCreate(filename, levelMode, resolution, rgbSpace, options);
+		return doCreate(filename, resolution, rgbSpace, options);
 	}
 	const TImageHandle open(
 			const std::string& filename, const TRgbSpacePtr& rgbSpace, 
@@ -70,51 +60,36 @@ public:
 		if (handle) doClose(handle); 
 	}
 
-	const LevelMode levelMode(TImageHandle handle) const
+	const TResolution2D resolution(TImageHandle handle) const
 	{
-		return doLevelMode(handle);
-	}
-	const TLevel levels(TImageHandle handle) const
-	{
-		return doLevels(handle);
-	}
-	const TResolution2D resolution(TImageHandle handle, const TLevel& level) const
-	{
-		return doResolution(handle, level);
+		return doResolution(handle);
 	}
 	const TRgbSpacePtr rgbSpace(TImageHandle handle) const
 	{
 		return doRgbSpace(handle);
 	}
 
-	void read(TImageHandle handle, const TLevel& level, const TResolution2D& begin, 
-		const TResolution2D& end, XYZ* xyz, TScalar* alpha) const
+	void readLine(TImageHandle handle, XYZ* xyz, TScalar* alpha) const
 	{
-		doRead(handle, level, begin, end, xyz, alpha);
+		doReadLine(handle, xyz, alpha);
 	}
-	void write(TImageHandle handle, const TLevel& level, const TResolution2D& begin, 
-		const TResolution2D& end, const XYZ* xyz, const TScalar* alpha) const
+	void writeLine(TImageHandle handle, const XYZ* xyz, const TScalar* alpha) const
 	{
-		doWrite(handle, level, begin, end, xyz, alpha);
+		doWriteLine(handle, xyz, alpha);
 	}
 
 private:
-	virtual const TImageHandle doCreate(const std::string& filename, LevelMode levelMode, 
-		const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace,
-		const std::string& options) const = 0;
+	virtual const TImageHandle doCreate(const std::string& filename, const TResolution2D& resolution, 
+		const TRgbSpacePtr& rgbSpace, const std::string& options) const = 0;
 	virtual const TImageHandle doOpen(const std::string& filename, const TRgbSpacePtr& rgbSpace,
 		const std::string& options) const = 0;
 	virtual void doClose(TImageHandle) const = 0;
 
-	virtual const LevelMode doLevelMode(TImageHandle handle) const = 0;
-	virtual const TLevel doLevels(TImageHandle handle) const = 0;
-	virtual const TResolution2D doResolution(TImageHandle handle, const TLevel& level) const = 0;
+	virtual const TResolution2D doResolution(TImageHandle handle) const = 0;
 	virtual const TRgbSpacePtr doRgbSpace(TImageHandle handle) const = 0;
 	
-	virtual void doRead(TImageHandle handle, const TLevel& level, const TResolution2D& begin, 
-		const TResolution2D& end, XYZ* xyz, TScalar* alpha) const = 0;	
-	virtual void doWrite(TImageHandle handle, const TLevel& level, const TResolution2D& begin, 
-		const TResolution2D& end, const XYZ* xyz, const TScalar* alpha) const = 0;
+	virtual void doReadLine(TImageHandle handle, XYZ* xyz, TScalar* alpha) const = 0;	
+	virtual void doWriteLine(TImageHandle handle, const XYZ* xyz, const TScalar* alpha) const = 0;
 };
 
 typedef python::PyObjectPtr<ImageCodec>::Type TImageCodecPtr;
@@ -123,38 +98,20 @@ typedef std::map<std::string, TImageCodecPtr> TImageCodecMap;
 LIAR_KERNEL_DLL TImageCodecMap& LASS_CALL imageCodecs();
 LIAR_KERNEL_DLL const TImageCodecPtr& LASS_CALL imageCodec(const std::string& extension);
 
-LIAR_KERNEL_DLL void transcodeImage(const std::string& source, const std::string& dest, const TRgbSpacePtr& destSpace);
+LIAR_KERNEL_DLL void transcodeImage(const std::string& source, const std::string& dest, const TRgbSpacePtr& sourceSpace, const TRgbSpacePtr& destSpace);
 
 class LIAR_KERNEL_DLL ImageReader: util::NonCopyable
 {
 public:
 
-	typedef ImageCodec::TLevel TLevel;
-
 	ImageReader(const std::string& filename, const TRgbSpacePtr& rgbSpace = TRgbSpacePtr(), 
 		const std::string& options = "");
 	~ImageReader();
 
-	const ImageCodec::LevelMode levelMode() const { return codec_->levelMode(handle_); }
-	const TLevel levels() const { return codec_->levels(handle_); }
-	const TResolution2D resolution(const TLevel& level = TLevel()) const 
-	{ 
-		return codec_->resolution(handle_, level); 
-	}
+	const TResolution2D resolution() const { return codec_->resolution(handle_); }
 	const TRgbSpacePtr rgbSpace() const { return codec_->rgbSpace(handle_); }
-
-	void read(
-			const TResolution2D& begin, const TResolution2D& end, 
-			XYZ* xyz, TScalar* alpha) const
-	{
-		codec_->read(handle_, TLevel(), begin, end, xyz, alpha);
-	}
-	void read(
-			const TLevel& level, const TResolution2D& begin, const TResolution2D& end, 
-			XYZ* xyz, TScalar* alpha) const
-	{
-		codec_->read(handle_, level, begin, end, xyz, alpha);
-	}
+	void readLine(XYZ* xyz, TScalar* alpha = 0) const { codec_->readLine(handle_, xyz, alpha); }
+	void readFull(XYZ* xyz, TScalar* alpha = 0) const;
 private:
 	TImageCodecPtr codec_;
 	ImageCodec::TImageHandle handle_;
@@ -166,32 +123,14 @@ class LIAR_KERNEL_DLL ImageWriter: util::NonCopyable
 {
 public:
 
-	typedef ImageCodec::TLevel TLevel;
-
-	ImageWriter(const std::string& filename, ImageCodec::LevelMode levelMode, 
-		const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace = TRgbSpacePtr(), const std::string& options = "");
+	ImageWriter(const std::string& filename, const TResolution2D& resolution, 
+		const TRgbSpacePtr& rgbSpace = TRgbSpacePtr(), const std::string& options = "");
 	~ImageWriter();
 
-	const ImageCodec::LevelMode levelMode() const { return codec_->levelMode(handle_); }
-	const TLevel levels() const { return codec_->levels(handle_); }
-	const TResolution2D resolution(const TLevel& level = TLevel()) const 
-	{ 
-		return codec_->resolution(handle_, level); 
-	}
+	const TResolution2D resolution() const { return codec_->resolution(handle_); }
 	const TRgbSpacePtr rgbSpace() const { return codec_->rgbSpace(handle_); }
-
-	void write(
-			const TResolution2D& level, const TResolution2D& begin, 
-			const TResolution2D& end, const XYZ* xyz, const TScalar* alpha) const
-	{
-		codec_->write(handle_, level, begin, end, xyz, alpha);
-	}
-	void write(
-			const TResolution2D& begin, const TResolution2D& end, 
-			const XYZ* xyz, const TScalar* alpha) const
-	{
-		codec_->write(handle_, TLevel(), begin, end, xyz, alpha);
-	}
+	void writeLine(const XYZ* xyz, const TScalar* alpha) const { codec_->writeLine(handle_, xyz, alpha); }
+	void writeFull(XYZ* xyz, TScalar* alpha = 0) const;
 private:
 	TImageCodecPtr codec_;
 	ImageCodec::TImageHandle handle_;
@@ -200,53 +139,27 @@ private:
 
 // built-in codecs
 
-class LIAR_KERNEL_DLL ImageCodecLassCommon: public ImageCodec
+class LIAR_KERNEL_DLL ImageCodecLass: public ImageCodec
 {
+	PY_HEADER(ImageCodec)
 public:
-	ImageCodecLassCommon(const TRgbSpacePtr& defaultSpace = TRgbSpacePtr());
+	ImageCodecLass(bool hasGammaCorrection = true, const TRgbSpacePtr& defaultSpace = TRgbSpacePtr());
 protected:
 	TRgbSpacePtr selectRgbSpace(const TRgbSpacePtr& defaultCodecSpace = TRgbSpacePtr()) const;
 private:
-	virtual const TImageHandle doCreate(const std::string& filename, LevelMode levelMode, 
-		const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string& options) const;
+	virtual const TImageHandle doCreate(const std::string& filename, const TResolution2D& resolution, 
+		const TRgbSpacePtr& rgbSpace, const std::string& options) const;
 	virtual const TImageHandle doOpen(const std::string& filename, const TRgbSpacePtr& rgbSpace,
 		const std::string& options) const;
 	virtual void doClose(TImageHandle handle) const;
 
-	virtual const ImageCodec::LevelMode doLevelMode(TImageHandle handle) const;
-	virtual const TLevel doLevels(TImageHandle handle) const;
-	virtual const TResolution2D doResolution(TImageHandle handle, const TLevel& level) const;
+	virtual const TResolution2D doResolution(TImageHandle handle) const;
 	virtual const TRgbSpacePtr doRgbSpace(TImageHandle handle) const;
+	virtual void doReadLine(TImageHandle handle, XYZ* xyz, TScalar* alpha) const;	
+	virtual void doWriteLine(TImageHandle handle, const XYZ* xyz, const TScalar* alpha) const;
 
 	TRgbSpacePtr defaultCodecSpace_;
-};
-
-
-
-class LIAR_KERNEL_DLL ImageCodecLassLDR: public ImageCodecLassCommon
-{
-	PY_HEADER(ImageCodec)
-public:
-	ImageCodecLassLDR(const TRgbSpacePtr& defaultSpace = TRgbSpacePtr());
-private:
-	virtual void doRead(TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 
-		const TResolution2D& end, XYZ* xyz, TScalar* alpha) const;	
-	virtual void doWrite(TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 
-		const TResolution2D& end, const XYZ* xyz, const TScalar* alpha) const;
-};
-
-
-
-class LIAR_KERNEL_DLL ImageCodecLassHDR: public ImageCodecLassCommon
-{
-	PY_HEADER(ImageCodec)
-public:
-	ImageCodecLassHDR(const TRgbSpacePtr& defaultSpace = TRgbSpacePtr());
-private:
-	virtual void doRead(TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 
-		const TResolution2D& end, XYZ* xyz, TScalar* alpha) const;	
-	virtual void doWrite(TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 
-		const TResolution2D& end, const XYZ* xyz, const TScalar* alpha) const;
+	bool hasGammaCorrection_;
 };
 
 

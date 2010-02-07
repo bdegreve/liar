@@ -69,8 +69,7 @@ PY_DECLARE_MODULE_DOC(kernel, "LiAR isn't a raytracer")
 PY_MODULE_CLASS(kernel, liar::kernel::Attenuation)
 PY_MODULE_CLASS(kernel, liar::kernel::Camera)
 PY_MODULE_CLASS(kernel, liar::kernel::ImageCodec)
-PY_MODULE_CLASS(kernel, liar::kernel::ImageCodecLassLDR)
-PY_MODULE_CLASS(kernel, liar::kernel::ImageCodecLassHDR)
+PY_MODULE_CLASS(kernel, liar::kernel::ImageCodecLass)
 PY_MODULE_CLASS(kernel, liar::kernel::Medium)
 PY_MODULE_CLASS(kernel, liar::kernel::RgbSpace)
 PY_MODULE_CLASS(kernel, liar::kernel::RayTracer)
@@ -96,7 +95,7 @@ using liar::kernel::XYZ;
 using lass::prim::ColorRGBA;
 using liar::kernel::TRgbSpacePtr;
 PY_MODULE_FUNCTION_QUALIFIED_DOC_1(kernel, rgb, XYZ, const ColorRGBA&,
-	"rgb({<R>, <G>, <B>} | <(R, G, B)>} [, <RgbSpace>] [, <SpectrumFormat>]\n"
+	"rgb({<R>, <G>, <B>} | <(R, G, B)>} [, <RgbSpace>] [, <SpectrumFormat>])\n"
 	"Create an XYZ from RGB color value\n");
 PY_MODULE_FUNCTION_QUALIFIED_2(kernel, rgb, XYZ, const ColorRGBA&, const TRgbSpacePtr&)
 PY_MODULE_FUNCTION_QUALIFIED_3(kernel, rgb, XYZ, ColorRGBA::TValue, ColorRGBA::TValue, ColorRGBA::TValue)
@@ -106,7 +105,13 @@ PY_MODULE_FUNCTION_QUALIFIED_4(kernel, rgb, XYZ, ColorRGBA::TValue, ColorRGBA::T
 using liar::kernel::imageCodecs;
 using liar::kernel::transcodeImage;
 PY_MODULE_FUNCTION(kernel, imageCodecs)
-PY_MODULE_FUNCTION(kernel, transcodeImage)
+PY_MODULE_FUNCTION_DOC(kernel, transcodeImage,
+	"transcodeImage(sourcePath, destPath, sourceSpace, destSpace) -> None\n"
+	"transcode image from one file format to another.\n"
+	"- sourcePath: path to source image.\n"
+	"- destPath: path to destination image.\n"
+	"- sourceSpace: RgbSpace of source image. If None, use image's stored space, format's default space or liar's default space, in that order.\n"
+	"- destSpace: RgbSpace of destination image. If None, use format's default space or liar's default space, in that order.\n");
 
 void kernelPreInject()
 {

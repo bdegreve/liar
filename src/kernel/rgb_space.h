@@ -49,7 +49,7 @@ public:
 
 	typedef prim::ColorRGBA RGBA;
 
-	RgbSpace(const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, const TPoint2D& white, TScalar gamma);
+	RgbSpace(const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, const TPoint2D& white, TScalar gamma = 1);
 	
 	const XYZ convert(const prim::ColorRGBA& rgb) const;
 	const XYZ convert(const prim::ColorRGBA& rgb, TScalar& alpha) const;
@@ -68,6 +68,8 @@ public:
 
 	bool operator==(const RgbSpace& other) const;
 	bool operator!=(const RgbSpace& other) const;
+
+	const RgbSpace withGamma(TScalar gamma) const;
 
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const;

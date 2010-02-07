@@ -35,19 +35,13 @@ namespace kernel
 
 PY_DECLARE_CLASS_DOC(ImageCodec, "Abstract base class of image codecs")
 
-PY_DECLARE_CLASS_DOC(ImageCodecLassLDR, "Lass based image codec for Low Dynamic Range images")
-PY_CLASS_CONSTRUCTOR_0(ImageCodecLassLDR)
-LASS_EXECUTE_BEFORE_MAIN_EX(ImageCodecLassLDR,
+PY_DECLARE_CLASS_DOC(ImageCodecLass, "Lass based image codec")
+PY_CLASS_CONSTRUCTOR_0(ImageCodecLass)
+LASS_EXECUTE_BEFORE_MAIN_EX(ImageCodecLass,
 	TImageCodecMap& map = imageCodecs();
-	map["tga"] = map["targa"] = TImageCodecPtr(new ImageCodecLassLDR);
-)
-
-PY_DECLARE_CLASS_DOC(ImageCodecLassHDR, "Lass based image codec for High Dynamic Range images")
-PY_CLASS_CONSTRUCTOR_0(ImageCodecLassHDR)
-LASS_EXECUTE_BEFORE_MAIN_EX(ImageCodecLassHDR,
-	TImageCodecMap& map = imageCodecs();
-	map["lass"] = map["hdr"] = map["pic"] = map["rgbe"] = TImageCodecPtr(new ImageCodecLassHDR);
-	map["igi"] = TImageCodecPtr(new ImageCodecLassHDR(CIEXYZ));
+	map["tga"] = map["targa"] = TImageCodecPtr(new ImageCodecLass);
+	map["lass"] = map["hdr"] = map["pic"] = map["rgbe"] = TImageCodecPtr(new ImageCodecLass(false));
+	map["igi"] = TImageCodecPtr(new ImageCodecLass(false, CIEXYZ));
 )
 
 // --- ImageCodec ----------------------------------------------------------------------------------
@@ -77,19 +71,23 @@ const TImageCodecPtr& imageCodec(const std::string& extension)
 }
 
 
-void transcodeImage(const std::string& source, const std::string& dest, const TRgbSpacePtr& destSpace)
+void transcodeImage(const std::string& source, const std::string& dest, const TRgbSpacePtr& sourceSpace, const TRgbSpacePtr& destSpace)
 {
-	ImageReader reader(source);
-	const size_t n = reader.resolution().x * reader.resolution().y;
-	if (n == 0)
+	ImageReader reader(source, sourceSpace);
+	const size_t nx = reader.resolution().x;
+	const size_t ny = reader.resolution().y;
+	if (nx == 0 || ny == 0)
 	{
 		return;
 	}
-	ImageWriter writer(dest, ImageCodec::lmSingleLevel, reader.resolution(), destSpace);
-	std::vector<XYZ> xyz(n);
-	std::vector<TScalar> alpha(n);
-	reader.read(TResolution2D(), reader.resolution(), &xyz[0], &alpha[0]);
-	writer.write(TResolution2D(), reader.resolution(), &xyz[0], &alpha[0]);		
+	ImageWriter writer(dest, reader.resolution(), destSpace ? destSpace : reader.rgbSpace());
+	std::vector<XYZ> xyz(nx);
+	std::vector<TScalar> alpha(nx);
+	for (size_t i = 0; i < ny; ++i)
+	{
+		reader.readLine(&xyz[0], &alpha[0]);
+		writer.writeLine(&xyz[0], &alpha[0]);
+	}
 }
 
 
@@ -109,17 +107,27 @@ ImageReader::~ImageReader()
 	handle_ = 0;
 }
 
+void ImageReader::readFull(XYZ* xyz, TScalar* alpha) const
+{
+	const TResolution2D res = resolution();
+	const size_t size = res.x * res.y;
+	for (size_t k = 0; k < size; k += res.x)
+	{
+		readLine(xyz + k, alpha ? alpha + k : 0);
+	}
+}
+
 
 
 // --- ImageWriter ---------------------------------------------------------------------------------
 
 ImageWriter::ImageWriter(
-		const std::string& filename, ImageCodec::LevelMode levelMode, 
-		const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string& options):
+		const std::string& filename, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, 
+		const std::string& options):
 	codec_(imageCodec(io::fileExtension(filename))),
 	handle_(0)
 {
-	handle_ = codec_->create(filename, levelMode, resolution, rgbSpace, options);
+	handle_ = codec_->create(filename, resolution, rgbSpace, options);
 }
 
 ImageWriter::~ImageWriter()
@@ -128,9 +136,19 @@ ImageWriter::~ImageWriter()
 	handle_ = 0;
 }
 
+void ImageWriter::writeFull(XYZ* xyz, TScalar* alpha) const
+{
+	const TResolution2D res = resolution();
+	const size_t size = res.x * res.y;
+	for (size_t k = 0; k < size; k += res.x)
+	{
+		writeLine(xyz + k, alpha ? alpha + k : 0);
+	}
+}
 
 
-// --- ImageCodecLassCommon ------------------------------------------------------------------------
+
+// --- ImageCodecLass ------------------------------------------------------------------------
 
 namespace impl
 {
@@ -139,20 +157,23 @@ namespace impl
 		io::Image image;
 		TRgbSpacePtr rgbSpace;
 		std::string filename;
+		size_t y;
 		bool saveOnClose;
+		LassImage(): y(0) {}
 	};
 }
 
 
 
-ImageCodecLassCommon::ImageCodecLassCommon(const TRgbSpacePtr& defaultCodecSpace):
-	defaultCodecSpace_(defaultCodecSpace)
+ImageCodecLass::ImageCodecLass(bool hasGammaCorrection, const TRgbSpacePtr& defaultCodecSpace):
+	defaultCodecSpace_(defaultCodecSpace),
+	hasGammaCorrection_(hasGammaCorrection)
 {
 }
 
 
 
-TRgbSpacePtr ImageCodecLassCommon::selectRgbSpace(const TRgbSpacePtr& customSpace) const
+TRgbSpacePtr ImageCodecLass::selectRgbSpace(const TRgbSpacePtr& customSpace) const
 {
 	if (customSpace)
 	{
@@ -167,17 +188,11 @@ TRgbSpacePtr ImageCodecLassCommon::selectRgbSpace(const TRgbSpacePtr& customSpac
 
 
 
-const ImageCodec::TImageHandle ImageCodecLassCommon::doCreate(
-		const std::string& filename, ImageCodec::LevelMode levelMode,
-		const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, 
-		const std::string& options) const
+const ImageCodec::TImageHandle ImageCodecLass::doCreate(
+		const std::string& filename, const TResolution2D& resolution, 
+		const TRgbSpacePtr& rgbSpace, const std::string& options) const
 {
 	typedef io::Image::TChromaticity TChromaticity;
-
-	if (levelMode != lmSingleLevel)
-	{
-		LASS_THROW("ImageCodecLass only supports single level images");
-	}
 
 	std::auto_ptr<impl::LassImage> pimpl(new impl::LassImage);
 	pimpl->image.reset(resolution.y, resolution.x);
@@ -191,13 +206,13 @@ const ImageCodec::TImageHandle ImageCodecLassCommon::doCreate(
 	colorSpace.green = TChromaticity(space.green());
 	colorSpace.blue = TChromaticity(space.blue());
 	colorSpace.white = TChromaticity(space.white());
-	colorSpace.gamma = static_cast<num::Tfloat32>(space.gamma()); // may be forced to one later.
+	colorSpace.gamma = static_cast<num::Tfloat32>(hasGammaCorrection_ ? space.gamma() : 1);
 	return pimpl.release();
 }
 
 
 
-const ImageCodec::TImageHandle ImageCodecLassCommon::doOpen(
+const ImageCodec::TImageHandle ImageCodecLass::doOpen(
 		const std::string& filename, const TRgbSpacePtr& rgbSpace, const std::string& options) const
 {
 	std::auto_ptr<impl::LassImage> pimpl(new impl::LassImage);
@@ -211,7 +226,7 @@ const ImageCodec::TImageHandle ImageCodecLassCommon::doOpen(
 			TPoint2D(colorSpace.green), 
 			TPoint2D(colorSpace.blue), 
 			TPoint2D(colorSpace.white), 
-			colorSpace.gamma));
+			hasGammaCorrection_ ? colorSpace.gamma : 1));
 	}
 	RgbSpace& space = *pimpl->rgbSpace;
 	LASS_COUT << "RGB open: " << space.red() << " " << space.green() << " " << space.blue() << " " << space.white() << "\n";
@@ -222,7 +237,7 @@ const ImageCodec::TImageHandle ImageCodecLassCommon::doOpen(
 
 
 
-void ImageCodecLassCommon::doClose(TImageHandle handle) const
+void ImageCodecLass::doClose(TImageHandle handle) const
 {
 	impl::LassImage* impl = static_cast<impl::LassImage*>(handle);
 	if (impl->saveOnClose)
@@ -234,125 +249,66 @@ void ImageCodecLassCommon::doClose(TImageHandle handle) const
 
 
 
-const ImageCodec::LevelMode ImageCodecLassCommon::doLevelMode(TImageHandle handle) const
+const TResolution2D ImageCodecLass::doResolution(TImageHandle handle) const
 {
-	return lmSingleLevel;
-}
-
-
-
-const ImageCodec::TLevel ImageCodecLassCommon::doLevels(TImageHandle handle) const
-{
-	return TLevel(1, 1);
-}
-
-
-
-const TResolution2D ImageCodecLassCommon::doResolution(TImageHandle handle, const TLevel& level) const
-{
-	LASS_ENFORCE(level.x == 0 && level.y == 0);
 	impl::LassImage* impl = static_cast<impl::LassImage*>(handle);
 	return TResolution2D(impl->image.cols(), impl->image.rows());
 }
 
 
 
-const TRgbSpacePtr ImageCodecLassCommon::doRgbSpace(TImageHandle handle) const
+const TRgbSpacePtr ImageCodecLass::doRgbSpace(TImageHandle handle) const
 {
 	return static_cast<impl::LassImage*>(handle)->rgbSpace;
 }
 
 
 
-// --- ImageCodecLassLDR ---------------------------------------------------------------------------
-
-ImageCodecLassLDR::ImageCodecLassLDR(const TRgbSpacePtr& defaultCodecSpace):
-	ImageCodecLassCommon(defaultCodecSpace)
+void ImageCodecLass::doReadLine(
+		TImageHandle handle, XYZ* xyz, TScalar* alpha) const
 {
+	impl::LassImage* pimpl = static_cast<impl::LassImage*>(handle);
+	const io::Image& image = pimpl->image;
+	const RgbSpace& space = *pimpl->rgbSpace;
+	LASS_ENFORCE(pimpl->y < image.rows());
+	for (size_t x = 0; x < image.cols(); ++x)
+	{
+		TScalar a;
+		if (hasGammaCorrection_)
+		{
+			*xyz++ = space.convertGamma(image(pimpl->y, x), a);
+		}
+		else
+		{
+			*xyz++ = space.convert(image(pimpl->y, x), a);
+		}
+		if (alpha) *alpha++ = a;
+	}
+	++pimpl->y;
 }
 
 
 
-void ImageCodecLassLDR::doRead(
-		TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 
-		const TResolution2D& end, XYZ* xyz, TScalar* alpha) const
+void ImageCodecLass::doWriteLine(
+		TImageHandle handle, const XYZ* xyz, const TScalar* alpha) const
 {
-	const impl::LassImage* impl = static_cast<impl::LassImage*>(handle);
-	const io::Image& image = impl->image;
-	const RgbSpace& space = *impl->rgbSpace;
-	for (size_t y = begin.y; y < end.y; ++y)
+	impl::LassImage* pimpl = static_cast<impl::LassImage*>(handle);
+	io::Image& image = pimpl->image;
+	const RgbSpace& space = *pimpl->rgbSpace;
+	LASS_ENFORCE(pimpl->y < image.rows());
+	for (size_t x = 0; x < image.cols(); ++x)
 	{
-		for (size_t x = begin.x; x < end.x; ++x)
+		const TScalar a = alpha ? *alpha++ : 1;
+		if (hasGammaCorrection_)
 		{
-			TScalar a;
-			*xyz++ = space.convertGamma(image(y, x), a);
-			if (alpha) *alpha++ = a;
+			image(pimpl->y, x) = space.convertGamma(*xyz++, a);
+		}
+		else
+		{
+			image(pimpl->y, x) = space.convert(*xyz++, a);
 		}
 	}
-}
-
-void ImageCodecLassLDR::doWrite(
-		TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 
-		const TResolution2D& end, const XYZ* xyz, const TScalar* alpha) const
-{
-	impl::LassImage* impl = static_cast<impl::LassImage*>(handle);
-	io::Image& image = impl->image;
-	const RgbSpace& space = *impl->rgbSpace;
-	for (size_t y = begin.y; y < end.y; ++y)
-	{
-		for (size_t x = begin.x; x < end.x; ++x)
-		{
-			const TScalar a = alpha ? *alpha++ : 1;
-			image(y, x) = space.convertGamma(*xyz++, a);
-		}
-	}
-}
-
-
-
-// --- ImageCodecLassHDR ---------------------------------------------------------------------------
-
-ImageCodecLassHDR::ImageCodecLassHDR(const TRgbSpacePtr& defaultCodecSpace):
-	ImageCodecLassCommon(defaultCodecSpace)
-{
-}
-
-
-
-void ImageCodecLassHDR::doRead(
-		TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 
-		const TResolution2D& end, XYZ* xyz, TScalar* alpha) const
-{
-	const impl::LassImage* impl = static_cast<impl::LassImage*>(handle);
-	const io::Image& image = impl->image;
-	const RgbSpace& space = *impl->rgbSpace;
-	for (size_t y = begin.y; y < end.y; ++y)
-	{
-		for (size_t x = begin.x; x < end.x; ++x)
-		{
-			TScalar a;
-			*xyz++ = space.convert(image(y, x), a);
-			if (alpha) *alpha++ = a;
-		}
-	}
-}
-
-void ImageCodecLassHDR::doWrite(
-		TImageHandle handle, const TResolution2D& level, const TResolution2D& begin, 
-		const TResolution2D& end, const XYZ* xyz, const TScalar* alpha) const
-{
-	impl::LassImage* impl = static_cast<impl::LassImage*>(handle);
-	io::Image& image = impl->image;
-	image.colorSpace().gamma = 1.f; // force gamma to one.
-	const RgbSpace& space = *impl->rgbSpace;
-	for (size_t y = begin.y; y < end.y; ++y)
-	{
-		for (size_t x = begin.x; x < end.x; ++x)
-		{
-			const TScalar a = alpha ? *alpha++ : 1;
-			image(y, x) = space.convert(*xyz++, a);
-		}
-	}
+	++pimpl->y;
 }
 
 }
