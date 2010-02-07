@@ -5,11 +5,15 @@ def triangulate_3d(*verts):
 	normal = polygon_normal_3d(*verts)
 	try:
 		return triangulate_3d_with_normal(normal, *verts)
-	except AssertionError, error:
+	except AssertionError as error:
 		raise AssertionError("Failed to triangulate %(verts)r, normal=%(normal)r: %(error)s" % vars())
 
 
 def polygon_normal_3d(*verts):
+	try:
+		from functools import reduce
+	except ImportError:
+		pass
 	assert len(verts) >= 3
 	a = verts[0]
 	pairs = zip(verts[1:-1], verts[2:])
@@ -121,7 +125,7 @@ def norm(v):
 
 
 if __name__ == "__main__":
-	print signed_area_2d((0, 0), (1, 0), (1, 1))
-	print triangulate_2d((0, 0), (1, 0), (1, 1), (0, 1))
-	print triangulate_2d((0, 0), (1, 0), (0.1, 0.1), (0, 1))
-	print triangulate_2d((1, 0), (0.1, 0.1), (0, 1), (0, 0))
+	print(signed_area_2d((0, 0), (1, 0), (1, 1)))
+	print(triangulate_2d((0, 0), (1, 0), (1, 1), (0, 1)))
+	print(triangulate_2d((0, 0), (1, 0), (0.1, 0.1), (0, 1)))
+	print(triangulate_2d((1, 0), (0.1, 0.1), (0, 1), (0, 0)))

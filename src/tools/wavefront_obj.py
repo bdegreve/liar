@@ -256,7 +256,7 @@ def decode(lines, filename="", material=liar.shaders.AshikhminShirley, initial_m
 					
 				try:
 					triangles = geometry.triangulate_3d(*[vertices[v[0]] for v in face])
-				except AssertionError, error:
+				except AssertionError as error:
 					raise AssertionError("failed to triangulate %(face)r: %(error)s" % vars())
 				faces += [(face[a], face[b], face[c]) for a, b, c in triangles]
 	
