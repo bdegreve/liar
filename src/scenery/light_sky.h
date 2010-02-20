@@ -49,15 +49,16 @@ public:
 
 	const TTexturePtr& radiance() const;
 	// const unsigned numberOfEmissionSamples() const; [via SceneLight]
-	const unsigned samplingResolution() const;
+	const TResolution2D& samplingResolution() const;
 
 	void setRadiance(const TTexturePtr& radiance);
 	void setNumberOfEmissionSamples(unsigned iNumberOfSamples);
-	void setSamplingResolution(unsigned resolution);
+	void setSamplingResolution(const TResolution2D& resolution);
 
 private:
 
 	typedef std::vector<TScalar> TMap;
+	typedef std::vector<XYZ> TXYZMap;
 
     LASS_UTIL_VISITOR_DO_ACCEPT;
 
@@ -87,7 +88,7 @@ private:
 	const TPyObjectPtr doGetLightState() const;
 	void doSetLightState(const TPyObjectPtr& state);
 
-	void buildPdf(TMap& pdf, XYZ& averageRadiance) const;
+	void buildPdf(TMap& pdf, TXYZMap& radianceMap, XYZ& averageRadiance) const;
 	void buildCdf(const TMap& iPdf, TMap& oMarginalCdfU, TMap& oConditionalCdfV) const;
 	void sampleMap(const TPoint2D& sample, TScalar&, TScalar& j, TScalar& pdf) const;
 	const TVector3D direction(TScalar i, TScalar j) const;
@@ -97,9 +98,10 @@ private:
 	TTexturePtr radiance_;
 	TMap marginalCdfU_;
 	TMap conditionalCdfV_;
+	TXYZMap radianceMap_;
 	unsigned numberOfSamples_;
-	int resolution_;
-	TScalar invResolution_;
+	TResolution2D resolution_;
+	TVector2D invResolution_;
 	TScalar radius_;
 };
 
