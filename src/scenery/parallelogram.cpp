@@ -54,7 +54,7 @@ void Parallelogram::doIntersect(
 		const kernel::Sample& sample, const kernel::BoundedRay& ray, 
 		kernel::Intersection& result) const
 {
-    TScalar t;
+	TScalar t;
 	const prim::Result hit = prim::intersect(
 		parallelogram_, ray.unboundedRay(), t, ray.nearLimit());
 	if (hit == prim::rOne && ray.inRange(t))
@@ -72,7 +72,7 @@ void Parallelogram::doIntersect(
 const bool Parallelogram::doIsIntersecting(
 		const kernel::Sample& sample, const kernel::BoundedRay& ray) const
 {
-    TScalar t;
+	TScalar t;
 	const prim::Result hit = prim::intersect(
 		parallelogram_, ray.unboundedRay(), t, ray.nearLimit());
 	return hit == prim::rOne && ray.inRange(t);
@@ -84,7 +84,7 @@ void Parallelogram::doLocalContext(
 		const kernel::Sample& sample, const BoundedRay& ray, 
 		const kernel::Intersection& intersection, kernel::IntersectionContext& result) const
 {
-    TPoint2D uv;
+	TPoint2D uv;
 	TScalar t;
 	const prim::Result hit = prim::intersect(
 		parallelogram_, ray.unboundedRay(), uv.x, uv.y, t, ray.nearLimit());
@@ -92,14 +92,14 @@ void Parallelogram::doLocalContext(
 	LASS_ASSERT(t == intersection.t());
 
 	result.setPoint(ray.point(intersection.t()));
-    result.setT(intersection.t());
+	result.setT(intersection.t());
 	result.setUv(uv);
-    result.setDPoint_dU(parallelogram_.sizeU());
-    result.setDPoint_dV(parallelogram_.sizeV());
-    result.setGeometricNormal(normal_);
-    result.setNormal(normal_);
-    result.setDNormal_dU(TVector3D());
-    result.setDNormal_dV(TVector3D());
+	result.setDPoint_dU(parallelogram_.sizeU());
+	result.setDPoint_dV(parallelogram_.sizeV());
+	result.setGeometricNormal(normal_);
+	result.setNormal(normal_);
+	result.setDNormal_dU(TVector3D());
+	result.setDNormal_dV(TVector3D());
 }
 
 

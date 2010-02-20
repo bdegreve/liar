@@ -31,10 +31,10 @@ namespace scenery
 
 PY_DECLARE_CLASS_DOC(TriangleMesh, "a simple triangle mesh")
 PY_CLASS_CONSTRUCTOR_4(TriangleMesh, 
-					   const TriangleMesh::TVertices&, 
-					   const TriangleMesh::TNormals&, 
-					   const TriangleMesh::TUvs&, 
- 					   const TriangleMesh::TIndexTriangles&)
+	const TriangleMesh::TVertices&, 
+	const TriangleMesh::TNormals&, 
+	const TriangleMesh::TUvs&, 
+ 	const TriangleMesh::TIndexTriangles&)
 PY_CLASS_METHOD_DOC(TriangleMesh, smoothNormals, 
 	"smoothNormals(maxAngleInRadians)\n"
 	"generate smooth vertex normals.  maxAngleInRadians is the maximum angle (in radians) that is "
@@ -132,8 +132,7 @@ const TriangleMesh::TIndexTriangles TriangleMesh::triangles() const
 
 // --- private -------------------------------------------------------------------------------------
 
-void TriangleMesh::doIntersect(const Sample& sample, const BoundedRay& ray, 
-						 Intersection& result) const
+void TriangleMesh::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
 {
     TScalar t;
 	TMesh::TTriangleIterator triangle;
@@ -150,22 +149,23 @@ void TriangleMesh::doIntersect(const Sample& sample, const BoundedRay& ray,
 
 
 
-const bool TriangleMesh::doIsIntersecting(const Sample& sample, 
-									const BoundedRay& ray) const
+const bool TriangleMesh::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
 {
 	return mesh_.intersects(ray.unboundedRay(), ray.nearLimit(), ray.farLimit());
 }
 
 
 
-void TriangleMesh::doLocalContext(const Sample& sample, const BoundedRay& ray,                            
-								  const Intersection& intersection, 
-								  IntersectionContext& result) const
+void TriangleMesh::doLocalContext(
+		const Sample& sample, const BoundedRay& ray, const Intersection& intersection,
+		IntersectionContext& result) const
 {
+	result.setBounds(this->boundingBox());
+
 	const TScalar t = intersection.t();
 	const TPoint3D point = ray.point(t);
-    result.setT(t);
-    result.setPoint(point);
+	result.setT(t);
+	result.setPoint(point);
 
 	LASS_ASSERT(intersection.specialField() < mesh_.triangles().size());
 	const TMesh::TTriangle& triangle = mesh_.triangles()[intersection.specialField()];

@@ -38,10 +38,9 @@ PY_CLASS_MEMBER_R(Transformation, worldToLocal)
 
 // --- public --------------------------------------------------------------------------------------
 
-Transformation::Transformation(const TSceneObjectPtr& child, 
-							   const TTransformation3D& localToWorld):
-    child_(child),
-    localToWorld_(localToWorld)
+Transformation::Transformation(const TSceneObjectPtr& child, const TTransformation3D& localToWorld):
+	child_(child),
+	localToWorld_(localToWorld)
 {
 }
 
@@ -95,23 +94,22 @@ void Transformation::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod
 
 void Transformation::doAccept(util::VisitorBase& visitor)
 {
-    preAccept(visitor, *this);
-    child_->accept(visitor);
+	preAccept(visitor, *this);
+	child_->accept(visitor);
 	postAccept(visitor, *this);
 }
 
 
 
-void Transformation::doIntersect(const Sample& sample, const BoundedRay& ray, 
-								 Intersection& result) const
+void Transformation::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
 {
 	TScalar tScaler = TNumTraits::one;
 	const BoundedRay localRay = transform(ray, localToWorld_.inverse(), tScaler);
 	child_->intersect(sample, localRay, result);
-    if (result)
-    {
-        result.push(this, result.t() / tScaler);
-    }
+	if (result)
+	{
+		result.push(this, result.t() / tScaler); // direction vectors are always normalized.
+	}
 }
 
 

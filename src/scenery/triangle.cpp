@@ -49,10 +49,11 @@ Triangle::Triangle(const TPoint3D& a, const TPoint3D& b, const TPoint3D& iC):
 
 // --- private -------------------------------------------------------------------------------------
 
-void Triangle::doIntersect(const kernel::Sample& sample, const kernel::BoundedRay& ray, 
-						 kernel::Intersection& result) const
+void Triangle::doIntersect(
+		const kernel::Sample& sample, const kernel::BoundedRay& ray, 
+		kernel::Intersection& result) const
 {
-    TScalar t;
+	TScalar t;
 	const prim::Result hit = prim::intersect(triangle_, ray.unboundedRay(), t, ray.nearLimit());
 	if (hit == prim::rOne && ray.inRange(t))
 	{
@@ -66,8 +67,7 @@ void Triangle::doIntersect(const kernel::Sample& sample, const kernel::BoundedRa
 
 
 
-const bool Triangle::doIsIntersecting(const kernel::Sample& sample, 
-									const kernel::BoundedRay& ray) const
+const bool Triangle::doIsIntersecting(const kernel::Sample& sample, const kernel::BoundedRay& ray) const
 {
     TScalar t;
 	const prim::Result hit = prim::intersect(triangle_, ray.unboundedRay(), t, ray.nearLimit());
@@ -76,11 +76,11 @@ const bool Triangle::doIsIntersecting(const kernel::Sample& sample,
 
 
 
-void Triangle::doLocalContext(const kernel::Sample& sample, const BoundedRay& ray,
-                            const kernel::Intersection& intersection, 
-                            kernel::IntersectionContext& result) const
+void Triangle::doLocalContext(
+		const kernel::Sample& sample, const BoundedRay& ray, const kernel::Intersection& intersection, 
+		kernel::IntersectionContext& result) const
 {
-    TPoint2D uv;
+	TPoint2D uv;
 	TScalar t;
 	const prim::Result hit = prim::intersect(
 		triangle_, ray.unboundedRay(), uv.x, uv.y, t, ray.nearLimit());

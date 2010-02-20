@@ -191,7 +191,7 @@ const XYZ Image::doLookUp(const Sample& sample, const IntersectionContext& conte
 	const TVector2D& dUv_dI = context.dUv_dI();
 	const TVector2D& dUv_dJ = context.dUv_dJ();
 
-	unsigned levelU0 = 0, levelU1 = 0, levelV0 = 0, levelV1 = 0;
+	size_t levelU0 = 0, levelU1 = 0, levelV0 = 0, levelV1 = 0;
 	TScalar dLevelU = TNumTraits::zero, dLevelV = TNumTraits::zero;
 	switch (mipMapping_)
 	{
@@ -282,7 +282,7 @@ void Image::makeMipMaps(MipMapping mode) const
 		}
 
 		TMipMaps mipMaps(1, MipMapLevel(image_, resolution_));
-		unsigned numLevelsU = 0, numLevelsV = 0;
+		size_t numLevelsU = 0, numLevelsV = 0;
 
 		switch (mode)
 		{
@@ -292,33 +292,33 @@ void Image::makeMipMaps(MipMapping mode) const
 			break;
 
 		case mmIsotropic:
-			numLevelsU = static_cast<unsigned>(num::floor(num::log2(
+			numLevelsU = static_cast<size_t>(num::floor(num::log2(
 				static_cast<TScalar>(std::max(resolution_.x, resolution_.y))))) + 1;
 			numLevelsV = 1;
-			for (unsigned i = 1; i < numLevelsU; ++i)
+			for (size_t i = 1; i < numLevelsU; ++i)
 			{
 				const TScalar scale = TNumTraits::one / (1 << i);
-				const unsigned width = static_cast<unsigned>(num::floor(scale * resolution_.x));
-				const unsigned height = static_cast<unsigned>(num::floor(scale * resolution_.x));
+				const size_t width = static_cast<size_t>(num::floor(scale * resolution_.x));
+				const size_t height = static_cast<size_t>(num::floor(scale * resolution_.x));
 				MipMapLevel temp = makeMipMap(mipMaps.back(), 'x', width);
 				mipMaps.push_back(makeMipMap(temp, 'y', height));
 			}
 			break;
 
 		case mmAnisotropic:
-			numLevelsU = static_cast<unsigned>(num::floor(num::log2(static_cast<TScalar>(resolution_.x))) + 1);
-			numLevelsV = static_cast<unsigned>(num::floor(num::log2(static_cast<TScalar>(resolution_.y))) + 1);
-			for (unsigned j = 0; j < numLevelsV; ++j)
+			numLevelsU = static_cast<size_t>(num::floor(num::log2(static_cast<TScalar>(resolution_.x))) + 1);
+			numLevelsV = static_cast<size_t>(num::floor(num::log2(static_cast<TScalar>(resolution_.y))) + 1);
+			for (size_t j = 0; j < numLevelsV; ++j)
 			{
 				if (j > 0)
 				{
-					const unsigned height = static_cast<unsigned>(
+					const size_t height = static_cast<size_t>(
 						num::floor(static_cast<TScalar>(resolution_.y) / (1 << j)));
 					mipMaps.push_back(makeMipMap(mipMaps[(j - 1) * numLevelsU], 'y', height));
 				}
-				for (unsigned i = 1; i < numLevelsU; ++i)
+				for (size_t i = 1; i < numLevelsU; ++i)
 				{
-					const unsigned width = static_cast<unsigned>(
+					const size_t width = static_cast<size_t>(
 						num::floor(static_cast<TScalar>(resolution_.x) / (1 << i)));
 					mipMaps.push_back(makeMipMap(mipMaps.back(), 'x', width));
 				}
@@ -369,9 +369,9 @@ Image::MipMapLevel Image::makeMipMapEven(
 	if (compressionAxis == 'x')
 	{
 		LASS_ASSERT(parent.resolution().x == 2 * resolution.x);
-		for (unsigned y = 0; y < resolution.y; ++y)
+		for (size_t y = 0; y < resolution.y; ++y)
 		{
-			for (unsigned x = 0; x < resolution.x; ++x)
+			for (size_t x = 0; x < resolution.x; ++x)
 			{
 				level(x, y) = (parent(2 * x, y) + parent(2 * x + 1, y)) / 2;
 			}
@@ -380,9 +380,9 @@ Image::MipMapLevel Image::makeMipMapEven(
 	else
 	{
 		LASS_ASSERT(parent.resolution().y == 2 * resolution.y);
-		for (unsigned y = 0; y < resolution.y; ++y)
+		for (size_t y = 0; y < resolution.y; ++y)
 		{
-			for (unsigned x = 0; x < resolution.x; ++x)
+			for (size_t x = 0; x < resolution.x; ++x)
 			{
 				level(x, y) = (parent(x, 2 * y) + parent(x, 2 * y + 1)) / 2;
 			}
@@ -409,25 +409,25 @@ Image::MipMapLevel Image::makeMipMapOdd(
 
 	const TScalar scale = num::inv(static_cast<TScalar>(oldSize));
 	const bool compressX = compressionAxis == 'x';
-	for (unsigned k = 0; k < newSize; ++k)
+	for (size_t k = 0; k < newSize; ++k)
 	{
-		const unsigned k0 = 2 * k;
-		const unsigned k1 = k0 + 1;
-		const unsigned k2 = k0 + 2;
+		const size_t k0 = 2 * k;
+		const size_t k1 = k0 + 1;
+		const size_t k2 = k0 + 2;
 		const TScalar w0 = scale * (newSize - k);
 		const TScalar w1 = scale * newSize; 
 		const TScalar w2 = scale * (k + 1);
 
 		if (compressX)
 		{
-			for (unsigned y = 0; y < resolution.y; ++y)
+			for (size_t y = 0; y < resolution.y; ++y)
 			{
 				level(k, y) = w0 * parent(k0, y) + w1 * parent(k1, y) + w2 * parent(k2, y);
 			}
 		}
 		else
 		{
-			for (unsigned x = 0; x < resolution.x; ++x)
+			for (size_t x = 0; x < resolution.x; ++x)
 			{
 				level(x, k) = w0 * parent(x, k0) + w1 * parent(x, k1) + w2 * parent(x, k2);
 			}
@@ -440,7 +440,7 @@ Image::MipMapLevel Image::makeMipMapOdd(
 
 
 void Image::mipMapLevel(
-		TScalar width, unsigned numLevels, unsigned& level0, unsigned& level1, TScalar& dLevel) const
+		TScalar width, size_t numLevels, size_t& level0, size_t& level1, TScalar& dLevel) const
 {
 	const TScalar maxLevel = static_cast<TScalar>(numLevels - 1);
 	const TScalar level = maxLevel + num::log2(std::max(width, TScalar(1e-9f)));
@@ -451,13 +451,13 @@ void Image::mipMapLevel(
 	}
 	else if (level >= maxLevel)
 	{
-		level0 = level1 = static_cast<unsigned>(maxLevel);
+		level0 = level1 = static_cast<size_t>(maxLevel);
 		dLevel = TNumTraits::zero;
 	}
 	else
 	{
 		const TScalar floorLevel = num::floor(level);
-		level0 = static_cast<unsigned>(floorLevel);
+		level0 = static_cast<size_t>(floorLevel);
 		level1 = level0 + 1;
 		dLevel = level - floorLevel;
 	}
@@ -466,7 +466,7 @@ void Image::mipMapLevel(
 
 
 
-const Image::TPixel Image::nearest(unsigned levelU, unsigned levelV, const TPoint2D& uv) const
+const Image::TPixel Image::nearest(size_t levelU, size_t levelV, const TPoint2D& uv) const
 {
 	LASS_ASSERT(levelU < numLevelsU_ && levelV < numLevelsV_);
 	const MipMapLevel& mipMap = mipMaps_[levelV * numLevelsU_ + levelU];
@@ -474,8 +474,8 @@ const Image::TPixel Image::nearest(unsigned levelU, unsigned levelV, const TPoin
 	const TResolution2D& res = mipMap.resolution();
 	const TScalar x = num::fractional(uv.x) * res.x;
 	const TScalar y = num::fractional(1.f - uv.y) * res.y;
-	const unsigned x0 = static_cast<unsigned>(num::floor(x));
-	const unsigned y0 = static_cast<unsigned>(num::floor(y));
+	const size_t x0 = static_cast<size_t>(num::floor(x));
+	const size_t y0 = static_cast<size_t>(num::floor(y));
 	
 	return mipMap(x0, y0);
 }
@@ -483,7 +483,7 @@ const Image::TPixel Image::nearest(unsigned levelU, unsigned levelV, const TPoin
 
 
 
-const Image::TPixel Image::bilinear(unsigned levelU, unsigned levelV, const TPoint2D& uv) const
+const Image::TPixel Image::bilinear(size_t levelU, size_t levelV, const TPoint2D& uv) const
 {
 	LASS_ASSERT(levelU < numLevelsU_ && levelV < numLevelsV_);
 	const MipMapLevel& mipMap = mipMaps_[levelV * numLevelsU_ + levelU];
@@ -496,10 +496,10 @@ const Image::TPixel Image::bilinear(unsigned levelU, unsigned levelV, const TPoi
 	const TScalar dx = x - x0;
 	const TScalar dy = y - y0;
 
-	const unsigned i0 = static_cast<unsigned>(x0) % res.x;
-	const unsigned j0 = static_cast<unsigned>(y0) % res.y;
-	const unsigned i1 = (i0 + 1) % res.x;
-	const unsigned j1 = (j0 + 1) % res.y;
+	const size_t i0 = static_cast<size_t>(x0) % res.x;
+	const size_t j0 = static_cast<size_t>(y0) % res.y;
+	const size_t i1 = (i0 + 1) % res.x;
+	const size_t j1 = (j0 + 1) % res.y;
 
 	return
 		(mipMap(i0, j0) * (TNumTraits::one - dx) + mipMap(i1, j0) * dx) * (TNumTraits::one - dy) +

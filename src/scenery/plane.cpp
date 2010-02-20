@@ -44,8 +44,8 @@ Plane::Plane():
 
 
 
-Plane::Plane(const TVector3D& i_normal, TScalar i_d):
-    plane_(i_normal, i_d)
+Plane::Plane(const TVector3D& normal, TScalar d):
+	plane_(normal, d)
 {
 }
 
@@ -67,14 +67,14 @@ void Plane::setNormal(const TVector3D& normal)
 
 const TScalar Plane::d() const
 {
-    return plane_.d();
+	return plane_.d();
 }
 
 
 
-void Plane::setD(TScalar iD)
+void Plane::setD(TScalar d)
 {
-	plane_ = TPlane3D(plane_.normal(), iD);
+	plane_ = TPlane3D(plane_.normal(), d);
 }
 
 
@@ -88,16 +88,16 @@ void Plane::setD(TScalar iD)
 void Plane::doIntersect(const Sample& sample, const BoundedRay& ray, 
 						Intersection& result) const
 {
-    TScalar t;
-    const prim::Result hit = prim::intersect(plane_, ray.unboundedRay(), t, ray.nearLimit());
+	TScalar t;
+	const prim::Result hit = prim::intersect(plane_, ray.unboundedRay(), t, ray.nearLimit());
 	if (hit == prim::rOne && ray.inRange(t)) 
-    {
+	{
 		result = Intersection(this, t, seNoEvent);
-    }
-    else
-    {
-        result = Intersection::empty();
-    }
+	}
+	else
+	{
+		result = Intersection::empty();
+	}
 }
 
 

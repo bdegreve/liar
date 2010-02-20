@@ -103,11 +103,11 @@ private:
 			resolution_(resolution)
 		{
 		}
-		TPixel& operator()(unsigned x, unsigned y)
+		TPixel& operator()(size_t x, size_t y)
 		{ 
 			return pixels_[y * resolution_.x + x]; 
 		}
-		const TPixel& operator()(unsigned x, unsigned y) const 
+		const TPixel& operator()(size_t x, size_t y) const 
 		{ 
 			return pixels_[y * resolution_.x + x]; 
 		}
@@ -129,11 +129,11 @@ private:
 	MipMapLevel makeMipMapEven(const MipMapLevel& parent, prim::XY compressionAxis, size_t newSize) const;
 	MipMapLevel makeMipMapOdd(const MipMapLevel& parent, prim::XY compressionAxis, size_t newSize) const;
 
-	void mipMapLevel(TScalar width, unsigned numLevels, 
-		unsigned& level0, unsigned& level1, TScalar& dLevel) const;
+	void mipMapLevel(TScalar width, size_t numLevels, 
+		size_t& level0, size_t& level1, TScalar& dLevel) const;
 
-	const TPixel nearest(unsigned levelU, unsigned levelV, const TPoint2D& uv) const;
-	const TPixel bilinear(unsigned levelU, unsigned levelV, const TPoint2D& uv) const;
+	const TPixel nearest(size_t levelU, size_t levelV, const TPoint2D& uv) const;
+	const TPixel bilinear(size_t levelU, size_t levelV, const TPoint2D& uv) const;
 
 	static TAntiAliasingDictionary makeAntiAliasingDictionary();
 	static TMipMappingDictionary makeMipMappingDictionary();
@@ -146,8 +146,8 @@ private:
 	MipMapping mipMapping_;
 	mutable MipMapping currentMipMapping_;
 	mutable TMipMaps mipMaps_;
-	mutable unsigned numLevelsU_;
-	mutable unsigned numLevelsV_;
+	mutable size_t numLevelsU_;
+	mutable size_t numLevelsV_;
 	mutable util::CriticalSection mutex_;
 
 	static TAntiAliasingDictionary antiAliasingDictionary_;

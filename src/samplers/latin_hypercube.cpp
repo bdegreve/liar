@@ -97,23 +97,23 @@ void LatinHypercube::init(const TResolution2D& resolution, size_t numberOfSample
 
 const TResolution2D& LatinHypercube::doResolution() const
 {
-    return resolution_;
+	return resolution_;
 }
 
 
 
 const size_t LatinHypercube::doSamplesPerPixel() const
 {
-    return samplesPerPixel_;
+	return samplesPerPixel_;
 }
 
 
 
 void LatinHypercube::doSetResolution(const TResolution2D& resolution)
 {
-    LASS_ASSERT(resolution.x > 0 && resolution.y > 0);
-    resolution_ = resolution;
-    reciprocalResolution_ = TVector2D(resolution).reciprocal();
+	LASS_ASSERT(resolution.x > 0 && resolution.y > 0);
+	resolution_ = resolution;
+	reciprocalResolution_ = TVector2D(resolution).reciprocal();
 }
 
 
@@ -121,13 +121,13 @@ void LatinHypercube::doSetResolution(const TResolution2D& resolution)
 void LatinHypercube::doSetSamplesPerPixel(size_t samplesPerPixel)
 {
 	samplesPerPixel_ = samplesPerPixel; 
-    stratumSize_ = TNumTraits::one / samplesPerPixel_;
-    timeStrata_.resize(samplesPerPixel_);
+	stratumSize_ = TNumTraits::one / samplesPerPixel_;
+	timeStrata_.resize(samplesPerPixel_);
 	frequencyStrata_.resize(samplesPerPixel_);
-    screenStrataX_.resize(samplesPerPixel_);
-    screenStrataY_.resize(samplesPerPixel_);
-    lensStrataX_.resize(samplesPerPixel_);
-    lensStrataY_.resize(samplesPerPixel_);
+	screenStrataX_.resize(samplesPerPixel_);
+	screenStrataY_.resize(samplesPerPixel_);
+	lensStrataX_.resize(samplesPerPixel_);
+	lensStrataY_.resize(samplesPerPixel_);
 
 	for (size_t i = 0; i < samplesPerPixel_; ++i)
 	{
@@ -153,7 +153,7 @@ void LatinHypercube::doSeed(size_t randomSeed)
 void LatinHypercube::doSampleScreen(const TResolution2D& pixel, size_t subPixel, 
 								TSample2D& screenCoordinate)
 {
-    LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
+	LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
 	TVector2D position(sampleStratum(subPixel, screenStrataX_), sampleStratum(subPixel, screenStrataY_));
 	position += TVector2D(pixel);
 	position *= reciprocalResolution_;
@@ -165,7 +165,7 @@ void LatinHypercube::doSampleScreen(const TResolution2D& pixel, size_t subPixel,
 void LatinHypercube::doSampleLens(const TResolution2D& pixel, size_t subPixel, 
 							  TSample2D& lensCoordinate)
 {
-    LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
+	LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
 	lensCoordinate = TSample2D(sampleStratum(subPixel, lensStrataX_), sampleStratum(subPixel, lensStrataY_));
 }
 
@@ -174,7 +174,7 @@ void LatinHypercube::doSampleLens(const TResolution2D& pixel, size_t subPixel,
 void LatinHypercube::doSampleTime(const TResolution2D& pixel, size_t subPixel, 
 							  const TimePeriod& period, TTime& time)
 {
-    LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
+	LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
 	const TScalar tau = sampleStratum(subPixel, timeStrata_);
 	time = period.interpolate(tau);
 }
@@ -183,7 +183,7 @@ void LatinHypercube::doSampleTime(const TResolution2D& pixel, size_t subPixel,
 
 void LatinHypercube::doSampleFrequency(const TResolution2D& pixel, size_t subPixel, TScalar& frequency)
 {
-    LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
+	LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
 	const TScalar phi = sampleStratum(subPixel, frequencyStrata_);
 	XYZ xyz;
 	TScalar pdf;
@@ -270,7 +270,7 @@ void LatinHypercube::doSetState(const TPyObjectPtr& state)
 
 const LatinHypercube::TSample1D LatinHypercube::sampleStratum(size_t subPixel, TStrata& strata)
 {
-    LASS_ASSERT(subPixel < samplesPerPixel_);
+	LASS_ASSERT(subPixel < samplesPerPixel_);
 	if (subPixel == 0)
 	{
 		stde::random_shuffle_r(strata, numberGenerator_);	

@@ -97,40 +97,40 @@ void Stratifier::init(const TResolution2D& resolution, size_t numberOfSamplesPer
 
 const TResolution2D& Stratifier::doResolution() const
 {
-    return resolution_;
+	return resolution_;
 }
 
 
 
 const size_t Stratifier::doSamplesPerPixel() const
 {
-    return strataPerPixel_;
+	return strataPerPixel_;
 }
 
 
 
 void Stratifier::doSetResolution(const TResolution2D& resolution)
 {
-    LASS_ASSERT(resolution.x > 0 && resolution.y > 0);
-    resolution_ = resolution;
-    reciprocalResolution_ = TVector2D(resolution).reciprocal();
+	LASS_ASSERT(resolution.x > 0 && resolution.y > 0);
+	resolution_ = resolution;
+	reciprocalResolution_ = TVector2D(resolution).reciprocal();
 }
 
 
 
 void Stratifier::doSetSamplesPerPixel(size_t samplesPerPixel)
 {
-    const size_t strataPerAxis = static_cast<size_t>(num::ceil(
-        num::sqrt(static_cast<TScalar>(samplesPerPixel))));
+	const size_t strataPerAxis = static_cast<size_t>(num::ceil(
+		num::sqrt(static_cast<TScalar>(samplesPerPixel))));
     
-    strataPerPixel_ = strataPerAxis * strataPerAxis;
-    stratum1DSize_ = TNumTraits::one / strataPerPixel_;
+	strataPerPixel_ = strataPerAxis * strataPerAxis;
+	stratum1DSize_ = TNumTraits::one / strataPerPixel_;
 	stratum2DSize_ = 
 		TVector2D(TNumTraits::one, TNumTraits::one) / static_cast<TScalar>(strataPerAxis);
-    timeStrata_.resize(strataPerPixel_);
+	timeStrata_.resize(strataPerPixel_);
 	frequencyStrata_.resize(strataPerPixel_);
-    screenStrata_.resize(strataPerPixel_);
-    lensStrata_.resize(strataPerPixel_);
+	screenStrata_.resize(strataPerPixel_);
+	lensStrata_.resize(strataPerPixel_);
 
 	for (size_t i = 0; i < strataPerPixel_; ++i)
 	{
@@ -138,14 +138,14 @@ void Stratifier::doSetSamplesPerPixel(size_t samplesPerPixel)
 		frequencyStrata_[i] = static_cast<TSample1D>(i);
 	}
 
-    for (size_t j = 0; j < strataPerAxis; ++j)
-    {
-        for (size_t i = 0; i < strataPerAxis; ++i)
-        {
-            screenStrata_[j * strataPerAxis + i] = TSample2D(i, j);
+	for (size_t j = 0; j < strataPerAxis; ++j)
+	{
+		for (size_t i = 0; i < strataPerAxis; ++i)
+		{
+			screenStrata_[j * strataPerAxis + i] = TSample2D(i, j);
 			lensStrata_[j * strataPerAxis + i] = TSample2D(i, j);
-        }
-    }
+		}
+	}
 }
 
 
@@ -160,7 +160,7 @@ void Stratifier::doSeed(size_t randomSeed)
 void Stratifier::doSampleScreen(const TResolution2D& pixel, size_t subPixel, 
 								TSample2D& screenCoordinate)
 {
-    LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
+	LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
 	TVector2D position = sampleStratum(subPixel, screenStrata_).position();
 	position += TVector2D(pixel);
 	position *= reciprocalResolution_;
@@ -172,7 +172,7 @@ void Stratifier::doSampleScreen(const TResolution2D& pixel, size_t subPixel,
 void Stratifier::doSampleLens(const TResolution2D& pixel, size_t subPixel, 
 							  TSample2D& lensCoordinate)
 {
-    LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
+	LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
 	lensCoordinate = sampleStratum(subPixel, lensStrata_);
 }
 
@@ -181,7 +181,7 @@ void Stratifier::doSampleLens(const TResolution2D& pixel, size_t subPixel,
 void Stratifier::doSampleTime(const TResolution2D& pixel, size_t subPixel, 
 							  const TimePeriod& period, TTime& time)
 {
-    LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
+	LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
 	const TScalar tau = sampleStratum(subPixel, timeStrata_);
 	time = period.interpolate(tau);
 }
@@ -190,7 +190,7 @@ void Stratifier::doSampleTime(const TResolution2D& pixel, size_t subPixel,
 
 void Stratifier::doSampleFrequency(const TResolution2D& pixel, size_t subPixel, TScalar& frequency)
 {
-    LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
+	LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
 	const TScalar phi = sampleStratum(subPixel, frequencyStrata_);
 	XYZ xyz;
 	TScalar pdf;
@@ -279,7 +279,7 @@ void Stratifier::doSetState(const TPyObjectPtr& state)
 	TStrata1D timeStrata;
 
 	python::decodeTuple(state, numGenState, resolution, strataPerPixel, lensStrata,
-        timeStrata,	isJittered_);
+		timeStrata,	isJittered_);
 
 	numberGenerator_.setState(numGenState.begin(), numGenState.end());
 	setResolution(resolution);
@@ -292,7 +292,7 @@ void Stratifier::doSetState(const TPyObjectPtr& state)
 
 const Stratifier::TSample1D Stratifier::sampleStratum(size_t subPixel, TStrata1D& strata)
 {
-    LASS_ASSERT(subPixel < strataPerPixel_);
+	LASS_ASSERT(subPixel < strataPerPixel_);
 	if (subPixel == 0)
 	{
 		stde::random_shuffle_r(strata, numberGenerator_);	
@@ -304,7 +304,7 @@ const Stratifier::TSample1D Stratifier::sampleStratum(size_t subPixel, TStrata1D
 
 const Stratifier::TSample2D Stratifier::sampleStratum(size_t subPixel, TStrata2D& strata)
 {
-    LASS_ASSERT(subPixel < strataPerPixel_);
+	LASS_ASSERT(subPixel < strataPerPixel_);
 	if (subPixel == 0)
 	{
 		stde::random_shuffle_r(strata, numberGenerator_);	

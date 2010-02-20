@@ -49,9 +49,9 @@ Sphere::Sphere():
 
 
 
-Sphere::Sphere(const TPoint3D& iCenter, TScalar radius):
-    sphere_(iCenter, radius),
-    invRadius_(num::inv(radius))
+Sphere::Sphere(const TPoint3D& center, TScalar radius):
+	sphere_(center, radius),
+	invRadius_(num::inv(radius))
 {
 }
 
@@ -59,21 +59,21 @@ Sphere::Sphere(const TPoint3D& iCenter, TScalar radius):
 
 const TPoint3D& Sphere::center() const
 {
-    return sphere_.center();
+	return sphere_.center();
 }
 
 
 
-void Sphere::setCenter(const TPoint3D& iCenter)
+void Sphere::setCenter(const TPoint3D& center)
 {
-	sphere_.center() = iCenter;
+	sphere_.center() = center;
 }
 
 
 
 const TScalar Sphere::radius() const
 {
-    return sphere_.radius();
+	return sphere_.radius();
 }
 
 
@@ -94,7 +94,7 @@ void Sphere::setRadius(TScalar radius)
 
 void Sphere::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
 {
-    TScalar t;
+	TScalar t;
 	const prim::Result hit = prim::intersect(sphere_, ray.unboundedRay(), t, ray.nearLimit());
 	if (hit == prim::rOne && ray.inRange(t))
 	{
@@ -112,7 +112,7 @@ void Sphere::doIntersect(const Sample& sample, const BoundedRay& ray, Intersecti
 
 const bool Sphere::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
 {
-    TScalar t;
+	TScalar t;
 	const prim::Result hit = prim::intersect(sphere_, ray.unboundedRay(), t, ray.nearLimit());
 	return hit == prim::rOne && ray.inRange(t);
 }
@@ -125,8 +125,8 @@ void Sphere::doLocalContext(
 {
 	const TScalar t = intersection.t();
 	const TPoint3D point = ray.point(t);
-    result.setT(t);
-    result.setPoint(point);
+	result.setT(t);
+	result.setPoint(point);
 
 	//         [sin theta * cos phi]
 	// R = r * [sin theta * sin phi]

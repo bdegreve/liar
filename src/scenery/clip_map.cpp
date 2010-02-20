@@ -178,7 +178,7 @@ const bool ClipMap::doContains(const Sample& sample, const TPoint3D& point) cons
 
 const TAabb3D ClipMap::doBoundingBox() const
 {
-	return child_->boundingBox();;
+	return child_->boundingBox();
 }
 
 

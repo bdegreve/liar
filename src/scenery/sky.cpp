@@ -74,8 +74,8 @@ void Sky::doLocalContext(const Sample& sample, const BoundedRay& ray,
 		const Intersection& intersection, IntersectionContext& result) const
 {
 	//LASS_ASSERT(intersection.t() == radius_);
-    result.setT(radius_);
-    result.setPoint(ray.point(radius_));
+	result.setT(radius_);
+	result.setPoint(ray.point(radius_));
 
 	//         [sin theta * cos phi]
 	// R = r * [sin theta * sin phi]
@@ -89,8 +89,8 @@ void Sky::doLocalContext(const Sample& sample, const BoundedRay& ray,
 	// theta = pi * v
 	//
 	LASS_ASSERT(normal.z >= -TNumTraits::one && normal.z <= TNumTraits::one);
-    const TScalar phi = num::atan2(normal.x, normal.y);
-    const TScalar theta = num::acos(normal.z);
+	const TScalar phi = num::atan2(normal.x, normal.y);
+	const TScalar theta = num::acos(normal.z);
 	result.setUv(phi / (2 * TNumTraits::pi), theta / TNumTraits::pi);
 
 	//               [sin theta * -sin phi]               [cos theta * cos phi]
