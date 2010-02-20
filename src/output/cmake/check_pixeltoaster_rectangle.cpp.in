@@ -1,0 +1,7 @@
+#include <${pixeltoaster_INCLUDE_DIR}/PixelToaster.h>
+
+int main()
+{
+	PixelToaster::Rectangle a;
+	return 0;
+}
