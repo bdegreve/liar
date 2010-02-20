@@ -23,6 +23,7 @@
 
 #include "textures_common.h"
 #include "cube_mapping.h"
+#include <lass/num/impl/matrix_solve.h>
 
 namespace liar
 {
@@ -64,7 +65,7 @@ void CubeMapping::setTexture(const TTexturePtr& texture)
 
 const XYZ CubeMapping::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
-	const TVector3D& n = context.normal();
+	const TVector3D& n = context.geometricNormal();
 	size_t i, j;
 	if (num::abs(n.z) >= num::abs(n.x) && num::abs(n.z) >= num::abs(n.y))
 	{
@@ -85,6 +86,24 @@ const XYZ CubeMapping::doLookUp(const Sample& sample, const IntersectionContext&
 	temp.setUv(TPoint2D(context.point()[i], context.point()[j]));
 	temp.setDUv_dI(TVector2D(context.dPoint_dI()[i], context.dPoint_dI()[j]));
 	temp.setDUv_dJ(TVector2D(context.dPoint_dJ()[i], context.dPoint_dJ()[j]));
+	
+	const TVector2D dst_du(context.dPoint_dU()[i], context.dPoint_dU()[j]);
+	const TVector2D dst_dv(context.dPoint_dV()[i], context.dPoint_dV()[j]);
+	const TScalar matrix[4] = { dst_du.x, dst_dv.x, dst_du.y, dst_dv.y };
+	TScalar inverse[4] = { 1, 0, 0, 1 };
+	if (num::impl::cramer2<TScalar>(matrix, inverse, inverse + 4))
+	{
+		const TVector2D duv_ds(inverse[0], inverse[2]);
+		const TVector2D duv_dt(inverse[1], inverse[3]);
+		const TVector3D dpoint_ds = context.dPoint_dU() * duv_ds.x + context.dPoint_dV() * duv_ds.y;
+		const TVector3D dpoint_dt = context.dPoint_dU() * duv_dt.x + context.dPoint_dV() * duv_dt.y;
+		temp.setDPoint_dU(dpoint_ds);
+		temp.setDPoint_dV(dpoint_dt);
+		const TVector3D dnormal_ds = context.dNormal_dU() * duv_ds.x + context.dNormal_dV() * duv_ds.y;
+		const TVector3D dnormal_dt = context.dNormal_dU() * duv_dt.x + context.dNormal_dV() * duv_dt.y;
+		temp.setDNormal_dU(dnormal_ds);
+		temp.setDNormal_dV(dnormal_dt);
+	}
 	return texture_->lookUp(sample, temp);
 }
 
