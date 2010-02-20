@@ -6,7 +6,7 @@
 # as well ;)
 #
 # LiAR isn't a raytracer
-# Copyright (C) 2004-2009  Bram de Greve
+# Copyright (C) 2004-2005  Bram de Greve
 
 from liar import *
 
