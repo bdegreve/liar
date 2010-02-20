@@ -24,6 +24,12 @@
 #include "../kernel/image_codec.h"
 #include <lass/io/binary_i_file.h>
 #include <lass/io/binary_o_file.h>
+#include <lass/io/arg_parser.h>
+
+#include <cstdio>
+#if LASS_HAVE_SYS_TYPES_H
+#	include <sys/types.h>
+#endif
 
 #ifdef HAVE_STDDEF_H
 #	undef HAVE_STDDEF_H
@@ -206,10 +212,14 @@ struct WriteHandle: Handle
 {
 	jpeg_compress_struct cinfo;
 	DestMgr dest;
-	WriteHandle(const std::string& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace):
+	WriteHandle(const std::string& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string& options):
 		Handle(rgbSpace),
 		dest(path)
 	{
+		io::ArgParser parser;
+		io::ArgValue<int> quality(parser, "q" ,"quality", "compression quality: 0-100");
+		parser.parse(options);
+
 		cinfo.err = jpeg_std_error(&jerr);
 		jpeg_create_compress(&cinfo);
 		cinfo.dest = &dest;
@@ -219,6 +229,10 @@ struct WriteHandle: Handle
 		cinfo.in_color_space = JCS_RGB;
 		cinfo.input_gamma = this->rgbSpace->gamma();
 		jpeg_set_defaults(&cinfo);
+		if (quality)
+		{
+			jpeg_set_quality(&cinfo, num::clamp(quality[0], 0, 100), TRUE);
+		}
 		jpeg_start_compress(&cinfo, TRUE);
 		line.resize(cinfo.image_width * cinfo.input_components);
 	}
@@ -235,7 +249,7 @@ private:
 			const std::string& path, const TResolution2D& resolution, 
 			const kernel::TRgbSpacePtr& rgbSpace, const std::string& options) const
 	{
-		return new WriteHandle(path, resolution, rgbSpace);
+		return new WriteHandle(path, resolution, rgbSpace, options);
 	}
 
 	const TImageHandle doOpen(
