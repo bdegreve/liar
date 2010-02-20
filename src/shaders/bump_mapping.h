@@ -50,6 +50,9 @@ public:
 	const TTexturePtr& displacement() const;
 	void setDisplacement(const TTexturePtr& displacement);
 
+	TScalar scale() const;
+	void setScale(TScalar scale);
+
 private:
 
 	void doRequestSamples(const TSamplerPtr& sampler);
@@ -71,6 +74,7 @@ private:
 
 	TShaderPtr shader_;
 	TTexturePtr displacement_;
+	TScalar scale_;
 };
 
 }
