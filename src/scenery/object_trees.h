@@ -30,6 +30,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_SCENERY_OBJECT_TREE_H
 
 #include "scenery_common.h"
+#include "list.h"
 #include "../kernel/scene_object.h"
 #include <lass/spat/aabb_tree.h>
 #include <lass/spat/aabp_tree.h>
@@ -52,11 +53,19 @@ public:
 	
 	void add(const TSceneObjectPtr& child)
 	{
-		children_.push_back(child);
+		if (child->area() == TNumTraits::infinity)
+		{
+			bigChildren_.add(child);
+		}
+		else
+		{
+			smallChildren_.push_back(child);
+		}
+		allChildren_.push_back(child);
 	}
 	void add(const TChildren& children)
 	{
-		children_.insert(children_.end(), children.begin(), children.end());
+		this->add(children.begin(), children.end());
 	}
 	template <typename InputIterator> void add(InputIterator first, InputIterator last)
 	{
@@ -69,10 +78,13 @@ public:
 protected:
 
 	ObjectTree() {}
-	ObjectTree(const TChildren& children): children_(children) {}
+	ObjectTree(const TChildren& children)
+	{
+		this->add(children.begin(), children.end());
+	}
 	template <typename InputIterator> ObjectTree(InputIterator begin, InputIterator end)
 	{
-		add(begin, end);
+		this->add(begin, end);
 	}
 
 private:
@@ -80,8 +92,8 @@ private:
 	void doAccept(lass::util::VisitorBase& visitor)
 	{
 		preAccept(visitor, *this);
-		const TChildren::const_iterator end = children_.end();
-		for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
+		const TChildren::const_iterator end = allChildren_.end();
+		for (TChildren::const_iterator i = allChildren_.begin(); i != end; ++i)
 		{
 			(*i)->accept(visitor);
 		}
@@ -90,12 +102,12 @@ private:
 
 	void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period)
 	{
-		const TChildren::const_iterator end = children_.end();
-		for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
+		const TChildren::const_iterator end = allChildren_.end();
+		for (TChildren::const_iterator i = allChildren_.begin(); i != end; ++i)
 		{
 			(*i)->preProcess(scene, period);
 		}
-		tree_.reset(children_.begin(), children_.end());
+		tree_.reset(smallChildren_.begin(), smallChildren_.end());
 	}
 
 	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
@@ -105,7 +117,7 @@ private:
 		info.sample = &sample;
 		info.intersectionResult = &treeResult;
 		TScalar t;
-		if (tree_.intersect(ray, t, ray.nearLimit(), &info) != children_.end() && t < ray.farLimit())
+		if (tree_.intersect(ray, t, ray.nearLimit(), &info) != smallChildren_.end() && t < ray.farLimit())
 		{
 			LASS_ASSERT(treeResult);
 			treeResult.push(this);
@@ -113,6 +125,12 @@ private:
 		else
 		{
 			LASS_ASSERT(!treeResult);
+		}
+		Intersection bigResult;
+		bigChildren_.intersect(sample, ray, bigResult);
+		if (bigResult && (!treeResult || bigResult.t() < treeResult.t()))
+		{
+			treeResult.swap(bigResult);
 		}
 		result.swap(treeResult);
 	}
@@ -122,7 +140,7 @@ private:
 		Info info;
 		info.sample = &sample;
 		info.intersectionResult = 0;
-		return tree_.intersects(ray, ray.nearLimit(), ray.farLimit(), &info);
+		return bigChildren_.isIntersecting(sample, ray) || tree_.intersects(ray, ray.nearLimit(), ray.farLimit(), &info);
 	}
 
 	void doLocalContext(
@@ -138,18 +156,18 @@ private:
 		Info info;
 		info.sample = &sample;
 		info.intersectionResult = 0;
-		return tree_.contains(point, &info);
+		return tree_.contains(point, &info) || bigChildren_.contains(sample, point);
 	}
 
 	const TAabb3D doBoundingBox() const
 	{
-		return tree_.aabb();
+		return tree_.aabb() + bigChildren_.boundingBox();
 	}
 
 	const TScalar doArea() const
 	{
 		TScalar result = 0;
-		for (TChildren::const_iterator i = children_.begin(); i != children_.end(); ++i)
+		for (TChildren::const_iterator i = allChildren_.begin(); i != allChildren_.end(); ++i)
 		{
 			result += (*i)->area();
 		}
@@ -159,12 +177,12 @@ private:
 
 	const TPyObjectPtr doGetState() const
 	{
-		return python::makeTuple(children_);
+		return python::makeTuple(allChildren_);
 	}
 
 	void doSetState(const TPyObjectPtr& state)
 	{
-		LASS_ENFORCE(python::decodeTuple(state, children_));
+		LASS_ENFORCE(python::decodeTuple(state, allChildren_));
 	}
 
 	struct Info
@@ -282,7 +300,9 @@ private:
 	typedef typename TreeTypedef<TChildren::value_type, ObjectTraits>::Type TTree;
 	//typedef spat::AabbTree<TChildren::value_type, ObjectTraits> TTree;
 
-	TChildren children_;
+	TChildren allChildren_;
+	TChildren smallChildren_;
+	List bigChildren_;
 	TTree tree_;
 };
 
