@@ -126,10 +126,12 @@ private:
 		{
 			LASS_ASSERT(!treeResult);
 		}
+
 		Intersection bigResult;
 		bigChildren_.intersect(sample, ray, bigResult);
 		if (bigResult && (!treeResult || bigResult.t() < treeResult.t()))
 		{
+			bigResult.push(this);
 			treeResult.swap(bigResult);
 		}
 		result.swap(treeResult);

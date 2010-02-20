@@ -98,8 +98,10 @@ PhotonMapper::PhotonMapper():
 		estimationRadius_[i] = 0;
 		estimationTolerance_[i] = 0.05f;
 		estimationSize_[i] = 50;
+		maxActualEstimationRadius_[i] = 0;
 	}
 }
+
 
 
 
@@ -325,8 +327,8 @@ const XYZ PhotonMapper::doCastRay(
 	}
 	shader->shadeContext(sample, context);
 
-	const TVector3D targetNormal = context.shaderToWorld(TVector3D(0, 0, 1)).normal();
-	const TVector3D omegaIn = context.worldToShader(-primaryRay.direction()).normal();
+	const TVector3D targetNormal = context.bsdfToWorld(TVector3D(0, 0, 1));
+	const TVector3D omegaIn = context.worldToBsdf(-primaryRay.direction());
 	LASS_ASSERT(omegaIn.z >= 0);
 
 	if (isVisualizingPhotonMap_)
@@ -406,8 +408,7 @@ const XYZ PhotonMapper::doCastRay(
 				if (out[i].pdf > 0 && out[i].value)
 				{
 					LASS_ASSERT(out[i].omegaOut.z > 0);
-					const TVector3D directionCentral =
-						context.shaderToWorld(out[i].omegaOut).normal();
+					const TVector3D directionCentral = context.bsdfToWorld(out[i].omegaOut);
 					LASS_ASSERT(dot(normal, directionCentral) > 0);
 					LASS_ASSERT(dot(normal, incident) < 0);
 					const TVector3D directionI = directionCentral + dReflected_dI;
@@ -451,9 +452,7 @@ const XYZ PhotonMapper::doCastRay(
 				if (out[i].pdf > 0 && out[i].value)
 				{
 					LASS_ASSERT(out[i].omegaOut.z < 0);
-					const TVector3D directionCentral =
-						context.shaderToWorld(out[i].omegaOut).normal();
-
+					const TVector3D directionCentral = context.bsdfToWorld(out[i].omegaOut);
 					const DifferentialRay transmittedRay(
 						BoundedRay(beginCentral, directionCentral, tolerance),
 						TRay3D(beginCentral, directionCentral),
@@ -732,8 +731,7 @@ void PhotonMapper::tracePhoton(
 				photonBuffer_[mtGlobal].push_back(photon);
 				if (uniform() < ratioPrecomputedIrradiance_)
 				{
-					const TVector3D worldNormal = 
-						context.shaderToWorld(TVector3D(0, 0, 1)).normal();
+					const TVector3D worldNormal = context.bsdfToWorld(TVector3D(0, 0, 1));
 					irradianceBuffer_.push_back(Irradiance(hitPoint, worldNormal));
 				}
 			}
@@ -747,7 +745,7 @@ void PhotonMapper::tracePhoton(
 	}
 	LASS_ASSERT(generation < maxRayGeneration());
 
-	const TVector3D omegaIn = context.worldToShader(-ray.direction()).normal();
+	const TVector3D omegaIn = context.worldToBsdf(-ray.direction());
 	if (omegaIn.z < 0)
 	{
 		return;
@@ -770,7 +768,7 @@ void PhotonMapper::tracePhoton(
 	if (uniform() < scatterProbability)
 	{
 		newPower /= scatterProbability;
-		const BoundedRay newRay(hitPoint, context.shaderToWorld(out.omegaOut).normal(), tolerance);
+		const BoundedRay newRay(hitPoint, context.bsdfToWorld(out.omegaOut));
 		const bool isSpecular = (out.usedCaps & (Shader::capsSpecular | Shader::capsGlossy)) > 0;
 		const bool newIsCaustic = isSpecular && (isCaustic || generation == 0);
 		MediumChanger mediumChanger(mediumStack_, context.interior(), 
@@ -842,7 +840,7 @@ const XYZ PhotonMapper::traceDirect(
 				targetNormal, shadowRay, lightPdf);
 			if (lightPdf > 0 && radiance)
 			{
-				const TVector3D& omegaOut = context.worldToShader(shadowRay.direction()).normal();
+				const TVector3D& omegaOut = context.worldToBsdf(shadowRay.direction());
 				BsdfIn in(omegaOut, caps);
 				BsdfOut out;
 				shader->bsdf(sample, context, omegaIn, &in, &in + 1, &out);
@@ -923,7 +921,7 @@ const XYZ PhotonMapper::gatherIndirect(
 	{
 		if (out[i].pdf > 0 && out[i].value)
 		{
-			const TVector3D direction = context.shaderToWorld(out[i].omegaOut).normal();
+			const TVector3D direction = context.bsdfToWorld(out[i].omegaOut);
 			const BoundedRay ray(target, direction, tolerance);
 			Intersection intersection;
 			scene()->intersect(sample, ray, intersection);
@@ -933,7 +931,7 @@ const XYZ PhotonMapper::gatherIndirect(
 				IntersectionContext hitContext(this);
 				scene()->localContext(sample, ray, intersection, hitContext);
 				hitContext.flipTo(-direction);
-				const TVector3D hitOmega = hitContext.worldToShader(-direction).normal();
+				const TVector3D hitOmega = hitContext.worldToBsdf(-direction);
 				const XYZ radiance = estimateRadiance(
 					sample, hitContext, hitPoint, hitOmega, gatherStage);
 				result += out[i].value * radiance * num::abs(out[i].omegaOut.z) / 
@@ -1015,7 +1013,7 @@ const XYZ PhotonMapper::estimateRadiance(
 		if (sqrDist < num::sqr(estimationRadius_[mtGlobal]))
 		//if (dot(normal, nearest.normal) > 0.9)
 		{
-			BsdfIn in(context.worldToShader(nearest.normal).normal(), Shader::capsAll);
+			BsdfIn in(context.worldToBsdf(nearest.normal), Shader::capsAll);
 			BsdfOut out;
 			shader->bsdf(sample, context, omegaOut, &in, &in + 1, &out);
 			return out.pdf > 0 && out.value ? out.value * nearest.irradiance : XYZ();
@@ -1036,7 +1034,7 @@ const XYZ PhotonMapper::estimateRadiance(
 	XYZ result;
 	for (TPhotonNeighbourhood::const_iterator i = photonNeighbourhood_.begin(); i != last; ++i)
 	{
-		const TVector3D omegaPhoton = context.worldToShader(i->object()->omegaIn).normal();
+		const TVector3D omegaPhoton = context.worldToBsdf(i->object()->omegaIn);
 		BsdfIn in(omegaPhoton, Shader::capsAll & ~Shader::capsSpecular & ~Shader::capsGlossy);
 		BsdfOut out;
 		shader->bsdf(sample, context, omegaOut, &in, &in + 1, &out);
@@ -1080,7 +1078,7 @@ const XYZ PhotonMapper::estimateCaustics(
 	for (int i = 0; i < n; ++i)
 	{
 		const TVector3D omegaPhoton = 
-			context.worldToShader(photonNeighbourhood_[i].object()->omegaIn).normal();
+			context.worldToBsdf(photonNeighbourhood_[i].object()->omegaIn);
 		bsdfIns_[i] = BsdfIn(omegaPhoton, Shader::capsAllDiffuse);
 	};
 
@@ -1104,6 +1102,13 @@ const XYZ PhotonMapper::estimateCaustics(
 	}
 
 	return result / (TNumTraits::pi * sqrSize);
+}
+
+
+
+void PhotonMapper::updateActualEstimationRadius(MapType mapType, TScalar radius) const
+{
+	maxActualEstimationRadius_[mapType] = std::max(maxActualEstimationRadius_[mapType], radius);
 }
 
 

@@ -36,6 +36,7 @@
 #include "image.h"
 #include "linear_interpolator.h"
 #include "mix_2.h"
+#include "orco.h"
 #include "product.h"
 #include "time.h"
 #include "transformation_uv.h"
@@ -63,6 +64,7 @@ PY_MODULE_CLASS(textures, Global)
 PY_MODULE_CLASS(textures, GridBoard)
 PY_MODULE_CLASS(textures, Image)
 PY_MODULE_CLASS(textures, LinearInterpolator)
+PY_MODULE_CLASS(textures, OrCo)
 PY_MODULE_CLASS(textures, Product)
 PY_MODULE_CLASS(textures, Time)
 PY_MODULE_CLASS(textures, TransformationUv)

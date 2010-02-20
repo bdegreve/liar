@@ -31,6 +31,8 @@
 #include <lass/stde/extended_iterator.h>
 #include <lass/util/thread.h>
 */
+#include <lass/num/floating_point_comparison.h>
+
 #define EVAL(x) LASS_COUT << LASS_STRINGIFY(x) << ": " << (x) << std::endl
 
 namespace liar
@@ -113,9 +115,9 @@ const XYZ DirectLighting::doCastRay(
 	}
 	shader->shadeContext(sample, context);
 
-	const TVector3D targetNormal = context.shaderToWorld(TVector3D(0, 0, 1));
-	const TVector3D omegaIn = context.worldToShader(-primaryRay.direction());
-	LASS_ASSERT(omegaIn.z >= 0);
+	const TVector3D targetNormal = context.bsdfToWorld(TVector3D(0, 0, 1));
+	const TVector3D omegaIn = context.worldToBsdf(-primaryRay.direction());
+	//LASS_ASSERT(omegaIn.z >= 0);
 
 	XYZ result = shader->emission(sample, context, omegaIn);
 
@@ -134,8 +136,7 @@ const XYZ DirectLighting::doCastRay(
 			for (size_t i = 0; i < n; ++i)
 			{
 				in[i].sample = bsdfSample[i];
-				in[i].allowedCaps = Shader::capsReflection | Shader::capsSpecular |
-					Shader::capsGlossy;
+				in[i].allowedCaps = Shader::capsReflection | Shader::capsSpecular | Shader::capsGlossy;
 			}
 			shader->sampleBsdf(sample, context, omegaIn, &in[0], &in[0] + n, &out[0]);
 
@@ -164,8 +165,7 @@ const XYZ DirectLighting::doCastRay(
 				if (out[i].pdf > 0 && out[i].value)
 				{
 					LASS_ASSERT(out[i].omegaOut.z > 0);
-					const TVector3D directionCentral =
-						context.shaderToWorld(out[i].omegaOut);
+					const TVector3D directionCentral = context.bsdfToWorld(out[i].omegaOut);
 					LASS_ASSERT(dot(normal, directionCentral) > 0);
 					LASS_ASSERT(dot(normal, incident) < 0);
 					const TVector3D directionI = directionCentral + dReflected_dI;
@@ -231,6 +231,8 @@ const XYZ DirectLighting::traceDirect(
 {
 	const Shader* const shader = context.shader();
 	LASS_ASSERT(shader);
+	LASS_ASSERT(lass::num::almostEqual<TScalar>(targetNormal.norm(), 1, 1e-5));
+	//LASS_ASSERT(lass::num::almostEqual<TScalar>(omegaIn.norm(), 1, 1e-5));
 
 	XYZ result;
 	const TLightContexts::const_iterator end = lights().end();
@@ -259,7 +261,7 @@ const XYZ DirectLighting::traceDirect(
 				targetNormal, shadowRay, lightPdf);
 			if (lightPdf > 0 && radiance)
 			{
-				const TVector3D& omegaOut = context.worldToShader(shadowRay.direction());
+				const TVector3D& omegaOut = context.worldToBsdf(shadowRay.direction());
 				BsdfIn in(omegaOut, caps);
 				BsdfOut out;
 				shader->bsdf(sample, context, omegaIn, &in, &in + 1, &out);
@@ -283,7 +285,7 @@ const XYZ DirectLighting::traceDirect(
 					&omegaIn, &bsdf, &bsdfPdf, Shader::capsAll & ~Shader::capsSpecular);
 				if (bsdfPdf > 0 && bsdf)
 				{
-					TRay3D ray(target, context.shaderToWorld(omegaIn));
+					TRay3D ray(target, context.shaderToWorld(omegaIn)).normal();
 					BoundedRay shadowRay;
 					TScalar lightPdf;
 					const XYZ radiance = light->emission(sample, ray, shadowRay, lightPdf);
@@ -355,7 +357,7 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 			if (out[i].pdf > 0 && out[i].value)
 			{
 				LASS_ASSERT(out[i].omegaOut.z > 0);
-				const TVector3D directionCentral = context.shaderToWorld(out[i].omegaOut);
+				const TVector3D directionCentral = context.bsdfToWorld(out[i].omegaOut);
 				LASS_ASSERT(dot(normal, directionCentral) > 0);
 				LASS_ASSERT(dot(normal, incident) < 0);
 				const TVector3D directionI = directionCentral + dReflected_dI;
@@ -394,7 +396,7 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 			if (out[i].pdf > 0 && out[i].value)
 			{
 				LASS_ASSERT(out[i].omegaOut.z < 0);
-				const TVector3D directionCentral = context.shaderToWorld(out[i].omegaOut);
+				const TVector3D directionCentral = context.bsdfToWorld(out[i].omegaOut);
 
 #pragma LASS_TODO("preserve ray differentials! [Bramz]")
 				const DifferentialRay transmittedRay(

@@ -57,8 +57,10 @@ IntersectionContext::IntersectionContext(const RayTracer* tracer):
 	tracer_(tracer),
 	shaderToWorld_(),
 	localToWorld_(),
+	bsdfToWorld_(),
 	solidEvent_(seNoEvent),
-	hasScreenSpaceDifferentials_(false)
+	hasScreenSpaceDifferentials_(false),
+	hasDirtyBsdfToWorld_(true)
 {
 }
 
@@ -67,8 +69,7 @@ IntersectionContext::IntersectionContext(const RayTracer* tracer):
 void IntersectionContext::setShader(const Shader* shader)
 {
 	shader_ = shader;
-	localToWorld_ = shaderToWorld_ = TTransformation3D();
-	generateShaderToWorld();
+	shaderToWorld_ = TTransformation3D();
 }
 
 
@@ -84,6 +85,13 @@ void IntersectionContext::setScreenSpaceDifferentials(const DifferentialRay& ray
 
 void IntersectionContext::transformBy(const TTransformation3D& transformation)
 {
+	localToWorld_ = prim::concatenate(localToWorld_, transformation);
+	if (shader_)
+	{
+		shaderToWorld_ = prim::concatenate(shaderToWorld_, transformation);
+	}
+
+	/*
 	if (!shader_)
 	{
 		point_ = prim::transform(point_, transformation);
@@ -112,21 +120,18 @@ void IntersectionContext::transformBy(const TTransformation3D& transformation)
 		shaderToWorld_ = prim::concatenate(shaderToWorld_, transformation);
 		localToWorld_ = prim::concatenate(localToWorld_, transformation);
 	}
+	*/
 }
 
 
 
 void IntersectionContext::translateBy(const TVector3D& offset)
 {
-	if (!shader_)
+	const TTransformation3D translation = TTransformation3D::translation(offset);
+	localToWorld_ = prim::concatenate(localToWorld_, translation);
+	if (shader_)
 	{
-		point_ += offset;
-	}
-	else
-	{
-		TTransformation3D translation = TTransformation3D::translation(offset);
 		shaderToWorld_ = prim::concatenate(shaderToWorld_, translation);
-		localToWorld_ = prim::concatenate(localToWorld_, translation);
 	}
 }
 
@@ -136,7 +141,7 @@ void IntersectionContext::translateBy(const TVector3D& offset)
  */
 const TVector3D IntersectionContext::flipTo(const TVector3D& worldOmega)
 {
-	const TVector3D worldNormal = prim::transform(TVector3D(0, 0, 1), shaderToWorld_);
+	const TVector3D worldNormal = bsdfToWorld(TVector3D(0, 0, 1));
 	if (dot(worldNormal, worldOmega) >= 0)
 	{
 		return worldNormal;
@@ -147,9 +152,46 @@ const TVector3D IntersectionContext::flipTo(const TVector3D& worldOmega)
 	dNormal_dV_ = -dNormal_dV_;
 	shaderToWorld_ = prim::concatenate(TTransformation3D::scaler(TVector3D(1, 1, -1)), shaderToWorld_);
 	//shaderToWorld_ = prim::concatenate(shaderToWorld_, TTransformation3D::scaler(TVector3D(1, 1, -1)));
+	hasDirtyBsdfToWorld_ = true;
 	return -worldNormal;
 }
 
+
+
+const TTransformation3D& IntersectionContext::bsdfToWorld() const
+{
+	if (!hasDirtyBsdfToWorld_)
+	{
+		return bsdfToWorld_;
+	}
+	const bool hasU = !dPoint_dU_.isZero();
+	const bool hasV = !dPoint_dV_.isZero();
+	const TVector3D n = prim::normalTransform(normal_, localToWorld_).normal();
+	const TPoint3D o = prim::transform(point_, localToWorld_);
+	TVector3D u, v;
+	if (hasU && hasV)
+	{
+		u = prim::transform(dPoint_dU_, localToWorld_);
+		v = prim::transform(dPoint_dV_, localToWorld_);
+	}
+	else if (!hasU && !hasV)
+	{
+		prim::impl::Plane3DImplDetail::generateDirections(n, u, v);
+	}
+	else if (hasU)
+	{
+		u = prim::transform(dPoint_dU_, localToWorld_);
+		v = cross(n, u);
+	}
+	else // if (hasV)
+	{
+		v = prim::transform(dPoint_dV_, localToWorld_);
+		u = cross(v, n);
+	}
+	bsdfToWorld_ = TTransformation3D(o, u.normal(), v.normal(), n);
+	hasDirtyBsdfToWorld_ = false;
+	return bsdfToWorld_;
+}
 
 
 
@@ -157,14 +199,12 @@ const TVector3D IntersectionContext::flipTo(const TVector3D& worldOmega)
 
 // --- private -------------------------------------------------------------------------------------
 
-void IntersectionContext::setScreenSpaceDifferentialsI(const TRay3D& dRay_dI, 
-													   TVector3D& dPoint_dI, 
-													   TVector3D& dNormal_dI,
-													   TVector2D& dUv_dI)
+void IntersectionContext::setScreenSpaceDifferentialsI(
+		const TRay3D& dRay_dI, TVector3D& dPoint_dI, TVector3D& dNormal_dI, TVector2D& dUv_dI)
 {	
-	prim::Plane3D<TScalar, prim::Cartesian, prim::Unnormalized> plane(normal_, point_);
+	const prim::Plane3D<TScalar, prim::Cartesian, prim::Unnormalized> plane(normal_, point_);
 	TScalar t;
-	prim::Result result = prim::intersect(plane, dRay_dI, t);
+	const prim::Result result = prim::intersect(plane, dRay_dI, t);
 	if (result != prim::rOne)
 	{
 		dPoint_dI = TVector3D();
@@ -178,7 +218,7 @@ void IntersectionContext::setScreenSpaceDifferentialsI(const TRay3D& dRay_dI,
 	const prim::XYZ a = majorAxis + 1;
 	const prim::XYZ b = majorAxis + 2;
 
-	TScalar matrix[4] = { dPoint_dU_[a], dPoint_dV_[a], dPoint_dU_[b], dPoint_dV_[b] };
+	const TScalar matrix[4] = { dPoint_dU_[a], dPoint_dV_[a], dPoint_dU_[b], dPoint_dV_[b] };
 	TScalar solution[2] = { dPoint_dI[a], dPoint_dI[b] };
 	if (!num::impl::cramer2<TScalar>(matrix, solution, solution + 2))
 	{
@@ -186,12 +226,12 @@ void IntersectionContext::setScreenSpaceDifferentialsI(const TRay3D& dRay_dI,
 		dUv_dI = TVector2D();
 		return;
 	}
-	dNormal_dI = dNormal_dU_ * solution[0] + dNormal_dV_ * solution[1];
 	dUv_dI = TVector2D(solution[0], solution[1]);
+	dNormal_dI = dNormal_dU_ * dUv_dI.x + dNormal_dV_ * dUv_dI.y;
 }
 
 
-
+/*
 void IntersectionContext::generateShaderToWorld()
 {
 	if (shader_)
@@ -217,7 +257,7 @@ void IntersectionContext::generateShaderToWorld()
 		}
 	}
 }
-
+*/
 
 
 

@@ -111,7 +111,7 @@ PY_MODULE_FUNCTION_DOC(kernel, transcodeImage,
 	"- sourcePath: path to source image.\n"
 	"- destPath: path to destination image.\n"
 	"- sourceSpace: RgbSpace of source image. If None, use image's stored space, format's default space or liar's default space, in that order.\n"
-	"- destSpace: RgbSpace of destination image. If None, use format's default space or liar's default space, in that order.\n");
+	"- destSpace: RgbSpace of destination image. If None, use same as source image.\n");
 
 void kernelPreInject()
 {

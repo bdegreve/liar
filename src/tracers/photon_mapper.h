@@ -174,6 +174,7 @@ private:
 		const TPoint3D& point, const TVector3D& omegaOut, size_t gatherStage = 0) const;
 	const XYZ estimateCaustics(const Sample& sample, const IntersectionContext& context, 
 		const TPoint3D& point, const TVector3D& omegaOut) const;
+	void updateActualEstimationRadius(MapType mapType, TScalar radius) const;
 
 	mutable MediumStack mediumStack_;
 	TPhotonBuffer photonBuffer_[numMapTypes];
@@ -181,6 +182,7 @@ private:
 	TIrradianceBuffer irradianceBuffer_;
 	TIrradianceMap irradianceMap_;
 	TScalar estimationRadius_[numMapTypes];
+	mutable TScalar maxActualEstimationRadius_[numMapTypes]; /**< keeps track of actual maximum needed estimation radius, for post diagnostics */
 	TScalar estimationTolerance_[numMapTypes];
 	unsigned estimationSize_[numMapTypes];
 

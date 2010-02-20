@@ -48,11 +48,20 @@ public:
 
 	IntersectionContext(const RayTracer* tracer = 0);
 
+	const TAabb3D& bounds() const { return bounds_; }
+	void setBounds(const TAabb3D& bounds) { bounds_ = bounds; }
+
+	//@{
+	/** 3D position of intersection in the local space of the object that sets the shader.
+	 */
 	const TPoint3D& point() const { return point_; }
+	void setPoint(const TPoint3D& point) { point_ = point; hasDirtyBsdfToWorld_ = true; }
 	const TVector3D& dPoint_dU() const { return dPoint_dU_; }
 	const TVector3D& dPoint_dV() const { return dPoint_dV_; }
 	const TVector3D& dPoint_dI() const { return dPoint_dI_; }
 	const TVector3D& dPoint_dJ() const { return dPoint_dJ_; }
+	//}@
+
 	const TVector3D& geometricNormal() const { return geometricNormal_; }
 	const TVector3D& normal() const { return normal_; }
 	const TVector3D& dNormal_dU() const { return dNormal_dU_; }
@@ -67,13 +76,12 @@ public:
 	const Medium* const interior() const { return interior_; }
 	const SolidEvent solidEvent() const { return solidEvent_; }
 
-	void setPoint(const TPoint3D& point) { point_ = point; }
-	void setDPoint_dU(const TVector3D& dPoint_dU) { dPoint_dU_ = dPoint_dU; }
-	void setDPoint_dV(const TVector3D& dPoint_dV) { dPoint_dV_ = dPoint_dV; }
+	void setDPoint_dU(const TVector3D& dPoint_dU) { dPoint_dU_ = dPoint_dU; hasDirtyBsdfToWorld_ = true; }
+	void setDPoint_dV(const TVector3D& dPoint_dV) { dPoint_dV_ = dPoint_dV; hasDirtyBsdfToWorld_ = true; }
 	void setDPoint_dI(const TVector3D& dPoint_dI) { dPoint_dI_ = dPoint_dI; }
 	void setDPoint_dJ(const TVector3D& dPoint_dJ) { dPoint_dJ_ = dPoint_dJ; }
 	void setGeometricNormal(const TVector3D& geometricNormal) { geometricNormal_ = geometricNormal; }
-	void setNormal(const TVector3D& normal) { normal_ = normal; }
+	void setNormal(const TVector3D& normal) { normal_ = normal; hasDirtyBsdfToWorld_ = true; }
 	void setDNormal_dU(const TVector3D& dNormal_dU) { dNormal_dU_ = dNormal_dU; }
 	void setDNormal_dV(const TVector3D& dNormal_dV) { dNormal_dV_ = dNormal_dV; }
 	void setUv(const TPoint2D& uv) { uv_ = uv; }
@@ -88,27 +96,29 @@ public:
 	void setSolidEvent(SolidEvent solidEvent) { solidEvent_ = solidEvent; }
 
 	void setScreenSpaceDifferentials(const DifferentialRay& ray);
+	bool hasScreenSpaceDifferentials() const { return hasScreenSpaceDifferentials_; }
 
 	void transformBy(const TTransformation3D& transformation);
 	void translateBy(const TVector3D& offset);
 	const TVector3D flipTo(const TVector3D& worldOmega);
 
-	const TTransformation3D& shaderToWorld() const { LASS_ASSERT(shader_); return shaderToWorld_; }
-	const TTransformation3D worldToShader() const { return shaderToWorld().inverse(); }
-	const TVector3D shaderToWorld(const TVector3D& v) const { return prim::transform(v, shaderToWorld()); }
-	const TVector3D worldToShader(const TVector3D& v) const { return prim::transform(v, worldToShader()); }
+	const TTransformation3D& bsdfToWorld() const;
+	const TTransformation3D worldToBsdf() const { return bsdfToWorld().inverse(); }
+	const TVector3D bsdfToWorld(const TVector3D& v) const { return prim::transform(v, bsdfToWorld()); }
+	const TVector3D worldToBsdf(const TVector3D& v) const { return prim::transform(v, worldToBsdf()); }
 
-	const TTransformation3D& localToWorld() const { LASS_ASSERT(shader_); return localToWorld_; }
+	const TTransformation3D& localToWorld() const { return localToWorld_; }
 	const TTransformation3D worldToLocal() const { return localToWorld().inverse(); }
-	const TVector3D localToWorld(const TVector3D& v) const { return prim::transform(v, localToWorld()); }
-	const TVector3D worldToLocal(const TVector3D& v) const { return prim::transform(v, worldToLocal()); }
-
+	//const TVector3D localToWorld(const TVector3D& v) const { return prim::transform(v, localToWorld()); }
+	//const TVector3D worldToLocal(const TVector3D& v) const { return prim::transform(v, worldToLocal()); }
 
 private:
 
 	void setScreenSpaceDifferentialsI(const TRay3D& ray, TVector3D& oDPoint, 
 		TVector3D& oDNormal, TVector2D& oDUv);
 	void generateShaderToWorld();
+
+	TAabb3D bounds_;
 
 	TPoint3D point_;		/**< world space coordinate */
 	TVector3D dPoint_dU_;	/**< partial derivative of point_ to surface coordinate u */
@@ -135,9 +145,11 @@ private:
 
 	TTransformation3D shaderToWorld_;
 	TTransformation3D localToWorld_;
+	mutable TTransformation3D bsdfToWorld_;
 
 	SolidEvent solidEvent_;
 	bool hasScreenSpaceDifferentials_;
+	mutable bool hasDirtyBsdfToWorld_;
 };
 
 }
