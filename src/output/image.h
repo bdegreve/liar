@@ -43,25 +43,27 @@ namespace output
 
 class LIAR_OUTPUT_DLL Image: public RenderTarget
 {
-    PY_HEADER(RenderTarget)
+	PY_HEADER(RenderTarget)
 public:
 
 	Image(const std::string& filename, const TResolution2D& resolution);
-    ~Image();
+	~Image();
 
 	const std::string& filename() const;
 	const TRgbSpacePtr& rgbSpace() const;
+	const std::string& options() const;
 	const TScalar exposure() const;
 	const TScalar fStops() const;
 	const TScalar gain() const;
-    const TScalar gamma() const;
+	const TScalar gamma() const;
 
 	void setFilename(const std::string& filename);
 	void setRgbSpace(const TRgbSpacePtr& rgbSpace);
 	void setExposure(TScalar exposure);
 	void setFStops(TScalar fStops);
-    void setGamma(TScalar gammaExponent);
+	void setGamma(TScalar gammaExponent);
 	void setGain(TScalar gain);
+	void setOptions(const std::string& options);
 
 private:
 
@@ -69,19 +71,20 @@ private:
 	typedef std::vector<TScalar> TWeightBuffer;
 
 	const TResolution2D doResolution() const;
-    void doBeginRender();
+	void doBeginRender();
 	void doWriteRender(const OutputSample* first, const OutputSample* last);
-    void doEndRender();
+	void doEndRender();
 
 	TRenderBuffer renderBuffer_;
 	TWeightBuffer totalWeight_;
 	TWeightBuffer alphaBuffer_;
-    std::string filename_;
+	std::string filename_;
+	std::string options_;
 	util::CriticalSection lock_;
-    TResolution2D resolution_;
+	TResolution2D resolution_;
 	TRgbSpacePtr rgbSpace_;
 	TScalar exposure_;
-    TScalar gain_;
+	TScalar gain_;
 	bool isQuiting_;
 	bool isSaved_;
 };

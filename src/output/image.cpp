@@ -38,18 +38,20 @@ PY_CLASS_MEMBER_RW(Image, rgbSpace, setRgbSpace)
 PY_CLASS_MEMBER_RW(Image, exposure, setExposure)
 PY_CLASS_MEMBER_RW(Image, fStops, setFStops)
 PY_CLASS_MEMBER_RW(Image, gain, setGain)
+PY_CLASS_MEMBER_RW(Image, options, setOptions)
 
 
 
 // --- public --------------------------------------------------------------------------------------
 
 Image::Image(const std::string& filename, const TResolution2D& resolution):
-    filename_(filename),
-    resolution_(resolution),
+	filename_(filename),
+	options_(""),
+	resolution_(resolution),
 	rgbSpace_(),
 	exposure_(0.f),
-    gain_(1.f),
-    isSaved_(true)
+	gain_(1.f),
+	isSaved_(true)
 {
 }
 
@@ -57,10 +59,10 @@ Image::Image(const std::string& filename, const TResolution2D& resolution):
 
 Image::~Image()
 {
-    if (!isSaved_)
-    {
-        endRender();
-    }
+	if (!isSaved_)
+	{
+		endRender();
+	}
 }
 
 
@@ -81,7 +83,7 @@ const TRgbSpacePtr& Image::rgbSpace() const
 
 const TScalar Image::exposure() const
 {
-    return exposure_;
+	return exposure_;
 }
 
 
@@ -95,9 +97,15 @@ const TScalar Image::fStops() const
 
 const TScalar Image::gain() const
 {
-    return gain_;
+	return gain_;
 }
 
+
+
+const std::string& Image::options() const
+{
+	return options_;
+}
 
 
 void Image::setFilename(const std::string& filename)
@@ -116,7 +124,7 @@ void Image::setRgbSpace(const TRgbSpacePtr& rgbSpace)
 
 void Image::setExposure(TScalar exposure)
 {
-    exposure_ = exposure;
+	exposure_ = exposure;
 }
 
 
@@ -130,7 +138,14 @@ void Image::setFStops(TScalar fStops)
 
 void Image::setGain(TScalar gain)
 {
-    gain_ = gain;
+	gain_ = gain;
+}
+
+
+
+void Image::setOptions(const std::string& options)
+{
+	options_ = options;
 }
 
 
@@ -159,7 +174,7 @@ void Image::doBeginRender()
 
 void Image::doWriteRender(const OutputSample* first, const OutputSample* last)
 {
-    LASS_ASSERT(resolution_.x > 0 && resolution_.y > 0);
+	LASS_ASSERT(resolution_.x > 0 && resolution_.y > 0);
 
 	LASS_LOCK(lock_)
 	{
@@ -229,7 +244,7 @@ void Image::doEndRender()
 		}
 	}
 
-	ImageWriter writer(filename_, resolution_, rgbSpace_, "");
+	ImageWriter writer(filename_, resolution_, rgbSpace_, options_);
 	writer.writeFull(&renderBuffer_[0], &alphaBuffer_[0]);
 	isSaved_ = true;
 }
