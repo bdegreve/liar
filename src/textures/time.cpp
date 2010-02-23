@@ -46,7 +46,7 @@ Time::Time()
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Time::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const XYZ Time::doLookUp(const Sample& sample, const IntersectionContext&) const
 {
 	const TScalar t = static_cast<TScalar>(sample.time());
 	return XYZ(t, t, t);
@@ -61,7 +61,7 @@ const TPyObjectPtr Time::doGetState() const
 
 
 
-void Time::doSetState(const TPyObjectPtr& state)
+void Time::doSetState(const TPyObjectPtr&)
 {
 }
 

@@ -39,8 +39,8 @@ PY_CLASS_MEMBER_RW(ClipMap, threshold, setThreshold)
 // --- public --------------------------------------------------------------------------------------
 
 ClipMap::ClipMap(const TSceneObjectPtr& child, const TTexturePtr& clipMap):
-    child_(LASS_ENFORCE_POINTER(child)),
-    clipMap_(LASS_ENFORCE_POINTER(clipMap)),
+	child_(LASS_ENFORCE_POINTER(child)),
+	clipMap_(LASS_ENFORCE_POINTER(clipMap)),
 	threshold_(0.5f)
 {
 }
@@ -48,8 +48,8 @@ ClipMap::ClipMap(const TSceneObjectPtr& child, const TTexturePtr& clipMap):
 
 
 ClipMap::ClipMap(const TSceneObjectPtr& child, const TTexturePtr& clipMap, TScalar threshold):
-    child_(LASS_ENFORCE_POINTER(child)),
-    clipMap_(clipMap),
+	 child_(LASS_ENFORCE_POINTER(child)),
+	clipMap_(clipMap),
 	threshold_(threshold)
 {
 }
@@ -84,7 +84,7 @@ void ClipMap::setClipMap(const TTexturePtr& clipMap)
 
 
 
-const TScalar ClipMap::threshold() const
+TScalar ClipMap::threshold() const
 {
 	return threshold_;
 }
@@ -107,8 +107,8 @@ void ClipMap::setThreshold(TScalar threshold)
 
 void ClipMap::doAccept(util::VisitorBase& visitor)
 {
-    preAccept(visitor, *this);
-    child_->accept(visitor);
+	preAccept(visitor, *this);
+	child_->accept(visitor);
 	postAccept(visitor, *this);
 }
 
@@ -149,7 +149,7 @@ void ClipMap::doIntersect(const Sample& sample, const BoundedRay& ray, Intersect
 
 
 
-const bool ClipMap::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
+bool ClipMap::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
 {
 	Intersection temp;
 	this->intersect(sample, ray, temp);
@@ -158,9 +158,7 @@ const bool ClipMap::doIsIntersecting(const Sample& sample, const BoundedRay& ray
 
 
 
-void ClipMap::doLocalContext(
-		const Sample& sample, const BoundedRay& ray, const Intersection& intersection, 
-		IntersectionContext& result) const
+void ClipMap::doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const
 {
 	IntersectionDescendor descendor(intersection);
 	LASS_ASSERT(intersection.object() == child_.get());
@@ -169,7 +167,7 @@ void ClipMap::doLocalContext(
 
 
 
-const bool ClipMap::doContains(const Sample& sample, const TPoint3D& point) const
+bool ClipMap::doContains(const Sample& sample, const TPoint3D& point) const
 {
 	return child_->contains(sample, point);
 }
@@ -183,7 +181,7 @@ const TAabb3D ClipMap::doBoundingBox() const
 
 
 
-const TScalar ClipMap::doArea() const
+TScalar ClipMap::doArea() const
 {
 	return child_->area();
 }

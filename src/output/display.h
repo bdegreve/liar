@@ -66,10 +66,10 @@ public:
 	const std::string& title() const;
 	const TRgbSpacePtr& rgbSpace() const;
 	const std::string toneMapping() const;
-	const TScalar exposure() const;
-	const TScalar exposureCorrection() const;
-	const bool autoExposure() const;
-	const TScalar middleGrey() const;
+	TScalar exposure() const;
+	TScalar exposureCorrection() const;
+	bool autoExposure() const;
+	TScalar middleGrey() const;
 
 	void setRgbSpace(const TRgbSpacePtr& rgbSpace);
 	void setToneMapping(const std::string& mode);
@@ -101,7 +101,7 @@ private:
 	void doBeginRender();
 	void doWriteRender(const OutputSample* first, const OutputSample* last);
 	void doEndRender();
-	const bool doIsCanceling() const;
+	bool doIsCanceling() const;
 		
 	void onKeyDown(PixelToaster::DisplayInterface& display, PixelToaster::Key key);
 	bool onClose(PixelToaster::DisplayInterface& display);

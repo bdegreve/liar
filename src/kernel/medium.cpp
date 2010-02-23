@@ -53,7 +53,7 @@ void Medium::setRefractionIndex(const XYZ& refractionIndex)
 
 
 
-const size_t Medium::priority() const
+size_t Medium::priority() const
 {
 	return priority_;
 }
@@ -101,7 +101,7 @@ const XYZ MediumStack::transparency(const BoundedRay& ray) const
 }
 
 
-
+/*
 void MediumStack::push(const Medium* medium)
 {
 	struct LessPriority
@@ -114,16 +114,15 @@ void MediumStack::push(const Medium* medium)
 	TStack::iterator i = std::upper_bound(stack_.begin(), stack_.end(), medium);
 	stack_.insert(i, medium);
 }
-
-
-void MediumStack::pop(const Medium* medium)
+*/
+/*
+void MediumStack::pop(const Medium*)
 {
-	
 }
+*/
 
 
-
-const Medium* const MediumStack::top() const
+const Medium* MediumStack::top() const
 {
 	return stack_.empty() ? default_.get() : stack_.back();
 }

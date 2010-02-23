@@ -180,7 +180,7 @@ void Image::setDefaultMipMapping(const std::string& mode)
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Image::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const XYZ Image::doLookUp(const Sample&, const IntersectionContext& context) const
 {
 	if (mipMapping_ != currentMipMapping_)
 	{

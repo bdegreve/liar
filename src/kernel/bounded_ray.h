@@ -42,7 +42,7 @@ public:
 
 	BoundedRay();
 	BoundedRay(const TRay3D& unboundedRay, 
-		TScalar nearLimit = liar::TNumTraits::zero,	TScalar farLimit = liar::TNumTraits::infinity);
+		TScalar nearLimit = liar::TNumTraits::zero, TScalar farLimit = liar::TNumTraits::infinity);
 	BoundedRay(const TPoint3D& support, const TVector3D& direction, 
 		TScalar nearLimit = liar::TNumTraits::zero, TScalar farLimit = liar::TNumTraits::infinity);
 	BoundedRay(const TPoint3D& support, const TVector3D& normalizedDirection, 
@@ -51,8 +51,8 @@ public:
 		TScalar nearLimit = liar::TNumTraits::zero, TScalar farLimit = liar::TNumTraits::infinity);
 
 	const TRay3D& unboundedRay() const { return unboundedRay_; }
-	const TScalar nearLimit() const { return nearLimit_; }
-	const TScalar farLimit() const { return farLimit_; }
+	TScalar nearLimit() const { return nearLimit_; }
+	TScalar farLimit() const { return farLimit_; }
 
 	const TPoint3D& support() const { return unboundedRay_.support(); }
 	TPoint3D& support() { return unboundedRay_.support(); }
@@ -61,7 +61,7 @@ public:
 	const TPoint3D point(TScalar t) const { return unboundedRay_.point(t); }
 
 	/** return true if @a t is between the scalar bounds of the ray */
-	const bool inRange(TScalar t) const 
+	bool inRange(TScalar t) const 
 	{ 
 		//return num::almostInOpenRange(t, nearLimit_, farLimit_, tolerance); 
 		return t > nearLimit_ * (TNumTraits::one + tolerance) &&

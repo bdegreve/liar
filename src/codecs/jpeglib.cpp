@@ -108,7 +108,7 @@ private:
 		}
 	}
 
-	static void do_term_source(j_decompress_ptr cinfo)
+	static void do_term_source(j_decompress_ptr)
 	{
 	}
 
@@ -245,15 +245,12 @@ struct WriteHandle: Handle
 class ImageCodecJpeg: public kernel::ImageCodec
 {
 private:
-	const TImageHandle doCreate(
-			const std::string& path, const TResolution2D& resolution, 
-			const kernel::TRgbSpacePtr& rgbSpace, const std::string& options) const
+	TImageHandle doCreate(const std::string& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string& options) const
 	{
 		return new WriteHandle(path, resolution, rgbSpace, options);
 	}
 
-	const TImageHandle doOpen(
-			const std::string& path, const kernel::TRgbSpacePtr& rgbSpace, const std::string& options) const
+	TImageHandle doOpen(const std::string& path, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
 	{
 		return new ReadHandle(path, rgbSpace);
 	}
@@ -273,8 +270,7 @@ private:
 		return static_cast<Handle*>(handle)->rgbSpace;
 	}
 
-	void doReadLine(
-			TImageHandle handle, kernel::XYZ* xyz, TScalar* alpha) const
+	void doReadLine(TImageHandle handle, kernel::XYZ* xyz, TScalar* alpha) const
 	{
 		ReadHandle* pimpl = static_cast<ReadHandle*>(handle);
 		LASS_ENFORCE(pimpl->cinfo.output_scanline < pimpl->cinfo.output_height);
@@ -297,8 +293,7 @@ private:
 		}
 	}
 
-	void doWriteLine(
-			TImageHandle handle, const kernel::XYZ* xyz, const TScalar* alpha) const
+	void doWriteLine(TImageHandle handle, const kernel::XYZ* xyz, const TScalar* alpha) const
 	{
 		WriteHandle* pimpl = static_cast<WriteHandle*>(handle);
 		LASS_ENFORCE(pimpl->cinfo.next_scanline < pimpl->cinfo.image_height);

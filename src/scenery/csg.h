@@ -73,26 +73,26 @@ private:
 
 	typedef util::Dictionary<std::string, Operation> TOperationDictionary;
 
-    void doAccept(lass::util::VisitorBase& visitor);
+	void doAccept(lass::util::VisitorBase& visitor);
 
 	void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
 	void doIntersect(const Sample& sample, const BoundedRay& ray, 
 		Intersection& result) const;
-	const bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
+	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
 	void doLocalContext(const Sample& sample, const BoundedRay& ray,
 		const Intersection& intersection, IntersectionContext& result) const;
 	void doLocalSpace(TTime time, TTransformation3D& localToWorld) const;
-	const bool doContains(const Sample& sample, const TPoint3D& point) const;
+	bool doContains(const Sample& sample, const TPoint3D& point) const;
 	const TAabb3D doBoundingBox() const;
-	const TScalar doArea() const;
+	TScalar doArea() const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
 	static TOperationDictionary makeOperationDictionary();
 
-    TSceneObjectPtr childA_;
-    TSceneObjectPtr childB_;
+	TSceneObjectPtr childA_;
+	TSceneObjectPtr childB_;
 	Operation operation_;
 
 	static TOperationDictionary operationDictionary_;

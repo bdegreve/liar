@@ -126,7 +126,7 @@ void List::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection
 
 
 
-const bool List::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
+bool List::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
 {
 	const TChildren::const_iterator end = children_.end();
 	for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
@@ -153,7 +153,7 @@ void List::doLocalContext(
 
 
 
-const bool List::doContains(const Sample& sample, const TPoint3D& point) const
+bool List::doContains(const Sample& sample, const TPoint3D& point) const
 {
 	const TChildren::const_iterator end = children_.end();
 	for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
@@ -185,7 +185,7 @@ const TAabb3D List::doBoundingBox() const
 
 
 
-const TScalar List::doArea() const
+TScalar List::doArea() const
 {
 	TScalar result = 0;
 	for (TChildren::const_iterator i = children_.begin(); i != children_.end(); ++i)

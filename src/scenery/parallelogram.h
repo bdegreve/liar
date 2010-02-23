@@ -41,36 +41,33 @@ namespace scenery
 
 class LIAR_SCENERY_DLL Parallelogram: public SceneObject
 {
-    PY_HEADER(SceneObject)
+	PY_HEADER(SceneObject)
 public:
 
-    Parallelogram(const TPoint3D& iSupport, const TVector3D& iSizeU, const TVector3D& iSizeV);
+	Parallelogram(const TPoint3D& support, const TVector3D& sizeU, const TVector3D& sizeV);
 
 private:
 
 	typedef prim::Parallelogram3D<TScalar> TParallelogram3D;
 
-    LASS_UTIL_VISITOR_DO_ACCEPT
-    
-	void doIntersect(const Sample& sample, const BoundedRay& ray, 
-		Intersection& result) const;
-	const bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
-	void doLocalContext(const Sample& sample, const BoundedRay& ray,
-		const Intersection& intersection, IntersectionContext& result) const;
-	const bool doContains(const Sample& sample, const TPoint3D& point) const;
+	LASS_UTIL_VISITOR_DO_ACCEPT
 
-	const bool doHasSurfaceSampling() const;
-	const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal,
-		TScalar& pdf) const;
+	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
+	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
+	void doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const;
+	bool doContains(const Sample& sample, const TPoint3D& point) const;
+
+	bool doHasSurfaceSampling() const;
+	const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const;
 	void doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
 
 	const TAabb3D doBoundingBox() const;
-	const TScalar doArea() const;
+	TScalar doArea() const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-    TParallelogram3D parallelogram_;
+	TParallelogram3D parallelogram_;
 	TVector3D normal_;
 	TScalar invArea_;
 };

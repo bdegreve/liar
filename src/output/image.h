@@ -52,10 +52,10 @@ public:
 	const std::string& filename() const;
 	const TRgbSpacePtr& rgbSpace() const;
 	const std::string& options() const;
-	const TScalar exposure() const;
-	const TScalar fStops() const;
-	const TScalar gain() const;
-	const TScalar gamma() const;
+	TScalar exposure() const;
+	TScalar fStops() const;
+	TScalar gain() const;
+	TScalar gamma() const;
 
 	void setFilename(const std::string& filename);
 	void setRgbSpace(const TRgbSpacePtr& rgbSpace);

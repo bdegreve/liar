@@ -43,15 +43,11 @@ public:
 	typedef void* TImageHandle;
 	virtual ~ImageCodec();
 
-	const TImageHandle create(
-			const std::string& filename, const TResolution2D& resolution, 
-			const TRgbSpacePtr& rgbSpace, const std::string& options) const 
+	TImageHandle create(const std::string& filename, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string& options) const 
 	{
 		return doCreate(filename, resolution, rgbSpace, options);
 	}
-	const TImageHandle open(
-			const std::string& filename, const TRgbSpacePtr& rgbSpace, 
-			const std::string& options) const 
+	TImageHandle open(const std::string& filename, const TRgbSpacePtr& rgbSpace, const std::string& options) const 
 	{
 		return doOpen(filename, rgbSpace, options); 
 	}
@@ -79,16 +75,14 @@ public:
 	}
 
 private:
-	virtual const TImageHandle doCreate(const std::string& filename, const TResolution2D& resolution, 
-		const TRgbSpacePtr& rgbSpace, const std::string& options) const = 0;
-	virtual const TImageHandle doOpen(const std::string& filename, const TRgbSpacePtr& rgbSpace,
-		const std::string& options) const = 0;
+	virtual TImageHandle doCreate(const std::string& filename, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string& options) const = 0;
+	virtual TImageHandle doOpen(const std::string& filename, const TRgbSpacePtr& rgbSpace, const std::string& options) const = 0;
 	virtual void doClose(TImageHandle) const = 0;
 
 	virtual const TResolution2D doResolution(TImageHandle handle) const = 0;
 	virtual const TRgbSpacePtr doRgbSpace(TImageHandle handle) const = 0;
 	
-	virtual void doReadLine(TImageHandle handle, XYZ* xyz, TScalar* alpha) const = 0;	
+	virtual void doReadLine(TImageHandle handle, XYZ* xyz, TScalar* alpha) const = 0;
 	virtual void doWriteLine(TImageHandle handle, const XYZ* xyz, const TScalar* alpha) const = 0;
 };
 
@@ -104,8 +98,7 @@ class LIAR_KERNEL_DLL ImageReader: util::NonCopyable
 {
 public:
 
-	ImageReader(const std::string& filename, const TRgbSpacePtr& rgbSpace = TRgbSpacePtr(), 
-		const std::string& options = "");
+	ImageReader(const std::string& filename, const TRgbSpacePtr& rgbSpace = TRgbSpacePtr(), const std::string& options = "");
 	~ImageReader();
 
 	const TResolution2D resolution() const { return codec_->resolution(handle_); }
@@ -123,8 +116,7 @@ class LIAR_KERNEL_DLL ImageWriter: util::NonCopyable
 {
 public:
 
-	ImageWriter(const std::string& filename, const TResolution2D& resolution, 
-		const TRgbSpacePtr& rgbSpace = TRgbSpacePtr(), const std::string& options = "");
+	ImageWriter(const std::string& filename, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace = TRgbSpacePtr(), const std::string& options = "");
 	~ImageWriter();
 
 	const TResolution2D resolution() const { return codec_->resolution(handle_); }
@@ -147,10 +139,8 @@ public:
 protected:
 	TRgbSpacePtr selectRgbSpace(const TRgbSpacePtr& defaultCodecSpace = TRgbSpacePtr()) const;
 private:
-	virtual const TImageHandle doCreate(const std::string& filename, const TResolution2D& resolution, 
-		const TRgbSpacePtr& rgbSpace, const std::string& options) const;
-	virtual const TImageHandle doOpen(const std::string& filename, const TRgbSpacePtr& rgbSpace,
-		const std::string& options) const;
+	virtual TImageHandle doCreate(const std::string& filename, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string& options) const;
+	virtual TImageHandle doOpen(const std::string& filename, const TRgbSpacePtr& rgbSpace, const std::string& options) const;
 	virtual void doClose(TImageHandle handle) const;
 
 	virtual const TResolution2D doResolution(TImageHandle handle) const;

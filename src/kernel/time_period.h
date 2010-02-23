@@ -42,11 +42,11 @@ public:
 
 	TimePeriod(TTime begin, TTime end): begin_(begin), end_(end) {}
 
-	const TTime begin() const { return begin_; }
-	const TTime end() const { return end_; }
-	const TTime duration() const { return end_ - begin_; }
+	TTime begin() const { return begin_; }
+	TTime end() const { return end_; }
+	TTime duration() const { return end_ - begin_; }
 
-	const TTime interpolate(TScalar tau) const { return num::lerp(begin_, end_, tau); }
+	TTime interpolate(TScalar tau) const { return num::lerp(begin_, end_, tau); }
 
 	TimePeriod& operator+=(TTime offset) 
 	{ 

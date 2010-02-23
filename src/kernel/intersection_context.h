@@ -71,10 +71,10 @@ public:
 	const TPoint2D& uv() const { return uv_; }
 	const TVector2D& dUv_dI() const { return dUv_dI_; }
 	const TVector2D& dUv_dJ() const { return dUv_dJ_; }
-	const TScalar t() const { return t_; }
-	const Shader* const shader() const { return shader_; }
-	const Medium* const interior() const { return interior_; }
-	const SolidEvent solidEvent() const { return solidEvent_; }
+	TScalar t() const { return t_; }
+	const Shader* shader() const { return shader_; }
+	const Medium* interior() const { return interior_; }
+	SolidEvent solidEvent() const { return solidEvent_; }
 
 	void setDPoint_dU(const TVector3D& dPoint_dU) { dPoint_dU_ = dPoint_dU; hasDirtyBsdfToWorld_ = true; }
 	void setDPoint_dV(const TVector3D& dPoint_dV) { dPoint_dV_ = dPoint_dV; hasDirtyBsdfToWorld_ = true; }

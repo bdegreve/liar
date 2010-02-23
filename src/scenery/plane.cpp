@@ -53,7 +53,7 @@ Plane::Plane(const TVector3D& normal, TScalar d):
 
 const TVector3D& Plane::normal() const
 {
-    return plane_.normal();
+	return plane_.normal();
 }
 
 
@@ -65,7 +65,7 @@ void Plane::setNormal(const TVector3D& normal)
 
 
 
-const TScalar Plane::d() const
+TScalar Plane::d() const
 {
 	return plane_.d();
 }
@@ -85,8 +85,7 @@ void Plane::setD(TScalar d)
 
 // --- private -------------------------------------------------------------------------------------
 
-void Plane::doIntersect(const Sample& sample, const BoundedRay& ray, 
-						Intersection& result) const
+void Plane::doIntersect(const Sample&, const BoundedRay& ray, Intersection& result) const
 {
 	TScalar t;
 	const prim::Result hit = prim::intersect(plane_, ray.unboundedRay(), t, ray.nearLimit());
@@ -102,39 +101,37 @@ void Plane::doIntersect(const Sample& sample, const BoundedRay& ray,
 
 
 
-const bool Plane::doIsIntersecting(const Sample& sample, 
-								   const BoundedRay& ray) const
+bool Plane::doIsIntersecting(const Sample&, const BoundedRay& ray) const
 {
-    TScalar t;
+	TScalar t;
 	const prim::Result hit = prim::intersect(plane_, ray.unboundedRay(), t, ray.nearLimit());
 	return hit == prim::rOne && ray.inRange(t);
 }
 
 
-void Plane::doLocalContext(const Sample& sample, const BoundedRay& ray,
-                           const Intersection& intersection, 
-                           IntersectionContext& result) const
-{
-    result.setPoint(ray.point(intersection.t()));
-    TVector3D dPoint_dU;
-    TVector3D dPoint_dV;
-    plane_.getDirections(dPoint_dU, dPoint_dV);
-    result.setDPoint_dU(dPoint_dU);
-    result.setDPoint_dV(dPoint_dV);
 
-    result.setNormal(plane_.normal());
-    result.setDNormal_dU(TVector3D());
-    result.setDNormal_dV(TVector3D());
+void Plane::doLocalContext(const Sample&, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const
+{
+	result.setPoint(ray.point(intersection.t()));
+	TVector3D dPoint_dU;
+	TVector3D dPoint_dV;
+	plane_.getDirections(dPoint_dU, dPoint_dV);
+	result.setDPoint_dU(dPoint_dU);
+	result.setDPoint_dV(dPoint_dV);
+
+	result.setNormal(plane_.normal());
+	result.setDNormal_dU(TVector3D());
+	result.setDNormal_dV(TVector3D());
 	
 	result.setGeometricNormal(result.normal());
 
 	result.setUv(plane_.uv(result.point()));
-    result.setT(intersection.t());
+	result.setT(intersection.t());
 }
 
 
 
-const bool Plane::doContains(const Sample& sample, const TPoint3D& point) const
+bool Plane::doContains(const Sample&, const TPoint3D&) const
 {
 	return false;
 }
@@ -144,29 +141,29 @@ const bool Plane::doContains(const Sample& sample, const TPoint3D& point) const
 const TAabb3D Plane::doBoundingBox() const
 {
 	return TAabb3D();
-    const TVector3D normal = plane_.normal();
-    TVector3D extent;
-    if (normal.x != 0)
-    {
-        extent.y = TNumTraits::infinity;
-        extent.z = TNumTraits::infinity;
-    }
-    if (normal.y != 0)
-    {
-        extent.z = TNumTraits::infinity;
-        extent.x = TNumTraits::infinity;
-    }
-    if (normal.z != 0)
-    {
-        extent.x = TNumTraits::infinity;
-        extent.y = TNumTraits::infinity;
-    }
-    return TAabb3D(TPoint3D(-extent), TPoint3D(+extent));
+	const TVector3D normal = plane_.normal();
+	TVector3D extent;
+	if (normal.x != 0)
+	{
+		extent.y = TNumTraits::infinity;
+		extent.z = TNumTraits::infinity;
+	}
+	if (normal.y != 0)
+	{
+		extent.z = TNumTraits::infinity;
+		extent.x = TNumTraits::infinity;
+	}
+	if (normal.z != 0)
+	{
+		extent.x = TNumTraits::infinity;
+		extent.y = TNumTraits::infinity;
+	}
+	return TAabb3D(TPoint3D(-extent), TPoint3D(+extent));
 }
 
 
 
-const TScalar Plane::doArea() const
+TScalar Plane::doArea() const
 {
 	return TNumTraits::infinity;
 }
@@ -187,7 +184,7 @@ void Plane::doSetState(const TPyObjectPtr& state)
 	LASS_ENFORCE(python::decodeTuple(state, normal, d));
 	plane_ = TPlane3D(normal, d);
 }
-    
+
 
 
 // --- free ----------------------------------------------------------------------------------------

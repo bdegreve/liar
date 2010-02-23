@@ -41,7 +41,7 @@ namespace scenery
 
 class LIAR_SCENERY_DLL Sky: public SceneObject
 {
-    PY_HEADER(SceneObject)
+	PY_HEADER(SceneObject)
 public:
 
 	Sky();
@@ -49,22 +49,18 @@ public:
 
 private:
 
-    LASS_UTIL_VISITOR_DO_ACCEPT
-    
-	void doIntersect(const Sample& sample, const BoundedRay& ray, 
-		Intersection& result) const;
-	const bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
-	void doLocalContext(const Sample& sample, const BoundedRay& ray,
-		const Intersection& intersection, IntersectionContext& result) const;
-	const bool doContains(const Sample& sample, const TPoint3D& point) const;
-	const TAabb3D doBoundingBox() const;
-	const TScalar doArea() const;
+	LASS_UTIL_VISITOR_DO_ACCEPT
 
-	const bool doHasSurfaceSampling() const;
-	const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal,
-		TScalar& pdf) const;
-	const TPoint3D doSampleSurface(const TPoint2D& sample, const TPoint3D& target,
-		TVector3D& normal,	TScalar& pdf) const;
+	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
+	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
+	void doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const;
+	bool doContains(const Sample& sample, const TPoint3D& point) const;
+	const TAabb3D doBoundingBox() const;
+	TScalar doArea() const;
+
+	bool doHasSurfaceSampling() const;
+	const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const;
+	const TPoint3D doSampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);

@@ -39,40 +39,36 @@ namespace scenery
 
 class LIAR_SCENERY_DLL MotionTranslation: public SceneObject
 {
-    PY_HEADER(SceneObject)
+	PY_HEADER(SceneObject)
 public:
 
-	MotionTranslation(const TSceneObjectPtr& child, 
-		const TVector3D& iLocalToWorldStart,
-		const TVector3D& iSpeedInWorld);
+	MotionTranslation(const TSceneObjectPtr& child, const TVector3D& localToWorldStart, const TVector3D& speedInWorld);
 
 	const TSceneObjectPtr& child() const;
 	void setChild(const TSceneObjectPtr& child);
 
 private:
 
-    void doAccept(lass::util::VisitorBase& visitor);
+	void doAccept(lass::util::VisitorBase& visitor);
 
 	void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
-	void doIntersect(const Sample& sample, const BoundedRay& ray, 
-		Intersection& result) const;
-	const bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
-	void doLocalContext(const Sample& sample, const BoundedRay& ray,
-		const Intersection& intersection, IntersectionContext& result) const;
+	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
+	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
+	void doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const;
 	void doLocalSpace(TTime time, TTransformation3D& localToWorld) const;
-	const bool doContains(const Sample& sample, const TPoint3D& point) const;
+	bool doContains(const Sample& sample, const TPoint3D& point) const;
 	const TAabb3D doBoundingBox() const;
-	const TScalar doArea() const;
-	const bool doHasMotion() const { return true; }
+	TScalar doArea() const;
+	bool doHasMotion() const { return true; }
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
 	const TVector3D localToWorldOffset(TTime time) const;
 
-    TSceneObjectPtr child_;
+	TSceneObjectPtr child_;
 	TAabb3D aabb_;
-    TVector3D localToWorldStart_;
+	TVector3D localToWorldStart_;
 	TVector3D speedInWorld_;
 };
 

@@ -70,7 +70,7 @@ private:
 	const TPyObjectPtr doGetMixState() const;
 	void doSetMixState(const TPyObjectPtr& state);
 
-	const TScalar integrate(const TVector2D& min, const TVector2D& max) const;
+	TScalar integrate(const TVector2D& min, const TVector2D& max) const;
 
 	static TAntiAliasingDictionary makeAntiAliasingDictionary();
 

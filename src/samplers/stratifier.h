@@ -40,14 +40,14 @@ namespace samplers
 
 class LIAR_SAMPLERS_DLL Stratifier: public Sampler
 {
-    PY_HEADER(Sampler)
+	PY_HEADER(Sampler)
 public:
 
-    Stratifier();
-    Stratifier(const TResolution2D& resolution, size_t numberOfSamplesPerPixel);
-    Stratifier(const TResolution2D& resolution);
+	Stratifier();
+	Stratifier(const TResolution2D& resolution, size_t numberOfSamplesPerPixel);
+	Stratifier(const TResolution2D& resolution);
 
-	const bool jittered() const;
+	bool jittered() const;
 	void setJittered(bool enabled);
 
 private:
@@ -55,15 +55,15 @@ private:
 	typedef std::vector<TSample2D> TStrata2D;
 	typedef std::vector<TSample1D> TStrata1D;
 
-    typedef num::RandomMT19937 TNumberGenerator;
-    typedef num::DistributionUniform<TScalar, TNumberGenerator, num::rtRightOpen> TJitterGenerator;
+	typedef num::RandomMT19937 TNumberGenerator;
+	typedef num::DistributionUniform<TScalar, TNumberGenerator, num::rtRightOpen> TJitterGenerator;
 
 	void init(const TResolution2D& resolution = TResolution2D(320, 240), size_t iNumberOfSamples = 1);
 
 	virtual const TResolution2D& doResolution() const;
-    virtual const size_t doSamplesPerPixel() const;
-    virtual void doSetResolution(const TResolution2D& resolution);
-    virtual void doSetSamplesPerPixel(size_t samplesPerPixel);
+	virtual size_t doSamplesPerPixel() const;
+	virtual void doSetResolution(const TResolution2D& resolution);
+	virtual void doSetSamplesPerPixel(size_t samplesPerPixel);
 	virtual void doSeed(size_t randomSeed);
 
 	virtual void doSampleScreen(const TResolution2D& pixel, size_t subPixel, TSample2D& screenCoordinate);
@@ -73,29 +73,29 @@ private:
 	virtual void doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, TSample1D* first, TSample1D* last);
 	virtual void doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, TSample2D* first, TSample2D* last);
 
-	virtual const size_t doRoundSize1D(size_t requestedSize) const;
-	virtual const size_t doRoundSize2D(size_t requestedSize) const;
+	virtual size_t doRoundSize1D(size_t requestedSize) const;
+	virtual size_t doRoundSize2D(size_t requestedSize) const;
 
 	virtual const TSamplerPtr doClone() const;
 
 	virtual const TPyObjectPtr doGetState() const;
 	virtual void doSetState(const TPyObjectPtr& state);
 
-	const TSample1D sampleStratum(size_t subPixel, TStrata1D& strata);
+	TSample1D sampleStratum(size_t subPixel, TStrata1D& strata);
 	const TSample2D sampleStratum(size_t subPixel, TStrata2D& strata);
 
-    TNumberGenerator numberGenerator_;
-    TJitterGenerator jitterGenerator_;
+	TNumberGenerator numberGenerator_;
+	TJitterGenerator jitterGenerator_;
 
-    TResolution2D resolution_;
-    TVector2D reciprocalResolution_;
+	TResolution2D resolution_;
+	TVector2D reciprocalResolution_;
 	TVector2D stratum2DSize_;
-    TScalar stratum1DSize_;
-    TStrata2D screenStrata_;
-    TStrata2D lensStrata_;
+	TScalar stratum1DSize_;
+	TStrata2D screenStrata_;
+	TStrata2D lensStrata_;
 	TStrata1D timeStrata_;
 	TStrata1D frequencyStrata_;
-    size_t strataPerPixel_;
+	size_t strataPerPixel_;
 	bool isJittered_;
 };
 

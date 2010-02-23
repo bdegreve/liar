@@ -36,8 +36,8 @@ PY_CLASS_CONSTRUCTOR_3(Triangle, TPoint3D, TPoint3D, TPoint3D)
 
 // --- public --------------------------------------------------------------------------------------
 
-Triangle::Triangle(const TPoint3D& a, const TPoint3D& b, const TPoint3D& iC):
-    triangle_(a, b, iC)
+Triangle::Triangle(const TPoint3D& a, const TPoint3D& b, const TPoint3D& c):
+	triangle_(a, b, c)
 {
 }
 
@@ -49,9 +49,7 @@ Triangle::Triangle(const TPoint3D& a, const TPoint3D& b, const TPoint3D& iC):
 
 // --- private -------------------------------------------------------------------------------------
 
-void Triangle::doIntersect(
-		const kernel::Sample& sample, const kernel::BoundedRay& ray, 
-		kernel::Intersection& result) const
+void Triangle::doIntersect(const kernel::Sample&, const kernel::BoundedRay& ray, kernel::Intersection& result) const
 {
 	TScalar t;
 	const prim::Result hit = prim::intersect(triangle_, ray.unboundedRay(), t, ray.nearLimit());
@@ -67,39 +65,36 @@ void Triangle::doIntersect(
 
 
 
-const bool Triangle::doIsIntersecting(const kernel::Sample& sample, const kernel::BoundedRay& ray) const
+bool Triangle::doIsIntersecting(const kernel::Sample&, const kernel::BoundedRay& ray) const
 {
-    TScalar t;
+	TScalar t;
 	const prim::Result hit = prim::intersect(triangle_, ray.unboundedRay(), t, ray.nearLimit());
 	return hit == prim::rOne && ray.inRange(t);
 }
 
 
 
-void Triangle::doLocalContext(
-		const kernel::Sample& sample, const BoundedRay& ray, const kernel::Intersection& intersection, 
-		kernel::IntersectionContext& result) const
+void Triangle::doLocalContext(const kernel::Sample&, const BoundedRay& ray, const kernel::Intersection& intersection, kernel::IntersectionContext& result) const
 {
 	TPoint2D uv;
 	TScalar t;
-	const prim::Result hit = prim::intersect(
-		triangle_, ray.unboundedRay(), uv.x, uv.y, t, ray.nearLimit());
+	const prim::Result LASS_UNUSED(hit) = prim::intersect(triangle_, ray.unboundedRay(), uv.x, uv.y, t, ray.nearLimit());
 	LASS_ASSERT(hit == prim::rOne && ray.inRange(t));
 	LASS_ASSERT(t == intersection.t());
 
 	result.setPoint(ray.point(intersection.t()));
-    result.setT(intersection.t());
+	result.setT(intersection.t());
 	result.setUv(uv);
-    result.setDPoint_dU(triangle_[1] - triangle_[0]);
-    result.setDPoint_dV(triangle_[2] - triangle_[0]);
-    result.setNormal(triangle_.plane().normal());
-    result.setDNormal_dU(TVector3D());
-    result.setDNormal_dV(TVector3D());
+	result.setDPoint_dU(triangle_[1] - triangle_[0]);
+	result.setDPoint_dV(triangle_[2] - triangle_[0]);
+	result.setNormal(triangle_.plane().normal());
+	result.setDNormal_dU(TVector3D());
+	result.setDNormal_dV(TVector3D());
 }
 
 
 
-const bool Triangle::doContains(const kernel::Sample& sample, const TPoint3D& point) const
+bool Triangle::doContains(const kernel::Sample&, const TPoint3D&) const
 {
 	return false;
 }
@@ -113,7 +108,7 @@ const TAabb3D Triangle::doBoundingBox() const
 
 
 
-const TScalar Triangle::doArea() const
+TScalar Triangle::doArea() const
 {
 	return triangle_.area();
 }

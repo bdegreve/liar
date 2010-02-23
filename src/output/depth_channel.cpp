@@ -59,7 +59,7 @@ void DepthChannel::setTarget(const TRenderTargetPtr& target)
 
 
 
-const TScalar DepthChannel::unit() const
+TScalar DepthChannel::unit() const
 {
 	return unit_;
 }
@@ -126,7 +126,7 @@ void DepthChannel::doEndRender()
 
 
 
-const bool DepthChannel::doIsCanceling() const
+bool DepthChannel::doIsCanceling() const
 {
 	return target_->isCanceling();
 }

@@ -67,7 +67,7 @@ void FilterMitchell::setTarget(const TRenderTargetPtr& target)
 
 
 
-const TScalar FilterMitchell::b() const
+TScalar FilterMitchell::b() const
 {
 	return b_;
 }
@@ -112,7 +112,6 @@ void FilterMitchell::doWriteRender(const OutputSample* first, const OutputSample
 	while (first != last)
 	{
 		const XYZ radiance = first->radiance();
-		const TScalar alpha = first->alpha();
 
 		const TVector2D p = res * first->screenCoordinate().position();
 		const TVector2D p0 = p.transform(num::floor) + .5f;
@@ -157,14 +156,14 @@ void FilterMitchell::doEndRender()
 
 
 
-const bool FilterMitchell::doIsCanceling() const
+bool FilterMitchell::doIsCanceling() const
 {
 	return target_->isCanceling();
 }
 
 
 
-inline const TScalar FilterMitchell::filterKernel(TScalar x) const
+inline TScalar FilterMitchell::filterKernel(TScalar x) const
 {
 	const TScalar B = b_;
 	const TScalar C = (1 - B) / 2;

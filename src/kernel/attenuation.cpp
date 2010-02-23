@@ -67,7 +67,7 @@ Attenuation::Attenuation(TScalar constant, TScalar linear, TScalar quadratic):
 
 /** return constant attenuation term.
  */
-const TScalar Attenuation::constant() const
+TScalar Attenuation::constant() const
 {
 	return constant_;
 }
@@ -76,7 +76,7 @@ const TScalar Attenuation::constant() const
 
 /** return factor of linear attenuation term.
  */
-const TScalar Attenuation::linear() const
+TScalar Attenuation::linear() const
 {
 	return linear_;
 }
@@ -85,7 +85,7 @@ const TScalar Attenuation::linear() const
 
 /** return factor of quadratic attenuation term.
  */
-const TScalar Attenuation::quadratic() const
+TScalar Attenuation::quadratic() const
 {
 	return quadratic_;
 }

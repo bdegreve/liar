@@ -61,17 +61,17 @@ public:
 
 	void push(const SceneObject* object) { push(object, t(), 0); }
 	void push(const SceneObject* object, TScalar t, TSpecialField special = 0);
-	const SceneObject* const object() const;
-	const TScalar t() const;
-	const TSpecialField specialField() const;
-	const size_t level() const;
+	const SceneObject* object() const;
+	TScalar t() const;
+	TSpecialField specialField() const;
+	size_t level() const;
 
-	const SolidEvent solidEvent() const { return solidEvent_; }
+	SolidEvent solidEvent() const { return solidEvent_; }
 	void setSolidEvent(SolidEvent event) { solidEvent_ = event; }
 	void flipSolidEvent() { solidEvent_ = flip(solidEvent_); }
 
-	const bool isEmpty() const;
-	const bool operator!() const { return isEmpty(); }
+	bool isEmpty() const;
+	bool operator!() const { return isEmpty(); }
 	operator num::SafeBool() const { return isEmpty() ? num::safeFalse : num::safeTrue; }
 
 	void swap(Intersection& other);

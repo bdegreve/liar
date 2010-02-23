@@ -81,21 +81,21 @@ const TRgbSpacePtr& Image::rgbSpace() const
 
 
 
-const TScalar Image::exposure() const
+TScalar Image::exposure() const
 {
 	return exposure_;
 }
 
 
 
-const TScalar Image::fStops() const
+TScalar Image::fStops() const
 {
 	return num::log2(exposure_);
 }
 
 
 
-const TScalar Image::gain() const
+TScalar Image::gain() const
 {
 	return gain_;
 }

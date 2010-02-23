@@ -46,9 +46,9 @@ Unshaded::Unshaded():
 
 
 
-Unshaded::Unshaded(const TTexturePtr& iColour):
+Unshaded::Unshaded(const TTexturePtr& colour):
 	Shader(Shader::capsEmission),
-	colour_(iColour)
+	colour_(colour)
 {
 }
 
@@ -61,9 +61,9 @@ const TTexturePtr& Unshaded::colour() const
 
 
 
-void Unshaded::setColour(const TTexturePtr& iColour)
+void Unshaded::setColour(const TTexturePtr& colour)
 {
-	colour_ = iColour;
+	colour_ = colour;
 }
 
 
@@ -74,24 +74,19 @@ void Unshaded::setColour(const TTexturePtr& iColour)
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Unshaded::doEmission(const Sample& sample, const IntersectionContext& context,
-		const TVector3D& omegaOut) const
+const XYZ Unshaded::doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D&) const
 {
 	return colour_->lookUp(sample, context);
 }
 
 
 
-void Unshaded::doBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
+void Unshaded::doBsdf(const Sample&, const IntersectionContext&, const TVector3D&, const BsdfIn*, const BsdfIn*, BsdfOut*) const
 {
 }
 
 
-void Unshaded::doSampleBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
+void Unshaded::doSampleBsdf(const Sample&, const IntersectionContext&, const TVector3D&, const SampleBsdfIn*, const SampleBsdfIn*, SampleBsdfOut*) const
 {
 }
 

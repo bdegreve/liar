@@ -103,28 +103,28 @@ const std::string Display::toneMapping() const
 
 
 
-const TScalar Display::exposure() const
+TScalar Display::exposure() const
 {
 	return exposure_ / 3.f;
 }
 
 
 
-const TScalar Display::exposureCorrection() const
+TScalar Display::exposureCorrection() const
 {
 	return exposureCorrection_ / 3.f;
 }
 
 
 
-const bool Display::autoExposure() const
+bool Display::autoExposure() const
 {
 	return autoExposure_;
 }
 
 
 
-const TScalar Display::middleGrey() const
+TScalar Display::middleGrey() const
 {
 	return middleGrey_;
 }
@@ -383,7 +383,7 @@ void Display::doEndRender()
 
 
 
-const bool Display::doIsCanceling() const
+bool Display::doIsCanceling() const
 {
 	return isCanceling_;
 }
@@ -439,7 +439,7 @@ void Display::onKeyDown(PixelToaster::DisplayInterface& display, PixelToaster::K
 
 
 
-bool Display::onClose(PixelToaster::DisplayInterface& display)
+bool Display::onClose(PixelToaster::DisplayInterface&)
 {
 	isCanceling_ = true;
 	signal_.signal();

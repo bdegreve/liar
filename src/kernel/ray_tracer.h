@@ -53,10 +53,10 @@ class LIAR_KERNEL_DLL RayTracer: public python::PyObjectPlus
 	PY_HEADER(python::PyObjectPlus)
 public:
 
-    virtual ~RayTracer();
+	virtual ~RayTracer();
 
 	const TSceneObjectPtr& scene() const;
-	const int maxRayGeneration() const;
+	int maxRayGeneration() const;
 
 	void setScene(const TSceneObjectPtr& scene);
 	void setMaxRayGeneration(const int rayGeneration);
@@ -66,8 +66,7 @@ public:
 
 	/** @warning castRay is NOT THREAD SAFE!
 	 */
-	const XYZ castRay(const Sample& sample, const DifferentialRay& primaryRay, 
-			TScalar& tIntersection, TScalar& alpha) const
+	const XYZ castRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha) const
 	{ 
 		RayGenerationIncrementor incrementor(*this);
 		if (rayGeneration_ < maxRayGeneration_)
@@ -79,8 +78,7 @@ public:
 
 	/** @warning sampleLights is NOT THREAD SAFE!
 	 */
-	const TLightSamplesRange sampleLights(const Sample& sample, 
-			const TPoint3D& target, const TVector3D& targetNormal) const
+	const TLightSamplesRange sampleLights(const Sample& sample, const TPoint3D& target, const TVector3D& targetNormal) const
 	{
 		return doSampleLights(sample, target, targetNormal);
 	}
@@ -101,11 +99,8 @@ private:
 
 	virtual void doRequestSamples(const TSamplerPtr& sampler) = 0;
 	virtual void doPreProcess(const TSamplerPtr& samper, const TimePeriod& period) = 0;
-	virtual const XYZ doCastRay(const Sample& sample, 
-		const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, 
-		int generation) const = 0;
-	virtual const TLightSamplesRange doSampleLights(const Sample& sample, 
-		const TPoint3D& target, const TVector3D& targetNormal) const = 0;
+	virtual const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, int generation) const = 0;
+	virtual const TLightSamplesRange doSampleLights(const Sample& sample, const TPoint3D& target, const TVector3D& targetNormal) const = 0;
 	virtual const TRayTracerPtr doClone() const = 0;
 
 	virtual const TPyObjectPtr doGetState() const = 0;

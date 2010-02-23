@@ -52,28 +52,28 @@ SceneObject::~SceneObject()
 
 const TShaderPtr& SceneObject::shader() const
 {
-    return shader_;
+	return shader_;
 }
 
 
 
 void SceneObject::setShader(const TShaderPtr& shader)
 {
-    shader_ = shader;
+	shader_ = shader;
 }
 
 
 
-const bool SceneObject::isOverridingShader() const
+bool SceneObject::isOverridingShader() const
 {
-    return isOverridingShader_;
+	return isOverridingShader_;
 }
 
 
 
 void SceneObject::setOverridingShader(bool enabled)
 {
-    isOverridingShader_ = enabled;
+	isOverridingShader_ = enabled;
 }
 
 
@@ -92,30 +92,30 @@ void SceneObject::setInterior(const TMediumPtr& medium)
 
 
 
-const bool SceneObject::isOverridingInterior() const
+bool SceneObject::isOverridingInterior() const
 {
-    return isOverridingInterior_;
+	return isOverridingInterior_;
 }
 
 
 
 void SceneObject::setOverridingInterior(bool enabled)
 {
-    isOverridingInterior_ = enabled;
+	isOverridingInterior_ = enabled;
 }
 
 
 
 const TShaderPtr& SceneObject::defaultShader()
 {
-    return defaultShader_;
+	return defaultShader_;
 }
 
 
 
 void SceneObject::setDefaultShader(const TShaderPtr& iDefaultShader)
 {
-    defaultShader_ = iDefaultShader;
+	defaultShader_ = iDefaultShader;
 }
 
 
@@ -148,7 +148,7 @@ void SceneObject::setState(const TPyObjectPtr& state)
 // --- protected -----------------------------------------------------------------------------------
 
 SceneObject::SceneObject():
-    shader_(defaultShader_),
+	shader_(defaultShader_),
 	isOverridingShader_(false),
 	isOverridingInterior_(false)
 {
@@ -158,7 +158,7 @@ SceneObject::SceneObject():
 
 // --- private -------------------------------------------------------------------------------------
 
-void SceneObject::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period)
+void SceneObject::doPreProcess(const TSceneObjectPtr&, const TimePeriod&)
 {
 	// not all objects need this
 }
@@ -169,14 +169,14 @@ void SceneObject::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& p
  *  If however, an object can, it must implement doSampleSurface to sample the surface
  *  and override this function to return true
  */
-const bool SceneObject::doHasSurfaceSampling() const
+bool SceneObject::doHasSurfaceSampling() const
 {
 	return false;
 }
 
 
 
-void SceneObject::doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+void SceneObject::doFun(const TRay3D&, BoundedRay&, TScalar&) const
 {
 	LASS_ASSERT(hasSurfaceSampling() == false);
 	LASS_THROW("surface sampling is unimplemented for scene objects '" << 
@@ -190,8 +190,7 @@ void SceneObject::doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) 
  *  store the normal of the surface in that point in @a normal, store its probability
  *  density in @a pdf and return that point.
  */
-const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, TVector3D& normal,
-		TScalar& pdf) const
+const TPoint3D SceneObject::doSampleSurface(const TPoint2D&, TVector3D&, TScalar&) const
 {
 	LASS_ASSERT(hasSurfaceSampling() == false);
 	LASS_THROW("surface sampling is unimplemented for scene objects '" << 
@@ -205,8 +204,7 @@ const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, TVector3D& n
  *  if not, the more general one will be called by default.
  *
  */
-const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TPoint3D& target, 
-		TVector3D& normal, TScalar& pdf) const
+const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const
 {
 	const TPoint3D result = doSampleSurface(sample, normal, pdf);
 	
@@ -227,15 +225,14 @@ const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TPoint
  *  If they have, they can override this function, if not, the more general one will 
  *  be called by default.
  */
-const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TPoint3D& target, 
-		const TVector3D& targetNormal, TVector3D& normal, TScalar& pdf) const
+const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TPoint3D& target, const TVector3D&, TVector3D& normal, TScalar& pdf) const
 {
 	return doSampleSurface(sample, target, normal, pdf);
 }
 
 
 
-void SceneObject::doLocalSpace(TTime time, TTransformation3D& localToWorld) const
+void SceneObject::doLocalSpace(TTime, TTransformation3D&) const
 {
 	// most objects don't have a local space matrix.
 }
@@ -245,7 +242,7 @@ void SceneObject::doLocalSpace(TTime time, TTransformation3D& localToWorld) cons
 /** return true if object can change with time.
  *  By default, objects don't.
  */
-const bool SceneObject::doHasMotion() const
+bool SceneObject::doHasMotion() const
 {
 	return false;
 }

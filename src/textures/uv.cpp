@@ -63,7 +63,7 @@ const TPyObjectPtr Uv::doGetMixState() const
 
 
 
-void Uv::doSetMixState(const TPyObjectPtr& state)
+void Uv::doSetMixState(const TPyObjectPtr&)
 {
 }
 

@@ -59,8 +59,7 @@ Dielectric::Dielectric(const TTexturePtr& innerRefractionIndex):
 
 
 
-Dielectric::Dielectric(
-		const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex):
+Dielectric::Dielectric(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex):
 	Shader(capsReflection | capsTransmission | capsSpecular),
 	innerRefractionIndex_(innerRefractionIndex),
 	outerRefractionIndex_(outerRefractionIndex)
@@ -103,23 +102,21 @@ void Dielectric::setOuterRefractionIndex(const TTexturePtr& outerRefractionIndex
 
 // --- private -------------------------------------------------------------------------------------
 
-const size_t Dielectric::doNumReflectionSamples() const
+size_t Dielectric::doNumReflectionSamples() const
 {
 	return 1;
 }
 
 
 
-const size_t Dielectric::doNumTransmissionSamples() const
+size_t Dielectric::doNumTransmissionSamples() const
 {
 	return 1;
 }
 
 
 
-void Dielectric::doBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
+void Dielectric::doBsdf(const Sample&, const IntersectionContext&, const TVector3D&, const BsdfIn*, const BsdfIn*, BsdfOut*) const
 {
 }
 

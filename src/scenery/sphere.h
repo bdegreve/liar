@@ -41,45 +41,41 @@ namespace scenery
 
 class LIAR_SCENERY_DLL Sphere: public SceneObject
 {
-    PY_HEADER(SceneObject)
+	PY_HEADER(SceneObject)
 public:
 
 	Sphere();
-    Sphere(const TPoint3D& iCenter, TScalar radius);
+	Sphere(const TPoint3D& center, TScalar radius);
 
-    const TPoint3D& center() const;
-	void setCenter(const TPoint3D& iCenter);
+	const TPoint3D& center() const;
+	void setCenter(const TPoint3D& center);
 
-    const TScalar radius() const;
+	TScalar radius() const;
 	void setRadius(TScalar radius);
 
 private:
 
-    typedef prim::Sphere3D<TScalar> TSphere3D;
+	typedef prim::Sphere3D<TScalar> TSphere3D;
 
-    LASS_UTIL_VISITOR_DO_ACCEPT
-    
-	void doIntersect(const Sample& sample, const BoundedRay& ray, 
-		Intersection& result) const;
-	const bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
-	void doLocalContext(const Sample& sample, const BoundedRay& ray,
-		const Intersection& intersection, IntersectionContext& result) const;
-	const bool doContains(const Sample& sample, const TPoint3D& point) const;
+	LASS_UTIL_VISITOR_DO_ACCEPT
+
+	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
+	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
+	void doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const;
+	bool doContains(const Sample& sample, const TPoint3D& point) const;
 	const TAabb3D doBoundingBox() const;
-	const TScalar doArea() const;
+	TScalar doArea() const;
 
-	const bool doHasSurfaceSampling() const;
-	const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal,
-		TScalar& pdf) const;
-	const TPoint3D doSampleSurface(const TPoint2D& sample, const TPoint3D& target,
-		TVector3D& normal,	TScalar& pdf) const;
+	bool doHasSurfaceSampling() const;
+	const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const;
+	const TPoint3D doSampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const;
 	void doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-    TSphere3D sphere_;
-    TScalar invRadius_;
+	TSphere3D sphere_;
+	TScalar invRadius_;
 };
 
 

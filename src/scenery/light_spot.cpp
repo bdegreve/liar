@@ -90,14 +90,14 @@ void LightSpot::setPosition(const TPoint3D& iPosition)
 
 
 
-const TScalar LightSpot::outerAngle() const
+TScalar LightSpot::outerAngle() const
 {
 	return num::acos(cosOuterAngle_);
 }
 
 
 
-const TScalar LightSpot::innerAngle() const
+TScalar LightSpot::innerAngle() const
 {
 	return num::acos(cosInnerAngle_);
 }
@@ -154,32 +154,28 @@ void LightSpot::lookAt(const TPoint3D& target)
 
 // --- private -------------------------------------------------------------------------------------
 
-void LightSpot::doIntersect(const Sample& sample, const BoundedRay& iRAy, 
-							 Intersection& result) const
+void LightSpot::doIntersect(const Sample&, const BoundedRay&, Intersection& result) const
 {
 	result = Intersection::empty();
 }
 
 
 
-const bool LightSpot::doIsIntersecting(const Sample& sample, 
-										const BoundedRay& ray) const
+bool LightSpot::doIsIntersecting(const Sample&, const BoundedRay&) const
 {
 	return false;
 }
 
 
 
-void LightSpot::doLocalContext(const Sample& sample, const BoundedRay& ray,
-								const Intersection& intersection, 
-								IntersectionContext& result) const
+void LightSpot::doLocalContext(const Sample&, const BoundedRay&, const Intersection&, IntersectionContext&) const
 {
 	LASS_THROW("since LightSpot can never return an intersection, you've called dead code.");
 }
 
 
 
-const bool LightSpot::doContains(const Sample& sample, const TPoint3D& point) const
+bool LightSpot::doContains(const Sample&, const TPoint3D&) const
 {
 	return false;
 }
@@ -194,20 +190,14 @@ const TAabb3D LightSpot::doBoundingBox() const
 
 
 
-const TScalar LightSpot::doArea() const
+TScalar LightSpot::doArea() const
 {
 	return 0;
 }
 
 
 
-const XYZ LightSpot::doSampleEmission(
-		const Sample& sample,
-		const TPoint2D& lightSample, 
-		const TPoint3D& target,
-		const TVector3D& targetNormal,
-		BoundedRay& shadowRay,
-		TScalar& pdf) const
+const XYZ LightSpot::doSampleEmission(const Sample&, const TPoint2D&, const TPoint3D& target, const TVector3D&, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	TVector3D toLight = position_ - target;
 	const TScalar squaredDistance = toLight.squaredNorm();
@@ -231,8 +221,7 @@ const XYZ LightSpot::doSampleEmission(
 
 
 
-const XYZ LightSpot::doEmission(
-		const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+const XYZ LightSpot::doEmission(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	shadowRay = ray;
 	pdf = 0;
@@ -241,9 +230,7 @@ const XYZ LightSpot::doEmission(
 
 
 
-const XYZ LightSpot::doSampleEmission(
-		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
-		const TAabb3D& sceneBound, BoundedRay& emissionRay, TScalar& pdf) const
+const XYZ LightSpot::doSampleEmission(const Sample&, const TPoint2D& lightSampleA, const TPoint2D&, const TAabb3D&, BoundedRay& emissionRay, TScalar& pdf) const
 {
 	const TPoint3D local = num::uniformCone(lightSampleA, cosOuterAngle_, pdf);
 	const TVector3D direction = tangentU_ * local.x + tangentV_ * local.y + direction_ * local.z;
@@ -254,21 +241,21 @@ const XYZ LightSpot::doSampleEmission(
 
 
 
-const XYZ LightSpot::doTotalPower(const TAabb3D& sceneBound) const
+const XYZ LightSpot::doTotalPower(const TAabb3D&) const
 {
 	const TScalar factor = ((1 - cosInnerAngle_) + (cosInnerAngle_ - cosOuterAngle_) / 4);
 	return (2 * TNumTraits::pi * factor) * intensity_;
 }
 
 
-const size_t LightSpot::doNumberOfEmissionSamples() const
+size_t LightSpot::doNumberOfEmissionSamples() const
 {
 	return 1;
 }
 
 
 
-const bool LightSpot::doIsSingular() const
+bool LightSpot::doIsSingular() const
 {
 	return true;
 }

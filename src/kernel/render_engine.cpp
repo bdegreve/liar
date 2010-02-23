@@ -108,7 +108,7 @@ const TRayTracerPtr& RenderEngine::tracer() const
 
 
 
-const size_t RenderEngine::numberOfThreads() const
+size_t RenderEngine::numberOfThreads() const
 {
 	return numberOfThreads_;
 }
@@ -251,21 +251,21 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 
 void RenderEngine::render(TTime iShutterOpen)
 {
-    render(iShutterOpen, bucketBound_);
+	render(iShutterOpen, bucketBound_);
 }
 
 
 
 void RenderEngine::render(const TBucket& bucket)
 {
-    render(0, bucket);
+	render(0, bucket);
 }
 
 
 
 void RenderEngine::render()
 {
-    render(0, bucketBound_);
+	render(0, bucketBound_);
 }
 
 
@@ -288,7 +288,7 @@ void RenderEngine::writeRender(const OutputSample* first, const OutputSample* la
 
 
 
-const bool RenderEngine::isCanceling() const
+bool RenderEngine::isCanceling() const
 {
 	return renderTarget_->isCanceling();
 }
@@ -319,7 +319,7 @@ RenderEngine::Consumer::Consumer(const Consumer& other):
 	pixelSize_(other.pixelSize_),
 	timePeriod_(other.timePeriod_)
 {
-}			
+}
 
 
 
@@ -332,8 +332,8 @@ RenderEngine::Consumer& RenderEngine::Consumer::operator=(const Consumer& other)
 	pixelSize_ = other.pixelSize_;
 	timePeriod_ = other.timePeriod_;
 	return *this;
-}			
-	
+}
+
 
 
 void RenderEngine::Consumer::operator()(const Task& iTask)

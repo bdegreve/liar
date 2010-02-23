@@ -46,7 +46,7 @@ Frequency::Frequency()
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Frequency::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const XYZ Frequency::doLookUp(const Sample& sample, const IntersectionContext&) const
 {
 	const TScalar f = static_cast<TScalar>(sample.frequency());
 	return XYZ(f, f, f);
@@ -61,7 +61,7 @@ const TPyObjectPtr Frequency::doGetState() const
 
 
 
-void Frequency::doSetState(const TPyObjectPtr& state)
+void Frequency::doSetState(const TPyObjectPtr&)
 {
 }
 

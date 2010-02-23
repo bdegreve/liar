@@ -48,12 +48,12 @@ class LIAR_KERNEL_DLL Attenuation: public python::PyObjectPlus
 public:
 
 	Attenuation();
-    Attenuation(TScalar constant, TScalar linear, TScalar quadratic);
-    
-	const TScalar constant() const;
-    const TScalar linear() const;
-    const TScalar quadratic() const;
-    
+	Attenuation(TScalar constant, TScalar linear, TScalar quadratic);
+
+	TScalar constant() const;
+	TScalar linear() const;
+	TScalar quadratic() const;
+
 	void setConstant(TScalar constant);
 	void setLinear(TScalar linear);
 	void setQuadratic(TScalar quadratic);

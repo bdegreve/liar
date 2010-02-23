@@ -39,7 +39,7 @@ namespace output
 
 class LIAR_OUTPUT_DLL Splitter: public RenderTarget
 {
-    PY_HEADER(RenderTarget)
+	PY_HEADER(RenderTarget)
 public:
 
 	typedef std::vector<TRenderTargetPtr> TChildren;
@@ -55,10 +55,10 @@ public:
 private:
 
 	const TResolution2D doResolution() const;
-    void doBeginRender();
+	void doBeginRender();
 	void doWriteRender(const OutputSample* first, const OutputSample* last);
-    void doEndRender();
-	const bool doIsCanceling() const;
+	void doEndRender();
+	bool doIsCanceling() const;
 
 	TChildren children_;
 };

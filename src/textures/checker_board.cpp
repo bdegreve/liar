@@ -103,27 +103,23 @@ CheckerBoard::doLookUp(const Sample& sample, const IntersectionContext& context)
 	switch (antiAliasing_)
 	{
 	case aaNone:
-		return ((uv.x < split_.x) == (uv.y < split_.y) ? textureA() : textureB())->lookUp(
-			sample, context);
+		return ((uv.x < split_.x) == (uv.y < split_.y) ? textureA() : textureB())->lookUp(sample, context);
 		
 	case aaBilinear:
 		{
-			const TVector2D dUv = prim::pointwiseMax(
-				context.dUv_dI().transform(num::abs), context.dUv_dJ().transform(num::abs));
-            const TVector2D uvMin = uv - dUv / 2;
+			const TVector2D dUv = prim::pointwiseMax(context.dUv_dI().transform(num::abs), context.dUv_dJ().transform(num::abs));
+			const TVector2D uvMin = uv - dUv / 2;
 			const TVector2D uvMax = uv + dUv / 2;
 			const TScalar area = dUv.x * dUv.y;
 			if (area > 0)
 			{
 				const TScalar areaA = integrate(uvMin, uvMax);
 				const TScalar weightA = num::clamp(areaA / area, TNumTraits::zero, TNumTraits::one);
-                return weightA * textureA()->lookUp(sample, context) +
-					(1 - weightA) * textureB()->lookUp(sample, context);
+				return weightA * textureA()->lookUp(sample, context) + (1 - weightA) * textureB()->lookUp(sample, context);
 			}
 			else
 			{
-				return ((uv.x < split_.x) == (uv.y < split_.y) ? textureA() : textureB())->lookUp(
-					sample, context);
+				return ((uv.x < split_.x) == (uv.y < split_.y) ? textureA() : textureB())->lookUp(sample, context);
 			}
 		}
 
@@ -150,7 +146,7 @@ void CheckerBoard::doSetMixState(const TPyObjectPtr& state)
 
 
 
-const TScalar CheckerBoard::integrate(const TVector2D& min, const TVector2D& max) const
+TScalar CheckerBoard::integrate(const TVector2D& min, const TVector2D& max) const
 {
 	const TVector2D min0 = min.transform(num::floor);
 	const TVector2D max0 = max.transform(num::floor);

@@ -49,9 +49,9 @@ LightPoint::LightPoint():
 
 
 
-LightPoint::LightPoint(const TPoint3D& iPosition, const XYZ& iIntensity):
-    position_(iPosition),
-	intensity_(iIntensity),
+LightPoint::LightPoint(const TPoint3D& position, const XYZ& intensity):
+	position_(position),
+	intensity_(intensity),
 	attenuation_(Attenuation::defaultAttenuation())
 {
 }
@@ -79,23 +79,23 @@ const TAttenuationPtr& LightPoint::attenuation() const
 
 
 
-void LightPoint::setPosition(const TPoint3D& iPosition)
+void LightPoint::setPosition(const TPoint3D& position)
 {
-	position_ = iPosition;
+	position_ = position;
 }
 
 
 
-void LightPoint::setIntensity(const XYZ& iIntensity)
+void LightPoint::setIntensity(const XYZ& intensity)
 {
-	intensity_ = iIntensity;
+	intensity_ = intensity;
 }
 
 
 
-void LightPoint::setAttenuation(const TAttenuationPtr& iAttenuation)
+void LightPoint::setAttenuation(const TAttenuationPtr& attenuation)
 {
-	attenuation_ = iAttenuation;
+	attenuation_ = attenuation;
 }
 
 
@@ -107,31 +107,28 @@ void LightPoint::setAttenuation(const TAttenuationPtr& iAttenuation)
 
 // --- private -------------------------------------------------------------------------------------
 
-void LightPoint::doIntersect(
-		const Sample& sample, const BoundedRay& ray, Intersection& result) const
+void LightPoint::doIntersect(const Sample&, const BoundedRay&, Intersection& result) const
 {
 	result = Intersection::empty();
 }
 
 
 
-const bool LightPoint::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
+bool LightPoint::doIsIntersecting(const Sample&, const BoundedRay&) const
 {
 	return false;
 }
 
 
 
-void LightPoint::doLocalContext(
-		const Sample& sample, const BoundedRay& ray,
-		const Intersection& intersection, IntersectionContext& result) const
+void LightPoint::doLocalContext(const Sample&, const BoundedRay&, const Intersection&, IntersectionContext&) const
 {
 	LASS_THROW("since LightPoint can never return an intersection, you've called dead code.");
 }
 
 
 
-const bool LightPoint::doContains(const Sample& sample, const TPoint3D& point) const
+bool LightPoint::doContains(const Sample&, const TPoint3D&) const
 {
 	return false;
 }
@@ -146,15 +143,14 @@ const TAabb3D LightPoint::doBoundingBox() const
 
 
 
-const TScalar LightPoint::doArea() const
+TScalar LightPoint::doArea() const
 {
 	return 0;
 }
 
 
 
-const XYZ LightPoint::doEmission(
-		const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+const XYZ LightPoint::doEmission(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	shadowRay = ray;
 	pdf = 0;
@@ -162,18 +158,14 @@ const XYZ LightPoint::doEmission(
 }
 
 
-const XYZ LightPoint::doSampleEmission(
-		const Sample& sample, const TPoint2D& lightSample, 
-		const TPoint3D& target,	const TVector3D& targetNormal,
-		BoundedRay& shadowRay, TScalar& pdf) const
+const XYZ LightPoint::doSampleEmission(const Sample&, const TPoint2D&, const TPoint3D& target, const TVector3D&, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	TVector3D toLight = position_ - target;
-    const TScalar squaredDistance = (position_ - target).squaredNorm();
+	const TScalar squaredDistance = (position_ - target).squaredNorm();
 	const TScalar distance = num::sqrt(squaredDistance);
 	toLight /= distance;
 
-	shadowRay = BoundedRay(target, toLight, tolerance, distance, 
-		prim::IsAlreadyNormalized());
+	shadowRay = BoundedRay(target, toLight, tolerance, distance, prim::IsAlreadyNormalized());
 	pdf = TNumTraits::one;
 
 	return intensity_ / attenuation_->attenuation(distance, squaredDistance);
@@ -181,9 +173,7 @@ const XYZ LightPoint::doSampleEmission(
 
 
 
-const XYZ LightPoint::doSampleEmission(
-		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
-		const TAabb3D& sceneBound, BoundedRay& emissionRay, TScalar& pdf) const
+const XYZ LightPoint::doSampleEmission(const Sample&, const TPoint2D& lightSampleA, const TPoint2D&, const TAabb3D&, BoundedRay& emissionRay, TScalar& pdf) const
 {
 	const TVector3D direction = num::uniformSphere(lightSampleA, pdf).position();
 	emissionRay = BoundedRay(position_, direction, tolerance);
@@ -192,21 +182,21 @@ const XYZ LightPoint::doSampleEmission(
 
 
 
-const XYZ LightPoint::doTotalPower(const TAabb3D& sceneBound) const
+const XYZ LightPoint::doTotalPower(const TAabb3D&) const
 {
 	return (4 * TNumTraits::pi) * intensity_;
 }
 
 
 
-const size_t LightPoint::doNumberOfEmissionSamples() const
+size_t LightPoint::doNumberOfEmissionSamples() const
 {
 	return 1;
 }
 
 
 
-const bool LightPoint::doIsSingular() const
+bool LightPoint::doIsSingular() const
 {
 	return true;
 }

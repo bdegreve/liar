@@ -94,7 +94,7 @@ inline void SceneObject::intersect(const Sample& sample, const DifferentialRay& 
  *  If you're only interested in whether a ray intersects an object, this method may be cheaper
  *  than a full intersection test.
  */
-inline const bool SceneObject::isIntersecting(const Sample& sample, const BoundedRay& ray) const
+inline bool SceneObject::isIntersecting(const Sample& sample, const BoundedRay& ray) const
 {
 	return doIsIntersecting(sample, ray);
 }
@@ -115,8 +115,7 @@ inline const bool SceneObject::isIntersecting(const Sample& sample, const Bounde
  *  If you're only interested in whether a ray intersects an object, this method may be cheaper
  *  than a full intersection test.
  */
-inline const bool SceneObject::isIntersecting(const Sample& sample, 
-		const DifferentialRay& ray) const 
+inline bool SceneObject::isIntersecting(const Sample& sample, const DifferentialRay& ray) const 
 {
 	return doIsIntersecting(sample, ray.centralRay()); 
 }
@@ -134,15 +133,14 @@ inline const bool SceneObject::isIntersecting(const Sample& sample,
  *	@param IntersectionContext [out]
  *		geometrical information on intersection
  */
-inline void SceneObject::localContext(const Sample& sample, const BoundedRay& ray, 
-		const Intersection& intersection, IntersectionContext& result) const
+inline void SceneObject::localContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const
 {
 	LASS_ASSERT(intersection.object() == this);
-    doLocalContext(sample, ray, intersection, result);
+	doLocalContext(sample, ray, intersection, result);
 	if (!result.shader() || this->isOverridingShader_)
-    {
-        result.setShader(shader_);
-    }
+	{
+		result.setShader(shader_);
+	}
 	if (!result.interior() || this->isOverridingInterior_)
 	{
 		result.setInterior(interior_);
@@ -169,8 +167,7 @@ inline void SceneObject::localContext(const Sample& sample, const BoundedRay& ra
  *
  *  Also sets screen differentials.
  */
-inline void SceneObject::localContext(const Sample& sample, const DifferentialRay& ray, 
-		const Intersection& intersection, IntersectionContext& result) const
+inline void SceneObject::localContext(const Sample& sample, const DifferentialRay& ray, const Intersection& intersection, IntersectionContext& result) const
 {
 	localContext(sample, ray.centralRay(), intersection, result);
 	result.setScreenSpaceDifferentials(transform(ray, result.worldToLocal()));
@@ -188,7 +185,7 @@ inline void SceneObject::localContext(const Sample& sample, const DifferentialRa
  *	@return
  *		true if point is inside object, false if it is not.
  */
-inline const bool SceneObject::contains(const Sample& sample, const TPoint3D& point) const 
+inline bool SceneObject::contains(const Sample& sample, const TPoint3D& point) const 
 { 
 	return doContains(sample, point); 
 }
@@ -216,7 +213,7 @@ inline void SceneObject::localSpace(TTime time, TTransformation3D& localToWorld)
  *
  *  Surface sampling is necessary for using an object as the surface of an area light.
  */
-inline const bool SceneObject::hasSurfaceSampling() const 
+inline bool SceneObject::hasSurfaceSampling() const 
 { 
 	return doHasSurfaceSampling(); 
 }
@@ -319,7 +316,7 @@ inline const TAabb3D SceneObject::boundingBox() const
  *  @return
  *		true if object moves, false otherwise.
  */
-inline const bool SceneObject::hasMotion() const 
+inline bool SceneObject::hasMotion() const 
 { 
 	return doHasMotion(); 
 }
@@ -331,7 +328,7 @@ inline const bool SceneObject::hasMotion() const
  *  @return
  *		total area.
  */
-inline const TScalar SceneObject::area() const 
+inline TScalar SceneObject::area() const 
 { 
 	return doArea(); 
 }

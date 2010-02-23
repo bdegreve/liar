@@ -33,10 +33,10 @@ namespace kernel
 // --- public --------------------------------------------------------------------------------------
 
 Sample::Sample():
-    screenCoordinate_(TSample2D(0, 0)),
-    lensCoordinate_(TSample2D(0, 0)),
+	screenCoordinate_(TSample2D(0, 0)),
+	lensCoordinate_(TSample2D(0, 0)),
 	time_(0.f),
-    weight_(1),
+	weight_(1),
 	sampler_(0)
 {
 }
@@ -45,40 +45,40 @@ Sample::Sample():
 
 const Sample::TSample2D& Sample::screenCoordinate() const
 {
-    return screenCoordinate_;
+	return screenCoordinate_;
 }
 
 
 
 const Sample::TSample2D& Sample::lensCoordinate() const
 {
-    return lensCoordinate_;
+	return lensCoordinate_;
 }
 
 
-const TTime Sample::time() const
+TTime Sample::time() const
 {
 	return time_;
 }
 
 
-const TScalar Sample::frequency() const
+TScalar Sample::frequency() const
 {
 	return frequency_;
 }
 
 
 
-const TScalar Sample::weight() const
+TScalar Sample::weight() const
 {
-    return weight_;
+	return weight_;
 }
 
 
 
-void Sample::setWeight(TScalar iWeight)
+void Sample::setWeight(TScalar Weight)
 {
-    weight_ = iWeight;
+	weight_ = Weight;
 }
 
 

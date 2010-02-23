@@ -64,7 +64,7 @@ public:
 	const TPoint2D& green() const;
 	const TPoint2D& blue() const;
 	const TPoint2D& white() const;
-	const TScalar gamma() const;
+	TScalar gamma() const;
 
 	bool operator==(const RgbSpace& other) const;
 	bool operator!=(const RgbSpace& other) const;

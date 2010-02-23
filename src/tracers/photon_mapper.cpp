@@ -105,7 +105,7 @@ PhotonMapper::PhotonMapper():
 
 
 
-const unsigned PhotonMapper::maxNumberOfPhotons() const
+unsigned PhotonMapper::maxNumberOfPhotons() const
 {
 	return maxNumberOfPhotons_;
 }
@@ -119,7 +119,7 @@ void PhotonMapper::setMaxNumberOfPhotons(unsigned maxNumberOfPhotons)
 
 
 
-const unsigned PhotonMapper::globalMapSize() const
+unsigned PhotonMapper::globalMapSize() const
 {
 	return globalMapSize_;
 }
@@ -133,7 +133,7 @@ void PhotonMapper::setGlobalMapSize(unsigned mapSize)
 
 
 
-const TScalar PhotonMapper::causticsQuality() const
+TScalar PhotonMapper::causticsQuality() const
 {
 	return causticsQuality_;
 }
@@ -147,7 +147,7 @@ void PhotonMapper::setCausticsQuality(TScalar quality)
 
 
 
-const TScalar PhotonMapper::estimationRadius(const std::string& mapType) const
+TScalar PhotonMapper::estimationRadius(const std::string& mapType) const
 {
 	return estimationRadius_[mapTypeDictionary_[mapType]];
 }
@@ -161,7 +161,7 @@ void PhotonMapper::setEstimationRadius(const std::string& mapType, TScalar radiu
 
 
 
-const TScalar PhotonMapper::estimationTolerance(const std::string& mapType) const
+TScalar PhotonMapper::estimationTolerance(const std::string& mapType) const
 {
 	return estimationTolerance_[mapTypeDictionary_[mapType]];
 }
@@ -175,7 +175,7 @@ void PhotonMapper::setEstimationTolerance(const std::string& mapType, TScalar to
 
 
 
-const unsigned PhotonMapper::estimationSize(const std::string& mapType) const
+unsigned PhotonMapper::estimationSize(const std::string& mapType) const
 {
 	return estimationSize_[mapTypeDictionary_[mapType]];
 }
@@ -189,7 +189,7 @@ void PhotonMapper::setEstimationSize(const std::string& mapType, unsigned size)
 
 
 
-const unsigned PhotonMapper::numFinalGatherRays() const
+unsigned PhotonMapper::numFinalGatherRays() const
 {
 	return numFinalGatherRays_;
 }
@@ -203,7 +203,7 @@ void PhotonMapper::setNumFinalGatherRays(unsigned numFinalGatherRays)
 
 
 
-const TScalar PhotonMapper::ratioPrecomputedIrradiance() const
+TScalar PhotonMapper::ratioPrecomputedIrradiance() const
 {
 	return ratioPrecomputedIrradiance_;
 }
@@ -217,7 +217,7 @@ void PhotonMapper::setRatioPrecomputedIrradiance(TScalar ratio)
 
 
 
-const bool PhotonMapper::isVisualizingPhotonMap() const
+bool PhotonMapper::isVisualizingPhotonMap() const
 {
 	return isVisualizingPhotonMap_;
 }
@@ -231,7 +231,7 @@ void PhotonMapper::setVisualizePhotonMap(bool enabled)
 
 
 
-const bool PhotonMapper::isRayTracingDirect() const
+bool PhotonMapper::isRayTracingDirect() const
 {
 	return isRayTracingDirect_;
 }
@@ -473,8 +473,7 @@ const XYZ PhotonMapper::doCastRay(
 
 
 const TLightSamplesRange
-PhotonMapper::doSampleLights(const Sample& iSample, const TPoint3D& iTarget, 
-		const TVector3D& iTargetNormal) const
+PhotonMapper::doSampleLights(const Sample&, const TPoint3D&, const TVector3D&) const
 {
 	return TLightSamplesRange();
 }

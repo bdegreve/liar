@@ -45,7 +45,7 @@ namespace shaders
 
 class LIAR_SHADERS_DLL AshikhminShirley: public Shader
 {
-    PY_HEADER(Shader)
+	PY_HEADER(Shader)
 public:
 
 	AshikhminShirley();
@@ -63,17 +63,15 @@ public:
 	const TTexturePtr& specularPowerV() const;
 	void setSpecularPowerV(const TTexturePtr& iSpecularPower);
 
-	const size_t numberOfSamples() const;
+	size_t numberOfSamples() const;
 	void setNumberOfSamples(size_t number);
 
 private:
 
-	const size_t doNumReflectionSamples() const;
+	size_t doNumReflectionSamples() const;
 
-	void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const;
-	void doSampleBsdf(const Sample& sample, const IntersectionContext& context,	const TVector3D& omegaIn,
-		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const;
+	void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn, const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const;
+	void doSampleBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn, const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const;
 	
 	const TVector3D sampleH(const TPoint2D& sample, TScalar nu, TScalar nv/*, TScalar& pdf*/) const ;
 

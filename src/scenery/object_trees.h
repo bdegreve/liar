@@ -65,13 +65,9 @@ public:
 	}
 	void add(const TChildren& children)
 	{
-		this->add(children.begin(), children.end());
-	}
-	template <typename InputIterator> void add(InputIterator first, InputIterator last)
-	{
-		while (first != last)
+		for (TChildren::const_iterator child = children.begin(); child != children.end(); ++child)
 		{
-			this->add(*first++);
+			this->add(*child);
 		}
 	}
 
@@ -80,11 +76,7 @@ protected:
 	ObjectTree() {}
 	ObjectTree(const TChildren& children)
 	{
-		this->add(children.begin(), children.end());
-	}
-	template <typename InputIterator> ObjectTree(InputIterator begin, InputIterator end)
-	{
-		this->add(begin, end);
+		this->add(children);
 	}
 
 private:
@@ -137,7 +129,7 @@ private:
 		result.swap(treeResult);
 	}
 
-	const bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
+	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
 	{
 		Info info;
 		info.sample = &sample;
@@ -153,7 +145,7 @@ private:
 		intersection.object()->localContext(sample, ray, intersection, result);
 	}
 
-	const bool doContains(const Sample& sample, const TPoint3D& point) const
+	bool doContains(const Sample& sample, const TPoint3D& point) const
 	{
 		Info info;
 		info.sample = &sample;
@@ -166,7 +158,7 @@ private:
 		return tree_.aabb() + bigChildren_.boundingBox();
 	}
 
-	const TScalar doArea() const
+	TScalar doArea() const
 	{
 		TScalar result = 0;
 		for (TChildren::const_iterator i = allChildren_.begin(); i != allChildren_.end(); ++i)
@@ -218,15 +210,13 @@ private:
 			return (*object)->boundingBox();
 		}
 
-		static const bool objectContains(TObjectIterator object, const TPoint& point, 
-			const TInfo* info)
+		static bool objectContains(TObjectIterator object, const TPoint& point, const TInfo* info)
 		{
 			LASS_ASSERT(info && info->sample);
 			return (*object)->contains(*info->sample, point);
 		}
 
-		static const bool objectIntersect(TObjectIterator object, const TRay& ray, 
-			TReference t, TParam minT, const TInfo* info)
+		static bool objectIntersect(TObjectIterator object, const TRay& ray, TReference t, TParam LASS_UNUSED(minT), const TInfo* info)
 		{
 			LASS_ASSERT(info && info->sample && info->intersectionResult);
 			LASS_ASSERT(ray.nearLimit() == minT);
@@ -246,15 +236,14 @@ private:
 			return false;
 		}
 
-		static const bool objectIntersects(TObjectIterator object, const TRay& ray, 
-			TParam minT, TParam maxT, const TInfo* info)
+		static bool objectIntersects(TObjectIterator object, const TRay& ray, TParam LASS_UNUSED(minT), TParam LASS_UNUSED(maxT), const TInfo* info)
 		{
 			LASS_ASSERT(info && info->sample);
 			LASS_ASSERT(ray.nearLimit() == minT && ray.farLimit() == maxT);
 			return (*object)->isIntersecting(*info->sample, ray);
 		}
 
-		static const bool objectIntersects(TObjectIterator it, const TAabb& aabb, const TInfo* /*info*/)
+		static bool objectIntersects(TObjectIterator it, const TAabb& aabb, const TInfo*)
 		{
 			return objectAabb(it).intersects(aabb);
 		}
@@ -264,18 +253,17 @@ private:
 			return TAabb();
 		}
 
-		static const bool aabbContains(const TAabb& aabb, const TPoint& point) 
+		static bool aabbContains(const TAabb& aabb, const TPoint& point) 
 		{ 
 			return aabb.contains(point); 
 		}
 
-		static const bool aabbContains(const TAabb& aabb, const TAabb& other)
+		static bool aabbContains(const TAabb& aabb, const TAabb& other)
 		{
 			return aabb.contains(other);
 		}
 
-		static const bool aabbIntersect(const TAabb& aabb, const TRay& ray, 
-			TReference t, const TParam minT)
+		static bool aabbIntersect(const TAabb& aabb, const TRay& ray, TReference t, const TParam minT)
 		{
 			TScalar temp;
 			prim::Result hit = prim::intersect(aabb, ray.unboundedRay(), temp, minT);
@@ -292,8 +280,8 @@ private:
 		static const TPoint aabbMax(const TAabb& aabb) { return aabb.max(); }
 		static const TPoint raySupport(const TRay& ray) { return ray.support();	}
 		static const TVector rayDirection(const TRay& ray) {	return ray.direction(); }
-		static const TValue coord(const TPoint& point, size_t axis) { return point[axis]; }
-		static const TValue coord(const TVector& vector, size_t axis) { return vector[axis]; }
+		static TValue coord(const TPoint& point, size_t axis) { return point[axis]; }
+		static TValue coord(const TVector& vector, size_t axis) { return vector[axis]; }
 		static void coord(TPoint& point, size_t axis, TValue x) { point[axis] = x; }
 		static void coord(TVector& vector, size_t axis, TValue x) { vector[axis] = x; }
 		static const TVector vectorReciprocal(const TVector& vector) { return vector.reciprocal();	}
@@ -321,9 +309,10 @@ private:
 	{\
 		PY_HEADER(SceneObject)\
 	public:\
-		i_name(): ObjectTree() {}\
-		i_name(const TChildren& children): ObjectTree(children) {}\
-		template <typename InputIterator> i_name(InputIterator begin, InputIterator end): ObjectTree(begin, end) {}\
+		typedef ObjectTree< LASS_CONCATENATE( ObjectTreeTypedef_, i_name ) > TObjectTree;\
+		i_name(): TObjectTree() {}\
+		i_name(const TChildren& children): TObjectTree(children) {}\
+		template <typename InputIterator> i_name(InputIterator begin, InputIterator end): TObjectTree(begin, end) {}\
 	};\
 	/**/
 

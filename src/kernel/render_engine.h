@@ -47,34 +47,34 @@ namespace kernel
 
 class LIAR_KERNEL_DLL RenderEngine: public python::PyObjectPlus
 {
-    PY_HEADER(python::PyObjectPlus)
+	PY_HEADER(python::PyObjectPlus)
 public:
 
-    typedef prim::Aabb2D<TScalar> TBucket;
+	typedef prim::Aabb2D<TScalar> TBucket;
 
 	enum { autoNumberOfThreads = util::ThreadPool<>::autoNumberOfThreads };
 
-    RenderEngine();
-    ~RenderEngine();
+	RenderEngine();
+	~RenderEngine();
 
-    const TCameraPtr& camera() const;
-    const TSamplerPtr& sampler() const;
-    const TSceneObjectPtr& scene() const;
-    const TRenderTargetPtr& target() const;
-    const TRayTracerPtr& tracer() const;
-	const size_t numberOfThreads() const;
+	const TCameraPtr& camera() const;
+	const TSamplerPtr& sampler() const;
+	const TSceneObjectPtr& scene() const;
+	const TRenderTargetPtr& target() const;
+	const TRayTracerPtr& tracer() const;
+	size_t numberOfThreads() const;
 
-    void setCamera(const TCameraPtr& camera);
-    void setSampler(const TSamplerPtr& sampler);
-    void setScene(const TSceneObjectPtr& scene);
-    void setTarget(const TRenderTargetPtr& renderTarget);
-    void setTracer(const TRayTracerPtr& iRayTracer);
+	void setCamera(const TCameraPtr& camera);
+	void setSampler(const TSamplerPtr& sampler);
+	void setScene(const TSceneObjectPtr& scene);
+	void setTarget(const TRenderTargetPtr& renderTarget);
+	void setTracer(const TRayTracerPtr& iRayTracer);
 	void setNumberOfThreads(size_t number);
 
-    void render(TTime time, const TBucket& bucket);
-    void render(TTime time);
-    void render(const TBucket& bucket);
-    void render();
+	void render(TTime time, const TBucket& bucket);
+	void render(TTime time);
+	void render(const TBucket& bucket);
+	void render();
 
 private:
 
@@ -123,19 +123,19 @@ private:
 	friend class Consumer;
 
 	void writeRender(const OutputSample* first, const OutputSample* last, Progress& ioProgress);
-	const bool isCanceling() const;
+	bool isCanceling() const;
 
-    TCameraPtr camera_;
-    TRayTracerPtr rayTracer_;
-    TRenderTargetPtr renderTarget_;
-    TSamplerPtr sampler_;
-    TSceneObjectPtr scene_;
+	TCameraPtr camera_;
+	TRayTracerPtr rayTracer_;
+	TRenderTargetPtr renderTarget_;
+	TSamplerPtr sampler_;
+	TSceneObjectPtr scene_;
 	util::Semaphore lock_;
 	util::Condition signal_;
 	size_t numberOfThreads_;
 	bool isDirty_;
 
-    static const TBucket bucketBound_;
+	static const TBucket bucketBound_;
 };
 
 }

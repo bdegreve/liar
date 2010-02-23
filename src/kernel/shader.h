@@ -83,7 +83,7 @@ struct SampleBsdfOut
 
 class LIAR_KERNEL_DLL Shader: public python::PyObjectPlus
 {
-    PY_HEADER(python::PyObjectPlus)
+	PY_HEADER(python::PyObjectPlus)
 public:
 
 	enum CapsFlags
@@ -106,10 +106,10 @@ public:
 		capsAllNonDiffuse = capsReflection | capsTransmission | capsNonDiffuse,
 	};
 
-    virtual ~Shader();
+	virtual ~Shader();
 
-	const unsigned caps() const { return caps_; }
-	const bool hasCaps(unsigned wantedCaps) const { return testCaps(caps_, wantedCaps); }
+	unsigned caps() const { return caps_; }
+	bool hasCaps(unsigned wantedCaps) const { return testCaps(caps_, wantedCaps); }
 
 	void shadeContext(const Sample& sample, IntersectionContext& context) const
 	{
@@ -139,10 +139,10 @@ public:
 	}
 
 	void requestSamples(const TSamplerPtr& sampler);
-	const size_t numReflectionSamples() const;
-	const size_t numTransmissionSamples() const;
-	const int idReflectionSamples() const;
-	const int idTransmissionSamples() const;
+	size_t numReflectionSamples() const;
+	size_t numTransmissionSamples() const;
+	int idReflectionSamples() const;
+	int idTransmissionSamples() const;
 
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const;
@@ -150,10 +150,10 @@ public:
 
 protected:
 
-    Shader(unsigned capabilityFlags);
+	Shader(unsigned capabilityFlags);
 
 	void setCaps(unsigned capabilityFlags);
-	const bool testCaps(unsigned capsUnderTest, unsigned wantedCaps) const
+	bool testCaps(unsigned capsUnderTest, unsigned wantedCaps) const
 	{
 		return (capsUnderTest & wantedCaps) == wantedCaps;
 	}
@@ -169,8 +169,8 @@ private:
 		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const = 0;
 	
 	virtual void doRequestSamples(const TSamplerPtr& sampler);
-	virtual const size_t doNumReflectionSamples() const;
-	virtual const size_t doNumTransmissionSamples() const;
+	virtual size_t doNumReflectionSamples() const;
+	virtual size_t doNumTransmissionSamples() const;
 
 	virtual const TPyObjectPtr doGetState() const = 0;
 	virtual void doSetState(const TPyObjectPtr& state) = 0;

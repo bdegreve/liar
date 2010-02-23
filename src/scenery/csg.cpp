@@ -44,23 +44,20 @@ Csg::TOperationDictionary Csg::operationDictionary_ = Csg::makeOperationDictiona
 
 // --- public --------------------------------------------------------------------------------------
 
-Csg::Csg(const TSceneObjectPtr& iChildA,
-		 const TSceneObjectPtr& iChildB):
-    childA_(iChildA),
-    childB_(iChildB),
+Csg::Csg(const TSceneObjectPtr& childA, const TSceneObjectPtr& childB):
+	childA_(childA),
+	childB_(childB),
 	operation_(oUnion)
 {
 }
 
 
 
-Csg::Csg(const TSceneObjectPtr& iChildA,
-		 const TSceneObjectPtr& iChildB,
-		 const std::string& iOperation):
-    childA_(iChildA),
-    childB_(iChildB)
+Csg::Csg(const TSceneObjectPtr& childA, const TSceneObjectPtr& childB, const std::string& operation):
+	childA_(childA),
+	childB_(childB)
 {
-	setOperation(iOperation);
+	setOperation(operation);
 }
 
 
@@ -114,9 +111,9 @@ void Csg::setOperation(const std::string& iOperation)
 
 void Csg::doAccept(util::VisitorBase& visitor)
 {
-    preAccept(visitor, *this);
-    childA_->accept(visitor);
-    childB_->accept(visitor);
+	preAccept(visitor, *this);
+	childA_->accept(visitor);
+	childB_->accept(visitor);
 	postAccept(visitor, *this);
 }
 
@@ -130,8 +127,7 @@ void Csg::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period)
 
 
 
-void Csg::doIntersect(const Sample& sample, const BoundedRay& ray, 
-					  Intersection& result) const
+void Csg::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
 {
 	Intersection resultA;
 	Intersection resultB;
@@ -250,8 +246,7 @@ void Csg::doIntersect(const Sample& sample, const BoundedRay& ray,
 
 
 
-const bool Csg::doIsIntersecting(const Sample& sample, 
-								 const BoundedRay& ray) const
+bool Csg::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
 {
 	Intersection temp;
 	intersect(sample, ray, temp);
@@ -260,11 +255,9 @@ const bool Csg::doIsIntersecting(const Sample& sample,
 
 
 
-void Csg::doLocalContext(const Sample& sample, const BoundedRay& ray,
-								 const Intersection& intersection, 
-								 IntersectionContext& result) const
+void Csg::doLocalContext(const Sample& sample, const BoundedRay& ray,  const Intersection& intersection, IntersectionContext& result) const
 {
-    IntersectionDescendor descend(intersection);
+	IntersectionDescendor descend(intersection);
 	if (intersection.object() == childA_.get())
 	{
 		childA_->localContext(sample, ray, intersection, result);
@@ -282,13 +275,13 @@ void Csg::doLocalContext(const Sample& sample, const BoundedRay& ray,
 
 
 
-void Csg::doLocalSpace(TTime time, TTransformation3D& localToWorld) const 
+void Csg::doLocalSpace(TTime, TTransformation3D&) const 
 {
 }
 
 
 
-const bool Csg::doContains(const Sample& sample, const TPoint3D& point) const
+bool Csg::doContains(const Sample& sample, const TPoint3D& point) const
 {
 	switch (operation_)
 	{
@@ -328,7 +321,7 @@ const TAabb3D Csg::doBoundingBox() const
 
 
 
-const TScalar Csg::doArea() const
+TScalar Csg::doArea() const
 {
 	LASS_THROW("not implemented yet");
 	return TNumTraits::qNaN;

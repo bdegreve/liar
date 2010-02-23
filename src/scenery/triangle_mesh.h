@@ -43,7 +43,7 @@ namespace scenery
 
 class LIAR_SCENERY_DLL TriangleMesh: public SceneObject
 {
-    PY_HEADER(SceneObject)
+	PY_HEADER(SceneObject)
 public:
 
 	typedef prim::TriangleMesh3D<TScalar, spat::AabbTree, spat::DefaultSplitHeuristics<4> > TMesh;
@@ -52,10 +52,9 @@ public:
 	typedef std::vector<TMesh::TUv> TUvs;
 	typedef std::vector<TMesh::TIndexTriangle> TIndexTriangles;
 
-	TriangleMesh(const TVertices& iVertices, const TNormals& iNormals,
-		const TUvs& iUvs, const TIndexTriangles& iTriangles);
+	TriangleMesh(const TVertices& vertices, const TNormals& normals, const TUvs& uvs, const TIndexTriangles& triangles);
 
-	void smoothNormals(TScalar iMaxAngleInRadians);
+	void smoothNormals(TScalar maxAngleInRadians);
 	void flatFaces();
 	void loopSubdivision(unsigned level);
 	void autoSew();
@@ -68,20 +67,19 @@ public:
 
 private:
 
-    LASS_UTIL_VISITOR_DO_ACCEPT
-    
+	LASS_UTIL_VISITOR_DO_ACCEPT
+
 	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
-	const bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
-	void doLocalContext(const Sample& sample, const BoundedRay& ray,
-		const Intersection& intersection, IntersectionContext& result) const;
-	const bool doContains(const Sample& sample, const TPoint3D& point) const;
+	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
+	void doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const;
+	bool doContains(const Sample& sample, const TPoint3D& point) const;
 	const TAabb3D doBoundingBox() const;
-	const TScalar doArea() const;
+	TScalar doArea() const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-    TMesh mesh_;
+	TMesh mesh_;
 };
 
 

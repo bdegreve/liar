@@ -35,12 +35,10 @@ PY_CLASS_MEMBER_RW(MotionTranslation, child, setChild)
 
 // --- public --------------------------------------------------------------------------------------
 
-MotionTranslation::MotionTranslation(const TSceneObjectPtr& child, 
-									 const TVector3D& iLocalToWorldStart,
-									 const TVector3D& iSpeedInWorld):
-    child_(LASS_ENFORCE_POINTER(child)),
-    localToWorldStart_(iLocalToWorldStart),
-	speedInWorld_(iSpeedInWorld)
+MotionTranslation::MotionTranslation(const TSceneObjectPtr& child, const TVector3D& localToWorldStart, const TVector3D& speedInWorld):
+	child_(LASS_ENFORCE_POINTER(child)),
+	localToWorldStart_(localToWorldStart),
+	speedInWorld_(speedInWorld)
 {
 }
 
@@ -69,8 +67,8 @@ void MotionTranslation::setChild(const TSceneObjectPtr& child)
 
 void MotionTranslation::doAccept(util::VisitorBase& visitor)
 {
-    preAccept(visitor, *this);
-    child_->accept(visitor);
+	preAccept(visitor, *this);
+	child_->accept(visitor);
 	postAccept(visitor, *this);
 }
 
@@ -90,21 +88,19 @@ void MotionTranslation::doPreProcess(const TSceneObjectPtr& scene, const TimePer
 
 
 
-void MotionTranslation::doIntersect(const Sample& sample, const BoundedRay& ray, 
-							  Intersection& result) const
+void MotionTranslation::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
 {
 	const BoundedRay localRay = translate(ray, -localToWorldOffset(sample.time()));
 	child_->intersect(sample, localRay, result);
-    if (result)
-    {
-        result.push(this);
-    }
+	if (result)
+	{
+		result.push(this);
+	}
 }
 
 
 
-const bool MotionTranslation::doIsIntersecting(const Sample& sample, 
-											   const BoundedRay& ray) const
+bool MotionTranslation::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
 {
 	const BoundedRay localRay = translate(ray, -localToWorldOffset(sample.time()));
 	return child_->isIntersecting(sample, localRay);
@@ -112,9 +108,7 @@ const bool MotionTranslation::doIsIntersecting(const Sample& sample,
 
 
 
-void MotionTranslation::doLocalContext(const Sample& sample, const BoundedRay& ray,
-									   const Intersection& intersection, 
-									   IntersectionContext& result) const
+void MotionTranslation::doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const
 {
 	IntersectionDescendor descendor(intersection);
 	LASS_ASSERT(intersection.object() == child_.get());
@@ -135,7 +129,7 @@ void MotionTranslation::doLocalSpace(TTime time, TTransformation3D& localToWorld
 
 
 
-const bool MotionTranslation::doContains(const Sample& sample, const TPoint3D& point) const
+bool MotionTranslation::doContains(const Sample& sample, const TPoint3D& point) const
 {
 	const TPoint3D localPoint = point - localToWorldOffset(sample.time());
 	return child_->contains(sample, localPoint);
@@ -150,7 +144,7 @@ const TAabb3D MotionTranslation::doBoundingBox() const
 
 
 
-const TScalar MotionTranslation::doArea() const
+TScalar MotionTranslation::doArea() const
 {
 	return child_->area();
 }

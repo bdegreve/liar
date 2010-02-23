@@ -114,8 +114,7 @@ void Transformation::doIntersect(const Sample& sample, const BoundedRay& ray, In
 
 
 
-const bool Transformation::doIsIntersecting(const Sample& sample, 
-											const BoundedRay& ray) const
+bool Transformation::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
 {
 	const BoundedRay localRay = transform(ray, localToWorld_.inverse());
 	return child_->isIntersecting(sample, localRay);
@@ -123,9 +122,7 @@ const bool Transformation::doIsIntersecting(const Sample& sample,
 
 
 
-void Transformation::doLocalContext(const Sample& sample, const BoundedRay& ray,
-									const Intersection& intersection, 
-									IntersectionContext& result) const
+void Transformation::doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const
 {
 	IntersectionDescendor descendor(intersection);
 	LASS_ASSERT(intersection.object() == child_.get());
@@ -139,14 +136,14 @@ void Transformation::doLocalContext(const Sample& sample, const BoundedRay& ray,
 
 
 
-void Transformation::doLocalSpace(TTime time, TTransformation3D& localToWorld) const
+void Transformation::doLocalSpace(TTime, TTransformation3D& localToWorld) const
 {
 	localToWorld = concatenate(localToWorld_, localToWorld);
 }
 
 
 
-const bool Transformation::doContains(const Sample& sample, const TPoint3D& point) const
+bool Transformation::doContains(const Sample& sample, const TPoint3D& point) const
 {
 	const TPoint3D localPoint = transform(point, localToWorld_.inverse());
 	return child_->contains(sample, localPoint);
@@ -161,7 +158,7 @@ const TAabb3D Transformation::doBoundingBox() const
 
 
 
-const TScalar Transformation::doArea() const
+TScalar Transformation::doArea() const
 {
 	return child_->area();
 }

@@ -188,9 +188,7 @@ TRgbSpacePtr ImageCodecLass::selectRgbSpace(const TRgbSpacePtr& customSpace) con
 
 
 
-const ImageCodec::TImageHandle ImageCodecLass::doCreate(
-		const std::string& filename, const TResolution2D& resolution, 
-		const TRgbSpacePtr& rgbSpace, const std::string& options) const
+ImageCodec::TImageHandle ImageCodecLass::doCreate(const std::string& filename, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string&) const
 {
 	typedef io::Image::TChromaticity TChromaticity;
 
@@ -212,8 +210,7 @@ const ImageCodec::TImageHandle ImageCodecLass::doCreate(
 
 
 
-const ImageCodec::TImageHandle ImageCodecLass::doOpen(
-		const std::string& filename, const TRgbSpacePtr& rgbSpace, const std::string& options) const
+ImageCodec::TImageHandle ImageCodecLass::doOpen(const std::string& filename, const TRgbSpacePtr& rgbSpace, const std::string&) const
 {
 	std::auto_ptr<impl::LassImage> pimpl(new impl::LassImage);
 	pimpl->image.open(filename);

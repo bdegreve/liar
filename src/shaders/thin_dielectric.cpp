@@ -62,8 +62,7 @@ ThinDielectric::ThinDielectric(const TTexturePtr& innerRefractionIndex):
 
 
 
-ThinDielectric::ThinDielectric(
-		const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex):
+ThinDielectric::ThinDielectric(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex):
 	Shader(capsReflection | capsTransmission | capsSpecular),
 	innerRefractionIndex_(innerRefractionIndex),
 	outerRefractionIndex_(outerRefractionIndex),
@@ -121,23 +120,21 @@ void ThinDielectric::setTransparency(const TTexturePtr& transparency)
 
 // --- private -------------------------------------------------------------------------------------
 
-const size_t ThinDielectric::doNumReflectionSamples() const
+size_t ThinDielectric::doNumReflectionSamples() const
 {
 	return 1;
 }
 
 
 
-const size_t ThinDielectric::doNumTransmissionSamples() const
+size_t ThinDielectric::doNumTransmissionSamples() const
 {
 	return 1;
 }
 
 
 
-void ThinDielectric::doBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
+void ThinDielectric::doBsdf(const Sample&, const IntersectionContext&, const TVector3D&, const BsdfIn*, const BsdfIn*, BsdfOut*) const
 {
 }
 

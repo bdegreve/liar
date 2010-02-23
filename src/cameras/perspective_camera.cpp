@@ -174,14 +174,14 @@ void PerspectiveCamera::setDown(const TVector3D& down)
 
 
 
-const TScalar PerspectiveCamera::width() const
+TScalar PerspectiveCamera::width() const
 {
 	return width_;
 }
 
 
 
-const TScalar PerspectiveCamera::height() const
+TScalar PerspectiveCamera::height() const
 {
 	return height_;
 }
@@ -190,7 +190,7 @@ const TScalar PerspectiveCamera::height() const
 
 /** return aspect ratio
  */
-const TScalar PerspectiveCamera::aspectRatio() const
+TScalar PerspectiveCamera::aspectRatio() const
 {
 	return aspectRatio_;
 }
@@ -227,7 +227,7 @@ void PerspectiveCamera::setAspectRatio(TScalar ratio)
 
 
 
-const TScalar PerspectiveCamera::focalLength() const
+TScalar PerspectiveCamera::focalLength() const
 {
 	return focalLength_;
 }
@@ -236,7 +236,7 @@ const TScalar PerspectiveCamera::focalLength() const
 
 /** return horizontal FOV in radians
  */
-const TScalar PerspectiveCamera::fovAngle() const
+TScalar PerspectiveCamera::fovAngle() const
 {
 	return fovAngle_;
 }
@@ -266,14 +266,14 @@ void PerspectiveCamera::setFovAngle(TScalar radians)
 }
 
 
-const TScalar PerspectiveCamera::nearLimit() const
+TScalar PerspectiveCamera::nearLimit() const
 {
 	return nearLimit_;
 }
 
 
 
-const TScalar PerspectiveCamera::farLimit() const
+TScalar PerspectiveCamera::farLimit() const
 {
 	return farLimit_;
 }
@@ -294,7 +294,7 @@ void PerspectiveCamera::setFarLimit(TScalar distance)
 
 
 
-const TScalar PerspectiveCamera::focusDistance() const
+TScalar PerspectiveCamera::focusDistance() const
 {
 	return focusDistance_;
 }
@@ -315,14 +315,14 @@ void PerspectiveCamera::focusAt(const TPoint3D& target)
 
 
 
-const TScalar PerspectiveCamera::fNumber() const
+TScalar PerspectiveCamera::fNumber() const
 {
 	return fNumber_;
 }
 
 
 
-const TScalar PerspectiveCamera::lensRadius() const
+TScalar PerspectiveCamera::lensRadius() const
 {
 	return lensRadius_;
 }
@@ -345,21 +345,21 @@ void PerspectiveCamera::setLensRadius(TScalar radius)
 
 
 
-const TTime PerspectiveCamera::shutterOpenDelta() const
+TTime PerspectiveCamera::shutterOpenDelta() const
 {
 	return shutterOpenDelta_;
 }
 
 
 
-const TTime PerspectiveCamera::shutterCloseDelta() const
+TTime PerspectiveCamera::shutterCloseDelta() const
 {
 	return shutterCloseDelta_;
 }
 
 
 
-const TTime PerspectiveCamera::shutterTime() const
+TTime PerspectiveCamera::shutterTime() const
 {
 	return shutterCloseDelta_ - shutterOpenDelta_;
 }
@@ -392,9 +392,8 @@ void PerspectiveCamera::setShutterTime(TTimeDelta shutterTime)
 
 
 // --- private -------------------------------------------------------------------------------------
-   
-const BoundedRay PerspectiveCamera::doGenerateRay(
-		const Sample& sample, const TVector2D& screenSpaceDelta) const
+
+const BoundedRay PerspectiveCamera::doGenerateRay(const Sample& sample, const TVector2D& screenSpaceDelta) const
 {
 	const TPoint2D& screen = sample.screenCoordinate() + screenSpaceDelta;
 
@@ -433,7 +432,7 @@ const TimePeriod PerspectiveCamera::doShutterDelta() const
 
 
 
-const TScalar PerspectiveCamera::doAsDepth(const TRay3D& ray, TScalar t) const
+TScalar PerspectiveCamera::doAsDepth(const TRay3D& ray, TScalar t) const
 {
 	return t * prim::dot(ray.direction(), direction_.normal());
 }

@@ -67,14 +67,14 @@ void Intersection::push(const SceneObject* object, TScalar t, TSpecialField spec
 
 
 
-const SceneObject* const Intersection::object() const
+const SceneObject* Intersection::object() const
 {
 	return intersectionStack_[currentLevel_].object;
 }
 
 
 
-const TScalar Intersection::t() const
+TScalar Intersection::t() const
 {
 	LASS_ASSERT(intersectionStack_[currentLevel_].t > 0);
 	return intersectionStack_[currentLevel_].t;
@@ -82,20 +82,20 @@ const TScalar Intersection::t() const
 
 
 
-const Intersection::TSpecialField Intersection::specialField() const
+Intersection::TSpecialField Intersection::specialField() const
 {
 	return intersectionStack_[currentLevel_].special;
 }
 
 
-const size_t Intersection::level() const
+size_t Intersection::level() const
 {
 	return currentLevel_;
 }
 
 
 
-const bool Intersection::isEmpty() const
+bool Intersection::isEmpty() const
 {
 	LASS_ASSERT(intersectionStack_.empty() || intersectionStack_[currentLevel_].t > 0);
 	return intersectionStack_.empty();

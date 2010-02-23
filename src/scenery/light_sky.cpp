@@ -126,15 +126,14 @@ void LightSky::doIntersect(const Sample&, const BoundedRay&, Intersection& resul
 
 
 
-const bool LightSky::doIsIntersecting(const Sample&, const BoundedRay&) const
+bool LightSky::doIsIntersecting(const Sample&, const BoundedRay&) const
 {
 	return false; //return ray.inRange(TNumTraits::max);
 }
 
 
 
-void LightSky::doLocalContext(
-		const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const
+void LightSky::doLocalContext(const Sample&, const BoundedRay& ray, const Intersection& LASS_UNUSED(intersection), IntersectionContext& result) const
 {
 	LASS_ASSERT(intersection.t() == TNumTraits::max);
 	result.setT(TNumTraits::max);
@@ -175,7 +174,7 @@ void LightSky::doLocalContext(
 
 
 
-const bool LightSky::doContains(const Sample&, const TPoint3D&) const
+bool LightSky::doContains(const Sample&, const TPoint3D&) const
 {
 	return true;
 }
@@ -190,15 +189,14 @@ const TAabb3D LightSky::doBoundingBox() const
 
 
 
-const TScalar LightSky::doArea() const
+TScalar LightSky::doArea() const
 {
 	return TNumTraits::infinity;
 }
 
 
 
-const XYZ LightSky::doEmission(
-		const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+const XYZ LightSky::doEmission(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	const TVector3D dir = ray.direction();
 	const TScalar i = num::atan2(dir.y, dir.x) * resolution_.x / (2 * TNumTraits::pi);
@@ -239,7 +237,7 @@ const XYZ LightSky::doSampleEmission(
 
 
 const XYZ LightSky::doSampleEmission(
-		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
+		const Sample&, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
 		const TAabb3D& sceneBound, BoundedRay& emissionRay, TScalar& pdf) const
 {
 	const prim::Sphere3D<TScalar> worldSphere = boundingSphere(sceneBound);
@@ -272,14 +270,14 @@ const XYZ LightSky::doTotalPower(const TAabb3D& sceneBound) const
 
 
 
-const size_t LightSky::doNumberOfEmissionSamples() const
+size_t LightSky::doNumberOfEmissionSamples() const
 {
 	return numberOfSamples_;
 }
 
 
 
-const bool LightSky::doIsSingular() const
+bool LightSky::doIsSingular() const
 {
 	return false;
 }
@@ -331,7 +329,6 @@ void LightSky::buildCdf(const TMap& pdf, TMap& oMarginalCdfU, TMap& oConditional
 	TMap marginalCdfU(resolution_.x);
 	TMap conditionalCdfV(resolution_.x * resolution_.y);
 	
-	TScalar sumU = 0;
 	for (size_t i = 0; i < resolution_.x; ++i)
 	{
 		const TScalar* pdfLine = &pdf[i * resolution_.y];

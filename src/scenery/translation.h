@@ -44,7 +44,7 @@ namespace scenery
 
 class LIAR_SCENERY_DLL Translation: public SceneObject
 {
-    PY_HEADER(SceneObject)
+	PY_HEADER(SceneObject)
 public:
 
 	Translation(const TSceneObjectPtr& child, const TVector3D& localToWorld);
@@ -59,24 +59,24 @@ public:
 
 private:
 
-    void doAccept(lass::util::VisitorBase& visitor);
+	void doAccept(lass::util::VisitorBase& visitor);
 
 	void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
 	void doIntersect(const Sample& sample, const BoundedRay& ray, 
 		Intersection& result) const;
-	const bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
+	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
 	void doLocalContext(const Sample& sample, const BoundedRay& ray,
 		const Intersection& intersection, IntersectionContext& result) const;
 	void doLocalSpace(TTime time, TTransformation3D& localToWorld) const;
-	const bool doContains(const Sample& sample, const TPoint3D& point) const;
+	bool doContains(const Sample& sample, const TPoint3D& point) const;
 	const TAabb3D doBoundingBox() const;
-	const TScalar doArea() const;
+	TScalar doArea() const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-    TSceneObjectPtr child_;
-    TVector3D localToWorld_;
+	TSceneObjectPtr child_;
+	TVector3D localToWorld_;
 };
 
 

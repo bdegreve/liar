@@ -140,7 +140,7 @@ const XYZ LightContext::totalPower() const
 
 
 
-const bool LightContext::isSingular() const
+bool LightContext::isSingular() const
 {
 	return light_->isSingular();
 }
@@ -199,11 +199,11 @@ namespace impl
 			objectPath_.push_back(python::fromNakedToSharedPtrCast<SceneObject>(&light));
 			lights_.push_back(LightContext(objectPath_, light));
 		}
-		void doPostVisit(SceneObject& object)
+		void doPostVisit(SceneObject&)
 		{
 			objectPath_.pop_back();
 		}
-		void doPostVisit(SceneLight& light)
+		void doPostVisit(SceneLight&)
 		{
 			objectPath_.pop_back();
 		}

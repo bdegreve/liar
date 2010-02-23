@@ -1,7 +1,7 @@
 find_path(OpenEXR_INCLUDE_DIR 
 	ImfRgbaFile.h
 	HINTS ${OpenEXR_DIR}
-	PATH_SUFFIXES include
+	PATH_SUFFIXES include OpenEXR
 	)
 
 if(NOT OpenEXR_DIR)
@@ -90,10 +90,10 @@ set(_requirements)
 foreach(_comp ${_components})
 	list(APPEND _requirements OpenEXR_${_comp}_LIBRARY)
 endforeach()
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenEXR DEFAULT_MSG OpenEXR_INCLUDE_DIR ${_requirements} ZLIB_INCLUDE_DIRS ZLIB_LIBRARIES)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenEXR DEFAULT_MSG OpenEXR_INCLUDE_DIR ${_requirements} ZLIB_INCLUDE_DIR ZLIB_LIBRARIES)
 
 if(OPENEXR_FOUND)
-	set(OpenEXR_INCLUDE_DIRS "${OpenEXR_INCLUDE_DIR}" "${ZLIB_INCLUDE_DIRS}")
+	set(OpenEXR_INCLUDE_DIRS "${OpenEXR_INCLUDE_DIR}" "${ZLIB_INCLUDE_DIR}")
 	set(OpenEXR_LIBRARIES "${_libraries}" "${ZLIB_LIBRARIES}")
 	set(OpenEXR_DEFINITIONS "${_definitions}")
 	set(OpenEXR_REDIST "${_redist}")

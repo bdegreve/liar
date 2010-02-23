@@ -41,15 +41,15 @@ namespace kernel
 
 class LIAR_KERNEL_DLL Medium: public python::PyObjectPlus
 {
-    PY_HEADER(python::PyObjectPlus)
+	PY_HEADER(python::PyObjectPlus)
 public:
 
-    virtual ~Medium();
+	virtual ~Medium();
 
 	const XYZ& refractionIndex() const;
 	void setRefractionIndex(const XYZ& refractionIndex);
 	
-	const size_t priority() const;
+	size_t priority() const;
 	void setPriority(size_t priority);
 
 	const XYZ transparency(const BoundedRay& ray) const
@@ -82,9 +82,9 @@ private:
 	friend class MediumChanger;
 	typedef std::vector<const Medium*> TStack;
 	
-	void push(const Medium* medium);
-	void pop(const Medium* medium);
-	const Medium* const top() const;
+	//void push(const Medium* medium);
+	//void pop(const Medium* medium);
+	const Medium* top() const;
 
 	TStack stack_;
 	TMediumPtr default_;

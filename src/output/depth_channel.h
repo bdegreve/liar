@@ -40,7 +40,7 @@ namespace output
 
 class LIAR_OUTPUT_DLL DepthChannel: public RenderTarget
 {
-    PY_HEADER(RenderTarget)
+	PY_HEADER(RenderTarget)
 public:
 
 	DepthChannel(const TRenderTargetPtr& target, TScalar unit = 1);
@@ -48,7 +48,7 @@ public:
 	const TRenderTargetPtr& target() const;
 	void setTarget(const TRenderTargetPtr& target);
 	
-	const TScalar unit() const;
+	TScalar unit() const;
 	void setUnit(TScalar unit);
 
 private:
@@ -58,10 +58,10 @@ private:
 	enum { bufferSize_ = 128 };
 
 	const TResolution2D doResolution() const;
-    void doBeginRender();
+	void doBeginRender();
 	void doWriteRender(const OutputSample* first, const OutputSample* last);
-    void doEndRender();
-	const bool doIsCanceling() const;
+	void doEndRender();
+	bool doIsCanceling() const;
 
 	TOutputBuffer outputBuffer_;
 	TRenderTargetPtr target_;

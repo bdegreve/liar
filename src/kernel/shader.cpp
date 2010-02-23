@@ -58,28 +58,28 @@ void Shader::requestSamples(const TSamplerPtr& sampler)
 
 
 
-const size_t Shader::numReflectionSamples() const
+size_t Shader::numReflectionSamples() const
 {
 	return doNumReflectionSamples();
 }
 
 
 
-const size_t Shader::numTransmissionSamples() const
+size_t Shader::numTransmissionSamples() const
 {
 	return doNumTransmissionSamples();
 }
 
 
 
-const int Shader::idReflectionSamples() const
+int Shader::idReflectionSamples() const
 {
 	return idReflectionSamples_;
 }
 
 
 
-const int Shader::idTransmissionSamples() const
+int Shader::idTransmissionSamples() const
 {
 	return idTransmissionSamples_;
 }
@@ -129,34 +129,33 @@ void Shader::setState(const TPyObjectPtr& state)
 
 // --- private -------------------------------------------------------------------------------------
 
-void Shader::doRequestSamples(const TSamplerPtr& sampler)
+void Shader::doRequestSamples(const TSamplerPtr&)
 {
 }
 
 
 
-const size_t Shader::doNumReflectionSamples() const
-{
-	return 0;
-}
-
-
-
-const size_t Shader::doNumTransmissionSamples() const
+size_t Shader::doNumReflectionSamples() const
 {
 	return 0;
 }
 
 
 
-void Shader::doShadeContext(const Sample& sample, IntersectionContext& context) const
+size_t Shader::doNumTransmissionSamples() const
+{
+	return 0;
+}
+
+
+
+void Shader::doShadeContext(const Sample&, IntersectionContext&) const
 {
 }
 
 
 
-const XYZ Shader::doEmission(const Sample& sample, const IntersectionContext& context, 
-		const TVector3D& dirOut) const
+const XYZ Shader::doEmission(const Sample&, const IntersectionContext&, const TVector3D&) const
 {
 	return XYZ();
 }

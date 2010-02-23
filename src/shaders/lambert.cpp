@@ -74,7 +74,7 @@ void Lambert::setDiffuse(const TTexturePtr& iDiffuse)
 // --- private -------------------------------------------------------------------------------------
 
 void Lambert::doBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
+		const Sample& sample, const IntersectionContext& context, const TVector3D&,
 		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
 {
 	LASS_ASSERT(omegaIn.z > 0);
@@ -94,7 +94,7 @@ void Lambert::doBsdf(
 
 
 void Lambert::doSampleBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
+		const Sample& sample, const IntersectionContext& context, const TVector3D&,
 		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
 {
 	LASS_ASSERT(omegaIn.z > 0);

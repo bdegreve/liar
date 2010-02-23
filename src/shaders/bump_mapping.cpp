@@ -104,14 +104,14 @@ void BumpMapping::doRequestSamples(const TSamplerPtr& sampler)
 
 
 
-const size_t BumpMapping::doNumReflectionSamples() const
+size_t BumpMapping::doNumReflectionSamples() const
 {
 	return shader_->numReflectionSamples();
 }
 
 
 
-const size_t BumpMapping::doNumTransmissionSamples() const
+size_t BumpMapping::doNumTransmissionSamples() const
 {
 	return shader_->numTransmissionSamples();
 }

@@ -38,10 +38,9 @@ PY_CLASS_MEMBER_R(Translation, worldToLocal)
 
 // --- public --------------------------------------------------------------------------------------
 
-Translation::Translation(const TSceneObjectPtr& child, 
-							   const TVector3D& localToWorld):
-    child_(child),
-    localToWorld_(localToWorld)
+Translation::Translation(const TSceneObjectPtr& child, const TVector3D& localToWorld):
+	child_(child),
+	localToWorld_(localToWorld)
 {
 }
 
@@ -95,28 +94,26 @@ void Translation::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& p
 
 void Translation::doAccept(util::VisitorBase& visitor)
 {
-    preAccept(visitor, *this);
-    child_->accept(visitor);
+	preAccept(visitor, *this);
+	child_->accept(visitor);
 	postAccept(visitor, *this);
 }
 
 
 
-void Translation::doIntersect(const Sample& sample, const BoundedRay& ray, 
-							  Intersection& result) const
+void Translation::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
 {
 	const BoundedRay localRay = translate(ray, -localToWorld_);
 	child_->intersect(sample, localRay, result);
-    if (result)
-    {
-        result.push(this);
-    }
+	if (result)
+	{
+		result.push(this);
+	}
 }
 
 
 
-const bool Translation::doIsIntersecting(const Sample& sample, 
-										 const BoundedRay& ray) const
+bool Translation::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
 {
 	const BoundedRay localRay = translate(ray, -localToWorld_);
 	return child_->isIntersecting(sample, localRay);
@@ -124,9 +121,7 @@ const bool Translation::doIsIntersecting(const Sample& sample,
 
 
 
-void Translation::doLocalContext(const Sample& sample, const BoundedRay& ray,
-								 const Intersection& intersection, 
-								 IntersectionContext& result) const
+void Translation::doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection,  IntersectionContext& result) const
 {
 	IntersectionDescendor descendor(intersection);
 	LASS_ASSERT(intersection.object() == child_.get());
@@ -138,14 +133,14 @@ void Translation::doLocalContext(const Sample& sample, const BoundedRay& ray,
 
 
 
-void Translation::doLocalSpace(TTime time, TTransformation3D& localToWorld) const 
+void Translation::doLocalSpace(TTime, TTransformation3D& localToWorld) const 
 {
 	localToWorld = concatenate(TTransformation3D::translation(localToWorld_), localToWorld);
 }
 
 
 
-const bool Translation::doContains(const Sample& sample, const TPoint3D& point) const
+bool Translation::doContains(const Sample& sample, const TPoint3D& point) const
 {
 	const TPoint3D localPoint = point - localToWorld_;
 	return child_->contains(sample, localPoint);
@@ -161,7 +156,7 @@ const TAabb3D Translation::doBoundingBox() const
 
 
 
-const TScalar Translation::doArea() const
+TScalar Translation::doArea() const
 {
 	return child_->area();
 }

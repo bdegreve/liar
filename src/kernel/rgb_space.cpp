@@ -169,7 +169,7 @@ const TPoint2D& RgbSpace::white() const
 
 
 
-const TScalar RgbSpace::gamma() const
+TScalar RgbSpace::gamma() const
 {
 	return gamma_;
 }

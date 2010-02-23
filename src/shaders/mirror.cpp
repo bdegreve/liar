@@ -73,16 +73,14 @@ void Mirror::setReflectance(const TTexturePtr& reflectance)
 
 // --- private -------------------------------------------------------------------------------------
 
-const size_t Mirror::doNumReflectionSamples() const
+size_t Mirror::doNumReflectionSamples() const
 {
 	return 1;
 }
 
 
 
-void Mirror::doBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
+void Mirror::doBsdf(const Sample&, const IntersectionContext&, const TVector3D&, const BsdfIn*, const BsdfIn*, BsdfOut*) const
 {
 }
 

@@ -34,16 +34,11 @@ namespace shaders
 PY_DECLARE_CLASS_DOC(AshikhminShirley, "Anisotropic Phong BRDF by Ashikhmin & Shirley (2001)")
 PY_CLASS_CONSTRUCTOR_0(AshikhminShirley)
 PY_CLASS_CONSTRUCTOR_2(AshikhminShirley, const TTexturePtr&, const TTexturePtr&)
-PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, diffuse, setDiffuse, 
-	"texture for diffuse component")
-PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specular, setSpecular, 
-	"texture for specular component")
-PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specularPowerU, setSpecularPowerU, 
-	"texture for rollof power of specular component in U direction")
-PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specularPowerV, setSpecularPowerV, 
-	"texture for rollof power of specular component in V direction")
-PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, numberOfSamples, setNumberOfSamples, 
-	"set number of samples for Monte Carlo simulations")
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, diffuse, setDiffuse, "texture for diffuse component")
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specular, setSpecular, "texture for specular component")
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specularPowerU, setSpecularPowerU, "texture for rollof power of specular component in U direction")
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specularPowerV, setSpecularPowerV, "texture for rollof power of specular component in V direction")
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, numberOfSamples, setNumberOfSamples, "set number of samples for Monte Carlo simulations")
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -78,9 +73,9 @@ const TTexturePtr& AshikhminShirley::diffuse() const
 
 
 
-void AshikhminShirley::setDiffuse(const TTexturePtr& iDiffuse)
+void AshikhminShirley::setDiffuse(const TTexturePtr& diffuse)
 {
-	diffuse_ = iDiffuse;
+	diffuse_ = diffuse;
 }
 
 
@@ -92,9 +87,9 @@ const TTexturePtr& AshikhminShirley::specular() const
 
 
 
-void AshikhminShirley::setSpecular(const TTexturePtr& iSpecular)
+void AshikhminShirley::setSpecular(const TTexturePtr& specular)
 {
-	specular_ = iSpecular;
+	specular_ = specular;
 }
 
 
@@ -106,9 +101,9 @@ const TTexturePtr& AshikhminShirley::specularPowerU() const
 
 
 
-void AshikhminShirley::setSpecularPowerU(const TTexturePtr& iSpecularPower)
+void AshikhminShirley::setSpecularPowerU(const TTexturePtr& specularPower)
 {
-	specularPowerU_ = iSpecularPower;
+	specularPowerU_ = specularPower;
 }
 
 
@@ -120,23 +115,23 @@ const TTexturePtr& AshikhminShirley::specularPowerV() const
 
 
 
-void AshikhminShirley::setSpecularPowerV(const TTexturePtr& iSpecularPower)
+void AshikhminShirley::setSpecularPowerV(const TTexturePtr& specularPower)
 {
-	specularPowerV_ = iSpecularPower;
+	specularPowerV_ = specularPower;
 }
 
 
 
-const size_t AshikhminShirley::numberOfSamples() const
+size_t AshikhminShirley::numberOfSamples() const
 {
 	return numberOfSamples_;
 }
 
 
 
-void AshikhminShirley::setNumberOfSamples(size_t iNumber)
+void AshikhminShirley::setNumberOfSamples(size_t number)
 {
-	numberOfSamples_ = std::max<size_t>(iNumber, 1);
+	numberOfSamples_ = std::max<size_t>(number, 1);
 }
 
 
@@ -159,13 +154,13 @@ namespace temp
 	}
 }
 
-const size_t AshikhminShirley::doNumReflectionSamples() const
+size_t AshikhminShirley::doNumReflectionSamples() const
 {
 	return numberOfSamples_;
 }
 
 void AshikhminShirley::doBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
+		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn, 
 		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
 {
 	const XYZ Rd = diffuse_->lookUp(sample, context);
@@ -252,7 +247,7 @@ inline TScalar cutoffHeuristic(TScalar p1, TScalar p2, TScalar alpha)
 }
 
 void AshikhminShirley::doSampleBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
+		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn, 
 		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
 {	
 	const XYZ Rd = diffuse_->lookUp(sample, context);

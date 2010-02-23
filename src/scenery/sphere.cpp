@@ -71,7 +71,7 @@ void Sphere::setCenter(const TPoint3D& center)
 
 
 
-const TScalar Sphere::radius() const
+TScalar Sphere::radius() const
 {
 	return sphere_.radius();
 }
@@ -92,7 +92,7 @@ void Sphere::setRadius(TScalar radius)
 
 // --- private -------------------------------------------------------------------------------------
 
-void Sphere::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
+void Sphere::doIntersect(const Sample&, const BoundedRay& ray, Intersection& result) const
 {
 	TScalar t;
 	const prim::Result hit = prim::intersect(sphere_, ray.unboundedRay(), t, ray.nearLimit());
@@ -110,7 +110,7 @@ void Sphere::doIntersect(const Sample& sample, const BoundedRay& ray, Intersecti
 
 
 
-const bool Sphere::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
+bool Sphere::doIsIntersecting(const Sample&, const BoundedRay& ray) const
 {
 	TScalar t;
 	const prim::Result hit = prim::intersect(sphere_, ray.unboundedRay(), t, ray.nearLimit());
@@ -119,9 +119,7 @@ const bool Sphere::doIsIntersecting(const Sample& sample, const BoundedRay& ray)
 
 
 
-void Sphere::doLocalContext(
-		const Sample& sample, const BoundedRay& ray, const Intersection& intersection,
-		IntersectionContext& result) const
+void Sphere::doLocalContext(const Sample&, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const
 {
 	const TScalar t = intersection.t();
 	const TPoint3D point = ray.point(t);
@@ -165,7 +163,7 @@ void Sphere::doLocalContext(
 
 
 
-const bool Sphere::doContains(const Sample& sample, const TPoint3D& point) const
+bool Sphere::doContains(const Sample&, const TPoint3D& point) const
 {
 	return sphere_.contains(point);
 }
@@ -174,14 +172,14 @@ const bool Sphere::doContains(const Sample& sample, const TPoint3D& point) const
 
 const TAabb3D Sphere::doBoundingBox() const
 {
-    TScalar radius = sphere_.radius();
-    TVector3D extent = TVector3D(radius, radius, radius);
-    return TAabb3D(sphere_.center() - extent, sphere_.center() + extent);
+	TScalar radius = sphere_.radius();
+	TVector3D extent = TVector3D(radius, radius, radius);
+	return TAabb3D(sphere_.center() - extent, sphere_.center() + extent);
 }
 
 
 
-const TScalar Sphere::doArea() const
+TScalar Sphere::doArea() const
 {
 	return sphere_.area();
 }
@@ -206,7 +204,7 @@ void Sphere::doSetState(const TPyObjectPtr& state)
 
 
 
-const bool Sphere::doHasSurfaceSampling() const
+bool Sphere::doHasSurfaceSampling() const
 {
 	return true;
 }
@@ -277,8 +275,8 @@ const TPoint3D Sphere::doSampleSurface(
 
 void Sphere::doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
-	TScalar t;
-	const prim::Result r = prim::intersect(sphere_, ray, t, tolerance);
+	TScalar t = 0;
+	const prim::Result LASS_UNUSED(r) = prim::intersect(sphere_, ray, t, tolerance);
 	shadowRay = BoundedRay(ray, tolerance, t);
 	if (sphere_.contains(ray.support()))
 	{

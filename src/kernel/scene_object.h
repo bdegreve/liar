@@ -107,39 +107,33 @@ public:
 	void preProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
 
 	void intersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
-	void intersect(const Sample& sample, const DifferentialRay& ray, 
-		Intersection& result) const;
-	const bool isIntersecting(const Sample& sample, const BoundedRay& ray) const ;
-	const bool isIntersecting(const Sample& sample, const DifferentialRay& ray) const;
-	void localContext(const Sample& sample, const BoundedRay& ray, 
-		const Intersection& intersection, IntersectionContext& result) const;
-	void localContext(const Sample& sample, const DifferentialRay& ray, 
-		const Intersection& intersection, IntersectionContext& result) const;
-	const bool contains(const Sample& sample, const TPoint3D& point) const;
+	void intersect(const Sample& sample, const DifferentialRay& ray, Intersection& result) const;
+	bool isIntersecting(const Sample& sample, const BoundedRay& ray) const ;
+	bool isIntersecting(const Sample& sample, const DifferentialRay& ray) const;
+	void localContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const;
+	void localContext(const Sample& sample, const DifferentialRay& ray, const Intersection& intersection, IntersectionContext& result) const;
+	bool contains(const Sample& sample, const TPoint3D& point) const;
 	void localSpace(TTime time, TTransformation3D& localToWorld) const;
 
-	const bool hasSurfaceSampling() const;
+	bool hasSurfaceSampling() const;
 	void fun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
-	const TPoint3D sampleSurface(const TPoint2D& sample, TVector3D& normal, 
-		TScalar& pdf) const;
-	const TPoint3D sampleSurface(const TPoint2D& sample, const TPoint3D& target, 
-		TVector3D& normal, TScalar& pdf) const;
-	const TPoint3D sampleSurface(const TPoint2D& sample, const TPoint3D& target,
-		const TVector3D& targetNormal, TVector3D& normal, TScalar& pdf) const;
+	const TPoint3D sampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const;
+	const TPoint3D sampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const;
+	const TPoint3D sampleSurface(const TPoint2D& sample, const TPoint3D& target, const TVector3D& targetNormal, TVector3D& normal, TScalar& pdf) const;
 
 	const TAabb3D boundingBox() const;
-	const bool hasMotion() const;
+	bool hasMotion() const;
 
-	const TScalar area() const;
+	TScalar area() const;
 
 	const TShaderPtr& shader() const;
 	void setShader(const TShaderPtr& shader);
-	const bool isOverridingShader() const;
+	bool isOverridingShader() const;
 	void setOverridingShader(bool enabled = true);
 
 	const TMediumPtr& interior() const;
 	void setInterior(const TMediumPtr& medium);
-	const bool isOverridingInterior() const;
+	bool isOverridingInterior() const;
 	void setOverridingInterior(bool enabled = true);
 
 	static const TShaderPtr& defaultShader();
@@ -158,26 +152,21 @@ private:
 	LASS_UTIL_VISITOR_DO_ACCEPT;
 	
 	virtual void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
-	virtual void doIntersect(const Sample& sample, const BoundedRay& ray, 
-		Intersection& result) const = 0;
-	virtual const bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const = 0;
-	virtual void doLocalContext(const Sample& sample, const BoundedRay& ray,
-		const Intersection& intersection, IntersectionContext& result) const = 0;
-	virtual const bool doContains(const Sample& sample, const TPoint3D& point) const = 0;
-    
-	virtual const bool doHasSurfaceSampling() const;
+	virtual void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const = 0;
+	virtual bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const = 0;
+	virtual void doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const = 0;
+	virtual bool doContains(const Sample& sample, const TPoint3D& point) const = 0;
+
+	virtual bool doHasSurfaceSampling() const;
 	virtual void doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
-	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal,
-		TScalar& pdf) const;
-	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, const TPoint3D& target,
-		TVector3D& normal, TScalar& pdf) const;
-	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, const TPoint3D& target,
-		const TVector3D& targetNormal, TVector3D& normal, TScalar& pdf) const;
+	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const;
+	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const;
+	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, const TPoint3D& target, const TVector3D& targetNormal, TVector3D& normal, TScalar& pdf) const;
 	
 	virtual const TAabb3D doBoundingBox() const = 0;
-	virtual const TScalar doArea() const = 0;
+	virtual TScalar doArea() const = 0;
 	virtual void doLocalSpace(TTime time, TTransformation3D& localToWorld) const;
-	virtual const bool doHasMotion() const;
+	virtual bool doHasMotion() const;
 
 	virtual const TPyObjectPtr doGetState() const = 0;
 	virtual void doSetState(const TPyObjectPtr& state) = 0;

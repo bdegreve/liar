@@ -92,7 +92,7 @@ void RenderTarget::endRender()
 
 
 
-const bool RenderTarget::isRendering() const
+bool RenderTarget::isRendering() const
 {
 	return isRendering_;
 }
@@ -101,7 +101,7 @@ const bool RenderTarget::isRendering() const
 
 // --- private -------------------------------------------------------------------------------------
 
-const bool RenderTarget::doIsCanceling() const
+bool RenderTarget::doIsCanceling() const
 {
 	return false;
 }

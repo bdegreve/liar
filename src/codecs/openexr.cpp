@@ -65,9 +65,7 @@ inline TPoint2D V2fToPoint2D(const Imath::V2f& p)
 class ImageCodecOpenEXR: public kernel::ImageCodec
 {
 private:
-	const TImageHandle doCreate(
-			const std::string& filename, const TResolution2D& resolution, 
-			const kernel::TRgbSpacePtr& rgbSpace, const std::string& options) const
+	TImageHandle doCreate(const std::string& filename, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
 	{
 		std::auto_ptr<Handle> pimpl(new Handle(resolution, rgbSpace));
 		pimpl->line.resize(resolution.x);
@@ -83,8 +81,7 @@ private:
 		return pimpl.release();
 	}
 
-	const TImageHandle doOpen(
-			const std::string& filename, const kernel::TRgbSpacePtr& rgbSpace, const std::string& options) const
+	TImageHandle doOpen(const std::string& filename, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
 	{
 		util::ScopedPtr<Imf::RgbaInputFile> input(new Imf::RgbaInputFile(filename.c_str(), 0));
 		const Imath::Box2i& dispWin = input->header().displayWindow();

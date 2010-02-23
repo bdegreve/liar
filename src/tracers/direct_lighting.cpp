@@ -55,13 +55,13 @@ DirectLighting::DirectLighting()
 
 // --- private -------------------------------------------------------------------------------------
 
-void DirectLighting::doRequestSamples(const kernel::TSamplerPtr& sampler)
+void DirectLighting::doRequestSamples(const kernel::TSamplerPtr&)
 {
 }
 
 
 
-void DirectLighting::doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period)
+void DirectLighting::doPreProcess(const kernel::TSamplerPtr&, const TimePeriod&)
 {
 }
 
@@ -190,8 +190,7 @@ const XYZ DirectLighting::doCastRay(
 
 
 const TLightSamplesRange
-DirectLighting::doSampleLights(const Sample& iSample, const TPoint3D& iTarget, 
-		const TVector3D& iTargetNormal) const
+DirectLighting::doSampleLights(const Sample&, const TPoint3D&, const TVector3D&) const
 {
 	return TLightSamplesRange();
 }
@@ -212,7 +211,7 @@ const TPyObjectPtr DirectLighting::doGetState() const
 
 
 
-void DirectLighting::doSetState(const TPyObjectPtr& state)
+void DirectLighting::doSetState(const TPyObjectPtr&)
 {
 }
 

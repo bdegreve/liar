@@ -40,7 +40,7 @@ namespace shaders
 
 class LIAR_SHADERS_DLL ThinDielectric: public Shader
 {
-    PY_HEADER(Shader)
+	PY_HEADER(Shader)
 public:
 
 	ThinDielectric();
@@ -56,13 +56,11 @@ public:
 
 private:
 
-	const size_t doNumReflectionSamples() const;
-	const size_t doNumTransmissionSamples() const;
+	size_t doNumReflectionSamples() const;
+	size_t doNumTransmissionSamples() const;
 
-	void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const;
-	void doSampleBsdf(const Sample& sample, const IntersectionContext& context,	const TVector3D& omegaIn,
-		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const;
+	void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn, const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const;
+	void doSampleBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn, const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);

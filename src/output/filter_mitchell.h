@@ -44,7 +44,7 @@ namespace output
 
 class LIAR_OUTPUT_DLL FilterMitchell: public RenderTarget
 {
-    PY_HEADER(RenderTarget)
+	PY_HEADER(RenderTarget)
 public:
 
 	FilterMitchell(const TRenderTargetPtr& target);
@@ -52,7 +52,7 @@ public:
 
 	const TRenderTargetPtr& target() const;
 	void setTarget(const TRenderTargetPtr& target);
-	const TScalar b() const;
+	TScalar b() const;
 	void setB(TScalar b);
 
 private:
@@ -68,12 +68,12 @@ private:
 	};
 
 	const TResolution2D doResolution() const;
-    void doBeginRender();
+	void doBeginRender();
 	void doWriteRender(const OutputSample* first, const OutputSample* last);
-    void doEndRender();
-	const bool doIsCanceling() const;
+	void doEndRender();
+	bool doIsCanceling() const;
 
-	const TScalar filterKernel(TScalar x) const;
+	TScalar filterKernel(TScalar x) const;
 	const TVector2D filterKernel(const TVector2D& p) const;
 
 	TOutputBuffer outputBuffer_;

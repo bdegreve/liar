@@ -53,17 +53,16 @@ PY_CLASS_METHOD(TriangleMesh, triangles)
 
 // --- public --------------------------------------------------------------------------------------
 
-TriangleMesh::TriangleMesh(const TVertices& iVertices, const TNormals& iNormals,
-		const TUvs& iUvs, const TIndexTriangles& iTriangles):
-    mesh_(iVertices, iNormals, iUvs, iTriangles)
+TriangleMesh::TriangleMesh(const TVertices& vertices, const TNormals& normals, const TUvs& uvs, const TIndexTriangles& triangles):
+	mesh_(vertices, normals, uvs, triangles)
 {
 }
 
 
 
-void TriangleMesh::smoothNormals(TScalar iMaxAngleInRadians)
+void TriangleMesh::smoothNormals(TScalar maxAngleInRadians)
 {
-	mesh_.smoothNormals(iMaxAngleInRadians);
+	mesh_.smoothNormals(maxAngleInRadians);
 }
 
 
@@ -132,9 +131,9 @@ const TriangleMesh::TIndexTriangles TriangleMesh::triangles() const
 
 // --- private -------------------------------------------------------------------------------------
 
-void TriangleMesh::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
+void TriangleMesh::doIntersect(const Sample&, const BoundedRay& ray, Intersection& result) const
 {
-    TScalar t;
+	TScalar t;
 	TMesh::TTriangleIterator triangle;
 	const prim::Result hit = mesh_.intersect(ray.unboundedRay(), triangle, t, ray.nearLimit());
 	if (hit == prim::rOne && ray.inRange(t))
@@ -149,16 +148,14 @@ void TriangleMesh::doIntersect(const Sample& sample, const BoundedRay& ray, Inte
 
 
 
-const bool TriangleMesh::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
+bool TriangleMesh::doIsIntersecting(const Sample&, const BoundedRay& ray) const
 {
 	return mesh_.intersects(ray.unboundedRay(), ray.nearLimit(), ray.farLimit());
 }
 
 
 
-void TriangleMesh::doLocalContext(
-		const Sample& sample, const BoundedRay& ray, const Intersection& intersection,
-		IntersectionContext& result) const
+void TriangleMesh::doLocalContext(const Sample&, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const
 {
 	result.setBounds(this->boundingBox());
 
@@ -172,7 +169,7 @@ void TriangleMesh::doLocalContext(
 
 	TMesh::TIntersectionContext context;
 	TScalar t2;	
-	const prim::Result r = triangle.intersect(ray.unboundedRay(), t2, ray.nearLimit(), &context);
+	const prim::Result LASS_UNUSED(r) = triangle.intersect(ray.unboundedRay(), t2, ray.nearLimit(), &context);
 #pragma LASS_FIXME("why can t != t2?")
 	LASS_ASSERT(r == prim::rOne /*&& t == t2*/);
 
@@ -187,7 +184,7 @@ void TriangleMesh::doLocalContext(
 
 
 
-const bool TriangleMesh::doContains(const Sample& sample, const TPoint3D& point) const
+bool TriangleMesh::doContains(const Sample&, const TPoint3D&) const
 {
 	return false;
 }
@@ -196,14 +193,14 @@ const bool TriangleMesh::doContains(const Sample& sample, const TPoint3D& point)
 
 const TAabb3D TriangleMesh::doBoundingBox() const
 {
-    return mesh_.aabb();
+	return mesh_.aabb();
 }
 
 
 
-const TScalar TriangleMesh::doArea() const
+TScalar TriangleMesh::doArea() const
 {
-    return mesh_.area();
+	return mesh_.area();
 }
 
 

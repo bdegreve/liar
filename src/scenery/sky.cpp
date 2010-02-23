@@ -49,7 +49,7 @@ Sky::Sky():
 
 // --- private -------------------------------------------------------------------------------------
 
-void Sky::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
+void Sky::doIntersect(const Sample&, const BoundedRay& ray, Intersection& result) const
 {
 	if (ray.inRange(radius_))
 	{
@@ -63,15 +63,14 @@ void Sky::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection&
 
 
 
-const bool Sky::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
+bool Sky::doIsIntersecting(const Sample&, const BoundedRay& ray) const
 {
 	return ray.inRange(radius_);
 }
 
 
 
-void Sky::doLocalContext(const Sample& sample, const BoundedRay& ray, 
-		const Intersection& intersection, IntersectionContext& result) const
+void Sky::doLocalContext(const Sample&, const BoundedRay& ray, const Intersection&, IntersectionContext& result) const
 {
 	//LASS_ASSERT(intersection.t() == radius_);
 	result.setT(radius_);
@@ -111,7 +110,7 @@ void Sky::doLocalContext(const Sample& sample, const BoundedRay& ray,
 
 
 
-const bool Sky::doContains(const Sample& sample, const TPoint3D& point) const
+bool Sky::doContains(const Sample&, const TPoint3D&) const
 {
 	return true;
 }
@@ -125,7 +124,7 @@ const TAabb3D Sky::doBoundingBox() const
 
 
 
-const TScalar Sky::doArea() const
+TScalar Sky::doArea() const
 {
 	return TNumTraits::infinity;
 }
@@ -146,23 +145,21 @@ void Sky::doSetState(const TPyObjectPtr& state)
 
 
 
-const bool Sky::doHasSurfaceSampling() const
+bool Sky::doHasSurfaceSampling() const
 {
 	return true;
 }
 
 
 
-const TPoint3D Sky::doSampleSurface(const TPoint2D& sample, TVector3D& normal, 
-		TScalar& pdf) const
+const TPoint3D Sky::doSampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const
 {
 	return sampleSurface(sample, TPoint3D(0, 0, 0), normal, pdf);
 }
 
 
 
-const TPoint3D Sky::doSampleSurface(const TPoint2D& sample, const TPoint3D& target,
-		TVector3D& normal, TScalar& pdf) const
+const TPoint3D Sky::doSampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const
 {
 	const TScalar z = 2 * sample.y - 1;
 	const TScalar rho = num::sqrt(1 - num::sqr(z));

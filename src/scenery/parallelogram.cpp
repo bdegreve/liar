@@ -34,10 +34,9 @@ PY_CLASS_CONSTRUCTOR_3(Parallelogram, const TPoint3D&, const TVector3D&, const T
 
 // --- public --------------------------------------------------------------------------------------
 
-Parallelogram::Parallelogram(
-		const TPoint3D& iSupport, const TVector3D& iSizeU, const TVector3D& iSizeV):
-    parallelogram_(iSupport, iSizeU, iSizeV),
-	normal_(cross(iSizeU, iSizeV).normal())
+Parallelogram::Parallelogram(const TPoint3D& support, const TVector3D& sizeU, const TVector3D& sizeV):
+	parallelogram_(support, sizeU, sizeV),
+	normal_(cross(sizeU, sizeV).normal())
 {
 	invArea_ = num::inv(parallelogram_.area());
 }
@@ -50,13 +49,10 @@ Parallelogram::Parallelogram(
 
 // --- private -------------------------------------------------------------------------------------
 
-void Parallelogram::doIntersect(
-		const kernel::Sample& sample, const kernel::BoundedRay& ray, 
-		kernel::Intersection& result) const
+void Parallelogram::doIntersect(const kernel::Sample&, const kernel::BoundedRay& ray, kernel::Intersection& result) const
 {
 	TScalar t;
-	const prim::Result hit = prim::intersect(
-		parallelogram_, ray.unboundedRay(), t, ray.nearLimit());
+	const prim::Result hit = prim::intersect(parallelogram_, ray.unboundedRay(), t, ray.nearLimit());
 	if (hit == prim::rOne && ray.inRange(t))
 	{
 		result = kernel::Intersection(this, t, seNoEvent);
@@ -69,25 +65,20 @@ void Parallelogram::doIntersect(
 
 
 
-const bool Parallelogram::doIsIntersecting(
-		const kernel::Sample& sample, const kernel::BoundedRay& ray) const
+bool Parallelogram::doIsIntersecting(const kernel::Sample&, const kernel::BoundedRay& ray) const
 {
 	TScalar t;
-	const prim::Result hit = prim::intersect(
-		parallelogram_, ray.unboundedRay(), t, ray.nearLimit());
+	const prim::Result hit = prim::intersect(parallelogram_, ray.unboundedRay(), t, ray.nearLimit());
 	return hit == prim::rOne && ray.inRange(t);
 }
 
 
 
-void Parallelogram::doLocalContext(
-		const kernel::Sample& sample, const BoundedRay& ray, 
-		const kernel::Intersection& intersection, kernel::IntersectionContext& result) const
+void Parallelogram::doLocalContext(const kernel::Sample&, const BoundedRay& ray, const kernel::Intersection& intersection, kernel::IntersectionContext& result) const
 {
 	TPoint2D uv;
 	TScalar t;
-	const prim::Result hit = prim::intersect(
-		parallelogram_, ray.unboundedRay(), uv.x, uv.y, t, ray.nearLimit());
+	const prim::Result LASS_UNUSED(hit) = prim::intersect(parallelogram_, ray.unboundedRay(), uv.x, uv.y, t, ray.nearLimit());
 	LASS_ASSERT(hit == prim::rOne && ray.inRange(t));
 	LASS_ASSERT(t == intersection.t());
 
@@ -104,14 +95,14 @@ void Parallelogram::doLocalContext(
 
 
 
-const bool Parallelogram::doContains(const kernel::Sample& sample, const TPoint3D& point) const
+bool Parallelogram::doContains(const kernel::Sample&, const TPoint3D&) const
 {
 	return false;
 }
 
 
 
-const bool Parallelogram::doHasSurfaceSampling() const
+bool Parallelogram::doHasSurfaceSampling() const
 {
 	return true;
 }
@@ -152,7 +143,7 @@ const TAabb3D Parallelogram::doBoundingBox() const
 
 
 
-const TScalar Parallelogram::doArea() const
+TScalar Parallelogram::doArea() const
 {
 	return parallelogram_.area();
 }

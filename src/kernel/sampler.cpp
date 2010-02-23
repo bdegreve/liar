@@ -45,12 +45,12 @@ TSamplerPtr Sampler::defaultSampler_;
 
 TSamplerPtr& Sampler::defaultSampler()
 {
-    return defaultSampler_;
+	return defaultSampler_;
 }
 
 
 
-const int Sampler::requestSubSequence1D(size_t requestedSize)
+int Sampler::requestSubSequence1D(size_t requestedSize)
 {
 	if (requestedSize == 0)
 	{
@@ -67,7 +67,7 @@ const int Sampler::requestSubSequence1D(size_t requestedSize)
 
 
 
-const int Sampler::requestSubSequence2D(size_t requestedSize)
+int Sampler::requestSubSequence2D(size_t requestedSize)
 {
 	if (requestedSize == 0)
 	{
@@ -206,14 +206,14 @@ Sampler::Sampler():
 
 // --- private -------------------------------------------------------------------------------------
 
-const size_t Sampler::doRoundSize1D(size_t requestedSize) const
+size_t Sampler::doRoundSize1D(size_t requestedSize) const
 {
 	return requestedSize;
 }
 
 
 
-const size_t Sampler::doRoundSize2D(size_t requestedSize) const
+size_t Sampler::doRoundSize2D(size_t requestedSize) const
 {
 	return requestedSize;
 }

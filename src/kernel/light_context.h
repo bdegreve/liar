@@ -53,22 +53,22 @@ public:
 	const TObjectPath& objectPath() const { return objectPath_; }
 	const SceneLight& light() const { return *light_; }
 
-	const int idLightSamples() const { return idLightSamples_; }
-	const int idBsdfSamples() const { return idBsdfSamples_; }
-	const int idBsdfComponentSamples() const { return idBsdfComponentSamples_; }
+	int idLightSamples() const { return idLightSamples_; }
+	int idBsdfSamples() const { return idBsdfSamples_; }
+	int idBsdfComponentSamples() const { return idBsdfComponentSamples_; }
 
-    void requestSamples(const TSamplerPtr& sampler);
+	void requestSamples(const TSamplerPtr& sampler);
 
-	const XYZ emission(const Sample& cameraSample, const TRay3D& ray,
-		BoundedRay& shadowRay, TScalar& pdf) const;
-	const XYZ sampleEmission(const Sample& cameraSample, const TPoint2D& sample,  
-		const TPoint3D& target, const TVector3D& targetNormal, BoundedRay& shadowRay, 
-		TScalar& pdf) const;
-	const XYZ sampleEmission(const Sample& cameraSample, const TPoint2D& lightSampleA, 
-		const TPoint2D& lightSampleB, BoundedRay& emissionRay, TScalar& pdf) const;
+	const XYZ emission(const Sample& cameraSample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
+	const XYZ sampleEmission(
+			const Sample& cameraSample, const TPoint2D& sample, const TPoint3D& target, 
+			const TVector3D& targetNormal, BoundedRay& shadowRay, TScalar& pdf) const;
+	const XYZ sampleEmission(
+			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
+			BoundedRay& emissionRay, TScalar& pdf) const;
 
 	const XYZ totalPower() const;
-	const bool isSingular() const;
+	bool isSingular() const;
 
 private:
 

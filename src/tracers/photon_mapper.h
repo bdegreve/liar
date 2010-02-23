@@ -47,36 +47,36 @@ public:
 
 	PhotonMapper();
 
-	const unsigned maxNumberOfPhotons() const;
+	unsigned maxNumberOfPhotons() const;
 	void setMaxNumberOfPhotons(unsigned maxNumberOfPhotons);
 
-	const unsigned globalMapSize() const;
+	unsigned globalMapSize() const;
 	void setGlobalMapSize(unsigned mapSize);
 
-	const TScalar causticsQuality() const;
+	TScalar causticsQuality() const;
 	void setCausticsQuality(TScalar quality);
 
-	const unsigned estimationSize(const std::string& mapType) const;
+	unsigned estimationSize(const std::string& mapType) const;
 	void setEstimationSize(const std::string& mapType, unsigned size);
 
-	const TScalar estimationRadius(const std::string& mapType) const;
+	TScalar estimationRadius(const std::string& mapType) const;
 	void setEstimationRadius(const std::string& mapType, TScalar radius);
 
-	const TScalar estimationTolerance(const std::string& mapType) const;
+	TScalar estimationTolerance(const std::string& mapType) const;
 	void setEstimationTolerance(const std::string& mapType, TScalar radius);
 
-	const unsigned numFinalGatherRays() const;
+	unsigned numFinalGatherRays() const;
 	void setNumFinalGatherRays(unsigned numFinalGatherRays);
 
-	const TScalar ratioPrecomputedIrradiance() const;
+	TScalar ratioPrecomputedIrradiance() const;
 	void setRatioPrecomputedIrradiance(TScalar ratio);
 
-	const bool isVisualizingPhotonMap() const;
+	bool isVisualizingPhotonMap() const;
 	void setVisualizePhotonMap(bool enabled = true);
 
-	const bool isRayTracingDirect() const;
+	bool isRayTracingDirect() const;
 	void setRayTracingDirect(bool enabled = true);
-    
+
 private:
 
 	typedef std::vector<Medium*> TMediumStack;

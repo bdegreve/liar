@@ -27,6 +27,7 @@
 #	if !defined(NDEBUG)
 #		define D3D_DEBUG_INFO
 #	endif
+#	include <cstdlib>
 #	include <PixelToaster.cpp>
 #endif
 

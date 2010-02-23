@@ -41,37 +41,35 @@ namespace scenery
 
 class LIAR_SCENERY_DLL Plane: public SceneObject
 {
-    PY_HEADER(SceneObject)
+	PY_HEADER(SceneObject)
 public:
 
 	Plane();
-    Plane(const TVector3D& i_normal, TScalar i_d);
+	Plane(const TVector3D& normal, TScalar d);
 
-    const TVector3D& normal() const;
+	const TVector3D& normal() const;
 	void setNormal(const TVector3D& normal);
 
-    const TScalar d() const;
-	void setD(TScalar iD);
+	TScalar d() const;
+	void setD(TScalar d);
 
 private:
 
-    typedef prim::Plane3D<TScalar, prim::Combined> TPlane3D;
+	typedef prim::Plane3D<TScalar, prim::Combined> TPlane3D;
 
-    LASS_UTIL_VISITOR_DO_ACCEPT
-    
-	void doIntersect(const Sample& sample, const BoundedRay& ray, 
-		Intersection& result) const;
-	const bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
-	void doLocalContext(const Sample& sample, const BoundedRay& ray,
-		const Intersection& intersection, IntersectionContext& result) const;
-	const bool doContains(const Sample& sample, const TPoint3D& point) const;
+	LASS_UTIL_VISITOR_DO_ACCEPT
+	
+	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
+	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
+	void doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const;
+	bool doContains(const Sample& sample, const TPoint3D& point) const;
 	const TAabb3D doBoundingBox() const;
-	const TScalar doArea() const;
+	TScalar doArea() const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-    TPlane3D plane_;
+	TPlane3D plane_;
 };
 
 

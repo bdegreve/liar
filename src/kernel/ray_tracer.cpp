@@ -70,12 +70,12 @@ RayTracer::~RayTracer()
 
 const TSceneObjectPtr& RayTracer::scene() const
 {
-    return scene_;
+	return scene_;
 }
 
 
 
-const int RayTracer::maxRayGeneration() const
+int RayTracer::maxRayGeneration() const
 {
 	return maxRayGeneration_;
 }
@@ -84,7 +84,7 @@ const int RayTracer::maxRayGeneration() const
 
 void RayTracer::setScene(const TSceneObjectPtr& scene)
 {
-    scene_ = scene;
+	scene_ = scene;
 	lights_ = gatherLightContexts(scene);
 }
 

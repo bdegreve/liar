@@ -45,9 +45,7 @@ class LIAR_KERNEL_DLL DifferentialRay
 public:
 
 	DifferentialRay();
-    DifferentialRay(const BoundedRay& centralRay, 
-		const TRay3D& differentialI, 
-		const TRay3D& differentialJ);
+	DifferentialRay(const BoundedRay& centralRay, const TRay3D& differentialI, const TRay3D& differentialJ);
 
 	const BoundedRay& centralRay() const { return centralRay_; }
 	const TRay3D& differentialI() const { return differentialI_; }
@@ -57,29 +55,23 @@ public:
 	const TVector3D& direction() const { return centralRay_.direction(); }	/**< return diretion of central ray */
 	const TPoint3D point(const TScalar t) const { return centralRay_.point(t); }
 
-	const bool isValid() const { return centralRay_.unboundedRay().isValid(); }
+	bool isValid() const { return centralRay_.unboundedRay().isValid(); }
 
-	friend LIAR_KERNEL_DLL DifferentialRay reflect(const IntersectionContext& context, 
-										const DifferentialRay& ray); 
-	friend LIAR_KERNEL_DLL DifferentialRay refract(const IntersectionContext& context, 
-										const DifferentialRay& ray, 
-										TScalar refractionIndex1over2); 
+	friend LIAR_KERNEL_DLL DifferentialRay reflect(const IntersectionContext& context, const DifferentialRay& ray); 
+	friend LIAR_KERNEL_DLL DifferentialRay refract(const IntersectionContext& context, const DifferentialRay& ray, 
+		TScalar refractionIndex1over2);
 
 private:
 
-    BoundedRay centralRay_;
-    TRay3D differentialI_;
-    TRay3D differentialJ_;
+	BoundedRay centralRay_;
+	TRay3D differentialI_;
+	TRay3D differentialJ_;
 };
 
-LIAR_KERNEL_DLL DifferentialRay transform(const DifferentialRay& ray,
-		const TTransformation3D& transformation);
-LIAR_KERNEL_DLL DifferentialRay reflect(const IntersectionContext& context, 
-		const DifferentialRay& ray); 
-LIAR_KERNEL_DLL DifferentialRay refract(const IntersectionContext& context,
-		const DifferentialRay& ray, TScalar refractionIndex1over2); 
-LIAR_KERNEL_DLL DifferentialRay bound(
-	const DifferentialRay& ray, TScalar nearLimit, TScalar farLimit = TNumTraits::infinity);
+LIAR_KERNEL_DLL DifferentialRay transform(const DifferentialRay& ray, const TTransformation3D& transformation);
+LIAR_KERNEL_DLL DifferentialRay reflect(const IntersectionContext& context, const DifferentialRay& ray); 
+LIAR_KERNEL_DLL DifferentialRay refract(const IntersectionContext& context, const DifferentialRay& ray, TScalar refractionIndex1over2); 
+LIAR_KERNEL_DLL DifferentialRay bound(const DifferentialRay& ray, TScalar nearLimit, TScalar farLimit = TNumTraits::infinity);
 
 
 }

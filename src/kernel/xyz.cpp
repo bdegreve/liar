@@ -222,7 +222,7 @@ struct cdf_accessor_t: std::unary_function<It, TScalar>
 	typedef const TScalar value_type;
 	typedef const TScalar reference;
 	typedef const TScalar* pointer;
-	cdf_accessor_t(const XYZ& weight): weight_(weight) {}
+	cdf_accessor_t(const XYZ& weight = XYZ()): weight_(weight) {}
 	TScalar operator()(It i) const
 	{
 		return dot(weight_, i->cdf); 

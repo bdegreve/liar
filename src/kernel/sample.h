@@ -38,6 +38,8 @@ namespace liar
 namespace kernel
 {
 
+class Sampler;
+
 class LIAR_KERNEL_DLL Sample
 {
 public:
@@ -50,30 +52,30 @@ public:
 	typedef stde::iterator_range<const TSample1D*> TSubSequence1D;
 	typedef stde::iterator_range<const TSample2D*> TSubSequence2D;
 
-    Sample();
-    
+	Sample();
+
 	const TSample2D& screenCoordinate() const;
 	const TSample2D& lensCoordinate() const;
-	const TTime time() const;
-	const TScalar frequency() const;
+	TTime time() const;
+	TScalar frequency() const;
 
-    const TScalar weight() const;
-    void setWeight(TScalar iWeight);
+	TScalar weight() const;
+	void setWeight(TScalar iWeight);
 
-    const TSubSequence1D subSequence1D(int id) const;
-    const TSubSequence2D subSequence2D(int id) const;
+	const TSubSequence1D subSequence1D(int id) const;
+	const TSubSequence2D subSequence2D(int id) const;
 
 private:
 
 	friend class Sampler;
 
-    TSample2D screenCoordinate_;
+	TSample2D screenCoordinate_;
 	TSample2D lensCoordinate_;
 	TTime time_;
 	TScalar frequency_;
-    TScalar weight_;
-    std::vector<TSample1D> subSequences1D_;
-    std::vector<TSample2D> subSequences2D_;
+	TScalar weight_;
+	std::vector<TSample1D> subSequences1D_;
+	std::vector<TSample2D> subSequences2D_;
 	Sampler* sampler_;
 };
 

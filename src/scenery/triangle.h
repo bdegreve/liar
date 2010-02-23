@@ -41,30 +41,28 @@ namespace scenery
 
 class LIAR_SCENERY_DLL Triangle: public SceneObject
 {
-    PY_HEADER(SceneObject)
+	PY_HEADER(SceneObject)
 public:
 
-    Triangle(const TPoint3D& a, const TPoint3D& b, const TPoint3D& iC);
+	Triangle(const TPoint3D& a, const TPoint3D& b, const TPoint3D& c);
 
 private:
 
-    typedef prim::Triangle3D<TScalar> TTriangle3D;
+	typedef prim::Triangle3D<TScalar> TTriangle3D;
 
-    LASS_UTIL_VISITOR_DO_ACCEPT
-    
-	void doIntersect(const Sample& sample, const BoundedRay& ray, 
-		Intersection& result) const;
-	const bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
-	void doLocalContext(const Sample& sample, const BoundedRay& ray,
-		const Intersection& intersection, IntersectionContext& result) const;
-	const bool doContains(const Sample& sample, const TPoint3D& point) const;
+	LASS_UTIL_VISITOR_DO_ACCEPT
+
+	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
+	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
+	void doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const;
+	bool doContains(const Sample& sample, const TPoint3D& point) const;
 	const TAabb3D doBoundingBox() const;
-	const TScalar doArea() const;
+	TScalar doArea() const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-    TTriangle3D triangle_;
+	TTriangle3D triangle_;
 };
 
 

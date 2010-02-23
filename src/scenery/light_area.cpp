@@ -82,7 +82,7 @@ const TAttenuationPtr& LightArea::attenuation() const
 
 
 
-const bool LightArea::isDoubleSided() const
+bool LightArea::isDoubleSided() const
 {
 	return !isSingleSided_;
 }
@@ -123,8 +123,7 @@ void LightArea::setDoubleSided(bool iIsDoubleSided)
 
 // --- private -------------------------------------------------------------------------------------
 
-void LightArea::doIntersect(const Sample& sample, const BoundedRay& ray, 
-							 Intersection& result) const
+void LightArea::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
 {
 	LASS_ASSERT(surface_);
 	surface_->intersect(sample, ray, result);
@@ -136,8 +135,7 @@ void LightArea::doIntersect(const Sample& sample, const BoundedRay& ray,
 
 
 
-const bool LightArea::doIsIntersecting(const Sample& sample, 
-											  const BoundedRay& ray) const
+bool LightArea::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
 {
 	LASS_ASSERT(surface_);
 	return surface_->isIntersecting(sample, ray);
@@ -145,18 +143,16 @@ const bool LightArea::doIsIntersecting(const Sample& sample,
 
 
 
-void LightArea::doLocalContext(const Sample& sample, const BoundedRay& ray,
-								const Intersection& intersection, 
-								IntersectionContext& result) const
+void LightArea::doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const
 {
-    IntersectionDescendor descend(intersection);
+	IntersectionDescendor descend(intersection);
 	LASS_ASSERT(surface_);
 	surface_->localContext(sample, ray, intersection, result);
 }
 
 
 
-const bool LightArea::doContains(const Sample& sample, const TPoint3D& point) const
+bool LightArea::doContains(const Sample& sample, const TPoint3D& point) const
 {
 	LASS_ASSERT(surface_);
 	return surface_->contains(sample, point);
@@ -173,7 +169,7 @@ const TAabb3D LightArea::doBoundingBox() const
 
 
 
-const TScalar LightArea::doArea() const
+TScalar LightArea::doArea() const
 {
 	LASS_ASSERT(surface_);
 	return surface_->area();
@@ -181,8 +177,7 @@ const TScalar LightArea::doArea() const
 
 
 
-const XYZ LightArea::doEmission(
-		const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+const XYZ LightArea::doEmission(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	surface_->fun(ray, shadowRay, pdf);
 	shadowRay = ray;
@@ -193,7 +188,7 @@ const XYZ LightArea::doEmission(
 
 
 const XYZ LightArea::doSampleEmission(
-		const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target,
+		const Sample&, const TPoint2D& lightSample, const TPoint3D& target,
 		const TVector3D& normalTarget, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	LASS_ASSERT(surface_);
@@ -218,8 +213,8 @@ const XYZ LightArea::doSampleEmission(
 
 
 const XYZ LightArea::doSampleEmission(
-		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
-		const TAabb3D& sceneBound, BoundedRay& emissionRay, TScalar& pdf) const
+		const Sample&, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
+		const TAabb3D&, BoundedRay& emissionRay, TScalar& pdf) const
 {
 	TVector3D originNormal;
 	TScalar originPdf;
@@ -240,21 +235,21 @@ const XYZ LightArea::doSampleEmission(
 
 
 
-const XYZ LightArea::doTotalPower(const TAabb3D& sceneBound) const
+const XYZ LightArea::doTotalPower(const TAabb3D&) const
 {
 	return (TNumTraits::pi * surface_->area()) * radiance_;
 }
 
 
 
-const size_t LightArea::doNumberOfEmissionSamples() const
+size_t LightArea::doNumberOfEmissionSamples() const
 {
 	return numberOfEmissionSamples_;
 }
 
 
 
-const bool LightArea::doIsSingular() const
+bool LightArea::doIsSingular() const
 {
 	return false;
 }

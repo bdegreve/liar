@@ -94,38 +94,34 @@ void LightDirectional::setRadiance(const XYZ& radiance)
 
 // --- private -------------------------------------------------------------------------------------
 
-void LightDirectional::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period)
+void LightDirectional::doPreProcess(const TSceneObjectPtr&, const TimePeriod&)
 {
 }
 
 
 
-void LightDirectional::doIntersect(const Sample& sample, const BoundedRay& iRAy, 
-							 Intersection& result) const
+void LightDirectional::doIntersect(const Sample&, const BoundedRay&, Intersection& result) const
 {
 	result = Intersection::empty();
 }
 
 
 
-const bool LightDirectional::doIsIntersecting(const Sample& sample, 
-											  const BoundedRay& ray) const
+bool LightDirectional::doIsIntersecting(const Sample&, const BoundedRay&) const
 {
 	return false;
 }
 
 
 
-void LightDirectional::doLocalContext(const Sample& sample, const BoundedRay& ray,
-								const Intersection& intersection, 
-								IntersectionContext& result) const
+void LightDirectional::doLocalContext(const Sample&, const BoundedRay&, const Intersection&, IntersectionContext&) const
 {
 	LASS_THROW("since LightDirectional can never return an intersection, you've called dead code.");
 }
 
 
 
-const bool LightDirectional::doContains(const Sample& sample, const TPoint3D& point) const
+bool LightDirectional::doContains(const Sample&, const TPoint3D&) const
 {
 	return false;
 }
@@ -140,15 +136,14 @@ const TAabb3D LightDirectional::doBoundingBox() const
 
 
 
-const TScalar LightDirectional::doArea() const
+TScalar LightDirectional::doArea() const
 {
 	return 0;
 }
 
 
 
-const XYZ LightDirectional::doEmission(
-		const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+const XYZ LightDirectional::doEmission(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	shadowRay = ray;
 	pdf = 0;
@@ -157,26 +152,20 @@ const XYZ LightDirectional::doEmission(
 
 
 
-const XYZ LightDirectional::doSampleEmission(
-		const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
-		const TVector3D& targetNormal, BoundedRay& shadowRay, TScalar& pdf) const
+const XYZ LightDirectional::doSampleEmission(const Sample&, const TPoint2D&, const TPoint3D& target, const TVector3D&, BoundedRay& shadowRay, TScalar& pdf) const
 {
-	shadowRay = BoundedRay(target, -direction_, tolerance, TNumTraits::infinity,
-		prim::IsAlreadyNormalized());
+	shadowRay = BoundedRay(target, -direction_, tolerance, TNumTraits::infinity, prim::IsAlreadyNormalized());
 	pdf = TNumTraits::one;
 	return radiance_;
 }
 
 
 
-const XYZ LightDirectional::doSampleEmission(
-		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
-		const TAabb3D& sceneBound, BoundedRay& emissionRay, TScalar& pdf) const
+const XYZ LightDirectional::doSampleEmission(const Sample&, const TPoint2D& lightSampleA, const TPoint2D&, const TAabb3D& sceneBound, BoundedRay& emissionRay, TScalar& pdf) const
 {
 	const prim::Sphere3D<TScalar> worldSphere = boundingSphere(sceneBound);
 	const TPoint2D uv = num::uniformDisk(lightSampleA, pdf);
-	const TPoint3D begin = worldSphere.center() + 
-		worldSphere.radius() * (tangentU_ * uv.x + tangentV_ * uv.y - direction_);
+	const TPoint3D begin = worldSphere.center() + worldSphere.radius() * (tangentU_ * uv.x + tangentV_ * uv.y - direction_);
 	emissionRay = BoundedRay(begin, direction_, tolerance);
 	pdf /= num::sqr(worldSphere.radius());
 	return radiance_;
@@ -192,14 +181,14 @@ const XYZ LightDirectional::doTotalPower(const TAabb3D& sceneBound) const
 
 
 
-const size_t LightDirectional::doNumberOfEmissionSamples() const
+size_t LightDirectional::doNumberOfEmissionSamples() const
 {
 	return 1;
 }
 
 
 
-const bool LightDirectional::doIsSingular() const
+bool LightDirectional::doIsSingular() const
 {
 	return true;
 }

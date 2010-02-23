@@ -39,8 +39,8 @@ PY_CLASS_MEMBER_RW(Constant, value, setValue);
 
 // --- public --------------------------------------------------------------------------------------
 
-Constant::Constant(const XYZ& iSpectrum):
-	value_(iSpectrum)
+Constant::Constant(const XYZ& spectrum):
+	value_(spectrum)
 {
 }
 
@@ -91,7 +91,7 @@ void Constant::setValue(const XYZ& value)
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Constant::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const XYZ Constant::doLookUp(const Sample&, const IntersectionContext&) const
 {
 	return value_;
 }

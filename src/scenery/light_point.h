@@ -40,7 +40,7 @@ namespace scenery
 
 class LIAR_SCENERY_DLL LightPoint: public SceneLight
 {
-    PY_HEADER(SceneLight)
+	PY_HEADER(SceneLight)
 public:
 
 	LightPoint();
@@ -56,35 +56,32 @@ public:
 
 private:
 
-    LASS_UTIL_VISITOR_DO_ACCEPT;
+	LASS_UTIL_VISITOR_DO_ACCEPT;
 
-	void doIntersect(const Sample& sample, const BoundedRay& ray, 
-		Intersection& result) const;
-	const bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
-	void doLocalContext(const Sample& sample, const BoundedRay& ray,
-		const Intersection& intersection, IntersectionContext& result) const;
-	const bool doContains(const Sample& sample, const TPoint3D& point) const;
+	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
+	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
+	void doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const;
+	bool doContains(const Sample& sample, const TPoint3D& point) const;
 	const TAabb3D doBoundingBox() const;
-	const TScalar doArea() const;
+	TScalar doArea() const;
 
-	const XYZ doEmission(const Sample& sample, const TRay3D& ray, 
-		BoundedRay& shadowRay, TScalar& pdf) const;
-	const XYZ doSampleEmission(const Sample& sample, const TPoint2D& lightSample, 
-		const TPoint3D& target, const TVector3D& targetNormal, 
-		BoundedRay& shadowRay, TScalar& pdf) const;
-	const XYZ doSampleEmission(const Sample& cameraSample, 
-		const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, const TAabb3D& sceneBound, 
-		BoundedRay& emissionRay, TScalar& pdf) const;
+	const XYZ doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
+	const XYZ doSampleEmission(
+			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
+			const TVector3D& targetNormal, BoundedRay& shadowRay, TScalar& pdf) const;
+	const XYZ doSampleEmission(
+			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
+			const TAabb3D& sceneBound, BoundedRay& emissionRay, TScalar& pdf) const;
 	const XYZ doTotalPower(const TAabb3D& sceneBound) const;
-	const size_t doNumberOfEmissionSamples() const;
-	const bool doIsSingular() const;
+	size_t doNumberOfEmissionSamples() const;
+	bool doIsSingular() const;
 
 	const TPyObjectPtr doGetLightState() const;
 	void doSetLightState(const TPyObjectPtr& state);
 
-    TPoint3D position_;
+	TPoint3D position_;
 	XYZ intensity_;
-    TAttenuationPtr attenuation_;
+	TAttenuationPtr attenuation_;
 };
 
 }

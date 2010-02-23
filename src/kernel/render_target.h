@@ -43,35 +43,35 @@ namespace kernel
 
 class LIAR_KERNEL_DLL RenderTarget: public python::PyObjectPlus
 {
-    PY_HEADER(python::PyObjectPlus)
+	PY_HEADER(python::PyObjectPlus)
 public:
 
-    virtual ~RenderTarget();
+	virtual ~RenderTarget();
 
 	const TResolution2D resolution() const;	
 
-    void beginRender();
-    void writeRender(const OutputSample* first, const OutputSample* last);
-    void endRender();
-	const bool isRendering() const;
+	void beginRender();
+	void writeRender(const OutputSample* first, const OutputSample* last);
+	void endRender();
+	bool isRendering() const;
 
-	const bool isCanceling() const { return doIsCanceling(); }
+	bool isCanceling() const { return doIsCanceling(); }
 
 protected:
 
-    RenderTarget();
+	RenderTarget();
 
 private:
 
 	virtual const TResolution2D doResolution() const = 0;
 
-    virtual void doBeginRender() = 0;
-    virtual void doWriteRender(const OutputSample* first, const OutputSample* last) = 0;
-    virtual void doEndRender() = 0;
-	virtual const bool doIsCanceling() const;
+	virtual void doBeginRender() = 0;
+	virtual void doWriteRender(const OutputSample* first, const OutputSample* last) = 0;
+	virtual void doEndRender() = 0;
+	virtual bool doIsCanceling() const;
 
 	util::CriticalSection lock_;
-    bool isRendering_;
+	bool isRendering_;
 };
 
 typedef python::PyObjectPtr<RenderTarget>::Type TRenderTargetPtr;

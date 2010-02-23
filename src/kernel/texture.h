@@ -44,11 +44,11 @@ typedef python::PyObjectPtr<Texture>::Type TTexturePtr;
 
 class LIAR_KERNEL_DLL Texture: public python::PyObjectPlus
 {
-    PY_HEADER(python::PyObjectPlus)
+	PY_HEADER(python::PyObjectPlus)
 public:
 
-    virtual ~Texture();
-    const XYZ lookUp(const Sample& sample, const IntersectionContext& context) const 
+	virtual ~Texture();
+	const XYZ lookUp(const Sample& sample, const IntersectionContext& context) const 
 	{ 
 		return doLookUp(sample, context); 
 	}
@@ -62,7 +62,7 @@ public:
 
 protected:
 
-    Texture();
+	Texture();
 
 private:
 
@@ -91,7 +91,7 @@ namespace impl
 			return XYZ(0, 0, 0); 
 		}
 		const TPyObjectPtr doGetState() const { return python::makeTuple(); }
-		void doSetState(const TPyObjectPtr& state) {}
+		void doSetState(const TPyObjectPtr&) {}
 	};
 
 	class LIAR_KERNEL_DLL TextureWhite: public Texture
@@ -105,7 +105,7 @@ namespace impl
 			return XYZ(1, 1, 1); 
 		}
 		const TPyObjectPtr doGetState() const { return python::makeTuple(); }
-		void doSetState(const TPyObjectPtr& state) {}
+		void doSetState(const TPyObjectPtr&) {}
 	};
 }
 

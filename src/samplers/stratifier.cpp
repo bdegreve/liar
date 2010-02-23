@@ -66,7 +66,7 @@ Stratifier::Stratifier(const TResolution2D& resolution, size_t numberOfSamplesPe
 
 
 
-const bool Stratifier::jittered() const
+bool Stratifier::jittered() const
 {
 	return isJittered_;
 }
@@ -102,7 +102,7 @@ const TResolution2D& Stratifier::doResolution() const
 
 
 
-const size_t Stratifier::doSamplesPerPixel() const
+size_t Stratifier::doSamplesPerPixel() const
 {
 	return strataPerPixel_;
 }
@@ -122,11 +122,10 @@ void Stratifier::doSetSamplesPerPixel(size_t samplesPerPixel)
 {
 	const size_t strataPerAxis = static_cast<size_t>(num::ceil(
 		num::sqrt(static_cast<TScalar>(samplesPerPixel))));
-    
+
 	strataPerPixel_ = strataPerAxis * strataPerAxis;
 	stratum1DSize_ = TNumTraits::one / strataPerPixel_;
-	stratum2DSize_ = 
-		TVector2D(TNumTraits::one, TNumTraits::one) / static_cast<TScalar>(strataPerAxis);
+	stratum2DSize_ = TVector2D(TNumTraits::one, TNumTraits::one) / static_cast<TScalar>(strataPerAxis);
 	timeStrata_.resize(strataPerPixel_);
 	frequencyStrata_.resize(strataPerPixel_);
 	screenStrata_.resize(strataPerPixel_);
@@ -157,8 +156,7 @@ void Stratifier::doSeed(size_t randomSeed)
 
 
 
-void Stratifier::doSampleScreen(const TResolution2D& pixel, size_t subPixel, 
-								TSample2D& screenCoordinate)
+void Stratifier::doSampleScreen(const TResolution2D& LASS_UNUSED(pixel), size_t subPixel, TSample2D& screenCoordinate)
 {
 	LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
 	TVector2D position = sampleStratum(subPixel, screenStrata_).position();
@@ -169,8 +167,7 @@ void Stratifier::doSampleScreen(const TResolution2D& pixel, size_t subPixel,
 
 
 
-void Stratifier::doSampleLens(const TResolution2D& pixel, size_t subPixel, 
-							  TSample2D& lensCoordinate)
+void Stratifier::doSampleLens(const TResolution2D& LASS_UNUSED(pixel), size_t subPixel, TSample2D& lensCoordinate)
 {
 	LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
 	lensCoordinate = sampleStratum(subPixel, lensStrata_);
@@ -178,8 +175,7 @@ void Stratifier::doSampleLens(const TResolution2D& pixel, size_t subPixel,
 
 
 
-void Stratifier::doSampleTime(const TResolution2D& pixel, size_t subPixel, 
-							  const TimePeriod& period, TTime& time)
+void Stratifier::doSampleTime(const TResolution2D& LASS_UNUSED(pixel), size_t subPixel, const TimePeriod& period, TTime& time)
 {
 	LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
 	const TScalar tau = sampleStratum(subPixel, timeStrata_);
@@ -188,7 +184,7 @@ void Stratifier::doSampleTime(const TResolution2D& pixel, size_t subPixel,
 
 
 
-void Stratifier::doSampleFrequency(const TResolution2D& pixel, size_t subPixel, TScalar& frequency)
+void Stratifier::doSampleFrequency(const TResolution2D& LASS_UNUSED(pixel), size_t subPixel, TScalar& frequency)
 {
 	LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
 	const TScalar phi = sampleStratum(subPixel, frequencyStrata_);
@@ -199,8 +195,7 @@ void Stratifier::doSampleFrequency(const TResolution2D& pixel, size_t subPixel, 
 
 
 
-void Stratifier::doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, 
-									   TSample1D* first, TSample1D* last)
+void Stratifier::doSampleSubSequence1D(const TResolution2D& LASS_UNUSED(pixel), size_t, TSample1D* first, TSample1D* last)
 {
 	const ptrdiff_t size = last - first;
 	const TScalar scale = 1.f / size;
@@ -213,8 +208,7 @@ void Stratifier::doSampleSubSequence1D(const TResolution2D& pixel, size_t subPix
 
 
 
-void Stratifier::doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, 
-									   TSample2D* first, TSample2D* last)
+void Stratifier::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixel), size_t, TSample2D* first, TSample2D* last)
 {
 	const size_t size = last - first;
 	const size_t sqrtSize = static_cast<size_t>(num::sqrt(static_cast<double>(size)));
@@ -235,14 +229,14 @@ void Stratifier::doSampleSubSequence2D(const TResolution2D& pixel, size_t subPix
 
 
 
-const size_t Stratifier::doRoundSize1D(size_t requestedSize) const
+size_t Stratifier::doRoundSize1D(size_t requestedSize) const
 {
 	return requestedSize;
 }
 
 
 
-const size_t Stratifier::doRoundSize2D(size_t requestedSize) const
+size_t Stratifier::doRoundSize2D(size_t requestedSize) const
 {
 	const TScalar realSqrt = num::sqrt(static_cast<TScalar>(requestedSize));
 	const size_t lowSqrt = static_cast<size_t>(num::floor(realSqrt));
@@ -278,8 +272,7 @@ void Stratifier::doSetState(const TPyObjectPtr& state)
 	TStrata2D lensStrata;
 	TStrata1D timeStrata;
 
-	python::decodeTuple(state, numGenState, resolution, strataPerPixel, lensStrata,
-		timeStrata,	isJittered_);
+	python::decodeTuple(state, numGenState, resolution, strataPerPixel, lensStrata, timeStrata, isJittered_);
 
 	numberGenerator_.setState(numGenState.begin(), numGenState.end());
 	setResolution(resolution);
@@ -290,7 +283,7 @@ void Stratifier::doSetState(const TPyObjectPtr& state)
 
 
 
-const Stratifier::TSample1D Stratifier::sampleStratum(size_t subPixel, TStrata1D& strata)
+Stratifier::TSample1D Stratifier::sampleStratum(size_t subPixel, TStrata1D& strata)
 {
 	LASS_ASSERT(subPixel < strataPerPixel_);
 	if (subPixel == 0)

@@ -127,7 +127,7 @@ void Splitter::doEndRender()
 
 
 
-const bool Splitter::doIsCanceling() const
+bool Splitter::doIsCanceling() const
 {
 	for (TChildren::const_iterator i = children_.begin(); i != children_.end(); ++i)
 	{
