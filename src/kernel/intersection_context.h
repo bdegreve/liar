@@ -46,7 +46,8 @@ class LIAR_KERNEL_DLL IntersectionContext
 {
 public:
 
-	IntersectionContext(const RayTracer* tracer = 0);
+	IntersectionContext(const SceneObject& object, const Sample& sample, const BoundedRay& primaryRay, const Intersection& intersection);
+	IntersectionContext(const SceneObject& object, const Sample& sample, const DifferentialRay& primaryRay, const Intersection& intersection);
 
 	const TAabb3D& bounds() const { return bounds_; }
 	void setBounds(const TAabb3D& bounds) { bounds_ = bounds; }
@@ -95,7 +96,6 @@ public:
 	void setInterior(const TMediumPtr& interior) { setInterior(interior.get()); }
 	void setSolidEvent(SolidEvent solidEvent) { solidEvent_ = solidEvent; }
 
-	void setScreenSpaceDifferentials(const DifferentialRay& ray);
 	bool hasScreenSpaceDifferentials() const { return hasScreenSpaceDifferentials_; }
 
 	void transformBy(const TTransformation3D& transformation);
@@ -114,8 +114,8 @@ public:
 
 private:
 
-	void setScreenSpaceDifferentialsI(const TRay3D& ray, TVector3D& oDPoint, 
-		TVector3D& oDNormal, TVector2D& oDUv);
+	void init(const SceneObject& object, const Sample& sample, const BoundedRay& primaryRay, const Intersection& intersection);
+	void setScreenSpaceDifferentialsI(const TRay3D& ray, TVector3D& dPoint, TVector3D& dNormal, TVector2D& dUv);
 	void generateShaderToWorld();
 
 	TAabb3D bounds_;
@@ -126,8 +126,7 @@ private:
 	TVector3D dPoint_dI_;	/**< partial derivative of point_ to screen space coordinate i */
 	TVector3D dPoint_dJ_;	/**< partial derivative of point_ to screen space coordinate j */
 
-	TVector3D geometricNormal_;	/**< normal of underlying geometry.  Do we need it?  Yes, think 
-			triangle normal in triangle meshes ...*/
+	TVector3D geometricNormal_;	/**< normal of underlying geometry.  Do we need it?  Yes, think triangle normal in triangle meshes ...*/
 	TVector3D normal_;		/**< normal of surface in world space */
 	TVector3D dNormal_dU_;	/**< partial derivative of normal_ to surface coordinate u */
 	TVector3D dNormal_dV_;	/**< partial derivative of normal_ to surface coordinate v */
@@ -141,7 +140,6 @@ private:
 	TScalar t_;				/**< parameter of point_ on ray */
 	const Shader* shader_;		/**< shader to be used */
 	const Medium* interior_;
-	const RayTracer* tracer_;	/**< tracer to be used */
 
 	TTransformation3D shaderToWorld_;
 	TTransformation3D localToWorld_;

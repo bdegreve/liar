@@ -87,9 +87,31 @@ private:
 	static util::CriticalSection lock_;
 };
 
-typedef std::vector<LightContext> TLightContexts;
 
-TLightContexts gatherLightContexts(const TSceneObjectPtr& scene);
+
+class LIAR_KERNEL_DLL LightContexts
+{
+public:
+	typedef std::vector<LightContext> TContexts;
+	typedef TContexts::const_iterator TIterator;
+
+	void clear();
+	void add(const LightContext& context);
+	void gatherContexts(const TSceneObjectPtr& scene);
+	void setSceneBound(const TAabb3D& bound, const TimePeriod& period);
+	void requestSamples(const TSamplerPtr& sampler);
+
+	const LightContext& operator[](size_t i) const;
+	const LightContext* sample(TScalar x, TScalar& pdf) const;
+	TIterator begin() const;
+	TIterator end() const;
+	size_t size() const;
+	const XYZ totalPower() const;
+private:
+	TContexts contexts_;
+	std::vector<TScalar> cdf_;
+	XYZ totalPower_;
+};
 
 }
 

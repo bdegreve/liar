@@ -30,7 +30,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_MEDIUM_H
 
 #include "kernel_common.h"
-#include "bounded_ray.h"
+#include "differential_ray.h"
 #include "xyz.h"
 #include "solid_event.h"
 
@@ -78,6 +78,8 @@ class LIAR_KERNEL_DLL MediumStack
 public:
 	MediumStack(const TMediumPtr& defaultMedium = TMediumPtr());
 	const XYZ transparency(const BoundedRay& ray) const;
+	const XYZ transparency(const BoundedRay& ray, TScalar farLimit) const;
+	const XYZ transparency(const DifferentialRay& ray, TScalar farLimit) const;
 private:
 	friend class MediumChanger;
 	typedef std::vector<const Medium*> TStack;

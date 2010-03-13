@@ -171,7 +171,8 @@ void LightContext::setTime(TTime time) const
 	}
 }
 
-// --- free ----------------------------------------------------------------------------------------
+
+// --- LightContexts -------------------------------------------------------------------------------
 
 namespace impl
 {
@@ -181,12 +182,15 @@ namespace impl
 		public util::Visitor<SceneLight>
 	{
 	public:
-		const TLightContexts& operator()(const TSceneObjectPtr& scene)
+		LightContextGatherer(LightContexts& contexts):
+			lights_(contexts)
+		{
+		}
+		void operator()(const TSceneObjectPtr& scene)
 		{
 			lights_.clear();
 			objectPath_.clear();
 			scene->accept(*this);
-			return lights_;
 		}
 	private:
 	  
@@ -197,7 +201,7 @@ namespace impl
 		void doPreVisit(SceneLight& light)
 		{
 			objectPath_.push_back(python::fromNakedToSharedPtrCast<SceneObject>(&light));
-			lights_.push_back(LightContext(objectPath_, light));
+			lights_.add(LightContext(objectPath_, light));
 		}
 		void doPostVisit(SceneObject&)
 		{
@@ -208,18 +212,122 @@ namespace impl
 			objectPath_.pop_back();
 		}
 
-		TLightContexts lights_;
+		LightContexts& lights_;
 		LightContext::TObjectPath objectPath_;
 	};
 }
 
-/** gather light contexts of all light in a scene, and return as vector
- */
-TLightContexts gatherLightContexts(const TSceneObjectPtr& scene)
+
+
+void LightContexts::clear()
 {
-	impl::LightContextGatherer gatherer;
-	return gatherer(scene);
+	contexts_.clear();
+	cdf_.clear();
+	totalPower_ = 0;
 }
+
+
+
+void LightContexts::add(const LightContext& context)
+{
+	contexts_.push_back(context);
+}
+
+
+
+void LightContexts::gatherContexts(const TSceneObjectPtr& scene)
+{
+	impl::LightContextGatherer gatherer(*this);
+	gatherer(scene);
+}
+
+
+
+void LightContexts::setSceneBound(const TAabb3D& bound, const TimePeriod& period)
+{
+	size_t n = contexts_.size();
+	if (n == 0)
+	{
+		return;
+	}
+	cdf_.resize(n);
+	totalPower_ = 0;
+	for (size_t k = 0; k < n; ++k)
+	{
+		contexts_[k].setSceneBound(bound, period);
+		const XYZ power = contexts_[k].totalPower();
+		totalPower_ += power;
+		cdf_[k] = positiveAverage(power);
+	}
+	std::partial_sum(cdf_.begin(), cdf_.end(), cdf_.begin());
+	std::transform(cdf_.begin(), cdf_.end(), cdf_.begin(), std::bind2nd(std::divides<TScalar>(), cdf_.back()));
+}
+
+
+void LightContexts::requestSamples(const TSamplerPtr& sampler)
+{
+	size_t n = contexts_.size();
+	for (size_t k = 0; k < n; ++k)
+	{
+		contexts_[k].requestSamples(sampler);
+	}
+}
+
+
+
+const LightContext& LightContexts::operator[](size_t i) const
+{
+	return contexts_[i];
+}
+
+
+
+const LightContext* LightContexts::sample(TScalar x, TScalar& pdf) const
+{
+	if (contexts_.empty())
+	{
+		return 0;
+	}
+	const std::vector<TScalar>::const_iterator i = std::lower_bound(cdf_.begin(), cdf_.end(), x);
+	const size_t k = std::min(static_cast<size_t>(i - cdf_.begin()), cdf_.size() - 1);
+	pdf = *i - (k > 0 ? cdf_[k - 1] : TNumTraits::zero);
+	return &contexts_[k];
+}
+
+
+
+LightContexts::TIterator LightContexts::begin() const
+{
+	return contexts_.begin();
+}
+
+
+
+LightContexts::TIterator LightContexts::end() const
+{
+	return contexts_.end();
+}
+
+
+
+size_t LightContexts::size() const
+{
+	return contexts_.size();
+}
+
+
+
+const XYZ LightContexts::totalPower() const
+{
+	return totalPower_;
+}
+
+
+
+
+
+
+// --- free ----------------------------------------------------------------------------------------
 
 }
 

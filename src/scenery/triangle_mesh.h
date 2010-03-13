@@ -35,11 +35,17 @@
 #include <lass/prim/triangle_mesh_3d.h>
 #include <lass/spat/aabb_tree.h>
 #include <lass/spat/aabp_tree.h>
+#include <lass/spat/quad_tree.h>
 
 namespace liar
 {
 namespace scenery
 {
+
+template<typename O, typename OT, typename SH>
+struct MyQuadTree: spat::QuadTree<O, OT>
+{
+};
 
 class LIAR_SCENERY_DLL TriangleMesh: public SceneObject
 {
@@ -48,17 +54,17 @@ public:
 
 	typedef prim::TriangleMesh3D<TScalar, spat::AabbTree, spat::DefaultSplitHeuristics<4> > TMesh;
 	typedef std::vector<TMesh::TPoint> TVertices;
-	typedef std::vector<TMesh::TVector> TNormals;
+	typedef TMesh::TNormals TNormals;
 	typedef std::vector<TMesh::TUv> TUvs;
 	typedef std::vector<TMesh::TIndexTriangle> TIndexTriangles;
 
 	TriangleMesh(const TVertices& vertices, const TNormals& normals, const TUvs& uvs, const TIndexTriangles& triangles);
 
-	void smoothNormals(TScalar maxAngleInRadians);
+	void smoothNormals();
 	void flatFaces();
 	void loopSubdivision(unsigned level);
 	void autoSew();
-	void autoCrease(unsigned level);
+	void autoCrease(unsigned level, TScalar maxAngleInRadians);
 
 	const TVertices& vertices() const;
 	const TNormals& normals() const;

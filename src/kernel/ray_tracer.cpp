@@ -85,7 +85,7 @@ int RayTracer::maxRayGeneration() const
 void RayTracer::setScene(const TSceneObjectPtr& scene)
 {
 	scene_ = scene;
-	lights_ = gatherLightContexts(scene);
+	lights_.gatherContexts(scene);
 }
 
 
@@ -102,14 +102,8 @@ void RayTracer::requestSamples(const TSamplerPtr& sampler)
 	if (scene_ && sampler)
 	{
 		sampler->clearSubSequenceRequests();
-
-		for (TLightContexts::iterator i = lights_.begin(); i != lights_.end(); ++i)
-		{
-			i->requestSamples(sampler);
-		}
-
+		lights_.requestSamples(sampler);
 		forAllObjects(scene_, impl::RequestShaderSamples(sampler));
-
 		doRequestSamples(sampler); 
 	}
 }
@@ -119,10 +113,7 @@ void RayTracer::requestSamples(const TSamplerPtr& sampler)
 void RayTracer::preProcess(const TSamplerPtr& sampler, const TimePeriod& period)
 {
 	const TAabb3D sceneBound = scene_->boundingBox();
-	for (TLightContexts::iterator i = lights_.begin(); i != lights_.end(); ++i)
-	{
-		i->setSceneBound(sceneBound, period);
-	}
+	lights_.setSceneBound(sceneBound, period);
 	doPreProcess(sampler, period);
 }
 

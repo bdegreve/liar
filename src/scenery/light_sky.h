@@ -33,6 +33,7 @@
 #include "scenery_common.h"
 #include "../kernel/scene_light.h"
 #include "../kernel/texture.h"
+#include <lass/util/progress_indicator.h>
 
 namespace liar
 {
@@ -85,8 +86,8 @@ private:
 	const TPyObjectPtr doGetLightState() const;
 	void doSetLightState(const TPyObjectPtr& state);
 
-	void buildPdf(TMap& pdf, TXYZMap& radianceMap, XYZ& averageRadiance) const;
-	void buildCdf(const TMap& iPdf, TMap& oMarginalCdfU, TMap& oConditionalCdfV) const;
+	void buildPdf(TMap& pdf, TXYZMap& radianceMap, XYZ& averageRadiance, util::ProgressIndicator& progress) const;
+	void buildCdf(const TMap& iPdf, TMap& oMarginalCdfU, TMap& oConditionalCdfV, util::ProgressIndicator& progress) const;
 	void sampleMap(const TPoint2D& sample, TScalar&, TScalar& j, TScalar& pdf) const;
 	const TVector3D direction(TScalar i, TScalar j) const;
 	const XYZ lookUpRadiance(const Sample& sample, TScalar i, TScalar j) const;

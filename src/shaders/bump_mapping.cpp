@@ -125,9 +125,14 @@ void BumpMapping::doShadeContext(const Sample& sample, IntersectionContext& cont
 
 	const TScalar s = num::sign(dot(cross(context.dPoint_dU(), context.dPoint_dV()), context.normal()));
 
-	const TVector3D dP_dU = context.dPoint_dU() + s * (dD_dUv.x * context.normal() + d * context.dNormal_dU());
-	const TVector3D dP_dV = context.dPoint_dV() + s * (dD_dUv.y * context.normal() + d * context.dNormal_dV());
-	const TVector3D n = s * cross(dP_dU, dP_dV).normal();
+	const TVector3D dP_dU = context.normal().reject(context.dPoint_dU()) + s * (dD_dUv.x * context.normal() + d * context.dNormal_dU());
+	const TVector3D dP_dV = context.normal().reject(context.dPoint_dV()) + s * (dD_dUv.y * context.normal() + d * context.dNormal_dV());
+	TVector3D n = cross(dP_dU, dP_dV).normal();
+
+	if (dot(n, context.geometricNormal()) < 0)
+	{
+		n = -n;
+	}
 
 	context.setDPoint_dU(dP_dU);
 	context.setDPoint_dV(dP_dV);
@@ -147,19 +152,9 @@ const XYZ BumpMapping::doEmission(const Sample& sample, const IntersectionContex
 
 
 
-void BumpMapping::doBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
+TBsdfPtr BumpMapping::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-	shader_->bsdf(sample, context, omegaIn, first, last, result);
-}
-
-
-void BumpMapping::doSampleBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
-{
-	shader_->sampleBsdf(sample, context, omegaIn, first, last, result);
+	return shader_->bsdf(sample, context);
 }
 
 

@@ -32,6 +32,7 @@
 #include "tracers_common.h"
 #include "../kernel/ray_tracer.h"
 #include <lass/spat/kd_tree.h>
+#include <lass/spat/aabp_tree.h>
 #include <lass/num/random.h>
 #include <lass/util/dictionary.h>
 
@@ -47,17 +48,17 @@ public:
 
 	PhotonMapper();
 
-	unsigned maxNumberOfPhotons() const;
-	void setMaxNumberOfPhotons(unsigned maxNumberOfPhotons);
+	size_t maxNumberOfPhotons() const;
+	void setMaxNumberOfPhotons(size_t maxNumberOfPhotons);
 
-	unsigned globalMapSize() const;
-	void setGlobalMapSize(unsigned mapSize);
+	size_t globalMapSize() const;
+	void setGlobalMapSize(size_t mapSize);
 
 	TScalar causticsQuality() const;
 	void setCausticsQuality(TScalar quality);
 
-	unsigned estimationSize(const std::string& mapType) const;
-	void setEstimationSize(const std::string& mapType, unsigned size);
+	size_t estimationSize(const std::string& mapType) const;
+	void setEstimationSize(const std::string& mapType, size_t size);
 
 	TScalar estimationRadius(const std::string& mapType) const;
 	void setEstimationRadius(const std::string& mapType, TScalar radius);
@@ -65,8 +66,11 @@ public:
 	TScalar estimationTolerance(const std::string& mapType) const;
 	void setEstimationTolerance(const std::string& mapType, TScalar radius);
 
-	unsigned numFinalGatherRays() const;
-	void setNumFinalGatherRays(unsigned numFinalGatherRays);
+	size_t numFinalGatherRays() const;
+	void setNumFinalGatherRays(size_t numFinalGatherRays);
+
+	size_t numSecondaryGatherRays() const;
+	void setNumSecondaryGatherRays(size_t numFinalGatherRays);
 
 	TScalar ratioPrecomputedIrradiance() const;
 	void setRatioPrecomputedIrradiance(TScalar ratio);
@@ -94,13 +98,15 @@ private:
 	struct Irradiance
 	{
 		Irradiance(const TPoint3D& position, const TVector3D& normal):
-			position(position), normal(normal), irradiance() {}
+			position(position), normal(normal), irradiance(), squaredEstimationRadius(0) {}
 		TPoint3D position;
 		TVector3D normal;
 		XYZ irradiance;
+		TScalar squaredEstimationRadius;
 	};
 	typedef std::vector<Irradiance> TIrradianceBuffer;
 
+#if 1
 	template <typename Buffer>
 	struct KdTreeTraits
 	{
@@ -117,6 +123,22 @@ private:
 	};
 	typedef spat::KdTree<Photon, KdTreeTraits<TPhotonBuffer> > TPhotonMap;
 	typedef spat::KdTree<Irradiance, KdTreeTraits<TIrradianceBuffer> > TIrradianceMap;
+#else
+	template <typename Buffer>
+	struct ObjectTraits: spat::DefaultObjectTraits<typename Buffer::value_type, TAabb3D, meta::NullType, typename Buffer::const_iterator>
+	{
+		static const TAabb objectAabb(TObjectIterator it) 
+		{ 
+			return aabb(it->position);
+		}
+		static const TValue objectSquaredDistance(TObjectIterator it, const TPoint& point, const TInfo* /* info */)
+		{
+			return squaredDistance(it->position, point);
+		}
+	};
+	typedef spat::AabpTree<Photon, ObjectTraits<TPhotonBuffer>, spat::DefaultSplitHeuristics<8> > TPhotonMap;
+	typedef spat::AabpTree<Irradiance, ObjectTraits<TIrradianceBuffer>, spat::DefaultSplitHeuristics<8> > TIrradianceMap;
+#endif
 
 	typedef std::vector<TPhotonMap::Neighbour> TPhotonNeighbourhood;
 
@@ -154,8 +176,7 @@ private:
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-	void fillPhotonMap(const TLightCdf& iCumulativeLightPower, const TSamplerPtr& sampler, 
-		const TimePeriod& period);
+	void fillPhotonMap(const TSamplerPtr& sampler, const TimePeriod& period);
 	void emitPhoton(const LightContext& light, TScalar lightPdf, const Sample& sample, 
 		TRandomSecondary::TValue secondarySeed);
 	void tracePhoton(const Sample& sample, const XYZ& power, const BoundedRay& ray,
@@ -163,33 +184,46 @@ private:
 	void buildPhotonMap();
 	void buildIrradianceMap();
 
-	const XYZ traceDirect(const Sample& sample, const IntersectionContext& context,
+	const XYZ traceDirect(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaOut) const;
-	const XYZ gatherIndirect(const Sample& sample, const IntersectionContext& context,
+	const XYZ gatherIndirect(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& target, const TVector3D& omegaOut, const TPoint2D* firstSample, 
 		const TPoint2D* lastSample, size_t gatherStage = 0) const;
+	const XYZ gatherSecondary(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
+		const TPoint3D& target, const TVector3D& omegaOut) const;
 
-	const XYZ estimateIrradiance(const TPoint3D& point, const TVector3D& normal) const;
-	const XYZ estimateRadiance(const Sample& sample, const IntersectionContext& context, 
+	const XYZ estimateIrradiance(const TPoint3D& point, const TVector3D& normal) const 
+	{ 
+		TScalar sqrRadius;
+		size_t count;
+		return estimateIrradiance(point, normal, sqrRadius, count);
+	}
+	const XYZ estimateIrradiance(const TPoint3D& point, const TVector3D& normal, TScalar& sqrEstimationRadius, size_t& estimationCount) const;
+	const XYZ estimateRadiance(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf, 
 		const TPoint3D& point, const TVector3D& omegaOut, size_t gatherStage = 0) const;
-	const XYZ estimateCaustics(const Sample& sample, const IntersectionContext& context, 
+	const XYZ estimateCaustics(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf, 
 		const TPoint3D& point, const TVector3D& omegaOut) const;
 	void updateActualEstimationRadius(MapType mapType, TScalar radius) const;
 
-	mutable MediumStack mediumStack_;
 	TPhotonBuffer photonBuffer_[numMapTypes];
 	TPhotonMap photonMap_[numMapTypes];
 	TIrradianceBuffer irradianceBuffer_;
 	TIrradianceMap irradianceMap_;
 	TScalar estimationRadius_[numMapTypes];
-	mutable TScalar maxActualEstimationRadius_[numMapTypes]; /**< keeps track of actual maximum needed estimation radius, for post diagnostics */
 	TScalar estimationTolerance_[numMapTypes];
-	unsigned estimationSize_[numMapTypes];
+	size_t estimationSize_[numMapTypes];
+	mutable MediumStack mediumStack_;
+	mutable TScalar maxActualEstimationRadius_[numMapTypes]; /**< keeps track of actual maximum needed estimation radius, for post diagnostics */
+	mutable std::vector<TPoint2D> secondaryGatherSamples_;
+	mutable std::vector<TPoint2D> secondaryLightSamples_;
+	mutable std::vector<TScalar> secondaryLightSelectorSamples_;
+	mutable TRandomSecondary secondarySampler_;
 
-	unsigned maxNumberOfPhotons_;
-	unsigned globalMapSize_;
+	size_t maxNumberOfPhotons_;
+	size_t globalMapSize_;
 	TScalar causticsQuality_;
-	unsigned numFinalGatherRays_;
+	size_t numFinalGatherRays_;
+	size_t numSecondaryGatherRays_;
 	TScalar ratioPrecomputedIrradiance_;
 	int idFinalGatherSamples_;
 	bool isVisualizingPhotonMap_;
@@ -197,10 +231,6 @@ private:
 
 	// buffers
 	mutable TPhotonNeighbourhood photonNeighbourhood_;
-	mutable std::vector<BsdfIn> bsdfIns_;
-	mutable std::vector<BsdfOut> bsdfOuts_;
-	mutable std::vector<SampleBsdfIn> sampleBsdfIns_[numGatherStages_];
-	mutable std::vector<SampleBsdfOut> sampleBsdfOuts_[numGatherStages_];
 
 	static TMapTypeDictionary generateMapTypeDictionary();
 

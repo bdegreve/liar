@@ -60,9 +60,9 @@ private:
 	size_t doNumTransmissionSamples() const;
 
 	void doShadeContext(const Sample& sample, IntersectionContext& context) const;
-	const XYZ doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const;
-	void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn, const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const;
-	void doSampleBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn, const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const;
+	const XYZ doEmission(const Sample& sample, const IntersectionContext& context,
+		const TVector3D& omegaOut) const;
+	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);

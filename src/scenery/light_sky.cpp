@@ -23,12 +23,11 @@
 
 #include "scenery_common.h"
 #include "light_sky.h"
+#include "../kernel/rgb_space.h"
+
 #include <lass/prim/sphere_3d.h>
 #include <lass/num/distribution_transformations.h>
 #include <lass/prim/impl/plane_3d_impl_detail.h>
-
-#include <lass/io/image.h>
-#include "../kernel/rgb_space.h"
 
 #if LASS_COMPILER_TYPE == LASS_COMPILER_TYPE_MSVC
 #	pragma warning(disable: 4996) // std::copy may be unsafe
@@ -112,9 +111,10 @@ void LightSky::setSamplingResolution(const TResolution2D& resolution)
 
 void LightSky::doPreProcess(const TSceneObjectPtr&, const TimePeriod&)
 {
+	util::ProgressIndicator progress("Preprocessing environment map");
 	TMap pdf;
-	buildPdf(pdf, radianceMap_, averageRadiance_);
-	buildCdf(pdf, marginalCdfU_, conditionalCdfV_);
+	buildPdf(pdf, radianceMap_, averageRadiance_, progress);
+	buildCdf(pdf, marginalCdfU_, conditionalCdfV_, progress);
 }
 
 
@@ -202,13 +202,12 @@ const XYZ LightSky::doEmission(const Sample&, const TRay3D& ray, BoundedRay& sha
 	const TScalar i = num::atan2(dir.y, dir.x) * resolution_.x / (2 * TNumTraits::pi);
 	const TScalar j = (dir.z + 1) * resolution_.y / 2;
 
-	const size_t ii = static_cast<size_t>(num::floor(i));
-	LASS_ASSERT(ii < resolution_.x);
+	const size_t ii = static_cast<size_t>(num::floor(i > 0 ? i : i + resolution_.x)) % resolution_.x;
 	const TScalar u0 = ii > 0 ? marginalCdfU_[ii - 1] : TNumTraits::zero;
 	const TScalar margPdfU = marginalCdfU_[ii] - u0;
 
 	const TScalar* condCdfV = &conditionalCdfV_[ii * resolution_.y];
-	const size_t jj = static_cast<size_t>(num::floor(j));
+	const size_t jj = num::clamp<size_t>(static_cast<size_t>(num::floor(j)), 0, resolution_.y - 1);
 	LASS_ASSERT(jj < resolution_.y);
 	const TScalar v0 = jj > 0 ? condCdfV[jj - 1] : TNumTraits::zero;
 	const TScalar condPdfV = condCdfV[jj] - v0;
@@ -231,7 +230,9 @@ const XYZ LightSky::doSampleEmission(
 	shadowRay = BoundedRay(target, dir, tolerance, TNumTraits::infinity,
 		prim::IsAlreadyNormalized());
 
-	return radianceMap_[static_cast<size_t>(num::floor(i)) * resolution_.y + static_cast<size_t>(num::floor(j))];
+	const size_t ii = std::min(static_cast<size_t>(num::floor(i)), resolution_.x - 1);
+	const size_t jj = std::min(static_cast<size_t>(num::floor(j)), resolution_.y - 1);
+	return radianceMap_[ii * resolution_.y + jj];
 }
 
 
@@ -298,7 +299,7 @@ void LightSky::doSetLightState(const TPyObjectPtr& state)
 
 
 
-void LightSky::buildPdf(TMap& pdf, TXYZMap& radianceMap, XYZ& averageRadiance) const
+void LightSky::buildPdf(TMap& pdf, TXYZMap& radianceMap, XYZ& averageRadiance, util::ProgressIndicator& progress) const
 {
 	Sample dummy;
 
@@ -307,6 +308,7 @@ void LightSky::buildPdf(TMap& pdf, TXYZMap& radianceMap, XYZ& averageRadiance) c
 	XYZ totalRadiance;
 	for (size_t i = 0; i < resolution_.x; ++i)
 	{
+		progress(.5 * static_cast<TScalar>(i) / resolution_.x);
 		for (size_t j = 0; j < resolution_.y; ++j)
 		{
 			const XYZ radiance = lookUpRadiance(
@@ -323,7 +325,7 @@ void LightSky::buildPdf(TMap& pdf, TXYZMap& radianceMap, XYZ& averageRadiance) c
 
 
 
-void LightSky::buildCdf(const TMap& pdf, TMap& oMarginalCdfU, TMap& oConditionalCdfV) const
+void LightSky::buildCdf(const TMap& pdf, TMap& oMarginalCdfU, TMap& oConditionalCdfV, util::ProgressIndicator& progress) const
 {
 	TMap marginalPdfU(resolution_.x);
 	TMap marginalCdfU(resolution_.x);
@@ -331,6 +333,7 @@ void LightSky::buildCdf(const TMap& pdf, TMap& oMarginalCdfU, TMap& oConditional
 	
 	for (size_t i = 0; i < resolution_.x; ++i)
 	{
+		progress(.5 + .5 * static_cast<TScalar>(i) / resolution_.x);
 		const TScalar* pdfLine = &pdf[i * resolution_.y];
 		TScalar* condCdfV = &conditionalCdfV[i * resolution_.y];
 		std::partial_sum(pdfLine, pdfLine + resolution_.y, condCdfV);
@@ -354,17 +357,15 @@ void LightSky::buildCdf(const TMap& pdf, TMap& oMarginalCdfU, TMap& oConditional
 
 void LightSky::sampleMap(const TPoint2D& sample, TScalar& i, TScalar& j, TScalar& pdf) const
 {
-	const size_t ii = static_cast<size_t>(
-		std::lower_bound(marginalCdfU_.begin(), marginalCdfU_.end(), sample.x) - marginalCdfU_.begin());
-	LASS_ASSERT(ii < resolution_.x);
+	const size_t ii = std::min(resolution_.x - 1, static_cast<size_t>(
+		std::lower_bound(marginalCdfU_.begin(), marginalCdfU_.end(), sample.x) - marginalCdfU_.begin()));
 	const TScalar u0 = ii > 0 ? marginalCdfU_[ii - 1] : TNumTraits::zero;
 	const TScalar margPdfU = marginalCdfU_[ii] - u0;
 	i = static_cast<TScalar>(ii) + (sample.x - u0) / margPdfU;
 
 	const TScalar* condCdfV = &conditionalCdfV_[ii * resolution_.y];
-	const size_t jj = static_cast<size_t>(
-		std::lower_bound(condCdfV, condCdfV + resolution_.y, sample.y) - condCdfV);
-	LASS_ASSERT(jj < resolution_.y);
+	const size_t jj = std::min(resolution_.y - 1, static_cast<size_t>(
+		std::lower_bound(condCdfV, condCdfV + resolution_.y, sample.y) - condCdfV));
 	const TScalar v0 = jj > 0 ? condCdfV[jj - 1] : TNumTraits::zero;
 	const TScalar condPdfV = condCdfV[jj] - v0;
 	j = static_cast<TScalar>(jj) + (sample.y - v0) / condPdfV;
@@ -396,9 +397,7 @@ const XYZ LightSky::lookUpRadiance(const Sample& sample, TScalar i, TScalar j) c
 
 	Intersection intersection;
 	this->intersect(sample, ray, intersection);
-
-	IntersectionContext context;
-	this->localContext(sample, ray, intersection, context);
+	IntersectionContext context(*this, sample, ray, intersection);
 
 	return radiance_->lookUp(sample, context);
 }

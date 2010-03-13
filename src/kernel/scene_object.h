@@ -88,6 +88,7 @@ namespace impl
 }
 
 class SceneObject;
+class SceneLight;
 
 /** @relates SceneObject
  */
@@ -111,7 +112,6 @@ public:
 	bool isIntersecting(const Sample& sample, const BoundedRay& ray) const ;
 	bool isIntersecting(const Sample& sample, const DifferentialRay& ray) const;
 	void localContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const;
-	void localContext(const Sample& sample, const DifferentialRay& ray, const Intersection& intersection, IntersectionContext& result) const;
 	bool contains(const Sample& sample, const TPoint3D& point) const;
 	void localSpace(TTime time, TTransformation3D& localToWorld) const;
 
@@ -135,6 +135,8 @@ public:
 	void setInterior(const TMediumPtr& medium);
 	bool isOverridingInterior() const;
 	void setOverridingInterior(bool enabled = true);
+
+	const SceneLight* asLight() const { return doAsLight(); }
 
 	static const TShaderPtr& defaultShader();
 	static void setDefaultShader(const TShaderPtr& defaultShader);
@@ -167,6 +169,7 @@ private:
 	virtual TScalar doArea() const = 0;
 	virtual void doLocalSpace(TTime time, TTransformation3D& localToWorld) const;
 	virtual bool doHasMotion() const;
+	virtual const SceneLight* doAsLight() const;
 
 	virtual const TPyObjectPtr doGetState() const = 0;
 	virtual void doSetState(const TPyObjectPtr& state) = 0;

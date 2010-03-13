@@ -49,6 +49,13 @@ SceneLight::SceneLight():
 
 // --- private -------------------------------------------------------------------------------------
 
+const SceneLight* SceneLight::doAsLight() const
+{
+	return this;
+}
+
+
+
 const TPyObjectPtr SceneLight::doGetState() const
 {
 	return python::makeTuple(isShadowless_, doGetLightState());

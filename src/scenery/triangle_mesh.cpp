@@ -60,9 +60,9 @@ TriangleMesh::TriangleMesh(const TVertices& vertices, const TNormals& normals, c
 
 
 
-void TriangleMesh::smoothNormals(TScalar maxAngleInRadians)
+void TriangleMesh::smoothNormals()
 {
-	mesh_.smoothNormals(maxAngleInRadians);
+	mesh_.smoothNormals();
 }
 
 
@@ -88,9 +88,9 @@ void TriangleMesh::autoSew()
 
 
 
-void TriangleMesh::autoCrease(unsigned level)
+void TriangleMesh::autoCrease(unsigned level, TScalar maxAngleInRadians)
 {
-	mesh_.autoCrease(level);
+	mesh_.autoCrease(level, maxAngleInRadians);
 }
 
 

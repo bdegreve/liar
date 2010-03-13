@@ -55,12 +55,11 @@ private:
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-	const XYZ traceDirect(
-			const Sample& sample, const IntersectionContext& context, const TPoint3D& target, 
-			const TVector3D& targetNormal, const TVector3D& omegaIn) const;
+	const XYZ traceDirect(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
+		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn) const;
 	const XYZ traceSpecularAndGlossy(
-			const Sample& sample, const IntersectionContext& context, const kernel::DifferentialRay& primaryRay,
-			const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn, bool singleSample) const;
+		const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf, const kernel::DifferentialRay& primaryRay,
+		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn, bool singleSample) const;
 
 	mutable MediumStack mediumStack_;
 };

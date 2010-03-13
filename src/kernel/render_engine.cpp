@@ -89,7 +89,7 @@ const TSamplerPtr& RenderEngine::sampler() const
 
 const TSceneObjectPtr& RenderEngine::scene() const
 {
-	return rayTracer_->scene();
+	return scene_;
 }
 
 

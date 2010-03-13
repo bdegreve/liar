@@ -93,7 +93,7 @@ protected:
 
 	RayTracer();
 
-	const TLightContexts& lights() const { return lights_; }
+	const LightContexts& lights() const { return lights_; }
 
 private:
 
@@ -125,7 +125,7 @@ private:
 	friend class RayGenerationIncrementor;
 
 	TSceneObjectPtr scene_;
-	TLightContexts lights_;
+	LightContexts lights_;
 	int maxRayGeneration_;
 	mutable int rayGeneration_;
 };

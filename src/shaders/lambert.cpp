@@ -73,43 +73,10 @@ void Lambert::setDiffuse(const TTexturePtr& iDiffuse)
 
 // --- private -------------------------------------------------------------------------------------
 
-void Lambert::doBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D&,
-		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
+TBsdfPtr Lambert::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-	LASS_ASSERT(omegaIn.z > 0);
 	const XYZ diffuseOverPi = diffuse_->lookUp(sample, context) / TNumTraits::pi;
-	while (first != last)
-	{
-		const TScalar cosTheta = first->omegaOut.z;
-		if (testCaps(first->allowedCaps, caps()) && cosTheta > 0)
-		{
-			result->value = diffuseOverPi;
-			result->pdf = cosTheta / TNumTraits::pi;
-		}
-		++first;
-		++result;
-	}
-}
-
-
-void Lambert::doSampleBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D&,
-		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
-{
-	LASS_ASSERT(omegaIn.z > 0);
-	const XYZ diffuseOverPi = diffuse_->lookUp(sample, context) / TNumTraits::pi;
-	while (first != last)
-	{
-		if (testCaps(first->allowedCaps, caps()))
-		{
-			result->omegaOut = num::cosineHemisphere(first->sample, result->pdf).position();
-			result->value = diffuseOverPi;
-			result->usedCaps = caps();
-		}
-		++first;
-		++result;
-	}
+	return TBsdfPtr(new LambertBsdf(sample, context, diffuseOverPi));
 }
 
 
@@ -127,7 +94,40 @@ void Lambert::doSetState(const TPyObjectPtr& state)
 }
 
 
+// --- bsdf ----------------------------------------------------------------------------------------
+
+LambertBsdf::LambertBsdf(const Sample& sample, const IntersectionContext& context, const XYZ& diffuseOverPi):
+	Bsdf(sample, context),
+	diffuseOverPi_(diffuseOverPi)
+{
+}
+
+BsdfOut LambertBsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, unsigned allowedCaps) const
+{
+	const TScalar cosTheta = omegaOut.z;
+	if (testCaps(allowedCaps, Shader::capsReflection | Shader::capsDiffuse) && cosTheta > 0)
+	{
+		return BsdfOut(diffuseOverPi_, cosTheta / TNumTraits::pi);
+	}
+	return BsdfOut();
+}
+
+SampleBsdfOut LambertBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, unsigned allowedCaps) const
+{
+	SampleBsdfOut out;
+	if (testCaps(allowedCaps, Shader::capsReflection | Shader::capsDiffuse))
+	{
+		out.omegaOut = num::cosineHemisphere(sample, out.pdf).position();
+		out.value = diffuseOverPi_;
+		out.usedCaps = Shader::capsReflection | Shader::capsDiffuse;
+	}
+	return out;
+}
+
+
+
 // --- free ----------------------------------------------------------------------------------------
+
 
 
 

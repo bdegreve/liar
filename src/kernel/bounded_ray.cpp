@@ -34,7 +34,7 @@ namespace kernel
 /** construct an empty bounded ray 
  */
 BoundedRay::BoundedRay():
-    unboundedRay_(),
+	unboundedRay_(),
 	nearLimit_(TNumTraits::zero),
 	farLimit_(TNumTraits::zero)
 {
@@ -45,11 +45,11 @@ BoundedRay::BoundedRay():
 /** construct from an unbounded ray and two scalar bounds.
  */
 BoundedRay::BoundedRay(const TRay3D& unboundedRay, TScalar nearLimit, TScalar farLimit):
-    unboundedRay_(unboundedRay),
-    nearLimit_(nearLimit),
-    farLimit_(farLimit)
+	unboundedRay_(unboundedRay),
+	nearLimit_(nearLimit),
+	farLimit_(farLimit)
 {
-	LASS_ASSERT(nearLimit_ <= farLimit_);
+	LASS_ASSERT(nearLimit_ >= 0 && nearLimit_ <= farLimit_);
 }
 
 
@@ -57,13 +57,12 @@ BoundedRay::BoundedRay(const TRay3D& unboundedRay, TScalar nearLimit, TScalar fa
 /** construct from support point, @e unnormalized direction and two scalar bounds.
  *  The direction is automatically normalized
  */
-BoundedRay::BoundedRay(const TPoint3D& support, const TVector3D& direction, 
-					   TScalar nearLimit, TScalar farLimit):
-    unboundedRay_(support, direction),
-    nearLimit_(nearLimit),
-    farLimit_(farLimit)
+BoundedRay::BoundedRay(const TPoint3D& support, const TVector3D& direction, TScalar nearLimit, TScalar farLimit):
+	unboundedRay_(support, direction),
+	nearLimit_(nearLimit),
+	farLimit_(farLimit)
 {
-	LASS_ASSERT(nearLimit_ < farLimit_);
+	LASS_ASSERT(nearLimit_ >= 0 && nearLimit_ < farLimit_);
 }
 
 
@@ -76,14 +75,12 @@ BoundedRay::BoundedRay(const TPoint3D& support, const TVector3D& direction,
  *	BoundedRay ray(support, normalizedDirection, nearLimit, farLimit, prim::IsAlreadyNormalized());
  *	@endcode
  */
-BoundedRay::BoundedRay(const TPoint3D& support, const TVector3D& normalizedDirection, 
-					   TScalar nearLimit, TScalar farLimit,
-					   prim::IsAlreadyNormalized):
-    unboundedRay_(support, normalizedDirection, prim::IsAlreadyNormalized()),
-    nearLimit_(nearLimit),
-    farLimit_(farLimit)
+BoundedRay::BoundedRay(const TPoint3D& support, const TVector3D& normalizedDirection, TScalar nearLimit, TScalar farLimit, prim::IsAlreadyNormalized):
+	unboundedRay_(support, normalizedDirection, prim::IsAlreadyNormalized()),
+	nearLimit_(nearLimit),
+	farLimit_(farLimit)
 {
-	LASS_ASSERT(nearLimit_ < farLimit_);
+	LASS_ASSERT(nearLimit_ >= 0 && nearLimit_ < farLimit_);
 }
 
 
@@ -91,13 +88,12 @@ BoundedRay::BoundedRay(const TPoint3D& support, const TVector3D& normalizedDirec
 /** construct from a support point, a look-at point and two scalar bounds.
  *	The direction of the ray will be from @a support @a lookAt.
  */
-BoundedRay::BoundedRay(const TPoint3D& support, const TPoint3D& lookAt, 
-					   TScalar nearLimit, TScalar farLimit):
-    unboundedRay_(support, lookAt),
-    nearLimit_(nearLimit),
-    farLimit_(farLimit)
+BoundedRay::BoundedRay(const TPoint3D& support, const TPoint3D& lookAt, TScalar nearLimit, TScalar farLimit):
+	unboundedRay_(support, lookAt),
+	nearLimit_(nearLimit),
+	farLimit_(farLimit)
 {
-	LASS_ASSERT(nearLimit_ < farLimit_);
+	LASS_ASSERT(nearLimit_ >= 0 && nearLimit_ < farLimit_);
 }
 
 
@@ -174,8 +170,7 @@ BoundedRay translate(const BoundedRay& ray, const TVector3D& offset)
  */
 BoundedRay bound(const BoundedRay& ray, TScalar nearLimit, TScalar farLimit)
 {
-	return BoundedRay(ray.unboundedRay(), std::max(ray.nearLimit(), nearLimit),
-		std::min(ray.farLimit(), farLimit));
+	return BoundedRay(ray.unboundedRay(), std::max(ray.nearLimit(), nearLimit), std::min(ray.farLimit(), farLimit));
 }
 
 }

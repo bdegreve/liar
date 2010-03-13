@@ -40,7 +40,7 @@ namespace shaders
 
 class LIAR_SHADERS_DLL Lambert: public Shader
 {
-    PY_HEADER(Shader)
+	PY_HEADER(Shader)
 public:
 
 	Lambert();
@@ -51,15 +51,22 @@ public:
 
 private:
 
-	void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const;
-	void doSampleBsdf(const Sample& sample, const IntersectionContext& context,	const TVector3D& omegaIn,
-		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const;
+	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
 	TTexturePtr diffuse_;
+};
+
+class LambertBsdf: public Bsdf
+{
+public:
+	LambertBsdf(const Sample& sample, const IntersectionContext& context, const XYZ& diffuseOverPi);
+private:
+	BsdfOut doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, unsigned allowedCaps) const;
+	SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, unsigned allowedCaps) const;
+	XYZ diffuseOverPi_;
 };
 
 }

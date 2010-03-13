@@ -28,6 +28,7 @@
 #include <lass/util/progress_indicator.h>
 #include <lass/stde/range_algorithm.h>
 #include <lass/stde/extended_iterator.h>
+#include <lass/stde/extended_string.h>
 #include <lass/util/thread.h>
 #include <lass/util/callback_0.h>
 #include <lass/util/thread_fun.h>
@@ -63,6 +64,11 @@ PY_CLASS_MEMBER_RW_DOC(PhotonMapper, numFinalGatherRays, setNumFinalGatherRays,
 	"- else, the indirect lighting is estimated by a direct query of the photon map.\n"
 	"\n"
 	"Set to zero to disable the final gather step\n")
+PY_CLASS_MEMBER_RW_DOC(PhotonMapper, numSecondaryGatherRays, setNumSecondaryGatherRays,
+	"- If final gather step is enabled (see numFinalGatherRays), secondary gather rays\n"
+	"  can be shot.\n"
+	"\n"
+	"Set to zero to disable the secondary gather step\n")
 PY_CLASS_MEMBER_RW_DOC(PhotonMapper, ratioPrecomputedIrradiance, setRatioPrecomputedIrradiance,
 	"- if ratioPrecomputedIrradiance > 0 and numFinalGatherRays > 0 and isRayTracingDirect == True, "
 	"the final gather step is optimized by precomputing irradiances. "
@@ -88,6 +94,7 @@ PhotonMapper::PhotonMapper():
 	globalMapSize_(10000),
 	causticsQuality_(5),
 	numFinalGatherRays_(0),
+	numSecondaryGatherRays_(0),
 	ratioPrecomputedIrradiance_(0.25f),
 	isVisualizingPhotonMap_(false),
 	isRayTracingDirect_(true),
@@ -105,28 +112,28 @@ PhotonMapper::PhotonMapper():
 
 
 
-unsigned PhotonMapper::maxNumberOfPhotons() const
+size_t PhotonMapper::maxNumberOfPhotons() const
 {
 	return maxNumberOfPhotons_;
 }
 
 
 
-void PhotonMapper::setMaxNumberOfPhotons(unsigned maxNumberOfPhotons)
+void PhotonMapper::setMaxNumberOfPhotons(size_t maxNumberOfPhotons)
 {
 	maxNumberOfPhotons_ = maxNumberOfPhotons;
 }
 
 
 
-unsigned PhotonMapper::globalMapSize() const
+size_t PhotonMapper::globalMapSize() const
 {
 	return globalMapSize_;
 }
 
 
 
-void PhotonMapper::setGlobalMapSize(unsigned mapSize)
+void PhotonMapper::setGlobalMapSize(size_t mapSize)
 {
 	globalMapSize_ = mapSize;
 }
@@ -175,30 +182,45 @@ void PhotonMapper::setEstimationTolerance(const std::string& mapType, TScalar to
 
 
 
-unsigned PhotonMapper::estimationSize(const std::string& mapType) const
+size_t PhotonMapper::estimationSize(const std::string& mapType) const
 {
 	return estimationSize_[mapTypeDictionary_[mapType]];
 }
 
 
 
-void PhotonMapper::setEstimationSize(const std::string& mapType, unsigned size)
+void PhotonMapper::setEstimationSize(const std::string& mapType, size_t size)
 {
-	estimationSize_[mapTypeDictionary_[mapType]] = std::max<unsigned>(size, 1);
+	estimationSize_[mapTypeDictionary_[mapType]] = std::max<size_t>(size, 1);
 }
 
 
 
-unsigned PhotonMapper::numFinalGatherRays() const
+size_t PhotonMapper::numFinalGatherRays() const
 {
 	return numFinalGatherRays_;
 }
 
 
 
-void PhotonMapper::setNumFinalGatherRays(unsigned numFinalGatherRays)
+void PhotonMapper::setNumFinalGatherRays(size_t numFinalGatherRays)
 {
 	numFinalGatherRays_ = numFinalGatherRays;
+}
+
+
+
+size_t PhotonMapper::numSecondaryGatherRays() const
+{
+	return numSecondaryGatherRays_;
+}
+
+
+
+void PhotonMapper::setNumSecondaryGatherRays(size_t numSecondaryGatherRays)
+{
+	numSecondaryGatherRays_ = numSecondaryGatherRays;
+	secondaryGatherSamples_.resize(numSecondaryGatherRays);
 }
 
 
@@ -258,21 +280,14 @@ void PhotonMapper::doRequestSamples(const kernel::TSamplerPtr& sampler)
 
 void PhotonMapper::doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period)
 {
-	const unsigned maxSize = *std::max_element(estimationSize_, estimationSize_ + numMapTypes);
+	const size_t maxSize = *std::max_element(estimationSize_, estimationSize_ + numMapTypes);
 	photonNeighbourhood_.resize(maxSize + 1);
 
-	if (!lights().empty())
+	if (lights().size() == 0)
 	{
-		TLightCdf lightCdf;
-		for (TLightContexts::const_iterator i = lights().begin(); i != lights().end(); ++i)
-		{
-			lightCdf.push_back(positiveAverage(i->totalPower()));
-		}
-		std::partial_sum(lightCdf.begin(), lightCdf.end(), lightCdf.begin());
-		std::transform(lightCdf.begin(), lightCdf.end(), lightCdf.begin(), 
-			std::bind2nd(std::divides<TScalar>(), lightCdf.back()));
-		fillPhotonMap(lightCdf, sampler, period);
+		return;
 	}
+	fillPhotonMap(sampler, period);
 	buildPhotonMap();
 	buildIrradianceMap();
 }
@@ -292,6 +307,17 @@ namespace temp
 
 	template <typename T>
 	class custom_stl_allocator: public stde::lass_allocator<T, CustomAllocator> {};
+
+	template <typename Container>
+	std::string statistics(Container& container)
+	{
+		std::sort(container.begin(), container.end());
+		size_t n = container.size();
+		std::ostringstream buffer;
+		buffer << std::setprecision(4) << "min=" << container.front() << ", Q1=" << container[n / 4] << ", Q2=" << container[n / 2]
+			<< ", Q3=" << container[3 * n / 4] << ", max=" << container.back();
+		return buffer.str();
+	}
 }
 
 const XYZ PhotonMapper::doCastRay(
@@ -309,23 +335,19 @@ const XYZ PhotonMapper::doCastRay(
 	tIntersection = intersection.t();
 	alpha = 1;
 	const TPoint3D target = primaryRay.point(intersection.t());
-	const XYZ mediumTransparency = mediumStack_.transparency(BoundedRay(
-		primaryRay.centralRay().unboundedRay(), primaryRay.centralRay().nearLimit(),
-		intersection.t()));
+	const XYZ mediumTransparency = mediumStack_.transparency(primaryRay, intersection.t());
 
-	IntersectionContext context(this);
-	scene()->localContext(sample, primaryRay, intersection, context);
-	context.flipTo(-primaryRay.direction());
-
+	IntersectionContext context(*scene(), sample, primaryRay, intersection);
 	const Shader* const shader = context.shader();
 	if (!shader)
 	{
 		// leaving or entering something
 		MediumChanger mediumChanger(mediumStack_, context.interior(), context.solidEvent());
-		const DifferentialRay continuedRay = bound(primaryRay, intersection.t() + tolerance);
+		const DifferentialRay continuedRay = bound(primaryRay, intersection.t() + liar::tolerance);
 		return mediumTransparency * this->castRay(sample, continuedRay, tIntersection, alpha);
 	}
 	shader->shadeContext(sample, context);
+	const TBsdfPtr bsdf = shader->bsdf(sample, context);
 
 	const TVector3D targetNormal = context.bsdfToWorld(TVector3D(0, 0, 1));
 	const TVector3D omegaIn = context.worldToBsdf(-primaryRay.direction());
@@ -338,12 +360,12 @@ const XYZ PhotonMapper::doCastRay(
 		return result;
 	}
 
-	XYZ result = estimateCaustics(sample, context, target, omegaIn);
+	XYZ result = estimateCaustics(sample, context, bsdf, target, omegaIn);
 	result += shader->emission(sample, context, omegaIn);
 
 	if (isRayTracingDirect_)
 	{
-		result += traceDirect(sample, context, target, targetNormal, omegaIn);
+		result += traceDirect(sample, context, bsdf, target, targetNormal, omegaIn);
 	}
 
 	//*
@@ -352,15 +374,12 @@ const XYZ PhotonMapper::doCastRay(
 		if (isRayTracingDirect_ && numFinalGatherRays_ > 0)
 		{
 			LASS_ASSERT(idFinalGatherSamples_ >= 0);
-			Sample::TSubSequence2D gatherSample = 
-				sample.subSequence2D(idFinalGatherSamples_);
-			result += gatherIndirect(
-				sample, context, target, omegaIn, gatherSample.begin(),
-				gatherSample.end());
+			Sample::TSubSequence2D gatherSample = sample.subSequence2D(idFinalGatherSamples_);
+			result += gatherIndirect(sample, context, bsdf, target + 10 * liar::tolerance * targetNormal, omegaIn, gatherSample.begin(), gatherSample.end());
 		}
 		else
 		{
-			result += estimateRadiance(sample, context, target, omegaIn);
+			result += estimateRadiance(sample, context, bsdf, target, omegaIn);
 		}
 	}
 	/**/
@@ -370,20 +389,7 @@ const XYZ PhotonMapper::doCastRay(
 		//*
 		if (shader->hasCaps(Shader::capsReflection) && shader->idReflectionSamples() != -1)
 		{
-			Sample::TSubSequence2D bsdfSample =
-				sample.subSequence2D(shader->idReflectionSamples());
-			const size_t n = generation == 0 ? bsdfSample.size() : 1;
-			std::vector<SampleBsdfIn, temp::custom_stl_allocator<SampleBsdfIn> > in(n);
-			std::vector<SampleBsdfOut, temp::custom_stl_allocator<SampleBsdfOut> > out(n);
-			for (size_t i = 0; i < n; ++i)
-			{
-				in[i].sample = bsdfSample[i];
-				in[i].allowedCaps = Shader::capsReflection | Shader::capsSpecular |
-					Shader::capsGlossy;
-			}
-			shader->sampleBsdf(sample, context, omegaIn, &in[0], &in[0] + n, &out[0]);
-
-			const TPoint3D beginCentral = target + 2 * tolerance * targetNormal;
+			const TPoint3D beginCentral = target + 10 * liar::tolerance * targetNormal;
 			const TPoint3D beginI = beginCentral + context.dPoint_dI();
 			const TPoint3D beginJ = beginCentral + context.dPoint_dJ();
 
@@ -403,65 +409,57 @@ const XYZ PhotonMapper::doCastRay(
 			const TVector3D dReflected_dJ = dIncident_dJ +
 				2 * (dCosTheta_dJ * normal + cosTheta * context.dNormal_dJ());
 
+			const Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idReflectionSamples());
+			const size_t n = generation == 0 ? bsdfSample.size() : 1;
 			for (size_t i = 0; i < n; ++i)
 			{
-				if (out[i].pdf > 0 && out[i].value)
+				const SampleBsdfOut out = bsdf->sample(omegaIn, bsdfSample[i], Shader::capsReflection | Shader::capsSpecular | Shader::capsGlossy);
+				if (!out)
 				{
-					LASS_ASSERT(out[i].omegaOut.z > 0);
-					const TVector3D directionCentral = context.bsdfToWorld(out[i].omegaOut);
-					LASS_ASSERT(dot(normal, directionCentral) > 0);
-					LASS_ASSERT(dot(normal, incident) < 0);
-					const TVector3D directionI = directionCentral + dReflected_dI;
-					const TVector3D directionJ = directionCentral + dReflected_dJ;
-
-					const DifferentialRay reflectedRay(
-						BoundedRay(beginCentral, directionCentral, tolerance),
-						TRay3D(beginI, directionI),
-						TRay3D(beginJ, directionJ));
-					TScalar t, a;
-					const XYZ reflected = castRay(sample, reflectedRay, t, a);
-					result += out[i].value * reflected * 
-						(a * num::abs(out[i].omegaOut.z) / (n * out[i].pdf));
+					continue;
 				}
+				LASS_ASSERT(out.omegaOut.z > 0);
+				const TVector3D directionCentral = context.bsdfToWorld(out.omegaOut);
+				LASS_ASSERT(dot(normal, directionCentral) > 0);
+				LASS_ASSERT(dot(normal, incident) < 0);
+				const TVector3D directionI = directionCentral + dReflected_dI;
+				const TVector3D directionJ = directionCentral + dReflected_dJ;
+
+				const DifferentialRay reflectedRay(
+					BoundedRay(beginCentral, directionCentral, liar::tolerance),
+					TRay3D(beginI, directionI),
+					TRay3D(beginJ, directionJ));
+				TScalar t, a;
+				const XYZ reflected = castRay(sample, reflectedRay, t, a);
+				result += out.value * reflected * (a * num::abs(out.omegaOut.z) / (n * out.pdf));
 			}
 		}
 		/**/
 		//*
 		if (shader->hasCaps(Shader::capsTransmission) && shader->idTransmissionSamples() != -1)
 		{
-			MediumChanger mediumChanger(
-				mediumStack_, context.interior(), context.solidEvent());
+			const MediumChanger mediumChanger(mediumStack_, context.interior(), context.solidEvent());
+			const TPoint3D beginCentral = target - 10 * liar::tolerance * targetNormal;
 
-			Sample::TSubSequence2D bsdfSample =
-				sample.subSequence2D(shader->idTransmissionSamples());
+			const Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idTransmissionSamples());
 			const size_t n = generation == 0 ? bsdfSample.size() : 1;
-			std::vector<SampleBsdfIn, temp::custom_stl_allocator<SampleBsdfIn> > in(n);
-			std::vector<SampleBsdfOut, temp::custom_stl_allocator<SampleBsdfOut> > out(n);
 			for (size_t i = 0; i < n; ++i)
 			{
-				in[i].sample = bsdfSample[i];
-				in[i].allowedCaps = Shader::capsTransmission | Shader::capsSpecular |
-					Shader::capsGlossy;
-			}
-			shader->sampleBsdf(sample, context, omegaIn, &in[0], &in[0] + n, &out[0]);
-
-			const TPoint3D beginCentral = target - 2 * tolerance * targetNormal;
-
-			for (size_t i = 0; i < n; ++i)
-			{
-				if (out[i].pdf > 0 && out[i].value)
+				const SampleBsdfOut out = bsdf->sample(omegaIn, bsdfSample[i], Shader::capsReflection | Shader::capsSpecular | Shader::capsGlossy);
+				if (!out)
 				{
-					LASS_ASSERT(out[i].omegaOut.z < 0);
-					const TVector3D directionCentral = context.bsdfToWorld(out[i].omegaOut);
-					const DifferentialRay transmittedRay(
-						BoundedRay(beginCentral, directionCentral, tolerance),
-						TRay3D(beginCentral, directionCentral),
-						TRay3D(beginCentral, directionCentral));
-					TScalar t, a;
-					const XYZ transmitted = castRay(sample, transmittedRay, t, a);
-					result += out[i].value * transmitted * 
-						(a * num::abs(out[i].omegaOut.z) / (n * out[i].pdf));
+					continue;
 				}
+
+				LASS_ASSERT(out.omegaOut.z < 0);
+				const TVector3D directionCentral = context.bsdfToWorld(out.omegaOut);
+				const DifferentialRay transmittedRay(
+					BoundedRay(beginCentral, directionCentral, liar::tolerance),
+					TRay3D(beginCentral, directionCentral),
+					TRay3D(beginCentral, directionCentral));
+				TScalar t, a;
+				const XYZ transmitted = castRay(sample, transmittedRay, t, a);
+				result += out.value * transmitted * (a * num::abs(out.omegaOut.z) / (n * out.pdf));
 			}
 		}
 		/**/
@@ -491,7 +489,7 @@ const TPyObjectPtr PhotonMapper::doGetState() const
 {
 	std::vector<TScalar> radius(estimationRadius_, estimationRadius_ + numMapTypes);
 	std::vector<TScalar> tolerance(estimationTolerance_, estimationTolerance_ + numMapTypes);
-	std::vector<unsigned> size(estimationSize_, estimationSize_ + numMapTypes);
+	std::vector<size_t> size(estimationSize_, estimationSize_ + numMapTypes);
 	
 	return python::makeTuple(maxNumberOfPhotons_, globalMapSize_, causticsQuality_,
 		numFinalGatherRays_, ratioPrecomputedIrradiance_, isVisualizingPhotonMap_,
@@ -504,7 +502,7 @@ void PhotonMapper::doSetState(const TPyObjectPtr& state)
 {
 	std::vector<TScalar> radius;
 	std::vector<TScalar> tolerance;
-	std::vector<unsigned> size;
+	std::vector<size_t> size;
 
 	python::decodeTuple(state, maxNumberOfPhotons_, globalMapSize_, causticsQuality_,
 		numFinalGatherRays_, ratioPrecomputedIrradiance_, isVisualizingPhotonMap_,
@@ -548,14 +546,8 @@ namespace experimental
 }
 
 
-void PhotonMapper::fillPhotonMap(
-		const TLightCdf& lightCdf, const TSamplerPtr& sampler, const TimePeriod& period)
+void PhotonMapper::fillPhotonMap(const TSamplerPtr& sampler, const TimePeriod& period)
 {
-	if (lightCdf.empty())
-	{
-		return;
-	}
-
 	TRandomPrimary random;
 	TUniformPrimary uniform(random);
 
@@ -575,25 +567,22 @@ void PhotonMapper::fillPhotonMap(
 			break;
 		}
 
-		const int light = static_cast<int>(std::lower_bound(
-			lightCdf.begin(), lightCdf.end(), uniform()) - lightCdf.begin());
-		const TScalar lightPdf = 
-			lightCdf[light] - (light > 0 ? lightCdf[light - 1] : TNumTraits::zero);
-
-		if (lightPdf > 0)
+		TScalar pdf;
+		const LightContext* const light = lights().sample(uniform(), pdf);
+		if (light && pdf > 0)
 		{
 			Sample sample;
 			sampler->sample(period, sample);
 			const TRandomSecondary::TValue secondarySeed = random();
-			emitPhoton(lights()[light], lightPdf, sample, secondarySeed);
+			emitPhoton(*light, pdf, sample, secondarySeed);
 		}
 
-		progress(std::min(1., static_cast<double>(photonBuffer_[mtGlobal].size()) /
-			globalMapSize_));
+		progress(std::min(1., static_cast<double>(photonBuffer_[mtGlobal].size()) / globalMapSize_));
 
 		++photonsShot;
 	}
 
+	LASS_COUT << "  total number of emitted photons: " << photonsShot << std::endl;
 	const TScalar invPhotonsShot = num::inv(static_cast<TScalar>(photonsShot));
 	for (int map = 0; map < numMapTypes; ++map)
 	{
@@ -611,35 +600,26 @@ void PhotonMapper::buildPhotonMap()
 {
 	for (int map = 0; map < numMapTypes; ++map)
 	{
-		LASS_COUT << mapTypeDictionary_.key(static_cast<MapType>(map)) << " photon map:" 
-			<< std::endl;
+		LASS_COUT << mapTypeDictionary_.key(static_cast<MapType>(map)) << " photon map:" << std::endl;
 		LASS_COUT << "  number of photons: " << photonBuffer_[map].size() << std::endl;
 		if (!photonBuffer_[map].empty())
 		{
 			std::vector<TScalar> powers;
-			for (TPhotonBuffer::iterator i = photonBuffer_[map].begin(); 
-				i != photonBuffer_[map].end(); ++i)
+			for (TPhotonBuffer::iterator i = photonBuffer_[map].begin(); i != photonBuffer_[map].end(); ++i)
 			{
 				powers.push_back(i->power.absTotal());
 			}
-
-			std::sort(powers.begin(), powers.end());
-			const TScalar minPower = powers.front();
-			const TScalar maxPower = powers.back();
+			LASS_COUT << "  photon powers: " << temp::statistics(powers) << std::endl;
 			const TScalar medianPower = powers[powers.size() / 2];
-			LASS_COUT << "  photon power: min " << minPower << ", median " << medianPower 
-				<< ", max " << maxPower << std::endl;
 			if (estimationRadius_[map] == 0 && estimationTolerance_[map] == 0)
 			{
 				estimationTolerance_[map] = 0.05f;
 			}
 			if (estimationTolerance_[map] > 0)
 			{
-				const TScalar estimationArea = estimationSize_[map] * medianPower /
-					estimationTolerance_[map];
+				const TScalar estimationArea = estimationSize_[map] * medianPower / estimationTolerance_[map];
 				estimationRadius_[map] = num::sqrt(estimationArea) / TNumTraits::pi;
-				LASS_COUT << "  automatic estimation radius: " << estimationRadius_[map]
-					<< std::endl;
+				LASS_COUT << "  automatic estimation radius: " << estimationRadius_[map] << std::endl;
 			}
 		}
 		photonMap_[map].reset(photonBuffer_[map].begin(), photonBuffer_[map].end());
@@ -682,8 +662,7 @@ void PhotonMapper::tracePhoton(
 
 	const TPoint3D hitPoint = ray.point(intersection.t());
 
-	const XYZ mediumTransparency = mediumStack_.transparency(
-		BoundedRay(ray.unboundedRay(), ray.nearLimit(), intersection.t()));
+	const XYZ mediumTransparency = mediumStack_.transparency(ray, intersection.t());
 	XYZ mediumPower = mediumTransparency * power;
 	const TScalar mediumAttenuation = mediumPower.average() / power.average();
 	LASS_ASSERT(mediumAttenuation < 1.1);
@@ -694,24 +673,21 @@ void PhotonMapper::tracePhoton(
 	}
 	mediumPower /= mediumProbability;
 
-	IntersectionContext context(this);
-	scene()->localContext(sample, ray, intersection, context);
-	context.flipTo(-ray.direction());
+	IntersectionContext context(*scene(), sample, ray, intersection);
 	const Shader* const shader = context.shader();
 	if (!shader)
 	{
 		// entering or leaving something ...
 		if (generation < maxRayGeneration())
 		{
-			MediumChanger mediumChanger(
-				mediumStack_, context.interior(), context.solidEvent());
-			const BoundedRay newRay(
-				ray.unboundedRay(), intersection.t() + tolerance, ray.farLimit());
+			MediumChanger mediumChanger(mediumStack_, context.interior(), context.solidEvent());
+			const BoundedRay newRay = bound(ray, intersection.t() + liar::tolerance, ray.farLimit());
 			tracePhoton(sample, mediumPower, newRay, generation + 1, uniform, isCaustic);
 		}
 		return;
 	}
 	shader->shadeContext(sample, context);
+	const TBsdfPtr bsdf = shader->bsdf(sample, context);
 
 	if (shader->hasCaps(Shader::capsDiffuse))
 	{
@@ -722,8 +698,7 @@ void PhotonMapper::tracePhoton(
 		}
 		else
 		{
-			const bool mayStorePhoton = !isRayTracingDirect_ || 
-				(isRayTracingDirect_ && numFinalGatherRays_ > 0) || generation > 0;
+			const bool mayStorePhoton = !isRayTracingDirect_ || (isRayTracingDirect_ && numFinalGatherRays_ > 0) || generation > 0;
 			if (mayStorePhoton && uniform() < num::inv(causticsQuality_))
 			{
 				photon.power *= causticsQuality_;
@@ -751,10 +726,8 @@ void PhotonMapper::tracePhoton(
 	}
 
 	const TPoint2D sampleBsdf(uniform(), uniform());
-	const SampleBsdfIn in(sampleBsdf, Shader::capsAll);
-	SampleBsdfOut out;
-	context.shader()->sampleBsdf(sample, context, omegaIn, &in, &in + 1, &out);
-	if (out.pdf == 0 || !out.value)
+	const SampleBsdfOut out = bsdf->sample(omegaIn, sampleBsdf, Shader::capsAll);
+	if (!out)
 	{
 		return;
 	}
@@ -783,15 +756,23 @@ void PhotonMapper::buildIrradianceMap()
 	irradianceMap_.reset();
 	if (ratioPrecomputedIrradiance_ > 0 && numFinalGatherRays_ > 0 && isRayTracingDirect_)
 	{
-		util::ProgressIndicator	progress("precomputing irradiances");
 		const size_t size = irradianceBuffer_.size();
 		const TScalar invSize = num::inv(static_cast<TScalar>(size));
-		for (size_t i = 0; i < size; ++i)
+		std::vector<TScalar> radii(size);
+		std::vector<size_t> counts(size);
 		{
-			Irradiance& ir = irradianceBuffer_[i];
-			ir.irradiance = estimateIrradiance(ir.position, ir.normal);
-			progress(i * invSize);
+			util::ProgressIndicator	progress("precomputing irradiances");
+			for (size_t i = 0; i < size; ++i)
+			{
+				Irradiance& ir = irradianceBuffer_[i];
+				ir.irradiance = estimateIrradiance(ir.position, ir.normal, ir.squaredEstimationRadius, counts[i]);
+				radii[i] = num::sqrt(ir.squaredEstimationRadius);
+				progress(i * invSize);
+			}
 		}
+		LASS_COUT << "  eff. radii: " << temp::statistics(radii) << std::endl;
+		LASS_COUT << "  eff. counts: " << temp::statistics(counts) << std::endl;
+
 		irradianceMap_.reset(irradianceBuffer_.begin(), irradianceBuffer_.end());
 	}
 }
@@ -805,7 +786,7 @@ namespace temp
 }
 
 const XYZ PhotonMapper::traceDirect(
-		const Sample& sample, const IntersectionContext& context,
+		const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& target, const TVector3D& targetNormal, 
 		const TVector3D& omegaIn) const
 {
@@ -813,73 +794,67 @@ const XYZ PhotonMapper::traceDirect(
 	LASS_ASSERT(shader);
 
 	XYZ result;
-	const TLightContexts::const_iterator end = lights().end();
-	for (TLightContexts::const_iterator light = lights().begin(); light != end; ++light)
+	const LightContexts::TIterator end = lights().end();
+	for (LightContexts::TIterator light = lights().begin(); light != end; ++light)
 	{
-		Sample::TSubSequence2D lightSample = sample.subSequence2D(light->idLightSamples());
+		Sample::TSubSequence2D lightSamples = sample.subSequence2D(light->idLightSamples());
+		Sample::TSubSequence2D bsdfSamples = sample.subSequence2D(light->idBsdfSamples());
 		/*
-		Sample::TSubSequence2D bsdfSample = sample.subSequence2D(light->idBsdfSamples());
 		Sample::TSubSequence1D componentSample = sample.subSequence1D(light->idBsdfComponentSamples());
 		LASS_ASSERT(bsdfSample.size() == lightSample.size() && componentSample.size() == lightSample.size());
 		*/
-		const TScalar n = static_cast<TScalar>(lightSample.size());
-		const bool isSingularLight = light->isSingular();
+		const TScalar nl = static_cast<TScalar>(lightSamples.size());
+		const TScalar nb = static_cast<TScalar>(bsdfSamples.size());
+		const bool isMultipleImportanceSampling = nb > 0 && !light->isSingular();
+		const TScalar n = isMultipleImportanceSampling ? nl + nb : nl;
+
 		unsigned caps = Shader::capsAll & ~Shader::capsSpecular;
-		if (!isSingularLight)
+		if (!light->isSingular())
 		{
 			caps &= ~Shader::capsGlossy;
 		}
 
-		while (lightSample)
+		const TPoint3D start = target + 10 * liar::tolerance * targetNormal;
+		for (Sample::TSubSequence2D::iterator ls = lightSamples.begin(); ls != lightSamples.end(); ++ls)
 		{
 			BoundedRay shadowRay;
 			TScalar lightPdf;
-			const XYZ radiance = light->sampleEmission(
-				sample, *lightSample, target + 2 * tolerance * targetNormal,
-				targetNormal, shadowRay, lightPdf);
-			if (lightPdf > 0 && radiance)
+			const XYZ radiance = light->sampleEmission(sample, *ls, start, targetNormal, shadowRay, lightPdf);
+			if (lightPdf <= 0 || !radiance)
 			{
-				const TVector3D& omegaOut = context.worldToBsdf(shadowRay.direction());
-				BsdfIn in(omegaOut, caps);
-				BsdfOut out;
-				shader->bsdf(sample, context, omegaIn, &in, &in + 1, &out);
-				if (out.value && !scene()->isIntersecting(sample, shadowRay))
-				{
-					//const TScalar weight = isSingularLight ? 
-					//	TNumTraits::one : temp::squaredHeuristic(lightPdf, bsdfPdf);
-					const TScalar cosTheta = omegaOut.z;
-					const TScalar weight = 1;
-					result += out.value * radiance * 
-						(weight * num::abs(cosTheta) / (n * lightPdf));
-				}
+				continue;
 			}
-			/*
-			if (!isSingularLight)
+			const TVector3D& omegaOut = context.worldToBsdf(shadowRay.direction());
+			const BsdfOut out = bsdf->call(omegaIn, omegaOut, caps);
+			if (!out || scene()->isIntersecting(sample, shadowRay))
 			{
-				TVector3D omegaIn;
-				XYZ bsdf;
-				TScalar bsdfPdf;
-				shader->sampleBsdf(sample, context, omegaOut, bsdfSample.begin(), bsdfSample.begin() + 1, 
-					&omegaIn, &bsdf, &bsdfPdf, Shader::capsAll & ~Shader::capsSpecular);
-				if (bsdfPdf > 0 && bsdf)
-				{
-					TRay3D ray(target, context.shaderToWorld(omegaIn).normal());
-					BoundedRay shadowRay;
-					TScalar lightPdf;
-					const XYZ radiance = light->emission(sample, ray, shadowRay, lightPdf);
-					if (lightPdf > 0 && !scene()->isIntersecting(sample, shadowRay))
-					{
-						const TScalar weight = temp::squaredHeuristic(bsdfPdf, lightPdf);
-						result += bsdf * radiance * (weight * abs(omegaIn.z) / (n * bsdfPdf));
-					}
-				}
+				continue;
 			}
-			*/
-			++lightSample;
-			/*
-			++bsdfSample;
-			++componentSample;
-			*/
+			const TScalar weight = isMultipleImportanceSampling ? temp::squaredHeuristic(nl * lightPdf, nb * out.pdf) : TNumTraits::one;
+			const TScalar cosTheta = omegaOut.z;
+			result += out.value * radiance * (weight * num::abs(cosTheta) / (n * lightPdf));
+		}
+		if (isMultipleImportanceSampling)
+		{
+			for (Sample::TSubSequence2D::iterator bs = lightSamples.begin(); bs != lightSamples.end(); ++bs)
+			{
+				const SampleBsdfOut out = bsdf->sample(omegaIn, *bs, Shader::capsAll & ~Shader::capsSpecular);
+				if (!out)
+				{
+					continue;
+				}
+				const TRay3D ray(start, context.bsdfToWorld(out.omegaOut).normal());
+				BoundedRay shadowRay;
+				TScalar lightPdf;
+				const XYZ radiance = light->emission(sample, ray, shadowRay, lightPdf);
+				if (lightPdf <= 0 || !radiance || scene()->isIntersecting(sample, shadowRay))
+				{
+					continue;
+				}
+				const TScalar weight = temp::squaredHeuristic(nb * out.pdf, nl * lightPdf);
+				const TScalar cosTheta = out.omegaOut.z;
+				result += out.value * radiance * (weight * abs(cosTheta) / (n * out.pdf));
+			}
 		}
 	}
 
@@ -889,69 +864,126 @@ const XYZ PhotonMapper::traceDirect(
 
 
 const XYZ PhotonMapper::gatherIndirect(
-		const Sample& sample, const IntersectionContext& context,
+		const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& target, const TVector3D& omegaIn,
 		const TPoint2D* firstSample, const TPoint2D* lastSample,
 		size_t gatherStage) const
 {		
 	LASS_ASSERT(gatherStage < numGatherStages_);
-	std::vector<SampleBsdfIn>& in = sampleBsdfIns_[gatherStage];
-	std::vector<SampleBsdfOut>& out = sampleBsdfOuts_[gatherStage];
-
-	const int n = static_cast<int>(lastSample - firstSample);
-	LASS_ASSERT(n >= 0);
-	if (static_cast<size_t>(n) > in.size())
-	{
-		in.resize(n);
-		out.resize(n);
-	}
-
-	for (int i = 0; i < n; ++i)
-	{
-		in[i].sample = firstSample[i];
-		in[i].allowedCaps = Shader::capsReflection | Shader::capsDiffuse;
-	}
-
-	LASS_ASSERT(context.shader());
-	context.shader()->sampleBsdf(sample, context, omegaIn, &in[0], &in[0] + n, &out[0]);
-
 	XYZ result;
-	for (int i = 0; i < n; ++i)
+	const ptrdiff_t n = lastSample - firstSample;
+	for (const TPoint2D* s = firstSample; s != lastSample; ++s)
 	{
-		if (out[i].pdf > 0 && out[i].value)
+		const SampleBsdfOut out = bsdf->sample(omegaIn, *s,  Shader::capsReflection | Shader::capsDiffuse);
+		if (!out)
 		{
-			const TVector3D direction = context.bsdfToWorld(out[i].omegaOut);
-			const BoundedRay ray(target, direction, tolerance);
-			Intersection intersection;
-			scene()->intersect(sample, ray, intersection);
-			if (intersection)
-			{
-				const TPoint3D hitPoint = ray.point(intersection.t());
-				IntersectionContext hitContext(this);
-				scene()->localContext(sample, ray, intersection, hitContext);
-				hitContext.flipTo(-direction);
-				const TVector3D hitOmega = hitContext.worldToBsdf(-direction);
-				const XYZ radiance = estimateRadiance(
-					sample, hitContext, hitPoint, hitOmega, gatherStage);
-				result += out[i].value * radiance * num::abs(out[i].omegaOut.z) / 
-					(n * out[i].pdf);
-			}
+			continue;
 		}
+		const TVector3D direction = context.bsdfToWorld(out.omegaOut);
+		const BoundedRay ray(target, direction, liar::tolerance);
+		Intersection intersection;
+		scene()->intersect(sample, ray, intersection);
+		if (!intersection)
+		{
+			continue;
+		}
+		const TPoint3D hitPoint = ray.point(intersection.t());
+		IntersectionContext hitContext(*scene(), sample, ray, intersection);
+		const Shader* const hitShader = hitContext.shader();
+		if (!hitShader)
+		{
+			// leaving or entering something
+			//MediumChanger mediumChanger(mediumStack_, hitContext.interior(), hitContext.solidEvent());
+			//const DifferentialRay continuedRay = bound(ray, intersection.t() + liar::tolerance);
+			//return mediumTransparency * this->castRay(sample, continuedRay, tIntersection, alpha);
+			continue;
+		}
+		hitShader->shadeContext(sample, hitContext);
+		const TBsdfPtr hitBsdf = hitShader->bsdf(sample, hitContext);
+		const TVector3D hitOmega = hitContext.worldToBsdf(-direction);
+		const XYZ radiance = estimateRadiance(sample, hitContext, hitBsdf, hitPoint, hitOmega, gatherStage);
+		result += out.value * radiance * num::abs(out.omegaOut.z) / (n * out.pdf);
 	}
 	return result;
 }
 
 
+namespace temp
+{
+	template <typename Generator>
+	void stratifier(TScalar* first, TScalar* last, Generator& generator)
+	{
+		num::DistributionUniform<TScalar, num::RandomMT19937> uniform(generator);
+		const ptrdiff_t n = last - first;
+		const TScalar scale = num::inv(static_cast<TScalar>(n));
+		for (ptrdiff_t k = 0; k < n; ++k)
+		{
+			first[k] = scale * (k + uniform());
+		};
+		std::random_shuffle(first, last, generator);
+	}
 
-const XYZ PhotonMapper::estimateIrradiance(
-		const TPoint3D& point, const TVector3D& normal) const
+	template <typename Generator>
+	void latinHypercube(TPoint2D* first, TPoint2D* last, Generator& generator)
+	{
+		num::DistributionUniform<TScalar, num::RandomMT19937> uniform(generator);
+		const ptrdiff_t n = last - first;
+		const TPoint2D::TValue scale = num::inv(static_cast<TPoint2D::TValue>(n));
+		for (ptrdiff_t k = 0; k < n; ++k)
+		{
+			first[k].x = scale * (k + uniform());
+			first[k].y = scale * (k + uniform());
+		};
+		std::random_shuffle(stde::member_iterator(first, &TPoint2D::x), stde::member_iterator(last, &TPoint2D::x), generator);
+		std::random_shuffle(stde::member_iterator(first, &TPoint2D::y), stde::member_iterator(last, &TPoint2D::y), generator);
+	}
+}
+
+
+
+const XYZ PhotonMapper::gatherSecondary(
+		const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
+		const TPoint3D& target, const TVector3D& omegaOut) const
+{
+	const size_t n = numSecondaryGatherRays_;
+	TPoint2D* gatherSamples = &secondaryGatherSamples_[0];
+	temp::latinHypercube(gatherSamples, gatherSamples + n, secondarySampler_);
+	XYZ result = gatherIndirect(sample, context, bsdf, target, omegaOut, gatherSamples, gatherSamples + n, 1);
+
+	//TPoint2D* lightSamples = &secondaryLightSamples_[0];
+	//TScalar* lightSelectors = &secondaryLightSelectorSamples_[0];
+	//temp::latinHypercube(lightSamples, lightSamples + n, secondarySampler_);
+	//temp::stratifier(lightSelectors, lightSelectors + n, secondarySampler_);
+	//for (size_t k = 0; k < n; ++k)
+	//{
+	//	TScalar pdf;
+	//	const LightContext* light = lights().sample(lightSelectors[k], pdf);
+	//	if (!light || pdf <= 0)
+	//	{
+	//		continue;
+	//	}
+	//}
+
+	return result;
+}
+
+
+const XYZ PhotonMapper::estimateIrradiance(const TPoint3D& point, const TVector3D& normal, TScalar& sqrEstimationRadius, size_t& count) const
 {
 	if (!irradianceMap_.isEmpty())
 	{
-		const Irradiance& nearest = *irradianceMap_.nearestNeighbour(point);
-		if (dot(normal, nearest.normal) > 0.9)
+		TIrradianceMap::Neighbour nearest = irradianceMap_.nearestNeighbour(point, estimationRadius_[mtGlobal]);
+		if (nearest.object() == irradianceMap_.end())
 		{
-			return nearest.irradiance;
+			sqrEstimationRadius = 0;
+			count = 0;
+			return XYZ();
+		}
+		if (dot(normal, nearest->normal) > 0.9)
+		{
+			sqrEstimationRadius = nearest->squaredEstimationRadius;
+			count = 1;
+			return nearest->irradiance;
 		}
 	}
 
@@ -959,8 +991,11 @@ const XYZ PhotonMapper::estimateIrradiance(
 	const TPhotonNeighbourhood::const_iterator last = photonMap_[mtGlobal].rangeSearch(
 		point, estimationRadius_[mtGlobal], estimationSize_[mtGlobal], 
 		photonNeighbourhood_.begin());
-	if (last == photonNeighbourhood_.begin())
+
+	count = static_cast<size_t>(last - photonNeighbourhood_.begin());
+	if (count == 0)
 	{
+		sqrEstimationRadius = 0;
 		return XYZ();
 	}
 
@@ -973,16 +1008,15 @@ const XYZ PhotonMapper::estimateIrradiance(
 		}
 	}
 
-	const TScalar sqrRad = photonNeighbourhood_.front().squaredDistance();
-	return sqrRad > 0 ? result / (TNumTraits::pi * sqrRad) : XYZ();
+	sqrEstimationRadius = photonNeighbourhood_.front().squaredDistance();
+	return sqrEstimationRadius > 0 ? result / (TNumTraits::pi * sqrEstimationRadius) : XYZ();
 }
 
 
 
 const XYZ PhotonMapper::estimateRadiance(
-		const Sample& sample, const IntersectionContext& context, 
-		const TPoint3D& point, const TVector3D& omegaOut,
-		size_t gatherStage) const
+		const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf, 
+		const TPoint3D& point, const TVector3D& omegaOut, size_t gatherStage) const
 {
 	const Shader* const shader = context.shader();
 	if (!shader || !shader->hasCaps(Shader::capsDiffuse))
@@ -990,32 +1024,24 @@ const XYZ PhotonMapper::estimateRadiance(
 		return XYZ();
 	}
 
-	if (context.t() < estimationRadius_[mtGlobal] && gatherStage + 1 < numGatherStages_)
-	{
-		static util::ThreadLocalVariable< num::RandomMT19937 > random2nd;
-		num::DistributionUniform<TScalar, num::RandomMT19937> uniform2nd(*random2nd);
-		static PerThreadBuffer<TPoint2D> samples2nd;
-		const size_t n = 8;
-		samples2nd.growTo(n);
-		for (size_t i = 0; i < n; ++i)
-		{
-			samples2nd[i] = TPoint2D(uniform2nd(), uniform2nd());
-		}
-		return gatherIndirect(sample, context, point, omegaOut, 
-			samples2nd.begin(), samples2nd.begin() + n, gatherStage + 1);
-	}
+	//*
+	/**/
 
 	if (!irradianceMap_.isEmpty())
 	{
-		const Irradiance& nearest = *irradianceMap_.nearestNeighbour(point);
-		const TScalar sqrDist = prim::squaredDistance(nearest.position, point);
-		if (sqrDist < num::sqr(estimationRadius_[mtGlobal]))
+		TIrradianceMap::Neighbour nearest = irradianceMap_.nearestNeighbour(point, estimationRadius_[mtGlobal]);
+		if (nearest.object() == irradianceMap_.end())
+		{
+			return XYZ();
+		}
+		if (num::sqr(context.t()) < nearest->squaredEstimationRadius && gatherStage == 0 && numSecondaryGatherRays_ > 0)
+		{
+			return gatherSecondary(sample, context, bsdf, point, omegaOut);
+		}
 		//if (dot(normal, nearest.normal) > 0.9)
 		{
-			BsdfIn in(context.worldToBsdf(nearest.normal), Shader::capsAll);
-			BsdfOut out;
-			shader->bsdf(sample, context, omegaOut, &in, &in + 1, &out);
-			return out.pdf > 0 && out.value ? out.value * nearest.irradiance : XYZ();
+			const BsdfOut out = bsdf->call(omegaOut, context.worldToBsdf(nearest->normal), Shader::capsAll);
+			return out ? out.value * nearest->irradiance : XYZ();
 		}
 	}
 
@@ -1030,13 +1056,16 @@ const XYZ PhotonMapper::estimateRadiance(
 		return XYZ();
 	}
 
+	if (num::sqr(context.t()) < photonNeighbourhood_.front().squaredDistance() && gatherStage == 0 && numSecondaryGatherRays_ > 0)
+	{
+		return gatherSecondary(sample, context, bsdf, point, omegaOut);
+	}
+
 	XYZ result;
 	for (TPhotonNeighbourhood::const_iterator i = photonNeighbourhood_.begin(); i != last; ++i)
 	{
 		const TVector3D omegaPhoton = context.worldToBsdf(i->object()->omegaIn);
-		BsdfIn in(omegaPhoton, Shader::capsAll & ~Shader::capsSpecular & ~Shader::capsGlossy);
-		BsdfOut out;
-		shader->bsdf(sample, context, omegaOut, &in, &in + 1, &out);
+		const BsdfOut out = bsdf->call(omegaOut, omegaPhoton, Shader::capsAll & ~Shader::capsSpecular & ~Shader::capsGlossy);
 		if (out.pdf > 0 && out.value)
 		{
 			result += out.value * i->object()->power;
@@ -1049,7 +1078,7 @@ const XYZ PhotonMapper::estimateRadiance(
 
 
 const XYZ PhotonMapper::estimateCaustics(
-		const Sample& sample, const IntersectionContext& context, 
+		const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf, 
 		const TPoint3D& point, const TVector3D& omegaIn) const
 {
 	const Shader* const shader = context.shader();
@@ -1068,20 +1097,6 @@ const XYZ PhotonMapper::estimateCaustics(
 	{
 		return XYZ();
 	}
-	
-	if (static_cast<size_t>(n) > bsdfIns_.size())
-	{
-		bsdfIns_.resize(n);
-		bsdfOuts_.resize(n);
-	}
-	for (int i = 0; i < n; ++i)
-	{
-		const TVector3D omegaPhoton = 
-			context.worldToBsdf(photonNeighbourhood_[i].object()->omegaIn);
-		bsdfIns_[i] = BsdfIn(omegaPhoton, Shader::capsAllDiffuse);
-	};
-
-	shader->bsdf(sample, context, omegaIn, &bsdfIns_[0], &bsdfIns_[0] + n, &bsdfOuts_[0]);
 
 	const TScalar sqrSize = photonNeighbourhood_[0].squaredDistance();
 	const TScalar alpha = 0.918f;
@@ -1092,11 +1107,13 @@ const XYZ PhotonMapper::estimateCaustics(
 	XYZ result;
 	for (int i = 0; i < n; ++i)
 	{
-		if (bsdfOuts_[i].pdf > 0)
+		const TVector3D omegaPhoton = context.worldToBsdf(photonNeighbourhood_[i].object()->omegaIn);
+		const BsdfOut out = bsdf->call(omegaIn, omegaPhoton, Shader::capsAllDiffuse);
+		if (out)
 		{
 			const TScalar sqrR = photonNeighbourhood_[i].squaredDistance();
 			const TScalar w = alpha * (1 - b2 * (1 - num::exp(b1 * sqrR)));
-			result += w * bsdfOuts_[i].value * photonNeighbourhood_[i].object()->power;
+			result += w * out.value * photonNeighbourhood_[i].object()->power;
 		}
 	}
 

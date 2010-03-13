@@ -101,6 +101,21 @@ const XYZ MediumStack::transparency(const BoundedRay& ray) const
 }
 
 
+
+const XYZ MediumStack::transparency(const BoundedRay& ray, TScalar farLimit) const
+{
+	return transparency(bound(ray, ray.nearLimit(), farLimit));
+}
+
+
+
+const XYZ MediumStack::transparency(const DifferentialRay& ray, TScalar farLimit) const
+{
+	return transparency(ray.centralRay(), farLimit);
+}
+
+
+
 /*
 void MediumStack::push(const Medium* medium)
 {

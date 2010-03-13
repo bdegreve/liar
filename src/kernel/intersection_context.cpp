@@ -36,32 +36,21 @@ namespace kernel
 
 // --- public --------------------------------------------------------------------------------------
 
-IntersectionContext::IntersectionContext(const RayTracer* tracer):
-	point_(),
-	dPoint_dU_(),
-	dPoint_dV_(),
-	dPoint_dI_(),
-	dPoint_dJ_(),
-	geometricNormal_(),
-	normal_(),
-	dNormal_dU_(),
-	dNormal_dV_(),
-	dNormal_dI_(),
-	dNormal_dJ_(),
-	uv_(),
-	dUv_dI_(),
-	dUv_dJ_(),
-	t_(),
-	shader_(0),
-	interior_(0),
-	tracer_(tracer),
-	shaderToWorld_(),
-	localToWorld_(),
-	bsdfToWorld_(),
-	solidEvent_(seNoEvent),
-	hasScreenSpaceDifferentials_(false),
-	hasDirtyBsdfToWorld_(true)
+IntersectionContext::IntersectionContext(const SceneObject& object, const Sample& sample, const BoundedRay& ray, const Intersection& intersection)
 {
+	init(object, sample, ray, intersection);
+}
+
+
+
+IntersectionContext::IntersectionContext(const SceneObject& object, const Sample& sample, const DifferentialRay& ray, const Intersection& intersection)
+{
+	init(object, sample, ray.centralRay(), intersection);
+
+	DifferentialRay localRay = transform(ray, worldToLocal());
+	setScreenSpaceDifferentialsI(ray.differentialI(), dPoint_dI_, dNormal_dI_, dUv_dI_);
+	setScreenSpaceDifferentialsI(ray.differentialJ(), dPoint_dJ_, dNormal_dJ_, dUv_dJ_);
+	hasScreenSpaceDifferentials_ = true;
 }
 
 
@@ -70,15 +59,6 @@ void IntersectionContext::setShader(const Shader* shader)
 {
 	shader_ = shader;
 	shaderToWorld_ = TTransformation3D();
-}
-
-
-
-void IntersectionContext::setScreenSpaceDifferentials(const DifferentialRay& ray)
-{
-	setScreenSpaceDifferentialsI(ray.differentialI(), dPoint_dI_, dNormal_dI_, dUv_dI_);
-	setScreenSpaceDifferentialsI(ray.differentialJ(), dPoint_dJ_, dNormal_dJ_, dUv_dJ_);
-	hasScreenSpaceDifferentials_ = true;
 }
 
 
@@ -143,6 +123,7 @@ const TVector3D IntersectionContext::flipTo(const TVector3D& worldOmega)
 {
 	const TVector3D worldNormal = bsdfToWorld(TVector3D(0, 0, 1));
 	if (dot(worldNormal, worldOmega) >= 0)
+	//if (worldToBsdf(worldOmega).z >= 0)
 	{
 		return worldNormal;
 	}
@@ -164,29 +145,25 @@ const TTransformation3D& IntersectionContext::bsdfToWorld() const
 	{
 		return bsdfToWorld_;
 	}
-	const bool hasU = !dPoint_dU_.isZero();
-	const bool hasV = !dPoint_dV_.isZero();
 	const TVector3D n = prim::normalTransform(normal_, localToWorld_).normal();
 	const TPoint3D o = prim::transform(point_, localToWorld_);
-	TVector3D u, v;
-	if (hasU && hasV)
+	TVector3D u = n.reject(dPoint_dU_);
+	TVector3D v;
+	if (!u.isZero())
 	{
-		u = prim::transform(dPoint_dU_, localToWorld_);
-		v = prim::transform(dPoint_dV_, localToWorld_);
-	}
-	else if (!hasU && !hasV)
-	{
-		prim::impl::Plane3DImplDetail::generateDirections(n, u, v);
-	}
-	else if (hasU)
-	{
-		u = prim::transform(dPoint_dU_, localToWorld_);
 		v = cross(n, u);
 	}
-	else // if (hasV)
+	else
 	{
-		v = prim::transform(dPoint_dV_, localToWorld_);
-		u = cross(v, n);
+		v = n.reject(dPoint_dV_);
+		if (!v.isZero())
+		{
+			u = cross(v, n);
+		}
+		else
+		{
+			prim::impl::Plane3DImplDetail::generateDirections(n, u, v);
+		}
 	}
 	bsdfToWorld_ = TTransformation3D(o, u.normal(), v.normal(), n);
 	hasDirtyBsdfToWorld_ = false;
@@ -198,6 +175,21 @@ const TTransformation3D& IntersectionContext::bsdfToWorld() const
 // --- protected -----------------------------------------------------------------------------------
 
 // --- private -------------------------------------------------------------------------------------
+
+void IntersectionContext::init(const SceneObject& object, const Sample& sample, const BoundedRay& ray, const Intersection& intersection)
+{
+	t_ = 0;
+	shader_ = 0;
+	interior_ = 0;
+	solidEvent_ = seNoEvent;
+	hasScreenSpaceDifferentials_ = false;
+	hasDirtyBsdfToWorld_ = true;
+
+	object.localContext(sample, ray, intersection, *this);
+	flipTo(-ray.direction());
+}
+
+
 
 void IntersectionContext::setScreenSpaceDifferentialsI(
 		const TRay3D& dRay_dI, TVector3D& dPoint_dI, TVector3D& dNormal_dI, TVector2D& dUv_dI)

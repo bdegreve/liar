@@ -30,7 +30,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SHADER_H
 
 #include "kernel_common.h"
-#include "xyz.h"
+#include "bsdf.h"
 #include <lass/util/bit_manip.h>
 
 namespace liar
@@ -50,36 +50,10 @@ class LightContext;
 typedef python::PyObjectPtr<Sampler>::Type TSamplerPtr;
 typedef python::PyObjectPtr<SceneObject>::Type TSceneObjectPtr;
 
-struct BsdfIn
+inline bool testCaps(unsigned capsUnderTest, unsigned wantedCaps)
 {
-	BsdfIn(): omegaOut(), allowedCaps() {}
-	BsdfIn(const TVector3D& omegaOut, unsigned allowedCaps): 
-		omegaOut(omegaOut), allowedCaps(allowedCaps) {}
-	TVector3D omegaOut;
-	unsigned allowedCaps;
-};
-
-struct BsdfOut
-{
-	XYZ value;
-	TScalar pdf;
-};
-
-struct SampleBsdfIn
-{
-	SampleBsdfIn(): sample(), allowedCaps() {}
-	SampleBsdfIn(const TPoint2D& sample, unsigned allowedCaps): sample(sample), allowedCaps(allowedCaps) {}
-	TPoint2D sample;
-	unsigned allowedCaps;
-};
-
-struct SampleBsdfOut
-{
-	TVector3D omegaOut;
-	XYZ value;
-	TScalar pdf;
-	unsigned usedCaps;
-};
+	return (capsUnderTest & wantedCaps) == wantedCaps;
+}
 
 class LIAR_KERNEL_DLL Shader: public python::PyObjectPlus
 {
@@ -122,20 +96,9 @@ public:
 		return doEmission(sample, context, omegaOut);
 	}
 
-	void bsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
+	TBsdfPtr bsdf(const Sample& sample, const IntersectionContext& context) const
 	{
-		LASS_ASSERT(omegaIn.z >= 0);
-		zeroBsdf(result, result + (last - first));
-		doBsdf(sample, context, omegaIn, first, last, result);
-	}
-
-	void sampleBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
-	{
-		LASS_ASSERT(omegaIn.z >= 0);
-		zeroSampleBsdf(result, result + (last - first));
-		doSampleBsdf(sample, context, omegaIn, first, last, result);
+		return doBsdf(sample, context);
 	}
 
 	void requestSamples(const TSamplerPtr& sampler);
@@ -163,10 +126,7 @@ private:
 	virtual void doShadeContext(const Sample& sample, IntersectionContext& context) const;
 	virtual const XYZ doEmission(const Sample& sample, const IntersectionContext& context,
 		const TVector3D& omegaOut) const;
-	virtual void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const = 0;
-	virtual void doSampleBsdf(const Sample& sample, const IntersectionContext& context,	const TVector3D& omegaIn,
-		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const = 0;
+	virtual TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
 	
 	virtual void doRequestSamples(const TSamplerPtr& sampler);
 	virtual size_t doNumReflectionSamples() const;
@@ -181,6 +141,28 @@ private:
 	unsigned caps_;
 	int idReflectionSamples_;
 	int idTransmissionSamples_;
+
+	// deprecated stuff ...
+	friend class Bsdf;
+	virtual void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
+		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const { LASS_ENFORCE(false); }
+	virtual void doSampleBsdf(const Sample& sample, const IntersectionContext& context,	const TVector3D& omegaIn,
+		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const { LASS_ENFORCE(false); }
+	void bsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
+		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
+	{
+		LASS_ASSERT(omegaIn.z >= 0);
+		zeroBsdf(result, result + (last - first));
+		doBsdf(sample, context, omegaIn, first, last, result);
+	}
+	void sampleBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
+		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
+	{
+		LASS_ASSERT(omegaIn.z >= 0);
+		zeroSampleBsdf(result, result + (last - first));
+		doSampleBsdf(sample, context, omegaIn, first, last, result);
+	}
+
 };
 
 typedef python::PyObjectPtr<Shader>::Type TShaderPtr;

@@ -223,8 +223,8 @@ struct WriteHandle: Handle
 		cinfo.err = jpeg_std_error(&jerr);
 		jpeg_create_compress(&cinfo);
 		cinfo.dest = &dest;
-		cinfo.image_width = resolution.x;
-		cinfo.image_height = resolution.y;
+		cinfo.image_width = static_cast<JDIMENSION>(resolution.x);
+		cinfo.image_height = static_cast<JDIMENSION>(resolution.y);
 		cinfo.input_components = 3;
 		cinfo.in_color_space = JCS_RGB;
 		cinfo.input_gamma = this->rgbSpace->gamma();

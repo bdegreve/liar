@@ -85,6 +85,8 @@ private:
 
 	LASS_UTIL_VISITOR_DO_ACCEPT;
 
+	const SceneLight* doAsLight() const;
+
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 	

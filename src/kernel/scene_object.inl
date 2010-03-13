@@ -154,27 +154,6 @@ inline void SceneObject::localContext(const Sample& sample, const BoundedRay& ra
 
 
 
-/** get geometrical information on intersection with DifferentialRay.
- *
- *  @param sample [in]
- *		sample information
- *	@param ray [in]
- *		ray to intersect with
- *  @param intersection [in]
- *		the result of a successful intersection is used as input.
- *	@param IntersectionContext [out]
- *		geometrical information on intersection
- *
- *  Also sets screen differentials.
- */
-inline void SceneObject::localContext(const Sample& sample, const DifferentialRay& ray, const Intersection& intersection, IntersectionContext& result) const
-{
-	localContext(sample, ray.centralRay(), intersection, result);
-	result.setScreenSpaceDifferentials(transform(ray, result.worldToLocal()));
-}
-
-
-
 /** check if object contains a point.
  *	
  *	@param sample [in]

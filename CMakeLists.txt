@@ -42,6 +42,12 @@ if (Lass_PYTHON_EXECUTABLE AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	set (CMAKE_INSTALL_PREFIX "${_python_site_packages}/liar" CACHE PATH "liar install prefix" FORCE)
 endif ()
 
+if (MSVC_IDE)
+	option(BUILD_USING_MULTIPLE_PROCESSES OFF)
+else()
+	set(BUILD_USING_MULTIPLE_PROCESSES OFF)
+endif ()
+
 macro(list_remove_regex listvar regex)
 	set(_to_be_removed)
 	foreach(_path ${${listvar}})
@@ -89,9 +95,22 @@ macro(add_liar_module name)
 endmacro()
 
 if(MSVC)
-	add_definitions(/EHsc)
+	add_definitions(
+		/EHsc
+		)
+	if (BUILD_USING_MULTIPLE_PROCESSES)
+		add_definitions(
+			/MP
+			)
+	endif()
 else()
-	add_definitions(-fno-strict-aliasing -Wall -Wextra -Wformat=2 -Winit-self)
+	add_definitions(
+		-fno-strict-aliasing 
+		-Wall 
+		-Wextra 
+		-Wformat=2 
+		-Winit-self
+		)
 endif()
 
 add_subdirectory(src)

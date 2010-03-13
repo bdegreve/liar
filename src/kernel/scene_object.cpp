@@ -105,6 +105,12 @@ void SceneObject::setOverridingInterior(bool enabled)
 }
 
 
+const SceneLight* SceneObject::doAsLight() const
+{
+	return 0;
+}
+
+
 
 const TShaderPtr& SceneObject::defaultShader()
 {
