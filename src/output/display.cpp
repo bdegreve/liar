@@ -46,6 +46,8 @@ PY_CLASS_MEMBER_RW(Display, middleGrey, setMiddleGrey);
 PY_CLASS_METHOD(Display, testGammut)
 PY_CLASS_STATIC_CONST(Display, "TM_LINEAR", "linear");
 PY_CLASS_STATIC_CONST(Display, "TM_COMPRESS_Y", "compress_y");
+PY_CLASS_STATIC_CONST(Display, "TM_COMPRESS_XYZ", "compress_xyz");
+PY_CLASS_STATIC_CONST(Display, "TM_REINHARD2002_Y", "reinhard2002_y");
 PY_CLASS_STATIC_CONST(Display, "TM_EXPONENTIAL_Y", "exponential_y");
 PY_CLASS_STATIC_CONST(Display, "TM_EXPONENTIAL_XYZ", "exponential_xyz");
 
@@ -58,8 +60,9 @@ Display::Display(const std::string& title, const TResolution2D& resolution):
 	resolution_(resolution),
 	rgbSpace_(RgbSpace::defaultSpace()),
 	totalLogSceneLuminance_(0),
+	maxSceneLuminance_(0),
 	sceneLuminanceCoverage_(0),
-	middleGrey_(.13f),
+	middleGrey_(.184f),
 	toneMapping_(tmExponentialY),
 	autoExposure_(true),
 	refreshTitle_(false),
@@ -203,10 +206,11 @@ void Display::setAutoExposure(bool enable)
 				for (size_t k = kBegin; k < kEnd; ++k)
 				{
 					const TScalar w = totalWeight_[k];
-					if (w > 0)
+					const XYZ xyz = renderBuffer_[k];
+					if (w > 0 && xyz.y > 0)
 					{
-						XYZ xyz = renderBuffer_[k] / w;
-						totalLogSceneLuminance_ += num::log(std::max(xyz.y, minY));
+						totalLogSceneLuminance_ += num::log(std::max(xyz.y / w, minY));
+						maxSceneLuminance_ = std::max(xyz.y / w, maxSceneLuminance_);
 						++sceneLuminanceCoverage_;
 					}
 				}			
@@ -356,9 +360,10 @@ void Display::doWriteRender(const OutputSample* first, const OutputSample* last)
 				w += first->weight();
 				renderDirtyBox_ += TDirtyBox::TPoint(i, j);
 
-				if (autoExposure_ && w > 0)
+				if (autoExposure_ && w > 0 && xyz.y > 0)
 				{
-					if (oldW > 0)
+					maxSceneLuminance_ = std::max(xyz.y / w, maxSceneLuminance_);
+					if (oldW > 0 && oldY > 0)
 					{
 						totalLogSceneLuminance_ -= num::log(std::max(oldY / oldW, minY));
 						--sceneLuminanceCoverage_;
@@ -544,6 +549,8 @@ void Display::copyToDisplayBuffer()
 					g = a / y;
 					break;
 				case tmCompressY: // a = g * y / (1 + g * y)  ->  g * y = a / (1 - a)
+				case tmCompressXYZ: 
+				case tmReinhard2002Y:
 					g = a / (y * (1 - a));
 					break;
 				case tmExponentialY: // a = 1 - exp(-g * y)  ->  g * y = -ln(1 - a)
@@ -598,6 +605,50 @@ void Display::copyToDisplayBuffer()
 					const TScalar w = totalWeight_[k];
 					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
 					xyz /= 1 + xyz.y;
+					const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
+					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+					p.a = 1;
+					p.b = rgb.b;
+					p.g = rgb.g;
+					p.r = rgb.r;
+				}			
+			}
+			break;
+
+		case tmCompressXYZ:
+			for (size_t j = min.y; j <= max.y; ++j)
+			{
+				const size_t kBegin = j * resolution_.x + min.x;
+				const size_t kEnd = kBegin + nx;
+				for (size_t k = kBegin; k < kEnd; ++k)
+				{
+					const TScalar w = totalWeight_[k];
+					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
+					xyz.x /= 1 + xyz.x;
+					xyz.y /= 1 + xyz.y;
+					xyz.z /= 1 + xyz.z;
+					const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
+					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+					p.a = 1;
+					p.b = rgb.b;
+					p.g = rgb.g;
+					p.r = rgb.r;
+				}			
+			}
+			break;
+
+		case tmReinhard2002Y:
+			for (size_t j = min.y; j <= max.y; ++j)
+			{
+				const size_t kBegin = j * resolution_.x + min.x;
+				const size_t kEnd = kBegin + nx;
+				for (size_t k = kBegin; k < kEnd; ++k)
+				{
+					const TScalar w = totalWeight_[k];
+					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
+					const TScalar L = xyz.y;
+					const TScalar Lw = gain_ * maxSceneLuminance_;
+					xyz *= (1 + L / (Lw * Lw)) / (1 + L);
 					const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
 					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
 					p.a = 1;
@@ -667,6 +718,8 @@ Display::TToneMappingDictionary Display::makeToneMappingDictionary()
 	result.enableSuggestions();
 	result.add("linear", tmLinear);
 	result.add("compress_y", tmCompressY);
+	result.add("compress_xyz", tmCompressXYZ);
+	result.add("reinhard2002_y", tmReinhard2002Y);
 	result.add("exponential_y", tmExponentialY);
 	result.add("exponential_xyz", tmExponentialXYZ);
 	return result;

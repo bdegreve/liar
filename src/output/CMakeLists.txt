@@ -3,14 +3,29 @@ set (_libraries)
 find_path(
 	pixeltoaster_INCLUDE_DIR 
 	PixelToaster.h
+	DOC "path to PixelToaster.h"
 	)
 if (pixeltoaster_INCLUDE_DIR)
 	set(_ok TRUE)
-	if (UNIX)
+	if (WIN32)
+		find_path(D3DX9_INCLUDE_DIR
+			d3dx9.h
+			HINTS ENV DXSDK_DIR ENV Include
+			PATH_SUFFIXES Include
+			DOC "path to d3dx9.h"
+			)
+		if (D3DX9_INCLUDE_DIR)
+			include_directories(
+				BEFORE ${D3DX9_INCLUDE_DIR}
+				)
+		else()
+			set(_ok FALSE)
+		endif()
+	else()
 		find_package(X11)
 		if (X11_FOUND)
 			include_directories(
-				${X11_INCLUDE_DIR}
+				BEFORE ${X11_INCLUDE_DIR}
 				)
 			list(APPEND output_LIBS ${X11_LIBRARIES})
 		else()

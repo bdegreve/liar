@@ -91,6 +91,8 @@ private:
 	{
 		tmLinear = 0,
 		tmCompressY,
+		tmCompressXYZ,
+		tmReinhard2002Y,
 		tmExponentialY,
 		tmExponentialXYZ,
 		numToneMapping
@@ -126,6 +128,7 @@ private:
 	TResolution2D resolution_;
 	TRgbSpacePtr rgbSpace_;
 	TScalar totalLogSceneLuminance_;
+	TScalar maxSceneLuminance_;
 	int sceneLuminanceCoverage_;
 	TScalar gain_;
 	TScalar middleGrey_;
