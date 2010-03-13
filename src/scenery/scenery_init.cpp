@@ -44,6 +44,7 @@
 #include "translation.h"
 #include "triangle.h"
 #include "triangle_mesh.h"
+#include "triangle_mesh_composite.h"
 
 #include <lass/io/proxy_man.h>
 
@@ -73,6 +74,7 @@ PY_MODULE_CLASS(scenery, Transformation)
 PY_MODULE_CLASS(scenery, Translation)
 PY_MODULE_CLASS(scenery, Triangle)
 PY_MODULE_CLASS(scenery, TriangleMesh)
+PY_MODULE_CLASS(scenery, TriangleMeshComposite)
 
 void sceneryPostInject(PyObject*)
 {
