@@ -34,18 +34,21 @@ PY_CLASS_CONSTRUCTOR_0(AabbTree)
 PY_CLASS_CONSTRUCTOR_1(AabbTree, const AabbTree::TChildren&)
 PY_CLASS_METHOD_QUALIFIED_1(AabbTree, add, void, const TSceneObjectPtr&)
 PY_CLASS_METHOD_QUALIFIED_1(AabbTree, add, void, const AabbTree::TChildren&)
+PY_CLASS_METHOD(AabbTree, children)
 
 PY_DECLARE_CLASS_DOC(AabpTree, "AABP tree of child objects")
 PY_CLASS_CONSTRUCTOR_0(AabpTree)
 PY_CLASS_CONSTRUCTOR_1(AabpTree, const AabpTree::TChildren&)
 PY_CLASS_METHOD_QUALIFIED_1(AabpTree, add, void, const TSceneObjectPtr&)
 PY_CLASS_METHOD_QUALIFIED_1(AabpTree, add, void, const AabpTree::TChildren&)
+PY_CLASS_METHOD(AabpTree, children)
 
 PY_DECLARE_CLASS_DOC(OctTree, "Octtree of child objects")
 PY_CLASS_CONSTRUCTOR_0(OctTree)
 PY_CLASS_CONSTRUCTOR_1(OctTree, const OctTree::TChildren&)
 PY_CLASS_METHOD_QUALIFIED_1(OctTree, add, void, const TSceneObjectPtr&)
 PY_CLASS_METHOD_QUALIFIED_1(OctTree, add, void, const OctTree::TChildren&)
+PY_CLASS_METHOD(OctTree, children)
 
 }
 

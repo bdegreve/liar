@@ -34,6 +34,7 @@ PY_CLASS_CONSTRUCTOR_0(List)
 PY_CLASS_CONSTRUCTOR_1(List, const List::TChildren&)
 PY_CLASS_METHOD_QUALIFIED_1(List, add, void, const TSceneObjectPtr&)
 PY_CLASS_METHOD_QUALIFIED_1(List, add, void, const List::TChildren&)
+PY_CLASS_METHOD(List, children)
 
 
 // --- public --------------------------------------------------------------------------------------
@@ -61,6 +62,13 @@ void List::add(const TSceneObjectPtr& child)
 void List::add(const TChildren& children)
 {
 	children_.insert(children_.end(), children.begin(), children.end());
+}
+
+
+
+const List::TChildren& List::children() const
+{
+	return children_;
 }
 
 

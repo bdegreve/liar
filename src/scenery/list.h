@@ -52,6 +52,7 @@ public:
 	}
 	void add(const TSceneObjectPtr& child);
 	void add(const TChildren& children); // for python
+	const TChildren& children() const;
 
 private:
 

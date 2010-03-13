@@ -70,6 +70,10 @@ public:
 			this->add(*child);
 		}
 	}
+	const TChildren& children() const
+	{
+		return allChildren_;
+	}
 
 protected:
 
