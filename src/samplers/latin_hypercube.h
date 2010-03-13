@@ -54,6 +54,9 @@ private:
 
 	typedef std::vector<TSample1D> TStrata;
 
+	typedef std::vector<TSample2D> TSubSequence2D;
+	typedef std::vector<TSubSequence2D> TSubSequence2DList;
+
 	typedef num::RandomMT19937 TNumberGenerator;
 	typedef num::DistributionUniform<TScalar, TNumberGenerator, num::rtRightOpen> TJitterGenerator;
 
@@ -63,14 +66,14 @@ private:
 	virtual size_t doSamplesPerPixel() const;
 	virtual void doSetResolution(const TResolution2D& resolution);
 	virtual void doSetSamplesPerPixel(size_t samplesPerPixel);
-	virtual void doSeed(size_t randomSeed);
+	virtual void doSeed(TSeed randomSeed);
 
 	virtual void doSampleScreen(const TResolution2D& pixel, size_t subPixel, TSample2D& screenCoordinate);
 	virtual void doSampleLens(const TResolution2D& pixel, size_t subPixel, TSample2D& lensCoordinate);
 	virtual void doSampleTime(const TResolution2D& pixel, size_t subPixel, const TimePeriod& period, TTime& time);
 	virtual void doSampleFrequency(const TResolution2D& pixel, size_t subPixel, TScalar& frequency);
-	virtual void doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, TSample1D* first, TSample1D* last);
-	virtual void doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, TSample2D* first, TSample2D* last);
+	virtual void doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, TSubSequenceId id, TSample1D* first, TSample1D* last);
+	virtual void doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, TSubSequenceId id, TSample2D* first, TSample2D* last);
 
 	virtual size_t doRoundSize1D(size_t requestedSize) const;
 	virtual size_t doRoundSize2D(size_t requestedSize) const;
@@ -94,6 +97,7 @@ private:
 	TStrata lensStrataY_;
 	TStrata timeStrata_;
 	TStrata frequencyStrata_;
+	TSubSequence2DList subSequences2d_;
 	size_t samplesPerPixel_;
 	bool isJittered_;
 };

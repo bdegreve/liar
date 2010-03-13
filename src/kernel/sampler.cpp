@@ -60,9 +60,15 @@ int Sampler::requestSubSequence1D(size_t requestedSize)
 	totalSubSequenceSize1D_ += size;
 	subSequenceSize1D_.push_back(size);
 	subSequenceOffset1D_.push_back(subSequenceOffset1D_.back() + size);
+	const int id = static_cast<int>(subSequenceSize1D_.size()) - 1;
+	LASS_ASSERT(id >= 0);
 
-	LASS_ASSERT(static_cast<int>(subSequenceSize1D_.size()) - 1 >= 0);
-	return static_cast<int>(subSequenceSize1D_.size()) - 1;
+	if (size != requestedSize)
+	{
+		LASS_COUT << "Sampler warning: 1D subsequence " << id << ": using size " << size << " instead of " << requestedSize << std::endl;
+	}
+
+	return id;
 }
 
 
@@ -77,9 +83,15 @@ int Sampler::requestSubSequence2D(size_t requestedSize)
 	totalSubSequenceSize2D_ += size;
 	subSequenceSize2D_.push_back(size);
 	subSequenceOffset2D_.push_back(subSequenceOffset2D_.back() + size);
+	const int id = static_cast<int>(subSequenceSize2D_.size()) - 1;
+	LASS_ASSERT(id >= 0);
 
-	LASS_ASSERT(static_cast<int>(subSequenceSize2D_.size()) - 1 >= 0);
-	return static_cast<int>(subSequenceSize2D_.size()) - 1;
+	if (size != requestedSize)
+	{
+		LASS_COUT << "Sampler warning: 2D subsequence " << id << ": using size " << size << " instead of " << requestedSize << std::endl;
+	}
+
+	return id;
 }
 
 
@@ -99,8 +111,7 @@ void Sampler::clearSubSequenceRequests()
 
 
 
-void Sampler::sample(const TResolution2D& pixel, size_t subPixel, const TimePeriod& period, 
-					 Sample& sample)
+void Sampler::sample(const TResolution2D& pixel, size_t subPixel, const TimePeriod& period, Sample& sample)
 {
 	sample.sampler_ = this;
 
@@ -115,8 +126,8 @@ void Sampler::sample(const TResolution2D& pixel, size_t subPixel, const TimePeri
 	{
 		const size_t offset = subSequenceOffset1D_[k];
 		const size_t size = subSequenceSize1D_[k];
-		doSampleSubSequence1D(pixel, subPixel, &sample.subSequences1D_[offset],
-			&sample.subSequences1D_[offset] + size);
+		doSampleSubSequence1D(pixel, subPixel, static_cast<TSubSequenceId>(k), 
+			&sample.subSequences1D_[offset], &sample.subSequences1D_[offset] + size);
 	}
 
 	sample.subSequences2D_.resize(totalSubSequenceSize2D_);
@@ -125,8 +136,8 @@ void Sampler::sample(const TResolution2D& pixel, size_t subPixel, const TimePeri
 	{
 		const size_t offset = subSequenceOffset2D_[k];
 		const size_t size = subSequenceSize2D_[k];
-		doSampleSubSequence2D(pixel, subPixel, &sample.subSequences2D_[offset],
-			&sample.subSequences2D_[offset] + size);
+		doSampleSubSequence2D(pixel, subPixel, static_cast<TSubSequenceId>(k), 
+			&sample.subSequences2D_[offset], &sample.subSequences2D_[offset] + size);
 	}
 }
 

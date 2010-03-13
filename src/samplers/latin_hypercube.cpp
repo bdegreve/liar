@@ -25,6 +25,7 @@
 #include "latin_hypercube.h"
 #include "../kernel/xyz.h"
 #include <lass/stde/range_algorithm.h>
+#include <lass/stde/access_iterator.h>
 
 namespace liar
 {
@@ -128,6 +129,7 @@ void LatinHypercube::doSetSamplesPerPixel(size_t samplesPerPixel)
 	screenStrataY_.resize(samplesPerPixel_);
 	lensStrataX_.resize(samplesPerPixel_);
 	lensStrataY_.resize(samplesPerPixel_);
+	subSequences2d_.clear();
 
 	for (size_t i = 0; i < samplesPerPixel_; ++i)
 	{
@@ -143,7 +145,7 @@ void LatinHypercube::doSetSamplesPerPixel(size_t samplesPerPixel)
 
 
 
-void LatinHypercube::doSeed(size_t randomSeed)
+void LatinHypercube::doSeed(TSeed randomSeed)
 {
 	numberGenerator_.seed(randomSeed);
 }
@@ -189,7 +191,7 @@ void LatinHypercube::doSampleFrequency(const TResolution2D& LASS_UNUSED(pixel), 
 
 
 
-void LatinHypercube::doSampleSubSequence1D(const TResolution2D& LASS_UNUSED(pixel), size_t, TSample1D* first, TSample1D* last)
+void LatinHypercube::doSampleSubSequence1D(const TResolution2D& LASS_UNUSED(pixel), size_t, TSubSequenceId, TSample1D* first, TSample1D* last)
 {
 	const ptrdiff_t size = last - first;
 	const TScalar scale = 1.f / size;
@@ -200,20 +202,52 @@ void LatinHypercube::doSampleSubSequence1D(const TResolution2D& LASS_UNUSED(pixe
 }
 
 
-
-void LatinHypercube::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixel), size_t, TSample2D* first, TSample2D* last)
+void LatinHypercube::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixel), size_t subPixel, TSubSequenceId id, TSample2D* first, TSample2D* last)
 {
-	const size_t size = last - first;
-	const TScalar scale = 1.f / size;
-	for (size_t k = 0; k < size; ++k)
+	const size_t nSubPixels = this->samplesPerPixel();
+	const size_t subSeqSize = this->subSequenceSize2D(id);
+	const size_t size = nSubPixels * subSeqSize;
+
+	LASS_ASSERT(id >= 0);
+	if (static_cast<size_t>(id) >= subSequences2d_.size())
 	{
-		first[k].y = (k + jitterGenerator_()) * scale;
-	}
-	std::random_shuffle(first, last, numberGenerator_);
-	for (size_t k = 0; k < size; ++k)
+		subSequences2d_.resize(id + 1);
+		subSequences2d_[id] = TSubSequence2D(nSubPixels * subSeqSize);
+	}		
+	TSubSequence2D::iterator subSequence = subSequences2d_[id].begin();	
+	
+	if (subPixel == 0)
 	{
-		first[k].x = (k + jitterGenerator_()) * scale;
+		// first, generate samples along the diagonal
+		//
+		const TScalar scale = 1.f / size;
+		for (size_t k = 0; k < size; ++k)
+		{
+			subSequence[k].x = (k + jitterGenerator_()) * scale;
+			subSequence[k].y = (k + jitterGenerator_()) * scale;
+		}
+
+		// consider the subsequences to be interleaved: sample1,subpixel1; sample1,subpixel2; ...; sample2,subpixel1; sample2,subpixel2; ...
+		// shuffle stuff per sample over different subpixels
+		//
+		for (size_t k = 0; k < size; k += nSubPixels)
+		{
+			std::random_shuffle(stde::member_iterator(subSequence + k, &TSample2D::x), stde::member_iterator(subSequence + k + nSubPixels, &TSample2D::x), numberGenerator_);
+			std::random_shuffle(stde::member_iterator(subSequence + k, &TSample2D::y), stde::member_iterator(subSequence + k + nSubPixels, &TSample2D::y), numberGenerator_);
+		}
 	}
+
+	// pick a subpixel worth of samples
+	//
+	LASS_ASSERT(last - first == subSeqSize);
+	for (size_t k = 0; k < subSeqSize; ++k)
+	{
+		first[k] = subSequence[k * nSubPixels + subPixel];
+	}
+
+	// and shuffle the ys again
+	//
+	std::random_shuffle(stde::member_iterator(first, &TSample2D::y), stde::member_iterator(last, &TSample2D::y), numberGenerator_);
 }
 
 

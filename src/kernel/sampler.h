@@ -53,14 +53,17 @@ class LIAR_KERNEL_DLL Sampler: public python::PyObjectPlus
 	PY_HEADER(python::PyObjectPlus)
 public:
 
+	typedef int TSubSequenceId;
+	typedef num::Tuint32 TSeed;
+
 	const TResolution2D& resolution() const { return doResolution(); }
 	size_t samplesPerPixel() const { return doSamplesPerPixel(); }
 	void setResolution(const TResolution2D& resolution) { doSetResolution(resolution); }
 	void setSamplesPerPixel(size_t samplesPerPixel) { doSetSamplesPerPixel(samplesPerPixel); }
-	void seed(size_t randomSeed) { doSeed(randomSeed); }
+	void seed(TSeed randomSeed) { doSeed(randomSeed); }
 
-	int requestSubSequence1D(size_t requestedSize);
-	int requestSubSequence2D(size_t requestedSize);
+	TSubSequenceId requestSubSequence1D(size_t requestedSize);
+	TSubSequenceId requestSubSequence2D(size_t requestedSize);
 	void clearSubSequenceRequests();
 
 	void sample(const TResolution2D& pixel, size_t subPixel, const TimePeriod& period, Sample& sample);
@@ -80,6 +83,8 @@ protected:
 	typedef TPoint2D TSample2D;
 
 	Sampler();
+	size_t subSequenceSize1D(TSubSequenceId id) const { return subSequenceSize1D_[id]; }
+	size_t subSequenceSize2D(TSubSequenceId id) const { return subSequenceSize2D_[id]; }
 
 private:
 
@@ -91,14 +96,14 @@ private:
 	virtual size_t doSamplesPerPixel() const = 0;
 	virtual void doSetResolution(const TResolution2D& resolution) = 0;
 	virtual void doSetSamplesPerPixel(size_t samplesPerPixel) = 0;
-	virtual void doSeed(size_t randomSeed) = 0;
-
+	virtual void doSeed(TSeed randomSeed) = 0;
+	
 	virtual void doSampleScreen(const TResolution2D& pixel, size_t subPixel, TSample2D& screenCoordinate) = 0;
 	virtual void doSampleLens(const TResolution2D& pixel, size_t subPixel, TSample2D& lensCoordinate) = 0;
 	virtual void doSampleTime(const TResolution2D& pixel, size_t subPixel, const TimePeriod& period, TTime& time) = 0;
 	virtual void doSampleFrequency(const TResolution2D& pixel, size_t subPixel, TScalar& frequency) = 0;
-	virtual void doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, TSample1D* first, TSample1D* last) = 0;
-	virtual void doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, TSample2D* first, TSample2D* last) = 0;
+	virtual void doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, TSubSequenceId id, TSample1D* first, TSample1D* last) = 0;
+	virtual void doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, TSubSequenceId id, TSample2D* first, TSample2D* last) = 0;
 
 	virtual size_t doRoundSize1D(size_t requestedSize) const;
 	virtual size_t doRoundSize2D(size_t requestedSize) const;
@@ -108,10 +113,8 @@ private:
 	virtual const TPyObjectPtr doGetState() const = 0;
 	virtual void doSetState(const TPyObjectPtr& state) = 0;
 
-	size_t subSequenceSize1D(int id) const { return subSequenceSize1D_[id]; }
-	size_t subSequenceSize2D(int id) const { return subSequenceSize2D_[id]; }
-	size_t subSequenceOffset1D(int id) const { return subSequenceOffset1D_[id]; }
-	size_t subSequenceOffset2D(int id) const { return subSequenceOffset2D_[id]; }
+	size_t subSequenceOffset1D(TSubSequenceId id) const { return subSequenceOffset1D_[id]; }
+	size_t subSequenceOffset2D(TSubSequenceId id) const { return subSequenceOffset2D_[id]; }
 
 	static TSamplerPtr defaultSampler_;
 

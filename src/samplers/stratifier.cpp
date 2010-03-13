@@ -120,8 +120,12 @@ void Stratifier::doSetResolution(const TResolution2D& resolution)
 
 void Stratifier::doSetSamplesPerPixel(size_t samplesPerPixel)
 {
-	const size_t strataPerAxis = static_cast<size_t>(num::ceil(
-		num::sqrt(static_cast<TScalar>(samplesPerPixel))));
+	const size_t strataPerAxis = static_cast<size_t>(num::round(num::sqrt(static_cast<TScalar>(samplesPerPixel))));
+	if (strataPerAxis * strataPerAxis != samplesPerPixel)
+	{
+		LASS_COUT << "Sampler warning: samples per pixel: using size " << strataPerAxis * strataPerAxis
+			<< " instead of " << samplesPerPixel << std::endl;
+	}
 
 	strataPerPixel_ = strataPerAxis * strataPerAxis;
 	stratum1DSize_ = TNumTraits::one / strataPerPixel_;
@@ -130,6 +134,7 @@ void Stratifier::doSetSamplesPerPixel(size_t samplesPerPixel)
 	frequencyStrata_.resize(strataPerPixel_);
 	screenStrata_.resize(strataPerPixel_);
 	lensStrata_.resize(strataPerPixel_);
+	subSequences2d_.clear();
 
 	for (size_t i = 0; i < strataPerPixel_; ++i)
 	{
@@ -149,7 +154,7 @@ void Stratifier::doSetSamplesPerPixel(size_t samplesPerPixel)
 
 
 
-void Stratifier::doSeed(size_t randomSeed)
+void Stratifier::doSeed(TSeed randomSeed)
 {
 	numberGenerator_.seed(randomSeed);
 }
@@ -195,7 +200,7 @@ void Stratifier::doSampleFrequency(const TResolution2D& LASS_UNUSED(pixel), size
 
 
 
-void Stratifier::doSampleSubSequence1D(const TResolution2D& LASS_UNUSED(pixel), size_t, TSample1D* first, TSample1D* last)
+void Stratifier::doSampleSubSequence1D(const TResolution2D& LASS_UNUSED(pixel), size_t, TSubSequenceId, TSample1D* first, TSample1D* last)
 {
 	const ptrdiff_t size = last - first;
 	const TScalar scale = 1.f / size;
@@ -208,23 +213,57 @@ void Stratifier::doSampleSubSequence1D(const TResolution2D& LASS_UNUSED(pixel), 
 
 
 
-void Stratifier::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixel), size_t, TSample2D* first, TSample2D* last)
+void Stratifier::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixel), size_t subPixel, TSubSequenceId id, TSample2D* first, TSample2D* last)
 {
-	const size_t size = last - first;
-	const size_t sqrtSize = static_cast<size_t>(num::sqrt(static_cast<double>(size)));
-	LASS_ASSERT(sqrtSize * sqrtSize == size);
+	const size_t nSubPixels = this->samplesPerPixel();
+	const size_t subSeqSize = this->subSequenceSize2D(id);
+	const size_t size = nSubPixels * subSeqSize;
 
-	const TScalar scale = TNumTraits::one / sqrtSize;
-	for (size_t i = 0; i < sqrtSize; ++i)
+	LASS_ASSERT(id >= 0);
+	if (static_cast<size_t>(id) >= subSequences2d_.size())
 	{
-		for (size_t j = 0; j < sqrtSize; ++j, ++first)
+		subSequences2d_.resize(id + 1);
+		subSequences2d_[id] = TSubSequence2D(nSubPixels * subSeqSize);
+	}		
+	
+	if (subPixel == 0)
+	{
+		const size_t sqrtNSubPixels = static_cast<size_t>(num::sqrt(static_cast<double>(nSubPixels)));
+		LASS_ASSERT(sqrtNSubPixels * sqrtNSubPixels == nSubPixels);
+		const size_t sqrtSubSeqSize = static_cast<size_t>(num::sqrt(static_cast<double>(subSeqSize)));
+		LASS_ASSERT(sqrtSubSeqSize * sqrtSubSeqSize == subSeqSize);
+		const TScalar scale = TNumTraits::one / (sqrtNSubPixels * sqrtSubSeqSize);
+
+		// generate interleaved samples: stratum1,subpixel1, stratum1,subpixel2, ... stratum2,subpixel1,stratum2,subpixel2
+		TSubSequence2D::iterator p = subSequences2d_[id].begin();	
+		for (size_t i = 0; i < sqrtSubSeqSize; ++i)
 		{
-			first->x = (i + jitterGenerator_()) * scale;
-			first->y = (j + jitterGenerator_()) * scale;
+			for (size_t j = 0; j < sqrtSubSeqSize; ++j)
+			{
+				// sample one stratum for all subpixels
+				TSubSequence2D::iterator start = p;
+				for (size_t di = 0; di < sqrtNSubPixels; ++di)
+				{
+					for (size_t dj = 0; dj < sqrtNSubPixels; ++dj)
+					{
+						p->x = ((i * sqrtNSubPixels + di) + jitterGenerator_()) * scale;
+						p->y = ((j * sqrtNSubPixels + dj) + jitterGenerator_()) * scale;
+						++p;
+					}
+				}
+				std::random_shuffle(start, p, numberGenerator_);
+			}
 		}
 	}
 
-	LASS_ASSERT(first == last);
+	// pick a subpixel worth of samples
+	//
+	LASS_ASSERT(last - first == subSeqSize);
+	TSubSequence2D::iterator p = subSequences2d_[id].begin();	
+	for (size_t k = 0; k < subSeqSize; ++k)
+	{
+		first[k] = p[k * nSubPixels + subPixel];
+	}
 }
 
 
