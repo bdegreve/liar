@@ -45,7 +45,7 @@ def triangulate_2d(*verts):
 	'''
 	triangulate((x1, y1), (x2, y2), ...) -> (a1, b1, c1), (a2, b2, c2), ...
 	
-	naive O(n**2) ear clipper.
+	naive O(n**3) ear clipper.
 	'''
 	vert_indices = list(range(len(verts)))
 	area = signed_area_2d(*verts)
@@ -55,17 +55,21 @@ def triangulate_2d(*verts):
 	triangles = []
 	inf_loop_guard = vert_indices[0]
 	while len(vert_indices) > 3:
-		candidate = tuple(vert_indices[:3])
-		others = vert_indices[3:]
-		a, b, c = [verts[k] for k in candidate]
-		is_ear = signed_area_2d(a, b, c) > 0 and not any(in_triangle_2d(a, b, c, verts[k]) for k in others)
-		if is_ear:
-			triangles.append(candidate)
-			del vert_indices[1] # the 2nd vert is the actual ear
-			inf_loop_guard = vert_indices[0]
-		else:
-			vert_indices = vert_indices[1:] + vert_indices[:1]
-			assert vert_indices[0] != inf_loop_guard, "oops, infinity loop!"
+		candidates = []
+		n = len(vert_indices)
+		for index in range(n):
+			candidate = (vert_indices[index - 1], vert_indices[index], vert_indices[index + 1 - n])
+			a, b, c = [verts[k] for k in candidate]
+			area = signed_area_2d(a, b, c)
+			if area <= 0:
+				continue
+			if any(in_triangle_2d(a, b, c, verts[k]) for k in vert_indices if not k in candidate):
+				continue
+			candidates.append((area, index, candidate))
+		assert candidates, "ooops, no candidates?"
+		area, index, candidate = max(candidates)
+		triangles.append(candidate)
+		del vert_indices[index]
 	assert len(vert_indices) == 3
 	triangles.append(tuple(vert_indices))
 	return triangles
