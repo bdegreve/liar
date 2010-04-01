@@ -187,6 +187,13 @@ def encode_mesh_to_obj(vertices, normals, uvs, face_groups):
 	return '\n'.join(lines)
 
 
+def const_texture(colour, value = 1):
+	if value <= 0:
+		return None
+	colour = tuple(x * value for x in colour)
+	return "liar.textures.Constant(liar.rgb%r)" % (colour,)
+
+
 class LiarExporter(object):
 	def __init__(self, script_path):
 		self.script_path = script_path
@@ -242,7 +249,7 @@ class LiarExporter(object):
 		
 		self.script_file.write('''
 # --- image IM:%(image_name)s ---
-image = liar.textures.Image(fix_path(r"%(filename)s"))
+image = liar.textures.Image(fix_path(%(filename)r))
 image.antiAliasing = liar.textures.Image.%(anti_aliasing)s
 image.mipMapping = liar.textures.Image.%(mip_mapping)s
 images['IM:%(image_name)s'] = image
@@ -268,6 +275,7 @@ textures['TE:%(name)s'] = images['IM:%(image_name)s']
 # --- texture TE:%(name)s ---
 textures['TE:%(name)s'] = liar.Texture.black()
 ''' % vars())
+		return "textures['TE:%(name)s']" % vars()
 	
 	def write_material(self, material):
 		name = material.name
@@ -276,30 +284,32 @@ textures['TE:%(name)s'] = liar.Texture.black()
 		self.materials[name] = True
 		
 		channels = ""
-		for index, mtex in enumerate(material.getTextures()):
+		for index in material.enabledTextures:
+			mtex = material.textures[index]
 			if not mtex:
 				continue
-			self.write_texture(mtex.tex)
-			tex_name = mtex.tex.name
-			channel = "textures['TE:%s']" % mtex.tex.name
+			channel = self.write_texture(mtex.tex)
 			if mtex.texco == Blender.Texture.TexCo['UV']:
 				ox, oy = mtex.ofs[:2]
 				sx, sy = mtex.size[:2]
 				ox += (1 - sx) / 2
 				oy += (1 - sy) / 2
-				sy, oy = -sx, -oy
+				#sy, oy = -sx, -oy
 				if ox != 0 or oy != 0 or sx != 1 or sy != 1:
 					channel = "liar.textures.TransformationUv(%(channel)s, [(%(sx)r, 0, %(ox)r), (0, %(sy)r, %(oy)r), (0, 0, 1)])" % vars()
-			elif mtex.texco == Blender.Texture.TexCo['ORCO']:
-				ox, oy, oz = mtex.ofs
-				sx, sy, sz = mtex.size
-				ox += (1 - sx) / 2
-				oy += (1 - sy) / 2
-				oz += (1 - sz) / 2
-				if ox != 0 or oy != 0 or oz != 0 or sx != 1 or sy != 1 or sz != 1:
-					channel = "liar.textures.TransformationLocal(%(channel)s, [(%(sx)r, 0, 0, %(ox)r), (0, %(sy)r, 0, %(oy)r), (0, 0, %(sz)r, %(oz)r), (0, 0, 0, 1)])" % vars()
+			else:
+				size = [s / 2 for s in mtex.size]
+				ofs = [o + s for o, s in zip(mtex.ofs, size)]
 				if mtex.mapping == Blender.Texture.Mappings['CUBE']:
 					channel = "liar.textures.CubeMapping(%s)" % channel
+					#size = [s / 2 for s in size]
+					#ofs = [(o + 1) / 2 for o in ofs]
+				sx, sy, sz = size
+				ox, oy, oz = ofs
+				if ox != 0 or oy != 0 or oz != 0 or sx != 1 or sy != 1 or sz != 1:
+					channel = "liar.textures.TransformationLocal(%(channel)s, [(%(sx)r, 0, 0, %(ox)r), (0, %(sy)r, 0, %(oy)r), (0, 0, %(sz)r, %(oz)r), (0, 0, 0, 1)])" % vars()
+				if mtex.texco == Blender.Texture.TexCo['ORCO']:
+					channel = "liar.textures.OrCo(%s)" % channel
 			channels += "\n\t%(index)d: %(channel)s," % vars()
 		
 		if material.alpha == 0:
@@ -311,19 +321,14 @@ material.innerRefractionIndex = liar.textures.Constant(%(ior)r)
 materials['MA:%(name)s'] = material
 ''' % vars())
 			return
-			
-		def _base_material(colour, value):
-			if value <= 0:
-				return None
-			colour = tuple(x * value for x in colour)
-			return "liar.textures.Constant(liar.rgb%r)" % (colour,)
 		
-		diffuse = _base_material(material.rgbCol, material.ref)
-		specular = _base_material(material.specCol, material.spec)
+		diffuse = const_texture(material.rgbCol, material.ref)
+		specular = const_texture(material.specCol, material.spec)
 		specular_power = "liar.textures.Constant(%r)" % material.hard
 		bumpmap = None
 		
-		for channel, mtex in enumerate(material.getTextures()):
+		for channel in material.enabledTextures:
+			mtex = material.textures[channel]
 			if not mtex:
 				continue
 			tex = "texture_channels[%d]" % channel
@@ -355,7 +360,7 @@ texture_channels = {%(channels)s
 material.diffuse = %(diffuse)s
 ''' % vars())
 		if bumpmap:
-			self.script_file.write("#material = liar.shaders.BumpMapping(material, %(bumpmap)s)\n" % vars())
+			self.script_file.write("material = liar.shaders.BumpMapping(material, %(bumpmap)s)\n" % vars())
 		self.script_file.write("materials['MA:%(name)s'] = material\n" % vars())
 	
 	def write_mesh(self, obj):
@@ -365,8 +370,6 @@ material.diffuse = %(diffuse)s
 			return
 		self.meshes[name] = True
 		
-		print obj.getSize('worldspace')
-
 		num_materials = len(mesh.materials)
 		if num_materials == 0:
 			print('WARNING: no material assigned to mesh, skipping mesh')
@@ -436,9 +439,10 @@ material.diffuse = %(diffuse)s
 # --- mesh ME:%(name)s ---
 face_groups = load_face_groups_from_archive(%(file_name)r%(auto_smooth_angle)s)
 ''' % vars())
-		
+
 		for i in used_groups:
-			self.script_file.write("face_groups[%d].shader = materials['MA:%s']\n" % (i, mesh.materials[i].name))
+			mat = "materials['MA:%s']" % mesh.materials[i].name
+			self.script_file.write("face_groups[%(i)d].shader = %(mat)s\n" % vars())
 		self.script_file.write("meshes['ME:%s'] = group_scenery(face_groups)\n" % name)
 
 		obj_matrix = matrix_to_list(obj.matrix)
@@ -565,37 +569,50 @@ cameras['CA:%(name)s'] = camera
 ''' % vars())
 	
 	def write_context(self, context):
+		from Blender.Scene import Render
+		image_types = {
+			Render.HDR: ".hdr",
+			Render.OPENEXR: ".exr",
+			Render.JPEG: ".jpg",
+			Render.TARGA: ".tga"
+			}
 		renderSize = 0.01 * context.renderwinSize
 		width = int(math.ceil(renderSize * context.sizeX))
 		height = int(math.ceil(renderSize * context.sizeY))
 		aspect_ratio = float(width * context.aspectRatioX()) / (height * context.aspectRatioY())
 		samples_per_pixel = (1, context.OSALevel)[context.oversampling]
-		out_file = os.path.splitext(self.script_path)[0] + ".igi"	
+		out_file = '//' + os.path.basename(os.path.splitext(self.script_path)[0]) + image_types.get(context.imageType, ".jpg")
+		options = ""
+		if context.imageType in (Render.JPEG,):
+			options += " --quality=%d" % context.quality()
 		self.script_file.write(r'''
-width = %(width)s
-height = %(height)s
-samples_per_pixel = %(samples_per_pixel)s
-aspect_ratio = %(aspect_ratio)s
-out_file = fix_path(r"%(out_file)s")
+width = %(width)r
+height = %(height)r
+samples_per_pixel = %(samples_per_pixel)r
+aspect_ratio = %(aspect_ratio)r
+out_file = fix_path(%(out_file)r)
+options = %(options)r
 
 for cam in cameras.values():
 	cam.aspectRatio = aspect_ratio
-sampler = liar.samplers.LatinHypercube((width, height), samples_per_pixel)
+sampler = liar.samplers.Stratifier((width, height), samples_per_pixel)
 target = liar.output.Image(out_file, (width, height))
+target.options = options
+target = liar.output.FilterMitchell(target)
 
 try:
 	Display = liar.output.Display
 except AttributeError:
 	print("no display output possible, unsupported by liar installation")
 else:
-	w = min(width, 800)
+	w = min(width, 1000)
 	h = int(w * height / float(width))
 	display = Display(out_file, (w, h))
-	target = liar.output.Splitter([target, display])
+	target = liar.output.Splitter([target, liar.output.FilterMitchell(display)])
 ''' % vars())
 
 	def write_header(self):
-		archive_path = self.archive_path
+		archive_path = '//' + os.path.basename(self.archive_path)
 		self.script_file.write(r'''#! /usr/bin/python
 
 # Exported from Blender by liar_export
@@ -611,7 +628,15 @@ materials = {}
 textures = {}
 images = {}
 
-archive_dir = r"%(archive_path)s"
+self_dir = os.path.dirname(os.path.abspath(__file__))
+def fix_path(path):
+	if path.startswith('//'):
+		path = os.path.join(self_dir, path[2:])
+	if os.path.altsep:
+		path = path.replace(os.path.altsep, os.path.sep)
+	return path
+
+archive_dir = fix_path(%(archive_path)r)
 zip_path = archive_dir + ".zip"
 if os.path.exists(zip_path):
 	import zipfile
@@ -625,7 +650,7 @@ def load_from_archive(file_name):
 		return file(file_path).read()
 	if zip_file:
 		return zip_file.read(file_name)
-	raise IOError("file '%%(file_name)s' not found, nor in archive directory '%%(archive_dir)s', nor in zip file '%%(zip_path)s'" %% vars())
+	raise IOError("file %%(file_name)r not found, nor in archive directory %%(archive_dir)r, nor in zip file %%(zip_path)r" %% vars())
 
 def load_face_groups_from_archive(mesh_file, auto_smooth_angle=None):
 	import liar.tools.wavefront_obj
@@ -633,7 +658,8 @@ def load_face_groups_from_archive(mesh_file, auto_smooth_angle=None):
 	parts, materials = liar.tools.wavefront_obj.decode(obj, filename=mesh_file)
 	if auto_smooth_angle:
 		for part in parts:
-			part.smoothNormals(math.radians(auto_smooth_angle))
+			part.autoCrease(1, math.radians(auto_smooth_angle))
+			part.smoothNormals()
 	return parts
 
 def int_or_none(s):
@@ -642,12 +668,7 @@ def int_or_none(s):
 	except:
 		return None
 
-def fix_path(path):
-	if path.startswith('//'):
-		path = os.path.join(os.path.curdir, path[2:])
-	if os.path.altsep:
-		path = path.replace(os.path.altsep, os.path.sep)
-	return path
+
 
 def group_scenery(scenery_objects):
 	assert len(scenery_objects) > 0
@@ -657,7 +678,38 @@ def group_scenery(scenery_objects):
 		return liar.scenery.AabpTree(scenery_objects)
 ''' % vars())
 
-
+	def write_world(self, context):
+		world = Blender.World.GetCurrent()
+		if not world:
+			return
+		name = world.name
+		horiz = None#const_texture
+		for mtex in world.textures:
+			if not mtex:
+				continue
+			texture = orig_texture = self.write_texture(mtex.tex)
+			print mtex.texco
+			if mtex.texco == Blender.Texture.TexCo['ANGMAP']:
+				print "been here"
+				texture = "liar.textures.AngularMapping(%s)" % texture
+			if mtex.mtHoriz:
+				horiz = texture
+		if not horiz:
+			return
+		shader = None
+		if context.alphaMode == 0:
+			shader = "liar.shaders.Unshaded(world.radiance)"
+		self.script_file.write(r'''
+# --- world WO:%(name)s ---
+world = liar.scenery.LightSky(%(horiz)s)
+try:
+	world.samplingResolution = %(orig_texture)s.resolution
+except AttributeError:
+	pass
+world.numberOfEmissionSamples = 64
+world.shader = %(shader)s
+objects['WO:%(name)s'] = world
+''' % vars())
 
 	def write_body(self):
 		object_writers = {
@@ -667,10 +719,14 @@ def group_scenery(scenery_objects):
 			}
 			
 		scene = Blender.Scene.GetCurrent()
+		visible_layers = set(scene.getLayers())
+		print "scene layers", visible_layers
 		children = scene.getChildren()
 		num_children = len(children)
 		
 		for obj, i in zip(children, range(num_children)):
+			if not visible_layers & set(obj.layers):
+				continue
 			obj_type = obj.getType()
 			obj_name = obj.getName()
 			print("- object '%(obj_name)s' of type '%(obj_type)s'" % vars())
@@ -689,7 +745,8 @@ def group_scenery(scenery_objects):
 					print(curve.getPoints())
 					
 			self.draw_progress(float(i+1) / num_children)
-		
+			
+		self.write_world(scene.render)		
 		self.write_context(scene.render)
 	
 	def write_footer(self):
@@ -701,7 +758,9 @@ def group_scenery(scenery_objects):
 			threads = "liar.RenderEngine.AUTO_NUMBER_OF_THREADS"
 		if scene.render.borderRender:
 			x1, y1, x2, y2 = scene.render.border
-			window = ((x1, 1-y1), (x2, 1-y2))
+			x1, x2 = min(x1, x2), max(x1, x2)
+			y1, y2 = min(y1, y2), max(y1, y2)
+			window = ((x1, 1-y2), (x2, 1-y1))
 		else:
 			window = ((0, 0), (1, 1))
 		self.script_file.write('''
