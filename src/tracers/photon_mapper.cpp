@@ -25,6 +25,7 @@
 #include "photon_mapper.h"
 #include "../kernel/per_thread_buffer.h"
 #include <lass/num/distribution.h>
+#include <lass/num/distribution_transformations.h>
 #include <lass/util/progress_indicator.h>
 #include <lass/stde/range_algorithm.h>
 #include <lass/stde/extended_iterator.h>
@@ -346,7 +347,6 @@ const XYZ PhotonMapper::doCastRay(
 		const DifferentialRay continuedRay = bound(primaryRay, intersection.t() + liar::tolerance);
 		return mediumTransparency * this->castRay(sample, continuedRay, tIntersection, alpha);
 	}
-	shader->shadeContext(sample, context);
 	const TBsdfPtr bsdf = shader->bsdf(sample, context);
 
 	const TVector3D targetNormal = context.bsdfToWorld(TVector3D(0, 0, 1));
@@ -870,11 +870,62 @@ const XYZ PhotonMapper::gatherIndirect(
 		size_t gatherStage) const
 {		
 	LASS_ASSERT(gatherStage < numGatherStages_);
+
+	const bool doImportanceGathering = false;
+	if (doImportanceGathering && gatherStage == 0)
+	{
+		const size_t gridSize = 8;
+		const TScalar alpha = 0.05;
+		grid_.resize(num::sqr(gridSize));
+		std::fill(grid_.begin(), grid_.end(), 0);
+		TScalar pTotal = 0;
+		//*
+		LASS_ASSERT(photonNeighbourhood_.size() > estimationSize_[mtGlobal]);
+		const TPhotonNeighbourhood::const_iterator last = photonMap_[mtGlobal].rangeSearch(
+			target, estimationRadius_[mtGlobal], estimationSize_[mtGlobal], photonNeighbourhood_.begin());
+		for (TPhotonNeighbourhood::const_iterator i = photonNeighbourhood_.begin(); i != last; ++i)
+		{
+			const TVector3D omega = context.worldToBsdf(i->object()->omegaIn);
+			const TScalar p = i->object()->power.absTotal();
+			if (omega.z < 0)
+			{
+				continue;
+			}
+			pTotal += p;
+			const TScalar u = omega.z;
+			const TScalar phi = (num::abs(omega.x) < 1e-6 && num::abs(omega.y) < 1e-6) ? 0 : num::atan2(omega.y, omega.x);
+			const TScalar v = (phi < 0 ? phi + 2 * TNumTraits::pi : phi) / (2 * TNumTraits::pi);
+			const size_t ii = num::clamp<size_t>(static_cast<size_t>(num::floor(u * gridSize)), 0, gridSize - 1);
+			const size_t jj = num::clamp<size_t>(static_cast<size_t>(num::floor(v * gridSize)), 0, gridSize - 1);
+			grid_[jj * gridSize + ii] += (1 - alpha) * p;
+		}
+		/*/
+		pTotal = 1;
+		/**/
+		LASS_ENFORCE(pTotal > 0);
+		std::transform(grid_.begin(), grid_.end(), grid_.begin(), std::bind2nd(std::plus<TScalar>(), alpha * pTotal / num::sqr(gridSize)));
+		gatherDistribution_.reset(grid_.begin(), grid_.end(), gridSize, gridSize);
+	}
+
 	XYZ result;
 	const ptrdiff_t n = lastSample - firstSample;
 	for (const TPoint2D* s = firstSample; s != lastSample; ++s)
 	{
-		const SampleBsdfOut out = bsdf->sample(omegaIn, *s,  Shader::capsReflection | Shader::capsDiffuse);
+		SampleBsdfOut out;
+		if (doImportanceGathering && gatherStage == 0)
+		{
+			prim::Point2D<size_t> i2;
+			out.pdf = 1;
+			const TPoint2D s2 = gatherDistribution_(*s, out.pdf, i2);
+			TScalar pdfHalfSphere;
+			out.omegaOut = num::uniformHemisphere(s2, pdfHalfSphere).position();
+			out.pdf *= pdfHalfSphere;
+			out.value = bsdf->call(omegaIn, out.omegaOut, Shader::capsReflection | Shader::capsDiffuse).value;
+		}
+		else
+		{
+			out = bsdf->sample(omegaIn, *s,  Shader::capsReflection | Shader::capsDiffuse);
+		}
 		if (!out)
 		{
 			continue;

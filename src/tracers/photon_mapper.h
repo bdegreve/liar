@@ -35,6 +35,7 @@
 #include <lass/spat/aabp_tree.h>
 #include <lass/num/random.h>
 #include <lass/util/dictionary.h>
+#include <lass/num/inverse_transform_sampling.h>
 
 namespace liar
 {
@@ -218,6 +219,9 @@ private:
 	mutable std::vector<TPoint2D> secondaryLightSamples_;
 	mutable std::vector<TScalar> secondaryLightSelectorSamples_;
 	mutable TRandomSecondary secondarySampler_;
+
+	mutable std::vector<TScalar> grid_;
+	mutable num::InverseTransformSampling2D<TScalar> gatherDistribution_;
 
 	size_t maxNumberOfPhotons_;
 	size_t globalMapSize_;

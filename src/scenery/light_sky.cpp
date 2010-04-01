@@ -308,7 +308,7 @@ void LightSky::buildPdf(TMap& pdf, TXYZMap& radianceMap, XYZ& averageRadiance, u
 	XYZ totalRadiance;
 	for (size_t i = 0; i < resolution_.x; ++i)
 	{
-		progress(.5 * static_cast<TScalar>(i) / resolution_.x);
+		progress(.8 * static_cast<TScalar>(i) / resolution_.x);
 		for (size_t j = 0; j < resolution_.y; ++j)
 		{
 			const XYZ radiance = lookUpRadiance(
@@ -333,7 +333,7 @@ void LightSky::buildCdf(const TMap& pdf, TMap& oMarginalCdfU, TMap& oConditional
 	
 	for (size_t i = 0; i < resolution_.x; ++i)
 	{
-		progress(.5 + .5 * static_cast<TScalar>(i) / resolution_.x);
+		progress(.8 + .2 * static_cast<TScalar>(i) / resolution_.x);
 		const TScalar* pdfLine = &pdf[i * resolution_.y];
 		TScalar* condCdfV = &conditionalCdfV[i * resolution_.y];
 		std::partial_sum(pdfLine, pdfLine + resolution_.y, condCdfV);

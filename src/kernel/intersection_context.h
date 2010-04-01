@@ -49,6 +49,8 @@ public:
 	IntersectionContext(const SceneObject& object, const Sample& sample, const BoundedRay& primaryRay, const Intersection& intersection);
 	IntersectionContext(const SceneObject& object, const Sample& sample, const DifferentialRay& primaryRay, const Intersection& intersection);
 
+	const kernel::Sample& sample() const { return sample_; }
+
 	const TAabb3D& bounds() const { return bounds_; }
 	void setBounds(const TAabb3D& bounds) { bounds_ = bounds; }
 
@@ -74,6 +76,7 @@ public:
 	const TVector2D& dUv_dJ() const { return dUv_dJ_; }
 	TScalar t() const { return t_; }
 	const Shader* shader() const { return shader_; }
+	const TBsdfPtr bsdf() const;
 	const Medium* interior() const { return interior_; }
 	SolidEvent solidEvent() const { return solidEvent_; }
 
@@ -114,7 +117,7 @@ public:
 
 private:
 
-	void init(const SceneObject& object, const Sample& sample, const BoundedRay& primaryRay, const Intersection& intersection);
+	void init(const SceneObject& object, const BoundedRay& primaryRay, const Intersection& intersection);
 	void setScreenSpaceDifferentialsI(const TRay3D& ray, TVector3D& dPoint, TVector3D& dNormal, TVector2D& dUv);
 	void generateShaderToWorld();
 
@@ -140,6 +143,7 @@ private:
 	TScalar t_;				/**< parameter of point_ on ray */
 	const Shader* shader_;		/**< shader to be used */
 	const Medium* interior_;
+	const kernel::Sample& sample_;
 
 	TTransformation3D shaderToWorld_;
 	TTransformation3D localToWorld_;

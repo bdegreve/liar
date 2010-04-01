@@ -36,21 +36,44 @@ namespace kernel
 
 // --- public --------------------------------------------------------------------------------------
 
-IntersectionContext::IntersectionContext(const SceneObject& object, const Sample& sample, const BoundedRay& ray, const Intersection& intersection)
+IntersectionContext::IntersectionContext(const SceneObject& object, const Sample& sample, const BoundedRay& ray, const Intersection& intersection):
+	sample_(sample)
 {
-	init(object, sample, ray, intersection);
+	init(object, ray, intersection);
+
+	if (shader_)
+	{
+		shader_->shadeContext(sample_, *this);
+	}
 }
 
 
 
-IntersectionContext::IntersectionContext(const SceneObject& object, const Sample& sample, const DifferentialRay& ray, const Intersection& intersection)
+IntersectionContext::IntersectionContext(const SceneObject& object, const Sample& sample, const DifferentialRay& ray, const Intersection& intersection):
+	sample_(sample)
 {
-	init(object, sample, ray.centralRay(), intersection);
+	init(object, ray.centralRay(), intersection);
 
 	DifferentialRay localRay = transform(ray, worldToLocal());
 	setScreenSpaceDifferentialsI(ray.differentialI(), dPoint_dI_, dNormal_dI_, dUv_dI_);
 	setScreenSpaceDifferentialsI(ray.differentialJ(), dPoint_dJ_, dNormal_dJ_, dUv_dJ_);
 	hasScreenSpaceDifferentials_ = true;
+
+	if (shader_)
+	{
+		shader_->shadeContext(sample_, *this);
+	}
+}
+
+
+
+const TBsdfPtr IntersectionContext::bsdf() const
+{
+	if (!shader_)
+	{
+		return TBsdfPtr();
+	}
+	return shader_->bsdf(sample_, *this);
 }
 
 
@@ -176,7 +199,7 @@ const TTransformation3D& IntersectionContext::bsdfToWorld() const
 
 // --- private -------------------------------------------------------------------------------------
 
-void IntersectionContext::init(const SceneObject& object, const Sample& sample, const BoundedRay& ray, const Intersection& intersection)
+void IntersectionContext::init(const SceneObject& object, const BoundedRay& ray, const Intersection& intersection)
 {
 	t_ = 0;
 	shader_ = 0;
@@ -185,7 +208,7 @@ void IntersectionContext::init(const SceneObject& object, const Sample& sample, 
 	hasScreenSpaceDifferentials_ = false;
 	hasDirtyBsdfToWorld_ = true;
 
-	object.localContext(sample, ray, intersection, *this);
+	object.localContext(sample_, ray, intersection, *this);
 	flipTo(-ray.direction());
 }
 

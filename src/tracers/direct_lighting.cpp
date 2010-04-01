@@ -101,7 +101,7 @@ const XYZ DirectLighting::doCastRay(
 		primaryRay.centralRay().unboundedRay(), primaryRay.centralRay().nearLimit(),
 		intersection.t()));
 
-	IntersectionContext context(*scene(), sample, primaryRay, intersection);
+	const IntersectionContext context(*scene(), sample, primaryRay, intersection);
 	const Shader* const shader = context.shader();
 	if (!shader)
 	{
@@ -110,7 +110,6 @@ const XYZ DirectLighting::doCastRay(
 		const DifferentialRay continuedRay = bound(primaryRay, intersection.t() + tolerance);
 		return mediumTransparency * this->castRay(sample, continuedRay, tIntersection, alpha);
 	}
-	shader->shadeContext(sample, context);
 	const TBsdfPtr bsdf = shader->bsdf(sample, context);
 
 	const TVector3D targetNormal = context.bsdfToWorld(TVector3D(0, 0, 1));
