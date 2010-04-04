@@ -67,17 +67,45 @@ void Medium::setPriority(size_t priority)
 
 
 
+void Medium::requestSamples(const TSamplerPtr& sampler)
+{
+	const size_t n = numScatterSamples();
+	if (idStepSamples_ < 0 && n > 0)
+	{
+		idStepSamples_ = sampler->requestSubSequence1D(n);
+		idLightSamples_ = sampler->requestSubSequence1D(n);
+		idSurfaceSamples_ = sampler->requestSubSequence2D(n);
+	}
+	doRequestSamples(sampler);
+}
+
+
+
 // --- protected -----------------------------------------------------------------------------------
 
 Medium::Medium():
 	refractionIndex_(1, 1, 1),
-	priority_(0)
+	priority_(0),
+	idStepSamples_(-1),
+	idLightSamples_(-1),
+	idSurfaceSamples_(-1)
 {
 }
 
 
 
 // --- private -------------------------------------------------------------------------------------
+
+void Medium::doRequestSamples(const TSamplerPtr& sampler)
+{
+}
+
+
+
+size_t Medium::doNumScatterSamples() const
+{
+	return 0;
+}
 
 
 
@@ -97,7 +125,7 @@ MediumStack::MediumStack(const TMediumPtr& defaultMedium):
 
 const XYZ MediumStack::transparency(const BoundedRay& ray) const
 {
-	return top() ? top()->transparency(ray) : XYZ(1, 1, 1);
+	return medium() ? medium()->transparency(ray) : XYZ(1, 1, 1);
 }
 
 
@@ -137,7 +165,7 @@ void MediumStack::pop(const Medium*)
 */
 
 
-const Medium* MediumStack::top() const
+const Medium* MediumStack::medium() const
 {
 	return stack_.empty() ? default_.get() : stack_.back();
 }

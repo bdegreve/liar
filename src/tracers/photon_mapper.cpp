@@ -90,7 +90,6 @@ PhotonMapper::TMapTypeDictionary PhotonMapper::mapTypeDictionary_ =
 // --- public --------------------------------------------------------------------------------------
 
 PhotonMapper::PhotonMapper():
-	mediumStack_(),
 	maxNumberOfPhotons_(100000000),
 	globalMapSize_(10000),
 	causticsQuality_(5),
@@ -336,16 +335,17 @@ const XYZ PhotonMapper::doCastRay(
 	tIntersection = intersection.t();
 	alpha = 1;
 	const TPoint3D target = primaryRay.point(intersection.t());
-	const XYZ mediumTransparency = mediumStack_.transparency(primaryRay, intersection.t());
+	const XYZ mediumTransparency = mediumStack().transparency(primaryRay, intersection.t());
+	const XYZ mediumInScattering = inScattering(sample, primaryRay.centralRay(), intersection.t());
 
 	IntersectionContext context(*scene(), sample, primaryRay, intersection);
 	const Shader* const shader = context.shader();
 	if (!shader)
 	{
 		// leaving or entering something
-		MediumChanger mediumChanger(mediumStack_, context.interior(), context.solidEvent());
+		MediumChanger mediumChanger(mediumStack(), context.interior(), context.solidEvent());
 		const DifferentialRay continuedRay = bound(primaryRay, intersection.t() + liar::tolerance);
-		return mediumTransparency * this->castRay(sample, continuedRay, tIntersection, alpha);
+		return mediumInScattering + mediumTransparency * this->castRay(sample, continuedRay, tIntersection, alpha);
 	}
 	const TBsdfPtr bsdf = shader->bsdf(sample, context);
 
@@ -357,7 +357,7 @@ const XYZ PhotonMapper::doCastRay(
 	{
 		XYZ result = estimateIrradiance(target, targetNormal);
 		result *= mediumTransparency;
-		return result;
+		return mediumInScattering + result;
 	}
 
 	XYZ result = estimateCaustics(sample, context, bsdf, target, omegaIn);
@@ -438,7 +438,7 @@ const XYZ PhotonMapper::doCastRay(
 		//*
 		if (shader->hasCaps(Shader::capsTransmission) && shader->idTransmissionSamples() != -1)
 		{
-			const MediumChanger mediumChanger(mediumStack_, context.interior(), context.solidEvent());
+			const MediumChanger mediumChanger(mediumStack(), context.interior(), context.solidEvent());
 			const TPoint3D beginCentral = target - 10 * liar::tolerance * targetNormal;
 
 			const Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idTransmissionSamples());
@@ -465,7 +465,7 @@ const XYZ PhotonMapper::doCastRay(
 		/**/
 	}
 
-	return mediumTransparency * result;
+	return mediumInScattering + mediumTransparency * result;
 }
 
 
@@ -662,7 +662,7 @@ void PhotonMapper::tracePhoton(
 
 	const TPoint3D hitPoint = ray.point(intersection.t());
 
-	const XYZ mediumTransparency = mediumStack_.transparency(ray, intersection.t());
+	const XYZ mediumTransparency = mediumStack().transparency(ray, intersection.t());
 	XYZ mediumPower = mediumTransparency * power;
 	const TScalar mediumAttenuation = mediumPower.average() / power.average();
 	LASS_ASSERT(mediumAttenuation < 1.1);
@@ -680,7 +680,7 @@ void PhotonMapper::tracePhoton(
 		// entering or leaving something ...
 		if (generation < maxRayGeneration())
 		{
-			MediumChanger mediumChanger(mediumStack_, context.interior(), context.solidEvent());
+			MediumChanger mediumChanger(mediumStack(), context.interior(), context.solidEvent());
 			const BoundedRay newRay = bound(ray, intersection.t() + liar::tolerance, ray.farLimit());
 			tracePhoton(sample, mediumPower, newRay, generation + 1, uniform, isCaustic);
 		}
@@ -743,7 +743,7 @@ void PhotonMapper::tracePhoton(
 		const BoundedRay newRay(hitPoint, context.bsdfToWorld(out.omegaOut));
 		const bool isSpecular = (out.usedCaps & (Shader::capsSpecular | Shader::capsGlossy)) > 0;
 		const bool newIsCaustic = isSpecular && (isCaustic || generation == 0);
-		MediumChanger mediumChanger(mediumStack_, context.interior(), 
+		MediumChanger mediumChanger(mediumStack(), context.interior(), 
 			out.omegaOut.z < 0 ? context.solidEvent() : seNoEvent);
 		tracePhoton(sample, newPower, newRay, generation + 1, uniform, newIsCaustic);
 	}
@@ -1169,6 +1169,60 @@ const XYZ PhotonMapper::estimateCaustics(
 	}
 
 	return result / (TNumTraits::pi * sqrSize);
+}
+
+
+
+const XYZ PhotonMapper::inScattering(const Sample& sample, const kernel::BoundedRay& ray, TScalar tFar) const
+{
+	typedef Sample::TSubSequence1D::difference_type difference_type;
+
+	const Medium* medium = mediumStack().medium();
+	const TScalar tNear = ray.nearLimit();
+	if (!medium || medium->numScatterSamples() == 0 || (tNear > tFar))
+	{
+		return XYZ();
+	}
+
+	const Sample::TSubSequence1D stepSamples = sample.subSequence1D(medium->idStepSamples());
+	const Sample::TSubSequence1D lightSamples = sample.subSequence1D(medium->idLightSamples());
+	const Sample::TSubSequence2D surfaceSamples = sample.subSequence2D(medium->idSurfaceSamples());
+
+	const difference_type n = stepSamples.size();
+	LASS_ASSERT(lightSamples.size() == n && surfaceSamples.size() == n);
+
+	TScalar tPrev = tNear;
+	XYZ trans = XYZ(1, 1, 1);
+	XYZ result;
+	
+	for (difference_type k = 0; k < n; ++k)
+	{
+		const TScalar t = num::lerp(tNear, tFar, stepSamples[k]);
+		const TPoint3D point = ray.point(t);
+		TScalar lightPdf;
+		const LightContext* light = lights().sample(lightSamples[k], lightPdf);
+		if (!light || lightPdf <= 0)
+		{
+			continue;
+		}
+		BoundedRay shadowRay;
+		TScalar surfacePdf;
+		const XYZ radiance = light->sampleEmission(sample, surfaceSamples[k], point, shadowRay, surfacePdf);
+		if (surfacePdf <= 0 || !radiance)
+		{
+			continue;
+		}
+		const XYZ phase = medium->phase(point, ray.direction(), shadowRay.direction());
+		if (scene()->isIntersecting(sample, shadowRay))
+		{
+			continue;
+		}
+		trans *= medium->transparency(bound(ray, tPrev, t));
+		tPrev = t;
+		result += trans * phase * radiance / (n * lightPdf * surfacePdf);
+	}
+
+	return result;
 }
 
 

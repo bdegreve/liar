@@ -39,23 +39,31 @@ PY_CLASS_METHOD_NAME(RayTracer, setState, "__setstate__")
 
 namespace impl
 {
-	class RequestShaderSamples
+	template <typename Member, typename Getter>
+	class RequestMemberSamples
 	{
 	public:
-		RequestShaderSamples(const TSamplerPtr& sampler): sampler_(sampler) {};
+		RequestMemberSamples(const TSamplerPtr& sampler, Getter getter): sampler_(sampler), getter_(getter) {};
 		void operator()(const SceneObject& object)
 		{
-			Shader* shader = object.shader().get();
-			if (shader && visited_.count(shader) == 0)
+			Member* member = (object.*getter_)().get();
+			if (member && visited_.count(member) == 0)
 			{
-				shader->requestSamples(sampler_);
-				visited_.insert(shader);
+				member->requestSamples(sampler_);
+				visited_.insert(member);
 			}
 		}
 	private:
-		std::set<Shader*> visited_;
+		std::set<Member*> visited_;
 		TSamplerPtr sampler_;
+		Getter getter_;
 	};
+
+	template <typename MemberPtr, typename Getter>
+	RequestMemberSamples<MemberPtr, Getter> requestMemberSamples(const TSamplerPtr& sampler, Getter getter)
+	{
+		return RequestMemberSamples<MemberPtr, Getter>(sampler, getter);
+	}
 }
 
 
@@ -86,6 +94,7 @@ void RayTracer::setScene(const TSceneObjectPtr& scene)
 {
 	scene_ = scene;
 	lights_.gatherContexts(scene);
+	mediumStack_ = MediumStack(scene->interior());
 }
 
 
@@ -103,7 +112,8 @@ void RayTracer::requestSamples(const TSamplerPtr& sampler)
 	{
 		sampler->clearSubSequenceRequests();
 		lights_.requestSamples(sampler);
-		forAllObjects(scene_, impl::RequestShaderSamples(sampler));
+		forAllObjects(scene_, impl::requestMemberSamples<Shader>(sampler, &SceneObject::shader));
+		forAllObjects(scene_, impl::requestMemberSamples<Medium>(sampler, &SceneObject::interior));
 		doRequestSamples(sampler); 
 	}
 }

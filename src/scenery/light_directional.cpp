@@ -152,7 +152,7 @@ const XYZ LightDirectional::doEmission(const Sample&, const TRay3D& ray, Bounded
 
 
 
-const XYZ LightDirectional::doSampleEmission(const Sample&, const TPoint2D&, const TPoint3D& target, const TVector3D&, BoundedRay& shadowRay, TScalar& pdf) const
+const XYZ LightDirectional::doSampleEmission(const Sample&, const TPoint2D&, const TPoint3D& target, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	shadowRay = BoundedRay(target, -direction_, tolerance, TNumTraits::infinity, prim::IsAlreadyNormalized());
 	pdf = TNumTraits::one;

@@ -76,6 +76,27 @@ void LightContext::requestSamples(const TSamplerPtr& sampler)
 
 
 const XYZ LightContext::sampleEmission(
+		const Sample& cameraSample, const TPoint2D& lightSample, const TPoint3D& target,
+		BoundedRay& shadowRay, TScalar& pdf) const
+{
+	setTime(cameraSample.time());
+
+	const TPoint3D localTarget = transform(target, localToWorld_.inverse());
+	
+	BoundedRay localRay;
+	const XYZ radiance = light_->sampleEmission(cameraSample, lightSample, localTarget, localRay, pdf);
+
+	// we must transform back to world space.  But we already do know the starting point, so don't rely
+	// on recalculating that one
+	shadowRay = transform(localRay, localToWorld_);
+	shadowRay.support() = target;
+
+	return radiance;
+}
+
+
+
+const XYZ LightContext::sampleEmission(
 		const Sample& cameraSample, const TPoint2D& lightSample, 
 		const TPoint3D& target,	const TVector3D& targetNormal,		
 		BoundedRay& shadowRay, TScalar& pdf) const

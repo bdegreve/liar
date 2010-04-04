@@ -206,6 +206,8 @@ private:
 		const TPoint3D& point, const TVector3D& omegaOut) const;
 	void updateActualEstimationRadius(MapType mapType, TScalar radius) const;
 
+	const XYZ inScattering(const Sample& sample, const kernel::BoundedRay& ray, TScalar tFar) const;
+
 	TPhotonBuffer photonBuffer_[numMapTypes];
 	TPhotonMap photonMap_[numMapTypes];
 	TIrradianceBuffer irradianceBuffer_;
@@ -213,7 +215,6 @@ private:
 	TScalar estimationRadius_[numMapTypes];
 	TScalar estimationTolerance_[numMapTypes];
 	size_t estimationSize_[numMapTypes];
-	mutable MediumStack mediumStack_;
 	mutable TScalar maxActualEstimationRadius_[numMapTypes]; /**< keeps track of actual maximum needed estimation radius, for post diagnostics */
 	mutable std::vector<TPoint2D> secondaryGatherSamples_;
 	mutable std::vector<TPoint2D> secondaryLightSamples_;

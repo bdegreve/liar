@@ -33,6 +33,7 @@
 #include "differential_ray.h"
 #include "xyz.h"
 #include "solid_event.h"
+#include "sampler.h"
 
 namespace liar
 {
@@ -52,9 +53,35 @@ public:
 	size_t priority() const;
 	void setPriority(size_t priority);
 
+	void requestSamples(const TSamplerPtr& sampler);
+	size_t numScatterSamples() const
+	{
+		return doNumScatterSamples();
+	}
+	Sampler::TSubSequenceId idStepSamples() const 
+	{ 
+		return idStepSamples_; 
+	}
+	Sampler::TSubSequenceId idLightSamples() const 
+	{ 
+		return idLightSamples_; 
+	}
+	Sampler::TSubSequenceId idSurfaceSamples() const 
+	{ 
+		return idSurfaceSamples_; 
+	}
+
 	const XYZ transparency(const BoundedRay& ray) const
 	{
 		return doTransparency(ray); 
+	}
+
+	/** @param dirIn: incoming direction @e towards @a position.
+	 *  @param dirOut: incoming direction away from @a position.
+	 */
+	const XYZ phase(const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut) const
+	{
+		return doPhase(position, dirIn, dirOut);
 	}
 
 protected:
@@ -63,10 +90,16 @@ protected:
 
 private:
 
+	virtual void doRequestSamples(const TSamplerPtr& sampler);
+	virtual size_t doNumScatterSamples() const;
 	virtual const XYZ doTransparency(const BoundedRay& ray) const = 0;
+	virtual const XYZ doPhase(const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut) const = 0;
 
 	XYZ refractionIndex_;
 	size_t priority_;
+	Sampler::TSubSequenceId idStepSamples_;
+	Sampler::TSubSequenceId idLightSamples_;
+	Sampler::TSubSequenceId idSurfaceSamples_;
 };
 
 typedef python::PyObjectPtr<Medium>::Type TMediumPtr;
@@ -77,6 +110,7 @@ class LIAR_KERNEL_DLL MediumStack
 {
 public:
 	MediumStack(const TMediumPtr& defaultMedium = TMediumPtr());
+	const Medium* medium() const;
 	const XYZ transparency(const BoundedRay& ray) const;
 	const XYZ transparency(const BoundedRay& ray, TScalar farLimit) const;
 	const XYZ transparency(const DifferentialRay& ray, TScalar farLimit) const;
@@ -86,7 +120,6 @@ private:
 	
 	//void push(const Medium* medium);
 	//void pop(const Medium* medium);
-	const Medium* top() const;
 
 	TStack stack_;
 	TMediumPtr default_;

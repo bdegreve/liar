@@ -189,7 +189,31 @@ const XYZ LightArea::doEmission(const Sample&, const TRay3D& ray, BoundedRay& sh
 
 const XYZ LightArea::doSampleEmission(
 		const Sample&, const TPoint2D& lightSample, const TPoint3D& target,
-		const TVector3D& normalTarget, BoundedRay& shadowRay, TScalar& pdf) const
+		BoundedRay& shadowRay, TScalar& pdf) const
+{
+	LASS_ASSERT(surface_);
+	TVector3D normalLight;
+	const TPoint3D pointLight = surface_->sampleSurface(lightSample, target, normalLight, pdf);
+
+	TVector3D toLight = pointLight - target;
+	const TScalar distance = toLight.norm();
+	toLight /= distance;
+
+	if (isSingleSided_ && dot(normalLight, toLight) > 0)
+	{
+		pdf = 0;
+		return XYZ();
+	}
+
+	shadowRay = BoundedRay(target, toLight, tolerance, distance, prim::IsAlreadyNormalized());
+	return radiance_ ;
+}
+
+
+
+const XYZ LightArea::doSampleEmission(
+		const Sample&, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D& normalTarget, 
+		BoundedRay& shadowRay, TScalar& pdf) const
 {
 	LASS_ASSERT(surface_);
 	TVector3D normalLight;

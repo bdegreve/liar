@@ -61,6 +61,9 @@ public:
 
 	const XYZ emission(const Sample& cameraSample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
 	const XYZ sampleEmission(
+			const Sample& cameraSample, const TPoint2D& sample, const TPoint3D& target,
+			BoundedRay& shadowRay, TScalar& pdf) const;
+	const XYZ sampleEmission(
 			const Sample& cameraSample, const TPoint2D& sample, const TPoint3D& target, 
 			const TVector3D& targetNormal, BoundedRay& shadowRay, TScalar& pdf) const;
 	const XYZ sampleEmission(

@@ -200,15 +200,44 @@ void Stratifier::doSampleFrequency(const TResolution2D& LASS_UNUSED(pixel), size
 
 
 
-void Stratifier::doSampleSubSequence1D(const TResolution2D& LASS_UNUSED(pixel), size_t, TSubSequenceId, TSample1D* first, TSample1D* last)
+void Stratifier::doSampleSubSequence1D(const TResolution2D&, size_t subPixel, TSubSequenceId id, TSample1D* first, TSample1D* last)
 {
-	const ptrdiff_t size = last - first;
-	const TScalar scale = 1.f / size;
-	for (ptrdiff_t k = 0; k < size; ++k, ++first)
+	const size_t nSubPixels = this->samplesPerPixel();
+	const size_t subSeqSize = this->subSequenceSize1D(id);
+	const size_t size = nSubPixels * subSeqSize;
+
+	if (static_cast<size_t>(id) >= subSequences1d_.size())
 	{
-		*first = (k + jitterGenerator_()) * scale;
+		subSequences1d_.resize(id + 1);
+	}		
+
+	if (subPixel == 0)
+	{
+		subSequences1d_[id].resize(size);
+		const TScalar scale = TNumTraits::one / size;
+
+		// generate interleaved samples: stratum1,subpixel1, stratum1,subpixel2, ... stratum2,subpixel1,stratum2,subpixel2
+		TSubSequence1D::iterator p = subSequences1d_[id].begin();	
+		for (size_t i = 0; i < subSeqSize; ++i)
+		{
+			// sample one stratum for all subpixels
+			TSubSequence1D::iterator start = p;
+			for (size_t di = 0; di < nSubPixels; ++di)
+			{
+				*p++ = ((i * nSubPixels + di) + jitterGenerator_()) * scale;
+			}
+			std::random_shuffle(start, p, numberGenerator_);
+		}
 	}
-	LASS_ASSERT(first == last);
+
+	// pick a subpixel worth of samples
+	//
+	LASS_ASSERT(last - first == subSeqSize);
+	TSubSequence1D::iterator p = subSequences1d_[id].begin();	
+	for (size_t k = 0; k < subSeqSize; ++k)
+	{
+		first[k] = p[k * nSubPixels + subPixel];
+	}
 }
 
 
@@ -222,12 +251,13 @@ void Stratifier::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixel), 
 	LASS_ASSERT(id >= 0);
 	if (static_cast<size_t>(id) >= subSequences2d_.size())
 	{
+		LASS_ENFORCE(subPixel == 0);
 		subSequences2d_.resize(id + 1);
-		subSequences2d_[id] = TSubSequence2D(nSubPixels * subSeqSize);
 	}		
 	
 	if (subPixel == 0)
 	{
+		subSequences2d_[id].resize(nSubPixels * subSeqSize);
 		const size_t sqrtNSubPixels = static_cast<size_t>(num::sqrt(static_cast<double>(nSubPixels)));
 		LASS_ASSERT(sqrtNSubPixels * sqrtNSubPixels == nSubPixels);
 		const size_t sqrtSubSeqSize = static_cast<size_t>(num::sqrt(static_cast<double>(subSeqSize)));

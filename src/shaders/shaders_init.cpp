@@ -29,6 +29,7 @@
 #include "beer.h"
 #include "bump_mapping.h"
 #include "dielectric.h"
+#include "fog.h"
 #include "lambert.h"
 #include "mirror.h"
 //#include "null_shader.h"
@@ -46,6 +47,7 @@ PY_MODULE_CLASS(shaders, AshikhminShirley)
 PY_MODULE_CLASS(shaders, Beer)
 PY_MODULE_CLASS(shaders, BumpMapping)
 PY_MODULE_CLASS(shaders, Dielectric)
+PY_MODULE_CLASS(shaders, Fog)
 PY_MODULE_CLASS(shaders, Lambert)
 PY_MODULE_CLASS(shaders, Mirror)
 //PY_MODULE_CLASS(shaders, NullShader)

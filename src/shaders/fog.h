@@ -22,12 +22,12 @@
  */
 
 /** @class liar::shaders::Beer
- *  @brief Not a "beer" medium, but a "Beer's law medium" ;)
+ *  @brief foggy smoky media ...
  *  @author Bram de Greve [Bramz]
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_BEER_H
-#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_BEER_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_FOG_H
+#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_FOG_H
 
 #include "shaders_common.h"
 #include "../kernel/medium.h"
@@ -37,23 +37,31 @@ namespace liar
 namespace shaders
 {
 
-class LIAR_SHADERS_DLL Beer: public Medium
+class LIAR_SHADERS_DLL Fog: public Medium
 {
-    PY_HEADER(Medium)
+	PY_HEADER(Medium)
 public:
 
-	Beer();
-	Beer(const XYZ& transparency);
+	Fog();
+	Fog(const XYZ& scattering);
 
-	const XYZ& transparency() const;
-	void setTransparency(const XYZ& transparency);
+	const XYZ& scattering() const;
+	void setScattering(const XYZ& scattering);
+
+	TScalar assymetry() const;
+	void setAssymetry(TScalar g);
+
+	void setNumScatterSamples(size_t n);
 
 private:
 
+	size_t doNumScatterSamples() const;
 	const XYZ doTransparency(const BoundedRay& ray) const;
-	const XYZ doPhase(const TPoint3D&, const TVector3D&, const TVector3D&) const;
+	const XYZ doPhase(const TPoint3D& pos, const TVector3D& dirIn, const TVector3D& dirOut) const;
 
-	XYZ transparency_;
+	XYZ scattering_;
+	TScalar assymetry_;
+	size_t numSamples_;
 };
 
 }

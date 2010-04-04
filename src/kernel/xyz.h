@@ -144,6 +144,10 @@ inline XYZ pow(const XYZ& a, TScalar b)
 {
 	return XYZ(num::pow(a.x, b), num::pow(a.y, b), num::pow(a.z, b));
 }
+inline XYZ exp(const XYZ& a)
+{
+	return XYZ(num::exp(a.x), num::exp(a.y), num::exp(a.z));
+}
 inline XYZ clamp(const XYZ& a, TScalar min, TScalar max)
 {
 	return XYZ(num::clamp(a.x, min, max), num::clamp(a.y, min, max), num::clamp(a.z, min, max));

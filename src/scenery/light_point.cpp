@@ -158,7 +158,7 @@ const XYZ LightPoint::doEmission(const Sample&, const TRay3D& ray, BoundedRay& s
 }
 
 
-const XYZ LightPoint::doSampleEmission(const Sample&, const TPoint2D&, const TPoint3D& target, const TVector3D&, BoundedRay& shadowRay, TScalar& pdf) const
+const XYZ LightPoint::doSampleEmission(const Sample&, const TPoint2D&, const TPoint3D& target, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	TVector3D toLight = position_ - target;
 	const TScalar squaredDistance = (position_ - target).squaredNorm();

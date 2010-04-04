@@ -197,7 +197,7 @@ TScalar LightSpot::doArea() const
 
 
 
-const XYZ LightSpot::doSampleEmission(const Sample&, const TPoint2D&, const TPoint3D& target, const TVector3D&, BoundedRay& shadowRay, TScalar& pdf) const
+const XYZ LightSpot::doSampleEmission(const Sample&, const TPoint2D&, const TPoint3D& target, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	TVector3D toLight = position_ - target;
 	const TScalar squaredDistance = toLight.squaredNorm();

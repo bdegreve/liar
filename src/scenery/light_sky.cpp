@@ -220,15 +220,14 @@ const XYZ LightSky::doEmission(const Sample&, const TRay3D& ray, BoundedRay& sha
 
 
 const XYZ LightSky::doSampleEmission(
-		const Sample&, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D&, 
+		const Sample&, const TPoint2D& lightSample, const TPoint3D& target, 
 		BoundedRay& shadowRay, TScalar& pdf) const
 {
 	TScalar i, j;
 	sampleMap(lightSample, i, j, pdf);
 
 	const TVector3D dir = direction(i, j);
-	shadowRay = BoundedRay(target, dir, tolerance, TNumTraits::infinity,
-		prim::IsAlreadyNormalized());
+	shadowRay = BoundedRay(target, dir, tolerance, TNumTraits::infinity, prim::IsAlreadyNormalized());
 
 	const size_t ii = std::min(static_cast<size_t>(num::floor(i)), resolution_.x - 1);
 	const size_t jj = std::min(static_cast<size_t>(num::floor(j)), resolution_.y - 1);

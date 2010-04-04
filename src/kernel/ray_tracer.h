@@ -94,6 +94,7 @@ protected:
 	RayTracer();
 
 	const LightContexts& lights() const { return lights_; }
+	MediumStack& mediumStack() const { return mediumStack_; }
 
 private:
 
@@ -128,6 +129,7 @@ private:
 	LightContexts lights_;
 	int maxRayGeneration_;
 	mutable int rayGeneration_;
+	mutable MediumStack mediumStack_;
 };
 
 }

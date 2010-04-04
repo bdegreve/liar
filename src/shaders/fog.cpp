@@ -22,44 +22,69 @@
  */
 
 #include "shaders_common.h"
-#include "beer.h"
+#include "fog.h"
+#include "../kernel/sample.h"
 
 namespace liar
 {
 namespace shaders
 {
 
-PY_DECLARE_CLASS_DOC(Beer, "Beer's Law")
-PY_CLASS_CONSTRUCTOR_0(Beer)
-PY_CLASS_CONSTRUCTOR_1(Beer, const XYZ&)
-PY_CLASS_MEMBER_RW(Beer, transparency, setTransparency)
+PY_DECLARE_CLASS_DOC(Fog, "")
+PY_CLASS_CONSTRUCTOR_0(Fog)
+PY_CLASS_CONSTRUCTOR_1(Fog, const XYZ&)
+PY_CLASS_MEMBER_RW(Fog, scattering, setScattering)
+PY_CLASS_MEMBER_RW(Fog, assymetry, setAssymetry)
+PY_CLASS_MEMBER_RW(Fog, numScatterSamples, setNumScatterSamples)
 
 // --- public --------------------------------------------------------------------------------------
 
-Beer::Beer():
-	transparency_(XYZ(1, 1, 1))
+Fog::Fog():
+	scattering_(0, 0, 0),
+	assymetry_(0)
 {
 }
 
 
 
-Beer::Beer(const XYZ& transparency):
-	transparency_(transparency)
+Fog::Fog(const XYZ& scattering):
+	scattering_(scattering)
 {
 }
 
 
 
-const XYZ& Beer::transparency() const
+const XYZ& Fog::scattering() const
 {
-	return transparency_;
+	return scattering_;
 }
 
 
 
-void Beer::setTransparency(const XYZ& transparency)
+void Fog::setScattering(const XYZ& scattering)
 {
-	transparency_ = transparency;
+	scattering_ = scattering;
+}
+
+
+
+TScalar Fog::assymetry() const
+{
+	return assymetry_;
+}
+
+
+
+void Fog::setAssymetry(TScalar g)
+{
+	assymetry_ = num::clamp<TScalar>(g, -1, 1);
+}
+
+
+
+void Fog::setNumScatterSamples(size_t n)
+{
+	numSamples_ = n;
 }
 
 
@@ -70,18 +95,30 @@ void Beer::setTransparency(const XYZ& transparency)
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Beer::doTransparency(const BoundedRay& ray) const
+size_t Fog::doNumScatterSamples() const
 {
-	const TScalar t = ray.farLimit() - ray.nearLimit();
-	LASS_ASSERT(t >= 0);
-	return pow(transparency_, t);
+	return numSamples_;
 }
 
 
 
-const XYZ Beer::doPhase(const TPoint3D&, const TVector3D&, const TVector3D&) const
+const XYZ Fog::doTransparency(const BoundedRay& ray) const
 {
-	return XYZ();
+	const TScalar t = ray.farLimit() - ray.nearLimit();
+	LASS_ASSERT(t >= 0);
+	return exp(scattering_ * -t); 
+}
+
+
+
+const XYZ Fog::doPhase(const TPoint3D& pos, const TVector3D& dirIn, const TVector3D& dirOut) const
+{
+	const TScalar cosTheta = dot(dirIn, dirOut);
+	const TScalar g = assymetry_;
+
+	const TScalar p = (1 - num::sqr(g)) / (4 * TNumTraits::pi * num::pow(1 + num::sqr(g) - 2 * g * cosTheta, 1.5));
+
+	return scattering_ * p;
 }
 
 

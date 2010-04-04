@@ -52,10 +52,12 @@ public:
 
 private:
 
-	typedef std::vector<TSample2D> TStrata2D;
 	typedef std::vector<TSample1D> TStrata1D;
+	typedef std::vector<TSample2D> TStrata2D;
 
+	typedef std::vector<TSample1D> TSubSequence1D;
 	typedef std::vector<TSample2D> TSubSequence2D;
+	typedef std::vector<TSubSequence1D> TSubSequence1DList;
 	typedef std::vector<TSubSequence2D> TSubSequence2DList;
 
 	typedef num::RandomMT19937 TNumberGenerator;
@@ -98,6 +100,7 @@ private:
 	TStrata2D lensStrata_;
 	TStrata1D timeStrata_;
 	TStrata1D frequencyStrata_;
+	TSubSequence1DList subSequences1d_;
 	TSubSequence2DList subSequences2d_;
 	size_t strataPerPixel_;
 	bool isJittered_;
