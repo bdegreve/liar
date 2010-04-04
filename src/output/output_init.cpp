@@ -35,6 +35,11 @@
 
 using namespace liar::output;
 
+PY_DECLARE_MODULE_DOC(output, 
+	"LiAR output devices\n"
+	"\n"
+	"this software is based in part on the PixelToaster library."
+	)
 PY_DECLARE_MODULE_DOC(output, "LiAR output devices")
 
 // keep in alphabetical order please! [Bramz]

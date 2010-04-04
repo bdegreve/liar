@@ -4,6 +4,7 @@ find_path(
 	pixeltoaster_INCLUDE_DIR 
 	PixelToaster.h
 	DOC "path to PixelToaster.h"
+	PATHS "${CMAKE_CURRENT_SOURCE_DIR}/PixelToaster"
 	)
 if (pixeltoaster_INCLUDE_DIR)
 	set(_ok TRUE)

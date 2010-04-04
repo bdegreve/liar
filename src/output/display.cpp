@@ -35,7 +35,39 @@ namespace liar
 namespace output
 {
 
-PY_DECLARE_CLASS_DOC(Display, "render target in a window (PixelToaster)");
+PY_DECLARE_CLASS_DOC(Display, 
+	"Render target in a window\n"
+	"\n"
+	"---\n"
+	"\n"
+	"This software is based in part on the PixelToaster library\n"
+	"(http://code.google.com/p/pixeltoaster/):\n"
+	"\n"
+	"PixelToaster Framebuffer Library.\n"
+	"\n"
+	"Copyright © 2004-2007 Glenn Fiedler\n"
+	"\n"
+	"This software is provided 'as-is', without any express or implied\n"
+	"warranty. In no event will the authors be held liable for any damages\n"
+	"arising from the use of this software.\n"
+	"\n"
+	"Permission is granted to anyone to use this software for any purpose,\n"
+	"including commercial applications, and to alter it and redistribute it\n"
+	"freely, subject to the following restrictions:\n"
+	"\n"
+	"1. The origin of this software must not be misrepresented; you must not\n"
+	"   claim that you wrote the original software. If you use this software\n"
+	"   in a product, an acknowledgment in the product documentation would be\n"
+	"   appreciated but is not required.\n"
+	"\n"
+	"2. Altered source versions must be plainly marked as such, and must not be\n"
+	"   misrepresented as being the original software.\n"
+	"\n"
+	"3. This notice may not be removed or altered from any source distribution.\n"
+	"\n"
+	"Glenn Fiedler\n"
+	"gaffer@gaffer.org\n"
+	);
 PY_CLASS_CONSTRUCTOR_2(Display, const std::string&, const TResolution2D&)
 PY_CLASS_MEMBER_R(Display, title)
 PY_CLASS_MEMBER_RW(Display, rgbSpace, setRgbSpace)
