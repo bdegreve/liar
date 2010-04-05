@@ -238,6 +238,7 @@ void Stratifier::doSampleSubSequence1D(const TResolution2D&, size_t subPixel, TS
 	{
 		first[k] = p[k * nSubPixels + subPixel];
 	}
+	std::random_shuffle(first, last, numberGenerator_); // to avoid inter-sequence coherence
 }
 
 
@@ -294,6 +295,7 @@ void Stratifier::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixel), 
 	{
 		first[k] = p[k * nSubPixels + subPixel];
 	}
+	std::random_shuffle(first, last, numberGenerator_); // to avoid inter-sequence coherence
 }
 
 

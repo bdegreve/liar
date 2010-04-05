@@ -245,8 +245,10 @@ void LatinHypercube::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixe
 		first[k] = subSequence[k * nSubPixels + subPixel];
 	}
 
-	// and shuffle the ys again
+	// and shuffle again. for a single sequence, it's sufficient to only shuffle the ys, 
+	// but to avoid inter-sequence coherence, we shuffle the xs too.
 	//
+	std::random_shuffle(stde::member_iterator(first, &TSample2D::x), stde::member_iterator(last, &TSample2D::x), numberGenerator_);
 	std::random_shuffle(stde::member_iterator(first, &TSample2D::y), stde::member_iterator(last, &TSample2D::y), numberGenerator_);
 }
 

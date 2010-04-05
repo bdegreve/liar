@@ -1184,17 +1184,14 @@ const XYZ PhotonMapper::inScattering(const Sample& sample, const kernel::Bounded
 		return XYZ();
 	}
 
-	const Sample::TSubSequence1D stepSamples = sample.subSequence1D(medium->idStepSamples());
+	const Sample::TSubSequence1D stepSamples = sample.subSequence1D(medium->idStepSamples()); // these are unsorted!!!
 	const Sample::TSubSequence1D lightSamples = sample.subSequence1D(medium->idLightSamples());
 	const Sample::TSubSequence2D surfaceSamples = sample.subSequence2D(medium->idSurfaceSamples());
 
 	const difference_type n = stepSamples.size();
 	LASS_ASSERT(lightSamples.size() == n && surfaceSamples.size() == n);
 
-	TScalar tPrev = tNear;
-	XYZ trans = XYZ(1, 1, 1);
-	XYZ result;
-	
+	XYZ result;	
 	for (difference_type k = 0; k < n; ++k)
 	{
 		const TScalar t = num::lerp(tNear, tFar, stepSamples[k]);
@@ -1217,8 +1214,7 @@ const XYZ PhotonMapper::inScattering(const Sample& sample, const kernel::Bounded
 		{
 			continue;
 		}
-		trans *= medium->transparency(bound(ray, tPrev, t));
-		tPrev = t;
+		const XYZ trans = medium->transparency(bound(ray, tNear, t));
 		result += trans * phase * radiance / (n * lightPdf * surfacePdf);
 	}
 
