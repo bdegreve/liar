@@ -1,16 +1,16 @@
-file(GLOB kernelshared_HDRS 
+file(GLOB libkernel_HDRS 
 	*.h 
 	*.inl
 	)
-file(GLOB kernelshared_SRCS 
+file(GLOB libkernel_SRCS 
 	*.cpp
 	)	
-list_remove_regex(kernelshared_SRCS "kernel_init.cpp$")
-add_library(kernelshared SHARED 
-	${kernelshared_HDRS} 
-	${kernelshared_SRCS}
+list_remove_regex(libkernel_SRCS "kernel_init.cpp$")
+add_library(libkernel SHARED 
+	${libkernel_HDRS} 
+	${libkernel_SRCS}
 	)
-target_link_libraries(kernelshared 
+target_link_libraries(libkernel 
 	lass
 	)
 
@@ -27,12 +27,12 @@ if (WIN32)
 		)
 endif()
 target_link_libraries(kernel 
-	kernelshared
+	libkernel
 	)
 
 
 
 install(
-	TARGETS kernel kernelshared 
+	TARGETS kernel libkernel 
 	DESTINATION .
 	)

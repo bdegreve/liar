@@ -56,7 +56,7 @@
 
 #include "config.h"
 
-#ifdef kernelshared_EXPORTS
+#ifdef libkernel_EXPORTS
 #	define LIAR_KERNEL_DLL LASS_DLL_EXPORT
 #else
 #	define LIAR_KERNEL_DLL LASS_DLL_IMPORT

@@ -1,6 +1,6 @@
 macro(add_liar_codec name)
 	file(GLOB ${name}_SRCS ${name}.cpp)
-	set(${name}_LIBS kernelshared ${ARGN})
+	set(${name}_LIBS libkernel ${ARGN})
 	add_library(${name} MODULE 
 		${${name}_SRCS}
 		)
