@@ -32,7 +32,7 @@ namespace shaders
 
 PY_DECLARE_CLASS_DOC(Fog, "")
 PY_CLASS_CONSTRUCTOR_0(Fog)
-PY_CLASS_CONSTRUCTOR_1(Fog, const XYZ&)
+PY_CLASS_CONSTRUCTOR_3(Fog, const XYZ&, const XYZ&, TScalar)
 PY_CLASS_MEMBER_RW(Fog, scattering, setScattering)
 PY_CLASS_MEMBER_RW(Fog, assymetry, setAssymetry)
 PY_CLASS_MEMBER_RW(Fog, numScatterSamples, setNumScatterSamples)
@@ -40,16 +40,35 @@ PY_CLASS_MEMBER_RW(Fog, numScatterSamples, setNumScatterSamples)
 // --- public --------------------------------------------------------------------------------------
 
 Fog::Fog():
+	absorption_(0, 0, 0),
 	scattering_(0, 0, 0),
-	assymetry_(0)
+	assymetry_(0),
+	numSamples_(1)
 {
 }
 
 
 
-Fog::Fog(const XYZ& scattering):
-	scattering_(scattering)
+Fog::Fog(const XYZ& absorption, const XYZ& scattering, TScalar assymetry):
+	absorption_(absorption),
+	scattering_(scattering),
+	assymetry_(assymetry),
+	numSamples_(1)
 {
+}
+
+
+
+const XYZ& Fog::absorption() const
+{
+	return absorption_;
+}
+
+
+
+void Fog::setAbsorption(const XYZ& absorption)
+{
+	absorption_ = absorption;
 }
 
 
@@ -106,7 +125,7 @@ const XYZ Fog::doTransparency(const BoundedRay& ray) const
 {
 	const TScalar t = ray.farLimit() - ray.nearLimit();
 	LASS_ASSERT(t >= 0);
-	return exp(scattering_ * -t); 
+	return exp((absorption_ + scattering_) * -t); 
 }
 
 

@@ -43,7 +43,10 @@ class LIAR_SHADERS_DLL Fog: public Medium
 public:
 
 	Fog();
-	Fog(const XYZ& scattering);
+	Fog(const XYZ& absorption, const XYZ& scattering, TScalar assymetry);
+
+	const XYZ& absorption() const;
+	void setAbsorption(const XYZ& absorption);
 
 	const XYZ& scattering() const;
 	void setScattering(const XYZ& scattering);
@@ -59,6 +62,7 @@ private:
 	const XYZ doTransparency(const BoundedRay& ray) const;
 	const XYZ doPhase(const TPoint3D& pos, const TVector3D& dirIn, const TVector3D& dirOut) const;
 
+	XYZ absorption_;
 	XYZ scattering_;
 	TScalar assymetry_;
 	size_t numSamples_;
