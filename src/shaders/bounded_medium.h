@@ -26,8 +26,8 @@
  *  @author Bram de Greve [Bramz]
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_FOG_H
-#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_FOG_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_BOUNDED_MEDIUM_H
+#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_BOUNDED_MEDIUM_H
 
 #include "shaders_common.h"
 #include "../kernel/medium.h"
@@ -37,27 +37,21 @@ namespace liar
 namespace shaders
 {
 
-class LIAR_SHADERS_DLL Fog: public Medium
+class LIAR_SHADERS_DLL BoundedMedium: public Medium
 {
 	PY_HEADER(Medium)
 public:
 
-	Fog();
-	Fog(TScalar extinction, TScalar assymetry);
+	BoundedMedium();
+	BoundedMedium(const TMediumPtr& medium, const TAabb3D& bounds);
 
-	TScalar extinction() const;
-	void setExtinction(TScalar extinction);
+	const TMediumPtr& medium() const;
+	void setMedium(const TMediumPtr& medium);
 
-	TScalar assymetry() const;
-	void setAssymetry(TScalar g);
-
-	const XYZ& color() const;
-	void setColor(const XYZ& color);
-
-	void setNumScatterSamples(size_t n);
+	const TAabb3D& bounds() const;
+	void setBounds(const TAabb3D& bounds);
 
 private:
-
 	size_t doNumScatterSamples() const;
 	const XYZ doTransmittance(const BoundedRay& ray) const;
 	const XYZ doScatterOut(const BoundedRay& ray) const;
@@ -66,12 +60,10 @@ private:
 	const XYZ doPhase(const TPoint3D&, const TVector3D&, const TVector3D&, TScalar& pdf) const;
 	const XYZ doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const;
 
-	void init(TScalar extinction = 0, TScalar assymetry = 0, const XYZ& color = XYZ(.5), size_t numSamples = 1);
+	bool bound(const BoundedRay& ray, BoundedRay& bounded) const;
 
-	XYZ color_;
-	TScalar extinction_;
-	TScalar assymetry_;
-	size_t numSamples_;
+	TMediumPtr medium_;
+	TAabb3D bounds_;
 };
 
 }

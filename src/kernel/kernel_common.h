@@ -53,6 +53,7 @@
 #include <lass/prim/color_rgba.h>
 #include <lass/prim/transformation_3d.h>
 #include <lass/python/python_api.h>
+#include <lass/python/streams.h>
 
 #include "config.h"
 

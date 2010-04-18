@@ -50,8 +50,12 @@ public:
 
 private:
 
-	const XYZ doTransparency(const BoundedRay& ray) const;
-	const XYZ doPhase(const TPoint3D&, const TVector3D&, const TVector3D&) const;
+	const XYZ doTransmittance(const BoundedRay& ray) const;
+	const XYZ doScatterOut(const BoundedRay& ray) const;
+	const XYZ doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
+	const XYZ doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
+	const XYZ doPhase(const TPoint3D&, const TVector3D&, const TVector3D&, TScalar&) const;
+	const XYZ doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const;
 
 	XYZ transparency_;
 };

@@ -192,8 +192,7 @@ void postInject(PyObject*)
 {
 	liar::kernel::TImageCodecMap& map = liar::kernel::imageCodecs();
 	map["exr"] = liar::kernel::TImageCodecPtr(new liar::openexr::ImageCodecOpenEXR);
-	PyRun_SimpleString("import sys");
-	PyRun_SimpleString("sys.stdout.write('''liar.codecs.openexr imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n''')\n");
+	LASS_COUT << "liar.codecs.openexr imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n";
 }
 
 }

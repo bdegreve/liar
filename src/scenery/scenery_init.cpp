@@ -78,8 +78,7 @@ PY_MODULE_CLASS(scenery, TriangleMeshComposite)
 
 void sceneryPostInject(PyObject*)
 {
-	PyRun_SimpleString("import sys");
-	PyRun_SimpleString("sys.stdout.write('''liar.scenery imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n''')\n");
+	LASS_COUT << "liar.scenery imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n";
 }
 
 LASS_EXECUTE_BEFORE_MAIN(

@@ -24,6 +24,7 @@
 #include "shaders_common.h"
 #include "fog.h"
 #include "../kernel/sample.h"
+#include <lass/prim/impl/plane_3d_impl_detail.h>
 
 namespace liar
 {
@@ -32,57 +33,38 @@ namespace shaders
 
 PY_DECLARE_CLASS_DOC(Fog, "")
 PY_CLASS_CONSTRUCTOR_0(Fog)
-PY_CLASS_CONSTRUCTOR_3(Fog, const XYZ&, const XYZ&, TScalar)
-PY_CLASS_MEMBER_RW(Fog, scattering, setScattering)
+PY_CLASS_CONSTRUCTOR_2(Fog, TScalar, TScalar)
+PY_CLASS_MEMBER_RW(Fog, extinction, setExtinction)
 PY_CLASS_MEMBER_RW(Fog, assymetry, setAssymetry)
+PY_CLASS_MEMBER_RW(Fog, color, setColor)
 PY_CLASS_MEMBER_RW(Fog, numScatterSamples, setNumScatterSamples)
 
 // --- public --------------------------------------------------------------------------------------
 
-Fog::Fog():
-	absorption_(0, 0, 0),
-	scattering_(0, 0, 0),
-	assymetry_(0),
-	numSamples_(1)
+Fog::Fog()
 {
+	init();
 }
 
 
 
-Fog::Fog(const XYZ& absorption, const XYZ& scattering, TScalar assymetry):
-	absorption_(absorption),
-	scattering_(scattering),
-	assymetry_(assymetry),
-	numSamples_(1)
+Fog::Fog(TScalar extinction, TScalar assymetry)
 {
+	init(extinction, assymetry);
 }
 
 
 
-const XYZ& Fog::absorption() const
+TScalar Fog::extinction() const
 {
-	return absorption_;
+	return extinction_;
 }
 
 
 
-void Fog::setAbsorption(const XYZ& absorption)
+void Fog::setExtinction(TScalar extinction)
 {
-	absorption_ = absorption;
-}
-
-
-
-const XYZ& Fog::scattering() const
-{
-	return scattering_;
-}
-
-
-
-void Fog::setScattering(const XYZ& scattering)
-{
-	scattering_ = scattering;
+	extinction_ = std::max<TScalar>(extinction, 0);
 }
 
 
@@ -97,6 +79,27 @@ TScalar Fog::assymetry() const
 void Fog::setAssymetry(TScalar g)
 {
 	assymetry_ = num::clamp<TScalar>(g, -1, 1);
+}
+
+
+
+/** diffuse color of particles.
+ *  @code
+ *  sigma_e = sigma_a + sigma_s // extinction = scattering + absorption.
+ *  -> sigma_s = color * sigma_e
+ *  -> sigma_a = (1 - color) * sigma_e
+ *  @endcode
+ */
+const XYZ& Fog::color() const
+{
+	return color_;
+}
+
+
+
+void Fog::setColor(const XYZ& color)
+{
+	color_ = color;
 }
 
 
@@ -121,23 +124,132 @@ size_t Fog::doNumScatterSamples() const
 
 
 
-const XYZ Fog::doTransparency(const BoundedRay& ray) const
+const XYZ Fog::doTransmittance(const BoundedRay& ray) const
 {
 	const TScalar t = ray.farLimit() - ray.nearLimit();
-	LASS_ASSERT(t >= 0);
-	return exp((absorption_ + scattering_) * -t); 
+	LASS_ASSERT(t >= 0 && extinction_ >= 0);
+	return XYZ(num::exp(extinction_ * -t)); 
 }
 
 
 
-const XYZ Fog::doPhase(const TPoint3D& pos, const TVector3D& dirIn, const TVector3D& dirOut) const
+const XYZ Fog::doScatterOut(const BoundedRay& ray) const
+{
+	const TScalar t = ray.farLimit() - ray.nearLimit();
+	LASS_ASSERT(t >= 0 && extinction_ >= 0);
+	return XYZ(extinction_ * num::exp(extinction_ * -t)); 
+}
+
+
+namespace temp
+{
+
+template <typename T>
+T uniformToExponential(T uniform, T sigma, T& pdf)
+{
+	pdf *= (1 - uniform) * sigma;
+	return sigma > 0 ? (-num::log(std::max<TScalar>(0, 1 - uniform)) / sigma) : TNumTraits::infinity;
+}
+
+}
+
+
+const XYZ Fog::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+{
+	const TScalar dMax = ray.farLimit() - ray.nearLimit();
+	const TScalar cdfMax = 1 - num::exp(-extinction_ * dMax);
+	if (cdfMax <= 0)
+	{
+		pdf = 0;
+		return XYZ();
+	}
+	TScalar p = 1;
+	const TScalar d = temp::uniformToExponential(sample * cdfMax, extinction_, pdf);
+	tScatter = std::min(ray.nearLimit() + d, ray.farLimit());
+	pdf = p / cdfMax;
+	return XYZ(p);
+}
+
+
+const XYZ Fog::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+{
+	pdf = 1;
+	const TScalar dMax = ray.farLimit() - ray.nearLimit();
+	const TScalar d = temp::uniformToExponential(sample, extinction_, pdf);
+	if (d > dMax)
+	{
+		// full transmission
+		tScatter = ray.farLimit();
+		pdf = num::exp(-extinction_ * dMax); // = 1 - cdf(tMax);
+		return XYZ(pdf);
+	}
+
+	// the photon has hit a particle. we always assume it's scattered.
+	// the callee has to russian roulette for absorption himself.
+	tScatter = ray.nearLimit() + d;
+	return XYZ(pdf);
+}
+
+
+const XYZ Fog::doPhase(const TPoint3D& pos, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
 {
 	const TScalar cosTheta = dot(dirIn, dirOut);
 	const TScalar g = assymetry_;
 
-	const TScalar p = (1 - num::sqr(g)) / (4 * TNumTraits::pi * num::pow(1 + num::sqr(g) - 2 * g * cosTheta, 1.5));
+	const TScalar g2 = num::sqr(g);
+	const TScalar a = 1 - g2;
+	const TScalar b = 1 + g2;
+	const TScalar c = b - 2 * g * cosTheta;
+	TScalar p = a / (4 * TNumTraits::pi * num::pow(c, 1.5));
+	if (num::isInf(p))
+	{
+		p = 1;
+	}
+	pdf = p;
+	return color_ * p;
+}
 
-	return scattering_ * p;
+
+
+const XYZ Fog::doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
+{
+	const TScalar g = assymetry_;
+	const TScalar p = 2 * sample.x - 1;
+	
+	TScalar cosTheta = g;
+	pdf = 1;
+	if (g == 0)
+	{
+		cosTheta = p;
+		pdf = 1 / (4 * TNumTraits::pi);
+	}
+	else if (g * p > -1)
+	{
+		const TScalar g2 = num::sqr(g);
+		const TScalar a = 1 - g2;
+		const TScalar b = 1 + g2;
+		const TScalar c = b - 2 * g * cosTheta;
+		cosTheta = ( b - num::sqr(a / (1 + g * p)) ) / (2 * g);
+		pdf = a / (4 * TNumTraits::pi * num::pow(c, 1.5));
+	}
+
+	TVector3D u, v;
+	prim::impl::Plane3DImplDetail::generateDirections(dirIn, u, v);
+	const TScalar phi = 2 * TNumTraits::pi * sample.y;
+	const TScalar sinTheta = num::sqrt(std::max<TScalar>(1 - num::sqr(cosTheta), 0));
+	dirOut = cosTheta * dirIn + (sinTheta * num::cos(phi)) * u + (sinTheta * num::sin(phi)) * v;
+
+	return color_ * pdf;
+}
+
+
+
+void Fog::init(TScalar extinction, TScalar assymetry, const XYZ& color, size_t numSamples)
+{
+	setExtinction(extinction);
+	setAssymetry(assymetry);
+	setColor(color);
+	setNumScatterSamples(numSamples);
 }
 
 

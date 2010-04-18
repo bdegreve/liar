@@ -44,8 +44,7 @@ PY_MODULE_FUNCTION(samplers, setDefaultSampler)
 void samplersPostInject(PyObject*)
 {
 	setDefaultSampler(liar::kernel::TSamplerPtr(new LatinHypercube));
-	PyRun_SimpleString( "import sys" );
-	PyRun_SimpleString("sys.stdout.write('''liar.samplers imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n''')\n");
+	LASS_COUT << "liar.samplers imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n";
 }
 
 LASS_EXECUTE_BEFORE_MAIN(

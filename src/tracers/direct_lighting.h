@@ -60,8 +60,6 @@ private:
 	const XYZ traceSpecularAndGlossy(
 		const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf, const kernel::DifferentialRay& primaryRay,
 		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn, bool singleSample) const;
-
-	mutable MediumStack mediumStack_;
 };
 
 }

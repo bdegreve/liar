@@ -116,9 +116,14 @@ PY_MODULE_FUNCTION_DOC(kernel, transcodeImage,
 void kernelPreInject()
 {
 	lass::util::setProcessPriority(lass::util::ppBelowNormal);
-#ifndef _DEBUG
-	lass::io::proxyMan()->clog()->remove(&std::clog);
+	lass::io::proxyMan()->cout()->add(&lass::python::sysStdout);
+	lass::io::proxyMan()->cerr()->add(&lass::python::sysStderr);
+#ifdef _DEBUG
+	lass::io::proxyMan()->clog()->add(&lass::python::sysStderr);
 #endif
+	lass::io::proxyMan()->cout()->remove(&std::cout);
+	lass::io::proxyMan()->cerr()->remove(&std::cerr);
+	lass::io::proxyMan()->clog()->remove(&std::clog);
 }
 
 void kernelPostInject(PyObject*)
@@ -126,19 +131,15 @@ void kernelPostInject(PyObject*)
 	PY_INJECT_OBJECT_IN_MODULE_EX(liar::kernel::CIEXYZ, kernel, "CIEXYZ")
 	PY_INJECT_OBJECT_IN_MODULE_EX(liar::kernel::sRGB, kernel, "sRGB")
 
-	std::ostringstream header;
-	header << liar::name << " v" << liar::version << " ("
+	LASS_COUT << liar::name << " v" << liar::version << " ("
 		<< LASS_LIB_PLATFORM "_" LASS_LIB_COMPILER LASS_LIB_DEBUG << ")\n"
 		<< "authors: " << liar::authors << "\n"
 		<< "website: " << liar::website << "\n"
 		<< liar::name << " comes with ABSOLUTELY NO WARRANTY.\n"
 		<< "This is free software, and you are welcome to redistribute it \n"
 		<< "under certain conditions.  Call license() for details.\n";
-		
-	PyRun_SimpleString( "import sys" );
-	PyRun_SimpleString( std::string("sys.stdout.write('''" + header.str() + "''')\n").c_str());
-	PyRun_SimpleString("sys.stdout.write('''liar.kernel imported (v" 
-		LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n''')\n");
+
+	LASS_COUT << "liar.kernel imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n";
 }
 
 LASS_EXECUTE_BEFORE_MAIN(

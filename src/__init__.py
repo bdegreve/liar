@@ -25,25 +25,24 @@
 import sys
 try:
 	_oldflags = sys.getdlopenflags()
+except AttributeError:
+	pass
+else:
 	try:
 		import dl
-	except:
-		try:
-			import DLFCN as dl
-		except:
-			pass
+	except ImportError:
+		import DLFCN as dl
 	sys.setdlopenflags(dl.RTLD_NOW | dl.RTLD_GLOBAL)
-except:
-	pass	
+
 
 from liar.kernel import *
 import liar.cameras
-import liar.scenery
+import liar.codecs
 import liar.output
 import liar.samplers
+import liar.scenery
 import liar.shaders
-import liar.tracers
 import liar.textures
-import liar.codecs
+import liar.tracers
 
 # EOF

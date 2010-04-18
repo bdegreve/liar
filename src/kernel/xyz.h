@@ -96,6 +96,11 @@ public:
 	}
 };
 
+inline XYZ abs(const XYZ& a)
+{
+	return XYZ(num::abs(a.x), num::abs(a.y), num::abs(a.z));
+}
+
 inline TScalar average(const XYZ& a)
 {
 	return a.x + a.y + a.z / 3;

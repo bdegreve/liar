@@ -53,8 +53,7 @@ PY_MODULE_CLASS(output, Splitter)
 
 void outputPostInject(PyObject*)
 {
-	PyRun_SimpleString( "import sys" );
-	PyRun_SimpleString("sys.stdout.write('''liar.output imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n''')\n");
+	LASS_COUT << "liar.output imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n";
 }
 
 LASS_EXECUTE_BEFORE_MAIN(

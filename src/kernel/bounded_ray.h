@@ -68,6 +68,8 @@ public:
 			t < farLimit_ * (TNumTraits::one - tolerance);
 	}
 
+	bool operator!() const { return nearLimit_ > farLimit_; }
+
 private:
 
 	TRay3D unboundedRay_;

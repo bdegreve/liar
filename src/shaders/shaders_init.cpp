@@ -27,6 +27,7 @@
 //
 #include "ashikhmin_shirley.h"
 #include "beer.h"
+#include "bounded_medium.h"
 #include "bump_mapping.h"
 #include "dielectric.h"
 #include "fog.h"
@@ -45,6 +46,7 @@ PY_DECLARE_MODULE_DOC(shaders, "surface and volume shaders for LiAR")
 //
 PY_MODULE_CLASS(shaders, AshikhminShirley)
 PY_MODULE_CLASS(shaders, Beer)
+PY_MODULE_CLASS(shaders, BoundedMedium)
 PY_MODULE_CLASS(shaders, BumpMapping)
 PY_MODULE_CLASS(shaders, Dielectric)
 PY_MODULE_CLASS(shaders, Fog)
@@ -57,8 +59,7 @@ PY_MODULE_CLASS(shaders, Unshaded)
 
 void shadersPostInject(PyObject*)
 {
-	PyRun_SimpleString("import sys");
-	PyRun_SimpleString("sys.stdout.write('''liar.shaders imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n''')\n");
+	LASS_COUT << "liar.shaders imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n";
 }
 
 LASS_EXECUTE_BEFORE_MAIN(

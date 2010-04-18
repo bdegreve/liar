@@ -319,8 +319,7 @@ void postInject(PyObject*)
 {
 	liar::kernel::TImageCodecMap& map = liar::kernel::imageCodecs();
 	map["jpg"] = map["jpeg"] = liar::kernel::TImageCodecPtr(new liar::jpeglib::ImageCodecJpeg);
-	PyRun_SimpleString("import sys");
-	PyRun_SimpleString("sys.stdout.write('''liar.codecs.jpeglib imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n''')\n");
+	LASS_COUT << "liar.codecs.jpeglib imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n";
 }
 
 }

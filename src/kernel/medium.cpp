@@ -123,26 +123,62 @@ MediumStack::MediumStack(const TMediumPtr& defaultMedium):
 
 
 
-const XYZ MediumStack::transparency(const BoundedRay& ray) const
+const XYZ MediumStack::transmittance(const BoundedRay& ray) const
 {
-	return medium() ? medium()->transparency(ray) : XYZ(1, 1, 1);
+	return medium() ? medium()->transmittance(ray) : XYZ(1, 1, 1);
 }
 
 
 
-const XYZ MediumStack::transparency(const BoundedRay& ray, TScalar farLimit) const
+const XYZ MediumStack::transmittance(const BoundedRay& ray, TScalar farLimit) const
 {
-	return transparency(bound(ray, ray.nearLimit(), farLimit));
+	return transmittance(bound(ray, ray.nearLimit(), farLimit));
 }
 
 
 
-const XYZ MediumStack::transparency(const DifferentialRay& ray, TScalar farLimit) const
+const XYZ MediumStack::transmittance(const DifferentialRay& ray, TScalar farLimit) const
 {
-	return transparency(ray.centralRay(), farLimit);
+	return transmittance(ray.centralRay(), farLimit);
 }
 
 
+
+const XYZ MediumStack::sampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+{
+	if (!medium())
+	{
+		pdf = 0;
+		return XYZ(0);
+	}
+	return medium()->sampleScatterOut(sample, ray, tScatter, pdf);
+}
+
+
+
+const XYZ MediumStack::sampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+{
+	if (!medium())
+	{
+		tScatter = ray.farLimit();
+		pdf = 1;
+		return XYZ(1);
+	}
+	return medium()->sampleScatterOutOrTransmittance(sample, ray, tScatter, pdf);
+}
+
+
+
+const XYZ MediumStack::samplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
+{
+	if (!medium())
+	{
+		pdf = 0;
+		dirOut = TVector3D();
+		return XYZ(0);
+	}
+	return medium()->samplePhase(sample, position, dirIn, dirOut, pdf);
+}
 
 /*
 void MediumStack::push(const Medium* medium)

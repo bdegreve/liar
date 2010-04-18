@@ -35,8 +35,7 @@ namespace liar
 namespace output
 {
 
-PY_DECLARE_CLASS_DOC(Display, 
-	"Render target in a window\n"
+PY_DECLARE_CLASS_DOC(Display, "Render target in a window"
 	"\n"
 	"---\n"
 	"\n"
@@ -45,7 +44,7 @@ PY_DECLARE_CLASS_DOC(Display,
 	"\n"
 	"PixelToaster Framebuffer Library.\n"
 	"\n"
-	"Copyright © 2004-2007 Glenn Fiedler\n"
+	"Copyright (c) 2004-2007 Glenn Fiedler\n"
 	"\n"
 	"This software is provided 'as-is', without any express or implied\n"
 	"warranty. In no event will the authors be held liable for any damages\n"

@@ -97,7 +97,7 @@ const XYZ DirectLighting::doCastRay(
 	tIntersection = intersection.t();
 	alpha = 1;
 	const TPoint3D target = primaryRay.point(intersection.t());
-	const XYZ mediumTransparency = mediumStack_.transparency(BoundedRay(
+	const XYZ mediumTransparency = mediumStack().transmittance(BoundedRay(
 		primaryRay.centralRay().unboundedRay(), primaryRay.centralRay().nearLimit(),
 		intersection.t()));
 
@@ -106,7 +106,7 @@ const XYZ DirectLighting::doCastRay(
 	if (!shader)
 	{
 		// leaving or entering something
-		MediumChanger mediumChanger(mediumStack_, context.interior(), context.solidEvent());
+		MediumChanger mediumChanger(mediumStack(), context.interior(), context.solidEvent());
 		const DifferentialRay continuedRay = bound(primaryRay, intersection.t() + tolerance);
 		return mediumTransparency * this->castRay(sample, continuedRay, tIntersection, alpha);
 	}
@@ -347,7 +347,7 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 
 	if (shader->hasCaps(Shader::capsTransmission) && shader->idTransmissionSamples() != -1)
 	{
-		const MediumChanger mediumChanger(mediumStack_, context.interior(), context.solidEvent());
+		const MediumChanger mediumChanger(mediumStack(), context.interior(), context.solidEvent());
 		const TPoint3D beginCentral = target - 2 * tolerance * targetNormal;
 
 		Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idTransmissionSamples());

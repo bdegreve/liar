@@ -71,9 +71,30 @@ public:
 		return idSurfaceSamples_; 
 	}
 
-	const XYZ transparency(const BoundedRay& ray) const
+	const XYZ transmittance(const BoundedRay& ray) const
 	{
-		return doTransparency(ray); 
+		return doTransmittance(ray); 
+	}
+
+	const XYZ scatterOut(const BoundedRay& ray) const
+	{
+		return doScatterOut(ray); 
+	}
+
+	/** @param tScatter [out] position along ray where photon hits particle
+	 *  @returns attenuation due to transmition only, does not include scattering at tScatter.
+	 */
+	const XYZ sampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+	{
+		return doSampleScatterOut(sample, ray, tScatter, pdf);
+	}
+
+	/** @param tScatter [out] position along ray where photon hits particle
+	 *  @returns attenuation due to transmition only, does not include scattering at tScatter.
+	 */
+	const XYZ sampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+	{
+		return doSampleScatterOutOrTransmittance(sample, ray, tScatter, pdf);
 	}
 
 	/** @param dirIn: incoming direction @e towards @a position.
@@ -81,7 +102,17 @@ public:
 	 */
 	const XYZ phase(const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut) const
 	{
-		return doPhase(position, dirIn, dirOut);
+		TScalar pdf;
+		return doPhase(position, dirIn, dirOut, pdf);
+	}
+	const XYZ phase(const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
+	{
+		return doPhase(position, dirIn, dirOut, pdf);
+	}
+
+	const XYZ samplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
+	{
+		return doSamplePhase(sample, position, dirIn, dirOut, pdf);
 	}
 
 protected:
@@ -92,8 +123,12 @@ private:
 
 	virtual void doRequestSamples(const TSamplerPtr& sampler);
 	virtual size_t doNumScatterSamples() const;
-	virtual const XYZ doTransparency(const BoundedRay& ray) const = 0;
-	virtual const XYZ doPhase(const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut) const = 0;
+	virtual const XYZ doTransmittance(const BoundedRay& ray) const = 0;
+	virtual const XYZ doScatterOut(const BoundedRay& ray) const = 0;
+	virtual const XYZ doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const = 0;
+	virtual const XYZ doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const = 0;
+	virtual const XYZ doPhase(const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const = 0;
+	virtual const XYZ doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const = 0;
 
 	XYZ refractionIndex_;
 	size_t priority_;
@@ -111,9 +146,14 @@ class LIAR_KERNEL_DLL MediumStack
 public:
 	MediumStack(const TMediumPtr& defaultMedium = TMediumPtr());
 	const Medium* medium() const;
-	const XYZ transparency(const BoundedRay& ray) const;
-	const XYZ transparency(const BoundedRay& ray, TScalar farLimit) const;
-	const XYZ transparency(const DifferentialRay& ray, TScalar farLimit) const;
+	const XYZ transmittance(const BoundedRay& ray) const;
+	const XYZ transmittance(const BoundedRay& ray, TScalar farLimit) const;
+	const XYZ transmittance(const DifferentialRay& ray, TScalar farLimit) const;
+
+	const XYZ sampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
+	const XYZ sampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
+	const XYZ samplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dir, TScalar& pdf) const;
+
 private:
 	friend class MediumChanger;
 	typedef std::vector<const Medium*> TStack;

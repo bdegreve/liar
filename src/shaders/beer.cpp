@@ -70,7 +70,7 @@ void Beer::setTransparency(const XYZ& transparency)
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Beer::doTransparency(const BoundedRay& ray) const
+const XYZ Beer::doTransmittance(const BoundedRay& ray) const
 {
 	const TScalar t = ray.farLimit() - ray.nearLimit();
 	LASS_ASSERT(t >= 0);
@@ -79,9 +79,44 @@ const XYZ Beer::doTransparency(const BoundedRay& ray) const
 
 
 
-const XYZ Beer::doPhase(const TPoint3D&, const TVector3D&, const TVector3D&) const
+const XYZ Beer::doScatterOut(const BoundedRay& ray) const
 {
-	return XYZ();
+	return XYZ(0);
+}
+
+
+
+const XYZ Beer::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+{
+	pdf = 0;
+	return XYZ(0);
+}
+
+
+
+/** As we don't do any scattering in Beer, all incoming photons exit at the end (albeit attenuated)
+ */
+const XYZ Beer::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+{
+	tScatter = ray.farLimit();
+	pdf = 1;
+	return transmittance(ray);
+}
+
+
+
+const XYZ Beer::doPhase(const TPoint3D&, const TVector3D&, const TVector3D&, TScalar& pdf) const
+{
+	pdf = 0;
+	return XYZ(0);
+}
+
+
+
+const XYZ Beer::doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
+{
+	pdf = 0;
+	return XYZ(0);
 }
 
 
