@@ -113,6 +113,7 @@ PhotonMapper::PhotonMapper():
 		estimationSize_[i] = 50;
 		maxActualEstimationRadius_[i] = 0;
 	}
+	setNumSecondaryGatherRays(4);
 }
 
 
@@ -227,6 +228,9 @@ void PhotonMapper::setNumSecondaryGatherRays(size_t numSecondaryGatherRays)
 {
 	numSecondaryGatherRays_ = numSecondaryGatherRays;
 	secondaryGatherSamples_.resize(numSecondaryGatherRays);
+	secondaryLightSelectorSamples_.resize(numSecondaryGatherRays);
+	secondaryLightSamples_.resize(numSecondaryGatherRays);
+	secondaryBsdfSamples_.resize(numSecondaryGatherRays);
 }
 
 
@@ -492,14 +496,6 @@ const XYZ PhotonMapper::doCastRay(
 	}
 
 	return mediumInScattering + mediumTransparency * result;
-}
-
-
-
-const TLightSamplesRange
-PhotonMapper::doSampleLights(const Sample&, const TPoint3D&, const TVector3D&) const
-{
-	return TLightSamplesRange();
 }
 
 
@@ -899,18 +895,9 @@ void PhotonMapper::buildVolumetricPhotonMap(const TPreliminaryVolumetricPhotonMa
 
 
 
-namespace temp
-{
-	inline TScalar squaredHeuristic(TScalar pdfA, TScalar pdfB)
-	{
-		return num::sqr(pdfA) / (num::sqr(pdfA) + num::sqr(pdfB));
-	}
-}
-
 const XYZ PhotonMapper::traceDirect(
 		const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
-		const TPoint3D& target, const TVector3D& targetNormal, 
-		const TVector3D& omegaIn) const
+		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn) const
 {
 	const Shader* const shader = context.shader();
 	LASS_ASSERT(shader);
@@ -921,65 +908,7 @@ const XYZ PhotonMapper::traceDirect(
 	{
 		Sample::TSubSequence2D lightSamples = sample.subSequence2D(light->idLightSamples());
 		Sample::TSubSequence2D bsdfSamples = sample.subSequence2D(light->idBsdfSamples());
-		/*
-		Sample::TSubSequence1D componentSample = sample.subSequence1D(light->idBsdfComponentSamples());
-		LASS_ASSERT(bsdfSample.size() == lightSample.size() && componentSample.size() == lightSample.size());
-		*/
-		const TScalar nl = static_cast<TScalar>(lightSamples.size());
-		const TScalar nb = static_cast<TScalar>(bsdfSamples.size());
-		const bool isMultipleImportanceSampling = nb > 0 && !light->isSingular();
-		const TScalar n = isMultipleImportanceSampling ? nl + nb : nl;
-
-		unsigned caps = Shader::capsAll & ~Shader::capsSpecular;
-		if (!light->isSingular())
-		{
-			caps &= ~Shader::capsGlossy;
-		}
-
-		const TPoint3D start = target + 10 * liar::tolerance * targetNormal;
-		for (Sample::TSubSequence2D::iterator ls = lightSamples.begin(); ls != lightSamples.end(); ++ls)
-		{
-			BoundedRay shadowRay;
-			TScalar lightPdf;
-			const XYZ radiance = light->sampleEmission(sample, *ls, start, targetNormal, shadowRay, lightPdf);
-			if (lightPdf <= 0 || !radiance)
-			{
-				continue;
-			}
-			const TVector3D& omegaOut = context.worldToBsdf(shadowRay.direction());
-			const BsdfOut out = bsdf->call(omegaIn, omegaOut, caps);
-			if (!out || scene()->isIntersecting(sample, shadowRay))
-			{
-				continue;
-			}
-			const XYZ trans = mediumStack().transmittance(shadowRay);
-			const TScalar weight = isMultipleImportanceSampling ? temp::squaredHeuristic(nl * lightPdf, nb * out.pdf) : TNumTraits::one;
-			const TScalar cosTheta = omegaOut.z;
-			result += out.value * trans * radiance * (weight * num::abs(cosTheta) / (n * lightPdf));
-		}
-		if (isMultipleImportanceSampling)
-		{
-			for (Sample::TSubSequence2D::iterator bs = lightSamples.begin(); bs != lightSamples.end(); ++bs)
-			{
-				const SampleBsdfOut out = bsdf->sample(omegaIn, *bs, Shader::capsAll & ~Shader::capsSpecular);
-				if (!out)
-				{
-					continue;
-				}
-				const TRay3D ray(start, context.bsdfToWorld(out.omegaOut).normal());
-				BoundedRay shadowRay;
-				TScalar lightPdf;
-				const XYZ radiance = light->emission(sample, ray, shadowRay, lightPdf);
-				if (lightPdf <= 0 || !radiance || scene()->isIntersecting(sample, shadowRay))
-				{
-					continue;
-				}
-				const XYZ trans = mediumStack().transmittance(shadowRay);
-				const TScalar weight = temp::squaredHeuristic(nb * out.pdf, nl * lightPdf);
-				const TScalar cosTheta = out.omegaOut.z;
-				result += out.value * trans * radiance * (weight * abs(cosTheta) / (n * out.pdf));
-			}
-		}
+		result += estimateLightContribution(sample, bsdf, *light, lightSamples, bsdfSamples, target, targetNormal, omegaIn);
 	}
 
 	return result;
@@ -1133,23 +1062,32 @@ const XYZ PhotonMapper::gatherSecondary(
 		const TPoint3D& target, const TVector3D& omegaOut) const
 {
 	const size_t n = numSecondaryGatherRays_;
+
 	TPoint2D* gatherSamples = &secondaryGatherSamples_[0];
 	temp::latinHypercube(gatherSamples, gatherSamples + n, secondarySampler_);
 	XYZ result = gatherIndirect(sample, context, bsdf, target, omegaOut, gatherSamples, gatherSamples + n, 1);
 
-	//TPoint2D* lightSamples = &secondaryLightSamples_[0];
-	//TScalar* lightSelectors = &secondaryLightSelectorSamples_[0];
-	//temp::latinHypercube(lightSamples, lightSamples + n, secondarySampler_);
-	//temp::stratifier(lightSelectors, lightSelectors + n, secondarySampler_);
-	//for (size_t k = 0; k < n; ++k)
-	//{
-	//	TScalar pdf;
-	//	const LightContext* light = lights().sample(lightSelectors[k], pdf);
-	//	if (!light || pdf <= 0)
-	//	{
-	//		continue;
-	//	}
-	//}
+	const TVector3D targetNormal = bsdf->bsdfToWorld(TVector3D(0, 0, 1));
+	TScalar* lightSelectors = &secondaryLightSelectorSamples_[0];
+	TPoint2D* lightSamples = &secondaryLightSamples_[0];
+	TPoint2D* bsdfSamples = &secondaryBsdfSamples_[0];
+	temp::stratifier(lightSelectors, lightSelectors + n, secondarySampler_);
+	temp::latinHypercube(lightSamples, lightSamples + n, secondarySampler_);
+	temp::latinHypercube(bsdfSamples, bsdfSamples + n, secondarySampler_);
+	for (size_t k = 0; k < n; ++k)
+	{
+		TScalar pdf;
+		const LightContext* light = lights().sample(lightSelectors[k], pdf);
+		if (!light || pdf <= 0)
+		{
+			continue;
+		}
+		const XYZ radiance = RayTracer::estimateLightContribution(
+			sample, bsdf, 
+			*light, Sample::TSubSequence2D(lightSamples + k, lightSamples + k + 1), Sample::TSubSequence2D(bsdfSamples + k, bsdfSamples + k + 1),
+			target, targetNormal, omegaOut);
+		result += radiance / (n * pdf);
+	}
 
 	return result;
 }

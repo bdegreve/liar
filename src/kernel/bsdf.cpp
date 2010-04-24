@@ -47,6 +47,26 @@ Bsdf::~Bsdf()
 
 
 
+const TVector3D Bsdf::bsdfToWorld(const TVector3D& v) const
+{
+	return context_.bsdfToWorld(v);
+}
+
+
+
+const TVector3D Bsdf::worldToBsdf(const TVector3D& v) const
+{
+	return context_.worldToBsdf(v);
+}
+
+
+
+// --- protected -----------------------------------------------------------------------------------
+
+
+
+// --- private -------------------------------------------------------------------------------------
+
 /** fall back for old shaders
  */
 BsdfOut Bsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, unsigned allowedCaps) const
@@ -73,14 +93,6 @@ SampleBsdfOut Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, u
 	context_.shader()->sampleBsdf(sample_, context_, omegaIn, &in, &in + 1, &out);
 	return out;
 }
-
-
-
-// --- protected -----------------------------------------------------------------------------------
-
-
-
-// --- private -------------------------------------------------------------------------------------
 
 
 

@@ -76,13 +76,6 @@ public:
 		return XYZ();
 	}
 
-	/** @warning sampleLights is NOT THREAD SAFE!
-	 */
-	const TLightSamplesRange sampleLights(const Sample& sample, const TPoint3D& target, const TVector3D& targetNormal) const
-	{
-		return doSampleLights(sample, target, targetNormal);
-	}
-
 	const TRayTracerPtr clone() const;
 
 	const TPyObjectPtr reduce() const;
@@ -96,12 +89,16 @@ protected:
 	const LightContexts& lights() const { return lights_; }
 	MediumStack& mediumStack() const { return mediumStack_; }
 
+	const XYZ estimateLightContribution(
+			const Sample& sample, const TBsdfPtr& bsdf, 
+			const LightContext& light, const Sample::TSubSequence2D& lightSamples,  const Sample::TSubSequence2D& bsdfSamples, 
+			const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn) const;
+
 private:
 
 	virtual void doRequestSamples(const TSamplerPtr& sampler) = 0;
 	virtual void doPreProcess(const TSamplerPtr& samper, const TimePeriod& period) = 0;
 	virtual const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, int generation) const = 0;
-	virtual const TLightSamplesRange doSampleLights(const Sample& sample, const TPoint3D& target, const TVector3D& targetNormal) const = 0;
 	virtual const TRayTracerPtr doClone() const = 0;
 
 	virtual const TPyObjectPtr doGetState() const = 0;

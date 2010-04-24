@@ -174,14 +174,6 @@ const XYZ DirectLighting::doCastRay(
 
 
 
-const TLightSamplesRange
-DirectLighting::doSampleLights(const Sample&, const TPoint3D&, const TVector3D&) const
-{
-	return TLightSamplesRange();
-}
-
-
-
 const TRayTracerPtr DirectLighting::doClone() const
 {
 	return TRayTracerPtr(new DirectLighting(*this));
@@ -224,63 +216,7 @@ const XYZ DirectLighting::traceDirect(
 	{
 		Sample::TSubSequence2D lightSamples = sample.subSequence2D(light->idLightSamples());
 		Sample::TSubSequence2D bsdfSamples = sample.subSequence2D(light->idBsdfSamples());
-		/*
-		Sample::TSubSequence1D componentSample = sample.subSequence1D(light->idBsdfComponentSamples());
-		LASS_ASSERT(bsdfSample.size() == lightSample.size() && componentSample.size() == lightSample.size());
-		*/
-		const TScalar nl = static_cast<TScalar>(lightSamples.size());
-		const TScalar nb = static_cast<TScalar>(bsdfSamples.size());
-		const bool isMultipleImportanceSampling = nb > 0 && !light->isSingular();
-		const TScalar n = isMultipleImportanceSampling ? nl + nb : nl;
-
-		unsigned caps = Shader::capsAll & ~Shader::capsSpecular;
-		if (!light->isSingular())
-		{
-			caps &= ~Shader::capsGlossy;
-		}
-
-		const TPoint3D start = target + 2 * tolerance * targetNormal;
-		for (Sample::TSubSequence2D::iterator ls = lightSamples.begin(); ls != lightSamples.end(); ++ls)
-		{
-			BoundedRay shadowRay;
-			TScalar lightPdf;
-			const XYZ radiance = light->sampleEmission(sample, *ls, start, targetNormal, shadowRay, lightPdf);
-			if (lightPdf <= 0 || !radiance)
-			{
-				continue;
-			}
-			const TVector3D& omegaOut = context.worldToBsdf(shadowRay.direction());
-			const BsdfOut out = bsdf->call(omegaIn, omegaOut, caps);
-			if (!out || scene()->isIntersecting(sample, shadowRay))
-			{
-				continue;
-			}
-			const TScalar weight = isMultipleImportanceSampling ? temp::squaredHeuristic(nl * lightPdf, nb * out.pdf) : TNumTraits::one;
-			const TScalar cosTheta = omegaOut.z;
-			result += out.value * radiance * (weight * num::abs(cosTheta) / (n * lightPdf));
-		}
-		if (isMultipleImportanceSampling)
-		{
-			for (Sample::TSubSequence2D::iterator bs = lightSamples.begin(); bs != lightSamples.end(); ++bs)
-			{
-				const SampleBsdfOut out = bsdf->sample(omegaIn, *bs, Shader::capsAll & ~Shader::capsSpecular);
-				if (!out)
-				{
-					continue;
-				}
-				const TRay3D ray(start, context.bsdfToWorld(out.omegaOut).normal());
-				BoundedRay shadowRay;
-				TScalar lightPdf;
-				const XYZ radiance = light->emission(sample, ray, shadowRay, lightPdf);
-				if (lightPdf <= 0 || !radiance || scene()->isIntersecting(sample, shadowRay))
-				{
-					continue;
-				}
-				const TScalar weight = temp::squaredHeuristic(nb * out.pdf, nl * lightPdf);
-				const TScalar cosTheta = out.omegaOut.z;
-				result += out.value * radiance * (weight * abs(cosTheta) / (n * out.pdf));
-			}
-		}
+		result += estimateLightContribution(sample, bsdf, *light, lightSamples, bsdfSamples, target, targetNormal, omegaIn);
 	}
 
 	return result;

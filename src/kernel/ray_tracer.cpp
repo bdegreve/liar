@@ -171,6 +171,84 @@ RayTracer::RayTracer():
 
 
 
+namespace temp
+{
+	inline TScalar squaredHeuristic(TScalar pdfA, TScalar pdfB)
+	{
+		return num::sqr(pdfA) / (num::sqr(pdfA) + num::sqr(pdfB));
+	}
+}
+
+
+
+const XYZ RayTracer::estimateLightContribution(
+		const Sample& sample, const TBsdfPtr& bsdf,
+		const LightContext& light, const Sample::TSubSequence2D& lightSamples,  const Sample::TSubSequence2D& bsdfSamples, 
+		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn) const
+{
+	const TScalar nl = static_cast<TScalar>(lightSamples.size());
+	const TScalar nb = static_cast<TScalar>(bsdfSamples.size());
+	const bool isMultipleImportanceSampling = nb > 0 && !light.isSingular();
+	const TScalar n = isMultipleImportanceSampling ? nl + nb : nl;
+
+	unsigned caps = Shader::capsAll & ~Shader::capsSpecular;
+	if (!light.isSingular())
+	{
+		caps &= ~Shader::capsGlossy;
+	}
+	// what about indirect estimator caps???
+
+	XYZ result;
+	const TPoint3D start = target + 10 * liar::tolerance * targetNormal;
+	for (Sample::TSubSequence2D::iterator ls = lightSamples.begin(); ls != lightSamples.end(); ++ls)
+	{
+		BoundedRay shadowRay;
+		TScalar lightPdf;
+		const XYZ radiance = light.sampleEmission(sample, *ls, start, targetNormal, shadowRay, lightPdf);
+		if (lightPdf <= 0 || !radiance)
+		{
+			continue;
+		}
+		const TVector3D& omegaOut = bsdf->worldToBsdf(shadowRay.direction());
+		const BsdfOut out = bsdf->call(omegaIn, omegaOut, caps);
+		if (!out || scene()->isIntersecting(sample, shadowRay))
+		{
+			continue;
+		}
+		const XYZ trans = mediumStack().transmittance(shadowRay);
+		const TScalar weight = isMultipleImportanceSampling ? temp::squaredHeuristic(nl * lightPdf, nb * out.pdf) : TNumTraits::one;
+		const TScalar cosTheta = omegaOut.z;
+		result += out.value * trans * radiance * (weight * num::abs(cosTheta) / (n * lightPdf));
+	}
+
+	if (isMultipleImportanceSampling)
+	{
+		for (Sample::TSubSequence2D::iterator bs = lightSamples.begin(); bs != lightSamples.end(); ++bs)
+		{
+			const SampleBsdfOut out = bsdf->sample(omegaIn, *bs, Shader::capsAll & ~Shader::capsSpecular);
+			if (!out)
+			{
+				continue;
+			}
+			const TRay3D ray(start, bsdf->bsdfToWorld(out.omegaOut).normal());
+			BoundedRay shadowRay;
+			TScalar lightPdf;
+			const XYZ radiance = light.emission(sample, ray, shadowRay, lightPdf);
+			if (lightPdf <= 0 || !radiance || scene()->isIntersecting(sample, shadowRay))
+			{
+				continue;
+			}
+			const XYZ trans = mediumStack().transmittance(shadowRay);
+			const TScalar weight = temp::squaredHeuristic(nb * out.pdf, nl * lightPdf);
+			const TScalar cosTheta = out.omegaOut.z;
+			result += out.value * trans * radiance * (weight * abs(cosTheta) / (n * out.pdf));
+		}
+	}
+
+	return result;
+}
+
+
 // --- private -------------------------------------------------------------------------------------
 
 

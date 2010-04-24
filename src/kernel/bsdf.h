@@ -101,7 +101,10 @@ public:
 		return doSample(omegaIn, sample, allowedCaps);
 	}
 
-protected:
+	const TVector3D bsdfToWorld(const TVector3D& v) const;
+	const TVector3D worldToBsdf(const TVector3D& v) const;
+
+private:
 
 	virtual BsdfOut doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, unsigned allowedCaps) const;
 	virtual SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, unsigned allowedCaps) const;

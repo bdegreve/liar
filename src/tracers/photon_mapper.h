@@ -200,10 +200,7 @@ private:
 
 	void doRequestSamples(const TSamplerPtr& sampler);
 	void doPreProcess(const TSamplerPtr& sampler, const TimePeriod& period);
-	const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay,
-		TScalar& depth, TScalar& alpha, int generation) const;
-	const TLightSamplesRange doSampleLights(const Sample& sample,
-		const TPoint3D& target, const TVector3D& targetNormal) const;
+	const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& depth, TScalar& alpha, int generation) const;
 	const TRayTracerPtr doClone() const;
 
 	const TPyObjectPtr doGetState() const;
@@ -258,8 +255,9 @@ private:
 	size_t estimationSize_[numMapTypes];
 	mutable TScalar maxActualEstimationRadius_[numMapTypes]; /**< keeps track of actual maximum needed estimation radius, for post diagnostics */
 	mutable std::vector<TPoint2D> secondaryGatherSamples_;
-	mutable std::vector<TPoint2D> secondaryLightSamples_;
 	mutable std::vector<TScalar> secondaryLightSelectorSamples_;
+	mutable std::vector<TPoint2D> secondaryLightSamples_;
+	mutable std::vector<TPoint2D> secondaryBsdfSamples_;
 	mutable TRandomSecondary secondarySampler_;
 
 	mutable std::vector<TScalar> grid_;

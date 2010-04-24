@@ -49,7 +49,6 @@ private:
 	void doRequestSamples(const TSamplerPtr& sampler);
 	void doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period);
 	const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, int generation) const;
-	const TLightSamplesRange doSampleLights(const Sample& sample, const TPoint3D& target, const TVector3D& targetNormal) const;
 	const TRayTracerPtr doClone() const;
 
 	const TPyObjectPtr doGetState() const;
