@@ -43,10 +43,23 @@ if (Lass_PYTHON_EXECUTABLE AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif ()
 
 if (MSVC_IDE)
-	option(BUILD_USING_MULTIPLE_PROCESSES OFF)
+	option(BUILD_USING_MULTIPLE_PROCESSES ON)
 else()
 	set(BUILD_USING_MULTIPLE_PROCESSES OFF)
-endif ()
+endif()
+
+set(liar_CFLAGS)
+if(MSVC)
+	set (liar_CFLAGS "${liar_CFLAGS} /EHsc")
+	if(NOT CMAKE_CL_64)
+		set (liar_CFLAGS "${liar_CFLAGS} /arch:SSE2 /fp:fast")
+	endif()
+	if(BUILD_USING_MULTIPLE_PROCESSES)
+		set (liar_CFLAGS "${liar_CFLAGS} /MP")
+	endif()
+else()
+	set (liar_CFLAGS "${liar_CFLAGS} -fno-strict-aliasing -Wall -Wextra -Wformat=2 -Winit-self")
+endif()
 
 macro(list_remove_regex listvar regex)
 	set(_to_be_removed)
@@ -78,6 +91,11 @@ macro(add_liar_module name)
 		${${name}_HDRS} 
 		${${name}_SRCS}
 		)
+	set_target_properties(
+		${name}
+		PROPERTIES 
+		COMPILE_FLAGS "${liar_CFLAGS}"
+		)
 	if (WIN32)
 		set_target_properties(
 			${name}
@@ -93,25 +111,6 @@ macro(add_liar_module name)
 		DESTINATION .
 		)
 endmacro()
-
-if(MSVC)
-	add_definitions(
-		/EHsc
-		)
-	if (BUILD_USING_MULTIPLE_PROCESSES)
-		add_definitions(
-			/MP
-			)
-	endif()
-else()
-	add_definitions(
-		-fno-strict-aliasing 
-		-Wall 
-		-Wextra 
-		-Wformat=2 
-		-Winit-self
-		)
-endif()
 
 add_subdirectory(src)
 

@@ -4,6 +4,11 @@ macro(add_liar_codec name)
 	add_library(${name} MODULE 
 		${${name}_SRCS}
 		)
+	set_target_properties(
+		${name}
+		PROPERTIES 
+		COMPILE_FLAGS "${liar_CFLAGS}"
+		)
 	if (WIN32)
 		set_target_properties(
 			${name}

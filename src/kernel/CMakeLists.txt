@@ -30,7 +30,11 @@ target_link_libraries(kernel
 	libkernel
 	)
 
-
+set_target_properties(
+	libkernel kernel
+	PROPERTIES 
+	COMPILE_FLAGS "${liar_CFLAGS}"
+	)
 
 install(
 	TARGETS kernel libkernel 
