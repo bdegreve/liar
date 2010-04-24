@@ -76,6 +76,10 @@ const SceneObject* Intersection::object() const
 
 TScalar Intersection::t() const
 {
+	if (isEmpty())
+	{
+		return TNumTraits::infinity;
+	}
 	LASS_ASSERT(intersectionStack_[currentLevel_].t > 0);
 	return intersectionStack_[currentLevel_].t;
 }

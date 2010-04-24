@@ -13,9 +13,10 @@ if False:
 	width = 1024
 	height = 1024
 	super_sampling = 4
-	global_size = 20000
+	global_size = 200000
 	caustics_quality = 1
-	raytrace_direct = False#True
+	raytrace_direct = True
+	scatter_direct = True
 	gather_rays = 36
 else:
 	width = 400
@@ -24,6 +25,7 @@ else:
 	global_size = 10000
 	caustics_quality = 1
 	raytrace_direct = True
+	scatter_direct = True
 	gather_rays = 0
 
 camera = geometry.getCamera()
@@ -36,7 +38,7 @@ fog = shaders.Fog()
 fog.extinction = .45
 fog.assymetry = 0
 fog.color = rgb(.5, .5, .5)
-fog.numScatterSamples = 64
+fog.numScatterSamples = 100
 
 photonMapper = tracers.PhotonMapper()
 photonMapper.maxNumberOfPhotons = 10000000
@@ -44,9 +46,10 @@ photonMapper.globalMapSize = global_size
 photonMapper.causticsQuality = caustics_quality
 photonMapper.isVisualizingPhotonMap = False
 photonMapper.isRayTracingDirect = raytrace_direct
-photonMapper.isScatteringDirect = False
+photonMapper.isScatteringDirect = scatter_direct
 photonMapper.numFinalGatherRays = gather_rays
 photonMapper.ratioPrecomputedIrradiance = 0.25
+photonMapper.setEstimationSize("volume", 100)
 
 image = output.Image("photon_mapper_fog.hdr", (width, height))
 display = output.Display("Participating Median in Cornell box with PhotonMapper", (width, height))
@@ -54,7 +57,6 @@ display = output.Display("Participating Median in Cornell box with PhotonMapper"
 engine = RenderEngine()
 engine.tracer = photonMapper
 engine.sampler = samplers.Stratifier((width, height), super_sampling)
-engine.sampler.jittered = False
 engine.scene = scenery.List(walls + blocks +  lights)
 engine.scene.interior = shaders.BoundedMedium(fog, engine.scene.boundingBox())
 engine.camera = camera

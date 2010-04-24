@@ -34,6 +34,7 @@
 #include <lass/prim/sphere_3d.h>
 #include <lass/spat/kd_tree.h>
 #include <lass/spat/aabp_tree.h>
+#include <lass/spat/aabb_tree.h>
 #include <lass/num/random.h>
 #include <lass/util/dictionary.h>
 #include <lass/num/inverse_transform_sampling.h>
@@ -147,12 +148,11 @@ private:
 
 	typedef std::vector<TPhotonMap::Neighbour> TPhotonNeighbourhood;
 
-	struct VolumetricPhoton
+	struct VolumetricPhoton: Photon
 	{
-		VolumetricPhoton(const Photon& photon, TScalar radius): 
-			photon(photon), radius(radius) {}
-		Photon photon;
+		VolumetricPhoton(const Photon& photon, bool isDirect): Photon(photon), radius(0), isDirect(isDirect) {}
 		TScalar radius;
+		bool isDirect;
 	};
 	typedef std::vector<VolumetricPhoton> TVolumetricPhotonBuffer;
 	
@@ -160,17 +160,18 @@ private:
 	{
 		static const TAabb objectAabb(TObjectIterator it) 
 		{ 
-			const TPoint3D center = it->photon.position;
+			const TPoint3D center = it->position;
 			const TVector3D halfExtent = TVector3D(it->radius, it->radius, it->radius);
 			return TAabb(center - halfExtent, center + halfExtent);
 		}
 		static bool objectIntersects(TObjectIterator it, const TRay& ray, TParam tMin, TParam tMax, const TInfo* /*iInfo*/)
 		{
-			TValue t;
-			const prim::Sphere3D<TScalar> sphere(it->photon.position, it->radius);
-			return prim::intersect(sphere, ray, t, tMin) != prim::rNone && t < tMax;
+			// ok, we're using a bit of a hack here. we're not intersecting the sphere surface, but it's volume.
+			const TValue t = num::clamp(ray.t(it->position), tMin, tMax);
+			return prim::squaredDistance(it->position, ray.point(t)) < num::sqr(it->radius);
 		}
 	};
+	typedef spat::KdTree< VolumetricPhoton, KdTreeTraits<TVolumetricPhotonBuffer> > TPreliminaryVolumetricPhotonMap;
 	typedef spat::AabpTree< VolumetricPhoton, VolumetricPhotonTraits, spat::DefaultSplitHeuristics > TVolumetricPhotonMap;
 	typedef TVolumetricPhotonMap::TObjectIterators TVolumetricNeighbourhood;
 
@@ -208,14 +209,12 @@ private:
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-	void fillPhotonMap(const TSamplerPtr& sampler, const TimePeriod& period);
-	void emitPhoton(const LightContext& light, TScalar lightPdf, const Sample& sample, 
-		TRandomSecondary::TValue secondarySeed);
-	void tracePhoton(const Sample& sample, XYZ power, const BoundedRay& ray,
-		int geneneration, TUniformSecondary& uniform, bool isCaustic = false);
-	void buildPhotonMap();
+	size_t fillPhotonMaps(const TSamplerPtr& sampler, const TimePeriod& period);
+	void emitPhoton(const LightContext& light, TScalar lightPdf, const Sample& sample, TRandomSecondary::TValue secondarySeed);
+	void tracePhoton(const Sample& sample, XYZ power, const BoundedRay& ray, int geneneration, TUniformSecondary& uniform, bool isCaustic = false);
+	template <typename PhotonBuffer, typename PhotonMap> void buildPhotonMap(MapType mapType, PhotonBuffer& buffer, PhotonMap& map, TScalar powerScale);
 	void buildIrradianceMap();
-	void buildVolumetricPhotonMap();
+	void buildVolumetricPhotonMap(const TPreliminaryVolumetricPhotonMap& preliminaryVolumetricMap);
 
 	const XYZ traceDirect(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaOut) const;
@@ -224,6 +223,7 @@ private:
 		const TPoint2D* lastSample, size_t gatherStage = 0) const;
 	const XYZ gatherSecondary(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& target, const TVector3D& omegaOut) const;
+	const XYZ traceGatherRay(const Sample& sample, const BoundedRay& ray, size_t gatherStage) const;
 
 	const XYZ estimateIrradiance(const TPoint3D& point, const TVector3D& normal) const 
 	{ 
@@ -238,16 +238,18 @@ private:
 		const TPoint3D& point, const TVector3D& omegaOut) const;
 	void updateActualEstimationRadius(MapType mapType, TScalar radius) const;
 
-	const XYZ inScattering(const Sample& sample, const kernel::BoundedRay& ray, TScalar tFar) const;
+	const XYZ inScattering(const Sample& sample, const kernel::BoundedRay& ray, TScalar tFar, bool traceSingleScattering = false) const;
 
 	struct SharedData
 	{
-		TPhotonBuffer photonBuffer_[numMapTypes];
-		TPhotonMap photonMap_[numMapTypes];
+		TPhotonBuffer globalBuffer_;
 		TIrradianceBuffer irradianceBuffer_;
+		TPhotonBuffer causticsBuffer_;
+		TVolumetricPhotonBuffer volumetricBuffer_;
+		TPhotonMap globalMap_;
 		TIrradianceMap irradianceMap_;
-		TVolumetricPhotonBuffer volumetricPhotonBuffer_;
-		TVolumetricPhotonMap volumetricPhotonMap_;
+		TPhotonMap causticsMap_;
+		TVolumetricPhotonMap volumetricMap_;
 	};
 	util::SharedPtr<SharedData> shared_;
 

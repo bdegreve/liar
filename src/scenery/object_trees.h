@@ -267,10 +267,10 @@ private:
 			return aabb.contains(other);
 		}
 
-		static bool aabbIntersect(const TAabb& aabb, const TRay& ray, TReference t, const TParam minT)
+		static bool aabbIntersect(const TAabb& aabb, const TRay& ray, TReference t, const TParam tMin)
 		{
 			TScalar temp;
-			prim::Result hit = prim::intersect(aabb, ray.unboundedRay(), temp, minT);
+			prim::Result hit = prim::intersect(aabb, ray.unboundedRay(), temp, tMin);
 			if (hit == prim::rOne)
 			{
 				t = temp;
@@ -284,6 +284,7 @@ private:
 		static const TPoint aabbMax(const TAabb& aabb) { return aabb.max(); }
 		static const TPoint raySupport(const TRay& ray) { return ray.support();	}
 		static const TVector rayDirection(const TRay& ray) {	return ray.direction(); }
+		static const TPoint rayPoint(const TRay& ray, TParam t) { return ray.point(t);	}
 		static TValue coord(const TPoint& point, size_t axis) { return point[axis]; }
 		static TValue coord(const TVector& vector, size_t axis) { return vector[axis]; }
 		static void coord(TPoint& point, size_t axis, TValue x) { point[axis] = x; }
