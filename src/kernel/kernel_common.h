@@ -71,10 +71,6 @@ namespace liar
 
 using namespace lass;
 
-
-
-// typedefs
-
 typedef LIAR_SCALAR TScalar;
 typedef LIAR_TIME TTime;
 typedef LIAR_TIME_DELTA TTimeDelta;
@@ -97,13 +93,9 @@ typedef python::PyObjectPtr<PyObject>::Type TPyObjectPtr;
 
 
 
-// globals
-
 LIAR_KERNEL_DLL extern TScalar tolerance;
 
 
-
-// constants
 
 const std::string name = LIAR_NAME_FULL;
 const std::string version = LIAR_VERSION_FULL;
@@ -134,6 +126,18 @@ const std::string license =
 
 namespace kernel
 {
+
+template <typename T>
+bool russianRoulette(T& subject, TScalar pdf, TScalar sample)
+{
+	if (pdf <= 0 || sample > pdf)
+	{
+		return false;
+	}
+	subject /= std::min(pdf, TNumTraits::one);
+	return true;
+}
+
 }
 
 }

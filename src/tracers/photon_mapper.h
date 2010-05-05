@@ -60,6 +60,9 @@ public:
 	TScalar causticsQuality() const;
 	void setCausticsQuality(TScalar quality);
 
+	TScalar volumetricQuality() const;
+	void setVolumetricQuality(TScalar quality);
+
 	size_t estimationSize(const std::string& mapType) const;
 	void setEstimationSize(const std::string& mapType, size_t size);
 
@@ -77,6 +80,9 @@ public:
 
 	TScalar ratioPrecomputedIrradiance() const;
 	void setRatioPrecomputedIrradiance(TScalar ratio);
+
+	TScalar volumetricGatherQuality() const;
+	void setVolumetricGatherQuality(TScalar quality);
 
 	bool isVisualizingPhotonMap() const;
 	void setVisualizePhotonMap(bool enabled = true);
@@ -206,6 +212,9 @@ private:
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
+	bool hasFinalGather() const { return isRayTracingDirect_ && (numFinalGatherRays_ > 0); }
+	bool hasSecondaryGather() const { return hasFinalGather() && (numSecondaryGatherRays_ > 0); }
+
 	size_t fillPhotonMaps(const TSamplerPtr& sampler, const TimePeriod& period);
 	void emitPhoton(const LightContext& light, TScalar lightPdf, const Sample& sample, TRandomSecondary::TValue secondarySeed);
 	void tracePhoton(const Sample& sample, XYZ power, const BoundedRay& ray, int geneneration, TUniformSecondary& uniform, bool isCaustic = false);
@@ -217,23 +226,32 @@ private:
 		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaOut) const;
 	const XYZ gatherIndirect(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& target, const TVector3D& omegaOut, const TPoint2D* firstSample, 
-		const TPoint2D* lastSample, size_t gatherStage = 0) const;
+		const TPoint2D* lastSample, const TScalar* firstVolumetricSample, size_t gatherStage = 0) const;
 	const XYZ gatherSecondary(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& target, const TVector3D& omegaOut) const;
-	const XYZ traceGatherRay(const Sample& sample, const BoundedRay& ray, size_t gatherStage) const;
+	const XYZ traceGatherRay(const Sample& sample, const BoundedRay& ray, bool gatherVolumetric, size_t gatherStage) const;
 
+	const XYZ estimateIrradiance(const TPoint3D& point, const TVector3D& normal, TScalar& sqrEstimationRadius, size_t& estimationCount) const;
 	const XYZ estimateIrradiance(const TPoint3D& point, const TVector3D& normal) const 
 	{ 
 		TScalar sqrRadius;
 		size_t count;
 		return estimateIrradiance(point, normal, sqrRadius, count);
 	}
-	const XYZ estimateIrradiance(const TPoint3D& point, const TVector3D& normal, TScalar& sqrEstimationRadius, size_t& estimationCount) const;
+
 	const XYZ estimateRadiance(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf, 
-		const TPoint3D& point, const TVector3D& omegaOut, size_t gatherStage = 0) const;
+		const TPoint3D& point, const TVector3D& omegaOut, TScalar& sqrEstimationRadius) const;
+	const XYZ estimateRadiance(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf, 
+		const TPoint3D& point, const TVector3D& omegaOut) const
+	{
+		TScalar sqrRadius;
+		return estimateRadiance(sample, context, bsdf, point, omegaOut, sqrRadius);
+	}
+
 	const XYZ estimateCaustics(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf, 
 		const TPoint3D& point, const TVector3D& omegaOut) const;
 	void updateActualEstimationRadius(MapType mapType, TScalar radius) const;
+	void updateStorageProbabilities();
 
 	const XYZ inScattering(const Sample& sample, const kernel::BoundedRay& ray, TScalar tFar, bool traceSingleScattering = false) const;
 
@@ -255,6 +273,7 @@ private:
 	size_t estimationSize_[numMapTypes];
 	mutable TScalar maxActualEstimationRadius_[numMapTypes]; /**< keeps track of actual maximum needed estimation radius, for post diagnostics */
 	mutable std::vector<TPoint2D> secondaryGatherSamples_;
+	mutable std::vector<TScalar> secondaryVolumetricGatherSamples_;
 	mutable std::vector<TScalar> secondaryLightSelectorSamples_;
 	mutable std::vector<TPoint2D> secondaryLightSamples_;
 	mutable std::vector<TPoint2D> secondaryBsdfSamples_;
@@ -266,10 +285,14 @@ private:
 	size_t maxNumberOfPhotons_;
 	size_t globalMapSize_;
 	TScalar causticsQuality_;
+	TScalar volumetricQuality_;
+	TScalar storageProbability_[numMapTypes];
 	size_t numFinalGatherRays_;
 	size_t numSecondaryGatherRays_;
 	TScalar ratioPrecomputedIrradiance_;
+	TScalar volumetricGatherQuality_;
 	int idFinalGatherSamples_;
+	int idFinalVolumetricGatherSamples_;
 	bool isVisualizingPhotonMap_;
 	bool isRayTracingDirect_;
 	bool isScatteringDirect_;

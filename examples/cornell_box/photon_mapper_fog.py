@@ -12,19 +12,19 @@ import geometry
 if False:
 	width = 1024
 	height = 1024
-	super_sampling = 4
+	super_sampling = 9
 	global_size = 200000
 	caustics_quality = 1
 	raytrace_direct = True
 	scatter_direct = True
-	gather_rays = 36
+	gather_rays = 64
 else:
 	width = 400
 	height = 400
 	super_sampling = 1
 	global_size = 10000
 	caustics_quality = 1
-	raytrace_direct = True
+	raytrace_direct = False#True
 	scatter_direct = True
 	gather_rays = 0
 
@@ -49,7 +49,8 @@ photonMapper.isRayTracingDirect = raytrace_direct
 photonMapper.isScatteringDirect = scatter_direct
 photonMapper.numFinalGatherRays = gather_rays
 photonMapper.ratioPrecomputedIrradiance = 0.25
-photonMapper.setEstimationSize("volume", 100)
+#photonMapper.setEstimationSize("volume", 100)
+photonMapper.setEstimationSize("global", 50)
 
 image = output.Image("photon_mapper_fog.hdr", (width, height))
 display = output.Display("Participating Median in Cornell box with PhotonMapper", (width, height))
