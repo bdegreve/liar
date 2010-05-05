@@ -257,6 +257,11 @@ private:
 			return TAabb();
 		}
 
+		static const TAabb aabbMake(const TPoint& min, const TPoint& max)
+		{
+			return TAabb(min, max);
+		}
+
 		static bool aabbContains(const TAabb& aabb, const TPoint& point) 
 		{ 
 			return aabb.contains(point); 

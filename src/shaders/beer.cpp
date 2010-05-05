@@ -79,14 +79,14 @@ const XYZ Beer::doTransmittance(const BoundedRay& ray) const
 
 
 
-const XYZ Beer::doScatterOut(const BoundedRay& ray) const
+const XYZ Beer::doScatterOut(const BoundedRay&) const
 {
 	return XYZ(0);
 }
 
 
 
-const XYZ Beer::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const XYZ Beer::doSampleScatterOut(TScalar, const BoundedRay&, TScalar&, TScalar& pdf) const
 {
 	pdf = 0;
 	return XYZ(0);
@@ -96,7 +96,7 @@ const XYZ Beer::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScala
 
 /** As we don't do any scattering in Beer, all incoming photons exit at the end (albeit attenuated)
  */
-const XYZ Beer::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const XYZ Beer::doSampleScatterOutOrTransmittance(TScalar, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	tScatter = ray.farLimit();
 	pdf = 1;
@@ -113,7 +113,7 @@ const XYZ Beer::doPhase(const TPoint3D&, const TVector3D&, const TVector3D&, TSc
 
 
 
-const XYZ Beer::doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
+const XYZ Beer::doSamplePhase(const TPoint2D&, const TPoint3D&, const TVector3D&, TVector3D&, TScalar& pdf) const
 {
 	pdf = 0;
 	return XYZ(0);

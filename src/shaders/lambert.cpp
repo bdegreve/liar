@@ -45,9 +45,9 @@ Lambert::Lambert():
 
 
 
-Lambert::Lambert(const TTexturePtr& iDiffuse):
+Lambert::Lambert(const TTexturePtr& diffuse):
 	Shader(capsReflection | capsDiffuse),
-	diffuse_(iDiffuse)
+	diffuse_(diffuse)
 {
 }
 
@@ -60,9 +60,9 @@ const TTexturePtr& Lambert::diffuse() const
 
 
 
-void Lambert::setDiffuse(const TTexturePtr& iDiffuse)
+void Lambert::setDiffuse(const TTexturePtr& diffuse)
 {
-	diffuse_ = iDiffuse;
+	diffuse_ = diffuse;
 }
 
 
@@ -102,7 +102,7 @@ LambertBsdf::LambertBsdf(const Sample& sample, const IntersectionContext& contex
 {
 }
 
-BsdfOut LambertBsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, unsigned allowedCaps) const
+BsdfOut LambertBsdf::doCall(const TVector3D&, const TVector3D& omegaOut, unsigned allowedCaps) const
 {
 	const TScalar cosTheta = omegaOut.z;
 	if (testCaps(allowedCaps, Shader::capsReflection | Shader::capsDiffuse) && cosTheta > 0)
@@ -112,7 +112,7 @@ BsdfOut LambertBsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut,
 	return BsdfOut();
 }
 
-SampleBsdfOut LambertBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, unsigned allowedCaps) const
+SampleBsdfOut LambertBsdf::doSample(const TVector3D&, const TPoint2D& sample, unsigned allowedCaps) const
 {
 	SampleBsdfOut out;
 	if (testCaps(allowedCaps, Shader::capsReflection | Shader::capsDiffuse))

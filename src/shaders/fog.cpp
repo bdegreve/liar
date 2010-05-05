@@ -191,7 +191,7 @@ const XYZ Fog::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRa
 }
 
 
-const XYZ Fog::doPhase(const TPoint3D& pos, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
+const XYZ Fog::doPhase(const TPoint3D&, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
 {
 	const TScalar cosTheta = dot(dirIn, dirOut);
 	const TScalar g = assymetry_;
@@ -211,7 +211,7 @@ const XYZ Fog::doPhase(const TPoint3D& pos, const TVector3D& dirIn, const TVecto
 
 
 
-const XYZ Fog::doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
+const XYZ Fog::doSamplePhase(const TPoint2D& sample, const TPoint3D&, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
 {
 	const TScalar g = assymetry_;
 	const TScalar p = 2 * sample.x - 1;

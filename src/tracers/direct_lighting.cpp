@@ -201,15 +201,10 @@ namespace temp
 }
 
 const XYZ DirectLighting::traceDirect(
-		const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
+		const Sample& sample, const IntersectionContext&, const TBsdfPtr& bsdf,
 		const TPoint3D& target, const TVector3D& targetNormal, 
 		const TVector3D& omegaIn) const
 {
-	const Shader* const shader = context.shader();
-	LASS_ASSERT(shader);
-	LASS_ASSERT(lass::num::almostEqual<TScalar>(targetNormal.norm(), 1, 1e-5));
-	//LASS_ASSERT(lass::num::almostEqual<TScalar>(omegaIn.norm(), 1, 1e-5));
-
 	XYZ result;
 	const LightContexts::TIterator end = lights().end();
 	for (LightContexts::TIterator light = lights().begin(); light != end; ++light)
@@ -218,7 +213,6 @@ const XYZ DirectLighting::traceDirect(
 		Sample::TSubSequence2D bsdfSamples = sample.subSequence2D(light->idBsdfSamples());
 		result += estimateLightContribution(sample, bsdf, *light, lightSamples, bsdfSamples, target, targetNormal, omegaIn);
 	}
-
 	return result;
 }
 

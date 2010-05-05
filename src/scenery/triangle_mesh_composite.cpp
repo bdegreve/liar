@@ -157,7 +157,7 @@ void TriangleMeshComposite::doPreProcess(const TSceneObjectPtr& scene, const Tim
 
 
 
-void TriangleMeshComposite::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
+void TriangleMeshComposite::doIntersect(const Sample&, const BoundedRay& ray, Intersection& result) const
 {
 	TScalar t;
 	TMesh::TTriangleIterator triangle;
@@ -178,7 +178,7 @@ void TriangleMeshComposite::doIntersect(const Sample& sample, const BoundedRay& 
 
 
 
-bool TriangleMeshComposite::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
+bool TriangleMeshComposite::doIsIntersecting(const Sample&, const BoundedRay& ray) const
 {
 	return mesh_.intersects(ray.unboundedRay(), ray.nearLimit(), ray.farLimit());
 }
@@ -195,7 +195,7 @@ void TriangleMeshComposite::doLocalContext(
 
 
 
-bool TriangleMeshComposite::doContains(const Sample& sample, const TPoint3D& point) const
+bool TriangleMeshComposite::doContains(const Sample&, const TPoint3D&) const
 {
 	return false;
 }

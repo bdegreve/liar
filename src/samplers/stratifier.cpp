@@ -247,7 +247,6 @@ void Stratifier::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixel), 
 {
 	const size_t nSubPixels = this->samplesPerPixel();
 	const size_t subSeqSize = this->subSequenceSize2D(id);
-	const size_t size = nSubPixels * subSeqSize;
 
 	LASS_ASSERT(id >= 0);
 	if (static_cast<size_t>(id) >= subSequences2d_.size())

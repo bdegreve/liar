@@ -758,7 +758,7 @@ void PhotonMapper::tracePhoton(
 		Photon photon(hitPoint, -ray.direction(), power);
 		if (isCaustic)
 		{
-			if (temp::russianRoulette(photon.power, storageProbability_[mtCaustics] > 0, uniform()))
+			if (russianRoulette(photon.power, storageProbability_[mtCaustics] > 0, uniform()))
 			{
 				shared_->causticsBuffer_.push_back(photon);
 			}
@@ -766,7 +766,7 @@ void PhotonMapper::tracePhoton(
 		else
 		{
 			const bool mayStorePhoton = (generation > 0) || !isRayTracingDirect_ || hasFinalGather();
-			if (mayStorePhoton && temp::russianRoulette(photon.power, storageProbability_[mtGlobal] > 0, uniform()))
+			if (mayStorePhoton && russianRoulette(photon.power, storageProbability_[mtGlobal] > 0, uniform()))
 			{
 				shared_->globalBuffer_.push_back(photon);
 				if (ratioPrecomputedIrradiance_ > 0 && uniform() <= ratioPrecomputedIrradiance_)
@@ -803,7 +803,7 @@ void PhotonMapper::tracePhoton(
 	const TScalar attenuation = newPower.average() / power.average();
 	//LASS_ASSERT(attenuation < 1.1);
 	const TScalar scatterProbability = std::min(TNumTraits::one, attenuation);
-	if (!temp::russianRoulette(newPower, scatterProbability, uniform()))
+	if (!russianRoulette(newPower, scatterProbability, uniform()))
 	{
 		return;
 	}
@@ -829,8 +829,8 @@ void PhotonMapper::buildPhotonMap(MapType type, PhotonBuffer& buffer, PhotonMap&
 	{
 		std::vector<TScalar> powers;
 		powers.reserve(buffer.size());
-		PhotonBuffer::iterator end = buffer.end();
-		for (PhotonBuffer::iterator i = buffer.begin(); i != end; ++i)
+		typename PhotonBuffer::iterator end = buffer.end();
+		for (typename PhotonBuffer::iterator i = buffer.begin(); i != end; ++i)
 		{
 			i->power *= powerScale;
 			powers.push_back(i->power.absTotal());
@@ -936,12 +936,9 @@ void PhotonMapper::buildVolumetricPhotonMap(const TPreliminaryVolumetricPhotonMa
 
 
 const XYZ PhotonMapper::traceDirect(
-		const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
+		const Sample& sample, const IntersectionContext&, const TBsdfPtr& bsdf,
 		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn) const
 {
-	const Shader* const shader = context.shader();
-	LASS_ASSERT(shader);
-
 	XYZ result;
 	const LightContexts::TIterator end = lights().end();
 	for (LightContexts::TIterator light = lights().begin(); light != end; ++light)
@@ -950,7 +947,6 @@ const XYZ PhotonMapper::traceDirect(
 		Sample::TSubSequence2D bsdfSamples = sample.subSequence2D(light->idBsdfSamples());
 		result += estimateLightContribution(sample, bsdf, *light, lightSamples, bsdfSamples, target, targetNormal, omegaIn);
 	}
-
 	return result;
 }
 
@@ -1197,7 +1193,7 @@ const XYZ PhotonMapper::estimateIrradiance(const TPoint3D& point, const TVector3
 
 
 const XYZ PhotonMapper::estimateRadiance(
-		const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf, 
+		const Sample&, const IntersectionContext& context, const TBsdfPtr& bsdf, 
 		const TPoint3D& point, const TVector3D& omegaOut, TScalar& sqrEstimationRadius) const
 {
 	const Shader* const shader = context.shader();
@@ -1254,7 +1250,7 @@ const XYZ PhotonMapper::estimateRadiance(
 
 
 const XYZ PhotonMapper::estimateCaustics(
-		const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf, 
+		const Sample&, const IntersectionContext& context, const TBsdfPtr& bsdf, 
 		const TPoint3D& point, const TVector3D& omegaIn) const
 {
 	const Shader* const shader = context.shader();
@@ -1377,7 +1373,6 @@ const XYZ PhotonMapper::inScattering(const Sample& sample, const kernel::Bounded
 		const TScalar tNear = ray.nearLimit();
 		TVolumetricNeighbourhood::const_iterator last = shared_->volumetricMap_.find(
 			unboundedRay, tNear, tFar, stde::overwrite_inserter(volumetricNeighbourhood_)).end();
-		const TScalar invN = num::inv(static_cast<TScalar>(last - volumetricNeighbourhood_.begin()));
 		for (TVolumetricNeighbourhood::const_iterator i = volumetricNeighbourhood_.begin(); i != last; ++i)
 		{
 			const VolumetricPhoton& photon = **i;

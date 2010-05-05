@@ -144,10 +144,8 @@ private:
 
 	// deprecated stuff ...
 	friend class Bsdf;
-	virtual void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const { LASS_ENFORCE(false); }
-	virtual void doSampleBsdf(const Sample& sample, const IntersectionContext& context,	const TVector3D& omegaIn,
-		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const { LASS_ENFORCE(false); }
+	virtual void doBsdf(const Sample&, const IntersectionContext&, const TVector3D&, const BsdfIn*, const BsdfIn*, BsdfOut*) const { LASS_ENFORCE(false); }
+	virtual void doSampleBsdf(const Sample&, const IntersectionContext&, const TVector3D&, const SampleBsdfIn*, const SampleBsdfIn*, SampleBsdfOut*) const { LASS_ENFORCE(false); }
 	void bsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
 		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
 	{

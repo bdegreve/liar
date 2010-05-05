@@ -73,7 +73,7 @@ void SceneLight::doSetState(const TPyObjectPtr& state)
 
 
 const XYZ SceneLight::doSampleEmission(
-		const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D& targetNormal, 
+		const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D&, 
 		BoundedRay& shadowRay, TScalar& pdf) const
 {
 	// the default implementation is a fallback on the sampling mechanism without knowledge the target normal.

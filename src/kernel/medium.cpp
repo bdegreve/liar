@@ -96,7 +96,7 @@ Medium::Medium():
 
 // --- private -------------------------------------------------------------------------------------
 
-void Medium::doRequestSamples(const TSamplerPtr& sampler)
+void Medium::doRequestSamples(const TSamplerPtr&)
 {
 }
 
