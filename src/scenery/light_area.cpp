@@ -188,9 +188,11 @@ TScalar LightArea::doArea(const TVector3D& normal) const
 const XYZ LightArea::doEmission(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	surface_->fun(ray, shadowRay, pdf);
-	shadowRay = ray;
-	pdf = 0;
-	return XYZ();
+	if (pdf <= 0)
+	{
+		return XYZ();
+	}
+	return radiance_;
 }
 
 
