@@ -165,6 +165,13 @@ TScalar Transformation::doArea() const
 
 
 
+TScalar Transformation::doArea(const TVector3D& normal) const
+{
+	return child_->area(normalTransform(normal, localToWorld_.inverse()));
+}
+
+
+
 const TPyObjectPtr Transformation::doGetState() const
 {
 	return python::makeTuple(child_, localToWorld_);

@@ -170,6 +170,13 @@ TScalar Plane::doArea() const
 
 
 
+TScalar Plane::doArea(const TVector3D& normal) const
+{
+	return prim::dot(normal, plane_.normal()) > 0 ? TNumTraits::infinity : 0;
+}
+
+
+
 const TPyObjectPtr Plane::doGetState() const
 {
 	return python::makeTuple(plane_.normal(), plane_.d());

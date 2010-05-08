@@ -207,6 +207,20 @@ TScalar List::doArea() const
 
 
 
+TScalar List::doArea(const TVector3D& normal) const
+{
+	TScalar result = 0;
+	for (TChildren::const_iterator i = children_.begin(); i != children_.end(); ++i)
+	{
+		const SceneObject* child = i->get();
+		LASS_ASSERT(child);
+		result += child->area(normal);
+	}
+	return result;
+}
+
+
+
 const TPyObjectPtr List::doGetState() const
 {
 	return python::makeTuple(children_);

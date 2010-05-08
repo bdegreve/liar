@@ -150,6 +150,13 @@ TScalar LightPoint::doArea() const
 
 
 
+TScalar LightPoint::doArea(const TVector3D&) const
+{
+	return 0;
+}
+
+
+
 const XYZ LightPoint::doEmission(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	shadowRay = ray;

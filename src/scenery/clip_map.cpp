@@ -187,6 +187,13 @@ TScalar ClipMap::doArea() const
 
 
 
+TScalar ClipMap::doArea(const TVector3D& normal) const
+{
+	return child_->area(normal);
+}
+
+
+
 const TPyObjectPtr ClipMap::doGetState() const
 {
 	return python::makeTuple(child_, clipMap_, threshold_);

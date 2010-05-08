@@ -115,6 +115,13 @@ TScalar Triangle::doArea() const
 
 
 
+TScalar Triangle::doArea(const TVector3D& normal) const
+{
+	return triangle_.area() * std::max(prim::dot(normal, triangle_.plane().normal()), TNumTraits::zero);
+}
+
+
+
 const TPyObjectPtr Triangle::doGetState() const
 {
 	return python::makeTuple(triangle_[0], triangle_[1], triangle_[2]);

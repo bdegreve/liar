@@ -163,6 +163,13 @@ TScalar Translation::doArea() const
 
 
 
+TScalar Translation::doArea(const TVector3D& normal) const
+{
+	return child_->area(normal);
+}
+
+
+
 const TPyObjectPtr Translation::doGetState() const
 {
 	return python::makeTuple(child_, localToWorld_);

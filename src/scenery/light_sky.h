@@ -51,10 +51,12 @@ public:
 	const TTexturePtr& radiance() const;
 	// const unsigned numberOfEmissionSamples() const; [via SceneLight]
 	const TResolution2D& samplingResolution() const;
+	const TSceneObjectPtr& portal() const;
 
 	void setRadiance(const TTexturePtr& radiance);
 	void setNumberOfEmissionSamples(unsigned iNumberOfSamples);
 	void setSamplingResolution(const TResolution2D& resolution);
+	void setPortal(const TSceneObjectPtr& portal);
 
 private:
 
@@ -71,6 +73,7 @@ private:
 	bool doContains(const Sample& sample, const TPoint3D& point) const;
 	const TAabb3D doBoundingBox() const;
 	TScalar doArea() const;
+	TScalar doArea(const TVector3D& normal) const;
 
 	const XYZ doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
 	const XYZ doSampleEmission(
@@ -86,14 +89,15 @@ private:
 	const TPyObjectPtr doGetLightState() const;
 	void doSetLightState(const TPyObjectPtr& state);
 
-	void buildPdf(TMap& pdf, TXYZMap& radianceMap, XYZ& averageRadiance, util::ProgressIndicator& progress) const;
+	void buildPdf(TMap& pdf, TXYZMap& radianceMap, XYZ& power, util::ProgressIndicator& progress) const;
 	void buildCdf(const TMap& iPdf, TMap& oMarginalCdfU, TMap& oConditionalCdfV, util::ProgressIndicator& progress) const;
 	void sampleMap(const TPoint2D& sample, TScalar&, TScalar& j, TScalar& pdf) const;
 	const TVector3D direction(TScalar i, TScalar j) const;
 	const XYZ lookUpRadiance(const Sample& sample, TScalar i, TScalar j) const;
 
-	XYZ averageRadiance_;
+	XYZ power_;
 	TTexturePtr radiance_;
+	TSceneObjectPtr portal_;
 	TMap marginalCdfU_;
 	TMap conditionalCdfV_;
 	TXYZMap radianceMap_;

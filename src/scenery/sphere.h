@@ -44,8 +44,11 @@ class LIAR_SCENERY_DLL Sphere: public SceneObject
 	PY_HEADER(SceneObject)
 public:
 
+	typedef prim::Sphere3D<TScalar> TSphere3D;
+
 	Sphere();
 	Sphere(const TPoint3D& center, TScalar radius);
+	Sphere(const TSphere3D& sphere);
 
 	const TPoint3D& center() const;
 	void setCenter(const TPoint3D& center);
@@ -55,8 +58,6 @@ public:
 
 private:
 
-	typedef prim::Sphere3D<TScalar> TSphere3D;
-
 	LASS_UTIL_VISITOR_DO_ACCEPT
 
 	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
@@ -65,10 +66,12 @@ private:
 	bool doContains(const Sample& sample, const TPoint3D& point) const;
 	const TAabb3D doBoundingBox() const;
 	TScalar doArea() const;
+	TScalar doArea(const TVector3D& normal) const;
 
 	bool doHasSurfaceSampling() const;
 	const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const;
 	const TPoint3D doSampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const;
+	const TPoint3D doSampleSurface(const TPoint2D& sample, const TVector3D& view, TVector3D& normal, TScalar& pdf) const;
 	void doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
 
 	const TPyObjectPtr doGetState() const;

@@ -329,6 +329,14 @@ TScalar Csg::doArea() const
 
 
 
+TScalar Csg::doArea(const TVector3D&) const
+{
+	LASS_THROW("not implemented yet");
+	return TNumTraits::qNaN;
+}
+
+
+
 const TPyObjectPtr Csg::doGetState() const
 {
 	return python::makeTuple(childA_, childB_, static_cast<int>(operation_));

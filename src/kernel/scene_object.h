@@ -120,11 +120,13 @@ public:
 	const TPoint3D sampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const;
 	const TPoint3D sampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const;
 	const TPoint3D sampleSurface(const TPoint2D& sample, const TPoint3D& target, const TVector3D& targetNormal, TVector3D& normal, TScalar& pdf) const;
+	const TPoint3D sampleSurface(const TPoint2D& sample, const TVector3D& viewDirection, TVector3D& normal, TScalar& pdf) const;
 
 	const TAabb3D boundingBox() const;
 	bool hasMotion() const;
 
 	TScalar area() const;
+	TScalar area(const TVector3D& normal) const;
 
 	const TShaderPtr& shader() const;
 	void setShader(const TShaderPtr& shader);
@@ -164,9 +166,11 @@ private:
 	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const;
 	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const;
 	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, const TPoint3D& target, const TVector3D& targetNormal, TVector3D& normal, TScalar& pdf) const;
+	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, const TVector3D& viewDirection, TVector3D& normal, TScalar& pdf) const;
 	
 	virtual const TAabb3D doBoundingBox() const = 0;
 	virtual TScalar doArea() const = 0;
+	virtual TScalar doArea(const TVector3D& normal) const = 0;
 	virtual void doLocalSpace(TTime time, TTransformation3D& localToWorld) const;
 	virtual bool doHasMotion() const;
 	virtual const SceneLight* doAsLight() const;

@@ -109,6 +109,8 @@ void LightSpot::setDirection(const TVector3D& direction)
 	direction_ = direction.normal();
 	prim::impl::Plane3DImplDetail::generateDirections(
 		direction_, tangentU_, tangentV_);
+	tangentU_.normalize();
+	tangentV_.normalize();
 }
 
 
@@ -191,6 +193,13 @@ const TAabb3D LightSpot::doBoundingBox() const
 
 
 TScalar LightSpot::doArea() const
+{
+	return 0;
+}
+
+
+
+TScalar LightSpot::doArea(const TVector3D&) const
 {
 	return 0;
 }

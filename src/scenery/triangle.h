@@ -58,6 +58,7 @@ private:
 	bool doContains(const Sample& sample, const TPoint3D& point) const;
 	const TAabb3D doBoundingBox() const;
 	TScalar doArea() const;
+	TScalar doArea(const TVector3D& normal) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);

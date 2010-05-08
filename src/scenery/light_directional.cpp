@@ -74,8 +74,7 @@ const XYZ& LightDirectional::radiance() const
 void LightDirectional::setDirection(const TVector3D& direction)
 {
 	direction_ = direction.normal();
-	lass::prim::impl::Plane3DImplDetail::generateDirections(
-		direction_, tangentU_, tangentV_);
+	generateOrthonormal(direction_, tangentU_, tangentV_);
 }
 
 
@@ -137,6 +136,13 @@ const TAabb3D LightDirectional::doBoundingBox() const
 
 
 TScalar LightDirectional::doArea() const
+{
+	return 0;
+}
+
+
+
+TScalar LightDirectional::doArea(const TVector3D&) const
 {
 	return 0;
 }

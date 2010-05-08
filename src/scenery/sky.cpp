@@ -131,6 +131,13 @@ TScalar Sky::doArea() const
 
 
 
+TScalar Sky::doArea(const TVector3D&) const
+{
+	return TNumTraits::infinity;
+}
+
+
+
 const TPyObjectPtr Sky::doGetState() const
 {
 	return python::makeTuple(radius_);

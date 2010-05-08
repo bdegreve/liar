@@ -186,8 +186,7 @@ bool SceneObject::doHasSurfaceSampling() const
 void SceneObject::doFun(const TRay3D&, BoundedRay&, TScalar&) const
 {
 	LASS_ASSERT(hasSurfaceSampling() == false);
-	LASS_THROW("surface sampling is unimplemented for scene objects '" << 
-		typeid(*this).name() << "'.");
+	LASS_THROW("surface sampling is unimplemented for scene objects '" << typeid(*this).name() << "'.");
 }
 
 
@@ -200,8 +199,7 @@ void SceneObject::doFun(const TRay3D&, BoundedRay&, TScalar&) const
 const TPoint3D SceneObject::doSampleSurface(const TPoint2D&, TVector3D&, TScalar&) const
 {
 	LASS_ASSERT(hasSurfaceSampling() == false);
-	LASS_THROW("surface sampling is unimplemented for scene objects '" << 
-		typeid(*this).name() << "'.");
+	LASS_THROW("surface sampling is unimplemented for scene objects '" << typeid(*this).name() << "'.");
 }
 
 
@@ -235,6 +233,22 @@ const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TPoint
 const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TPoint3D& target, const TVector3D&, TVector3D& normal, TScalar& pdf) const
 {
 	return doSampleSurface(sample, target, normal, pdf);
+}
+
+
+
+/** Some objects may have a good strategy for sampling a point when you know the direction
+ *  in which you're looking at the object
+ */
+const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TVector3D& view, TVector3D& normal, TScalar& pdf) const
+{
+	const TPoint3D result = doSampleSurface(sample, normal, pdf);
+	const TScalar cosTheta = -dot(normal, view);
+	if (cosTheta <= 0)
+	{
+		pdf = 0;
+	}
+	return result;
 }
 
 

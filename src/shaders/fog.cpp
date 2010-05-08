@@ -234,7 +234,7 @@ const XYZ Fog::doSamplePhase(const TPoint2D& sample, const TPoint3D&, const TVec
 	}
 
 	TVector3D u, v;
-	prim::impl::Plane3DImplDetail::generateDirections(dirIn, u, v);
+	generateOrthonormal(dirIn, u, v);
 	const TScalar phi = 2 * TNumTraits::pi * sample.y;
 	const TScalar sinTheta = num::sqrt(std::max<TScalar>(1 - num::sqr(cosTheta), 0));
 	dirOut = cosTheta * dirIn + (sinTheta * num::cos(phi)) * u + (sinTheta * num::sin(phi)) * v;

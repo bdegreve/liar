@@ -57,6 +57,7 @@ private:
 	bool doContains(const Sample& sample, const TPoint3D& point) const;
 	const TAabb3D doBoundingBox() const;
 	TScalar doArea() const;
+	TScalar doArea(const TVector3D& normal) const;
 
 	bool doHasSurfaceSampling() const;
 	const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const;

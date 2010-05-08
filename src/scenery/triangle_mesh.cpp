@@ -205,6 +205,14 @@ TScalar TriangleMesh::doArea() const
 
 
 
+TScalar TriangleMesh::doArea(const TVector3D&) const
+{
+	LASS_THROW("not implemented yet");
+	return TNumTraits::qNaN;
+}
+
+
+
 const TPyObjectPtr TriangleMesh::doGetState() const
 {
 	TIndexTriangles triangles;

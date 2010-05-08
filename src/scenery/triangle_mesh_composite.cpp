@@ -216,6 +216,14 @@ TScalar TriangleMeshComposite::doArea() const
 
 
 
+TScalar TriangleMeshComposite::doArea(const TVector3D&) const
+{
+	LASS_THROW("not implemented yet");
+	return TNumTraits::qNaN;
+}
+
+
+
 const TPyObjectPtr TriangleMeshComposite::doGetState() const
 {
 	return python::makeTuple(children_);

@@ -54,6 +54,7 @@
 #include <lass/prim/transformation_3d.h>
 #include <lass/python/python_api.h>
 #include <lass/python/streams.h>
+#include <lass/prim/impl/plane_3d_impl_detail.h>
 
 #include "config.h"
 
@@ -136,6 +137,15 @@ bool russianRoulette(T& subject, TScalar pdf, TScalar sample)
 	}
 	subject /= std::min(pdf, TNumTraits::one);
 	return true;
+}
+
+/** generate an orthonormal basis <i,j,k>, given k.
+ */
+inline void generateOrthonormal(const TVector3D& k, TVector3D& i, TVector3D& j)
+{
+	prim::impl::Plane3DImplDetail::generateDirections(k, i, j);
+	i.normalize();
+	j.normalize();
 }
 
 }

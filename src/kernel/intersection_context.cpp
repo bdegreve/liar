@@ -267,7 +267,7 @@ void IntersectionContext::generateShaderToWorld()
 		{
 			TVector3D u;
 			TVector3D v;
-			prim::impl::Plane3DImplDetail::generateDirections(normal_, u, v);
+			generateOrthonormal(normal_, u, v);
 			shaderToWorld_ = TTransformation3D(point_, u, v, normal_);
 		}
 	}

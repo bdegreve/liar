@@ -25,6 +25,7 @@
 #include "sphere.h"
 #include <lass/meta/type_list.h>
 #include <lass/prim/impl/plane_3d_impl_detail.h>
+#include <lass/num/distribution_transformations.h>
 
 namespace liar
 {
@@ -52,6 +53,14 @@ Sphere::Sphere():
 Sphere::Sphere(const TPoint3D& center, TScalar radius):
 	sphere_(center, radius),
 	invRadius_(num::inv(radius))
+{
+}
+
+
+
+Sphere::Sphere(const TSphere3D& sphere):
+	sphere_(sphere),
+	invRadius_(num::inv(sphere.radius()))
 {
 }
 
@@ -186,6 +195,13 @@ TScalar Sphere::doArea() const
 
 
 
+TScalar Sphere::doArea(const TVector3D&) const
+{
+	return TNumTraits::pi * num::sqr(sphere_.radius());
+}
+
+
+
 const TPyObjectPtr Sphere::doGetState() const
 {
 	return python::makeTuple(sphere_.center(), sphere_.radius());
@@ -211,8 +227,7 @@ bool Sphere::doHasSurfaceSampling() const
 
 
 
-const TPoint3D Sphere::doSampleSurface(
-		const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const
+const TPoint3D Sphere::doSampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const
 {
 	const TScalar z = 2 * sample.y - 1;
 	const TScalar rho = num::sqrt(1 - num::sqr(z));
@@ -227,9 +242,7 @@ const TPoint3D Sphere::doSampleSurface(
 
 
 
-const TPoint3D Sphere::doSampleSurface(
-		const TPoint2D& sample, const TPoint3D& target,
-		TVector3D& normal, TScalar& pdf) const
+const TPoint3D Sphere::doSampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const
 {
 	if (sphere_.contains(target))
 	{
@@ -242,6 +255,8 @@ const TPoint3D Sphere::doSampleSurface(
 	k /= distance;
 	TVector3D i, j;
 	prim::impl::Plane3DImplDetail::generateDirections(k, i, j);
+	i.normalize();
+	j.normalize();
 
 	const TScalar cosThetaMax = num::sqrt(
 		std::max(TNumTraits::zero, 1 - num::sqr(sphere_.radius()) / sqrDistance));
@@ -268,6 +283,29 @@ const TPoint3D Sphere::doSampleSurface(
 	}
 	pdf = num::inv(2 * TNumTraits::pi * (1 - cosThetaMax));
 
+	return sphere_.center() + sphere_.radius() * normal;
+}
+
+
+
+const TPoint3D Sphere::doSampleSurface(const TPoint2D& sample, const TVector3D& view, TVector3D& normal, TScalar& pdf) const
+{
+	if (sphere_.radius() == 0)
+	{
+		normal = -view;
+		pdf = 1;
+		return sphere_.center();
+	}
+
+	const TVector3D normalizedView = view.normal();
+	TVector3D tangentU, tangentV;
+	lass::prim::impl::Plane3DImplDetail::generateDirections(normalizedView, tangentU, tangentV);
+	tangentU.normalize();
+	tangentV.normalize();
+
+	const TPoint3D uvw = num::cosineHemisphere(sample, pdf);
+	normal = tangentU * uvw.x + tangentV * uvw.y - normalizedView * uvw.z;
+	pdf /= num::sqr(sphere_.radius());
 	return sphere_.center() + sphere_.radius() * normal;
 }
 

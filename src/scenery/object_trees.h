@@ -172,6 +172,15 @@ private:
 		return result;
 	}
 
+	TScalar doArea(const TVector3D& normal) const
+	{
+		TScalar result = 0;
+		for (TChildren::const_iterator i = allChildren_.begin(); i != allChildren_.end(); ++i)
+		{
+			result += (*i)->area(normal);
+		}
+		return result;
+	}
 
 	const TPyObjectPtr doGetState() const
 	{

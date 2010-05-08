@@ -151,6 +151,13 @@ TScalar MotionTranslation::doArea() const
 
 
 
+TScalar MotionTranslation::doArea(const TVector3D& normal) const
+{
+	return child_->area(normal);
+}
+
+
+
 const TPyObjectPtr MotionTranslation::doGetState() const
 {
 	return python::makeTuple(child_, localToWorldStart_, speedInWorld_);

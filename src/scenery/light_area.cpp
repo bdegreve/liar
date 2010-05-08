@@ -177,6 +177,14 @@ TScalar LightArea::doArea() const
 
 
 
+TScalar LightArea::doArea(const TVector3D& normal) const
+{
+	LASS_ASSERT(surface_);
+	return surface_->area(normal);
+}
+
+
+
 const XYZ LightArea::doEmission(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	surface_->fun(ray, shadowRay, pdf);
@@ -245,7 +253,7 @@ const XYZ LightArea::doSampleEmission(
 	const TPoint3D origin = surface_->sampleSurface(lightSampleA, originNormal, originPdf);
 
 	TVector3D originU, originV;
-	prim::impl::Plane3DImplDetail::generateDirections(originNormal, originU, originV);
+	generateOrthonormal(originNormal, originU, originV);
 	
 	TScalar directionPdf;
 	TVector3D localDirection = num::cosineHemisphere(lightSampleB, directionPdf).position();

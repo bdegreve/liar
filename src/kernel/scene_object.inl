@@ -236,8 +236,7 @@ inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, TVector
  *  Scene objects that do not implement this will fallback on sampleSurface without target 
  *	position.  This is also a fallback for sampleSurface with target position and target normal.
  */
-inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, const TPoint3D& target,
-		TVector3D& normal, TScalar& pdf) const
+inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const
 {
 	return doSampleSurface(sample, target, normal, pdf);
 }
@@ -263,10 +262,33 @@ inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, const T
  *  Scene objects that do not implement this will fallback on sampleSurface with only a target 
  *	point.
  */
-inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, const TPoint3D& target,
-		const TVector3D& targetNormal, TVector3D& normal, TScalar& pdf) const
+inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, const TPoint3D& target, const TVector3D& targetNormal, TVector3D& normal, TScalar& pdf) const
 {
 	return doSampleSurface(sample, target, targetNormal, normal, pdf);
+}
+
+
+
+/** sample surface with viewing direction
+ *
+ *  @param sample [in]
+ *		(u,v) sample
+ *  @param view [in]
+ *		direction from which you intersect the object (from infinity)
+ *	@param normal [out]
+ *		normal of surface at sampled position.
+ *  @param pdf [out]
+ *		value of probability density function the position was choosen with.
+ *
+ *  This is used to sample a point on an area light to illuminate a target point.  This way
+ *	we can avoid sampling points that won't contribute.
+ *
+ *  Scene objects that do not implement this will fallback on sampleSurface with only a target 
+ *	point.
+ */
+inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, const TVector3D& view, TVector3D& normal, TScalar& pdf) const
+{
+	return doSampleSurface(sample, view, normal, pdf);
 }
 
 
@@ -311,6 +333,20 @@ inline TScalar SceneObject::area() const
 { 
 	return doArea(); 
 }
+
+
+
+/** get area of object surface projected according normal.
+ *
+ *  @return
+ *		total area.
+ */
+inline TScalar SceneObject::area(const TVector3D& normal) const 
+{ 
+	return doArea(normal); 
+}
+
+
 
 }
 

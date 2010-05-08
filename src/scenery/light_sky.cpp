@@ -23,11 +23,10 @@
 
 #include "scenery_common.h"
 #include "light_sky.h"
+#include "sphere.h"
 #include "../kernel/rgb_space.h"
 
-#include <lass/prim/sphere_3d.h>
 #include <lass/num/distribution_transformations.h>
-#include <lass/prim/impl/plane_3d_impl_detail.h>
 
 #if LASS_COMPILER_TYPE == LASS_COMPILER_TYPE_MSVC
 #	pragma warning(disable: 4996) // std::copy may be unsafe
@@ -42,6 +41,7 @@ PY_DECLARE_CLASS_DOC(LightSky, "infinite sky light")
 PY_CLASS_CONSTRUCTOR_0(LightSky)
 PY_CLASS_CONSTRUCTOR_1(LightSky, const TTexturePtr&)
 PY_CLASS_MEMBER_RW(LightSky, radiance, setRadiance)
+PY_CLASS_MEMBER_RW(LightSky, portal, setPortal)
 PY_CLASS_MEMBER_RW(LightSky, numberOfEmissionSamples, setNumberOfEmissionSamples)
 PY_CLASS_MEMBER_RW(LightSky, samplingResolution, setSamplingResolution)
 
@@ -71,6 +71,13 @@ const TTexturePtr& LightSky::radiance() const
 
 
 
+const TSceneObjectPtr& LightSky::portal() const
+{
+	return portal_;
+}
+
+
+
 const TResolution2D& LightSky::samplingResolution() const
 {
 	return resolution_;
@@ -81,6 +88,17 @@ const TResolution2D& LightSky::samplingResolution() const
 void LightSky::setRadiance(const TTexturePtr& radiance)
 {
 	radiance_ = radiance;
+}
+
+
+
+void LightSky::setPortal(const TSceneObjectPtr& portal)
+{
+	if (portal && !portal->hasSurfaceSampling())
+	{
+		throw python::PythonException(PyExc_TypeError, "portal must support surface sampling", LASS_PRETTY_FUNCTION);
+	}
+	portal_ = portal;
 }
 
 
@@ -109,11 +127,16 @@ void LightSky::setSamplingResolution(const TResolution2D& resolution)
 
 // --- private -------------------------------------------------------------------------------------
 
-void LightSky::doPreProcess(const TSceneObjectPtr&, const TimePeriod&)
+void LightSky::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod&)
 {
+	if (!portal_)
+	{
+		portal_.reset(new Sphere(boundingSphere(scene->boundingBox())));
+	}
+
 	util::ProgressIndicator progress("Preprocessing environment map");
 	TMap pdf;
-	buildPdf(pdf, radianceMap_, averageRadiance_, progress);
+	buildPdf(pdf, radianceMap_, power_, progress);
 	buildCdf(pdf, marginalCdfU_, conditionalCdfV_, progress);
 }
 
@@ -196,6 +219,13 @@ TScalar LightSky::doArea() const
 
 
 
+TScalar LightSky::doArea(const TVector3D&) const
+{
+	return TNumTraits::infinity;
+}
+
+
+
 const XYZ LightSky::doEmission(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	const TVector3D dir = ray.direction();
@@ -245,18 +275,19 @@ const XYZ LightSky::doSampleEmission(
 	TScalar i, j, pdfA;
 	sampleMap(lightSampleA, i, j, pdfA);
 	const TVector3D dir = -direction(i, j);
-	
-	TVector3D tangentU, tangentV;
-	lass::prim::impl::Plane3DImplDetail::generateDirections(dir, tangentU, tangentV);
 
 	TScalar pdfB;
-	const TPoint2D uv = num::uniformDisk(lightSampleB, pdfB);
-	const TPoint3D begin = worldSphere.center() + 
-		worldSphere.radius() * (tangentU * uv.x + tangentV * uv.y - dir);
+	TVector3D normal;
+	const TPoint3D begin = portal_->sampleSurface(lightSampleB, dir, normal, pdfB);
+	const TScalar cosTheta = -prim::dot(dir, normal);
+	if (cosTheta <= 0)
+	{
+		pdf = 0;
+		return XYZ();
+	}
 
 	emissionRay = BoundedRay(begin, dir, tolerance);
-	pdf = pdfA * pdfB / num::sqr(worldSphere.radius());
-
+	pdf = pdfA * pdfB / cosTheta;
 	return radianceMap_[static_cast<size_t>(num::floor(i)) * resolution_.y + static_cast<size_t>(num::floor(j))];
 }
 
@@ -264,8 +295,7 @@ const XYZ LightSky::doSampleEmission(
 
 const XYZ LightSky::doTotalPower(const TAabb3D& sceneBound) const
 {
-	const prim::Sphere3D<TScalar> worldSphere = boundingSphere(sceneBound);
-	return (8 * num::sqr(TNumTraits::pi * worldSphere.radius())) * averageRadiance_;
+	return power_;
 }
 
 
@@ -298,28 +328,32 @@ void LightSky::doSetLightState(const TPyObjectPtr& state)
 
 
 
-void LightSky::buildPdf(TMap& pdf, TXYZMap& radianceMap, XYZ& averageRadiance, util::ProgressIndicator& progress) const
+void LightSky::buildPdf(TMap& pdf, TXYZMap& radianceMap, XYZ& power, util::ProgressIndicator& progress) const
 {
 	Sample dummy;
 
-	TMap tempPdf(resolution_.x * resolution_.y);
-	TXYZMap radMap(resolution_.x * resolution_.y);
-	XYZ totalRadiance;
+	const size_t n = resolution_.x * resolution_.y;
+	TMap tempPdf(n);
+	TXYZMap radMap(n);
+	XYZ totalIntensity = 0;
 	for (size_t i = 0; i < resolution_.x; ++i)
 	{
+		const TScalar fi = static_cast<TScalar>(i) + .5f;
 		progress(.8 * static_cast<TScalar>(i) / resolution_.x);
 		for (size_t j = 0; j < resolution_.y; ++j)
 		{
-			const XYZ radiance = lookUpRadiance(
-				dummy, static_cast<TScalar>(i) + .5f, static_cast<TScalar>(j) + .5f);
-			totalRadiance += radiance;
+			const TScalar fj = static_cast<TScalar>(j) + .5f;
+			const XYZ radiance = lookUpRadiance(dummy, fi, fj);
+			const TScalar projectedArea = portal_->area(direction(fi, fj));
+			const XYZ intensity = radiance * projectedArea;
 			radMap[i * resolution_.y + j] = radiance;
-			tempPdf[i * resolution_.y + j] = average(radiance);
+			tempPdf[i * resolution_.y + j] = intensity.absTotal();
+			totalIntensity += intensity;
 		}
 	}
-	averageRadiance = totalRadiance / static_cast<TScalar>(resolution_.x * resolution_.y);
 	radianceMap.swap(radMap);
 	pdf.swap(tempPdf);
+	power = totalIntensity * (4 * TNumTraits::pi / static_cast<TScalar>(n));
 }
 
 

@@ -150,6 +150,13 @@ TScalar Parallelogram::doArea() const
 
 
 
+TScalar Parallelogram::doArea(const TVector3D& normal) const
+{
+	return parallelogram_.area() * std::max(prim::dot(normal, normal_), TNumTraits::zero);
+}
+
+
+
 const TPyObjectPtr Parallelogram::doGetState() const
 {
 	return python::makeTuple(
