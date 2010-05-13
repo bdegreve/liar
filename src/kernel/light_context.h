@@ -79,6 +79,7 @@ private:
 
 	TAabb3D localBound_;
 	mutable TTransformation3D localToWorld_;	/**< concatenated local to world transformation */
+	mutable TTransformation3D worldToLocal_;	/**< concatenated world to local transformation */
 	mutable TTime timeOfTransformation_;		/**< time localToWorld_ was calculated for */
 	TObjectPath objectPath_;					/**< path in object tree to light (light included) */
 	const SceneLight* light_;					/**< pointer to actual light object */

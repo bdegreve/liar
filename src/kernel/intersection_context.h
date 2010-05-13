@@ -58,7 +58,7 @@ public:
 	/** 3D position of intersection in the local space of the object that sets the shader.
 	 */
 	const TPoint3D& point() const { return point_; }
-	void setPoint(const TPoint3D& point) { point_ = point; hasDirtyBsdfToWorld_ = true; }
+	void setPoint(const TPoint3D& point) { point_ = point; hasDirtyBsdfToWorld_ = hasDirtyWorldToBsdf_ = true; }
 	const TVector3D& dPoint_dU() const { return dPoint_dU_; }
 	const TVector3D& dPoint_dV() const { return dPoint_dV_; }
 	const TVector3D& dPoint_dI() const { return dPoint_dI_; }
@@ -80,12 +80,12 @@ public:
 	const Medium* interior() const { return interior_; }
 	SolidEvent solidEvent() const { return solidEvent_; }
 
-	void setDPoint_dU(const TVector3D& dPoint_dU) { dPoint_dU_ = dPoint_dU; hasDirtyBsdfToWorld_ = true; }
-	void setDPoint_dV(const TVector3D& dPoint_dV) { dPoint_dV_ = dPoint_dV; hasDirtyBsdfToWorld_ = true; }
+	void setDPoint_dU(const TVector3D& dPoint_dU) { dPoint_dU_ = dPoint_dU; hasDirtyBsdfToWorld_ = hasDirtyWorldToBsdf_ = true; }
+	void setDPoint_dV(const TVector3D& dPoint_dV) { dPoint_dV_ = dPoint_dV; hasDirtyBsdfToWorld_ = hasDirtyWorldToBsdf_ = true; }
 	void setDPoint_dI(const TVector3D& dPoint_dI) { dPoint_dI_ = dPoint_dI; }
 	void setDPoint_dJ(const TVector3D& dPoint_dJ) { dPoint_dJ_ = dPoint_dJ; }
 	void setGeometricNormal(const TVector3D& geometricNormal) { geometricNormal_ = geometricNormal; }
-	void setNormal(const TVector3D& normal) { normal_ = normal; hasDirtyBsdfToWorld_ = true; }
+	void setNormal(const TVector3D& normal) { normal_ = normal; hasDirtyBsdfToWorld_ = hasDirtyWorldToBsdf_ = true; }
 	void setDNormal_dU(const TVector3D& dNormal_dU) { dNormal_dU_ = dNormal_dU; }
 	void setDNormal_dV(const TVector3D& dNormal_dV) { dNormal_dV_ = dNormal_dV; }
 	void setUv(const TPoint2D& uv) { uv_ = uv; }
@@ -106,12 +106,26 @@ public:
 	const TVector3D flipTo(const TVector3D& worldOmega);
 
 	const TTransformation3D& bsdfToWorld() const;
-	const TTransformation3D worldToBsdf() const { return bsdfToWorld().inverse(); }
+	const TTransformation3D& worldToBsdf() const
+	{
+		if (hasDirtyWorldToBsdf_)
+		{
+			worldToBsdf_ = bsdfToWorld_.inverse();
+		}
+		return worldToBsdf_;
+	}
 	const TVector3D bsdfToWorld(const TVector3D& v) const { return prim::transform(v, bsdfToWorld()); }
 	const TVector3D worldToBsdf(const TVector3D& v) const { return prim::transform(v, worldToBsdf()); }
 
 	const TTransformation3D& localToWorld() const { return localToWorld_; }
-	const TTransformation3D worldToLocal() const { return localToWorld().inverse(); }
+	const TTransformation3D& worldToLocal() const
+	{
+		if (hasDirtyWorldToLocal_)
+		{
+			worldToLocal_ = localToWorld_.inverse();
+		}
+		return worldToLocal_;
+	}
 	//const TVector3D localToWorld(const TVector3D& v) const { return prim::transform(v, localToWorld()); }
 	//const TVector3D worldToLocal(const TVector3D& v) const { return prim::transform(v, worldToLocal()); }
 
@@ -145,13 +159,16 @@ private:
 	const Medium* interior_;
 	const kernel::Sample& sample_;
 
-	TTransformation3D shaderToWorld_;
 	TTransformation3D localToWorld_;
 	mutable TTransformation3D bsdfToWorld_;
+	mutable TTransformation3D worldToLocal_;
+	mutable TTransformation3D worldToBsdf_;
 
 	SolidEvent solidEvent_;
 	bool hasScreenSpaceDifferentials_;
 	mutable bool hasDirtyBsdfToWorld_;
+	mutable bool hasDirtyWorldToLocal_;
+	mutable bool hasDirtyWorldToBsdf_;
 };
 
 }

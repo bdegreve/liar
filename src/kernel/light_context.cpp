@@ -57,9 +57,9 @@ LightContext::LightContext(const TObjectPath& objectPathToLight, const SceneLigh
 void LightContext::setSceneBound(const TAabb3D& bound, const TimePeriod& period)
 {
 	setTime(period.begin());
-	const TAabb3D beginBound = transform(bound, localToWorld_.inverse());
+	const TAabb3D beginBound = transform(bound, worldToLocal_);
 	setTime(period.end());
-	const TAabb3D endBound = transform(bound, localToWorld_.inverse());
+	const TAabb3D endBound = transform(bound, worldToLocal_);
 	localBound_ = beginBound + endBound;
 }
 
@@ -81,7 +81,7 @@ const XYZ LightContext::sampleEmission(
 {
 	setTime(cameraSample.time());
 
-	const TPoint3D localTarget = transform(target, localToWorld_.inverse());
+	const TPoint3D localTarget = transform(target, worldToLocal_);
 	
 	BoundedRay localRay;
 	const XYZ radiance = light_->sampleEmission(cameraSample, lightSample, localTarget, localRay, pdf);
@@ -103,8 +103,8 @@ const XYZ LightContext::sampleEmission(
 {
 	setTime(cameraSample.time());
 
-	const TPoint3D localTarget = transform(target, localToWorld_.inverse());
-	const TVector3D localNormal = normalTransform(targetNormal, localToWorld_.inverse()).normal();
+	const TPoint3D localTarget = transform(target, worldToLocal_);
+	const TVector3D localNormal = normalTransform(targetNormal, worldToLocal_).normal();
 	
 	BoundedRay localRay;
 	const XYZ radiance = light_->sampleEmission(
@@ -142,7 +142,7 @@ const XYZ LightContext::emission(
 {
 	setTime(cameraSample.time());
 	TScalar scale = 1;
-	const TRay3D localRay = prim::transform(ray, localToWorld_.inverse(), scale);
+	const TRay3D localRay = prim::transform(ray, worldToLocal_, scale);
 
 	BoundedRay localShadowRay;
 	const XYZ radiance = light_->emission(cameraSample, localRay, localShadowRay, pdf);
@@ -187,6 +187,7 @@ void LightContext::setTime(TTime time) const
 				(*i)->localSpace(time, temp);
 			}
 			localToWorld_.swap(temp);
+			worldToLocal_ = localToWorld_.inverse();
 			timeOfTransformation_ = time;
 		}
 	}

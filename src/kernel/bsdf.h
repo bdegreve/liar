@@ -111,9 +111,12 @@ private:
 
 	const Sample& sample_;
 	const IntersectionContext& context_;
+
+public:
+	size_t refCount_;
 };
 
-typedef util::SharedPtr<Bsdf> TBsdfPtr;
+typedef util::SharedPtr<Bsdf, util::ObjectStorage, util::IntrusiveCounter<Bsdf, size_t, &Bsdf::refCount_> > TBsdfPtr;
 
 }
 

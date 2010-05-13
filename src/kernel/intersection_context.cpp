@@ -81,7 +81,6 @@ const TBsdfPtr IntersectionContext::bsdf() const
 void IntersectionContext::setShader(const Shader* shader)
 {
 	shader_ = shader;
-	shaderToWorld_ = TTransformation3D();
 }
 
 
@@ -89,41 +88,7 @@ void IntersectionContext::setShader(const Shader* shader)
 void IntersectionContext::transformBy(const TTransformation3D& transformation)
 {
 	localToWorld_ = prim::concatenate(localToWorld_, transformation);
-	if (shader_)
-	{
-		shaderToWorld_ = prim::concatenate(shaderToWorld_, transformation);
-	}
-
-	/*
-	if (!shader_)
-	{
-		point_ = prim::transform(point_, transformation);
-		dPoint_dU_ = prim::transform(dPoint_dU_, transformation);
-		dPoint_dV_ = prim::transform(dPoint_dV_, transformation);
-
-		geometricNormal_ = prim::normalTransform(geometricNormal_, transformation);
-		normal_ = prim::normalTransform(normal_, transformation);
-		dNormal_dU_ = prim::normalTransform(dNormal_dU_, transformation);
-		dNormal_dV_ = prim::normalTransform(dNormal_dV_, transformation);
-		const TScalar rescaleNormal = num::inv(normal_.norm());
-		normal_ *= rescaleNormal;
-		dNormal_dU_ *= rescaleNormal;
-		dNormal_dV_ *= rescaleNormal;
-		
-		if (hasScreenSpaceDifferentials_)
-		{
-			dPoint_dI_ = prim::transform(dPoint_dI_, transformation);
-			dPoint_dJ_ = prim::transform(dPoint_dJ_, transformation);
-			dNormal_dI_ = prim::normalTransform(dNormal_dI_, transformation);
-			dNormal_dJ_ = prim::normalTransform(dNormal_dJ_, transformation);
-		}
-	}
-	else
-	{
-		shaderToWorld_ = prim::concatenate(shaderToWorld_, transformation);
-		localToWorld_ = prim::concatenate(localToWorld_, transformation);
-	}
-	*/
+	hasDirtyWorldToLocal_ = true;
 }
 
 
@@ -132,10 +97,7 @@ void IntersectionContext::translateBy(const TVector3D& offset)
 {
 	const TTransformation3D translation = TTransformation3D::translation(offset);
 	localToWorld_ = prim::concatenate(localToWorld_, translation);
-	if (shader_)
-	{
-		shaderToWorld_ = prim::concatenate(shaderToWorld_, translation);
-	}
+	hasDirtyWorldToLocal_ = true;
 }
 
 
@@ -154,9 +116,7 @@ const TVector3D IntersectionContext::flipTo(const TVector3D& worldOmega)
 	normal_ = -normal_;
 	dNormal_dU_ = -dNormal_dU_;
 	dNormal_dV_ = -dNormal_dV_;
-	shaderToWorld_ = prim::concatenate(TTransformation3D::scaler(TVector3D(1, 1, -1)), shaderToWorld_);
-	//shaderToWorld_ = prim::concatenate(shaderToWorld_, TTransformation3D::scaler(TVector3D(1, 1, -1)));
-	hasDirtyBsdfToWorld_ = true;
+	hasDirtyBsdfToWorld_ = hasDirtyWorldToBsdf_ = true;
 	return -worldNormal;
 }
 
@@ -190,6 +150,7 @@ const TTransformation3D& IntersectionContext::bsdfToWorld() const
 	}
 	bsdfToWorld_ = TTransformation3D(o, u.normal(), v.normal(), n);
 	hasDirtyBsdfToWorld_ = false;
+	hasDirtyWorldToBsdf_ = true;
 	return bsdfToWorld_;
 }
 
@@ -206,7 +167,7 @@ void IntersectionContext::init(const SceneObject& object, const BoundedRay& ray,
 	interior_ = 0;
 	solidEvent_ = seNoEvent;
 	hasScreenSpaceDifferentials_ = false;
-	hasDirtyBsdfToWorld_ = true;
+	hasDirtyBsdfToWorld_ = hasDirtyWorldToLocal_ = hasDirtyWorldToBsdf_ = true;
 
 	object.localContext(sample_, ray, intersection, *this);
 	flipTo(-ray.direction());
