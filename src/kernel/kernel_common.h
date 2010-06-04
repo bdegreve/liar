@@ -51,6 +51,7 @@
 #include <lass/prim/aabb_3d.h>
 #include <lass/prim/ray_3d.h>
 #include <lass/prim/color_rgba.h>
+#include <lass/prim/transformation_2d.h>
 #include <lass/prim/transformation_3d.h>
 #include <lass/python/python_api.h>
 #include <lass/python/streams.h>
@@ -85,6 +86,7 @@ typedef prim::Vector3D<TScalar> TVector3D;
 typedef prim::Point3D<TScalar> TPoint3D;
 typedef prim::Ray3D<TScalar, prim::Normalized, prim::Unbounded> TRay3D;
 typedef prim::Aabb3D<TScalar> TAabb3D;
+typedef prim::Transformation2D<TScalar> TTransformation2D;
 typedef prim::Transformation3D<TScalar> TTransformation3D;
 
 typedef prim::Vector2D<size_t> TResolution2D;
@@ -92,11 +94,7 @@ typedef prim::Aabb2D<size_t> TRange2D;
 
 typedef python::PyObjectPtr<PyObject>::Type TPyObjectPtr;
 
-
-
 LIAR_KERNEL_DLL extern TScalar tolerance;
-
-
 
 const std::string name = LIAR_NAME_FULL;
 const std::string version = LIAR_VERSION_FULL;
@@ -151,6 +149,8 @@ inline void generateOrthonormal(const TVector3D& k, TVector3D& i, TVector3D& j)
 }
 
 }
+
+#include "lass_exports.h"
 
 #endif
 

@@ -173,8 +173,19 @@ private:
 		static bool objectIntersects(TObjectIterator it, const TRay& ray, TParam tMin, TParam tMax, const TInfo* /*iInfo*/)
 		{
 			// ok, we're using a bit of a hack here. we're not intersecting the sphere surface, but it's volume.
+			/*
 			const TValue t = num::clamp(ray.t(it->position), tMin, tMax);
 			return prim::squaredDistance(it->position, ray.point(t)) < num::sqr(it->radius);
+			/*/
+			const VolumetricPhoton& photon = *it;
+			TVector3D v = photon.position - ray.support();
+			const TVector3D& d = ray.direction();
+			const TValue t = num::clamp(dot(v, d), tMin, tMax);
+			v.x -= t * d.x;
+			v.y -= t * d.y;
+			v.z -= t * d.z;
+			return v.squaredNorm() < num::sqr(photon.radius);
+			/**/
 		}
 	};
 	typedef spat::KdTree< VolumetricPhoton, KdTreeTraits<TVolumetricPhotonBuffer> > TPreliminaryVolumetricPhotonMap;
@@ -205,7 +216,7 @@ private:
 	};
 
 	void doRequestSamples(const TSamplerPtr& sampler);
-	void doPreProcess(const TSamplerPtr& sampler, const TimePeriod& period);
+	void doPreProcess(const TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads);
 	const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& depth, TScalar& alpha, int generation) const;
 	const TRayTracerPtr doClone() const;
 
@@ -219,14 +230,14 @@ private:
 	void emitPhoton(const LightContext& light, TScalar lightPdf, const Sample& sample, TRandomSecondary::TValue secondarySeed);
 	void tracePhoton(const Sample& sample, XYZ power, const BoundedRay& ray, int geneneration, TUniformSecondary& uniform, bool isCaustic = false);
 	template <typename PhotonBuffer, typename PhotonMap> void buildPhotonMap(MapType mapType, PhotonBuffer& buffer, PhotonMap& map, TScalar powerScale);
-	void buildIrradianceMap();
-	void buildVolumetricPhotonMap(const TPreliminaryVolumetricPhotonMap& preliminaryVolumetricMap);
+	void buildIrradianceMap(size_t numberOfThreads);
+	void buildVolumetricPhotonMap(const TPreliminaryVolumetricPhotonMap& preliminaryVolumetricMap, size_t numberOfThreads);
 
 	const XYZ traceDirect(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaOut) const;
 	const XYZ gatherIndirect(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
-		const TPoint3D& target, const TVector3D& omegaOut, const TPoint2D* firstSample, 
-		const TPoint2D* lastSample, const TScalar* firstVolumetricSample, size_t gatherStage = 0) const;
+		const TPoint3D& target, const TVector3D& omegaOut, const TPoint2D* firstSample, const TPoint2D* lastSample, 
+		const TScalar* firstComponentSample, const TScalar* firstVolumetricSample, size_t gatherStage = 0) const;
 	const XYZ gatherSecondary(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& target, const TVector3D& omegaOut) const;
 	const XYZ traceGatherRay(const Sample& sample, const BoundedRay& ray, bool gatherVolumetric, size_t gatherStage) const;
@@ -238,6 +249,7 @@ private:
 		size_t count;
 		return estimateIrradiance(point, normal, sqrRadius, count);
 	}
+	const XYZ estimateIrradianceImpl(TPhotonNeighbourhood& neighbourhood, const TPoint3D& point, const TVector3D& normal, TScalar& sqrEstimationRadius, size_t& estimationCount) const;
 
 	const XYZ estimateRadiance(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf, 
 		const TPoint3D& point, const TVector3D& omegaOut, TScalar& sqrEstimationRadius) const;
@@ -272,11 +284,13 @@ private:
 	TScalar estimationTolerance_[numMapTypes];
 	size_t estimationSize_[numMapTypes];
 	mutable TScalar maxActualEstimationRadius_[numMapTypes]; /**< keeps track of actual maximum needed estimation radius, for post diagnostics */
-	mutable std::vector<TPoint2D> secondaryGatherSamples_;
-	mutable std::vector<TScalar> secondaryVolumetricGatherSamples_;
+	mutable std::vector<TPoint2D> secondaryGatherBsdfSamples_;
+	mutable std::vector<TScalar> secondaryGatherComponentSamples_;
+	mutable std::vector<TScalar> secondaryGatherVolumetricSamples_;
 	mutable std::vector<TScalar> secondaryLightSelectorSamples_;
 	mutable std::vector<TPoint2D> secondaryLightSamples_;
 	mutable std::vector<TPoint2D> secondaryBsdfSamples_;
+	mutable std::vector<TScalar> secondaryBsdfComponentSamples_;
 	mutable TRandomSecondary secondarySampler_;
 
 	mutable std::vector<TScalar> grid_;
@@ -292,6 +306,7 @@ private:
 	TScalar ratioPrecomputedIrradiance_;
 	TScalar volumetricGatherQuality_;
 	int idFinalGatherSamples_;
+	int idFinalGatherComponentSamples_;
 	int idFinalVolumetricGatherSamples_;
 	bool isVisualizingPhotonMap_;
 	bool isRayTracingDirect_;

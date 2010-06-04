@@ -43,7 +43,7 @@ PY_CLASS_MEMBER_RW_DOC(ThinDielectric, transparency, setTransparency,
 // --- public --------------------------------------------------------------------------------------
 
 ThinDielectric::ThinDielectric():
-	Shader(capsReflection | capsTransmission | capsSpecular),
+	Shader(Bsdf::capsReflection | Bsdf::capsTransmission | Bsdf::capsSpecular),
 	innerRefractionIndex_(Texture::white()),
 	outerRefractionIndex_(Texture::white()),
 	transparency_(Texture::white())
@@ -53,7 +53,7 @@ ThinDielectric::ThinDielectric():
 
 
 ThinDielectric::ThinDielectric(const TTexturePtr& innerRefractionIndex):
-	Shader(capsReflection | capsTransmission | capsSpecular),
+	Shader(Bsdf::capsReflection | Bsdf::capsTransmission | Bsdf::capsSpecular),
 	innerRefractionIndex_(innerRefractionIndex),
 	outerRefractionIndex_(Texture::white()),
 	transparency_(Texture::white())
@@ -63,7 +63,7 @@ ThinDielectric::ThinDielectric(const TTexturePtr& innerRefractionIndex):
 
 
 ThinDielectric::ThinDielectric(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex):
-	Shader(capsReflection | capsTransmission | capsSpecular),
+	Shader(Bsdf::capsReflection | Bsdf::capsTransmission | Bsdf::capsSpecular),
 	innerRefractionIndex_(innerRefractionIndex),
 	outerRefractionIndex_(outerRefractionIndex),
 	transparency_(Texture::white())
@@ -206,8 +206,8 @@ void ThinDielectric::doSampleBsdf(
 
 	while (first != last)
 	{
-		const bool doReflection = testCaps(first->allowedCaps, capsReflection | capsSpecular);
-		const bool doTransmission = testCaps(first->allowedCaps, capsTransmission | capsSpecular);
+		const bool doReflection = kernel::hasCaps(first->allowedCaps, Bsdf::capsReflection | Bsdf::capsSpecular);
+		const bool doTransmission = kernel::hasCaps(first->allowedCaps, Bsdf::capsTransmission | Bsdf::capsSpecular);
 		const TScalar sr = doReflection ? (doTransmission ? r : 1) : 0;
 		const TScalar st = doTransmission ? (doReflection ? t : 1) : 0;
 		if (sr > 0 || st > 0)
@@ -219,14 +219,14 @@ void ThinDielectric::doSampleBsdf(
 				result->omegaOut = TVector3D(-omegaIn.x, -omegaIn.y, omegaIn.z);
 				result->value = R;
 				result->pdf = pr;
-				result->usedCaps = capsReflection | capsSpecular;
+				result->usedCaps = Bsdf::capsReflection | Bsdf::capsSpecular;
 			}
 			else
 			{
 				result->omegaOut = -omegaIn;
 				result->value = T;
 				result->pdf = 1 - pr;
-				result->usedCaps = capsTransmission | capsSpecular;
+				result->usedCaps = Bsdf::capsTransmission | Bsdf::capsSpecular;
 			}
 		}
 		++first;

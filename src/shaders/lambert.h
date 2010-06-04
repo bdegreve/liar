@@ -62,10 +62,10 @@ private:
 class LambertBsdf: public Bsdf
 {
 public:
-	LambertBsdf(const Sample& sample, const IntersectionContext& context, const XYZ& diffuseOverPi);
+	LambertBsdf(const Sample& sample, const IntersectionContext& context, unsigned caps, const XYZ& diffuseOverPi);
 private:
 	BsdfOut doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, unsigned allowedCaps) const;
-	SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, unsigned allowedCaps) const;
+	SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, unsigned allowedCaps) const;
 	XYZ diffuseOverPi_;
 };
 

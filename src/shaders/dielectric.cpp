@@ -42,7 +42,7 @@ PY_CLASS_MEMBER_RW_DOC(Dielectric, outerRefractionIndex, setOuterRefractionIndex
 // --- public --------------------------------------------------------------------------------------
 
 Dielectric::Dielectric():
-	Shader(capsReflection | capsTransmission | capsSpecular),
+	Shader(Bsdf::capsReflection | Bsdf::capsTransmission | Bsdf::capsSpecular),
 	innerRefractionIndex_(Texture::white()),
 	outerRefractionIndex_(Texture::white())
 {
@@ -51,7 +51,7 @@ Dielectric::Dielectric():
 
 
 Dielectric::Dielectric(const TTexturePtr& innerRefractionIndex):
-	Shader(capsReflection | capsTransmission | capsSpecular),
+	Shader(Bsdf::capsReflection | Bsdf::capsTransmission | Bsdf::capsSpecular),
 	innerRefractionIndex_(innerRefractionIndex),
 	outerRefractionIndex_(Texture::white())
 {
@@ -60,7 +60,7 @@ Dielectric::Dielectric(const TTexturePtr& innerRefractionIndex):
 
 
 Dielectric::Dielectric(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex):
-	Shader(capsReflection | capsTransmission | capsSpecular),
+	Shader(Bsdf::capsReflection | Bsdf::capsTransmission | Bsdf::capsSpecular),
 	innerRefractionIndex_(innerRefractionIndex),
 	outerRefractionIndex_(outerRefractionIndex)
 {
@@ -165,8 +165,8 @@ void Dielectric::doSampleBsdf(
 
 	while (first != last)
 	{
-		const bool doReflection = testCaps(first->allowedCaps, capsReflection | capsSpecular);
-		const bool doTransmission = testCaps(first->allowedCaps, capsTransmission | capsSpecular);
+		const bool doReflection = kernel::hasCaps(first->allowedCaps, Bsdf::capsReflection | Bsdf::capsSpecular);
+		const bool doTransmission = kernel::hasCaps(first->allowedCaps, Bsdf::capsTransmission | Bsdf::capsSpecular);
 		const TScalar pr = doReflection ? (doTransmission ? r : 1) : 0;
 
 		if (first->sample.x < pr)
@@ -174,7 +174,7 @@ void Dielectric::doSampleBsdf(
 			result->omegaOut = omegaRefl;
 			result->value = XYZ(r, r, r);
 			result->pdf = pr;
-			result->usedCaps = capsReflection | capsSpecular;
+			result->usedCaps = Bsdf::capsReflection | Bsdf::capsSpecular;
 		}
 		else
 		{
@@ -182,7 +182,7 @@ void Dielectric::doSampleBsdf(
 			result->omegaOut = omegaTrans;
 			result->value = XYZ(t, t, t);
 			result->pdf = 1 - pr;
-			result->usedCaps = capsTransmission | capsSpecular;
+			result->usedCaps = Bsdf::capsTransmission | Bsdf::capsSpecular;
 		}
 		++first;
 		++result;

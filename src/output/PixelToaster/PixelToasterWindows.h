@@ -1091,7 +1091,7 @@ namespace PixelToaster
 				*(memory++) = 0; 
 		}
 
-		bool createDevice( LPDIRECT3D9 direct3d, int width, int height, Format format, bool windowed, D3DDEVTYPE devType = D3DDEVTYPE_HAL )
+		bool createDevice( LPDIRECT3D9 direct3d, UINT width, UINT height, Format format, bool windowed, D3DDEVTYPE devType = D3DDEVTYPE_HAL )
 		{
 			this->deviceFormat = format;
 
@@ -1101,7 +1101,7 @@ namespace PixelToaster
 			{
 				// round up to nearest resolution
 				
-				int bestWidth = 0, bestHeight = 0;
+				UINT bestWidth = 0, bestHeight = 0;
 				const UINT n = direct3d->GetAdapterModeCount( D3DADAPTER_DEFAULT, fmt );
 				for ( UINT i = 0; i < n; ++i )
 				{
@@ -1273,8 +1273,8 @@ namespace PixelToaster
 		SmartI<IDirect3DTexture9> thingy;
 		SmartI<ID3DXEffect> effect;
 
-		int width;
-		int height;
+		UINT width;
+		UINT height;
 		Format deviceFormat;
 		Format textureFormat;
 		Mode mode;

@@ -61,9 +61,11 @@ void DirectLighting::doRequestSamples(const kernel::TSamplerPtr&)
 
 
 
-void DirectLighting::doPreProcess(const kernel::TSamplerPtr&, const TimePeriod&)
+void DirectLighting::doPreProcess(const kernel::TSamplerPtr&, const TimePeriod&, size_t)
 {
 }
+
+
 
 namespace temp
 {
@@ -120,10 +122,10 @@ const XYZ DirectLighting::doCastRay(
 
 	result += traceDirect(sample, context, bsdf, target, targetNormal, omegaIn);
 
-	if (shader->hasCaps(Shader::capsSpecular) || shader->hasCaps(Shader::capsGlossy))
+	if (shader->hasCaps(Bsdf::capsSpecular) || shader->hasCaps(Bsdf::capsGlossy))
 	{
 		//*
-		if (shader->hasCaps(Shader::capsReflection) && shader->idReflectionSamples() != -1)
+		if (shader->hasCaps(Bsdf::capsReflection) && shader->idReflectionSamples() != -1)
 		{
 			const TPoint3D beginCentral = target + 2 * tolerance * targetNormal;
 			const TPoint3D beginI = beginCentral + context.dPoint_dI();
@@ -142,10 +144,11 @@ const XYZ DirectLighting::doCastRay(
 			const TVector3D dReflected_dJ = dIncident_dJ + 2 * (dCosTheta_dJ * normal + cosTheta * context.dNormal_dJ());
 
 			const Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idReflectionSamples());
+			const Sample::TSubSequence1D componentSample = sample.subSequence1D(shader->idReflectionComponentSamples());
 			const size_t n = generation == 0 ? bsdfSample.size() : 1;
 			for (size_t i = 0; i < n; ++i)
 			{
-				const SampleBsdfOut out = bsdf->sample(omegaIn, bsdfSample[i], Shader::capsReflection | Shader::capsSpecular | Shader::capsGlossy);
+				const SampleBsdfOut out = bsdf->sample(omegaIn, bsdfSample[i], componentSample[i], Bsdf::capsReflection | Bsdf::capsSpecular | Bsdf::capsGlossy);
 				if (!out)
 				{
 					continue;
@@ -211,7 +214,8 @@ const XYZ DirectLighting::traceDirect(
 	{
 		Sample::TSubSequence2D lightSamples = sample.subSequence2D(light->idLightSamples());
 		Sample::TSubSequence2D bsdfSamples = sample.subSequence2D(light->idBsdfSamples());
-		result += estimateLightContribution(sample, bsdf, *light, lightSamples, bsdfSamples, target, targetNormal, omegaIn);
+		Sample::TSubSequence1D compSamples = sample.subSequence1D(light->idBsdfComponentSamples());
+		result += estimateLightContribution(sample, bsdf, *light, lightSamples, bsdfSamples, compSamples, target, targetNormal, omegaIn);
 	}
 	return result;
 }
@@ -225,13 +229,13 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 	const Shader* const shader = context.shader();
 	LASS_ASSERT(shader);
 
-	if (!(shader->hasCaps(Shader::capsSpecular) || shader->hasCaps(Shader::capsGlossy)))
+	if (!(shader->hasCaps(Bsdf::capsSpecular) || shader->hasCaps(Bsdf::capsGlossy)))
 	{
 		return XYZ();
 	}
 
 	XYZ result;
-	if (shader->hasCaps(Shader::capsReflection) && shader->idReflectionSamples() != -1)
+	if (shader->hasCaps(Bsdf::capsReflection) && shader->idReflectionSamples() != -1)
 	{
 		const TPoint3D beginCentral = target + 2 * tolerance * targetNormal;
 		const TPoint3D beginI = beginCentral + context.dPoint_dI();
@@ -250,10 +254,11 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 		const TVector3D dReflected_dJ = dIncident_dJ + 2 * (dCosTheta_dJ * normal + cosTheta * context.dNormal_dJ());
 
 		Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idReflectionSamples());
+		Sample::TSubSequence1D compSample = sample.subSequence1D(shader->idReflectionComponentSamples());
 		const size_t n = singleSample ? 1 : bsdfSample.size();
 		for (size_t i = 0; i < n; ++i)
 		{
-			const SampleBsdfOut out = bsdf->sample(omegaIn, bsdfSample[i], Shader::capsReflection | Shader::capsSpecular | Shader::capsGlossy);
+			const SampleBsdfOut out = bsdf->sample(omegaIn, bsdfSample[i], compSample[i], Bsdf::capsReflection | Bsdf::capsSpecular | Bsdf::capsGlossy);
 			if (!out)
 			{
 				continue;
@@ -275,16 +280,17 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 		}
 	}
 
-	if (shader->hasCaps(Shader::capsTransmission) && shader->idTransmissionSamples() != -1)
+	if (shader->hasCaps(Bsdf::capsTransmission) && shader->idTransmissionSamples() != -1)
 	{
 		const MediumChanger mediumChanger(mediumStack(), context.interior(), context.solidEvent());
 		const TPoint3D beginCentral = target - 2 * tolerance * targetNormal;
 
 		Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idTransmissionSamples());
+		Sample::TSubSequence1D compSample = sample.subSequence1D(shader->idTransmissionComponentSamples());
 		const size_t n = singleSample ? 1 : bsdfSample.size();
 		for (size_t i = 0; i < n; ++i)
 		{
-			const SampleBsdfOut out = bsdf->sample(omegaIn, bsdfSample[i], Shader::capsTransmission | Shader::capsSpecular | Shader::capsGlossy);
+			const SampleBsdfOut out = bsdf->sample(omegaIn, bsdfSample[i], compSample[i], Bsdf::capsTransmission | Bsdf::capsSpecular | Bsdf::capsGlossy);
 			if (!out)
 			{
 				continue;

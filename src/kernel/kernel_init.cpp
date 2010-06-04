@@ -39,6 +39,7 @@
 #include "rgb_space.h"
 #include "xyz.h"
 #include "texture.h"
+#include "transformation.h"
 
 #include <lass/io/proxy_man.h>
 #include <lass/io/logger.h>
@@ -80,6 +81,8 @@ PY_MODULE_CLASS(kernel, liar::kernel::SceneObject)
 	PY_MODULE_CLASS(kernel, liar::kernel::SceneLight)
 PY_MODULE_CLASS(kernel, liar::kernel::Shader)
 PY_MODULE_CLASS(kernel, liar::kernel::Texture)
+PY_MODULE_CLASS(kernel, liar::kernel::impl::ShadowTransformation2D)
+PY_MODULE_CLASS(kernel, liar::kernel::PyTransformation3D)
 
 PY_MODULE_FUNCTION(kernel, license)
 PY_MODULE_FUNCTION(kernel, tolerance)

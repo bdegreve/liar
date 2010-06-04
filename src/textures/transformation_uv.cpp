@@ -38,9 +38,9 @@ PY_CLASS_MEMBER_RW(TransformationUv, transformation, setTransformation);
 
 TransformationUv::TransformationUv(
 		const TTexturePtr& texture, const TTransformation2D& transformation):
-	texture_(texture),
-	transformation_(transformation)
+	texture_(texture)
 {
+	setTransformation(transformation);
 }
 
 
@@ -61,14 +61,15 @@ void TransformationUv::setTexture(const TTexturePtr& texture)
 
 const TTransformation2D& TransformationUv::transformation() const
 {
-	return transformation_;
+	return forward_;
 }
 
 
 
 void TransformationUv::setTransformation(const TTransformation2D& transformation)
 {
-	transformation_ = transformation;
+	forward_ = transformation;
+	inverse_ = forward_.inverse();
 }
 
 
@@ -82,10 +83,20 @@ void TransformationUv::setTransformation(const TTransformation2D& transformation
 const XYZ TransformationUv::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	IntersectionContext temp(context);
-	temp.setUv(prim::transform(context.uv(), transformation_));
-	temp.setDUv_dI(prim::transform(context.dUv_dI(), transformation_));
-	temp.setDUv_dJ(prim::transform(context.dUv_dJ(), transformation_));
-#pragma LASS_TODO("perhaps we need to transform other Uv dependent quantities as well [Brams]")
+	temp.setUv(prim::transform(context.uv(), forward_));
+	temp.setDUv_dI(prim::transform(context.dUv_dI(), forward_));
+	temp.setDUv_dJ(prim::transform(context.dUv_dJ(), forward_));
+
+	// we need derivatives from old (u,v) coordinates to new (s,t) coordinates.
+	const TScalar* const invMat = inverse_.matrix();
+	const TVector2D dUv_dS(invMat[0], invMat[3]);
+	const TVector2D dUv_dT(invMat[1], invMat[4]);
+
+	temp.setDPoint_dU(context.dPoint_dU() * dUv_dS.x + context.dPoint_dV() * dUv_dS.y);
+	temp.setDPoint_dV(context.dPoint_dU() * dUv_dT.x + context.dPoint_dV() * dUv_dT.y);
+	temp.setDNormal_dU(context.dNormal_dU() * dUv_dS.x + context.dNormal_dV() * dUv_dS.y);
+	temp.setDNormal_dV(context.dNormal_dU() * dUv_dT.x + context.dNormal_dV() * dUv_dT.y);
+
 	return texture_->lookUp(sample, temp);
 }
 
@@ -93,14 +104,16 @@ const XYZ TransformationUv::doLookUp(const Sample& sample, const IntersectionCon
 
 const TPyObjectPtr TransformationUv::doGetState() const
 {
-	return python::makeTuple(texture_, transformation_);
+	return python::makeTuple(texture_, forward_);
 }
 
 
 
 void TransformationUv::doSetState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(state, texture_, transformation_);
+	TTransformation2D transformation;
+	python::decodeTuple(state, texture_, transformation);
+	setTransformation(transformation);
 }
 
 

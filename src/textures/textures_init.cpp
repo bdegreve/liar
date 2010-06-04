@@ -38,6 +38,7 @@
 #include "mix_2.h"
 #include "orco.h"
 #include "product.h"
+#include "screen_space.h"
 #include "time.h"
 #include "transformation_uv.h"
 #include "transformation_local.h"
@@ -66,6 +67,7 @@ PY_MODULE_CLASS(textures, Image)
 PY_MODULE_CLASS(textures, LinearInterpolator)
 PY_MODULE_CLASS(textures, OrCo)
 PY_MODULE_CLASS(textures, Product)
+PY_MODULE_CLASS(textures, ScreenSpace)
 PY_MODULE_CLASS(textures, Time)
 PY_MODULE_CLASS(textures, TransformationUv)
 PY_MODULE_CLASS(textures, TransformationLocal)

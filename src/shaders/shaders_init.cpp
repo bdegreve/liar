@@ -35,6 +35,7 @@
 #include "mirror.h"
 //#include "null_shader.h"
 //#include "simple.h"
+#include "sum.h"
 #include "thin_dielectric.h"
 #include "unshaded.h"
 
@@ -54,6 +55,7 @@ PY_MODULE_CLASS(shaders, Lambert)
 PY_MODULE_CLASS(shaders, Mirror)
 //PY_MODULE_CLASS(shaders, NullShader)
 //PY_MODULE_CLASS(shaders, Simple)
+PY_MODULE_CLASS(shaders, Sum)
 PY_MODULE_CLASS(shaders, ThinDielectric)
 PY_MODULE_CLASS(shaders, Unshaded)
 

@@ -43,7 +43,7 @@ PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, numberOfSamples, setNumberOfSamples, "s
 // --- public --------------------------------------------------------------------------------------
 
 AshikhminShirley::AshikhminShirley():
-	Shader(capsReflection | capsDiffuse | capsGlossy),
+	Shader(Bsdf::capsReflection | Bsdf::capsDiffuse | Bsdf::capsGlossy),
 	diffuse_(Texture::white()),
 	specular_(Texture::white()),
 	specularPowerU_(Texture::white()),
@@ -55,7 +55,7 @@ AshikhminShirley::AshikhminShirley():
 
 
 AshikhminShirley::AshikhminShirley(const TTexturePtr& iDiffuse, const TTexturePtr& iSpecular):
-	Shader(capsReflection | capsDiffuse | capsGlossy),
+	Shader(Bsdf::capsReflection | Bsdf::capsDiffuse | Bsdf::capsGlossy),
 	diffuse_(iDiffuse),
 	specular_(iSpecular),
 	specularPowerU_(Texture::white()),
@@ -178,8 +178,8 @@ void AshikhminShirley::doBsdf(
 
 	while (first != last)
 	{
-		const bool doDiffuse = testCaps(first->allowedCaps, capsReflection | capsDiffuse);
-		const bool doGlossy = testCaps(first->allowedCaps, capsReflection | capsGlossy);
+		const bool doDiffuse = kernel::hasCaps(first->allowedCaps, Bsdf::capsReflection | Bsdf::capsDiffuse);
+		const bool doGlossy = kernel::hasCaps(first->allowedCaps, Bsdf::capsReflection | Bsdf::capsGlossy);
 		const TScalar pd = doDiffuse ? rd : 0;
 		const TScalar ps = doGlossy ? rs : 0;
 		const TScalar ptot = pd + ps;
@@ -265,8 +265,8 @@ void AshikhminShirley::doSampleBsdf(
 
 	while (first != last)
 	{
-		const bool doDiffuse = testCaps(first->allowedCaps, capsReflection | capsDiffuse);
-		const bool doGlossy = testCaps(first->allowedCaps, capsReflection | capsGlossy);
+		const bool doDiffuse = kernel::hasCaps(first->allowedCaps, Bsdf::capsReflection | Bsdf::capsDiffuse);
+		const bool doGlossy = kernel::hasCaps(first->allowedCaps, Bsdf::capsReflection | Bsdf::capsGlossy);
 		TScalar pd = doDiffuse ? rd : 0;
 		TScalar ps = doGlossy ? rs : 0;
 		const TScalar ptot = pd + ps;
@@ -319,13 +319,13 @@ void AshikhminShirley::doSampleBsdf(
 				{
 					result->value *= temp::maximumHeuristic(pdfD, pdfS);
 					result->pdf = pd * pdfD;
-					result->usedCaps = capsReflection | capsDiffuse;
+					result->usedCaps = Bsdf::capsReflection | Bsdf::capsDiffuse;
 				}
 				else
 				{
 					result->value *= temp::maximumHeuristic(pdfS, pdfD);
 					result->pdf = ps * pdfS;
-					result->usedCaps = capsReflection | capsGlossy;
+					result->usedCaps = Bsdf::capsReflection | Bsdf::capsGlossy;
 				}
 			}
 		}

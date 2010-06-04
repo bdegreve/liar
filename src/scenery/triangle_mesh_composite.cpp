@@ -204,7 +204,21 @@ bool TriangleMeshComposite::doContains(const Sample&, const TPoint3D&) const
 
 const TAabb3D TriangleMeshComposite::doBoundingBox() const
 {
-	return mesh_.aabb();
+	TAabb3D result = mesh_.aabb();
+	if (!result.isEmpty())
+	{
+		return result;
+	}
+
+	// backup plan: if mesh doesn't have aabb yet, compute from children.
+	const TChildren::const_iterator end = children_.end();
+	for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
+	{
+		const SceneObject* child = i->get();
+		LASS_ASSERT(child);
+		result += child->boundingBox();
+	}
+	return result;
 }
 
 

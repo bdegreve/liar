@@ -31,6 +31,7 @@
 
 #include "scenery_common.h"
 #include "../kernel/scene_object.h"
+#include "../kernel/transformation.h"
 
 namespace liar
 {
@@ -43,6 +44,7 @@ class LIAR_SCENERY_DLL Transformation: public SceneObject
 public:
 
 	Transformation(const TSceneObjectPtr& child, const TTransformation3D& localToWorld);
+	Transformation(const TSceneObjectPtr& child, const TPyTransformation3DPtr& localToWorld);
 
 	const TSceneObjectPtr& child() const;
 	void setChild(const TSceneObjectPtr& child);

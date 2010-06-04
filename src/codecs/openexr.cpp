@@ -69,7 +69,7 @@ private:
 	{
 		std::auto_ptr<Handle> pimpl(new Handle(resolution, rgbSpace));
 		pimpl->line.resize(resolution.x);
-		Imf::Header header(resolution.x, resolution.y);
+		Imf::Header header(num::numCast<int>(resolution.x), num::numCast<int>(resolution.y));
 		Imf::Chromaticities chromaticities;
 		chromaticities.red = point2DToV2f(pimpl->rgbSpace->red());
 		chromaticities.green = point2DToV2f(pimpl->rgbSpace->green());

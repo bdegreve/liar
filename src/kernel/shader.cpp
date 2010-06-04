@@ -49,9 +49,17 @@ void Shader::requestSamples(const TSamplerPtr& sampler)
 	{
 		idReflectionSamples_ = sampler->requestSubSequence2D(numReflectionSamples());
 	}
+	if (idReflectionComponentSamples_ < 0)
+	{
+		idReflectionComponentSamples_ = sampler->requestSubSequence1D(numReflectionSamples());
+	}
 	if (idTransmissionSamples_ < 0)
 	{
 		idTransmissionSamples_ = sampler->requestSubSequence2D(numTransmissionSamples());
+	}
+	if (idTransmissionComponentSamples_ < 0)
+	{
+		idTransmissionComponentSamples_ = sampler->requestSubSequence1D(numTransmissionSamples());
 	}
 	doRequestSamples(sampler);
 }
@@ -79,6 +87,13 @@ int Shader::idReflectionSamples() const
 
 
 
+int Shader::idReflectionComponentSamples() const
+{
+	return idReflectionComponentSamples_;
+}
+
+
+
 int Shader::idTransmissionSamples() const
 {
 	return idTransmissionSamples_;
@@ -86,18 +101,27 @@ int Shader::idTransmissionSamples() const
 
 
 
+int Shader::idTransmissionComponentSamples() const
+{
+	return idTransmissionComponentSamples_;
+}
+
+
+
 // --- protected -----------------------------------------------------------------------------------
 
-Shader::Shader(unsigned capabilityFlags):
+Shader::Shader(TBsdfCaps capabilityFlags):
 	caps_(capabilityFlags),
 	idReflectionSamples_(-1),
-	idTransmissionSamples_(-1)
+	idReflectionComponentSamples_(-1),
+	idTransmissionSamples_(-1),
+	idTransmissionComponentSamples_(-1)
 {
 }
 
 
 
-void Shader::setCaps(unsigned capabilityFlags)
+void Shader::setCaps(TBsdfCaps capabilityFlags)
 {
 	caps_ = capabilityFlags;
 }
@@ -157,7 +181,7 @@ void Shader::doShadeContext(const Sample&, IntersectionContext&) const
 
 TBsdfPtr Shader::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-	return TBsdfPtr(new Bsdf(sample, context));
+	return TBsdfPtr(new Bsdf(sample, context, caps()));
 }
 
 

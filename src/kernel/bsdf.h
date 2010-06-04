@@ -30,6 +30,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_BSDF_H
 
 #include "kernel_common.h"
+#include "bsdf_caps.h"
 #include "xyz.h"
 #include <lass/util/allocator.h>
 
@@ -42,13 +43,15 @@ class Shader;
 class Sample;
 class IntersectionContext;
 
+typedef size_t TBsdfCaps;
+
 struct BsdfIn
 {
 	BsdfIn(): omegaOut(), allowedCaps() {}
-	BsdfIn(const TVector3D& omegaOut, unsigned allowedCaps): 
+	BsdfIn(const TVector3D& omegaOut, TBsdfCaps allowedCaps): 
 		omegaOut(omegaOut), allowedCaps(allowedCaps) {}
 	TVector3D omegaOut;
-	unsigned allowedCaps;
+	TBsdfCaps allowedCaps;
 };
 
 struct BsdfOut
@@ -58,14 +61,20 @@ struct BsdfOut
 	BsdfOut(const XYZ& value = XYZ(), TScalar pdf = 0): value(value), pdf(pdf) {}
 	bool operator!() const { return !(pdf > 0 && value); }
 	operator num::SafeBool() const { return !*this ? num::safeFalse : num::safeTrue; }
+	BsdfOut& operator+=(const BsdfOut& other) 
+	{
+		value += other.value;
+		pdf += other.pdf;
+		return *this;
+	}
 };
 
 struct SampleBsdfIn
 {
 	SampleBsdfIn(): sample(), allowedCaps() {}
-	SampleBsdfIn(const TPoint2D& sample, unsigned allowedCaps): sample(sample), allowedCaps(allowedCaps) {}
+	SampleBsdfIn(const TPoint2D& sample, TBsdfCaps allowedCaps): sample(sample), allowedCaps(allowedCaps) {}
 	TPoint2D sample;
-	unsigned allowedCaps;
+	TBsdfCaps allowedCaps;
 };
 
 struct SampleBsdfOut
@@ -73,8 +82,8 @@ struct SampleBsdfOut
 	TVector3D omegaOut;
 	XYZ value;
 	TScalar pdf;
-	unsigned usedCaps;
-	SampleBsdfOut(const TVector3D& omegaOut = TVector3D(), const XYZ& value = XYZ(), TScalar pdf = 0, unsigned usedCaps = 0):
+	TBsdfCaps usedCaps;
+	SampleBsdfOut(const TVector3D& omegaOut = TVector3D(), const XYZ& value = XYZ(), TScalar pdf = 0, TBsdfCaps usedCaps = 0):
 		omegaOut(omegaOut), value(value), pdf(pdf), usedCaps(usedCaps) {}
 	bool operator!() const { return !(pdf > 0 && value); }
 	operator num::SafeBool() const { return !*this ? num::safeFalse : num::safeTrue; }
@@ -82,23 +91,63 @@ struct SampleBsdfOut
 
 typedef util::AllocatorBinned< util::AllocatorConcurrentFreeList<> > TBsdfAllocator;
 
+inline bool hasCaps(TBsdfCaps capsUnderTest, TBsdfCaps wantedCaps)
+{
+	return (capsUnderTest & wantedCaps) == wantedCaps;
+}
+
+inline bool compatibleCaps(TBsdfCaps capsUnderTest, TBsdfCaps allowedCaps)
+{
+	const TBsdfCaps overlapping = capsUnderTest & allowedCaps;
+	return (overlapping & 0xf) > 0 && (overlapping & 0xf0) > 0;
+}
+
+
+
 class LIAR_KERNEL_DLL Bsdf: public util::AllocatorClassAdaptor<TBsdfAllocator>
 {
 public:
 
-	Bsdf(const Sample& sample, const IntersectionContext& context);
+	enum CapsFlags
+	{
+		capsNone = 0x00,
+
+		capsEmission = 0x01,
+		capsReflection = 0x02,
+		capsTransmission = 0x04,
+
+		capsDiffuse = 0x10,
+		capsSpecular = 0x20,
+		capsGlossy = 0x40,
+
+		capsAll = 0xff,
+
+		capsNonDiffuse = capsGlossy | capsSpecular,
+
+		capsAllReflection = capsReflection | capsDiffuse | capsNonDiffuse,
+		capsAllTransmission = capsTransmission | capsDiffuse | capsNonDiffuse,
+
+		capsAllDiffuse = capsReflection | capsTransmission | capsDiffuse,
+		capsAllSpecular = capsReflection | capsTransmission | capsSpecular,
+		capsAllGlossy = capsReflection | capsTransmission | capsGlossy,
+		capsAllNonDiffuse = capsReflection | capsTransmission | capsNonDiffuse,
+	};
+
+	Bsdf(const Sample& sample, const IntersectionContext& context, unsigned caps);
 	virtual ~Bsdf();
+
+	TBsdfCaps caps() const { return caps_; }
+	bool hasCaps(TBsdfCaps wantedCaps) const { return kernel::hasCaps(caps_, wantedCaps); }
+	bool compatibleCaps(TBsdfCaps allowedCaps) const { return kernel::compatibleCaps(caps_, allowedCaps); }
 
 	BsdfOut call(const TVector3D& omegaIn, const TVector3D& omegaOut, unsigned allowedCaps) const
 	{
-		//LASS_ASSERT(omegaIn.z >= 0);
 		return doCall(omegaIn, omegaOut, allowedCaps);
 	}
 
-	SampleBsdfOut sample(const TVector3D& omegaIn, const TPoint2D& sample, unsigned allowedCaps) const
+	SampleBsdfOut sample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, unsigned allowedCaps) const
 	{
-		//LASS_ASSERT(omegaIn.z >= 0);
-		return doSample(omegaIn, sample, allowedCaps);
+		return doSample(omegaIn, sample, componentSample, allowedCaps);
 	}
 
 	const TVector3D bsdfToWorld(const TVector3D& v) const;
@@ -106,14 +155,15 @@ public:
 
 private:
 
-	virtual BsdfOut doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, unsigned allowedCaps) const;
-	virtual SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, unsigned allowedCaps) const;
+	virtual BsdfOut doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
+	virtual SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
 
 	const Sample& sample_;
 	const IntersectionContext& context_;
+	TBsdfCaps caps_;
 
 public:
-	size_t refCount_;
+	size_t refCount_; // oops, public???
 };
 
 typedef util::SharedPtr<Bsdf, util::ObjectStorage, util::IntrusiveCounter<Bsdf, size_t, &Bsdf::refCount_> > TBsdfPtr;

@@ -505,14 +505,15 @@ const std::string Display::makeTitle() const
 {
 	std::ostringstream buffer;
 	buffer << title_ << " [" << toneMappingDictionary_.key(toneMapping_);
-	printThirdStops(buffer, exposure_);
 	if (autoExposure_)
 	{
+		printThirdStops(buffer, exposure_);
 		buffer << " A";
-	}
-	if (exposureCorrection_)
-	{
 		printThirdStops(buffer, exposureCorrection_);
+	}
+	else
+	{
+		printThirdStops(buffer, exposure_ + exposureCorrection_);
 	}
 	buffer << "]";
 	return buffer.str();

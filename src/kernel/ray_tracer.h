@@ -62,7 +62,7 @@ public:
 	void setMaxRayGeneration(const int rayGeneration);
 
 	void requestSamples(const TSamplerPtr& sampler);
-	void preProcess(const TSamplerPtr& sampler, const TimePeriod& period);
+	void preProcess(const TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads = 0);
 
 	/** @warning castRay is NOT THREAD SAFE!
 	 */
@@ -90,14 +90,14 @@ protected:
 	MediumStack& mediumStack() const { return mediumStack_; }
 
 	const XYZ estimateLightContribution(
-			const Sample& sample, const TBsdfPtr& bsdf, 
-			const LightContext& light, const Sample::TSubSequence2D& lightSamples,  const Sample::TSubSequence2D& bsdfSamples, 
+			const Sample& sample, const TBsdfPtr& bsdf, const LightContext& light, 
+			const Sample::TSubSequence2D& lightSamples,  const Sample::TSubSequence2D& bsdfSamples, const Sample::TSubSequence1D& componentSamples, 
 			const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn) const;
 
 private:
 
 	virtual void doRequestSamples(const TSamplerPtr& sampler) = 0;
-	virtual void doPreProcess(const TSamplerPtr& samper, const TimePeriod& period) = 0;
+	virtual void doPreProcess(const TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads) = 0;
 	virtual const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, int generation) const = 0;
 	virtual const TRayTracerPtr doClone() const = 0;
 

@@ -120,11 +120,11 @@ void RayTracer::requestSamples(const TSamplerPtr& sampler)
 
 
 
-void RayTracer::preProcess(const TSamplerPtr& sampler, const TimePeriod& period)
+void RayTracer::preProcess(const TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads)
 {
 	const TAabb3D sceneBound = scene_->boundingBox();
 	lights_.setSceneBound(sceneBound, period);
-	doPreProcess(sampler, period);
+	doPreProcess(sampler, period, numberOfThreads);
 }
 
 
@@ -182,19 +182,21 @@ namespace temp
 
 
 const XYZ RayTracer::estimateLightContribution(
-		const Sample& sample, const TBsdfPtr& bsdf,
-		const LightContext& light, const Sample::TSubSequence2D& lightSamples,  const Sample::TSubSequence2D& bsdfSamples, 
+		const Sample& sample, const TBsdfPtr& bsdf, const LightContext& light, 
+		const Sample::TSubSequence2D& lightSamples, const Sample::TSubSequence2D& bsdfSamples, const Sample::TSubSequence1D& componentSamples,
 		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn) const
 {
+	LASS_ASSERT(bsdfSamples.size() == componentSamples.size());
+
 	const TScalar nl = static_cast<TScalar>(lightSamples.size());
 	const TScalar nb = static_cast<TScalar>(bsdfSamples.size());
 	const bool isMultipleImportanceSampling = nb > 0 && !light.isSingular();
 	const TScalar n = isMultipleImportanceSampling ? nl + nb : nl;
 
-	unsigned caps = Shader::capsAll & ~Shader::capsSpecular;
+	unsigned caps = Bsdf::capsAll & ~Bsdf::capsSpecular;
 	if (!light.isSingular())
 	{
-		caps &= ~Shader::capsGlossy;
+		caps &= ~Bsdf::capsGlossy;
 	}
 	// what about indirect estimator caps???
 
@@ -223,9 +225,10 @@ const XYZ RayTracer::estimateLightContribution(
 
 	if (isMultipleImportanceSampling)
 	{
-		for (Sample::TSubSequence2D::iterator bs = lightSamples.begin(); bs != lightSamples.end(); ++bs)
+		Sample::TSubSequence1D::iterator cs = componentSamples.begin();
+		for (Sample::TSubSequence2D::iterator bs = bsdfSamples.begin(); bs != bsdfSamples.end(); ++bs, ++cs)
 		{
-			const SampleBsdfOut out = bsdf->sample(omegaIn, *bs, Shader::capsAll & ~Shader::capsSpecular);
+			const SampleBsdfOut out = bsdf->sample(omegaIn, *bs, *cs, Bsdf::capsAll & ~Bsdf::capsSpecular);
 			if (!out)
 			{
 				continue;

@@ -38,7 +38,7 @@ PY_CLASS_MEMBER_RW_DOC(Mirror, reflectance, setReflectance, "texture for reflect
 // --- public --------------------------------------------------------------------------------------
 
 Mirror::Mirror():
-	Shader(capsReflection | capsSpecular),
+	Shader(Bsdf::capsReflection | Bsdf::capsSpecular),
 	reflectance_(Texture::white())
 {
 }
@@ -46,7 +46,7 @@ Mirror::Mirror():
 
 
 Mirror::Mirror(const TTexturePtr& reflectance):
-	Shader(capsReflection | capsSpecular),
+	Shader(Bsdf::capsReflection | Bsdf::capsSpecular),
 	reflectance_(reflectance)
 {
 }
@@ -94,7 +94,7 @@ void Mirror::doSampleBsdf(
 	const TVector3D omegaOut(-omegaIn.x, -omegaIn.y, omegaIn.z);
 	while (first != last)
 	{
-		if (testCaps(first->allowedCaps, caps()))
+		if (compatibleCaps(first->allowedCaps))
 		{
 			result->omegaOut = omegaOut;
 			result->value = r;

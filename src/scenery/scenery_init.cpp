@@ -28,6 +28,7 @@
 //#include "aabb_tree.h"
 #include "clip_map.h"
 #include "csg.h"
+#include "disk.h"
 #include "light_area.h"
 #include "light_directional.h"
 #include "light_point.h"
@@ -58,6 +59,7 @@ PY_MODULE_CLASS(scenery, AabbTree)
 PY_MODULE_CLASS(scenery, AabpTree)
 PY_MODULE_CLASS(scenery, ClipMap)
 PY_MODULE_CLASS(scenery, Csg)
+PY_MODULE_CLASS(scenery, Disk)
 PY_MODULE_CLASS(scenery, LightArea)
 PY_MODULE_CLASS(scenery, LightDirectional)
 PY_MODULE_CLASS(scenery, LightPoint)

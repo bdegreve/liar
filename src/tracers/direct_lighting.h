@@ -47,7 +47,7 @@ public:
 private:
 
 	void doRequestSamples(const TSamplerPtr& sampler);
-	void doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period);
+	void doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads);
 	const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, int generation) const;
 	const TRayTracerPtr doClone() const;
 

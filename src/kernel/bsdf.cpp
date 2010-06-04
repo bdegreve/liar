@@ -33,9 +33,10 @@ namespace kernel
 
 // --- public --------------------------------------------------------------------------------------
 
-Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context):
+Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps):
 	sample_(sample),
-	context_(context)
+	context_(context),
+	caps_(caps)
 {
 }
 
@@ -69,8 +70,12 @@ const TVector3D Bsdf::worldToBsdf(const TVector3D& v) const
 
 /** fall back for old shaders
  */
-BsdfOut Bsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, unsigned allowedCaps) const
+BsdfOut Bsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
 {
+	if (!compatibleCaps(allowedCaps))
+	{
+		return BsdfOut();
+	}
 	LASS_ASSERT(context_.shader());
 	BsdfIn in;
 	in.omegaOut = omegaOut;
@@ -83,8 +88,12 @@ BsdfOut Bsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, unsign
 
 /** fall back for old shaders
  */
-SampleBsdfOut Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, unsigned allowedCaps) const
+SampleBsdfOut Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar /*componentSample*/, TBsdfCaps allowedCaps) const
 {
+	if (!compatibleCaps(allowedCaps))
+	{
+		return SampleBsdfOut();
+	}
 	LASS_ASSERT(context_.shader());
 	SampleBsdfIn in;
 	in.sample = sample;

@@ -31,6 +31,7 @@ namespace scenery
 
 PY_DECLARE_CLASS_DOC(Transformation, "transformation of local space")
 PY_CLASS_CONSTRUCTOR_2(Transformation, const TSceneObjectPtr&, const TTransformation3D&)
+PY_CLASS_CONSTRUCTOR_2(Transformation, const TSceneObjectPtr&, const TPyTransformation3DPtr&)
 PY_CLASS_MEMBER_RW(Transformation, child, setChild)
 PY_CLASS_MEMBER_RW(Transformation, localToWorld, setLocalToWorld)
 PY_CLASS_MEMBER_R(Transformation, worldToLocal)
@@ -41,6 +42,14 @@ PY_CLASS_MEMBER_R(Transformation, worldToLocal)
 Transformation::Transformation(const TSceneObjectPtr& child, const TTransformation3D& localToWorld):
 	child_(child),
 	localToWorld_(localToWorld)
+{
+}
+
+
+
+Transformation::Transformation(const TSceneObjectPtr& child, const TPyTransformation3DPtr& localToWorld):
+	child_(child),
+	localToWorld_(localToWorld ? localToWorld->transformation() : TTransformation3D::identity())
 {
 }
 

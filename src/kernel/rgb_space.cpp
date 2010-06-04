@@ -316,7 +316,7 @@ void RgbSpace::init(
 	g_ = XYZ(mat[1], mat[5], mat[9]);
 	b_ = XYZ(mat[2], mat[6], mat[10]);
 
-	const TScalar* invMat = M.inverse().matrix();
+	const TScalar* invMat = M.inverseMatrix();
 	x_ = RGBA(static_cast<RGBA::TValue>(invMat[0]), static_cast<RGBA::TValue>(invMat[4]), static_cast<RGBA::TValue>(invMat[8]));
 	y_ = RGBA(static_cast<RGBA::TValue>(invMat[1]), static_cast<RGBA::TValue>(invMat[5]), static_cast<RGBA::TValue>(invMat[9]));
 	z_ = RGBA(static_cast<RGBA::TValue>(invMat[2]), static_cast<RGBA::TValue>(invMat[6]), static_cast<RGBA::TValue>(invMat[10]));

@@ -241,7 +241,7 @@ const TPoint3D Sphere::doSampleSurface(const TPoint2D& sample, TVector3D& normal
 }
 
 
-
+/*
 const TPoint3D Sphere::doSampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const
 {
 	if (sphere_.contains(target))
@@ -308,7 +308,7 @@ const TPoint3D Sphere::doSampleSurface(const TPoint2D& sample, const TVector3D& 
 	pdf /= num::sqr(sphere_.radius());
 	return sphere_.center() + sphere_.radius() * normal;
 }
-
+*/
 
 
 void Sphere::doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const

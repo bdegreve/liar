@@ -119,6 +119,10 @@ def subtract(a, b):
 	return tuple(x1 - x2 for x1, x2 in zip(a, b))
 
 
+def negate(a):
+	return tuple(-x for x in a)
+
+
 def normalize(v):
 	scale = 1. / norm(v)
 	return tuple(scale * x for x in v)

@@ -62,7 +62,8 @@ private:
 	void doSetState(const TPyObjectPtr& state);
 
 	TTexturePtr texture_;
-	TTransformation2D transformation_;
+	TTransformation2D forward_;
+	TTransformation2D inverse_;
 };
 
 }

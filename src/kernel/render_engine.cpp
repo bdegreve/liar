@@ -61,14 +61,15 @@ RenderEngine::RenderEngine():
 
 
 RenderEngine::~RenderEngine()
+try
 {
-	try
+	if (renderTarget_)
 	{
 		renderTarget_->endRender();
 	}
-	catch(...)
-	{
-	}
+}
+catch(...)
+{
 }
 
 
@@ -204,11 +205,11 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 	const size_t numberOfSamples = numberOfPixels * samplesPerPixel;
 
 	if (isDirty_)
-	{		
+	{
 		scene_->preProcess(scene_, timePeriod);
 		rayTracer_->setScene(scene_);
 		rayTracer_->requestSamples(sampler_);
-		rayTracer_->preProcess(sampler_, timePeriod);
+		rayTracer_->preProcess(sampler_, timePeriod, numberOfThreads_);
 		isDirty_ = false;
 	}
 

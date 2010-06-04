@@ -50,40 +50,16 @@ class LightContext;
 typedef python::PyObjectPtr<Sampler>::Type TSamplerPtr;
 typedef python::PyObjectPtr<SceneObject>::Type TSceneObjectPtr;
 
-inline bool testCaps(unsigned capsUnderTest, unsigned wantedCaps)
-{
-	return (capsUnderTest & wantedCaps) == wantedCaps;
-}
-
 class LIAR_KERNEL_DLL Shader: public python::PyObjectPlus
 {
 	PY_HEADER(python::PyObjectPlus)
 public:
 
-	enum CapsFlags
-	{
-		capsNone = 0x00,
-		capsEmission = 0x01,
-		capsReflection = 0x02,
-		capsTransmission = 0x04,
-		capsDiffuse = 0x08,
-		capsSpecular = 0x10,
-		capsGlossy = 0x20,
-		capsAll = 0xff,
-
-		capsNonDiffuse = capsGlossy | capsSpecular,
-		capsAllReflection = capsReflection | capsDiffuse | capsNonDiffuse,
-		capsAllTransmission = capsTransmission | capsDiffuse | capsNonDiffuse,
-		capsAllDiffuse = capsReflection | capsTransmission | capsDiffuse,
-		capsAllSpecular = capsReflection | capsTransmission | capsSpecular,
-		capsAllGlossy = capsReflection | capsTransmission | capsGlossy,
-		capsAllNonDiffuse = capsReflection | capsTransmission | capsNonDiffuse,
-	};
-
 	virtual ~Shader();
 
-	unsigned caps() const { return caps_; }
-	bool hasCaps(unsigned wantedCaps) const { return testCaps(caps_, wantedCaps); }
+	TBsdfCaps caps() const { return caps_; }
+	bool hasCaps(TBsdfCaps wantedCaps) const { return kernel::hasCaps(caps_, wantedCaps); }
+	bool compatibleCaps(TBsdfCaps allowedCaps) const { return kernel::compatibleCaps(caps_, allowedCaps); }
 
 	void shadeContext(const Sample& sample, IntersectionContext& context) const
 	{
@@ -105,7 +81,9 @@ public:
 	size_t numReflectionSamples() const;
 	size_t numTransmissionSamples() const;
 	int idReflectionSamples() const;
+	int idReflectionComponentSamples() const;
 	int idTransmissionSamples() const;
+	int idTransmissionComponentSamples() const;
 
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const;
@@ -113,13 +91,9 @@ public:
 
 protected:
 
-	Shader(unsigned capabilityFlags);
+	Shader(TBsdfCaps capabilityFlags);
 
-	void setCaps(unsigned capabilityFlags);
-	bool testCaps(unsigned capsUnderTest, unsigned wantedCaps) const
-	{
-		return (capsUnderTest & wantedCaps) == wantedCaps;
-	}
+	void setCaps(TBsdfCaps capabilityFlags);
 
 private:
 
@@ -138,9 +112,11 @@ private:
 	void zeroBsdf(BsdfOut* first, BsdfOut* last) const;
 	void zeroSampleBsdf(SampleBsdfOut* first, SampleBsdfOut* last) const;
 
-	unsigned caps_;
+	TBsdfCaps caps_;
 	int idReflectionSamples_;
+	int idReflectionComponentSamples_;
 	int idTransmissionSamples_;
+	int idTransmissionComponentSamples_;
 
 	// deprecated stuff ...
 	friend class Bsdf;

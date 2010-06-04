@@ -170,6 +170,44 @@ TScalar Translation::doArea(const TVector3D& normal) const
 
 
 
+bool Translation::doHasSurfaceSampling() const
+{
+	return child_ && child_->hasSurfaceSampling();
+}
+
+
+
+const TPoint3D Translation::doSampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const
+{
+	return child_->sampleSurface(sample, normal, pdf) + localToWorld_;
+}
+
+
+
+const TPoint3D Translation::doSampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const
+{
+	return child_->sampleSurface(sample, target - localToWorld_, normal, pdf) + localToWorld_;
+}
+
+
+
+const TPoint3D Translation::doSampleSurface(const TPoint2D& sample, const TVector3D& view, TVector3D& normal, TScalar& pdf) const
+{
+	return child_->sampleSurface(sample, view, normal, pdf) + localToWorld_;
+}
+
+
+
+void Translation::doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+{
+	const TRay3D localRay(ray.support() - localToWorld_, ray.direction());
+	BoundedRay localShadow;
+	child_->fun(localRay, localShadow, pdf);
+	shadowRay = translate(localShadow, localToWorld_);
+}
+
+
+
 const TPyObjectPtr Translation::doGetState() const
 {
 	return python::makeTuple(child_, localToWorld_);
