@@ -52,19 +52,40 @@ public:
 	const TTexturePtr& outerRefractionIndex() const;
 	void setOuterRefractionIndex(const TTexturePtr& refractionIndex);
 
+	const TTexturePtr& reflectance() const;
+	void setReflectance(const TTexturePtr& reflectance);
+	const TTexturePtr& transmittance() const;
+	void setTransmittance(const TTexturePtr& transmittance);
+
+	class DielectricBsdf: public Bsdf
+	{
+	public:
+		DielectricBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TScalar ior, const XYZ& reflectance, const XYZ& transmittance);
+	private:
+		BsdfOut doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, unsigned allowedCaps) const;
+		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, unsigned allowedCaps) const;
+		XYZ reflectance_;
+		XYZ transmittance_;
+		TScalar ior_;
+	};
+
 private:
 
 	size_t doNumReflectionSamples() const;
 	size_t doNumTransmissionSamples() const;
-
-	void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn, const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const;
-	void doSampleBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn, const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const;
+	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
+	void init(
+		const TTexturePtr& innerRefractionIndex = Texture::white(), const TTexturePtr& outerRefractionIndex = Texture::white(), 
+		const TTexturePtr& reflectance = Texture::white(), const TTexturePtr& transmittance = Texture::white());
+
 	TTexturePtr innerRefractionIndex_;
 	TTexturePtr outerRefractionIndex_;
+	TTexturePtr reflectance_;
+	TTexturePtr transmittance_;
 };
 
 }

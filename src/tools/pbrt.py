@@ -12,8 +12,9 @@ def parse(path, *args, **kwargs):
 
 
 class PbrtScene(object):
-	def __init__(self, verbose=False, render_immediately=True, display=True):
+	def __init__(self, verbose=False, render_immediately=True, display=True, threads=None):
 		self.engine = liar.RenderEngine()
+		self.engine.numberOfThreads = threads or liar.RenderEngine.AUTO_NUMBER_OF_THREADS
 		self.Identity()
 		self.__state = _STATE_OPTIONS_BLOCK
 		self.__named_coordinate_systems = {}
@@ -244,6 +245,15 @@ class PbrtScene(object):
 		diffuse = liar.shaders.Lambert(self._get_texture(Kd))
 		return liar.shaders.Sum([diffuse])
 	
+	def _material_mirror(self, Kr=1):
+		diffuse = liar.shaders.Mirror(self._get_texture(Kr))
+	
+	def _material_glass(self, Kr=1, Kt=1, index=1.5):
+		glass = liar.shaders.Dielectric(self._get_texture(index))
+		glass.reflectance = self._get_texture(Kr)
+		glass.transmittance = self._get_texture(Kt)
+		return glass
+	
 	
 	def Texture(self, name, type, class_, mapping="uv", uscale=1, vscale=1, udelta=0, vdelta=0, v1=(1,0,0), v2=(0,1,0), **kwargs):
 		self.verify_world()
@@ -337,6 +347,9 @@ class PbrtScene(object):
 	def _surfaceintegrator_photonmapper(self, causticphotons=20000, indirectphotons=100000, directphotons=100000, nused=50, maxdepth=5, maxdist=.1, finalgather=True, finalgathersamples=32, directwithphotons=False):
 		tracer = liar.tracers.PhotonMapper()
 		tracer.globalMapSize = indirectphotons
+		tracer.causticsQuality = (100. * causticphotons) / indirectphotons
+		if self.__verbose:
+			print ("  causticsQuality=%r" % tracer.causticsQuality)
 		if finalgather or directwithphotons:
 			tracer.globalMapSize += directphotons
 		for k in ("global", "caustic", "volume"):
@@ -376,8 +389,7 @@ class PbrtScene(object):
 		for token_type, token, line_number in tokens:
 			if token_type == _IDENTIFIER:
 				if identifier:
-					if self.__verbose:
-						print (identifier, args, kwargs)
+					self.__print_statement(identifier, args, kwargs)
 					getattr(self, identifier)(*args, **kwargs)
 					identifier = None
 					args = []
@@ -412,9 +424,24 @@ class PbrtScene(object):
 				else:
 					args.append(arg)
 		if identifier:
-			if self.__verbose:
-				print (identifier, args, kwargs)
+			self.__print_statement(identifier, args, kwargs)
 			getattr(self, identifier)(*args, **kwargs)
+	
+	def __print_statement(self, identifier, args, kwargs):
+		if not self.__verbose:
+			return
+		def truncated_repr(x, n=80):
+			s = repr(x)
+			if len(s) <= n:
+				return s
+			trunc = " ..."
+			if s[-1] in "'\")]}>":
+				trunc += s[-1]
+			return s[:n-len(trunc)] + trunc
+		import pprint
+		pretty_args = map(truncated_repr, args)
+		pretty_kwargs = ["%s=%s" % (key, truncated_repr(value)) for key, value in kwargs.items()]
+		print ("%s (%s)" % (identifier, ", ".join(pretty_args + pretty_kwargs)))
 	
 	def render(self):
 		self.engine.render(self.cropwindow)
@@ -472,7 +499,8 @@ if __name__ == "__main__":
 	from optparse import OptionParser
 	parser = OptionParser()
 	parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True)
-	parser.add_option("-n", "--no-display", action="store_false", dest="display", default=True)
+	parser.add_option("-d", "--display", action="store_true", dest="display", default=False, help="show progress in preview display [default=%default]")
+	parser.add_option("-t", "--threads", action="store", type="int", help="number of threads for rendering")
 	options, args = parser.parse_args()
 	for path in args:
-		parse(path, verbose=options.verbose, render_immediately=True, display=options.display)
+		parse(path, render_immediately=True, **options.__dict__)

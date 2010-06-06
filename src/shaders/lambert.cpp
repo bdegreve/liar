@@ -104,7 +104,7 @@ LambertBsdf::LambertBsdf(const Sample& sample, const IntersectionContext& contex
 
 BsdfOut LambertBsdf::doCall(const TVector3D&, const TVector3D& omegaOut, TBsdfCaps LASS_UNUSED(allowedCaps)) const
 {
-	LASS_ASSERT(hasCaps(allowedCaps, caps()));
+	LASS_ASSERT(shaders::hasCaps(allowedCaps, caps()));
 	const TScalar cosTheta = omegaOut.z;
 	if (cosTheta <= 0)
 	{
@@ -115,7 +115,7 @@ BsdfOut LambertBsdf::doCall(const TVector3D&, const TVector3D& omegaOut, TBsdfCa
 
 SampleBsdfOut LambertBsdf::doSample(const TVector3D&, const TPoint2D& sample, TScalar, TBsdfCaps LASS_UNUSED(allowedCaps)) const
 {
-	LASS_ASSERT(hasCaps(allowedCaps, caps()));
+	LASS_ASSERT(shaders::hasCaps(allowedCaps, caps()));
 	SampleBsdfOut out;
 	out.omegaOut = num::cosineHemisphere(sample, out.pdf).position();
 	out.value = diffuseOverPi_;

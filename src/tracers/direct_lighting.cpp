@@ -170,6 +170,35 @@ const XYZ DirectLighting::doCastRay(
 				result += out.value * reflected * (a * num::abs(out.omegaOut.z) / (n * out.pdf));
 			}
 		}
+		//*
+		if (shader->hasCaps(Bsdf::capsTransmission) && shader->idTransmissionSamples() != -1)
+		{
+			const MediumChanger mediumChanger(mediumStack(), context.interior(), context.solidEvent());
+			const TPoint3D beginCentral = target - 10 * liar::tolerance * targetNormal;
+
+			const Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idTransmissionSamples());
+			const Sample::TSubSequence1D compSample = sample.subSequence1D(shader->idTransmissionComponentSamples());
+			const size_t n = generation == 0 ? bsdfSample.size() : 1;
+			for (size_t i = 0; i < n; ++i)
+			{
+				const SampleBsdfOut out = bsdf->sample(omegaIn, bsdfSample[i], compSample[i], Bsdf::capsTransmission | Bsdf::capsSpecular | Bsdf::capsGlossy);
+				if (!out)
+				{
+					continue;
+				}
+
+				LASS_ASSERT(out.omegaOut.z < 0);
+				const TVector3D directionCentral = context.bsdfToWorld(out.omegaOut);
+				const DifferentialRay transmittedRay(
+					BoundedRay(beginCentral, directionCentral, liar::tolerance),
+					TRay3D(beginCentral, directionCentral),
+					TRay3D(beginCentral, directionCentral));
+				TScalar t, a;
+				const XYZ transmitted = castRay(sample, transmittedRay, t, a);
+				result += out.value * transmitted * (a * num::abs(out.omegaOut.z) / (n * out.pdf));
+			}
+		}
+		/**/
 	}
 
 	return mediumTransparency * result;

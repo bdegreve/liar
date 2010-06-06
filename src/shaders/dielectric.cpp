@@ -38,32 +38,33 @@ PY_CLASS_MEMBER_RW_DOC(Dielectric, innerRefractionIndex, setInnerRefractionIndex
 	"index of refraction for material on inside")
 PY_CLASS_MEMBER_RW_DOC(Dielectric, outerRefractionIndex, setOuterRefractionIndex, 
 	"index of refraction for material on outside")
+PY_CLASS_MEMBER_RW_DOC(Dielectric, reflectance, setReflectance, 
+	"multiplier for the Fresnel reflectance")
+PY_CLASS_MEMBER_RW_DOC(Dielectric, transmittance, setTransmittance, 
+	"multiplier for the Fresnel transmittance")
 
 // --- public --------------------------------------------------------------------------------------
 
 Dielectric::Dielectric():
-	Shader(Bsdf::capsReflection | Bsdf::capsTransmission | Bsdf::capsSpecular),
-	innerRefractionIndex_(Texture::white()),
-	outerRefractionIndex_(Texture::white())
+	Shader(Bsdf::capsReflection | Bsdf::capsTransmission | Bsdf::capsSpecular)
 {
+	init();
 }
 
 
 
 Dielectric::Dielectric(const TTexturePtr& innerRefractionIndex):
-	Shader(Bsdf::capsReflection | Bsdf::capsTransmission | Bsdf::capsSpecular),
-	innerRefractionIndex_(innerRefractionIndex),
-	outerRefractionIndex_(Texture::white())
+	Shader(Bsdf::capsReflection | Bsdf::capsTransmission | Bsdf::capsSpecular)
 {
+	init(innerRefractionIndex);
 }
 
 
 
 Dielectric::Dielectric(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex):
-	Shader(Bsdf::capsReflection | Bsdf::capsTransmission | Bsdf::capsSpecular),
-	innerRefractionIndex_(innerRefractionIndex),
-	outerRefractionIndex_(outerRefractionIndex)
+	Shader(Bsdf::capsReflection | Bsdf::capsTransmission | Bsdf::capsSpecular)
 {
+	init(innerRefractionIndex, outerRefractionIndex);
 }
 
 
@@ -96,6 +97,34 @@ void Dielectric::setOuterRefractionIndex(const TTexturePtr& outerRefractionIndex
 
 
 
+const TTexturePtr& Dielectric::reflectance() const
+{
+	return reflectance_;
+}
+
+
+
+void Dielectric::setReflectance(const TTexturePtr& reflectance)
+{
+	reflectance_ = reflectance;
+}
+
+
+
+const TTexturePtr& Dielectric::transmittance() const
+{
+	return transmittance_;
+}
+
+
+
+void Dielectric::setTransmittance(const TTexturePtr& transmittance)
+{
+	transmittance_ = transmittance;
+}
+
+
+
 // --- protected -----------------------------------------------------------------------------------
 
 
@@ -116,91 +145,92 @@ size_t Dielectric::doNumTransmissionSamples() const
 
 
 
-void Dielectric::doBsdf(const Sample&, const IntersectionContext&, const TVector3D&, const BsdfIn*, const BsdfIn*, BsdfOut*) const
+TBsdfPtr Dielectric::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-}
-
-
-
-void Dielectric::doSampleBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
-{
-	TScalar ior1 = average(outerRefractionIndex_->lookUp(sample, context));
-	TScalar ior2 = average(innerRefractionIndex_->lookUp(sample, context));
-
-	if (ior1 <= 0)
-	{
-		LASS_WARNING_ONCE("detected outerRefractionIndex evaluating to zero or less.  Defaulting to 1."
-			"See documentation");
-		ior1 = 1;
-	}
-	if (ior2 <= 0)
-	{
-		LASS_WARNING_ONCE("detected innerRefractionIndex evaluating to zero or less.  Defaulting to 1."
-			"See documentation");
-		ior2 = 1;
-	}
-
-	const TVector3D omegaRefl(-omegaIn.x, -omegaIn.y, omegaIn.z);
-
-	// http://users.skynet.be/bdegreve/writings/reflection_transmission.pdf
+	const TScalar ior1 = std::max(average(outerRefractionIndex_->lookUp(sample, context)), TNumTraits::zero);
+	const TScalar ior2 = std::max(average(innerRefractionIndex_->lookUp(sample, context)), TNumTraits::zero);
 	const bool isLeaving = context.solidEvent() == seLeaving;
 	const TScalar ior = isLeaving ? ior2 / ior1 : ior1 / ior2;
-	const TScalar cosI = omegaIn.z;
-	LASS_ASSERT(cosI > 0);
-	const TScalar sinT2 = num::sqr(ior) * (1 - num::sqr(cosI));
-	TScalar r = 1;
-	TVector3D omegaTrans = -omegaIn;
-	if (sinT2 < 1)
-	{
-		const TScalar cosT = num::sqrt(1 - sinT2);
-		const TScalar rOrth = (ior1 * cosI - ior2 * cosT) / (ior1 * cosI + ior2 * cosT);
-		const TScalar rPar = (ior2 * cosI - ior1 * cosT) / (ior2 * cosI + ior1 * cosT);
-		r = (num::sqr(rOrth) + num::sqr(rPar)) / 2;
+	const XYZ reflectance = reflectance_->lookUp(sample, context);
+	const XYZ transmittance = transmittance_->lookUp(sample, context);
 
-		omegaTrans *= ior;
-		omegaTrans.z += (ior * cosI - cosT);
-	}
-
-	while (first != last)
-	{
-		const bool doReflection = kernel::hasCaps(first->allowedCaps, Bsdf::capsReflection | Bsdf::capsSpecular);
-		const bool doTransmission = kernel::hasCaps(first->allowedCaps, Bsdf::capsTransmission | Bsdf::capsSpecular);
-		const TScalar pr = doReflection ? (doTransmission ? r : 1) : 0;
-
-		if (first->sample.x < pr)
-		{
-			result->omegaOut = omegaRefl;
-			result->value = XYZ(r, r, r);
-			result->pdf = pr;
-			result->usedCaps = Bsdf::capsReflection | Bsdf::capsSpecular;
-		}
-		else
-		{
-			const TScalar t = 1 - r;
-			result->omegaOut = omegaTrans;
-			result->value = XYZ(t, t, t);
-			result->pdf = 1 - pr;
-			result->usedCaps = Bsdf::capsTransmission | Bsdf::capsSpecular;
-		}
-		++first;
-		++result;
-	}
+	return TBsdfPtr(new DielectricBsdf(sample, context, caps(), ior, reflectance, transmittance));
 }
-
 
 
 const TPyObjectPtr Dielectric::doGetState() const
 {
-	return python::makeTuple(outerRefractionIndex_, innerRefractionIndex_);
+	return python::makeTuple(innerRefractionIndex_, outerRefractionIndex_, reflectance_, transmittance_);
 }
 
 
 
 void Dielectric::doSetState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(state, outerRefractionIndex_, innerRefractionIndex_);
+	python::decodeTuple(state, innerRefractionIndex_, outerRefractionIndex_, reflectance_, transmittance_);
+}
+
+
+
+void Dielectric::init(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex, const TTexturePtr& reflectance, const TTexturePtr& transmittance)
+{
+	innerRefractionIndex_ = innerRefractionIndex;
+	outerRefractionIndex_ = outerRefractionIndex;
+	reflectance_ = reflectance;
+	transmittance_ = transmittance;
+}
+
+
+
+// --- bsdf ----------------------------------------------------------------------------------------
+
+Dielectric::DielectricBsdf::DielectricBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, TScalar ior, const XYZ& reflectance, const XYZ& transmittance):
+	Bsdf(sample, context, caps),
+	reflectance_(reflectance),
+	transmittance_(transmittance),
+	ior_(ior)
+{
+	LASS_ASSERT(ior_ > 0);
+}
+
+BsdfOut Dielectric::DielectricBsdf::doCall(const TVector3D&, const TVector3D& omegaOut, unsigned allowedCaps) const
+{
+	return BsdfOut();
+}
+
+SampleBsdfOut Dielectric::DielectricBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, unsigned allowedCaps) const
+{
+	enum
+	{
+		capsRefl = Bsdf::capsReflection | Bsdf::capsSpecular,
+		capsTrans = Bsdf::capsTransmission | Bsdf::capsSpecular
+	};
+
+	const TScalar cosI = omegaIn.z;
+	LASS_ASSERT(cosI > 0);
+	const TScalar sinT2 = num::sqr(ior_) * (1 - num::sqr(cosI));
+	const TScalar cosT = num::sqrt(std::max<TScalar>(1 - sinT2, 0));
+	const TScalar rOrth = (ior_ * cosI - cosT) / (ior_ * cosI + cosT);
+	const TScalar rPar = (cosI - ior_ * cosT) / (cosI + ior_ * cosT);
+	const TScalar rFresnel = (num::sqr(rOrth) + num::sqr(rPar)) / 2;
+
+	const TScalar powRefl = kernel::hasCaps(allowedCaps, capsRefl) ? reflectance_.absTotal() * rFresnel : 0;
+	const TScalar powTrans = kernel::hasCaps(allowedCaps, capsTrans) ? transmittance_.absTotal() * (1 - rFresnel) : 0;
+	LASS_ASSERT(powRefl + powTrans > 0);
+	const TScalar probRefl = powRefl / (powRefl + powTrans);
+	
+	if (componentSample < probRefl)
+	{
+		const TVector3D omegaRefl(-omegaIn.x, -omegaIn.y, omegaIn.z);
+		return SampleBsdfOut(omegaRefl, reflectance_ * rFresnel, probRefl, capsRefl);
+	}
+	else
+	{
+		TVector3D omegaTrans = -omegaIn;
+		omegaTrans *= ior_;
+		omegaTrans.z += (ior_ * cosI - cosT);
+		return SampleBsdfOut(omegaTrans, transmittance_ * (1 - rFresnel), 1 - probRefl, capsTrans); 
+	}
 }
 
 

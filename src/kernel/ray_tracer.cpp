@@ -228,7 +228,7 @@ const XYZ RayTracer::estimateLightContribution(
 		Sample::TSubSequence1D::iterator cs = componentSamples.begin();
 		for (Sample::TSubSequence2D::iterator bs = bsdfSamples.begin(); bs != bsdfSamples.end(); ++bs, ++cs)
 		{
-			const SampleBsdfOut out = bsdf->sample(omegaIn, *bs, *cs, Bsdf::capsAll & ~Bsdf::capsSpecular);
+			const SampleBsdfOut out = bsdf->sample(omegaIn, *bs, *cs, Bsdf::capsReflection | Bsdf::capsDiffuse | Bsdf::capsGlossy);
 			if (!out)
 			{
 				continue;
