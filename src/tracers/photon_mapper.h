@@ -30,7 +30,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_TRACERS_PHOTON_MAPPER_H
 
 #include "tracers_common.h"
-#include "../kernel/ray_tracer.h"
+#include "direct_lighting.h"
 #include <lass/prim/sphere_3d.h>
 #include <lass/spat/kd_tree.h>
 #include <lass/spat/aabp_tree.h>
@@ -44,9 +44,9 @@ namespace liar
 namespace tracers
 {
 
-class LIAR_TRACERS_DLL PhotonMapper: public RayTracer
+class LIAR_TRACERS_DLL PhotonMapper: public DirectLighting
 {
-	PY_HEADER(RayTracer)
+	PY_HEADER(DirectLighting)
 public:
 
 	PhotonMapper();
@@ -218,13 +218,17 @@ private:
 	friend class IrradianceWorker;
 	friend class VolumetricWorker;
 
+	// RayTracer
 	void doRequestSamples(const TSamplerPtr& sampler);
 	void doPreProcess(const TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads);
-	const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& depth, TScalar& alpha, int generation) const;
 	const TRayTracerPtr doClone() const;
-
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
+
+	// DirectLighting
+	const XYZ doShadeMedium(const kernel::Sample& sample, const DifferentialRay& primaryRay, TScalar tMax, XYZ& transparency) const;
+	const XYZ doShadeSurface(const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
+		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, int generation) const;
 
 	bool hasFinalGather() const { return isRayTracingDirect_ && (numFinalGatherRays_ > 0); }
 	bool hasSecondaryGather() const { return hasFinalGather() && (numSecondaryGatherRays_ > 0); }
@@ -236,8 +240,6 @@ private:
 	void buildIrradianceMap(size_t numberOfThreads);
 	void buildVolumetricPhotonMap(const TPreliminaryVolumetricPhotonMap& preliminaryVolumetricMap, size_t numberOfThreads);
 
-	const XYZ traceDirect(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
-		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaOut) const;
 	const XYZ gatherIndirect(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& target, const TVector3D& omegaOut, const TPoint2D* firstSample, const TPoint2D* lastSample, 
 		const TScalar* firstComponentSample, const TScalar* firstVolumetricSample, size_t gatherStage = 0) const;

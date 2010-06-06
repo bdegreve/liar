@@ -84,6 +84,8 @@ namespace temp
 	class custom_stl_allocator: public stde::lass_allocator<T, CustomAllocator> {};
 }
 
+
+
 const XYZ DirectLighting::doCastRay(
 		const kernel::Sample& sample, const kernel::DifferentialRay& primaryRay,
 		TScalar& tIntersection, TScalar& alpha, int generation) const
@@ -94,114 +96,37 @@ const XYZ DirectLighting::doCastRay(
 	{
 		tIntersection = TNumTraits::infinity;
 		alpha = 0;
-		return 0;
+		return XYZ();
 	}
 	tIntersection = intersection.t();
 	alpha = 1;
-	const TPoint3D target = primaryRay.point(intersection.t());
-	const XYZ mediumTransparency = mediumStack().transmittance(BoundedRay(
-		primaryRay.centralRay().unboundedRay(), primaryRay.centralRay().nearLimit(),
-		intersection.t()));
 
-	const IntersectionContext context(*scene(), sample, primaryRay, intersection);
-	const Shader* const shader = context.shader();
-	if (!shader)
+	XYZ transparency;
+	XYZ result = doShadeMedium(sample, primaryRay, tIntersection, transparency);
+	if (!transparency)
+	{
+		return result;
+	}
+
+	XYZ surfaceResult;
+	IntersectionContext context(*scene(), sample, primaryRay, intersection);
+	if (context.shader())
+	{
+		const TPoint3D point = primaryRay.point(intersection.t());
+		const TVector3D normal = context.bsdfToWorld(TVector3D(0, 0, 1));
+		const TVector3D omega = context.worldToBsdf(-primaryRay.direction());
+		LASS_ASSERT(omegaIn.z >= 0);
+		result += transparency * doShadeSurface(sample, primaryRay, context, point, normal, omega, generation);
+	}
+	else
 	{
 		// leaving or entering something
 		MediumChanger mediumChanger(mediumStack(), context.interior(), context.solidEvent());
-		const DifferentialRay continuedRay = bound(primaryRay, intersection.t() + tolerance);
-		return mediumTransparency * this->castRay(sample, continuedRay, tIntersection, alpha);
-	}
-	const TBsdfPtr bsdf = shader->bsdf(sample, context);
-
-	const TVector3D targetNormal = context.bsdfToWorld(TVector3D(0, 0, 1));
-	const TVector3D omegaIn = context.worldToBsdf(-primaryRay.direction());
-	//LASS_ASSERT(omegaIn.z >= 0);
-
-	XYZ result = shader->emission(sample, context, omegaIn);
-
-	result += traceDirect(sample, context, bsdf, target, targetNormal, omegaIn);
-
-	if (shader->hasCaps(Bsdf::capsSpecular) || shader->hasCaps(Bsdf::capsGlossy))
-	{
-		//*
-		if (shader->hasCaps(Bsdf::capsReflection) && shader->idReflectionSamples() != -1)
-		{
-			const TPoint3D beginCentral = target + 2 * tolerance * targetNormal;
-			const TPoint3D beginI = beginCentral + context.dPoint_dI();
-			const TPoint3D beginJ = beginCentral + context.dPoint_dJ();
-
-			const TVector3D incident = primaryRay.centralRay().direction();
-			const TVector3D normal = context.normal();
-			const TScalar cosTheta = -dot(incident, normal);
-
-			const TVector3D dIncident_dI = primaryRay.differentialI().direction() - incident;
-			const TScalar dCosTheta_dI = -dot(dIncident_dI, normal) - dot(incident, context.dNormal_dI());
-			const TVector3D dReflected_dI = dIncident_dI + 2 * (dCosTheta_dI * normal + cosTheta * context.dNormal_dI());
-
-			const TVector3D dIncident_dJ = primaryRay.differentialJ().direction() - incident;
-			const TScalar dCosTheta_dJ = -dot(dIncident_dJ, normal) - dot(incident, context.dNormal_dJ());
-			const TVector3D dReflected_dJ = dIncident_dJ + 2 * (dCosTheta_dJ * normal + cosTheta * context.dNormal_dJ());
-
-			const Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idReflectionSamples());
-			const Sample::TSubSequence1D componentSample = sample.subSequence1D(shader->idReflectionComponentSamples());
-			const size_t n = generation == 0 ? bsdfSample.size() : 1;
-			for (size_t i = 0; i < n; ++i)
-			{
-				const SampleBsdfOut out = bsdf->sample(omegaIn, bsdfSample[i], componentSample[i], Bsdf::capsReflection | Bsdf::capsSpecular | Bsdf::capsGlossy);
-				if (!out)
-				{
-					continue;
-				}
-
-				LASS_ASSERT(out.omegaOut.z > 0);
-				const TVector3D directionCentral = context.bsdfToWorld(out.omegaOut);
-				LASS_ASSERT(dot(normal, directionCentral) > 0);
-				LASS_ASSERT(dot(normal, incident) < 0);
-				const TVector3D directionI = directionCentral + dReflected_dI;
-				const TVector3D directionJ = directionCentral + dReflected_dJ;
-
-				const DifferentialRay reflectedRay(
-					BoundedRay(beginCentral, directionCentral, tolerance),
-					TRay3D(beginI, directionI),
-					TRay3D(beginJ, directionJ));
-				TScalar t, a;
-				const XYZ reflected = castRay(sample, reflectedRay, t, a);
-				result += out.value * reflected * (a * num::abs(out.omegaOut.z) / (n * out.pdf));
-			}
-		}
-		//*
-		if (shader->hasCaps(Bsdf::capsTransmission) && shader->idTransmissionSamples() != -1)
-		{
-			const MediumChanger mediumChanger(mediumStack(), context.interior(), context.solidEvent());
-			const TPoint3D beginCentral = target - 10 * liar::tolerance * targetNormal;
-
-			const Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idTransmissionSamples());
-			const Sample::TSubSequence1D compSample = sample.subSequence1D(shader->idTransmissionComponentSamples());
-			const size_t n = generation == 0 ? bsdfSample.size() : 1;
-			for (size_t i = 0; i < n; ++i)
-			{
-				const SampleBsdfOut out = bsdf->sample(omegaIn, bsdfSample[i], compSample[i], Bsdf::capsTransmission | Bsdf::capsSpecular | Bsdf::capsGlossy);
-				if (!out)
-				{
-					continue;
-				}
-
-				LASS_ASSERT(out.omegaOut.z < 0);
-				const TVector3D directionCentral = context.bsdfToWorld(out.omegaOut);
-				const DifferentialRay transmittedRay(
-					BoundedRay(beginCentral, directionCentral, liar::tolerance),
-					TRay3D(beginCentral, directionCentral),
-					TRay3D(beginCentral, directionCentral));
-				TScalar t, a;
-				const XYZ transmitted = castRay(sample, transmittedRay, t, a);
-				result += out.value * transmitted * (a * num::abs(out.omegaOut.z) / (n * out.pdf));
-			}
-		}
-		/**/
+		const DifferentialRay continuedRay = bound(primaryRay, intersection.t() + liar::tolerance);
+		result += transparency * this->castRay(sample, continuedRay, tIntersection, alpha);
 	}
 
-	return mediumTransparency * result;
+	return result;
 }
 
 
@@ -224,18 +149,38 @@ void DirectLighting::doSetState(const TPyObjectPtr&)
 {
 }
 
-namespace temp
+
+
+const XYZ DirectLighting::doShadeMedium(const kernel::Sample& sample, const DifferentialRay& primaryRay, TScalar tMax, XYZ& transparency) const
 {
-	inline TScalar squaredHeuristic(TScalar pdfA, TScalar pdfB)
-	{
-		return num::sqr(pdfA) / (num::sqr(pdfA) + num::sqr(pdfB));
-	}
+	transparency = mediumStack().transmittance(primaryRay, tMax);
+	return XYZ();
+	//const XYZ mediumInScattering = inScattering(sample, primaryRay.centralRay(), context.t(), isScatteringDirect());
 }
+
+
+
+const XYZ DirectLighting::doShadeSurface(
+		const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
+		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, int generation) const
+{
+
+	const Shader* const shader = context.shader();
+	const TBsdfPtr bsdf = context.bsdf();
+
+	XYZ result = context.shader()->emission(sample, context, omega);
+	result += traceDirect(sample, context, bsdf, point, normal, omega);
+	const bool singleSample = generation > 0;
+	result += traceSpecularAndGlossy(sample, primaryRay, context, bsdf, point, normal, omega, singleSample);
+
+	return result;
+}
+
+
 
 const XYZ DirectLighting::traceDirect(
 		const Sample& sample, const IntersectionContext&, const TBsdfPtr& bsdf,
-		const TPoint3D& target, const TVector3D& targetNormal, 
-		const TVector3D& omegaIn) const
+		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega) const
 {
 	XYZ result;
 	const LightContexts::TIterator end = lights().end();
@@ -244,7 +189,7 @@ const XYZ DirectLighting::traceDirect(
 		Sample::TSubSequence2D lightSamples = sample.subSequence2D(light->idLightSamples());
 		Sample::TSubSequence2D bsdfSamples = sample.subSequence2D(light->idBsdfSamples());
 		Sample::TSubSequence1D compSamples = sample.subSequence1D(light->idBsdfComponentSamples());
-		result += estimateLightContribution(sample, bsdf, *light, lightSamples, bsdfSamples, compSamples, target, targetNormal, omegaIn);
+		result += estimateLightContribution(sample, bsdf, *light, lightSamples, bsdfSamples, compSamples, point, normal, omega);
 	}
 	return result;
 }
@@ -252,8 +197,8 @@ const XYZ DirectLighting::traceDirect(
 
 
 const XYZ DirectLighting::traceSpecularAndGlossy(
-		const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf, const kernel::DifferentialRay& primaryRay,
-		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn, bool singleSample) const
+		const Sample& sample, const kernel::DifferentialRay& primaryRay, const IntersectionContext& context, const TBsdfPtr& bsdf,
+		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, bool singleSample) const
 {
 	const Shader* const shader = context.shader();
 	LASS_ASSERT(shader);
@@ -263,31 +208,35 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 		return XYZ();
 	}
 
+	const TVector3D dNormal_dI = prim::normalTransform(context.dNormal_dI(), context.localToWorld());
+	const TVector3D dNormal_dJ = prim::normalTransform(context.dNormal_dJ(), context.localToWorld());
+	const TVector3D dPoint_dI = prim::transform(context.dPoint_dI(), context.localToWorld());
+	const TVector3D dPoint_dJ = prim::transform(context.dPoint_dJ(), context.localToWorld());
+
 	XYZ result;
-	if (shader->hasCaps(Bsdf::capsReflection) && shader->idReflectionSamples() != -1)
+	if (bsdf->hasCaps(Bsdf::capsReflection) && shader->idReflectionSamples() != -1)
 	{
-		const TPoint3D beginCentral = target + 2 * tolerance * targetNormal;
-		const TPoint3D beginI = beginCentral + context.dPoint_dI();
-		const TPoint3D beginJ = beginCentral + context.dPoint_dJ();
+		const TPoint3D beginCentral = point + 10 * liar::tolerance * normal;
+		const TPoint3D beginI = beginCentral + dPoint_dI;
+		const TPoint3D beginJ = beginCentral + dPoint_dJ;
 
 		const TVector3D incident = primaryRay.centralRay().direction();
-		const TVector3D normal = context.normal();
 		const TScalar cosTheta = -dot(incident, normal);
 
 		const TVector3D dIncident_dI = primaryRay.differentialI().direction() - incident;
-		const TScalar dCosTheta_dI = -dot(dIncident_dI, normal) - dot(incident, context.dNormal_dI());
-		const TVector3D dReflected_dI = dIncident_dI + 2 * (dCosTheta_dI * normal + cosTheta * context.dNormal_dI());
+		const TScalar dCosTheta_dI = -dot(dIncident_dI, normal) - dot(incident, dNormal_dI);
+		const TVector3D dReflected_dI = dIncident_dI + 2 * (dCosTheta_dI * normal + cosTheta * dNormal_dI);
 
 		const TVector3D dIncident_dJ = primaryRay.differentialJ().direction() - incident;
-		const TScalar dCosTheta_dJ = -dot(dIncident_dJ, normal) - dot(incident, context.dNormal_dJ());
-		const TVector3D dReflected_dJ = dIncident_dJ + 2 * (dCosTheta_dJ * normal + cosTheta * context.dNormal_dJ());
+		const TScalar dCosTheta_dJ = -dot(dIncident_dJ, normal) - dot(incident, dNormal_dJ);
+		const TVector3D dReflected_dJ = dIncident_dJ + 2 * (dCosTheta_dJ * normal + cosTheta * dNormal_dJ);
 
-		Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idReflectionSamples());
-		Sample::TSubSequence1D compSample = sample.subSequence1D(shader->idReflectionComponentSamples());
+		const Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idReflectionSamples());
+		const Sample::TSubSequence1D compSample = sample.subSequence1D(shader->idReflectionComponentSamples());
 		const size_t n = singleSample ? 1 : bsdfSample.size();
 		for (size_t i = 0; i < n; ++i)
 		{
-			const SampleBsdfOut out = bsdf->sample(omegaIn, bsdfSample[i], compSample[i], Bsdf::capsReflection | Bsdf::capsSpecular | Bsdf::capsGlossy);
+			const SampleBsdfOut out = bsdf->sample(omega, bsdfSample[i], compSample[i], Bsdf::capsReflection | Bsdf::capsSpecular | Bsdf::capsGlossy);
 			if (!out)
 			{
 				continue;
@@ -300,7 +249,7 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 			const TVector3D directionJ = directionCentral + dReflected_dJ;
 
 			const DifferentialRay reflectedRay(
-				BoundedRay(beginCentral, directionCentral, tolerance),
+				BoundedRay(beginCentral, directionCentral, liar::tolerance),
 				TRay3D(beginI, directionI),
 				TRay3D(beginJ, directionJ));
 			TScalar t, a;
@@ -312,14 +261,14 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 	if (shader->hasCaps(Bsdf::capsTransmission) && shader->idTransmissionSamples() != -1)
 	{
 		const MediumChanger mediumChanger(mediumStack(), context.interior(), context.solidEvent());
-		const TPoint3D beginCentral = target - 2 * tolerance * targetNormal;
+		const TPoint3D beginCentral = point - 10 * liar::tolerance * normal;
 
-		Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idTransmissionSamples());
-		Sample::TSubSequence1D compSample = sample.subSequence1D(shader->idTransmissionComponentSamples());
+		const Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idTransmissionSamples());
+		const Sample::TSubSequence1D compSample = sample.subSequence1D(shader->idTransmissionComponentSamples());
 		const size_t n = singleSample ? 1 : bsdfSample.size();
 		for (size_t i = 0; i < n; ++i)
 		{
-			const SampleBsdfOut out = bsdf->sample(omegaIn, bsdfSample[i], compSample[i], Bsdf::capsTransmission | Bsdf::capsSpecular | Bsdf::capsGlossy);
+			const SampleBsdfOut out = bsdf->sample(omega, bsdfSample[i], compSample[i], Bsdf::capsTransmission | Bsdf::capsSpecular | Bsdf::capsGlossy);
 			if (!out)
 			{
 				continue;
@@ -329,7 +278,7 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 
 #pragma LASS_TODO("preserve ray differentials! [Bramz]")
 			const DifferentialRay transmittedRay(
-				BoundedRay(beginCentral, directionCentral, tolerance),
+				BoundedRay(beginCentral, directionCentral, liar::tolerance),
 				TRay3D(beginCentral, directionCentral),
 				TRay3D(beginCentral, directionCentral));
 			TScalar t, a;

@@ -99,6 +99,7 @@ PhotonMapper::TMapTypeDictionary PhotonMapper::mapTypeDictionary_ =
 // --- public --------------------------------------------------------------------------------------
 
 PhotonMapper::PhotonMapper():
+	DirectLighting(),
 	shared_(new SharedData),
 	maxNumberOfPhotons_(100000000),
 	globalMapSize_(10000),
@@ -337,6 +338,8 @@ void PhotonMapper::setScatteringDirect(bool enabled)
 
 void PhotonMapper::doRequestSamples(const kernel::TSamplerPtr& sampler)
 {
+	DirectLighting::doRequestSamples(sampler);
+
 	idFinalGatherSamples_ = numFinalGatherRays_ > 0 ? sampler->requestSubSequence2D(numFinalGatherRays_) : -1;
 	idFinalGatherComponentSamples_ = numFinalGatherRays_ > 0 ? sampler->requestSubSequence1D(numFinalGatherRays_) : -1;
 	idFinalVolumetricGatherSamples_ = numFinalGatherRays_ > 0 ? sampler->requestSubSequence1D(numFinalGatherRays_) : -1;
@@ -346,6 +349,8 @@ void PhotonMapper::doRequestSamples(const kernel::TSamplerPtr& sampler)
 
 void PhotonMapper::doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads)
 {
+	DirectLighting::doPreProcess(sampler, period, numberOfThreads);
+
 	const size_t maxSize = *std::max_element(estimationSize_, estimationSize_ + numMapTypes);
 	photonNeighbourhood_.resize(maxSize + 1);
 
@@ -363,6 +368,108 @@ void PhotonMapper::doPreProcess(const kernel::TSamplerPtr& sampler, const TimePe
 	buildPhotonMap(mtVolume, shared_->volumetricBuffer_, preliminaryVolumetricMap, powerScale);
 	buildVolumetricPhotonMap(preliminaryVolumetricMap, numberOfThreads);
 }
+
+
+
+const TRayTracerPtr PhotonMapper::doClone() const
+{
+	return TRayTracerPtr(new PhotonMapper(*this));
+}
+
+
+
+const TPyObjectPtr PhotonMapper::doGetState() const
+{
+	std::vector<TScalar> radius(estimationRadius_, estimationRadius_ + numMapTypes);
+	std::vector<TScalar> tolerance(estimationTolerance_, estimationTolerance_ + numMapTypes);
+	std::vector<size_t> size(estimationSize_, estimationSize_ + numMapTypes);
+	
+	return python::makeTuple(DirectLighting::doGetState(), 
+		maxNumberOfPhotons_, globalMapSize_, causticsQuality_,
+		numFinalGatherRays_, ratioPrecomputedIrradiance_, isVisualizingPhotonMap_,
+		isRayTracingDirect_, isScatteringDirect_, radius, tolerance, size);
+}
+
+
+
+void PhotonMapper::doSetState(const TPyObjectPtr& state)
+{
+	TPyObjectPtr directLighting;
+	std::vector<TScalar> radius;
+	std::vector<TScalar> tolerance;
+	std::vector<size_t> size;
+
+	python::decodeTuple(state, directLighting, maxNumberOfPhotons_, globalMapSize_, causticsQuality_,
+		numFinalGatherRays_, ratioPrecomputedIrradiance_, isVisualizingPhotonMap_,
+		isRayTracingDirect_, isScatteringDirect_, radius, tolerance, size);
+
+	DirectLighting::doSetState(directLighting);
+
+	LASS_ENFORCE(radius.size() == numMapTypes);
+	LASS_ENFORCE(tolerance.size() == numMapTypes);
+	LASS_ENFORCE(size.size() == numMapTypes);
+	
+	std::copy(radius.begin(), radius.end(), estimationRadius_);
+	std::copy(tolerance.begin(), tolerance.end(), estimationTolerance_);
+	std::copy(size.begin(), size.end(), estimationSize_);
+}
+
+
+
+const XYZ PhotonMapper::doShadeMedium(const kernel::Sample& sample, const DifferentialRay& primaryRay, TScalar tMax, XYZ& transparency) const
+{
+	transparency = mediumStack().transmittance(primaryRay, tMax);
+	return inScattering(sample, primaryRay.centralRay(), tMax, isScatteringDirect());
+}
+
+
+
+const XYZ PhotonMapper::doShadeSurface(
+		const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
+		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, int generation) const
+{
+	if (isVisualizingPhotonMap_)
+	{
+		return estimateIrradiance(point, normal);
+	}
+
+	const Shader* const shader = context.shader();
+	const TBsdfPtr bsdf = context.bsdf();
+
+	XYZ result = estimateCaustics(sample, context, bsdf, point, omega);
+	result += context.shader()->emission(sample, context, omega);
+
+	if (isRayTracingDirect_)
+	{
+		result += traceDirect(sample, context, bsdf, point, normal, omega);
+	}
+
+	//*
+	if (bsdf->hasCaps(Bsdf::capsDiffuse))
+	{
+		if (hasFinalGather())
+		{
+			LASS_ASSERT(idFinalGatherSamples_ >= 0);
+			Sample::TSubSequence2D gatherSample = sample.subSequence2D(idFinalGatherSamples_);
+			Sample::TSubSequence1D componentSample = sample.subSequence1D(idFinalGatherComponentSamples_);
+			Sample::TSubSequence1D volumetricGatherSample = sample.subSequence1D(idFinalVolumetricGatherSamples_);
+			result += gatherIndirect(sample, context, bsdf, point + 10 * liar::tolerance * normal, omega, 
+				gatherSample.begin(), gatherSample.end(), componentSample.begin(), volumetricGatherSample.begin());
+		}
+		else
+		{
+			result += estimateRadiance(sample, context, bsdf, point, omega);
+		}
+	}
+	/**/
+
+	const bool singleSample = generation > 0;
+	result += traceSpecularAndGlossy(sample, primaryRay, context, bsdf, point, normal, omega, singleSample);
+
+	return result;
+}
+
+
 
 namespace temp
 {
@@ -392,199 +499,6 @@ namespace temp
 	}
 }
 
-const XYZ PhotonMapper::doCastRay(
-		const kernel::Sample& sample, const kernel::DifferentialRay& primaryRay,
-		TScalar& tIntersection, TScalar& alpha, int generation) const
-{
-	Intersection intersection;
-	scene()->intersect(sample, primaryRay, intersection);
-	if (!intersection)
-	{
-		tIntersection = TNumTraits::infinity;
-		alpha = 0;
-		return XYZ();
-	}
-	tIntersection = intersection.t();
-	alpha = 1;
-	const TPoint3D target = primaryRay.point(intersection.t());
-	const XYZ mediumTransparency = mediumStack().transmittance(primaryRay, intersection.t());
-	const XYZ mediumInScattering = inScattering(sample, primaryRay.centralRay(), intersection.t(), isScatteringDirect());
-
-	IntersectionContext context(*scene(), sample, primaryRay, intersection);
-	const Shader* const shader = context.shader();
-	if (!shader)
-	{
-		// leaving or entering something
-		MediumChanger mediumChanger(mediumStack(), context.interior(), context.solidEvent());
-		const DifferentialRay continuedRay = bound(primaryRay, intersection.t() + liar::tolerance);
-		return mediumInScattering + mediumTransparency * this->castRay(sample, continuedRay, tIntersection, alpha);
-	}
-	const TBsdfPtr bsdf = shader->bsdf(sample, context);
-
-	const TVector3D targetNormal = context.bsdfToWorld(TVector3D(0, 0, 1));
-	const TVector3D omegaIn = context.worldToBsdf(-primaryRay.direction());
-	LASS_ASSERT(omegaIn.z >= 0);
-
-	if (isVisualizingPhotonMap_)
-	{
-		XYZ result = estimateIrradiance(target, targetNormal);
-		result *= mediumTransparency;
-		return mediumInScattering + result;
-	}
-
-	XYZ result = estimateCaustics(sample, context, bsdf, target, omegaIn);
-	result += shader->emission(sample, context, omegaIn);
-
-	if (isRayTracingDirect_)
-	{
-		result += traceDirect(sample, context, bsdf, target, targetNormal, omegaIn);
-	}
-
-	//*
-	if (shader->hasCaps(Bsdf::capsDiffuse))
-	{
-		if (hasFinalGather())
-		{
-			LASS_ASSERT(idFinalGatherSamples_ >= 0);
-			Sample::TSubSequence2D gatherSample = sample.subSequence2D(idFinalGatherSamples_);
-			Sample::TSubSequence1D componentSample = sample.subSequence1D(idFinalGatherComponentSamples_);
-			Sample::TSubSequence1D volumetricGatherSample = sample.subSequence1D(idFinalVolumetricGatherSamples_);
-			result += gatherIndirect(sample, context, bsdf, target + 10 * liar::tolerance * targetNormal, omegaIn, 
-				gatherSample.begin(), gatherSample.end(), componentSample.begin(), volumetricGatherSample.begin());
-		}
-		else
-		{
-			result += estimateRadiance(sample, context, bsdf, target, omegaIn);
-		}
-	}
-	/**/
-
-	if (shader->hasCaps(Bsdf::capsSpecular) || shader->hasCaps(Bsdf::capsGlossy))
-	{
-		//*
-		if (shader->hasCaps(Bsdf::capsReflection) && shader->idReflectionSamples() != -1)
-		{
-			const TPoint3D beginCentral = target + 10 * liar::tolerance * targetNormal;
-			const TPoint3D beginI = beginCentral + context.dPoint_dI();
-			const TPoint3D beginJ = beginCentral + context.dPoint_dJ();
-
-			const TVector3D incident = primaryRay.centralRay().direction();
-			const TVector3D normal = context.normal();
-			const TScalar cosTheta = -dot(incident, normal);
-
-			const TVector3D dIncident_dI = primaryRay.differentialI().direction() - incident;
-			const TScalar dCosTheta_dI = -dot(dIncident_dI, normal) - 
-				dot(incident, context.dNormal_dI());
-			const TVector3D dReflected_dI = dIncident_dI + 
-				2 * (dCosTheta_dI * normal + cosTheta * context.dNormal_dI());
-
-			const TVector3D dIncident_dJ = primaryRay.differentialJ().direction() - incident;
-			const TScalar dCosTheta_dJ = -dot(dIncident_dJ, normal) - 
-				dot(incident, context.dNormal_dJ());
-			const TVector3D dReflected_dJ = dIncident_dJ +
-				2 * (dCosTheta_dJ * normal + cosTheta * context.dNormal_dJ());
-
-			const Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idReflectionSamples());
-			const Sample::TSubSequence1D compSample = sample.subSequence1D(shader->idReflectionComponentSamples());
-			const size_t n = generation == 0 ? bsdfSample.size() : 1;
-			for (size_t i = 0; i < n; ++i)
-			{
-				const SampleBsdfOut out = bsdf->sample(omegaIn, bsdfSample[i], compSample[i], Bsdf::capsReflection | Bsdf::capsSpecular | Bsdf::capsGlossy);
-				if (!out)
-				{
-					continue;
-				}
-				LASS_ASSERT(out.omegaOut.z > 0);
-				const TVector3D directionCentral = context.bsdfToWorld(out.omegaOut);
-				LASS_ASSERT(dot(normal, directionCentral) > 0);
-				LASS_ASSERT(dot(normal, incident) < 0);
-				const TVector3D directionI = directionCentral + dReflected_dI;
-				const TVector3D directionJ = directionCentral + dReflected_dJ;
-
-				const DifferentialRay reflectedRay(
-					BoundedRay(beginCentral, directionCentral, liar::tolerance),
-					TRay3D(beginI, directionI),
-					TRay3D(beginJ, directionJ));
-				TScalar t, a;
-				const XYZ reflected = castRay(sample, reflectedRay, t, a);
-				result += out.value * reflected * (a * num::abs(out.omegaOut.z) / (n * out.pdf));
-			}
-		}
-		/**/
-		//*
-		if (shader->hasCaps(Bsdf::capsTransmission) && shader->idTransmissionSamples() != -1)
-		{
-			const MediumChanger mediumChanger(mediumStack(), context.interior(), context.solidEvent());
-			const TPoint3D beginCentral = target - 10 * liar::tolerance * targetNormal;
-
-			const Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idTransmissionSamples());
-			const Sample::TSubSequence1D compSample = sample.subSequence1D(shader->idTransmissionComponentSamples());
-			const size_t n = generation == 0 ? bsdfSample.size() : 1;
-			for (size_t i = 0; i < n; ++i)
-			{
-				const SampleBsdfOut out = bsdf->sample(omegaIn, bsdfSample[i], compSample[i], Bsdf::capsTransmission | Bsdf::capsSpecular | Bsdf::capsGlossy);
-				if (!out)
-				{
-					continue;
-				}
-
-				LASS_ASSERT(out.omegaOut.z < 0);
-				const TVector3D directionCentral = context.bsdfToWorld(out.omegaOut);
-				const DifferentialRay transmittedRay(
-					BoundedRay(beginCentral, directionCentral, liar::tolerance),
-					TRay3D(beginCentral, directionCentral),
-					TRay3D(beginCentral, directionCentral));
-				TScalar t, a;
-				const XYZ transmitted = castRay(sample, transmittedRay, t, a);
-				result += out.value * transmitted * (a * num::abs(out.omegaOut.z) / (n * out.pdf));
-			}
-		}
-		/**/
-	}
-
-	return mediumInScattering + mediumTransparency * result;
-}
-
-
-
-const TRayTracerPtr PhotonMapper::doClone() const
-{
-	return TRayTracerPtr(new PhotonMapper(*this));
-}
-
-
-
-const TPyObjectPtr PhotonMapper::doGetState() const
-{
-	std::vector<TScalar> radius(estimationRadius_, estimationRadius_ + numMapTypes);
-	std::vector<TScalar> tolerance(estimationTolerance_, estimationTolerance_ + numMapTypes);
-	std::vector<size_t> size(estimationSize_, estimationSize_ + numMapTypes);
-	
-	return python::makeTuple(maxNumberOfPhotons_, globalMapSize_, causticsQuality_,
-		numFinalGatherRays_, ratioPrecomputedIrradiance_, isVisualizingPhotonMap_,
-		isRayTracingDirect_, isScatteringDirect_, radius, tolerance, size);
-}
-
-
-
-void PhotonMapper::doSetState(const TPyObjectPtr& state)
-{
-	std::vector<TScalar> radius;
-	std::vector<TScalar> tolerance;
-	std::vector<size_t> size;
-
-	python::decodeTuple(state, maxNumberOfPhotons_, globalMapSize_, causticsQuality_,
-		numFinalGatherRays_, ratioPrecomputedIrradiance_, isVisualizingPhotonMap_,
-		isRayTracingDirect_, isScatteringDirect_, radius, tolerance, size);	
-
-	LASS_ENFORCE(radius.size() == numMapTypes);
-	LASS_ENFORCE(tolerance.size() == numMapTypes);
-	LASS_ENFORCE(size.size() == numMapTypes);
-	
-	std::copy(radius.begin(), radius.end(), estimationRadius_);
-	std::copy(tolerance.begin(), tolerance.end(), estimationTolerance_);
-	std::copy(size.begin(), size.end(), estimationSize_);
-}
 
 
 namespace experimental
@@ -1094,24 +1008,6 @@ void PhotonMapper::buildVolumetricPhotonMap(const TPreliminaryVolumetricPhotonMa
 	LASS_COUT << "  eff. radii: " << temp::statistics(radii) << std::endl;
 
 	shared_->volumetricMap_.reset(shared_->volumetricBuffer_.begin(), shared_->volumetricBuffer_.end());
-}
-
-
-
-const XYZ PhotonMapper::traceDirect(
-		const Sample& sample, const IntersectionContext&, const TBsdfPtr& bsdf,
-		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn) const
-{
-	XYZ result;
-	const LightContexts::TIterator end = lights().end();
-	for (LightContexts::TIterator light = lights().begin(); light != end; ++light)
-	{
-		Sample::TSubSequence2D lightSamples = sample.subSequence2D(light->idLightSamples());
-		Sample::TSubSequence2D bsdfSamples = sample.subSequence2D(light->idBsdfSamples());
-		Sample::TSubSequence1D compSamples = sample.subSequence1D(light->idBsdfComponentSamples());
-		result += estimateLightContribution(sample, bsdf, *light, lightSamples, bsdfSamples, compSamples, target, targetNormal, omegaIn);
-	}
-	return result;
 }
 
 
