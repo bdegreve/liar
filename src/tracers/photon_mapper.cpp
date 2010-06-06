@@ -764,22 +764,19 @@ void PhotonMapper::tracePhoton(
 		Photon photon(hitPoint, -ray.direction(), power);
 		if (isCaustic)
 		{
-			if (russianRoulette(photon.power, storageProbability_[mtCaustics] > 0, uniform()))
+			if (russianRoulette(photon.power, storageProbability_[mtCaustics], uniform()))
 			{
 				shared_->causticsBuffer_.push_back(photon);
 			}
 		}
-		else
+		const bool mayStorePhoton = (((generation > 0) || !isRayTracingDirect_) && !isCaustic) || hasFinalGather();
+		if (mayStorePhoton && russianRoulette(photon.power, storageProbability_[mtGlobal], uniform()))
 		{
-			const bool mayStorePhoton = (generation > 0) || !isRayTracingDirect_ || hasFinalGather();
-			if (mayStorePhoton && russianRoulette(photon.power, storageProbability_[mtGlobal] > 0, uniform()))
+			shared_->globalBuffer_.push_back(photon);
+			if (ratioPrecomputedIrradiance_ > 0 && uniform() <= ratioPrecomputedIrradiance_)
 			{
-				shared_->globalBuffer_.push_back(photon);
-				if (ratioPrecomputedIrradiance_ > 0 && uniform() <= ratioPrecomputedIrradiance_)
-				{
-					const TVector3D worldNormal = context.bsdfToWorld(TVector3D(0, 0, 1));
-					shared_->irradianceBuffer_.push_back(Irradiance(hitPoint, worldNormal));
-				}
+				const TVector3D worldNormal = context.bsdfToWorld(TVector3D(0, 0, 1));
+				shared_->irradianceBuffer_.push_back(Irradiance(hitPoint, worldNormal));
 			}
 		}
 	}
@@ -1454,7 +1451,7 @@ const XYZ PhotonMapper::estimateCaustics(
 	const TScalar sqrSize = photonNeighbourhood_[0].squaredDistance();
 	const TScalar alpha = 0.918f;
 	const TScalar beta = 1.953f;
-	const TScalar b1 = -beta / 2 * sqrSize;
+	const TScalar b1 = -beta / (2 * sqrSize);
 	const TScalar b2 = num::inv(1 - num::exp(-beta));
 
 	XYZ result;
