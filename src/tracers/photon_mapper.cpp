@@ -416,10 +416,19 @@ void PhotonMapper::doSetState(const TPyObjectPtr& state)
 
 
 
-const XYZ PhotonMapper::doShadeMedium(const kernel::Sample& sample, const DifferentialRay& primaryRay, TScalar tMax, XYZ& transparency) const
+const XYZ PhotonMapper::doShadeMedium(const kernel::Sample& sample, const kernel::BoundedRay& ray, XYZ& transparency) const
 {
-	transparency = mediumStack().transmittance(primaryRay, tMax);
-	return inScattering(sample, primaryRay.centralRay(), tMax, isScatteringDirect());
+	const bool doTraceSingleScattering = isScatteringDirect();
+
+	transparency = mediumStack().transmittance(ray);
+
+	XYZ result = estimateVolumetric(sample, ray, doTraceSingleScattering);
+	if (doTraceSingleScattering)
+	{
+		result += traceSingleScattering(sample, ray);
+	}
+
+	return result;
 }
 
 
@@ -703,10 +712,7 @@ void PhotonMapper::tracePhoton(
 	LASS_ASSERT(generation < maxRayGeneration());
 
 	const TVector3D omegaIn = context.worldToBsdf(-ray.direction());
-	if (omegaIn.z < 0)
-	{
-		return;
-	}
+	LASS_ASSERT(omegaIn.z > 0);
 
 	const TPoint2D sampleBsdf(uniform(), uniform());
 	const TScalar sampleComponent = uniform();
@@ -1096,7 +1102,7 @@ const XYZ PhotonMapper::traceGatherRay(const Sample& sample, const BoundedRay& r
 	Intersection intersection;
 	scene()->intersect(sample, ray, intersection);
 
-	const XYZ inScatter = gatherVolumetric ? inScattering(sample, ray, intersection.t()) / volumetricGatherQuality_ : XYZ();
+	const XYZ inScatter = gatherVolumetric ? estimateVolumetric(sample, bound(ray, ray.nearLimit(), intersection.t())) / volumetricGatherQuality_ : XYZ();
 	if (!intersection)
 	{
 		return inScatter;
@@ -1393,79 +1399,40 @@ namespace temp
 
 
 
-const XYZ PhotonMapper::inScattering(const Sample& sample, const kernel::BoundedRay& ray, TScalar tFar, bool traceSingleScattering) const
+const XYZ PhotonMapper::estimateVolumetric(const Sample& sample, const kernel::BoundedRay& ray, bool dropDirectPhotons) const
 {
 	typedef Sample::TSubSequence1D::difference_type difference_type;
 
 	const Medium* medium = mediumStack().medium();
-	if (!medium || (ray.nearLimit() > tFar))
+	if (shared_->volumetricMap_.isEmpty() || !medium || ray.isEmpty())
 	{
 		return XYZ();
 	}
 
-	BoundedRay boundedRay = bound(ray, ray.nearLimit(), tFar);
-	XYZ result;	
-	
-	if (traceSingleScattering)
-	{
-		const Sample::TSubSequence1D stepSamples = sample.subSequence1D(medium->idStepSamples()); // these are unsorted!!!
-		const Sample::TSubSequence1D lightSamples = sample.subSequence1D(medium->idLightSamples());
-		const Sample::TSubSequence2D surfaceSamples = sample.subSequence2D(medium->idSurfaceSamples());
+	XYZ result;
 
-		const difference_type n = stepSamples.size();
-		LASS_ASSERT(lightSamples.size() == n && surfaceSamples.size() == n);
-		for (difference_type k = 0; k < n; ++k)
-		{
-			TScalar tScatter, tPdf;
-			const XYZ transRay = medium->sampleScatterOut(stepSamples[k], boundedRay, tScatter, tPdf);
-			const TPoint3D point = ray.point(tScatter);
-			TScalar lightPdf;
-			const LightContext* light = lights().sample(lightSamples[k], lightPdf);
-			if (!light || lightPdf <= 0)
-			{
-				continue;
-			}
-			BoundedRay shadowRay;
-			TScalar surfacePdf;
-			const XYZ radiance = light->sampleEmission(sample, surfaceSamples[k], point, shadowRay, surfacePdf);
-			if (surfacePdf <= 0 || !radiance)
-			{
-				continue;
-			}
-			const XYZ phase = medium->phase(point, ray.direction(), shadowRay.direction());
-			if (scene()->isIntersecting(sample, shadowRay))
-			{
-				continue;
-			}
-			const XYZ transShadow = medium->transmittance(shadowRay);
-			result += transRay * transShadow * phase * radiance / (n * tPdf * lightPdf * surfacePdf);
-		}
-	}
-
-	if (!shared_->volumetricMap_.isEmpty())
+	const TRay3D& unboundedRay = ray.unboundedRay();
+	const TScalar tNear = ray.nearLimit();
+	const TScalar tFar = ray.farLimit();
+	TVolumetricNeighbourhood::const_iterator last = shared_->volumetricMap_.find(
+		unboundedRay, tNear, tFar, stde::overwrite_inserter(volumetricNeighbourhood_)).end();
+	for (TVolumetricNeighbourhood::const_iterator i = volumetricNeighbourhood_.begin(); i != last; ++i)
 	{
-		const TRay3D& unboundedRay = ray.unboundedRay();
-		const TScalar tNear = ray.nearLimit();
-		TVolumetricNeighbourhood::const_iterator last = shared_->volumetricMap_.find(
-			unboundedRay, tNear, tFar, stde::overwrite_inserter(volumetricNeighbourhood_)).end();
-		for (TVolumetricNeighbourhood::const_iterator i = volumetricNeighbourhood_.begin(); i != last; ++i)
+		const VolumetricPhoton& photon = **i;
+		if (dropDirectPhotons && photon.isDirect)
 		{
-			const VolumetricPhoton& photon = **i;
-			if (traceSingleScattering && photon.isDirect)
-			{
-				continue;
-			}
-			const TScalar t = num::clamp(unboundedRay.t(photon.position), tNear, tFar);
-			const TPoint3D pos = unboundedRay.point(t);
-			const TScalar k = temp::kernelEpanechnikov2D(pos, photon.position, photon.radius);
-			if (k <= 0)
-			{
-				continue;
-			}
-			const XYZ trans = medium->scatterOut(bound(ray, tNear, t));
-			const XYZ phase = medium->phase(pos, ray.direction(), -photon.omegaIn);
-			result += (k) * trans * phase * photon.power;
+			continue;
 		}
+		const TScalar t = num::clamp(unboundedRay.t(photon.position), tNear, tFar);
+		const TPoint3D pos = unboundedRay.point(t);
+		const TScalar k = temp::kernelEpanechnikov2D(pos, photon.position, photon.radius);
+		if (k <= 0)
+		{
+			continue;
+		}
+		const XYZ trans = medium->scatterOut(bound(ray, tNear, t));
+		const XYZ phase = medium->phase(pos, ray.direction(), -photon.omegaIn);
+		result += (k) * trans * phase * photon.power;
 	}
 
 	return result;

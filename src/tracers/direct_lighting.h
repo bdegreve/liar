@@ -54,7 +54,7 @@ protected:
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-	virtual const XYZ doShadeMedium(const kernel::Sample& sample, const DifferentialRay& primaryRay, TScalar tMax, XYZ& transparency) const;
+	virtual const XYZ doShadeMedium(const kernel::Sample& sample, const kernel::BoundedRay& ray, XYZ& transparency) const;
 	virtual const XYZ doShadeSurface(const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
 		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, int generation) const;
 
@@ -63,6 +63,7 @@ protected:
 	const XYZ traceSpecularAndGlossy(
 		const Sample& sample, const kernel::DifferentialRay& primaryRay, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn, bool singleSample) const;
+	const XYZ traceSingleScattering(const Sample& sample, const kernel::BoundedRay& ray) const;
 };
 
 }

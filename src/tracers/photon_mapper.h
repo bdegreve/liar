@@ -226,7 +226,7 @@ private:
 	void doSetState(const TPyObjectPtr& state);
 
 	// DirectLighting
-	const XYZ doShadeMedium(const kernel::Sample& sample, const DifferentialRay& primaryRay, TScalar tMax, XYZ& transparency) const;
+	const XYZ doShadeMedium(const kernel::Sample& sample, const kernel::BoundedRay& ray, XYZ& transparency) const;
 	const XYZ doShadeSurface(const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
 		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, int generation) const;
 
@@ -270,7 +270,7 @@ private:
 	void updateActualEstimationRadius(MapType mapType, TScalar radius) const;
 	void updateStorageProbabilities();
 
-	const XYZ inScattering(const Sample& sample, const kernel::BoundedRay& ray, TScalar tFar, bool traceSingleScattering = false) const;
+	const XYZ estimateVolumetric(const Sample& sample, const kernel::BoundedRay& ray, bool dropDirectPhotons = false) const;
 
 	struct SharedData
 	{

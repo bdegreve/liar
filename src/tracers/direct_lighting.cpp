@@ -101,8 +101,10 @@ const XYZ DirectLighting::doCastRay(
 	tIntersection = intersection.t();
 	alpha = 1;
 
+	const BoundedRay mediumRay = bound(primaryRay.centralRay(), primaryRay.centralRay().nearLimit(), tIntersection);
+	LASS_ENFORCE(!mediumRay.isEmpty());
 	XYZ transparency;
-	XYZ result = doShadeMedium(sample, primaryRay, tIntersection, transparency);
+	XYZ result = doShadeMedium(sample, mediumRay, transparency);
 	if (!transparency)
 	{
 		return result;
@@ -115,7 +117,7 @@ const XYZ DirectLighting::doCastRay(
 		const TPoint3D point = primaryRay.point(intersection.t());
 		const TVector3D normal = context.bsdfToWorld(TVector3D(0, 0, 1));
 		const TVector3D omega = context.worldToBsdf(-primaryRay.direction());
-		LASS_ASSERT(omegaIn.z >= 0);
+		LASS_ASSERT(omega.z >= 0);
 		result += transparency * doShadeSurface(sample, primaryRay, context, point, normal, omega, generation);
 	}
 	else
@@ -151,11 +153,10 @@ void DirectLighting::doSetState(const TPyObjectPtr&)
 
 
 
-const XYZ DirectLighting::doShadeMedium(const kernel::Sample& sample, const DifferentialRay& primaryRay, TScalar tMax, XYZ& transparency) const
+const XYZ DirectLighting::doShadeMedium(const kernel::Sample& sample, const kernel::BoundedRay& ray, XYZ& transparency) const
 {
-	transparency = mediumStack().transmittance(primaryRay, tMax);
-	return XYZ();
-	//const XYZ mediumInScattering = inScattering(sample, primaryRay.centralRay(), context.t(), isScatteringDirect());
+	transparency = mediumStack().transmittance(ray);
+	return traceSingleScattering(sample, ray);
 }
 
 
@@ -285,6 +286,54 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 			const XYZ transmitted = castRay(sample, transmittedRay, t, a);
 			result += out.value * transmitted * (a * num::abs(out.omegaOut.z) / (n * out.pdf));
 		}
+	}
+
+	return result;
+}
+
+
+const XYZ DirectLighting::traceSingleScattering(const Sample& sample, const kernel::BoundedRay& ray) const
+{
+	typedef Sample::TSubSequence1D::difference_type difference_type;
+
+	const Medium* medium = mediumStack().medium();
+	if (!medium)
+	{
+		return XYZ();
+	}
+
+	const Sample::TSubSequence1D stepSamples = sample.subSequence1D(medium->idStepSamples()); // these are unsorted!!!
+	const Sample::TSubSequence1D lightSamples = sample.subSequence1D(medium->idLightSamples());
+	const Sample::TSubSequence2D surfaceSamples = sample.subSequence2D(medium->idSurfaceSamples());
+
+	XYZ result;
+	const difference_type n = stepSamples.size();
+	LASS_ASSERT(lightSamples.size() == n && surfaceSamples.size() == n);
+	for (difference_type k = 0; k < n; ++k)
+	{
+		TScalar tScatter, tPdf;
+		const XYZ transRay = medium->sampleScatterOut(stepSamples[k], ray, tScatter, tPdf);
+		const TPoint3D point = ray.point(tScatter);
+		TScalar lightPdf;
+		const LightContext* light = lights().sample(lightSamples[k], lightPdf);
+		if (!light || lightPdf <= 0)
+		{
+			continue;
+		}
+		BoundedRay shadowRay;
+		TScalar surfacePdf;
+		const XYZ radiance = light->sampleEmission(sample, surfaceSamples[k], point, shadowRay, surfacePdf);
+		if (surfacePdf <= 0 || !radiance)
+		{
+			continue;
+		}
+		const XYZ phase = medium->phase(point, ray.direction(), shadowRay.direction());
+		if (scene()->isIntersecting(sample, shadowRay))
+		{
+			continue;
+		}
+		const XYZ transShadow = medium->transmittance(shadowRay);
+		result += transRay * transShadow * phase * radiance / (n * tPdf * lightPdf * surfacePdf);
 	}
 
 	return result;

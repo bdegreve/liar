@@ -68,7 +68,8 @@ public:
 			t < farLimit_ * (TNumTraits::one - tolerance);
 	}
 
-	bool operator!() const { return nearLimit_ > farLimit_; }
+	bool isEmpty() const { return nearLimit_ > farLimit_; }
+	bool operator!() const { return isEmpty(); }
 
 private:
 
