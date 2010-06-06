@@ -14,12 +14,15 @@
 #include <d3dx9.h> 
 #endif
 
+#include <gdiplus.h> // fallback when d3d9 is not available.
+
 #ifdef _MSC_VER
 #pragma comment( lib, "d3d9.lib" )
 #pragma comment( lib, "kernel32.lib" )
 #pragma comment( lib, "gdi32.lib" )
 #pragma comment( lib, "shell32.lib" )
 #pragma comment( lib, "user32.lib" )
+#pragma comment (lib, "Gdiplus.lib")
 #endif
 
 namespace PixelToaster
@@ -858,8 +861,22 @@ namespace PixelToaster
 	class WindowsDevice
 	{
 	public:
+		virtual ~WindowsDevice() {};
+		virtual bool valid() const = 0;
+		virtual bool update( const TrueColorPixel * trueColorPixels, const FloatingPointPixel * floatingPointPixels, const Rectangle * dirtyBox ) = 0;
+		virtual bool paint() = 0;
+	protected:
+		WindowsDevice() {}
+	private:
+		WindowsDevice(const WindowsDevice&);
+		WindowsDevice& operator=(const WindowsDevice&);
+	};
 
-		WindowsDevice( LPDIRECT3D9 direct3d, HWND window, int width, int height, Mode mode, bool windowed )
+	class WindowsDeviceDX9: public WindowsDevice
+	{
+	public:
+
+		WindowsDeviceDX9( LPDIRECT3D9 direct3d, HWND window, int width, int height, Mode mode, bool windowed )
 		{
 			assert( direct3d );
 			assert( window );
@@ -887,7 +904,7 @@ namespace PixelToaster
 
 		/// destructor
 
-		~WindowsDevice()
+		~WindowsDeviceDX9()
 		{
 		}
 
@@ -1284,6 +1301,122 @@ namespace PixelToaster
 		bool scalesUp;
 	};
 
+	class WindowsDeviceGDIplus: public WindowsDevice
+	{
+	public:
+
+		WindowsDeviceGDIplus( ULONG_PTR& gdiplusToken, HWND window, int width, int height, Mode mode, bool windowed ):
+			graphics( NULL ),
+			buffer( NULL ),
+			width( width ),
+			height( height ),
+			format( PixelFormat32bppRGB )
+		{
+			if ( !gdiplusToken )
+			{
+				Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+				Gdiplus::GdiplusStartup( &gdiplusToken, &gdiplusStartupInput, NULL );
+			}
+
+			graphics = new Gdiplus::Graphics( window, TRUE );
+			buffer = new Gdiplus::Bitmap( this->width, this->height, format );
+		}
+
+		~WindowsDeviceGDIplus()
+		{
+			delete buffer;
+			delete graphics;
+		}
+
+		bool valid() const
+		{
+			return graphics && buffer;
+		}
+
+		bool update( const TrueColorPixel * trueColorPixels, const FloatingPointPixel * floatingPointPixels, const Rectangle * dirtyBox )
+		{
+			if ( !valid() )
+				return false;
+
+			Gdiplus::Rect rect(0, 0, width, height);
+			if (dirtyBox)
+			{
+				rect.X = dirtyBox->xBegin;
+				rect.Y = dirtyBox->yBegin;
+				rect.Width = dirtyBox->xEnd - dirtyBox->xBegin;
+				rect.Height = dirtyBox->yEnd - dirtyBox->yBegin;
+			}
+
+			Gdiplus::BitmapData lock;
+			if ( buffer->LockBits( &rect, Gdiplus::ImageLockModeWrite, format, &lock ) != Gdiplus::Ok )
+				return false;
+
+			unsigned char * dest = static_cast<unsigned char*>(lock.Scan0);
+			const int bytesPerDestLine = lock.Stride;
+
+			Converter * converter = 0;
+			const unsigned char * source = 0;
+			int bytesPerSourcePixel = 0;
+			if ( floatingPointPixels )
+			{
+				converter = requestConverter( Format::XBGRFFFF, Format::XRGB8888 );
+				source = reinterpret_cast<const unsigned char*>(floatingPointPixels);
+				bytesPerSourcePixel = sizeof(FloatingPointPixel);
+			}
+			else
+			{
+				converter = requestConverter( Format::XRGB8888, Format::XRGB8888 );
+				source = reinterpret_cast<const unsigned char*>(trueColorPixels);
+				bytesPerSourcePixel = sizeof(TrueColorPixel);
+			}
+			const int bytesPerSourceLine = width * bytesPerSourcePixel;
+
+			if ( converter )
+			{
+				converter->begin();
+
+				const Rectangle box = dirtyBox ? *dirtyBox : Rectangle(0, width, 0, height);
+				const int boxWidth = box.xEnd - box.xBegin;
+				source += (box.yBegin * width + box.xBegin) * bytesPerSourcePixel;
+
+				for ( int y = box.yBegin; y < box.yEnd; ++y )
+				{
+					converter->convert( source, dest, boxWidth );
+					source += bytesPerSourceLine;
+					dest += bytesPerDestLine;
+				}
+
+				converter->end();
+			}
+
+			buffer->UnlockBits( &lock );
+
+
+			// paint display
+
+			return paint();
+		}
+
+		bool paint()
+		{
+			if ( !valid() )
+				return false;
+
+			if ( graphics->DrawImage( buffer, 0, 0 ) != Gdiplus::Ok )
+				return false;
+
+			return true;
+		}
+
+	private:
+
+		Gdiplus::Graphics* graphics;
+		Gdiplus::Bitmap* buffer;
+		INT width;
+		INT height;
+		Gdiplus::PixelFormat format;
+	};
+
 	// ********************* Windows Display Implementation ***************************
 
 	class WindowsDisplay : public DisplayAdapter, public WindowsAdapter
@@ -1304,6 +1437,11 @@ namespace PixelToaster
 			{
 				direct3d->Release();
 				direct3d = NULL;
+			}
+
+			if ( gdiplusToken )
+			{
+				Gdiplus::GdiplusShutdown( gdiplusToken );
 			}
 		}
 
@@ -1436,7 +1574,13 @@ namespace PixelToaster
 
 			window->fullscreen( width(), height() );
 
-			device = new WindowsDevice( direct3d, window->handle(), width(), height(), mode(), false );
+			device = new WindowsDeviceDX9( direct3d, window->handle(), width(), height(), mode(), false );
+
+			if ( !device->valid() )
+			{
+				delete device;
+				device = new WindowsDeviceGDIplus( gdiplusToken, window->handle(), width(), height(), mode(), false );
+			}
 
 			if ( !device->valid() )
 			{
@@ -1464,7 +1608,13 @@ namespace PixelToaster
 
 			window->windowed( width(), height() );
 
-			device = new WindowsDevice( direct3d, window->handle(), width(), height(), mode(), true );
+			device = new WindowsDeviceDX9( direct3d, window->handle(), width(), height(), mode(), true );
+
+			if ( !device->valid() )
+			{
+				delete device;
+				device = new WindowsDeviceGDIplus( gdiplusToken, window->handle(), width(), height(), mode(), true );
+			}
 
 			if ( !device->valid() )
 			{
@@ -1492,6 +1642,7 @@ namespace PixelToaster
 		void defaults()
 		{
 			DisplayAdapter::defaults();
+			gdiplusToken = NULL;
 			window = NULL;
 			device = NULL;
 			shutdown = false;
@@ -1501,6 +1652,7 @@ namespace PixelToaster
 	private:
 
 		LPDIRECT3D9 direct3d;
+		ULONG_PTR gdiplusToken;
 		WindowsWindow * window;
 		WindowsDevice * device;
 		bool shutdown;
