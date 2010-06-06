@@ -106,26 +106,13 @@ public:
 	const TVector3D flipTo(const TVector3D& worldOmega);
 
 	const TTransformation3D& bsdfToWorld() const;
-	const TTransformation3D& worldToBsdf() const
-	{
-		if (hasDirtyWorldToBsdf_)
-		{
-			worldToBsdf_ = bsdfToWorld_.inverse();
-		}
-		return worldToBsdf_;
-	}
+	const TTransformation3D& worldToBsdf() const;
 	const TVector3D bsdfToWorld(const TVector3D& v) const { return prim::transform(v, bsdfToWorld()); }
 	const TVector3D worldToBsdf(const TVector3D& v) const { return prim::transform(v, worldToBsdf()); }
 
 	const TTransformation3D& localToWorld() const { return localToWorld_; }
-	const TTransformation3D& worldToLocal() const
-	{
-		if (hasDirtyWorldToLocal_)
-		{
-			worldToLocal_ = localToWorld_.inverse();
-		}
-		return worldToLocal_;
-	}
+	const TTransformation3D& worldToLocal() const;
+	
 	//const TVector3D localToWorld(const TVector3D& v) const { return prim::transform(v, localToWorld()); }
 	//const TVector3D worldToLocal(const TVector3D& v) const { return prim::transform(v, worldToLocal()); }
 

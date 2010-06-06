@@ -106,18 +106,17 @@ void IntersectionContext::translateBy(const TVector3D& offset)
  */
 const TVector3D IntersectionContext::flipTo(const TVector3D& worldOmega)
 {
-	const TVector3D worldNormal = bsdfToWorld(TVector3D(0, 0, 1));
-	if (dot(worldNormal, worldOmega) >= 0)
-	//if (worldToBsdf(worldOmega).z >= 0)
+	const TVector3D worldNormal =  prim::normalTransform(normal_, localToWorld_).normal();
+	if (dot(worldNormal, worldOmega) < 0)
 	{
-		return worldNormal;
+		geometricNormal_ = -geometricNormal_;
+		normal_ = -normal_;
+		dNormal_dU_ = -dNormal_dU_;
+		dNormal_dV_ = -dNormal_dV_;
+		hasDirtyBsdfToWorld_ = hasDirtyWorldToBsdf_ = true;
+		return -worldNormal;
 	}
-	geometricNormal_ = -geometricNormal_;
-	normal_ = -normal_;
-	dNormal_dU_ = -dNormal_dU_;
-	dNormal_dV_ = -dNormal_dV_;
-	hasDirtyBsdfToWorld_ = hasDirtyWorldToBsdf_ = true;
-	return -worldNormal;
+	return worldNormal;
 }
 
 
@@ -130,7 +129,7 @@ const TTransformation3D& IntersectionContext::bsdfToWorld() const
 	}
 	const TVector3D n = prim::normalTransform(normal_, localToWorld_).normal();
 	const TPoint3D o = prim::transform(point_, localToWorld_);
-	TVector3D u = n.reject(dPoint_dU_);
+	TVector3D u = n.reject(prim::transform(dPoint_dU_, localToWorld_));
 	TVector3D v;
 	if (!u.isZero())
 	{
@@ -138,7 +137,7 @@ const TTransformation3D& IntersectionContext::bsdfToWorld() const
 	}
 	else
 	{
-		v = n.reject(dPoint_dV_);
+		v = n.reject(prim::transform(dPoint_dV_, localToWorld_));
 		if (!v.isZero())
 		{
 			u = cross(v, n);
@@ -156,6 +155,30 @@ const TTransformation3D& IntersectionContext::bsdfToWorld() const
 
 
 
+const TTransformation3D& IntersectionContext::worldToBsdf() const
+{
+	if (hasDirtyWorldToBsdf_)
+	{
+		worldToBsdf_ = bsdfToWorld().inverse();
+		hasDirtyWorldToBsdf_ = false;
+	}
+	return worldToBsdf_;
+}
+
+
+
+const TTransformation3D& IntersectionContext::worldToLocal() const
+{
+	if (hasDirtyWorldToLocal_)
+	{
+		worldToLocal_ = localToWorld().inverse();
+		hasDirtyWorldToLocal_ = false;
+	}
+	return worldToLocal_;
+}
+
+
+
 // --- protected -----------------------------------------------------------------------------------
 
 // --- private -------------------------------------------------------------------------------------
@@ -167,7 +190,9 @@ void IntersectionContext::init(const SceneObject& object, const BoundedRay& ray,
 	interior_ = 0;
 	solidEvent_ = seNoEvent;
 	hasScreenSpaceDifferentials_ = false;
-	hasDirtyBsdfToWorld_ = hasDirtyWorldToLocal_ = hasDirtyWorldToBsdf_ = true;
+	localToWorld_ = worldToLocal_ = TTransformation3D::identity();
+	hasDirtyWorldToLocal_ = false;
+	hasDirtyBsdfToWorld_ = hasDirtyWorldToBsdf_ = true;
 
 	object.localContext(sample_, ray, intersection, *this);
 	flipTo(-ray.direction());
