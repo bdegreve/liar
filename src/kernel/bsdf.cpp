@@ -72,10 +72,6 @@ const TVector3D Bsdf::worldToBsdf(const TVector3D& v) const
  */
 BsdfOut Bsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
 {
-	if (!compatibleCaps(allowedCaps))
-	{
-		return BsdfOut();
-	}
 	LASS_ASSERT(context_.shader());
 	BsdfIn in;
 	in.omegaOut = omegaOut;
@@ -90,10 +86,6 @@ BsdfOut Bsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfC
  */
 SampleBsdfOut Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar /*componentSample*/, TBsdfCaps allowedCaps) const
 {
-	if (!compatibleCaps(allowedCaps))
-	{
-		return SampleBsdfOut();
-	}
 	LASS_ASSERT(context_.shader());
 	SampleBsdfIn in;
 	in.sample = sample;

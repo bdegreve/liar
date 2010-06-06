@@ -142,11 +142,19 @@ public:
 
 	BsdfOut call(const TVector3D& omegaIn, const TVector3D& omegaOut, unsigned allowedCaps) const
 	{
+		if (!compatibleCaps(allowedCaps))
+		{
+			return BsdfOut();
+		}
 		return doCall(omegaIn, omegaOut, allowedCaps);
 	}
 
 	SampleBsdfOut sample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, unsigned allowedCaps) const
 	{
+		if (!compatibleCaps(allowedCaps))
+		{
+			return SampleBsdfOut();
+		}
 		return doSample(omegaIn, sample, componentSample, allowedCaps);
 	}
 
