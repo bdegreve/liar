@@ -96,14 +96,15 @@ void Lambert::doSetState(const TPyObjectPtr& state)
 
 // --- bsdf ----------------------------------------------------------------------------------------
 
-LambertBsdf::LambertBsdf(const Sample& sample, const IntersectionContext& context, unsigned caps, const XYZ& diffuseOverPi):
+LambertBsdf::LambertBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const XYZ& diffuseOverPi):
 	Bsdf(sample, context, caps),
 	diffuseOverPi_(diffuseOverPi)
 {
 }
 
-BsdfOut LambertBsdf::doCall(const TVector3D&, const TVector3D& omegaOut, unsigned allowedCaps) const
+BsdfOut LambertBsdf::doCall(const TVector3D&, const TVector3D& omegaOut, TBsdfCaps LASS_UNUSED(allowedCaps)) const
 {
+	LASS_ASSERT(hasCaps(allowedCaps, caps()));
 	const TScalar cosTheta = omegaOut.z;
 	if (cosTheta <= 0)
 	{
@@ -112,8 +113,9 @@ BsdfOut LambertBsdf::doCall(const TVector3D&, const TVector3D& omegaOut, unsigne
 	return BsdfOut(diffuseOverPi_, cosTheta / TNumTraits::pi);
 }
 
-SampleBsdfOut LambertBsdf::doSample(const TVector3D&, const TPoint2D& sample, TScalar componentSample, unsigned allowedCaps) const
+SampleBsdfOut LambertBsdf::doSample(const TVector3D&, const TPoint2D& sample, TScalar, TBsdfCaps LASS_UNUSED(allowedCaps)) const
 {
+	LASS_ASSERT(hasCaps(allowedCaps, caps()));
 	SampleBsdfOut out;
 	out.omegaOut = num::cosineHemisphere(sample, out.pdf).position();
 	out.value = diffuseOverPi_;

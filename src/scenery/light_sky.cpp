@@ -279,10 +279,8 @@ const XYZ LightSky::doSampleEmission(
 
 const XYZ LightSky::doSampleEmission(
 		const Sample&, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
-		const TAabb3D& sceneBound, BoundedRay& emissionRay, TScalar& pdf) const
+		const TAabb3D&, BoundedRay& emissionRay, TScalar& pdf) const
 {
-	const prim::Sphere3D<TScalar> worldSphere = boundingSphere(sceneBound);
-
 	TScalar i, j, pdfA;
 	sampleMap(lightSampleA, i, j, pdfA);
 	const TVector3D dir = -direction(i, j);
@@ -304,7 +302,7 @@ const XYZ LightSky::doSampleEmission(
 
 
 
-const XYZ LightSky::doTotalPower(const TAabb3D& sceneBound) const
+const XYZ LightSky::doTotalPower(const TAabb3D&) const
 {
 	return power_;
 }

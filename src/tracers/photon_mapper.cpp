@@ -945,7 +945,7 @@ private:
 
 
 template <typename WorkerType>
-void runWorkers(const std::string& description, WorkerType& worker, size_t size, size_t numberOfThreads)
+void runWorkers(WorkerType& worker, size_t size, size_t numberOfThreads, const std::string& description)
 {
 	typedef util::ThreadPool<TaskRange, WorkerType, util::Spinning, util::SelfParticipating> TThreadPool;
 
@@ -970,56 +970,58 @@ void runWorkers(const std::string& description, WorkerType& worker, size_t size,
 
 
 
-void PhotonMapper::buildIrradianceMap(size_t numberOfThreads)
+class IrradianceWorker
 {
+public:
 	typedef std::vector<TScalar> TRadii;
 	typedef std::vector<size_t> TCounts;
 	typedef std::vector<TScalar> TIrradiances;
 
+	IrradianceWorker(PhotonMapper& photonMapper, TRadii& radii, TCounts& counts, TIrradiances& irradiances):
+		neighbourhood_(photonMapper.estimationSize_[PhotonMapper::mtGlobal] + 1),
+		photonMapper_(photonMapper),
+		buffer_(photonMapper.shared_->irradianceBuffer_),
+		radii_(radii),
+		counts_(counts),
+		irradiances_(irradiances)
+	{
+	}
+	void operator()(experimental::TaskRange task)
+	{
+		while (task)
+		{
+			const size_t i = *task++;
+			PhotonMapper::Irradiance& ir = buffer_[i];
+			ir.irradiance = photonMapper_.estimateIrradianceImpl(neighbourhood_, ir.position, ir.normal, ir.squaredEstimationRadius, counts_[i]);
+			radii_[i] = num::sqrt(ir.squaredEstimationRadius);
+			irradiances_[i] = ir.irradiance.absTotal();
+		}
+	}
+private:
+	PhotonMapper::TPhotonNeighbourhood neighbourhood_;
+	PhotonMapper& photonMapper_;
+	PhotonMapper::TIrradianceBuffer& buffer_;
+	TRadii& radii_;
+	TCounts& counts_;
+	TIrradiances& irradiances_;
+};
+
+
+
+void PhotonMapper::buildIrradianceMap(size_t numberOfThreads)
+{
 	shared_->irradianceMap_.reset();
 	if (shared_->irradianceBuffer_.empty() || ratioPrecomputedIrradiance_ == 0 || numFinalGatherRays_ == 0 || !isRayTracingDirect_)
 	{
 		return;
 	}
 
-	class Worker
-	{
-	public:
-		Worker(PhotonMapper& photonMapper, TRadii& radii, TCounts& counts, TIrradiances& irradiances):
-			neighbourhood_(photonMapper.estimationSize_[mtGlobal] + 1),
-			photonMapper_(photonMapper),
-			buffer_(photonMapper.shared_->irradianceBuffer_),
-			radii_(radii),
-			counts_(counts),
-			irradiances_(irradiances)
-		{
-		}
-		void operator()(experimental::TaskRange task)
-		{
-			while (task)
-			{
-				const size_t i = *task++;
-				Irradiance& ir = buffer_[i];
-				ir.irradiance = photonMapper_.estimateIrradianceImpl(neighbourhood_, ir.position, ir.normal, ir.squaredEstimationRadius, counts_[i]);
-				radii_[i] = num::sqrt(ir.squaredEstimationRadius);
-				irradiances_[i] = ir.irradiance.absTotal();
-			}
-		}
-	private:
-		TPhotonNeighbourhood neighbourhood_;
-		PhotonMapper& photonMapper_;
-		TIrradianceBuffer& buffer_;
-		TRadii& radii_;
-		TCounts& counts_;
-		TIrradiances& irradiances_;
-	};
-
 	const size_t size = shared_->irradianceBuffer_.size();
-	TRadii radii(size);
-	TCounts counts(size);
-	TIrradiances irradiances(size);
-	Worker worker(*this, radii, counts, irradiances);
-	experimental::runWorkers("  precomputing irradiances", worker, size, numberOfThreads);
+	IrradianceWorker::TRadii radii(size);
+	IrradianceWorker::TCounts counts(size);
+	IrradianceWorker::TIrradiances irradiances(size);
+	IrradianceWorker worker(*this, radii, counts, irradiances);
+	experimental::runWorkers(worker, size, numberOfThreads, "  precomputing irradiances");
 
 	LASS_COUT << "  irradiance: " << temp::statistics(irradiances) << std::endl;
 	LASS_COUT << "  eff. radii: " << temp::statistics(radii) << std::endl;
@@ -1030,64 +1032,68 @@ void PhotonMapper::buildIrradianceMap(size_t numberOfThreads)
 
 
 
+class VolumetricWorker
+{
+public:
+	typedef PhotonMapper::TVolumetricPhotonBuffer TVolumetricPhotonBuffer;
+	typedef PhotonMapper::TPreliminaryVolumetricPhotonMap TPreliminaryVolumetricPhotonMap;
+	typedef TPreliminaryVolumetricPhotonMap::TNeighbourhood TNeighbourhood;
+	typedef std::vector<TScalar> TRadii;
+
+	VolumetricWorker(TVolumetricPhotonBuffer& buffer, TRadii& radii, const TPreliminaryVolumetricPhotonMap& map, TScalar rMax, size_t nMax):
+		buffer_(buffer),
+		radii_(radii),
+		map_(map),
+		rMax_(rMax),
+		mMax_(std::max<size_t>(static_cast<size_t>(num::ceil(num::sqrt(static_cast<TScalar>(nMax)))), 5))
+	{
+		neighbourhood_.resize(mMax_ + 1);
+		mnScale_ = num::pow(static_cast<TScalar>(nMax) / static_cast<TScalar>(mMax_), TNumTraits::one / 3);
+	}
+	void operator()(experimental::TaskRange task)
+	{
+		while (task)
+		{
+			const size_t i = *task++;
+			PhotonMapper::VolumetricPhoton& photon = buffer_[i];
+			//*
+			const TNeighbourhood::const_iterator last = map_.rangeSearch(photon.position, rMax_, mMax_, neighbourhood_.begin());
+			size_t m = static_cast<size_t>(last - neighbourhood_.begin());
+			LASS_ASSERT(m > 0);
+			const TScalar dist = num::sqrt(neighbourhood_.front().squaredDistance());
+			photon.radius = std::min(rMax_, mnScale_ * (m < mMax_ ? rMax_ : dist));
+			/*/
+			photon.radius = rMax;
+			/**/
+			radii_[i] = photon.radius;
+		}
+	}
+private:
+	TNeighbourhood neighbourhood_;
+	TVolumetricPhotonBuffer& buffer_;
+	TRadii& radii_;
+	const TPreliminaryVolumetricPhotonMap& map_;
+	TScalar rMax_;
+	size_t mMax_;
+	TScalar mnScale_;
+};
+
+
+
 /** Build a tree of spherical photons for the volumetric map.
  *  An estimation of the radius is made by searching for less photons than required by the settings (see article).
  *  @par ref: W. Jarosz, M. Zwicker, H.W.n Jensen. The Beam Radiance Estimate for Volumetric Photon Mapping (2008)
  */
 void PhotonMapper::buildVolumetricPhotonMap(const TPreliminaryVolumetricPhotonMap& preliminaryVolumetricMap, size_t numberOfThreads)
 {
-	typedef TPreliminaryVolumetricPhotonMap::TNeighbourhood TNeighbourhood;
-	typedef std::vector<TScalar> TRadii;
-
-	class Worker
-	{
-	public:
-		Worker(TVolumetricPhotonBuffer& buffer, TRadii& radii, const TPreliminaryVolumetricPhotonMap& map, TScalar rMax, size_t nMax):
-			buffer_(buffer),
-			radii_(radii),
-			map_(map),
-			rMax_(rMax),
-			mMax_(std::max<size_t>(static_cast<size_t>(num::ceil(num::sqrt(static_cast<TScalar>(nMax)))), 5))
-		{
-			neighbourhood_.resize(mMax_ + 1);
-			mnScale_ = num::pow(static_cast<TScalar>(nMax) / static_cast<TScalar>(mMax_), TNumTraits::one / 3);
-		}
-		void operator()(experimental::TaskRange task)
-		{
-			while (task)
-			{
-				const size_t i = *task++;
-				VolumetricPhoton& photon = buffer_[i];
-				//*
-				const TNeighbourhood::const_iterator last = map_.rangeSearch(photon.position, rMax_, mMax_, neighbourhood_.begin());
-				size_t m = static_cast<size_t>(last - neighbourhood_.begin());
-				LASS_ASSERT(m > 0);
-				const TScalar dist = num::sqrt(neighbourhood_.front().squaredDistance());
-				photon.radius = std::min(rMax_, mnScale_ * (m < mMax_ ? rMax_ : dist));
-				/*/
-				photon.radius = rMax;
-				/**/
-				radii_[i] = photon.radius;
-			}
-		}
-	private:
-		TNeighbourhood neighbourhood_;
-		TVolumetricPhotonBuffer& buffer_;
-		TRadii& radii_;
-		const TPreliminaryVolumetricPhotonMap& map_;
-		TScalar rMax_;
-		size_t mMax_;
-		TScalar mnScale_;
-	};
-
 	const size_t size = shared_->volumetricBuffer_.size();
 	if (!size)
 	{
 		return;
 	}
-	TRadii radii(size);
-	Worker worker(shared_->volumetricBuffer_, radii, preliminaryVolumetricMap, estimationRadius_[mtVolume], estimationSize_[mtVolume]);
-	experimental::runWorkers("  precomputing radii", worker, size, numberOfThreads);
+	VolumetricWorker::TRadii radii(size);
+	VolumetricWorker worker(shared_->volumetricBuffer_, radii, preliminaryVolumetricMap, estimationRadius_[mtVolume], estimationSize_[mtVolume]);
+	experimental::runWorkers(worker, size, numberOfThreads, "  precomputing radii");
 	LASS_COUT << "  eff. radii: " << temp::statistics(radii) << std::endl;
 
 	shared_->volumetricMap_.reset(shared_->volumetricBuffer_.begin(), shared_->volumetricBuffer_.end());

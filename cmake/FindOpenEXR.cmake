@@ -87,12 +87,14 @@ endif()
 find_package(ZLIB ${_find_zlib_arg})
 if (ZLIB_LIBRARY)
 	get_filename_component(_hint "${ZLIB_LIBRARY}" PATH)
-	find_file(ZLIB_REDIST
-		NAMES zlib1.dll
-		HINTS ${_hint} ${_hint}/.. ${_hint}/../bin
-		)
-	list(APPEND _redist "${ZLIB_REDIST}")
-	list(APPEND _debug_redist "${ZLIB_REDIST}")
+	if (WIN32)
+		find_file(ZLIB_REDIST
+			NAMES zlib1.dll
+			HINTS ${_hint} ${_hint}/.. ${_hint}/../bin
+			)
+		list(APPEND _redist "${ZLIB_REDIST}")
+		list(APPEND _debug_redist "${ZLIB_REDIST}")
+	endif()
 endif()
 
 include(FindPackageHandleStandardArgs)

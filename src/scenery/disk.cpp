@@ -165,7 +165,7 @@ void Disk::doLocalContext(const Sample&, const BoundedRay& ray, const Intersecti
 
 
 
-bool Disk::doContains(const Sample&, const TPoint3D& point) const
+bool Disk::doContains(const Sample&, const TPoint3D&) const
 {
 	return false;
 }

@@ -215,6 +215,9 @@ private:
 		numGatherStages_ = 2,
 	};
 
+	friend class IrradianceWorker;
+	friend class VolumetricWorker;
+
 	void doRequestSamples(const TSamplerPtr& sampler);
 	void doPreProcess(const TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads);
 	const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& depth, TScalar& alpha, int generation) const;
