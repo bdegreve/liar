@@ -6,7 +6,7 @@
 # this scene sets a few spheres, each with a different use of the shader
 #
 # LiAR isn't a raytracer
-# Copyright (C) 2004-2009  Bram de Greve (bramz@users.sourceforge.net)
+# Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
 # http://liar.bramz.net/
 
 from liar import *
