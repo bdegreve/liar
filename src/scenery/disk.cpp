@@ -220,7 +220,7 @@ bool Disk::doHasSurfaceSampling() const
 
 const TPoint3D Disk::doSampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const
 {
-	const TPoint2D xy = num::uniformDisk(sample, pdf);
+	const TPoint2D xy(num::uniformDisk(sample, pdf).position() * disk_.radius());
 	normal = disk_.normal();
 	pdf = num::inv(disk_.area());
 	return disk_.plane().point(xy);

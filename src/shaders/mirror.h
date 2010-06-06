@@ -22,7 +22,7 @@
  */
 
 /** @class liar::shaders::Mirror
- *  @brief very simple shader using lambert's cosine law.
+ *  @brief very simple shader with perfect specular reflection,
  *  @author Bram de Greve [Bramz]
  */
 
