@@ -83,3 +83,54 @@ Models a classical surface material
 	\item \kw{refractionIndex}: 
 		get and set the texture that gives the relative index of refraction of the interior material with respect to the exterior metarial.  This texture is evaluated as a scalar.
 \end{itemize}
+
+\section{volume shaders}
+
+\subsection{ExponentialFog}\label{shaders.ExponentialFog}
+
+\begin{equation}
+	\sigma \left( h \right) = a \exp \left( -bh \right)
+\end{equation}
+
+\begin{equation}
+	\begin{array}{lcl}
+		\sigma \left( t \right) &=& a \exp \left( -b \left( \Vect{op} \cdot \Vect u + t \, \Vect \omega \cdot \Vect u \right) \right)\\
+		&=& \frac A B \exp \left( -B t ) \right) 
+			\text{ with } \begin{cases}
+				A = a \exp \left( -b \, \Vect{op} \cdot \Vect u \right)\\
+				B = b \, \Vect \omega \cdot \Vect u
+			\end{cases}
+	\end{array}
+\end{equation}
+
+\begin{eqnarray}
+	\tau \left( d \right) &=& \int_0^d \sigma \left( t \right) \D t = \frac A B \left( 1 - \exp \left( -B t \right) \right)\\
+	\tau \left( d \right) &\approx& A d \left(1 - \frac{B d} 2\right) \Leftrightarrow \Abs{B d} \ll 1
+\end{eqnarray}
+
+\begin{equation}
+	\alpha_r \left( d \right) = 1 - \exp \left( -\tau \left( d \right) \right)
+\end{equation}
+
+\begin{equation}
+	\alpha_{r,max} = \lim_{d \rightarrow \infty} \alpha_r \left( d \right) = 
+		\begin{cases}
+			1 - \exp \left( -\frac A B \right) & \Leftrightarrow B > 0\\
+			1 & \Leftrightarrow B \leq 0
+		\end{cases}
+\end{equation}
+
+\begin{equation}
+	P \left(d\right) = \Prob{x < d} = \frac {\alpha_r \left( d \right)} {\alpha_{r,max}}
+\end{equation}
+
+\begin{equation}
+	P^{-1} \left( \xi \right) = \begin{cases}
+		- \frac 1 B \ln \left(1 + \frac B A \ln \left(1 - \alpha_{r,max} \xi\right)\right) & \Leftrightarrow B \neq 0\\
+		- \frac 1 A \ln \left(1 - \alpha_{r,max} \xi\right) & \Leftrightarrow B = 0
+	\end{cases}
+\end{equation}
+
+\begin{equation}
+	p \left(d\right) = \frac A {\alpha_{r,max}} \exp \left( -\tau \left(d\right) - B d \right)
+\end{equation}

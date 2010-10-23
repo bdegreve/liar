@@ -85,6 +85,8 @@ struct SampleBsdfOut
 	TBsdfCaps usedCaps;
 	SampleBsdfOut(const TVector3D& omegaOut = TVector3D(), const XYZ& value = XYZ(), TScalar pdf = 0, TBsdfCaps usedCaps = 0):
 		omegaOut(omegaOut), value(value), pdf(pdf), usedCaps(usedCaps) {}
+	SampleBsdfOut(const TVector3D& omegaOut, const BsdfOut& bsdf, TBsdfCaps usedCaps):
+		omegaOut(omegaOut), value(bsdf.value), pdf(bsdf.pdf), usedCaps(usedCaps) {}
 	bool operator!() const { return !(pdf > 0 && value); }
 	operator num::SafeBool() const { return !*this ? num::safeFalse : num::safeTrue; }
 };
@@ -133,14 +135,14 @@ public:
 		capsAllNonDiffuse = capsReflection | capsTransmission | capsNonDiffuse,
 	};
 
-	Bsdf(const Sample& sample, const IntersectionContext& context, unsigned caps);
+	Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps);
 	virtual ~Bsdf();
 
 	TBsdfCaps caps() const { return caps_; }
 	bool hasCaps(TBsdfCaps wantedCaps) const { return kernel::hasCaps(caps_, wantedCaps); }
 	bool compatibleCaps(TBsdfCaps allowedCaps) const { return kernel::compatibleCaps(caps_, allowedCaps); }
 
-	BsdfOut call(const TVector3D& omegaIn, const TVector3D& omegaOut, unsigned allowedCaps) const
+	BsdfOut call(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
 	{
 		if (!compatibleCaps(allowedCaps))
 		{
@@ -149,7 +151,7 @@ public:
 		return doCall(omegaIn, omegaOut, allowedCaps);
 	}
 
-	SampleBsdfOut sample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, unsigned allowedCaps) const
+	SampleBsdfOut sample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const
 	{
 		if (!compatibleCaps(allowedCaps))
 		{

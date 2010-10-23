@@ -58,7 +58,7 @@ void AdjointPhotonTracer::doPreProcess(const kernel::TSamplerPtr&, const TimePer
 
 const XYZ AdjointPhotonTracer::doCastRay(
 		const kernel::Sample& sample, const kernel::DifferentialRay& primaryRay,
-		TScalar& tIntersection, TScalar& alpha, int generation) const
+		TScalar& tIntersection, TScalar& alpha, int generation, bool highQuality) const
 {
 /*	TScalar weight = 1;
 

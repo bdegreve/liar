@@ -37,6 +37,11 @@ PY_CLASS_MEMBER_RW_DOC(SceneLight, isShadowless, setShadowless,
 
 // --- public --------------------------------------------------------------------------------------
 
+void SceneLight::setSceneBound(const TAabb3D& bound, const TimePeriod& period)
+{
+	doSetSceneBound(bound, period);
+}
+
 
 
 // --- protected -----------------------------------------------------------------------------------
@@ -68,6 +73,12 @@ void SceneLight::doSetState(const TPyObjectPtr& state)
 	TPyObjectPtr lightState;
 	python::decodeTuple(state, isShadowless_, lightState);
 	doSetLightState(lightState);
+}
+
+
+
+void SceneLight::doSetSceneBound(const TAabb3D& bound, const TimePeriod& period)
+{
 }
 
 

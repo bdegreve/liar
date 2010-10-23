@@ -66,12 +66,12 @@ public:
 
 	/** @warning castRay is NOT THREAD SAFE!
 	 */
-	const XYZ castRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha) const
+	const XYZ castRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, bool highQuality = true) const
 	{ 
 		RayGenerationIncrementor incrementor(*this);
 		if (rayGeneration_ < maxRayGeneration_)
 		{
-			return doCastRay(sample, primaryRay, tIntersection, alpha, rayGeneration_);
+			return doCastRay(sample, primaryRay, tIntersection, alpha, rayGeneration_, highQuality);
 		}
 		return XYZ();
 	}
@@ -98,7 +98,7 @@ private:
 
 	virtual void doRequestSamples(const TSamplerPtr& sampler) = 0;
 	virtual void doPreProcess(const TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads) = 0;
-	virtual const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, int generation) const = 0;
+	virtual const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, int generation, bool highQuality) const = 0;
 	virtual const TRayTracerPtr doClone() const = 0;
 
 	virtual const TPyObjectPtr doGetState() const = 0;

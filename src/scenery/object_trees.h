@@ -293,6 +293,18 @@ private:
 			return false;
 		}
 
+		static bool aabbIntersect(const TAabb& aabb, const TRay& ray, const TVector3D& invDir, TReference t, const TParam tMin)
+		{
+			TScalar temp;
+			prim::Result hit = prim::intersect(aabb, ray.unboundedRay(), invDir, temp, tMin);
+			if (hit == prim::rOne)
+			{
+				t = temp;
+				return true;
+			}
+			return false;
+		}
+
 		static const TAabb aabbJoin(const TAabb& a, const TAabb& b) { return a + b; }
 		static const TPoint aabbMin(const TAabb& aabb) { return aabb.min(); }
 		static const TPoint aabbMax(const TAabb& aabb) { return aabb.max(); }

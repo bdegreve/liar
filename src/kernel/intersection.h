@@ -40,6 +40,7 @@
 #include <lass/num/safe_bool.h>
 #include <lass/util/allocator.h>
 #include <lass/stde/lass_allocator.h>
+#include <lass/stde/static_vector.h>
 
 namespace liar
 {
@@ -107,7 +108,8 @@ private:
 		>
 		TIntersectionInfoAllocator;
 
-	typedef std::vector<IntersectionInfo, TIntersectionInfoAllocator> TIntersectionStack;
+	//typedef std::vector<IntersectionInfo/*, TIntersectionInfoAllocator*/> TIntersectionStack;
+	typedef stde::static_vector<IntersectionInfo, 8> TIntersectionStack;
 
 	void descend() const;
 	void ascend() const;

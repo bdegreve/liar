@@ -24,7 +24,7 @@ else:
 	super_sampling = 1
 	global_size = 10000
 	caustics_quality = 1
-	raytrace_direct = False#True
+	raytrace_direct = True
 	scatter_direct = True
 	gather_rays = 0
 
@@ -33,12 +33,17 @@ walls = geometry.getWalls()
 blocks = geometry.getBlocks()
 lights = geometry.getLights()
 
-
 fog = shaders.Fog()
-fog.extinction = .45
+fog = shaders.ExponentialFog()
+fog.extinction = 4.5#.45
 fog.assymetry = 0
 fog.color = rgb(.5, .5, .5)
 fog.numScatterSamples = 100
+try:
+	fog.decay = 2
+	fog.up = camera.sky
+except AttributeError:
+	pass
 
 photonMapper = tracers.PhotonMapper()
 photonMapper.maxNumberOfPhotons = 10000000
@@ -53,10 +58,11 @@ photonMapper.ratioPrecomputedIrradiance = 0.25
 photonMapper.setEstimationSize("global", 50)
 
 image = output.Image("photon_mapper_fog.hdr", (width, height))
-display = output.Display("Participating Median in Cornell box with PhotonMapper", (width, height))
+display = output.Display("Exponential Fog", (width, height))
 
 engine = RenderEngine()
 engine.tracer = photonMapper
+engine.tracer = tracers.DirectLighting()
 engine.sampler = samplers.Stratifier((width, height), super_sampling)
 engine.scene = scenery.List(walls + blocks +  lights)
 engine.scene.interior = shaders.BoundedMedium(fog, engine.scene.boundingBox())

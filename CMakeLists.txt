@@ -10,8 +10,9 @@ find_package(Lass REQUIRED)
 include_directories(${Lass_INCLUDE_DIRS})
 foreach(_config RELEASE DEBUG MINSIZEREL RELWITHDEBINFO)
 	get_target_property(_location lass IMPORTED_LOCATION_${_config})
+	get_target_property(_location_python lass_python IMPORTED_LOCATION_${_config})
 	install(
-		FILES "${_location}"
+		FILES "${_location}" "${_location_python}"
 		DESTINATION .
 		CONFIGURATIONS ${_config}
 		)
@@ -113,6 +114,7 @@ macro(add_liar_module name)
 endmacro()
 
 add_subdirectory(src)
+add_subdirectory(doc)
 
 set(BUILD_TESTING "ON" CACHE BOOL "build test")
 if(BUILD_TESTING)

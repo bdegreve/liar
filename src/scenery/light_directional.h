@@ -31,6 +31,7 @@
 
 #include "scenery_common.h"
 #include "../kernel/scene_light.h"
+#include <lass/prim/sphere_3d.h>
 
 namespace liar
 {
@@ -69,9 +70,9 @@ private:
 			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
 			BoundedRay& shadowRay, TScalar& pdf) const;
 	const XYZ doSampleEmission(
-			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, const TAabb3D& sceneBound, 
+			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 			BoundedRay& emissionRay, TScalar& pdf) const;
-	const XYZ doTotalPower(const TAabb3D& sceneBound) const;
+	const XYZ doTotalPower() const;
 	size_t doNumberOfEmissionSamples() const;
 	bool doIsSingular() const;
 
@@ -82,6 +83,7 @@ private:
 	TVector3D tangentU_;
 	TVector3D tangentV_;
 	XYZ radiance_;
+	prim::Sphere3D<TScalar> boundingSphere_;
 };
 
 }

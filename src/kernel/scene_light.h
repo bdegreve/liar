@@ -44,6 +44,8 @@ class LIAR_KERNEL_DLL SceneLight: public SceneObject
 	PY_HEADER(SceneObject)
 public:
 
+	void setSceneBound(const TAabb3D& bound, const TimePeriod& period);
+
 	const XYZ emission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 	{
 		return doEmission(sample, ray, shadowRay, pdf);
@@ -61,14 +63,14 @@ public:
 		return doSampleEmission(cameraSample, lightSample, target, targetNormal, shadowRay, pdf);
 	}
 	const XYZ sampleEmission(
-			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, const TAabb3D& sceneBound, 
+			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 			BoundedRay& emissionRay, TScalar& pdf) const
 	{
-		return doSampleEmission(cameraSample, lightSampleA, lightSampleB, sceneBound, emissionRay, pdf);
+		return doSampleEmission(cameraSample, lightSampleA, lightSampleB, emissionRay, pdf);
 	}
-	const XYZ totalPower(const TAabb3D& sceneBound) const
+	const XYZ totalPower() const
 	{
-		return doTotalPower(sceneBound);
+		return doTotalPower();
 	}
 	size_t numberOfEmissionSamples() const 
 	{ 
@@ -96,6 +98,7 @@ private:
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 	
+	virtual void doSetSceneBound(const TAabb3D& bound, const TimePeriod& period);
 	virtual const XYZ doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const = 0;
 	virtual const XYZ doSampleEmission(
 			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
@@ -104,9 +107,9 @@ private:
 			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D& targetNormal, 
 			BoundedRay& shadowRay, TScalar& pdf) const;
 	virtual const XYZ doSampleEmission(
-			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, const TAabb3D& sceneBound, 
+			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 			BoundedRay& emissionRay, TScalar& pdf) const = 0;
-	virtual const XYZ doTotalPower(const TAabb3D& sceneBound) const = 0;
+	virtual const XYZ doTotalPower() const = 0;
 	virtual size_t doNumberOfEmissionSamples() const = 0;
 	virtual bool doIsSingular() const = 0;
 	

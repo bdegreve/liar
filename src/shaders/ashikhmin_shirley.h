@@ -49,29 +49,44 @@ class LIAR_SHADERS_DLL AshikhminShirley: public Shader
 public:
 
 	AshikhminShirley();
-	AshikhminShirley(const TTexturePtr& iDiffuse, const TTexturePtr& iSpecular);
+	AshikhminShirley(const TTexturePtr& diffuse, const TTexturePtr& specular);
 
 	const TTexturePtr& diffuse() const;
-	void setDiffuse(const TTexturePtr& iDiffuse);
+	void setDiffuse(const TTexturePtr& diffuse);
 
 	const TTexturePtr& specular() const;
-	void setSpecular(const TTexturePtr& iSpecular);
+	void setSpecular(const TTexturePtr& specular);
 
 	const TTexturePtr& specularPowerU() const;
-	void setSpecularPowerU(const TTexturePtr& iSpecularPower);
+	void setSpecularPowerU(const TTexturePtr& specularPower);
 
 	const TTexturePtr& specularPowerV() const;
-	void setSpecularPowerV(const TTexturePtr& iSpecularPower);
+	void setSpecularPowerV(const TTexturePtr& specularPower);
 
 	size_t numberOfSamples() const;
 	void setNumberOfSamples(size_t number);
+
+	class Bsdf: public kernel::Bsdf
+	{
+	public:
+		Bsdf(const Sample& sample, const IntersectionContext& context, const XYZ& diffuse, const XYZ& specular, TScalar powerU, TScalar powerV);
+	private:
+		BsdfOut doCall(const TVector3D& k1, const TVector3D& k2, TBsdfCaps allowedCaps) const;
+		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
+		const XYZ rhoD(const TVector3D& k1, const TVector3D& k2) const;
+		const XYZ rhoS(const TVector3D& k1, const TVector3D& k2, const TVector3D& h, TScalar& pdf) const;
+		const TVector3D sampleH(const TPoint2D& sample) const;
+		XYZ diffuse_;
+		XYZ specular_;
+		TScalar powerU_;
+		TScalar powerV_;
+	};
 
 private:
 
 	size_t doNumReflectionSamples() const;
 
-	void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn, const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const;
-	void doSampleBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn, const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const;
+	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
 	
 	const TVector3D sampleH(const TPoint2D& sample, TScalar nu, TScalar nv/*, TScalar& pdf*/) const ;
 

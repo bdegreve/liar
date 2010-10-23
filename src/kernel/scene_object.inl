@@ -76,6 +76,10 @@ inline void SceneObject::intersect(const Sample& sample, const DifferentialRay& 
 		Intersection& result) const
 { 
 	doIntersect(sample, ray.centralRay(), result); 
+	if (result.t() > ray.farLimit())
+	{
+		result = Intersection::empty();
+	}
 	LASS_ASSERT(!result || result.object() == this);
 }
 	

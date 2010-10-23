@@ -205,8 +205,6 @@ private:
 
 	typedef std::vector<TScalar> TLightCdf;
 	typedef num::RandomMT19937 TRandomPrimary;
-	typedef num::RandomMT19937 TRandomSecondary;
-	//typedef num::RandomParkMiller TRandomSecondary;
 	typedef num::DistributionUniform<TScalar, TRandomPrimary> TUniformPrimary;
 	typedef num::DistributionUniform<TScalar, TRandomSecondary> TUniformSecondary;
 
@@ -228,7 +226,7 @@ private:
 	// DirectLighting
 	const XYZ doShadeMedium(const kernel::Sample& sample, const kernel::BoundedRay& ray, XYZ& transparency) const;
 	const XYZ doShadeSurface(const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
-		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, int generation) const;
+		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, int generation, bool highQuality) const;
 
 	bool hasFinalGather() const { return isRayTracingDirect_ && (numFinalGatherRays_ > 0); }
 	bool hasSecondaryGather() const { return hasFinalGather() && (numSecondaryGatherRays_ > 0); }
@@ -292,11 +290,6 @@ private:
 	mutable std::vector<TPoint2D> secondaryGatherBsdfSamples_;
 	mutable std::vector<TScalar> secondaryGatherComponentSamples_;
 	mutable std::vector<TScalar> secondaryGatherVolumetricSamples_;
-	mutable std::vector<TScalar> secondaryLightSelectorSamples_;
-	mutable std::vector<TPoint2D> secondaryLightSamples_;
-	mutable std::vector<TPoint2D> secondaryBsdfSamples_;
-	mutable std::vector<TScalar> secondaryBsdfComponentSamples_;
-	mutable TRandomSecondary secondarySampler_;
 
 	mutable std::vector<TScalar> grid_;
 	mutable num::InverseTransformSampling2D<TScalar> gatherDistribution_;

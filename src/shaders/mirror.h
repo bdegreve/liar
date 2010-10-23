@@ -49,12 +49,21 @@ public:
 	const TTexturePtr& reflectance() const;
 	void setReflectance(const TTexturePtr& reflectance);
 
+	class Bsdf: public kernel::Bsdf
+	{
+	public:
+		Bsdf(const Sample& sample, const IntersectionContext& context, const XYZ& reflectance);
+	private:
+		BsdfOut doCall(const TVector3D& k1, const TVector3D& k2, TBsdfCaps allowedCaps) const;
+		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
+		XYZ reflectance_;
+	};
+
 private:
 
 	size_t doNumReflectionSamples() const;
 
-	void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn, const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const;
-	void doSampleBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn, const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const;
+	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);

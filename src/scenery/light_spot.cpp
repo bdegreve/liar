@@ -239,7 +239,7 @@ const XYZ LightSpot::doEmission(const Sample&, const TRay3D& ray, BoundedRay& sh
 
 
 
-const XYZ LightSpot::doSampleEmission(const Sample&, const TPoint2D& lightSampleA, const TPoint2D&, const TAabb3D&, BoundedRay& emissionRay, TScalar& pdf) const
+const XYZ LightSpot::doSampleEmission(const Sample&, const TPoint2D& lightSampleA, const TPoint2D&, BoundedRay& emissionRay, TScalar& pdf) const
 {
 	const TPoint3D local = num::uniformCone(lightSampleA, cosOuterAngle_, pdf);
 	const TVector3D direction = tangentU_ * local.x + tangentV_ * local.y + direction_ * local.z;
@@ -250,7 +250,7 @@ const XYZ LightSpot::doSampleEmission(const Sample&, const TPoint2D& lightSample
 
 
 
-const XYZ LightSpot::doTotalPower(const TAabb3D&) const
+const XYZ LightSpot::doTotalPower() const
 {
 	const TScalar factor = ((1 - cosInnerAngle_) + (cosInnerAngle_ - cosOuterAngle_) / 4);
 	return (2 * TNumTraits::pi * factor) * intensity_;

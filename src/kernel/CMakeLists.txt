@@ -11,7 +11,8 @@ add_library(libkernel SHARED
 	${libkernel_SRCS}
 	)
 target_link_libraries(libkernel 
-	lass
+	lass 
+	lass_python
 	)
 
 

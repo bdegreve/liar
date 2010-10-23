@@ -31,6 +31,7 @@
 
 #include "tracers_common.h"
 #include "../kernel/ray_tracer.h"
+#include <lass/num/random.h>
 
 namespace liar
 {
@@ -44,11 +45,16 @@ public:
 
 	DirectLighting();
 
+	size_t numSecondaryLightSamples() const;
+	void setNumSecondaryLightSamples(size_t numSamples);
+
 protected:
+
+	typedef num::RandomMT19937 TRandomSecondary;
 
 	void doRequestSamples(const TSamplerPtr& sampler);
 	void doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads);
-	const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, int generation) const;
+	const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, int generation, bool highQuality) const;
 	const TRayTracerPtr doClone() const;
 
 	const TPyObjectPtr doGetState() const;
@@ -56,14 +62,26 @@ protected:
 
 	virtual const XYZ doShadeMedium(const kernel::Sample& sample, const kernel::BoundedRay& ray, XYZ& transparency) const;
 	virtual const XYZ doShadeSurface(const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
-		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, int generation) const;
+		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, int generation, bool highQuality) const;
 
 	const XYZ traceDirect(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
-		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn) const;
+		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn, bool highQuality) const;
 	const XYZ traceSpecularAndGlossy(
 		const Sample& sample, const kernel::DifferentialRay& primaryRay, const IntersectionContext& context, const TBsdfPtr& bsdf,
-		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn, bool singleSample) const;
+		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn, bool highQuality) const;
 	const XYZ traceSingleScattering(const Sample& sample, const kernel::BoundedRay& ray) const;
+
+	TRandomSecondary& secondarySampler() const { return secondarySampler_; }
+
+private:
+
+	mutable std::vector<TScalar> secondaryLightSelectorSamples_;
+	mutable std::vector<TPoint2D> secondaryLightSamples_;
+	mutable std::vector<TPoint2D> secondaryBsdfSamples_;
+	mutable std::vector<TScalar> secondaryBsdfComponentSamples_;
+	mutable TRandomSecondary secondarySampler_;
+
+	size_t numSecondaryLightSamples_;
 };
 
 }

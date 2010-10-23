@@ -193,12 +193,12 @@ Dielectric::DielectricBsdf::DielectricBsdf(const Sample& sample, const Intersect
 	LASS_ASSERT(ior_ > 0);
 }
 
-BsdfOut Dielectric::DielectricBsdf::doCall(const TVector3D&, const TVector3D& omegaOut, unsigned allowedCaps) const
+BsdfOut Dielectric::DielectricBsdf::doCall(const TVector3D&, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
 {
 	return BsdfOut();
 }
 
-SampleBsdfOut Dielectric::DielectricBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, unsigned allowedCaps) const
+SampleBsdfOut Dielectric::DielectricBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const
 {
 	enum
 	{
@@ -222,14 +222,14 @@ SampleBsdfOut Dielectric::DielectricBsdf::doSample(const TVector3D& omegaIn, con
 	if (componentSample < probRefl)
 	{
 		const TVector3D omegaRefl(-omegaIn.x, -omegaIn.y, omegaIn.z);
-		return SampleBsdfOut(omegaRefl, reflectance_ * rFresnel, probRefl, capsRefl);
+		return SampleBsdfOut(omegaRefl, reflectance_ * rFresnel / cosI, probRefl, capsRefl);
 	}
 	else
 	{
 		TVector3D omegaTrans = -omegaIn;
 		omegaTrans *= ior_;
 		omegaTrans.z += (ior_ * cosI - cosT);
-		return SampleBsdfOut(omegaTrans, transmittance_ * (1 - rFresnel), 1 - probRefl, capsTrans); 
+		return SampleBsdfOut(omegaTrans, transmittance_ * (1 - rFresnel) / num::abs(omegaTrans.z), 1 - probRefl, capsTrans); 
 	}
 }
 

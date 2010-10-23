@@ -82,13 +82,13 @@ void Sum::doSetState(const TPyObjectPtr& state)
 
 // --- bsdf ----------------------------------------------------------------------------------------
 
-Sum::SumBsdf::SumBsdf(const Sample& sample, const IntersectionContext& context, unsigned caps, const TComponents& components):
+Sum::SumBsdf::SumBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TComponents& components):
 	Bsdf(sample, context, caps),
 	components_(components)
 {
 }
 
-BsdfOut Sum::SumBsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, unsigned allowedCaps) const
+BsdfOut Sum::SumBsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
 {
 	size_t usedComponents = 0;
 	BsdfOut out;
@@ -109,7 +109,7 @@ BsdfOut Sum::SumBsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut
 	return out;
 }
 
-SampleBsdfOut Sum::SumBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, unsigned allowedCaps) const
+SampleBsdfOut Sum::SumBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const
 {
 	if (allowedCaps != activeCaps_)
 	{
@@ -135,13 +135,13 @@ SampleBsdfOut Sum::SumBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& s
 	const size_t k = std::min(static_cast<size_t>(num::floor(n * componentSample)), n - 1);
 
 	SampleBsdfOut out = activeComponents_[k]->sample(omegaIn, sample, componentSample, allowedCaps);
-	/*
-	const BsdfOut bsdfOut = this->bsdf(omegaIn, out.omegaOut, allowedCaps);
-	out.value = bsdfOut.value;
-	out.pdf = bsdfOut.pdf;
-	out.usedCaps = allowedCaps & caps();
-	/*/
 	out.pdf /= n;
+	if (componentSample > 1)
+	{
+		//const BsdfOut bsdfOut = this->bsdf(omegaIn, out.omegaOut, out.usedCaps);
+		//out.value = bsdfOut.value;
+		//out.pdf = bsdfOut.pdf ???  no it isn't.
+	}
 	return out;
 }
 

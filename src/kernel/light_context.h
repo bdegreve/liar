@@ -40,6 +40,10 @@ namespace liar
 namespace kernel
 {
 
+/** 
+ *  @warning THREAD UNSAFE!  Each thread should have its own copy of the light contexts, 
+ *		and LightContext must have a deep copy for at least the mutable parts.
+ */
 class LIAR_KERNEL_DLL LightContext
 {
 public:
@@ -48,8 +52,6 @@ public:
 
 	LightContext(const TObjectPath& objectPathToLight, const SceneLight& light);
 
-	void setSceneBound(const TAabb3D& bound, const TimePeriod& period);
-
 	const TObjectPath& objectPath() const { return objectPath_; }
 	const SceneLight& light() const { return *light_; }
 
@@ -57,6 +59,7 @@ public:
 	int idBsdfSamples() const { return idBsdfSamples_; }
 	int idBsdfComponentSamples() const { return idBsdfComponentSamples_; }
 
+	void setSceneBound(const TAabb3D& bound, const TimePeriod& period);
 	void requestSamples(const TSamplerPtr& sampler);
 
 	const XYZ emission(const Sample& cameraSample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
@@ -77,7 +80,6 @@ private:
 
 	void setTime(TTime time) const;
 
-	TAabb3D localBound_;
 	mutable TTransformation3D localToWorld_;	/**< concatenated local to world transformation */
 	mutable TTransformation3D worldToLocal_;	/**< concatenated world to local transformation */
 	mutable TTime timeOfTransformation_;		/**< time localToWorld_ was calculated for */
@@ -87,8 +89,6 @@ private:
 	int idBsdfSamples_;
 	int idBsdfComponentSamples_;
 	bool hasMotion_;							/**< does light move in time? */
-
-	static util::CriticalSection lock_;
 };
 
 

@@ -30,6 +30,7 @@
 #include "bounded_medium.h"
 #include "bump_mapping.h"
 #include "dielectric.h"
+#include "exponential_fog.h"
 #include "fog.h"
 #include "lambert.h"
 #include "mirror.h"
@@ -51,6 +52,7 @@ PY_MODULE_CLASS(shaders, BoundedMedium)
 PY_MODULE_CLASS(shaders, BumpMapping)
 PY_MODULE_CLASS(shaders, Dielectric)
 PY_MODULE_CLASS(shaders, Fog)
+PY_MODULE_CLASS(shaders, ExponentialFog)
 PY_MODULE_CLASS(shaders, Lambert)
 PY_MODULE_CLASS(shaders, Mirror)
 //PY_MODULE_CLASS(shaders, NullShader)

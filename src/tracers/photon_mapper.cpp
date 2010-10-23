@@ -255,10 +255,6 @@ void PhotonMapper::setNumSecondaryGatherRays(size_t numSecondaryGatherRays)
 	secondaryGatherBsdfSamples_.resize(numSecondaryGatherRays);
 	secondaryGatherComponentSamples_.resize(numSecondaryGatherRays);
 	secondaryGatherVolumetricSamples_.resize(numSecondaryGatherRays);
-	secondaryLightSelectorSamples_.resize(numSecondaryGatherRays);
-	secondaryLightSamples_.resize(numSecondaryGatherRays);
-	secondaryBsdfSamples_.resize(numSecondaryGatherRays);
-	secondaryBsdfComponentSamples_.resize(numSecondaryGatherRays);
 }
 
 
@@ -435,7 +431,7 @@ const XYZ PhotonMapper::doShadeMedium(const kernel::Sample& sample, const kernel
 
 const XYZ PhotonMapper::doShadeSurface(
 		const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
-		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, int generation) const
+		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, int generation, bool highQuality) const
 {
 	if (isVisualizingPhotonMap_)
 	{
@@ -446,17 +442,23 @@ const XYZ PhotonMapper::doShadeSurface(
 	const TBsdfPtr bsdf = context.bsdf();
 
 	XYZ result = estimateCaustics(sample, context, bsdf, point, omega);
-	result += context.shader()->emission(sample, context, omega);
+	if (generation == 0)
+	{
+		// actually, we block this because currently this is our way to include area lights in the camera rays only.
+		// we should always to the shader emission thing, but get the light emission seperately.
+		// and generation == 0 isn't a good discriminator eighter.
+		result += context.shader()->emission(sample, context, omega);
+	}
 
 	if (isRayTracingDirect_)
 	{
-		result += traceDirect(sample, context, bsdf, point, normal, omega);
+		result += traceDirect(sample, context, bsdf, point, normal, omega, highQuality);
 	}
 
 	//*
 	if (bsdf->hasCaps(Bsdf::capsDiffuse))
 	{
-		if (hasFinalGather())
+		if (highQuality && hasFinalGather())
 		{
 			LASS_ASSERT(idFinalGatherSamples_ >= 0);
 			Sample::TSubSequence2D gatherSample = sample.subSequence2D(idFinalGatherSamples_);
@@ -472,8 +474,7 @@ const XYZ PhotonMapper::doShadeSurface(
 	}
 	/**/
 
-	const bool singleSample = generation > 0;
-	result += traceSpecularAndGlossy(sample, primaryRay, context, bsdf, point, normal, omega, singleSample);
+	result += traceSpecularAndGlossy(sample, primaryRay, context, bsdf, point, normal, omega, highQuality);
 
 	return result;
 }
@@ -1138,85 +1139,30 @@ const XYZ PhotonMapper::traceGatherRay(const Sample& sample, const BoundedRay& r
 }
 
 
-namespace temp
-{
-	template <typename Generator>
-	void stratifier(TScalar* first, TScalar* last, Generator& generator)
-	{
-		num::DistributionUniform<TScalar, num::RandomMT19937> uniform(generator);
-		const ptrdiff_t n = last - first;
-		const TScalar scale = num::inv(static_cast<TScalar>(n));
-		for (ptrdiff_t k = 0; k < n; ++k)
-		{
-			first[k] = scale * (k + uniform());
-		};
-		std::random_shuffle(first, last, generator);
-	}
-
-	template <typename Generator>
-	void latinHypercube(TPoint2D* first, TPoint2D* last, Generator& generator)
-	{
-		num::DistributionUniform<TScalar, num::RandomMT19937> uniform(generator);
-		const ptrdiff_t n = last - first;
-		const TPoint2D::TValue scale = num::inv(static_cast<TPoint2D::TValue>(n));
-		for (ptrdiff_t k = 0; k < n; ++k)
-		{
-			first[k].x = scale * (k + uniform());
-			first[k].y = scale * (k + uniform());
-		};
-		std::random_shuffle(stde::member_iterator(first, &TPoint2D::x), stde::member_iterator(last, &TPoint2D::x), generator);
-		std::random_shuffle(stde::member_iterator(first, &TPoint2D::y), stde::member_iterator(last, &TPoint2D::y), generator);
-	}
-}
-
-
 
 const XYZ PhotonMapper::gatherSecondary(
 		const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
-		const TPoint3D& target, const TVector3D& omegaOut) const
+		const TPoint3D& point, const TVector3D& omega) const
 {
 	const size_t n = numSecondaryGatherRays_;
 	if (n == 0)
 	{
 		return XYZ();
 	}
+
 	XYZ result;
-	{
-		TPoint2D* bsdfSamples = &secondaryGatherBsdfSamples_[0];
-		TScalar* componentSamples = &secondaryGatherComponentSamples_[0];
-		TScalar* volumetricSamples = &secondaryGatherVolumetricSamples_[0];
-		temp::latinHypercube(bsdfSamples, bsdfSamples + n, secondarySampler_);
-		temp::stratifier(componentSamples, componentSamples + n, secondarySampler_);
-		temp::stratifier(volumetricSamples, volumetricSamples + n, secondarySampler_);
-		result += gatherIndirect(sample, context, bsdf, target, omegaOut, bsdfSamples, bsdfSamples + n, componentSamples, volumetricSamples, 1);
-	}
-	{
-		const TVector3D targetNormal = bsdf->bsdfToWorld(TVector3D(0, 0, 1));
-		TScalar* lightSelectors = &secondaryLightSelectorSamples_[0];
-		TPoint2D* lightSamples = &secondaryLightSamples_[0];
-		TPoint2D* bsdfSamples = &secondaryBsdfSamples_[0];
-		TScalar* componentSamples = &secondaryBsdfComponentSamples_[0];
-		temp::stratifier(lightSelectors, lightSelectors + n, secondarySampler_);
-		temp::latinHypercube(lightSamples, lightSamples + n, secondarySampler_);
-		temp::latinHypercube(bsdfSamples, bsdfSamples + n, secondarySampler_);
-		temp::stratifier(componentSamples, componentSamples + n, secondarySampler_);
-		for (size_t k = 0; k < n; ++k)
-		{
-			TScalar pdf;
-			const LightContext* light = lights().sample(lightSelectors[k], pdf);
-			if (!light || pdf <= 0)
-			{
-				continue;
-			}
-			const XYZ radiance = RayTracer::estimateLightContribution(
-				sample, bsdf, *light, 
-				Sample::TSubSequence2D(lightSamples + k, lightSamples + k + 1), 
-				Sample::TSubSequence2D(bsdfSamples + k, bsdfSamples + k + 1),
-				Sample::TSubSequence1D(componentSamples + k, componentSamples + k + 1),
-				target, targetNormal, omegaOut);
-			result += radiance / (n * pdf);
-		}
-	}
+
+	TPoint2D* bsdfSamples = &secondaryGatherBsdfSamples_[0];
+	TScalar* componentSamples = &secondaryGatherComponentSamples_[0];
+	TScalar* volumetricSamples = &secondaryGatherVolumetricSamples_[0];
+	latinHypercube2D(bsdfSamples, bsdfSamples + n, secondarySampler());
+	stratifier1D(componentSamples, componentSamples + n, secondarySampler());
+	stratifier1D(volumetricSamples, volumetricSamples + n, secondarySampler());
+	result += gatherIndirect(sample, context, bsdf, point, omega, bsdfSamples, bsdfSamples + n, componentSamples, volumetricSamples, 1);
+	
+	const TVector3D normal = context.bsdfToWorld(TVector3D(0, 0, 1));
+	result += traceDirect(sample, context, bsdf, point, normal, omega, false);
+
 	return result;
 }
 

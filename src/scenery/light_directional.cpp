@@ -25,7 +25,6 @@
 #include "light_directional.h"
 #include <lass/num/distribution_transformations.h>
 #include <lass/prim/impl/plane_3d_impl_detail.h>
-#include <lass/prim/sphere_3d.h>
 
 namespace liar
 {
@@ -93,8 +92,9 @@ void LightDirectional::setRadiance(const XYZ& radiance)
 
 // --- private -------------------------------------------------------------------------------------
 
-void LightDirectional::doPreProcess(const TSceneObjectPtr&, const TimePeriod&)
+void LightDirectional::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod&)
 {
+	boundingSphere_ = prim::boundingSphere(scene->boundingBox());
 }
 
 
@@ -167,22 +167,20 @@ const XYZ LightDirectional::doSampleEmission(const Sample&, const TPoint2D&, con
 
 
 
-const XYZ LightDirectional::doSampleEmission(const Sample&, const TPoint2D& lightSampleA, const TPoint2D&, const TAabb3D& sceneBound, BoundedRay& emissionRay, TScalar& pdf) const
+const XYZ LightDirectional::doSampleEmission(const Sample&, const TPoint2D& lightSampleA, const TPoint2D&, BoundedRay& emissionRay, TScalar& pdf) const
 {
-	const prim::Sphere3D<TScalar> worldSphere = boundingSphere(sceneBound);
 	const TPoint2D uv = num::uniformDisk(lightSampleA, pdf);
-	const TPoint3D begin = worldSphere.center() + worldSphere.radius() * (tangentU_ * uv.x + tangentV_ * uv.y - direction_);
+	const TPoint3D begin = boundingSphere_.center() + boundingSphere_.radius() * (tangentU_ * uv.x + tangentV_ * uv.y - direction_);
 	emissionRay = BoundedRay(begin, direction_, tolerance);
-	pdf /= num::sqr(worldSphere.radius());
+	pdf /= num::sqr(boundingSphere_.radius());
 	return radiance_;
 }
 
 
 
-const XYZ LightDirectional::doTotalPower(const TAabb3D& sceneBound) const
+const XYZ LightDirectional::doTotalPower() const
 {
-	const prim::Sphere3D<TScalar> worldSphere = boundingSphere(sceneBound);
-	return (2 * TNumTraits::pi * num::sqr(worldSphere.radius())) * radiance_;
+	return (2 * TNumTraits::pi * num::sqr(boundingSphere_.radius())) * radiance_;
 }
 
 

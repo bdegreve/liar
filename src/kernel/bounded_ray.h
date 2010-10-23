@@ -59,6 +59,8 @@ public:
 	const TVector3D& direction() const { return unboundedRay_.direction(); }
 
 	const TPoint3D point(TScalar t) const { return unboundedRay_.point(t); }
+	const TPoint3D nearPoint() const { return point(nearLimit_); }
+	const TPoint3D farPoint() const { return point(nearLimit_); }
 
 	/** return true if @a t is between the scalar bounds of the ray */
 	bool inRange(TScalar t) const 

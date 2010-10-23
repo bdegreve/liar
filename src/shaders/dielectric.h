@@ -62,8 +62,8 @@ public:
 	public:
 		DielectricBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TScalar ior, const XYZ& reflectance, const XYZ& transmittance);
 	private:
-		BsdfOut doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, unsigned allowedCaps) const;
-		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, unsigned allowedCaps) const;
+		BsdfOut doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
+		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
 		XYZ reflectance_;
 		XYZ transmittance_;
 		TScalar ior_;

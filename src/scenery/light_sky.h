@@ -80,15 +80,16 @@ private:
 			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
 			BoundedRay& shadowRay, TScalar& pdf) const;
 	const XYZ doSampleEmission(
-			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, const TAabb3D& sceneBound, 
+			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 			BoundedRay& emissionRay, TScalar& pdf) const;
-	const XYZ doTotalPower(const TAabb3D& sceneBound) const;
+	const XYZ doTotalPower() const;
 	size_t doNumberOfEmissionSamples() const;
 	bool doIsSingular() const;
 
 	const TPyObjectPtr doGetLightState() const;
 	void doSetLightState(const TPyObjectPtr& state);
 
+	void init(const TTexturePtr& radiance);
 	void buildPdf(TMap& pdf, TXYZMap& radianceMap, XYZ& power, util::ProgressIndicator& progress) const;
 	void buildCdf(const TMap& iPdf, TMap& oMarginalCdfU, TMap& oConditionalCdfV, util::ProgressIndicator& progress) const;
 	void sampleMap(const TPoint2D& sample, TScalar&, TScalar& j, TScalar& pdf) const;

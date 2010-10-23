@@ -54,6 +54,8 @@ public:
 	const TPoint3D& support() const { return centralRay_.support(); }		/**< return support point of central ray */
 	const TVector3D& direction() const { return centralRay_.direction(); }	/**< return diretion of central ray */
 	const TPoint3D point(const TScalar t) const { return centralRay_.point(t); }
+	TScalar nearLimit() const { return centralRay_.nearLimit(); }
+	TScalar farLimit() const { return centralRay_.farLimit(); }
 
 	bool isValid() const { return centralRay_.unboundedRay().isValid(); }
 

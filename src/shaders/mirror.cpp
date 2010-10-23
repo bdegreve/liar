@@ -80,30 +80,9 @@ size_t Mirror::doNumReflectionSamples() const
 
 
 
-void Mirror::doBsdf(const Sample&, const IntersectionContext&, const TVector3D&, const BsdfIn*, const BsdfIn*, BsdfOut*) const
+TBsdfPtr Mirror::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-}
-
-
-
-void Mirror::doSampleBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
-{
-	const XYZ r = reflectance_->lookUp(sample, context);
-	const TVector3D omegaOut(-omegaIn.x, -omegaIn.y, omegaIn.z);
-	while (first != last)
-	{
-		if (compatibleCaps(first->allowedCaps))
-		{
-			result->omegaOut = omegaOut;
-			result->value = r;
-			result->pdf = omegaOut.z;
-			result->usedCaps = caps();
-		}
-		++first;
-		++result;
-	}
+	return TBsdfPtr(new Bsdf(sample, context, reflectance_->lookUp(sample, context)));
 }
 
 
@@ -119,6 +98,33 @@ void Mirror::doSetState(const TPyObjectPtr& state)
 {
 	python::decodeTuple(state, reflectance_);
 }
+
+
+// --- Bsdf ----------------------------------------------------------------------------------------
+
+Mirror::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, const XYZ& reflectance):
+	kernel::Bsdf(sample, context, Bsdf::capsReflection | Bsdf::capsSpecular),
+	reflectance_(reflectance)
+{
+}
+
+
+
+BsdfOut Mirror::Bsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
+{
+	return BsdfOut();
+}
+
+
+
+SampleBsdfOut Mirror::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const
+{
+	LASS_ASSERT(omegaIn.z > 0);
+	LASS_ASSERT(kernel::hasCaps(allowedCaps, caps()));
+	const TVector3D omegaOut(-omegaIn.x, -omegaIn.y, omegaIn.z);
+	return SampleBsdfOut(omegaOut, reflectance_, omegaOut.z, caps());
+}
+
 
 
 // --- free ----------------------------------------------------------------------------------------

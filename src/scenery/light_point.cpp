@@ -180,7 +180,7 @@ const XYZ LightPoint::doSampleEmission(const Sample&, const TPoint2D&, const TPo
 
 
 
-const XYZ LightPoint::doSampleEmission(const Sample&, const TPoint2D& lightSampleA, const TPoint2D&, const TAabb3D&, BoundedRay& emissionRay, TScalar& pdf) const
+const XYZ LightPoint::doSampleEmission(const Sample&, const TPoint2D& lightSampleA, const TPoint2D&, BoundedRay& emissionRay, TScalar& pdf) const
 {
 	const TVector3D direction = num::uniformSphere(lightSampleA, pdf).position();
 	emissionRay = BoundedRay(position_, direction, tolerance);
@@ -189,7 +189,7 @@ const XYZ LightPoint::doSampleEmission(const Sample&, const TPoint2D& lightSampl
 
 
 
-const XYZ LightPoint::doTotalPower(const TAabb3D&) const
+const XYZ LightPoint::doTotalPower() const
 {
 	return (4 * TNumTraits::pi) * intensity_;
 }

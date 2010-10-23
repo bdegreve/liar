@@ -205,7 +205,7 @@ void Disk::doSetState(const TPyObjectPtr& state)
 	TPoint3D center;
 	TVector3D normal;
 	TScalar radius;
-	LASS_ENFORCE(python::decodeTuple(state, normal, radius));
+	LASS_ENFORCE(python::decodeTuple(state, center, normal, radius));
 	disk_ = TDisk3D(center, normal, radius);
 }
 

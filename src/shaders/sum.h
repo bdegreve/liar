@@ -57,14 +57,14 @@ private:
 	{
 	public:
 		typedef stde::static_vector<TBsdfPtr, capacity> TComponents;
-		SumBsdf(const Sample& sample, const IntersectionContext& context, unsigned caps, const TComponents& components);
+		SumBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TComponents& components);
 	private:
-		BsdfOut doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, unsigned allowedCaps) const;
-		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, unsigned allowedCaps) const;
+		BsdfOut doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
+		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
 		TComponents components_;
 		mutable stde::static_vector<const Bsdf*, capacity> activeComponents_;
-		unsigned caps_;
-		mutable unsigned activeCaps_;
+		TBsdfCaps caps_;
+		mutable TBsdfCaps activeCaps_;
 	};
 
 	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;

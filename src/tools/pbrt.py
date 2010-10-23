@@ -57,12 +57,12 @@ class PbrtScene(object):
 	def Transform(self, *m):
 		m = _unwrap(m)
 		assert len(m) == 16
-		self.__cur_transform = liar.Transformation3D(m)
+		self.__cur_transform = liar.Transformation3D(_transpose(m))
 	
 	def ConcatTransform(self, *m):
 		m = _unwrap(m)
 		assert len(m) == 16
-		self.__cur_transform = liar.Transformation3D(m).concatenate(self.__cur_transform)
+		self.__cur_transform = liar.Transformation3D(_transpose(m)).concatenate(self.__cur_transform)
 	
 	def ReverseOrientation(self):
 		# quick hack
@@ -80,6 +80,8 @@ class PbrtScene(object):
 		self.__textures = {}
 		self.__auto_textures = {}
 		self.__objects = []
+		self.__instances = {}
+		self.__cur_instance = None
 		self.Material()
 	
 	def WorldEnd(self):
@@ -104,6 +106,7 @@ class PbrtScene(object):
 		if self.__pixelFilter:
 			self.__pixelFilter.target, engine.target = engine.target, self.__pixelFilter
 		engine.scene = liar.scenery.AabbTree(self.__objects)
+		engine.scene.interior = self.__volume
 		if self.__render_immediately:
 			self.render()
 	
@@ -118,11 +121,41 @@ class PbrtScene(object):
 	
 	def AttributeBegin(self):
 		self.TransformBegin()
-		self.__pushed_states.append((self.__textures, self.__material, self.__area_light))
+		self.__pushed_states.append((self.__textures.copy(), self.__material, self.__area_light))
 		
 	def AttributeEnd(self):
 		self.TransformEnd()
 		self.__textures, self.__material, self.__area_light = self.__pushed_states.pop()
+	
+	def ObjectBegin(self, name):
+		self.AttributeBegin()
+		assert self.__cur_instance is None, "ObjectBegin called inside of instance definition"
+		self.__cur_instance = self.__instances[name] = []
+	
+	def ObjectEnd(self):
+		self.AttributeEnd()
+		self.__cur_instance = None
+	
+	def ObjectInstance(self, name):
+		self.verify_world()
+		for shape in self.__instances[name]:
+			self.__add_shape(shape)
+	
+	def __add_shape(self, shape):
+		self.verify_world()
+		shape = self.__with_cur_transform(shape)
+		if not self.__cur_instance is None:
+			self.__cur_instance.append(shape)
+		self.__objects.append(shape)
+	
+	def __with_cur_transform(self, shape):
+		# todo: merge __cur_transform with shape's transform.
+		if self.__cur_transform.isIdentity():
+			return shape
+		if self.__cur_transform.isTranslation():
+			matrix = self.__cur_transform.matrix
+			return liar.scenery.Translation(shape, matrix[3:12:4])
+		return liar.scenery.Transformation(shape, self.__cur_transform)
 	
 	
 	def Camera(self, name="perspective", frameaspectratio=None, screenwindow=None, fov=90, **kwargs):
@@ -138,7 +171,7 @@ class PbrtScene(object):
 		from liar.tools.geometry import negate
 		camera = liar.cameras.PerspectiveCamera()
 		camera.position, camera.sky, camera.direction = position, up, direction
-		camera.right, camera.down = negate(right), negate(up) # -right for rhs to lhs, -up for down
+		camera.right, camera.down = right, negate(up) # -up for down
 		camera.nearLimit, camera.farLimit = hither, yon
 		camera.shutterOpenDelta, camera.shutterCloseDelta = shutteropen, shutterclose
 		camera.lensRadius, camera.focusDistance = lensradius, focaldistance
@@ -189,27 +222,20 @@ class PbrtScene(object):
 			light_name, light_kwargs = self.__area_light
 			shape = getattr(self, "_lightsource_" + light_name)(shape=shape, **light_kwargs)
 			shape.surface.shader = liar.shaders.Unshaded(liar.textures.Constant(shape.radiance))
-		self.__objects.append(self._with_cur_transform(shape))
-	
-	def _with_cur_transform(self, shape):
-		if self.__cur_transform.isIdentity():
-			return shape
-		if self.__cur_transform.isTranslation():
-			matrix = self.__cur_transform.matrix
-			return liar.scenery.Translation(shape, matrix[3:12:4])
-		return liar.scenery.Transformation(shape, self.__cur_transform)
+		self.__add_shape(shape)
 	
 	def _shape_disk(self, height=0, radius=1):
 		return liar.scenery.Disk((0, 0, height), (0, 0, 1), radius)
 	
-	def _shape_sphere(self, radius):
+	def _shape_sphere(self, radius=1):
 		return liar.scenery.Sphere((0, 0, 0), radius)
 	
-	def _shape_trianglemesh(self, indices, P, N=None, uv=None):
+	def _shape_trianglemesh(self, indices, P, N=None, uv=None, st=None):
 		def split_as_tuples(xs, n):
 			assert len(xs) % n == 0
 			return [tuple(xs[k:k+n]) for k in range(0, len(xs), n)]
 
+		uv = uv or st
 		if N and uv:
 			as_vertex_index = lambda i: (i, i, i)
 		elif N:
@@ -234,19 +260,30 @@ class PbrtScene(object):
 	
 	def Material(self, name="matte", bumpmap=None, **kwargs):
 		self.verify_world()
-		self.__material = getattr(self, "_material_" + name)(**kwargs)
+		try:
+			self.__material = getattr(self, "_material_" + name)(**kwargs)
+		except AttributeError:
+			warnings.warn("unknown material %(name)r, defaulting to matte." % vars())
+			self.__material = self._material_matte(**kwargs)
 		if bumpmap:
-			self.__material = liar.shaders.BumpMapping(material, self._get_texture(bumpmap))
+			self.__material = liar.shaders.BumpMapping(self.__material, self._get_texture(bumpmap))
 	
 	def _material_matte(self, Kd=1, sigma=0):
 		return liar.shaders.Lambert(self._get_texture(Kd))
 	
 	def _material_plastic(self, Kd=1, Ks=1, roughness=0.1):
-		diffuse = liar.shaders.Lambert(self._get_texture(Kd))
-		return liar.shaders.Sum([diffuse])
+		#diffuse = liar.shaders.Lambert(self._get_texture(Kd))
+		#return liar.shaders.Sum([diffuse])
+		return self._material_substrate(Kd, Ks, roughness, roughness)
+
+	def _material_substrate(self, Kd=.5, Ks=.5, uroughness=.1, vroughness=.1):
+		shader = liar.shaders.AshikhminShirley(self._get_texture(Kd), self._get_texture(Ks))
+		shader.specularPowerU = self._get_texture(1 / max(uroughness, 1e-6))
+		shader.specularPowerV = self._get_texture(1 / max(vroughness, 1e-6))
+		return shader
 	
 	def _material_mirror(self, Kr=1):
-		diffuse = liar.shaders.Mirror(self._get_texture(Kr))
+		return liar.shaders.Mirror(self._get_texture(Kr))
 	
 	def _material_glass(self, Kr=1, Kt=1, index=1.5):
 		glass = liar.shaders.Dielectric(self._get_texture(index))
@@ -254,6 +291,11 @@ class PbrtScene(object):
 		glass.transmittance = self._get_texture(Kt)
 		return glass
 	
+	def _material_bluepaint(self):
+		return liar.shaders.Lambert(self._get_texture((.3, .4, .7)))
+	
+	def _material_clay(self):
+		return liar.shaders.Lambert(self._get_texture((.4, .3, .3)))
 	
 	def Texture(self, name, type, class_, mapping="uv", uscale=1, vscale=1, udelta=0, vdelta=0, v1=(1,0,0), v2=(0,1,0), **kwargs):
 		self.verify_world()
@@ -285,9 +327,8 @@ class PbrtScene(object):
 		if dimension == 3:
 			tex = liar.textures.CheckerVolume(tex1, tex2)
 		else:
-			print liar.Transformation2D.scaler(.5)
 			tex = liar.textures.CheckerBoard(tex1, tex2)
-			assert aamode in ("none", "closedform", "supersample")
+			assert aamode in ("none", "closedform", "supersample"), aamode
 			tex.antiAliasing = ("none", "bilinear")[aamode != "none"]
 			tex = liar.textures.TransformationUv(tex, liar.Transformation2D.scaler(.5))
 		return tex
@@ -295,26 +336,66 @@ class PbrtScene(object):
 	def _texture_imagemap(self, filename, wrap="repeat", maxanisotropy=8, trilinear=False):
 		return liar.textures.Image(filename)
 	
+	def _texture_windy(self):
+		return self._get_texture(0) # to be implemented ...
+	
 	def _get_texture(self, arg):
-		if _is_string(arg):
+		# arg as a texture name
+		try:
 			return self.__textures[arg]
+		except KeyError:
+			pass
+		# arg as a cached texture
 		try:
 			return self.__auto_textures[arg]
 		except KeyError:
+			pass
+		tex = None
+		# arg as a path to an image file
+		try:
+			if os.path.isfile(arg):
+				tex = liar.textures.Image(arg)
+		except TypeError:
+			pass
+		if not tex:
+			# an RGB triple
 			try:
 				x, y, z = arg
 			except TypeError:
-				tex = liar.textures.Constant(arg)
+				pass
 			else:
-				tex = liar.textures.Constant(liar.rgb(x, y, z))
-			self.__auto_textures[arg] = tex
-			return tex
+				try:
+					tex = liar.textures.Constant(liar.rgb(x, y, z))
+				except TypeError:
+					pass
+		if not tex:
+			# a gray value
+			try:
+				tex = liar.textures.Constant(arg)
+			except TypeError:
+				pass
+		if not tex:
+			raise ValueError("%(arg)r is nor a registered texture name, nor a imagemap path, nor an RGB triple, nor a single float" % vars())
+		self.__auto_textures[arg] = tex
+		return tex
 	
+	
+	def Volume(self, name, p0=(0,0,0), p1=(1,1,1), **kwargs):
+		self.verify_world()
+		shader = getattr(self, "_volume_" + name)(**kwargs)
+		self.__volume = liar.shaders.BoundedMedium(shader, (p0, p1))
+	
+	def _volume_exponential(self, sigma_a=0, sigma_s=0, g=0, Le=0, a=1, b=1, updir=(0,1,0)):
+		# let's start off with a simple one ...
+		extinction = _avg(sigma_a) + _avg(sigma_s)
+		fog = liar.shaders.Fog(extinction, g)
+		fog.color = _mul(sigma_s, 1 / extinction)
+		return fog
 	
 	def LightSource(self, name, **kwargs):
 		self.verify_world()
 		light = getattr(self, "_lightsource_" + name)(**kwargs)
-		self.__objects.append(self._with_cur_transform(light))
+		self.__objects.append(self.__with_cur_transform(light))
 	
 	def AreaLightSource(self, name, **kwargs):
 		self.verify_world()
@@ -331,6 +412,12 @@ class PbrtScene(object):
 		from liar.tools import geometry
 		direction = geometry.subtract(to, from_)
 		return liar.scenery.LightDirectional(direction, L)
+	
+	def _lightsource_infinite(self, L=(1, 1, 1), nsamples=1, mapname=None):
+		light = liar.scenery.LightSky(self._get_texture(mapname or L))
+		light.numberOfEmissionSamples = nsamples
+		light.shader = liar.shaders.Unshaded(light.radiance)
+		return light
 	
 	def _lightsource_point(self, from_=(0, 0, 0), I=(1, 1, 1)):
 		return liar.scenery.LightPoint(from_, I)
@@ -354,11 +441,16 @@ class PbrtScene(object):
 			tracer.globalMapSize += directphotons
 		for k in ("global", "caustic", "volume"):
 			tracer.setEstimationSize(k, nused)
-			tracer.setEstimationRadius(k, maxdist)
+			#tracer.setEstimationRadius(k, maxdist)
 		tracer.numFinalGatherRays = finalgather and finalgathersamples
 		tracer.isRayTracingDirect = not directwithphotons
 		return tracer
-		
+	
+	def VolumeIntegrator(self, *args, **kwargs):
+		self.verify_options()
+		# we don't do special settings yet
+	
+	
 	def verify_options(self):
 		assert self.__state == _STATE_OPTIONS_BLOCK
 
@@ -369,10 +461,12 @@ class PbrtScene(object):
 	def parse(self, path):
 		if path == '-':
 			return self.parse_stream('stdin', sys.stdin)
+		return self.parse_stream(path, open(path))
+		
 		dirname, fname = os.path.split(path)
 		oldcwd = os.getcwd()
 		if dirname:
-			os.chdir(dirname)
+			pass
 		try:
 			return self.parse_stream(path, open(fname))
 		finally:
@@ -439,7 +533,7 @@ class PbrtScene(object):
 				trunc += s[-1]
 			return s[:n-len(trunc)] + trunc
 		import pprint
-		pretty_args = map(truncated_repr, args)
+		pretty_args = [truncated_repr(value) for value in args]
 		pretty_kwargs = ["%s=%s" % (key, truncated_repr(value)) for key, value in kwargs.items()]
 		print ("%s (%s)" % (identifier, ", ".join(pretty_args + pretty_kwargs)))
 	
@@ -454,8 +548,8 @@ def _scanner(path, stream):
 	from re import Scanner
 	scanner = Scanner([
 		(r"[a-zA-Z_]\w*", lambda scanner, token: (_IDENTIFIER, token)),
-		(r"[-+]?(\d+\.\d*|\.\d+)([eE][-+]?[0-9]+)?", lambda scanner, token: (_NUMBER, float(token))),
-		(r"[-+]?\d+", lambda scanner, token: (_NUMBER, int(token))),
+		(r"[\-+]?(\d+\.\d*|\.\d+)([eE][\-+]?[0-9]+)?", lambda scanner, token: (_NUMBER, float(token))),
+		(r"[\-+]?\d+", lambda scanner, token: (_NUMBER, int(token))),
 		(r'\[', lambda scanner, token: (_START_LIST, token)),
 		(r'\]', lambda scanner, token: (_END_LIST, token)),
 		(r'"(integer|float|point|vector|normal|color|bool|string|texture)\s+[a-zA-Z_][a-zA-Z0-9_]*"', lambda scanner, token: (_PARAMETER, token[1:-1].split()[1])),
@@ -484,6 +578,31 @@ def _unwrap(arg):
 	except ValueError:
 		x = arg
 	return x
+
+
+def _transpose(m):
+	'''
+	transpose a 4x4 matrix
+	'''
+	assert len(m) == 16
+	return [m[0], m[4], m[8], m[12],
+		m[1], m[5], m[9], m[13],
+		m[2], m[6], m[10], m[14],
+		m[3], m[7], m[11], m[15]]
+
+
+def _avg(arg):
+	try:
+		return float(arg)
+	except TypeError:
+		return float(sum(arg)) / len(arg)
+
+
+def _mul(arg, factor):
+	try:
+		return [x * factor for x in arg]
+	except TypeError:
+		return factor * arg
 
 
 try:

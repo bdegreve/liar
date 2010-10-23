@@ -42,13 +42,34 @@ namespace tracers
 
 PY_DECLARE_CLASS_DOC(DirectLighting, "simple ray tracer")
 PY_CLASS_CONSTRUCTOR_0(DirectLighting)
+PY_CLASS_MEMBER_RW(DirectLighting, numSecondaryLightSamples, setNumSecondaryLightSamples)
 
 
 // --- public --------------------------------------------------------------------------------------
 
 DirectLighting::DirectLighting()
 {
+	setNumSecondaryLightSamples(1);
 }
+
+
+
+size_t DirectLighting::numSecondaryLightSamples() const
+{
+	return numSecondaryLightSamples_;
+}
+
+
+
+void DirectLighting::setNumSecondaryLightSamples(size_t numSamples)
+{
+	numSecondaryLightSamples_ = std::max<size_t>(numSamples, 1);
+	secondaryLightSelectorSamples_.resize(numSecondaryLightSamples_);
+	secondaryLightSamples_.resize(numSecondaryLightSamples_);
+	secondaryBsdfSamples_.resize(numSecondaryLightSamples_);
+	secondaryBsdfComponentSamples_.resize(numSecondaryLightSamples_);
+}
+
 
 
 // --- protected -----------------------------------------------------------------------------------
@@ -88,7 +109,7 @@ namespace temp
 
 const XYZ DirectLighting::doCastRay(
 		const kernel::Sample& sample, const kernel::DifferentialRay& primaryRay,
-		TScalar& tIntersection, TScalar& alpha, int generation) const
+		TScalar& tIntersection, TScalar& alpha, int generation, bool highQuality) const
 {
 	Intersection intersection;
 	scene()->intersect(sample, primaryRay, intersection);
@@ -96,7 +117,6 @@ const XYZ DirectLighting::doCastRay(
 	{
 		tIntersection = TNumTraits::infinity;
 		alpha = 0;
-		return XYZ();
 	}
 	tIntersection = intersection.t();
 	alpha = 1;
@@ -105,7 +125,7 @@ const XYZ DirectLighting::doCastRay(
 	LASS_ENFORCE(!mediumRay.isEmpty());
 	XYZ transparency;
 	XYZ result = doShadeMedium(sample, mediumRay, transparency);
-	if (!transparency)
+	if (!transparency || !intersection)
 	{
 		return result;
 	}
@@ -118,14 +138,14 @@ const XYZ DirectLighting::doCastRay(
 		const TVector3D normal = context.bsdfToWorld(TVector3D(0, 0, 1));
 		const TVector3D omega = context.worldToBsdf(-primaryRay.direction());
 		LASS_ASSERT(omega.z >= 0);
-		result += transparency * doShadeSurface(sample, primaryRay, context, point, normal, omega, generation);
+		result += transparency * doShadeSurface(sample, primaryRay, context, point, normal, omega, generation, highQuality);
 	}
 	else
 	{
 		// leaving or entering something
 		MediumChanger mediumChanger(mediumStack(), context.interior(), context.solidEvent());
 		const DifferentialRay continuedRay = bound(primaryRay, intersection.t() + liar::tolerance);
-		result += transparency * this->castRay(sample, continuedRay, tIntersection, alpha);
+		result += transparency * this->castRay(sample, continuedRay, tIntersection, alpha, highQuality);
 	}
 
 	return result;
@@ -163,16 +183,22 @@ const XYZ DirectLighting::doShadeMedium(const kernel::Sample& sample, const kern
 
 const XYZ DirectLighting::doShadeSurface(
 		const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
-		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, int generation) const
+		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, int generation, bool highQuality) const
 {
 
 	const Shader* const shader = context.shader();
 	const TBsdfPtr bsdf = context.bsdf();
 
-	XYZ result = context.shader()->emission(sample, context, omega);
-	result += traceDirect(sample, context, bsdf, point, normal, omega);
-	const bool singleSample = generation > 0;
-	result += traceSpecularAndGlossy(sample, primaryRay, context, bsdf, point, normal, omega, singleSample);
+	XYZ result;
+	if (generation == 0)
+	{
+		// actually, we block this because currently this is our way to include area lights in the camera rays only.
+		// we should always to the shader emission thing, but get the light emission seperately.
+		// and generation == 0 isn't a good discriminator eighter.
+		result += context.shader()->emission(sample, context, omega);
+	}
+	result += traceDirect(sample, context, bsdf, point, normal, omega, highQuality);
+	result += traceSpecularAndGlossy(sample, primaryRay, context, bsdf, point, normal, omega, highQuality);
 
 	return result;
 }
@@ -181,17 +207,51 @@ const XYZ DirectLighting::doShadeSurface(
 
 const XYZ DirectLighting::traceDirect(
 		const Sample& sample, const IntersectionContext&, const TBsdfPtr& bsdf,
-		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega) const
+		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, bool highQuality) const
 {
 	XYZ result;
-	const LightContexts::TIterator end = lights().end();
-	for (LightContexts::TIterator light = lights().begin(); light != end; ++light)
+
+	if (highQuality)
 	{
-		Sample::TSubSequence2D lightSamples = sample.subSequence2D(light->idLightSamples());
-		Sample::TSubSequence2D bsdfSamples = sample.subSequence2D(light->idBsdfSamples());
-		Sample::TSubSequence1D compSamples = sample.subSequence1D(light->idBsdfComponentSamples());
-		result += estimateLightContribution(sample, bsdf, *light, lightSamples, bsdfSamples, compSamples, point, normal, omega);
+		const LightContexts::TIterator end = lights().end();
+		for (LightContexts::TIterator light = lights().begin(); light != end; ++light)
+		{
+			Sample::TSubSequence2D lightSamples = sample.subSequence2D(light->idLightSamples());
+			Sample::TSubSequence2D bsdfSamples = sample.subSequence2D(light->idBsdfSamples());
+			Sample::TSubSequence1D compSamples = sample.subSequence1D(light->idBsdfComponentSamples());
+			result += estimateLightContribution(sample, bsdf, *light, lightSamples, bsdfSamples, compSamples, point, normal, omega);
+		}
 	}
+	else
+	{
+		const size_t n = numSecondaryLightSamples_;
+		LASS_ASSERT(n > 0);
+		TScalar* lightSelectors = &secondaryLightSelectorSamples_[0];
+		TPoint2D* lightSamples = &secondaryLightSamples_[0];
+		TPoint2D* bsdfSamples = &secondaryBsdfSamples_[0];
+		TScalar* componentSamples = &secondaryBsdfComponentSamples_[0];
+		stratifier1D(lightSelectors, lightSelectors + n, secondarySampler_);
+		latinHypercube2D(lightSamples, lightSamples + n, secondarySampler_);
+		latinHypercube2D(bsdfSamples, bsdfSamples + n, secondarySampler_);
+		stratifier1D(componentSamples, componentSamples + n, secondarySampler_);
+		for (size_t k = 0; k < n; ++k)
+		{
+			TScalar pdf;
+			const LightContext* light = lights().sample(lightSelectors[k], pdf);
+			if (!light || pdf <= 0)
+			{
+				continue;
+			}
+			const XYZ radiance = RayTracer::estimateLightContribution(
+				sample, bsdf, *light, 
+				Sample::TSubSequence2D(lightSamples + k, lightSamples + k + 1), 
+				Sample::TSubSequence2D(bsdfSamples + k, bsdfSamples + k + 1),
+				Sample::TSubSequence1D(componentSamples + k, componentSamples + k + 1),
+				point, normal, omega);
+			result += radiance / (n * pdf);
+		}
+	}
+
 	return result;
 }
 
@@ -199,7 +259,7 @@ const XYZ DirectLighting::traceDirect(
 
 const XYZ DirectLighting::traceSpecularAndGlossy(
 		const Sample& sample, const kernel::DifferentialRay& primaryRay, const IntersectionContext& context, const TBsdfPtr& bsdf,
-		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, bool singleSample) const
+		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, bool highQuality) const
 {
 	const Shader* const shader = context.shader();
 	LASS_ASSERT(shader);
@@ -234,7 +294,9 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 
 		const Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idReflectionSamples());
 		const Sample::TSubSequence1D compSample = sample.subSequence1D(shader->idReflectionComponentSamples());
-		const size_t n = singleSample ? 1 : bsdfSample.size();
+		LASS_ASSERT(bsdfSample.size() > 0 && compSample.size() == bsdfSample.size());
+
+		const size_t n = highQuality ? bsdfSample.size() : 1;
 		for (size_t i = 0; i < n; ++i)
 		{
 			const SampleBsdfOut out = bsdf->sample(omega, bsdfSample[i], compSample[i], Bsdf::capsReflection | Bsdf::capsSpecular | Bsdf::capsGlossy);
@@ -254,11 +316,11 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 				TRay3D(beginI, directionI),
 				TRay3D(beginJ, directionJ));
 			TScalar t, a;
-			const XYZ reflected = castRay(sample, reflectedRay, t, a);
+			const XYZ reflected = castRay(sample, reflectedRay, t, a, highQuality && (out.usedCaps & Bsdf::capsSpecular));
 			result += out.value * reflected * (a * num::abs(out.omegaOut.z) / (n * out.pdf));
 		}
 	}
-
+	//*
 	if (shader->hasCaps(Bsdf::capsTransmission) && shader->idTransmissionSamples() != -1)
 	{
 		const MediumChanger mediumChanger(mediumStack(), context.interior(), context.solidEvent());
@@ -266,7 +328,9 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 
 		const Sample::TSubSequence2D bsdfSample = sample.subSequence2D(shader->idTransmissionSamples());
 		const Sample::TSubSequence1D compSample = sample.subSequence1D(shader->idTransmissionComponentSamples());
-		const size_t n = singleSample ? 1 : bsdfSample.size();
+		LASS_ASSERT(bsdfSample.size() > 0 && compSample.size() == bsdfSample.size());
+
+		const size_t n = highQuality ? bsdfSample.size() : 1;
 		for (size_t i = 0; i < n; ++i)
 		{
 			const SampleBsdfOut out = bsdf->sample(omega, bsdfSample[i], compSample[i], Bsdf::capsTransmission | Bsdf::capsSpecular | Bsdf::capsGlossy);
@@ -283,11 +347,11 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 				TRay3D(beginCentral, directionCentral),
 				TRay3D(beginCentral, directionCentral));
 			TScalar t, a;
-			const XYZ transmitted = castRay(sample, transmittedRay, t, a);
+			const XYZ transmitted = castRay(sample, transmittedRay, t, a, highQuality && (out.usedCaps & Bsdf::capsSpecular));
 			result += out.value * transmitted * (a * num::abs(out.omegaOut.z) / (n * out.pdf));
 		}
 	}
-
+	/**/
 	return result;
 }
 
@@ -313,6 +377,10 @@ const XYZ DirectLighting::traceSingleScattering(const Sample& sample, const kern
 	{
 		TScalar tScatter, tPdf;
 		const XYZ transRay = medium->sampleScatterOut(stepSamples[k], ray, tScatter, tPdf);
+		if (tPdf <= 0)
+		{
+			continue;
+		}
 		const TPoint3D point = ray.point(tScatter);
 		TScalar lightPdf;
 		const LightContext* light = lights().sample(lightSamples[k], lightPdf);

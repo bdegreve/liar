@@ -44,10 +44,10 @@ class LIAR_SHADERS_DLL Lambert: public Shader
 public:
 
 	Lambert();
-	Lambert(const TTexturePtr& iDiffuse);
+	Lambert(const TTexturePtr& diffuse);
 
 	const TTexturePtr& diffuse() const;
-	void setDiffuse(const TTexturePtr& iDiffuse);
+	void setDiffuse(const TTexturePtr& diffuse);
 
 private:
 
@@ -62,10 +62,10 @@ private:
 class LambertBsdf: public Bsdf
 {
 public:
-	LambertBsdf(const Sample& sample, const IntersectionContext& context, unsigned caps, const XYZ& diffuseOverPi);
+	LambertBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const XYZ& diffuseOverPi);
 private:
-	BsdfOut doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, unsigned allowedCaps) const;
-	SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, unsigned allowedCaps) const;
+	BsdfOut doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
+	SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
 	XYZ diffuseOverPi_;
 };
 

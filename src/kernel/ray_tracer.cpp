@@ -193,10 +193,10 @@ const XYZ RayTracer::estimateLightContribution(
 	const bool isMultipleImportanceSampling = nb > 0 && !light.isSingular();
 	const TScalar n = isMultipleImportanceSampling ? nl + nb : nl;
 
-	unsigned caps = Bsdf::capsAll & ~Bsdf::capsSpecular;
+	TBsdfCaps caps = Bsdf::capsAllDiffuse | Bsdf::capsGlossy;
 	if (!light.isSingular())
 	{
-		caps &= ~Bsdf::capsGlossy;
+		caps |= Bsdf::capsSpecular;
 	}
 	// what about indirect estimator caps???
 
@@ -228,7 +228,7 @@ const XYZ RayTracer::estimateLightContribution(
 		Sample::TSubSequence1D::iterator cs = componentSamples.begin();
 		for (Sample::TSubSequence2D::iterator bs = bsdfSamples.begin(); bs != bsdfSamples.end(); ++bs, ++cs)
 		{
-			const SampleBsdfOut out = bsdf->sample(omegaIn, *bs, *cs, Bsdf::capsReflection | Bsdf::capsDiffuse | Bsdf::capsGlossy);
+			const SampleBsdfOut out = bsdf->sample(omegaIn, *bs, *cs, caps);
 			if (!out)
 			{
 				continue;

@@ -64,6 +64,8 @@ public:
 
 	TSubSequenceId requestSubSequence1D(size_t requestedSize);
 	TSubSequenceId requestSubSequence2D(size_t requestedSize);
+	size_t subSequenceSize1D(TSubSequenceId id) const { return subSequenceSize1D_[id]; }
+	size_t subSequenceSize2D(TSubSequenceId id) const { return subSequenceSize2D_[id]; }
 	void clearSubSequenceRequests();
 
 	void sample(const TResolution2D& pixel, size_t subPixel, const TimePeriod& period, Sample& sample);
@@ -83,8 +85,6 @@ protected:
 	typedef TPoint2D TSample2D;
 
 	Sampler();
-	size_t subSequenceSize1D(TSubSequenceId id) const { return subSequenceSize1D_[id]; }
-	size_t subSequenceSize2D(TSubSequenceId id) const { return subSequenceSize2D_[id]; }
 
 private:
 

@@ -48,18 +48,16 @@ PY_CLASS_MEMBER_RW(LightSky, samplingResolution, setSamplingResolution)
 
 // --- public --------------------------------------------------------------------------------------
 
-LightSky::LightSky():
-	radiance_(Texture::white())
+LightSky::LightSky()
 {
-	setSamplingResolution(TResolution2D(512, 512));
+	init(Texture::white());
 }
 
 
 
-LightSky::LightSky(const TTexturePtr& radiance):
-	radiance_(radiance)
+LightSky::LightSky(const TTexturePtr& radiance)
 {
-	setSamplingResolution(TResolution2D(512, 512));
+	init(radiance);
 }
 
 
@@ -129,10 +127,10 @@ void LightSky::setSamplingResolution(const TResolution2D& resolution)
 
 void LightSky::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod&)
 {
-	if (!portal_)
+	/*if (!portal_)
 	{
 		portal_.reset(new Sphere(boundingSphere(scene->boundingBox())));
-	}
+	}*/
 
 	util::ProgressIndicator progress("Preprocessing environment map");
 	TMap pdf;
@@ -142,9 +140,16 @@ void LightSky::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod&)
 
 
 
-void LightSky::doIntersect(const Sample&, const BoundedRay&, Intersection& result) const
+void LightSky::doIntersect(const Sample&, const BoundedRay& ray, Intersection& result) const
 {
-	result = Intersection(this, TNumTraits::max, seLeaving);
+	if (ray.nearLimit() < ray.farLimit())
+	{
+		result = Intersection(this, ray.farLimit(), seLeaving);
+	}
+	else
+	{
+		result = Intersection::empty();
+	}
 }
 
 
@@ -279,7 +284,7 @@ const XYZ LightSky::doSampleEmission(
 
 const XYZ LightSky::doSampleEmission(
 		const Sample&, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
-		const TAabb3D&, BoundedRay& emissionRay, TScalar& pdf) const
+		BoundedRay& emissionRay, TScalar& pdf) const
 {
 	TScalar i, j, pdfA;
 	sampleMap(lightSampleA, i, j, pdfA);
@@ -302,7 +307,7 @@ const XYZ LightSky::doSampleEmission(
 
 
 
-const XYZ LightSky::doTotalPower(const TAabb3D&) const
+const XYZ LightSky::doTotalPower() const
 {
 	return power_;
 }
@@ -337,6 +342,15 @@ void LightSky::doSetLightState(const TPyObjectPtr& state)
 
 
 
+void LightSky::init(const TTexturePtr& radiance)
+{
+	setRadiance(radiance);
+	setNumberOfEmissionSamples(1);
+	setSamplingResolution(TResolution2D(512, 512));
+}
+
+
+
 void LightSky::buildPdf(TMap& pdf, TXYZMap& radianceMap, XYZ& power, util::ProgressIndicator& progress) const
 {
 	Sample dummy;
@@ -353,7 +367,7 @@ void LightSky::buildPdf(TMap& pdf, TXYZMap& radianceMap, XYZ& power, util::Progr
 		{
 			const TScalar fj = static_cast<TScalar>(j) + .5f;
 			const XYZ radiance = lookUpRadiance(dummy, fi, fj);
-			const TScalar projectedArea = portal_->area(direction(fi, fj));
+			const TScalar projectedArea = portal_ ? portal_->area(direction(fi, fj)) : TNumTraits::pi;
 			const XYZ intensity = radiance * projectedArea;
 			radMap[i * resolution_.y + j] = radiance;
 			tempPdf[i * resolution_.y + j] = intensity.absTotal();

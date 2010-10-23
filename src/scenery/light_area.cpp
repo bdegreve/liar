@@ -248,7 +248,7 @@ const XYZ LightArea::doSampleEmission(
 
 const XYZ LightArea::doSampleEmission(
 		const Sample&, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
-		const TAabb3D&, BoundedRay& emissionRay, TScalar& pdf) const
+		BoundedRay& emissionRay, TScalar& pdf) const
 {
 	TVector3D originNormal;
 	TScalar originPdf;
@@ -269,7 +269,7 @@ const XYZ LightArea::doSampleEmission(
 
 
 
-const XYZ LightArea::doTotalPower(const TAabb3D&) const
+const XYZ LightArea::doTotalPower() const
 {
 	return (TNumTraits::pi * surface_->area()) * radiance_;
 }

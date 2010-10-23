@@ -26,6 +26,7 @@
 // keep in alphabetical order please! [Bramz]
 //
 //#include "aabb_tree.h"
+#include "box.h"
 #include "clip_map.h"
 #include "csg.h"
 #include "disk.h"
@@ -57,6 +58,7 @@ PY_DECLARE_MODULE_DOC(scenery, "LiAR scene objects")
 //
 PY_MODULE_CLASS(scenery, AabbTree)
 PY_MODULE_CLASS(scenery, AabpTree)
+PY_MODULE_CLASS(scenery, Box)
 PY_MODULE_CLASS(scenery, ClipMap)
 PY_MODULE_CLASS(scenery, Csg)
 PY_MODULE_CLASS(scenery, Disk)

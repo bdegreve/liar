@@ -25,6 +25,7 @@
 #include "fog.h"
 #include "../kernel/sample.h"
 #include <lass/prim/impl/plane_3d_impl_detail.h>
+#include <lass/num/distribution_transformations.h>
 
 namespace liar
 {
@@ -126,47 +127,34 @@ size_t Fog::doNumScatterSamples() const
 
 const XYZ Fog::doTransmittance(const BoundedRay& ray) const
 {
-	const TScalar t = ray.farLimit() - ray.nearLimit();
-	LASS_ASSERT(t >= 0 && extinction_ >= 0);
-	return XYZ(num::exp(extinction_ * -t)); 
+	const TScalar d = ray.farLimit() - ray.nearLimit();
+	LASS_ASSERT(d >= 0 && extinction_ >= 0);
+	const TScalar thickness = extinction_ * d;
+	return XYZ(num::exp(-thickness)); 
 }
 
 
 
 const XYZ Fog::doScatterOut(const BoundedRay& ray) const
 {
-	const TScalar t = ray.farLimit() - ray.nearLimit();
-	LASS_ASSERT(t >= 0 && extinction_ >= 0);
-	return XYZ(extinction_ * num::exp(extinction_ * -t)); 
+	return extinction_ * transmittance(ray);
 }
 
-
-namespace temp
-{
-
-template <typename T>
-T uniformToExponential(T uniform, T sigma, T& pdf)
-{
-	pdf *= (1 - uniform) * sigma;
-	return sigma > 0 ? (-num::log(std::max<TScalar>(0, 1 - uniform)) / sigma) : TNumTraits::infinity;
-}
-
-}
 
 
 const XYZ Fog::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	const TScalar dMax = ray.farLimit() - ray.nearLimit();
-	const TScalar cdfMax = 1 - num::exp(-extinction_ * dMax);
-	if (cdfMax <= 0)
+	const TScalar attMax = 1 - num::exp(-extinction_ * dMax);
+	if (attMax <= 0)
 	{
 		pdf = 0;
 		return XYZ();
 	}
-	TScalar p = 1;
-	const TScalar d = temp::uniformToExponential(sample * cdfMax, extinction_, pdf);
+	TScalar p;
+	const TScalar d = num::uniformToExponential(sample * attMax, extinction_, p);
 	tScatter = std::min(ray.nearLimit() + d, ray.farLimit());
-	pdf = p / cdfMax;
+	pdf = p / attMax;
 	return XYZ(p);
 }
 
@@ -175,7 +163,7 @@ const XYZ Fog::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRa
 {
 	pdf = 1;
 	const TScalar dMax = ray.farLimit() - ray.nearLimit();
-	const TScalar d = temp::uniformToExponential(sample, extinction_, pdf);
+	const TScalar d = num::uniformToExponential(sample, extinction_, pdf);
 	if (d > dMax)
 	{
 		// full transmission

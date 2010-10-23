@@ -29,8 +29,6 @@ namespace liar
 namespace kernel
 {
 
-util::CriticalSection LightContext::lock_;
-
 // --- public --------------------------------------------------------------------------------------
 
 LightContext::LightContext(const TObjectPath& objectPathToLight, const SceneLight& light):
@@ -56,11 +54,7 @@ LightContext::LightContext(const TObjectPath& objectPathToLight, const SceneLigh
 
 void LightContext::setSceneBound(const TAabb3D& bound, const TimePeriod& period)
 {
-	setTime(period.begin());
-	const TAabb3D beginBound = transform(bound, worldToLocal_);
-	setTime(period.end());
-	const TAabb3D endBound = transform(bound, worldToLocal_);
-	localBound_ = beginBound + endBound;
+	//light_->setSceneBound(bound, period);
 }
 
 
@@ -70,7 +64,7 @@ void LightContext::requestSamples(const TSamplerPtr& sampler)
 	const size_t n = light_->numberOfEmissionSamples();
 	idLightSamples_ = sampler->requestSubSequence2D(n);
 	idBsdfSamples_ = sampler->requestSubSequence2D(n);
-	idBsdfComponentSamples_ = sampler->requestSubSequence1D(n);
+	idBsdfComponentSamples_ = sampler->requestSubSequence1D(sampler->subSequenceSize2D(idBsdfSamples_));
 }
 
 
@@ -127,8 +121,7 @@ const XYZ LightContext::sampleEmission(
 	setTime(cameraSample.time());
 
 	BoundedRay localRay;
-	const XYZ radiance = light_->sampleEmission(
-		cameraSample, lightSampleA, lightSampleB, localBound_, localRay, pdf);
+	const XYZ radiance = light_->sampleEmission(cameraSample, lightSampleA, lightSampleB, localRay, pdf);
 	
 	emissionRay = transform(localRay, localToWorld_);
 	return radiance;
@@ -156,7 +149,7 @@ const XYZ LightContext::emission(
 
 const XYZ LightContext::totalPower() const
 {
-	return light_->totalPower(localBound_);
+	return light_->totalPower();
 }
 
 
@@ -175,21 +168,20 @@ bool LightContext::isSingular() const
 
 // --- private -------------------------------------------------------------------------------------
 
+/** THREAD UNSAFE
+ */
 void LightContext::setTime(TTime time) const
 {
 	if ((hasMotion_ && time != timeOfTransformation_) || num::isNaN(timeOfTransformation_))
 	{
-		LASS_LOCK(lock_)
+		TTransformation3D temp;
+		for (TObjectPath::const_iterator i = objectPath_.begin(); i != objectPath_.end(); ++i)
 		{
-			TTransformation3D temp;
-			for (TObjectPath::const_iterator i = objectPath_.begin(); i != objectPath_.end(); ++i)
-			{
-				(*i)->localSpace(time, temp);
-			}
-			localToWorld_.swap(temp);
-			worldToLocal_ = localToWorld_.inverse();
-			timeOfTransformation_ = time;
+			(*i)->localSpace(time, temp);
 		}
+		localToWorld_.swap(temp);
+		worldToLocal_ = localToWorld_.inverse();
+		timeOfTransformation_ = time;
 	}
 }
 

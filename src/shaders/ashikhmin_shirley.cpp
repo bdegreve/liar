@@ -159,57 +159,19 @@ size_t AshikhminShirley::doNumReflectionSamples() const
 	return numberOfSamples_;
 }
 
-void AshikhminShirley::doBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn, 
-		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
+
+
+TBsdfPtr AshikhminShirley::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
 	const XYZ Rd = diffuse_->lookUp(sample, context);
 	const XYZ Rs = specular_->lookUp(sample, context);
 	const TScalar nu = positiveAverage(specularPowerU_->lookUp(sample, context));
 	const TScalar nv = positiveAverage(specularPowerV_->lookUp(sample, context));
-	const TScalar rd = positiveAverage(Rd);
-	const TScalar rs = positiveAverage(Rs);
-
-	const TVector3D& k1 = omegaIn;
-	LASS_ASSERT(k1.z > 0);
-	const TScalar a = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k1.z / 2));
-	const XYZ rhoA = Rd * (1 - Rs) * (a * 28.f / (23.f * TNumTraits::pi));
-	const TScalar c = num::sqrt((nu + 1) * (nv + 1)) / (8 * TNumTraits::pi);
-
-	while (first != last)
-	{
-		const bool doDiffuse = kernel::hasCaps(first->allowedCaps, Bsdf::capsReflection | Bsdf::capsDiffuse);
-		const bool doGlossy = kernel::hasCaps(first->allowedCaps, Bsdf::capsReflection | Bsdf::capsGlossy);
-		const TScalar pd = doDiffuse ? rd : 0;
-		const TScalar ps = doGlossy ? rs : 0;
-		const TScalar ptot = pd + ps;
-
-		const TVector3D& k2 = first->omegaOut;
-		if (k2.z > 0 && ptot > 0)
-		{
-			if (doDiffuse)
-			{
-				const TScalar b = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k2.z / 2));
-				result->value += rhoA * b;
-				result->pdf += (pd * k2.z) / (TNumTraits::pi * ptot);
-			}
-			if (doGlossy)
-			{
-				const TVector3D h = (k1 + k2).normal();
-				const TScalar n = nu * num::sqr(h.x) + nv * num::sqr(h.y);
-				const TScalar nn = h.z == 1 ? 0 : n / (1 - num::sqr(h.z));
-				const TScalar hk = dot(h, k1);
-				const XYZ F = Rs + (1 - Rs) * temp::pow5(1 - hk);
-				result->value += F * (c * num::pow(h.z, nn) / (hk * std::max(k1.z, k2.z)));
-				const TScalar pdfH = 4 * c * num::pow(h.z, n);
-				result->pdf += (ps * pdfH) / (4 * hk * ptot);
-			}
-		}
-		++first;
-		++result;
-	}
+	return TBsdfPtr(new Bsdf(sample, context, Rd, Rs, nu, nv));
 }
 
+
+/*
 namespace temp
 {
 
@@ -245,95 +207,7 @@ inline TScalar cutoffHeuristic(TScalar p1, TScalar p2, TScalar alpha)
 }
 
 }
-
-void AshikhminShirley::doSampleBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn, 
-		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
-{	
-	const XYZ Rd = diffuse_->lookUp(sample, context);
-	const XYZ Rs = specular_->lookUp(sample, context);
-	const TScalar nu = positiveAverage(specularPowerU_->lookUp(sample, context));
-	const TScalar nv = positiveAverage(specularPowerV_->lookUp(sample, context));
-	const TScalar rd = positiveAverage(Rd);
-	const TScalar rs = positiveAverage(Rs);
-
-	const TVector3D& k1 = omegaIn;
-	LASS_ASSERT(k1.z > 0);
-	const TScalar a = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k1.z / 2));
-	const XYZ rhoA = Rd * (1 - Rs) * (a * 28.f / (23.f * TNumTraits::pi));
-	const TScalar c = num::sqrt((nu + 1) * (nv + 1)) / (8 * TNumTraits::pi);
-
-	while (first != last)
-	{
-		const bool doDiffuse = kernel::hasCaps(first->allowedCaps, Bsdf::capsReflection | Bsdf::capsDiffuse);
-		const bool doGlossy = kernel::hasCaps(first->allowedCaps, Bsdf::capsReflection | Bsdf::capsGlossy);
-		TScalar pd = doDiffuse ? rd : 0;
-		TScalar ps = doGlossy ? rs : 0;
-		const TScalar ptot = pd + ps;
-		if (ptot > 0)
-		{
-			pd /= ptot;
-			ps /= ptot;
-
-			TVector3D h, k2;
-			bool pdfIsDiffuse = false;
-			TPoint2D bsdfSample = first->sample;
-			if (bsdfSample.x < pd)
-			{
-				bsdfSample.x /= pd;
-				TScalar pdf;
-				k2 = num::cosineHemisphere(bsdfSample, pdf).position();
-				h = (k1 + k2).normal();
-				pdfIsDiffuse = true;
-			}
-			else
-			{
-				LASS_ASSERT(ps > 0);
-				bsdfSample.x = (bsdfSample.x - pd) / ps;
-				h = sampleH(bsdfSample, nu, nv);
-				k2 = h.reflect(k1);
-			}
-			result->omegaOut = k2;
-
-			if (k2.z > 0)
-			{
-				TScalar pdfD = 0;
-				if (doDiffuse)
-				{
-					const TScalar b = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k2.z / 2));
-					result->value += rhoA * b;
-					pdfD = k2.z / TNumTraits::pi;
-				}
-				TScalar pdfS = 0;
-				if (doGlossy)
-				{
-					const TScalar n = nu * num::sqr(h.x) + nv * num::sqr(h.y);
-					const TScalar nn = h.z == 1 ? 0 : n / (1 - num::sqr(h.z));
-					const TScalar hk = dot(h, k1);
-					const XYZ F = Rs + (1 - Rs) * temp::pow5(1 - hk);
-					result->value += F * (c * num::pow(h.z, nn) / (hk * std::max(k1.z, k2.z)));
-					const TScalar pdfH = 4 * c * num::pow(h.z, n);
-					pdfS = pdfH / (4 * hk);
-				}
-				if (pdfIsDiffuse)
-				{
-					result->value *= temp::maximumHeuristic(pdfD, pdfS);
-					result->pdf = pd * pdfD;
-					result->usedCaps = Bsdf::capsReflection | Bsdf::capsDiffuse;
-				}
-				else
-				{
-					result->value *= temp::maximumHeuristic(pdfS, pdfD);
-					result->pdf = ps * pdfS;
-					result->usedCaps = Bsdf::capsReflection | Bsdf::capsGlossy;
-				}
-			}
-		}
-		++first;
-		++result;
-	}
-}
-
+*/
 
 
 const TPyObjectPtr AshikhminShirley::doGetState() const
@@ -352,10 +226,110 @@ void AshikhminShirley::doSetState(const TPyObjectPtr& iState)
 
 
 
-const TVector3D AshikhminShirley::sampleH(const TPoint2D& sample, 
-		TScalar nu, TScalar nv/*, TScalar& pdf*/) const
+AshikhminShirley::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, const XYZ& diffuse, const XYZ& specular, TScalar powerU, TScalar powerV):
+	kernel::Bsdf(sample, context, Bsdf::capsReflection | Bsdf::capsDiffuse | Bsdf::capsGlossy),
+	diffuse_(diffuse),
+	specular_(specular),
+	powerU_(powerU),
+	powerV_(powerV)
 {
-	const TScalar f = num::sqrt((nu + 1) / (nv + 1));
+}
+
+
+
+BsdfOut AshikhminShirley::Bsdf::doCall(const TVector3D& k1, const TVector3D& k2, TBsdfCaps allowedCaps) const
+{
+	LASS_ASSERT(k1.z > 0);
+	if (k2.z <= 0)
+	{
+		return BsdfOut();
+	}
+	const TScalar pd = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsDiffuse) ? diffuse_.absTotal() : 0;
+	const TScalar ps = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsGlossy) ? specular_.absTotal() : 0;
+	LASS_ASSERT(pd >= 0 && ps >= 0);
+	const TScalar ptot = pd + ps;
+
+	BsdfOut out;
+	if (ps > 0)
+	{
+		const TVector3D h = (k1 + k2).normal();
+		out.value = rhoS(k1, k2, h, out.pdf);
+		out.pdf *= ps / ptot;
+	}
+	if (pd > 0)
+	{
+		out.value += rhoD(k1, k2);
+		out.pdf += pd * k2.z / (ptot * TNumTraits::pi);
+	}
+	return out;
+}
+
+
+
+SampleBsdfOut AshikhminShirley::Bsdf::doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const
+{
+	LASS_ASSERT(k1.z > 0);
+	TScalar pd = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsDiffuse) ? diffuse_.absTotal() : 0;
+	TScalar ps = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsGlossy) ? specular_.absTotal() : 0;
+	const TScalar ptot = pd + ps;
+	if (ptot <= 0)
+	{
+		return SampleBsdfOut();
+	}
+	pd /= ptot;
+	ps /= ptot;
+
+	SampleBsdfOut out;
+	if (componentSample < pd)
+	{
+		out.omegaOut = num::cosineHemisphere(sample, out.pdf).position();
+		out.pdf *= pd;
+		out.value = rhoD(k1, out.omegaOut);
+		out.usedCaps = Bsdf::capsReflection | Bsdf::capsDiffuse;
+	}
+	else
+	{
+		LASS_ASSERT(ps > 0);
+		const TVector3D h = sampleH(sample);
+		out.omegaOut = h.reflect(k1);
+		if (out.omegaOut.z > 0)
+		{
+			out.value = rhoS(k1, out.omegaOut, h, out.pdf);
+			out.pdf *= ps;
+		}
+		out.usedCaps = Bsdf::capsReflection | Bsdf::capsGlossy;
+	}
+	return out;
+}
+
+
+
+const XYZ AshikhminShirley::Bsdf::rhoD(const TVector3D& k1, const TVector3D& k2) const
+{
+	const TScalar a = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k1.z / 2));
+	const TScalar b = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k2.z / 2));
+	return diffuse_ * (1 - specular_) * (a * b * 28.f / (23.f * TNumTraits::pi));
+}
+
+
+
+const XYZ AshikhminShirley::Bsdf::rhoS(const TVector3D& k1, const TVector3D& k2, const TVector3D& h, TScalar& pdf) const
+{
+	const TScalar c = num::sqrt((powerU_ + 1) * (powerV_ + 1)) / (8 * TNumTraits::pi);
+	const TScalar n = powerU_ * num::sqr(h.x) + powerV_ * num::sqr(h.y);
+	const TScalar nn = h.z == 1 ? 0 : n / (1 - num::sqr(h.z));
+	const TScalar hk = dot(h, k1);
+	const XYZ F = specular_ + (1 - specular_) * temp::pow5(1 - hk);
+	const TScalar pdfH = 4 * c * num::pow(h.z, n);
+	pdf = pdfH / (4 * hk);
+	return F * (c * num::pow(h.z, nn) / (hk * std::max(k1.z, k2.z)));
+}
+
+
+
+const TVector3D AshikhminShirley::Bsdf::sampleH(const TPoint2D& sample) const
+{
+	const TScalar f = num::sqrt((powerU_ + 1) / (powerV_ + 1));
 	TScalar phi;
 	if (sample.x < .5f)
 	{
@@ -365,36 +339,33 @@ const TVector3D AshikhminShirley::sampleH(const TPoint2D& sample,
 		}
 		else
 		{
-			phi = TNumTraits::pi - num::atan(
-				f * num::tan(2 * TNumTraits::pi * (.5f - sample.x)));
+			phi = TNumTraits::pi - num::atan(f * num::tan(2 * TNumTraits::pi * (.5f - sample.x)));
 		}
 	}
 	else
 	{
 		if (sample.x < .75f)
 		{
-			phi = TNumTraits::pi + num::atan(
-				f * num::tan(2 * TNumTraits::pi * (sample.x - .5f))); 
+			phi = TNumTraits::pi + num::atan(f * num::tan(2 * TNumTraits::pi * (sample.x - .5f))); 
 		}
 		else
 		{
-			phi = 2 * TNumTraits::pi - num::atan(
-				f * num::tan(2 * TNumTraits::pi * (1.f - sample.x))); 
+			phi = 2 * TNumTraits::pi - num::atan(f * num::tan(2 * TNumTraits::pi * (1.f - sample.x))); 
 		}
 	}
+
 	const TScalar cosPhi = num::cos(phi);
 	const TScalar sinPhi = num::sin(phi);
-	
-	const TScalar n = nu * num::sqr(cosPhi) + nv * num::sqr(sinPhi);
+	const TScalar n = powerU_ * num::sqr(cosPhi) + powerV_ * num::sqr(sinPhi);
 
 	const TScalar cosTheta = std::pow(1 - sample.y, num::inv(n + 1));
 	const TScalar sinTheta = num::sqrt(std::max(TNumTraits::zero, 1 - num::sqr(cosTheta)));
-
-	//pdf = num::sqrt((nu + 1) * (nv + 1)) / (2 * TNumTraits::pi) * num::pow(cosTheta, n);
 	return TVector3D(cosPhi * sinTheta, sinPhi * sinTheta, cosTheta);
 }
 
+
 // --- free ----------------------------------------------------------------------------------------
+
 
 
 

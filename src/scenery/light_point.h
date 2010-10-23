@@ -71,9 +71,9 @@ private:
 			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
 			BoundedRay& shadowRay, TScalar& pdf) const;
 	const XYZ doSampleEmission(
-			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, const TAabb3D& sceneBound, 
+			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 			BoundedRay& emissionRay, TScalar& pdf) const;
-	const XYZ doTotalPower(const TAabb3D& sceneBound) const;
+	const XYZ doTotalPower() const;
 	size_t doNumberOfEmissionSamples() const;
 	bool doIsSingular() const;
 
