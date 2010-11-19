@@ -389,7 +389,7 @@ class PbrtScene(object):
 			shader.origin = p0
 		except AttributeError:
 			pass
-		self.__volume = liar.mediums.BoundedMedium(shader, (p0, p1))
+		self.__volume = liar.mediums.Bounded(shader, (p0, p1))
 	
 	def _volume_exponential(self, sigma_a=0, sigma_s=0, g=0, Le=0, a=1, b=1, updir=(0,1,0)):
 		# let's start off with a simple one ...

@@ -21,13 +21,13 @@
  *  http://liar.bramz.net/
  */
 
-/** @class liar::mediums::Beer
- *  @brief foggy smoky media ...
+/** @class liar::mediums::Bounded
+ *  @brief bounds a medium with an AABB
  *  @author Bram de Greve [Bramz]
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_MEDIUMS_BOUNDED_MEDIUM_H
-#define LIAR_GUARDIAN_OF_INCLUSION_MEDIUMS_BOUNDED_MEDIUM_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_MEDIUMS_BOUNDED_H
+#define LIAR_GUARDIAN_OF_INCLUSION_MEDIUMS_BOUNDED_H
 
 #include "mediums_common.h"
 #include "../kernel/medium.h"
@@ -37,16 +37,16 @@ namespace liar
 namespace mediums
 {
 
-class LIAR_MEDIUMS_DLL BoundedMedium: public Medium
+class LIAR_MEDIUMS_DLL Bounded: public Medium
 {
 	PY_HEADER(Medium)
 public:
 
-	BoundedMedium();
-	BoundedMedium(const TMediumPtr& medium, const TAabb3D& bounds);
+	Bounded();
+	Bounded(const TMediumPtr& child, const TAabb3D& bounds);
 
-	const TMediumPtr& medium() const;
-	void setMedium(const TMediumPtr& medium);
+	const TMediumPtr& child() const;
+	void setChild(const TMediumPtr& child);
 
 	const TAabb3D& bounds() const;
 	void setBounds(const TAabb3D& bounds);
@@ -63,7 +63,7 @@ private:
 
 	bool bound(const BoundedRay& ray, BoundedRay& bounded) const;
 
-	TMediumPtr medium_;
+	TMediumPtr child_;
 	TAabb3D bounds_;
 };
 

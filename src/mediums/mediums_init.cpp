@@ -26,7 +26,7 @@
 // keep in alphabetical order please! [Bramz]
 //
 #include "beer.h"
-#include "bounded_medium.h"
+#include "bounded.h"
 #include "exponential_fog.h"
 #include "fog.h"
 
@@ -37,7 +37,7 @@ PY_DECLARE_MODULE_DOC(mediums, "volume shaders for LiAR")
 // keep in alphabetical order please! [Bramz]
 //
 PY_MODULE_CLASS(mediums, Beer)
-PY_MODULE_CLASS(mediums, BoundedMedium)
+PY_MODULE_CLASS(mediums, Bounded)
 PY_MODULE_CLASS(mediums, Fog)
 	PY_MODULE_CLASS(mediums, ExponentialFog)
 

@@ -22,56 +22,56 @@
  */
 
 #include "mediums_common.h"
-#include "bounded_medium.h"
+#include "bounded.h"
 
 namespace liar
 {
 namespace mediums
 {
 
-PY_DECLARE_CLASS_DOC(BoundedMedium, "")
-PY_CLASS_CONSTRUCTOR_0(BoundedMedium)
-PY_CLASS_CONSTRUCTOR_2(BoundedMedium, const TMediumPtr&, const TAabb3D&)
-PY_CLASS_MEMBER_RW(BoundedMedium, medium, setMedium)
-PY_CLASS_MEMBER_RW(BoundedMedium, bounds, setBounds)
+PY_DECLARE_CLASS_DOC(Bounded, "")
+PY_CLASS_CONSTRUCTOR_0(Bounded)
+PY_CLASS_CONSTRUCTOR_2(Bounded, const TMediumPtr&, const TAabb3D&)
+PY_CLASS_MEMBER_RW(Bounded, child, setChild)
+PY_CLASS_MEMBER_RW(Bounded, bounds, setBounds)
 
 // --- public --------------------------------------------------------------------------------------
 
-BoundedMedium::BoundedMedium()
+Bounded::Bounded()
 {
 }
 
 
 
-BoundedMedium::BoundedMedium(const TMediumPtr& medium, const TAabb3D& bounds):
-	medium_(medium), bounds_(bounds)
+Bounded::Bounded(const TMediumPtr& child, const TAabb3D& bounds):
+	child_(child), bounds_(bounds)
 {
 }
 
 
 
-const TMediumPtr& BoundedMedium::medium() const
+const TMediumPtr& Bounded::child() const
 {
-	return medium_;
+	return child_;
 }
 
 
 
-void BoundedMedium::setMedium(const TMediumPtr& medium)
+void Bounded::setChild(const TMediumPtr& child)
 {
-	medium_ = medium;
+	child_ = child;
 }
 
 
 
-const TAabb3D& BoundedMedium::bounds() const
+const TAabb3D& Bounded::bounds() const
 {
 	return bounds_;
 }
 
 
 
-void BoundedMedium::setBounds(const TAabb3D& bounds)
+void Bounded::setBounds(const TAabb3D& bounds)
 {
 	bounds_ = bounds;
 }
@@ -85,101 +85,101 @@ void BoundedMedium::setBounds(const TAabb3D& bounds)
 
 // --- private -------------------------------------------------------------------------------------
 
-size_t BoundedMedium::doNumScatterSamples() const
+size_t Bounded::doNumScatterSamples() const
 {
-	return medium_ ? medium_->numScatterSamples() : 0;
+	return child_ ? child_->numScatterSamples() : 0;
 }
 
 
 
-const XYZ BoundedMedium::doTransmittance(const BoundedRay& ray) const
+const XYZ Bounded::doTransmittance(const BoundedRay& ray) const
 {
 	BoundedRay bounded;
-	if (!medium_ || !bound(ray, bounded))
+	if (!child_ || !bound(ray, bounded))
 	{
 		return XYZ(1);
 	}
-	return medium_->transmittance(bounded);
+	return child_->transmittance(bounded);
 }
 
 
 
-const XYZ BoundedMedium::doEmission(const BoundedRay& ray) const
+const XYZ Bounded::doEmission(const BoundedRay& ray) const
 {
 	BoundedRay bounded;
-	if (!medium_ || !bound(ray, bounded))
+	if (!child_ || !bound(ray, bounded))
 	{
 		return XYZ(0);
 	}
-	return medium_->emission(bounded);
+	return child_->emission(bounded);
 }
 
 
 
-const XYZ BoundedMedium::doScatterOut(const BoundedRay& ray) const
+const XYZ Bounded::doScatterOut(const BoundedRay& ray) const
 {
 	BoundedRay bounded;
-	if (!medium_ || !bound(ray, bounded))
+	if (!child_ || !bound(ray, bounded))
 	{
 		return XYZ(0);
 	}
-	return medium_->scatterOut(bounded);
+	return child_->scatterOut(bounded);
 }
 
 
 
-const XYZ BoundedMedium::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const XYZ Bounded::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	BoundedRay bounded;
-	if (!medium_ || !bound(ray, bounded))
+	if (!child_ || !bound(ray, bounded))
 	{
 		pdf = 0;
 		return XYZ(0);
 	}
-	return medium_->sampleScatterOut(sample, bounded, tScatter, pdf);
+	return child_->sampleScatterOut(sample, bounded, tScatter, pdf);
 }
 
 
 
-const XYZ BoundedMedium::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const XYZ Bounded::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	BoundedRay bounded;
-	if (!medium_ || !bound(ray, bounded))
+	if (!child_ || !bound(ray, bounded))
 	{
 		tScatter = ray.farLimit();
 		pdf = 1;
 		return XYZ(1);
 	}
-	return medium_->sampleScatterOutOrTransmittance(sample, bounded, tScatter, pdf);
+	return child_->sampleScatterOutOrTransmittance(sample, bounded, tScatter, pdf);
 }
 
 
-const XYZ BoundedMedium::doPhase(const TPoint3D& pos, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
+const XYZ Bounded::doPhase(const TPoint3D& pos, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
 {
-	if (!medium_ || !bounds_.contains(pos))
+	if (!child_ || !bounds_.contains(pos))
 	{
 		pdf = 0;
 		return XYZ(0);
 	}
-	return medium_->phase(pos, dirIn, dirOut, pdf);
+	return child_->phase(pos, dirIn, dirOut, pdf);
 }
 
 
 
-const XYZ BoundedMedium::doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
+const XYZ Bounded::doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
 {
-	if (!medium_ || !bounds_.contains(position))
+	if (!child_ || !bounds_.contains(position))
 	{
 		pdf = 0;
 		dirOut = dirIn;
 		return XYZ(0);
 	}
-	return medium_->samplePhase(sample, position, dirIn, dirOut, pdf);
+	return child_->samplePhase(sample, position, dirIn, dirOut, pdf);
 }
 
 
 
-bool BoundedMedium::bound(const BoundedRay& ray, BoundedRay& bounded) const
+bool Bounded::bound(const BoundedRay& ray, BoundedRay& bounded) const
 {
 	TScalar tNear;
 	if (prim::intersect(bounds_, ray.unboundedRay(), tNear, ray.nearLimit()) == prim::rNone)

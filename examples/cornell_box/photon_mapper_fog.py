@@ -65,7 +65,7 @@ engine.tracer = photonMapper
 engine.tracer = tracers.DirectLighting()
 engine.sampler = samplers.Stratifier((width, height), super_sampling)
 engine.scene = scenery.List(walls + blocks +  lights)
-engine.scene.interior = mediums.BoundedMedium(fog, engine.scene.boundingBox())
+engine.scene.interior = mediums.Bounded(fog, engine.scene.boundingBox())
 engine.camera = camera
 engine.target = output.Splitter([image, display])
 engine.render()
