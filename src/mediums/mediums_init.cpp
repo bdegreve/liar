@@ -21,47 +21,35 @@
  *  http://liar.bramz.net/
  */
 
-#include "shaders_common.h"
+#include "mediums_common.h"
 
 // keep in alphabetical order please! [Bramz]
 //
-#include "ashikhmin_shirley.h"
-#include "bump_mapping.h"
-#include "dielectric.h"
-#include "lambert.h"
-#include "mirror.h"
-//#include "null_shader.h"
-//#include "simple.h"
-#include "sum.h"
-#include "thin_dielectric.h"
-#include "unshaded.h"
+#include "beer.h"
+#include "bounded_medium.h"
+#include "exponential_fog.h"
+#include "fog.h"
 
-using namespace liar::shaders;
+using namespace liar::mediums;
 
-PY_DECLARE_MODULE_DOC(shaders, "surface shaders for LiAR")
+PY_DECLARE_MODULE_DOC(mediums, "volume shaders for LiAR")
 
 // keep in alphabetical order please! [Bramz]
 //
-PY_MODULE_CLASS(shaders, AshikhminShirley)
-PY_MODULE_CLASS(shaders, BumpMapping)
-PY_MODULE_CLASS(shaders, Dielectric)
-PY_MODULE_CLASS(shaders, Lambert)
-PY_MODULE_CLASS(shaders, Mirror)
-//PY_MODULE_CLASS(shaders, NullShader)
-//PY_MODULE_CLASS(shaders, Simple)
-PY_MODULE_CLASS(shaders, Sum)
-PY_MODULE_CLASS(shaders, ThinDielectric)
-PY_MODULE_CLASS(shaders, Unshaded)
+PY_MODULE_CLASS(mediums, Beer)
+PY_MODULE_CLASS(mediums, BoundedMedium)
+PY_MODULE_CLASS(mediums, Fog)
+	PY_MODULE_CLASS(mediums, ExponentialFog)
 
-void shadersPostInject(PyObject*)
+void mediumsPostInject(PyObject*)
 {
-	LASS_COUT << "liar.shaders imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n";
+	LASS_COUT << "liar.mediums imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n";
 }
 
 LASS_EXECUTE_BEFORE_MAIN(
-	shaders.setPostInject(shadersPostInject);
+	mediums.setPostInject(mediumsPostInject);
 	)
 
-PY_MODULE_ENTRYPOINT(shaders)
+PY_MODULE_ENTRYPOINT(mediums)
 
 // EOF

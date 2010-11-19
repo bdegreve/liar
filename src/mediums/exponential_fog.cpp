@@ -21,13 +21,13 @@
  *  http://liar.bramz.net/
  */
 
-#include "shaders_common.h"
+#include "mediums_common.h"
 #include "exponential_fog.h"
 #include <lass/num/distribution_transformations.h>
 
 namespace liar
 {
-namespace shaders
+namespace mediums
 {
 
 PY_DECLARE_CLASS_DOC(ExponentialFog, "")

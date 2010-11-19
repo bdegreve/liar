@@ -38,6 +38,7 @@ else:
 from liar.kernel import *
 import liar.cameras
 import liar.codecs
+import liar.mediums
 import liar.output
 import liar.samplers
 import liar.scenery

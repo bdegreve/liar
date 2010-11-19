@@ -21,23 +21,23 @@
  *  http://liar.bramz.net/
  */
 
-/** @class liar::shaders::Beer
+/** @class liar::mediums::Beer
  *  @brief Not a "beer" medium, but a "Beer's law medium" ;)
  *  @author Bram de Greve [Bramz]
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_BEER_H
-#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_BEER_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_MEDIUMS_BEER_H
+#define LIAR_GUARDIAN_OF_INCLUSION_MEDIUMS_BEER_H
 
-#include "shaders_common.h"
+#include "mediums_common.h"
 #include "../kernel/medium.h"
 
 namespace liar
 {
-namespace shaders
+namespace mediums
 {
 
-class LIAR_SHADERS_DLL Beer: public Medium
+class LIAR_MEDIUMS_DLL Beer: public Medium
 {
     PY_HEADER(Medium)
 public:

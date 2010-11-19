@@ -21,62 +21,55 @@
  *  http://liar.bramz.net/
  */
 
-/** @class liar::shaders::Beer
- *  @brief foggy smoky media ...
+/** @class liar::mediums::Exponential
+ *  @brief Fog with exponentially decreasing density
  *  @author Bram de Greve [Bramz]
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_FOG_H
-#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_FOG_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_MEDIUMS_EXPONENTIAL_H
+#define LIAR_GUARDIAN_OF_INCLUSION_MEDIUMS_EXPONENTIAL_H
 
-#include "shaders_common.h"
-#include "../kernel/medium.h"
+#include "mediums_common.h"
+#include "fog.h"
 
 namespace liar
 {
-namespace shaders
+namespace mediums
 {
 
-class LIAR_SHADERS_DLL Fog: public Medium
+class LIAR_MEDIUMS_DLL ExponentialFog: public Fog
 {
-	PY_HEADER(Medium)
+	PY_HEADER(Fog)
 public:
 
-	Fog();
-	Fog(TScalar extinction, TScalar assymetry);
+	ExponentialFog();
+	ExponentialFog(TScalar extinction, TScalar assymetry);
+	ExponentialFog(TScalar extinction, TScalar assymetry, TScalar decay);
 
-	TScalar extinction() const;
-	void setExtinction(TScalar extinction);
+	const TPoint3D& origin() const;
+	void setOrigin(const TPoint3D& origin);
 
-	TScalar assymetry() const;
-	void setAssymetry(TScalar g);
+	const TVector3D& up() const;
+	void setUp(const TVector3D& up);
 
-	const XYZ& color() const;
-	void setColor(const XYZ& color);
-
-	const XYZ& emission() const;
-	void setEmission(const XYZ& emission);
-
-	void setNumScatterSamples(size_t n);
+	TScalar decay() const;
+	void setDecay(TScalar decay);
 
 private:
 
-	size_t doNumScatterSamples() const;
 	const XYZ doTransmittance(const BoundedRay& ray) const;
 	const XYZ doEmission(const BoundedRay& ray) const;
 	const XYZ doScatterOut(const BoundedRay& ray) const;
 	const XYZ doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
 	const XYZ doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
-	const XYZ doPhase(const TPoint3D&, const TVector3D&, const TVector3D&, TScalar& pdf) const;
-	const XYZ doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const;
 
-	void init(TScalar extinction = 0, TScalar assymetry = 0, const XYZ& color = XYZ(1), const XYZ& emission = XYZ(0), size_t numSamples = 1);
+	void init(TScalar decay = 1);
+	TScalar alpha(const BoundedRay& ray) const;
+	TScalar beta(const BoundedRay& ray) const;
 
-	XYZ color_;
-	XYZ emission_;
-	TScalar extinction_;
-	TScalar assymetry_;
-	size_t numSamples_;
+	TPoint3D origin_;
+	TVector3D up_;
+	TScalar decay_;
 };
 
 }

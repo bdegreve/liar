@@ -21,7 +21,7 @@
  *  http://liar.bramz.net/
  */
 
-#include "shaders_common.h"
+#include "mediums_common.h"
 #include "fog.h"
 #include "../kernel/sample.h"
 #include <lass/prim/impl/plane_3d_impl_detail.h>
@@ -29,7 +29,7 @@
 
 namespace liar
 {
-namespace shaders
+namespace mediums
 {
 
 PY_DECLARE_CLASS_DOC(Fog, "")

@@ -21,12 +21,12 @@
  *  http://liar.bramz.net/
  */
 
-#include "shaders_common.h"
+#include "mediums_common.h"
 #include "bounded_medium.h"
 
 namespace liar
 {
-namespace shaders
+namespace mediums
 {
 
 PY_DECLARE_CLASS_DOC(BoundedMedium, "")

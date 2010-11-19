@@ -33,8 +33,8 @@ walls = geometry.getWalls()
 blocks = geometry.getBlocks()
 lights = geometry.getLights()
 
-fog = shaders.Fog()
-fog = shaders.ExponentialFog()
+fog = mediums.Fog()
+fog = mediums.ExponentialFog()
 fog.extinction = 4.5#.45
 fog.assymetry = 0
 fog.color = rgb(.5, .5, .5)
@@ -65,7 +65,7 @@ engine.tracer = photonMapper
 engine.tracer = tracers.DirectLighting()
 engine.sampler = samplers.Stratifier((width, height), super_sampling)
 engine.scene = scenery.List(walls + blocks +  lights)
-engine.scene.interior = shaders.BoundedMedium(fog, engine.scene.boundingBox())
+engine.scene.interior = mediums.BoundedMedium(fog, engine.scene.boundingBox())
 engine.camera = camera
 engine.target = output.Splitter([image, display])
 engine.render()
