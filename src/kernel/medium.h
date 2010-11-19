@@ -76,6 +76,11 @@ public:
 		return doTransmittance(ray); 
 	}
 
+	const XYZ emission(const BoundedRay& ray) const
+	{
+		return doEmission(ray);
+	}
+
 	const XYZ scatterOut(const BoundedRay& ray) const
 	{
 		return doScatterOut(ray); 
@@ -124,6 +129,7 @@ private:
 	virtual void doRequestSamples(const TSamplerPtr& sampler);
 	virtual size_t doNumScatterSamples() const;
 	virtual const XYZ doTransmittance(const BoundedRay& ray) const = 0;
+	virtual const XYZ doEmission(const BoundedRay& ray) const = 0;
 	virtual const XYZ doScatterOut(const BoundedRay& ray) const = 0;
 	virtual const XYZ doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const = 0;
 	virtual const XYZ doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const = 0;
@@ -149,7 +155,7 @@ public:
 	const XYZ transmittance(const BoundedRay& ray) const;
 	const XYZ transmittance(const BoundedRay& ray, TScalar farLimit) const;
 	const XYZ transmittance(const DifferentialRay& ray, TScalar farLimit) const;
-
+	const XYZ emission(const BoundedRay& ray) const;
 	const XYZ sampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
 	const XYZ sampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
 	const XYZ samplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dir, TScalar& pdf) const;

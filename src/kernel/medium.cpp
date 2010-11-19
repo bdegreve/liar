@@ -125,7 +125,7 @@ MediumStack::MediumStack(const TMediumPtr& defaultMedium):
 
 const XYZ MediumStack::transmittance(const BoundedRay& ray) const
 {
-	return medium() ? medium()->transmittance(ray) : XYZ(1, 1, 1);
+	return medium() ? medium()->transmittance(ray) : XYZ(1);
 }
 
 
@@ -140,6 +140,13 @@ const XYZ MediumStack::transmittance(const BoundedRay& ray, TScalar farLimit) co
 const XYZ MediumStack::transmittance(const DifferentialRay& ray, TScalar farLimit) const
 {
 	return transmittance(ray.centralRay(), farLimit);
+}
+
+
+
+const XYZ MediumStack::emission(const BoundedRay& ray) const
+{
+	return medium() ? medium()->emission(ray) : XYZ(0);
 }
 
 

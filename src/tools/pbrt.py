@@ -75,6 +75,7 @@ class PbrtScene(object):
 		self.CoordinateSystem("world")
 		self.__state = _STATE_WORLD_BLOCK
 		self.__area_light = None
+		self.__volume = None
 		self.__pushed_transforms = []
 		self.__pushed_states = []
 		self.__textures = {}
@@ -264,6 +265,7 @@ class PbrtScene(object):
 			self.__material = getattr(self, "_material_" + name)(**kwargs)
 		except AttributeError:
 			warnings.warn("unknown material %(name)r, defaulting to matte." % vars())
+			kwargs = _filter_dict(kwargs, lambda key: key in ('Kd', 'sigma'))
 			self.__material = self._material_matte(**kwargs)
 		if bumpmap:
 			self.__material = liar.shaders.BumpMapping(self.__material, self._get_texture(bumpmap))
@@ -383,13 +385,20 @@ class PbrtScene(object):
 	def Volume(self, name, p0=(0,0,0), p1=(1,1,1), **kwargs):
 		self.verify_world()
 		shader = getattr(self, "_volume_" + name)(**kwargs)
+		try:
+			shader.origin = p0
+		except AttributeError:
+			pass
 		self.__volume = liar.shaders.BoundedMedium(shader, (p0, p1))
 	
 	def _volume_exponential(self, sigma_a=0, sigma_s=0, g=0, Le=0, a=1, b=1, updir=(0,1,0)):
 		# let's start off with a simple one ...
-		extinction = _avg(sigma_a) + _avg(sigma_s)
-		fog = liar.shaders.Fog(extinction, g)
-		fog.color = _mul(sigma_s, 1 / extinction)
+		sigma_e = (_avg(sigma_a) + _avg(sigma_s))
+		fog = liar.shaders.ExponentialFog(a * sigma_e, g)
+		fog.emission = Le
+		fog.color = _mul(sigma_s, 1 / sigma_e)
+		fog.decay = b
+		fog.up = updir
 		return fog
 	
 	def LightSource(self, name, **kwargs):
@@ -414,7 +423,13 @@ class PbrtScene(object):
 		return liar.scenery.LightDirectional(direction, L)
 	
 	def _lightsource_infinite(self, L=(1, 1, 1), nsamples=1, mapname=None):
-		light = liar.scenery.LightSky(self._get_texture(mapname or L))
+		tex = self._get_texture(mapname or L)
+		try:
+			tex.mipMapping = 'none'
+		except AttributeError:
+			pass
+		flipAndShiftU = liar.Transformation2D([-1, 0, -.25, 0, 1, 0, 0, 0, 1])
+		light = liar.scenery.LightSky(liar.textures.TransformationUv(tex, flipAndShiftU))
 		light.numberOfEmissionSamples = nsamples
 		light.shader = liar.shaders.Unshaded(light.radiance)
 		return light
@@ -489,8 +504,9 @@ class PbrtScene(object):
 					args = []
 					kwargs = {}
 				if token == "Include":
-					token_type, token, line_number = tokens.next()
+					token_type, token, line_number = next(tokens)
 					assert token_type == _STRING, "syntax error in file %(path)r, line %(line_number)d: Include must be followed by a string" % vars()
+					print ("Include %r" % token)
 					self.parse(token)
 				else:
 					identifier = token
@@ -578,6 +594,10 @@ def _unwrap(arg):
 	except ValueError:
 		x = arg
 	return x
+
+
+def _filter_dict(mapping, predicate):
+	return dict((key, value) for key, value in mapping.items() if predicate(key))
 
 
 def _transpose(m):

@@ -104,6 +104,18 @@ const XYZ BoundedMedium::doTransmittance(const BoundedRay& ray) const
 
 
 
+const XYZ BoundedMedium::doEmission(const BoundedRay& ray) const
+{
+	BoundedRay bounded;
+	if (!medium_ || !bound(ray, bounded))
+	{
+		return XYZ(0);
+	}
+	return medium_->emission(bounded);
+}
+
+
+
 const XYZ BoundedMedium::doScatterOut(const BoundedRay& ray) const
 {
 	BoundedRay bounded;

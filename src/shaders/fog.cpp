@@ -38,6 +38,7 @@ PY_CLASS_CONSTRUCTOR_2(Fog, TScalar, TScalar)
 PY_CLASS_MEMBER_RW(Fog, extinction, setExtinction)
 PY_CLASS_MEMBER_RW(Fog, assymetry, setAssymetry)
 PY_CLASS_MEMBER_RW(Fog, color, setColor)
+PY_CLASS_MEMBER_RW(Fog, emission, setEmission)
 PY_CLASS_MEMBER_RW(Fog, numScatterSamples, setNumScatterSamples)
 
 // --- public --------------------------------------------------------------------------------------
@@ -105,6 +106,20 @@ void Fog::setColor(const XYZ& color)
 
 
 
+const XYZ& Fog::emission() const
+{
+	return emission_;
+}
+
+
+
+void Fog::setEmission(const XYZ& emission)
+{
+	emission_ = emission;
+}
+
+
+
 void Fog::setNumScatterSamples(size_t n)
 {
 	numSamples_ = n;
@@ -131,6 +146,22 @@ const XYZ Fog::doTransmittance(const BoundedRay& ray) const
 	LASS_ASSERT(d >= 0 && extinction_ >= 0);
 	const TScalar thickness = extinction_ * d;
 	return XYZ(num::exp(-thickness)); 
+}
+
+
+
+const XYZ Fog::doEmission(const BoundedRay& ray) const
+{
+	const TScalar d = ray.farLimit() - ray.nearLimit();
+	LASS_ASSERT(d >= 0 && extinction_ >= 0);
+	const TScalar thickness = extinction_ * d;
+	if (thickness < 1e-5)
+	{
+		return emission_ * d;
+	}
+	const TScalar absorptance = -num::expm1(-thickness); // = 1 - transmittance(ray)
+	return emission_ * (absorptance / extinction_);
+
 }
 
 
@@ -232,9 +263,10 @@ const XYZ Fog::doSamplePhase(const TPoint2D& sample, const TPoint3D&, const TVec
 
 
 
-void Fog::init(TScalar extinction, TScalar assymetry, const XYZ& color, size_t numSamples)
+void Fog::init(TScalar extinction, TScalar assymetry, const XYZ& color, const XYZ& emission, size_t numSamples)
 {
 	setExtinction(extinction);
+	setEmission(emission);
 	setAssymetry(assymetry);
 	setColor(color);
 	setNumScatterSamples(numSamples);

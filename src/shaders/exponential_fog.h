@@ -58,6 +58,7 @@ public:
 private:
 
 	const XYZ doTransmittance(const BoundedRay& ray) const;
+	const XYZ doEmission(const BoundedRay& ray) const;
 	const XYZ doScatterOut(const BoundedRay& ray) const;
 	const XYZ doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
 	const XYZ doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;

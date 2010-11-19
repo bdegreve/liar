@@ -176,7 +176,7 @@ void DirectLighting::doSetState(const TPyObjectPtr&)
 const XYZ DirectLighting::doShadeMedium(const kernel::Sample& sample, const kernel::BoundedRay& ray, XYZ& transparency) const
 {
 	transparency = mediumStack().transmittance(ray);
-	return traceSingleScattering(sample, ray);
+	return mediumStack().emission(ray) + traceSingleScattering(sample, ray);
 }
 
 

@@ -79,6 +79,12 @@ const XYZ Beer::doTransmittance(const BoundedRay& ray) const
 
 
 
+const XYZ Beer::doEmission(const BoundedRay&) const
+{
+	return XYZ(0);
+}
+
+
 const XYZ Beer::doScatterOut(const BoundedRay&) const
 {
 	return XYZ(0);

@@ -418,7 +418,7 @@ const XYZ PhotonMapper::doShadeMedium(const kernel::Sample& sample, const kernel
 
 	transparency = mediumStack().transmittance(ray);
 
-	XYZ result = estimateVolumetric(sample, ray, doTraceSingleScattering);
+	XYZ result = mediumStack().emission(ray) + estimateVolumetric(sample, ray, doTraceSingleScattering);
 	if (doTraceSingleScattering)
 	{
 		result += traceSingleScattering(sample, ray);

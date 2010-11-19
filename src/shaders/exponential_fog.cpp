@@ -119,23 +119,25 @@ void ExponentialFog::setDecay(TScalar decay)
 namespace 
 {
 
-inline TScalar sigma(TScalar t, TScalar alpha, TScalar beta)
+inline TScalar sigma(TScalar alpha, TScalar beta, TScalar t)
 {
 	return alpha * num::exp(-beta * t);
 }
 
-inline TScalar tau(TScalar d, TScalar alpha, TScalar beta)
+template <typename T>
+inline T tau(T alpha, TScalar beta, TScalar d)
 {
-	if (num::abs(beta * d) < 1e-5)
+	const TScalar bd = beta * d;
+	if (num::abs(bd) < 1e-5)
 	{
-		return alpha * d * (1 - beta * d / 2);
+		return alpha * d * (1 - bd / 2);
 	}
-	return alpha / beta * -num::expm1(-beta * d);
+	return alpha / beta * -num::expm1(-bd);
 }
 
-inline TScalar trans(TScalar d, TScalar alpha, TScalar beta)
+inline TScalar trans(TScalar alpha, TScalar beta, TScalar d)
 {
-	return num::exp(-tau(d, alpha, beta));
+	return num::exp(-tau(alpha, beta, d));
 }
 
 inline TScalar invCdf(TScalar uniform, TScalar alpha, TScalar beta, TScalar& pdf)
@@ -150,7 +152,7 @@ inline TScalar invCdf(TScalar uniform, TScalar alpha, TScalar beta, TScalar& pdf
 		return num::uniformToExponential(uniform, alpha, pdf);
 	}
 	TScalar d = -num::log1p( num::log1p( std::max<TScalar>(-1, -uniform) ) * (beta / alpha) ) / beta;
-	pdf = alpha * num::exp(-beta * d - tau(d, alpha, beta));
+	pdf = alpha * num::exp(-beta * d - tau(alpha, beta, d));
 	return d;
 }
 
@@ -162,9 +164,34 @@ const XYZ ExponentialFog::doTransmittance(const BoundedRay& ray) const
 	const TScalar a = alpha(ray);
 	const TScalar b = beta(ray);
 	LASS_ASSERT(d >= 0 && decay_ >= 0);
-	return XYZ(trans(d, a, b));
+	return XYZ(trans(a, b, d));
 }
 
+
+
+const XYZ ExponentialFog::doEmission(const BoundedRay& ray) const
+{
+	if (!emission())
+	{
+		return XYZ();
+	}
+
+	const TScalar d = ray.farLimit() - ray.nearLimit();
+	const TScalar a = alpha(ray);
+	const TScalar b = beta(ray);
+	LASS_ASSERT(d >= 0 && a >= 0 && decay_ >= 0);
+
+	if (extinction() == 0) // instead special case for thickness < 1e-5?
+	{
+		return tau(emission(), b, d);
+	}
+
+	const TScalar thickness = tau(a, b, d);
+	LASS_ASSERT(thickness >= 0);
+
+	const TScalar absorptance = -num::expm1(-thickness); // = 1 - transmittance(ray)
+	return emission() * (absorptance / extinction());
+}
 
 
 const XYZ ExponentialFog::doScatterOut(const BoundedRay& ray) const
@@ -173,7 +200,7 @@ const XYZ ExponentialFog::doScatterOut(const BoundedRay& ray) const
 	const TScalar a = alpha(ray);
 	const TScalar b = beta(ray);
 	LASS_ASSERT(d >= 0 && decay_ >= 0);
-	return XYZ(sigma(d, a, b) * trans(d, a, b));
+	return XYZ(sigma(a, b, d) * trans(a, b, d));
 }
 
 
@@ -185,7 +212,7 @@ const XYZ ExponentialFog::doSampleScatterOut(TScalar sample, const BoundedRay& r
 	const TScalar b = beta(ray);
 	LASS_ASSERT(dMax >= 0 && a >= 0 && decay_ >= 0);
 
-	const TScalar attMax = -num::expm1(-tau(dMax, a, b)); // = 1 - trans(dMax, a, b);
+	const TScalar attMax = -num::expm1(-tau(a, b, dMax)); // = 1 - trans(dMax, a, b);
 	if (attMax <= 0)
 	{
 		pdf = 0;
@@ -220,7 +247,7 @@ const XYZ ExponentialFog::doSampleScatterOutOrTransmittance(TScalar sample, cons
 	{
 		// full transmission
 		tScatter = ray.farLimit();
-		pdf = trans(dMax, a, b); // = 1 - cdf(tMax);
+		pdf = trans(a, b, dMax); // = 1 - cdf(tMax);
 		return XYZ(pdf);
 	}
 

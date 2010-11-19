@@ -163,9 +163,9 @@ bool LightSky::doIsIntersecting(const Sample&, const BoundedRay&) const
 
 void LightSky::doLocalContext(const Sample&, const BoundedRay& ray, const Intersection& LASS_UNUSED(intersection), IntersectionContext& result) const
 {
-	LASS_ASSERT(intersection.t() == TNumTraits::max);
-	result.setT(TNumTraits::max);
-	result.setPoint(TPoint3D(ray.direction()));
+	//LASS_ASSERT(intersection.t() == TNumTraits::max);
+	result.setT(intersection.t());
+	result.setPoint(ray.support() + ray.direction());
 
 	//         [sin theta * cos phi]
 	// R = r * [sin theta * sin phi]
