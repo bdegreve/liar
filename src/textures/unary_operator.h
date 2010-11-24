@@ -21,13 +21,13 @@
  *  http://liar.bramz.net/
  */
 
-/** @class liar::textures::Xyz
- *  @brief Much like Uv, this texture mixes three textures based.
+/** @class liar::textures::UnaryOperator
+ *  @brief base class for textures operating on one input texture.
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_XYZ_H
-#define LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_XYZ_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_UNARY_OPERATOR_H
+#define LIAR_GUARDIAN_OF_INCLUSION_UNARY_OPERATOR_H
 
 #include "textures_common.h"
 #include "../kernel/texture.h"
@@ -37,32 +37,24 @@ namespace liar
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL Xyz: public Texture
+class LIAR_TEXTURES_DLL UnaryOperator: public Texture
 {
 	PY_HEADER(Texture)
 public:
 
-	Xyz(const TTexturePtr& a, const TTexturePtr& b, const TTexturePtr& c);
-
-	const TTexturePtr& textureA() const;
-	const TTexturePtr& textureB() const;
-	const TTexturePtr& textureC() const;
-	void setTextureA(const TTexturePtr& a);
-	void setTextureB(const TTexturePtr& b);
-	void setTextureC(const TTexturePtr& c);
+	const TTexturePtr& texture() const { return texture_; }
+	void setTexture(const TTexturePtr& texture);
 
 protected:
+
+	UnaryOperator(const TTexturePtr& texture);
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
 private:
 
-	const XYZ doLookUp(const Sample& sample, const IntersectionContext& context) const;
-
-	TTexturePtr a_;
-	TTexturePtr b_;
-	TTexturePtr c_;
+	TTexturePtr texture_;
 };
 
 }

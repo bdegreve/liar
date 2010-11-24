@@ -21,13 +21,13 @@
  *  http://liar.bramz.net/
  */
 
-/** @class liar::textures::Mix2
+/** @class liar::textures::BinaryOperator
  *  @brief a base class for texture that mixes two input textures
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_MIX_2_H
-#define LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_MIX_2_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_BINARY_OPERATOR_H
+#define LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_BINARY_OPERATOR_H
 
 #include "textures_common.h"
 #include "../kernel/texture.h"
@@ -37,7 +37,7 @@ namespace liar
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL Mix2: public Texture
+class LIAR_TEXTURES_DLL BinaryOperator: public Texture
 {
 	PY_HEADER(Texture)
 public:
@@ -49,16 +49,12 @@ public:
 
 protected:
 
-	//Mix2();
-	Mix2(const TTexturePtr& a, const TTexturePtr& b);
-
-private:
+	BinaryOperator(const TTexturePtr& a, const TTexturePtr& b);
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-	virtual const TPyObjectPtr doGetMixState() const = 0;
-	virtual void doSetMixState(const TPyObjectPtr& state) = 0;
+private:
 
 	TTexturePtr a_;
 	TTexturePtr b_;

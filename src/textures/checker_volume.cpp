@@ -36,7 +36,7 @@ PY_CLASS_MEMBER_RW(CheckerVolume, split, setSplit);
 // --- public --------------------------------------------------------------------------------------
 
 CheckerVolume::CheckerVolume(const TTexturePtr& a, const TTexturePtr& b):
-	Mix2(a, b),
+	BinaryOperator(a, b),
 	split_(0.5f, 0.5f, 0.5f)
 {
 }
@@ -59,6 +59,20 @@ void CheckerVolume::setSplit(const TVector3D& split)
 
 // --- protected -----------------------------------------------------------------------------------
 
+const TPyObjectPtr CheckerVolume::doGetState() const
+{
+	return python::makeTuple(BinaryOperator::doGetState(), split_);
+}
+
+
+
+void CheckerVolume::doSetState(const TPyObjectPtr& state)
+{
+	TPyObjectPtr parentState;
+	python::decodeTuple(state, parentState, split_);
+	BinaryOperator::doSetState(parentState);
+}
+
 
 
 // --- private -------------------------------------------------------------------------------------
@@ -77,20 +91,6 @@ CheckerVolume::doLookUp(const Sample& sample, const IntersectionContext& context
 	{
 		return ((x < split_.x) != (y < split_.y) ? textureA() : textureB())->lookUp(sample, context);
 	}
-}
-
-
-
-const TPyObjectPtr CheckerVolume::doGetMixState() const
-{
-	return python::makeTuple(split_);
-}
-
-
-
-void CheckerVolume::doSetMixState(const TPyObjectPtr& state)
-{
-	python::decodeTuple(state, split_);
 }
 
 

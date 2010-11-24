@@ -37,7 +37,7 @@
 #include "grid_board.h"
 #include "image.h"
 #include "linear_interpolator.h"
-#include "mix_2.h"
+#include "binary_operator.h"
 #include "orco.h"
 #include "perlin.h"
 #include "product.h"
@@ -46,6 +46,7 @@
 #include "time.h"
 #include "transformation_uv.h"
 #include "transformation_local.h"
+#include "unary_operator.h"
 #include "uv.h"
 #include "xyz.h"
 
@@ -55,8 +56,9 @@ PY_DECLARE_MODULE_DOC(textures, "textures for LiAR")
 
 // some base classes, keep in keep in alphabetical order please! [Bramz]
 //
-PY_MODULE_CLASS(textures, Mix2)
+PY_MODULE_CLASS(textures, BinaryOperator)
 PY_MODULE_CLASS(textures, Perlin)
+PY_MODULE_CLASS(textures, UnaryOperator)
 
 // keep in alphabetical order please! [Bramz]
 //

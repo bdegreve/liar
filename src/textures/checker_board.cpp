@@ -45,7 +45,7 @@ CheckerBoard::AntiAliasing CheckerBoard::defaultAntiAliasing_ = CheckerBoard::aa
 // --- public --------------------------------------------------------------------------------------
 
 CheckerBoard::CheckerBoard(const TTexturePtr& a, const TTexturePtr& b):
-	Mix2(a, b),
+	BinaryOperator(a, b),
 	split_(0.5f, 0.5f),
 	antiAliasing_(defaultAntiAliasing_)
 {
@@ -90,6 +90,20 @@ void CheckerBoard::setDefaultAntiAliasing(const std::string& mode)
 
 // --- protected -----------------------------------------------------------------------------------
 
+const TPyObjectPtr CheckerBoard::doGetState() const
+{
+	return python::makeTuple(BinaryOperator::doGetState(), split_);
+}
+
+
+
+void CheckerBoard::doSetState(const TPyObjectPtr& state)
+{
+	TPyObjectPtr parentState;
+	python::decodeTuple(state, parentState, split_);
+	BinaryOperator::doSetState(parentState);
+}
+
 
 
 // --- private -------------------------------------------------------------------------------------
@@ -128,20 +142,6 @@ CheckerBoard::doLookUp(const Sample& sample, const IntersectionContext& context)
 	}
 
 	return XYZ();
-}
-
-
-
-const TPyObjectPtr CheckerBoard::doGetMixState() const
-{
-	return python::makeTuple(split_);
-}
-
-
-
-void CheckerBoard::doSetMixState(const TPyObjectPtr& state)
-{
-	python::decodeTuple(state, split_);
 }
 
 

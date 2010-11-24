@@ -31,27 +31,12 @@ namespace textures
 
 PY_DECLARE_CLASS_DOC(Global, "use global texture parameters instead of local")
 PY_CLASS_CONSTRUCTOR_1(Global, const TTexturePtr&);
-PY_CLASS_MEMBER_RW(Global, texture, setTexture);
 
 // --- public --------------------------------------------------------------------------------------
 
 Global::Global(const TTexturePtr& texture):
-	texture_(texture)
+	UnaryOperator(texture)
 {
-}
-
-
-
-const TTexturePtr& Global::texture() const
-{
-	return texture_;
-}
-
-
-
-void Global::setTexture(const TTexturePtr& texture)
-{
-	texture_ = texture;
 }
 
 
@@ -68,21 +53,7 @@ const XYZ Global::doLookUp(const Sample& sample, const IntersectionContext& cont
 	global.setShader(0);
 	global.transformBy(context.localToWorld());
 	global.setShader(context.shader());
-	return texture_->lookUp(sample, global);
-}
-
-
-
-const TPyObjectPtr Global::doGetState() const
-{
-	return python::makeTuple(texture_);
-}
-
-
-
-void Global::doSetState(const TPyObjectPtr& state)
-{
-	python::decodeTuple(state, texture_);
+	return texture()->lookUp(sample, global);
 }
 
 

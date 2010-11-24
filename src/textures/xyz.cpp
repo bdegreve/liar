@@ -90,20 +90,6 @@ const TTexturePtr& Xyz::textureC() const
 
 // --- protected -----------------------------------------------------------------------------------
 
-
-
-// --- private -------------------------------------------------------------------------------------
-
-const XYZ Xyz::doLookUp(const Sample& sample, const IntersectionContext& context) const
-{
-	const TScalar x = num::abs(context.normal().x);
-	const TScalar y = num::abs(context.normal().y);
-	const TScalar z = num::abs(context.normal().z);
-	return x * a_->lookUp(sample, context) + y * b_->lookUp(sample, context) + z * c_->lookUp(sample, context);
-}
-
-
-
 const TPyObjectPtr Xyz::doGetState() const
 {
 	return python::makeTuple(a_, b_, c_);
@@ -114,6 +100,18 @@ const TPyObjectPtr Xyz::doGetState() const
 void Xyz::doSetState(const TPyObjectPtr& state)
 {
 	python::decodeTuple(state, a_, b_, c_);
+}
+
+
+
+// --- private -------------------------------------------------------------------------------------
+
+const XYZ Xyz::doLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	const TScalar x = num::abs(context.normal().x);
+	const TScalar y = num::abs(context.normal().y);
+	const TScalar z = num::abs(context.normal().z);
+	return x * a_->lookUp(sample, context) + y * b_->lookUp(sample, context) + z * c_->lookUp(sample, context);
 }
 
 

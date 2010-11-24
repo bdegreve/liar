@@ -30,16 +30,16 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_CHECKER_VOLUME_H
 
 #include "textures_common.h"
-#include "mix_2.h"
+#include "binary_operator.h"
 
 namespace liar
 {
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL CheckerVolume: public Mix2
+class LIAR_TEXTURES_DLL CheckerVolume: public BinaryOperator
 {
-	PY_HEADER(Mix2)
+	PY_HEADER(BinaryOperator)
 public:
 
 	CheckerVolume(const TTexturePtr& a, const TTexturePtr& b);
@@ -47,13 +47,15 @@ public:
 	const TVector3D& split() const;
 	void setSplit(const TVector3D& split);
 
+protected:
+
+	const TPyObjectPtr doGetState() const;
+	void doSetState(const TPyObjectPtr& state);
+
 private:
 
 	const XYZ doLookUp(const Sample& sample, 
 		const IntersectionContext& context) const;
-
-	const TPyObjectPtr doGetMixState() const;
-	void doSetMixState(const TPyObjectPtr& state);
 
 	TVector3D split_;
 };

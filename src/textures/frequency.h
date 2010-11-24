@@ -44,13 +44,14 @@ public:
 
 	Frequency();
 
-private:
-
-	const XYZ doLookUp(const Sample& sample, 
-		const IntersectionContext& context) const;
+protected:
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
+
+private:
+
+	const XYZ doLookUp(const Sample& sample, const IntersectionContext& context) const;
 };
 
 }

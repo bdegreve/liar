@@ -36,7 +36,7 @@ PY_CLASS_MEMBER_RW(GridBoard, thickness, setThickness);
 // --- public --------------------------------------------------------------------------------------
 
 GridBoard::GridBoard(const TTexturePtr& a, const TTexturePtr& b):
-	Mix2(a, b),
+	BinaryOperator(a, b),
 	halfThickness_(0.05f, 0.05f)
 {
 }
@@ -50,14 +50,28 @@ const TVector2D GridBoard::thickness() const
 
 
 
-void GridBoard::setThickness(const TVector2D& iThickness)
+void GridBoard::setThickness(const TVector2D& thickness)
 {
-	halfThickness_ = iThickness / 2;
+	halfThickness_ = thickness / 2;
 }
 
 
 
 // --- protected -----------------------------------------------------------------------------------
+
+const TPyObjectPtr GridBoard::doGetState() const
+{
+	return python::makeTuple(BinaryOperator::doGetState(), halfThickness_);
+}
+
+
+
+void GridBoard::doSetState(const TPyObjectPtr& state)
+{
+	TPyObjectPtr parentState;
+	python::decodeTuple(state, parentState, halfThickness_);
+	BinaryOperator::doSetState(parentState);
+}
 
 
 
@@ -70,20 +84,6 @@ const XYZ GridBoard::doLookUp(const Sample& sample, const IntersectionContext& c
 	const bool isA = u < halfThickness_.x || v < halfThickness_.x || 
 		u > (TNumTraits::one - halfThickness_.x) || v > (TNumTraits::one - halfThickness_.y);
 	return (isA ? textureA() : textureB())->lookUp(sample, context);	
-}
-
-
-
-const TPyObjectPtr GridBoard::doGetMixState() const
-{
-	return python::makeTuple(halfThickness_);
-}
-
-
-
-void GridBoard::doSetMixState(const TPyObjectPtr& state)
-{
-	python::decodeTuple(state, halfThickness_);
 }
 
 

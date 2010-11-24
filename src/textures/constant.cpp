@@ -87,17 +87,6 @@ void Constant::setValue(const XYZ& value)
 
 // --- protected -----------------------------------------------------------------------------------
 
-
-
-// --- private -------------------------------------------------------------------------------------
-
-const XYZ Constant::doLookUp(const Sample&, const IntersectionContext&) const
-{
-	return value_;
-}
-
-
-
 const TPyObjectPtr Constant::doGetState() const
 {
 	return python::makeTuple(value_);
@@ -108,6 +97,15 @@ const TPyObjectPtr Constant::doGetState() const
 void Constant::doSetState(const TPyObjectPtr& state)
 {
 	python::decodeTuple(state, value_);
+}
+
+
+
+// --- private -------------------------------------------------------------------------------------
+
+const XYZ Constant::doLookUp(const Sample&, const IntersectionContext&) const
+{
+	return value_;
 }
 
 

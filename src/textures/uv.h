@@ -30,27 +30,23 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_UV_H
 
 #include "textures_common.h"
-#include "mix_2.h"
+#include "binary_operator.h"
 
 namespace liar
 {
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL Uv: public Mix2
+class LIAR_TEXTURES_DLL Uv: public BinaryOperator
 {
-	PY_HEADER(Mix2)
+	PY_HEADER(BinaryOperator)
 public:
 
 	Uv(const TTexturePtr& a, const TTexturePtr& b);
 
 private:
 
-	const XYZ doLookUp(const Sample& sample, 
-		const IntersectionContext& context) const;
-
-	const TPyObjectPtr doGetMixState() const;
-	void doSetMixState(const TPyObjectPtr& state);
+	const XYZ doLookUp(const Sample& sample, const IntersectionContext& context) const;
 };
 
 }

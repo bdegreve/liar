@@ -32,27 +32,12 @@ namespace textures
 
 PY_DECLARE_CLASS_DOC(CubeMapping, "converts point to angular coordinates as used in light probes")
 PY_CLASS_CONSTRUCTOR_1(CubeMapping, const TTexturePtr&);
-PY_CLASS_MEMBER_RW(CubeMapping, texture, setTexture);
 
 // --- public --------------------------------------------------------------------------------------
 
 CubeMapping::CubeMapping(const TTexturePtr& texture):
-	texture_(texture)
+	UnaryOperator(texture)
 {
-}
-
-
-
-const TTexturePtr& CubeMapping::texture() const
-{
-	return texture_;
-}
-
-
-
-void CubeMapping::setTexture(const TTexturePtr& texture)
-{
-	texture_ = texture;
 }
 
 
@@ -104,21 +89,7 @@ const XYZ CubeMapping::doLookUp(const Sample& sample, const IntersectionContext&
 		temp.setDNormal_dU(dnormal_ds);
 		temp.setDNormal_dV(dnormal_dt);
 	}
-	return texture_->lookUp(sample, temp);
-}
-
-
-
-const TPyObjectPtr CubeMapping::doGetState() const
-{
-	return python::makeTuple(texture_);
-}
-
-
-
-void CubeMapping::doSetState(const TPyObjectPtr& state)
-{
-	python::decodeTuple(state, texture_);
+	return texture()->lookUp(sample, temp);
 }
 
 

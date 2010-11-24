@@ -30,7 +30,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_CHECKER_BOARD_H
 
 #include "textures_common.h"
-#include "mix_2.h"
+#include "binary_operator.h"
 #include <lass/util/dictionary.h>
 
 namespace liar
@@ -38,9 +38,9 @@ namespace liar
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL CheckerBoard: public Mix2
+class LIAR_TEXTURES_DLL CheckerBoard: public BinaryOperator
 {
-	PY_HEADER(Mix2)
+	PY_HEADER(BinaryOperator)
 public:
 
 	CheckerBoard(const TTexturePtr& a, const TTexturePtr& b);
@@ -53,6 +53,11 @@ public:
 
 	static void setDefaultAntiAliasing(const std::string& mode);
 
+protected:
+
+	const TPyObjectPtr doGetState() const;
+	void doSetState(const TPyObjectPtr& state);
+
 private:
 
 	enum AntiAliasing
@@ -64,11 +69,7 @@ private:
 
 	typedef util::Dictionary<std::string, AntiAliasing> TAntiAliasingDictionary;
 
-	const XYZ doLookUp(const Sample& sample, 
-		const IntersectionContext& context) const;
-
-	const TPyObjectPtr doGetMixState() const;
-	void doSetMixState(const TPyObjectPtr& state);
+	const XYZ doLookUp(const Sample& sample, const IntersectionContext& context) const;
 
 	TScalar integrate(const TVector2D& min, const TVector2D& max) const;
 

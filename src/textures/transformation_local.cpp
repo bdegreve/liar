@@ -32,39 +32,22 @@ namespace textures
 PY_DECLARE_CLASS_DOC(TransformationLocal, "transform local coordinates")
 PY_CLASS_CONSTRUCTOR_2(TransformationLocal, const TTexturePtr&, const TTransformation3D&);
 PY_CLASS_CONSTRUCTOR_2(TransformationLocal, const TTexturePtr&, const TPyTransformation3DPtr&);
-PY_CLASS_MEMBER_RW(TransformationLocal, texture, setTexture);
 PY_CLASS_MEMBER_RW(TransformationLocal, transformation, setTransformation);
 
 // --- public --------------------------------------------------------------------------------------
 
-TransformationLocal::TransformationLocal(
-		const TTexturePtr& texture, const TTransformation3D& transformation):
-	texture_(texture),
+TransformationLocal::TransformationLocal(const TTexturePtr& texture, const TTransformation3D& transformation):
+	UnaryOperator(texture),
 	transformation_(transformation)
 {
 }
 
 
 
-TransformationLocal::TransformationLocal(
-		const TTexturePtr& texture, const TPyTransformation3DPtr& transformation):
-	texture_(texture),
+TransformationLocal::TransformationLocal(const TTexturePtr& texture, const TPyTransformation3DPtr& transformation):
+	UnaryOperator(texture),
 	transformation_(transformation->transformation())
 {
-}
-
-
-
-const TTexturePtr& TransformationLocal::texture() const
-{
-	return texture_;
-}
-
-
-
-void TransformationLocal::setTexture(const TTexturePtr& texture)
-{
-	texture_ = texture;
 }
 
 
@@ -98,21 +81,23 @@ const XYZ TransformationLocal::doLookUp(const Sample& sample, const Intersection
 	temp.setDPoint_dU(prim::transform(context.dPoint_dU(), transformation_));
 	temp.setDPoint_dV(prim::transform(context.dPoint_dV(), transformation_));
 #pragma LASS_TODO("perhaps we need to transform other Uv dependent quantities as well [Brams]")
-	return texture_->lookUp(sample, temp);
+	return texture()->lookUp(sample, temp);
 }
 
 
 
 const TPyObjectPtr TransformationLocal::doGetState() const
 {
-	return python::makeTuple(texture_, transformation_);
+	return python::makeTuple(UnaryOperator::doGetState(), transformation_);
 }
 
 
 
 void TransformationLocal::doSetState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(state, texture_, transformation_);
+	TPyObjectPtr parentState;
+	python::decodeTuple(state, parentState, transformation_);
+	UnaryOperator::doSetState(parentState);
 }
 
 

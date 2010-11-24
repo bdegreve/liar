@@ -51,18 +51,18 @@ FBm::FBm(size_t numOctaves, TScalar falloff)
 
 // --- protected -----------------------------------------------------------------------------------
 
-#pragma LASS_FIXME("this overrides Perlin::doGetState!  whoops")
-
 const TPyObjectPtr FBm::doGetState() const
 {
-	return python::makeTuple(numOctaves_, falloff_);
+	return python::makeTuple(Perlin::doGetState(), numOctaves_, falloff_);
 }
 
 
 
 void FBm::doSetState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(state, numOctaves_, falloff_);
+	TPyObjectPtr parentState;
+	python::decodeTuple(state, parentState, numOctaves_, falloff_);
+	Perlin::doSetState(parentState);
 }
 
 

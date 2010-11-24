@@ -30,32 +30,23 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_GLOBAL_H
 
 #include "textures_common.h"
-#include "../kernel/texture.h"
+#include "unary_operator.h"
 
 namespace liar
 {
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL Global: public Texture
+class LIAR_TEXTURES_DLL Global: public UnaryOperator
 {
-	PY_HEADER(Texture)
+	PY_HEADER(UnaryOperator)
 public:
 
 	Global(const TTexturePtr& texture);
 
-	const TTexturePtr& texture() const;
-	void setTexture(const TTexturePtr& texture);
-
 private:
 
-	const XYZ doLookUp(const Sample& sample, 
-		const IntersectionContext& context) const;
-
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
-
-	TTexturePtr texture_;
+	const XYZ doLookUp(const Sample& sample, const IntersectionContext& context) const;
 };
 
 }

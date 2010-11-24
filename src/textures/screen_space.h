@@ -30,31 +30,23 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_SCREEN_SPACE_H
 
 #include "textures_common.h"
-#include "../kernel/texture.h"
+#include "unary_operator.h"
 
 namespace liar
 {
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL ScreenSpace: public Texture
+class LIAR_TEXTURES_DLL ScreenSpace: public UnaryOperator
 {
 	PY_HEADER(Texture)
 public:
 
 	ScreenSpace(const TTexturePtr& texture);
 
-	const TTexturePtr& texture() const;
-	void setTexture(const TTexturePtr& texture);
-
 private:
 
 	const XYZ doLookUp(const Sample& sample, const IntersectionContext& context) const;
-
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
-
-	TTexturePtr texture_;
 };
 
 }

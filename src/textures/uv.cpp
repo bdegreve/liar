@@ -35,7 +35,7 @@ PY_CLASS_CONSTRUCTOR_2(Uv, TTexturePtr, TTexturePtr);
 // --- public --------------------------------------------------------------------------------------
 
 Uv::Uv(const TTexturePtr& a, const TTexturePtr& b):
-	Mix2(a, b)
+	BinaryOperator(a, b)
 {
 }
 
@@ -52,19 +52,6 @@ const XYZ Uv::doLookUp(const Sample& sample, const IntersectionContext& context)
 	const TScalar u = num::mod(context.uv().x, TNumTraits::one);
 	const TScalar v = num::mod(context.uv().y, TNumTraits::one);
 	return u * textureA()->lookUp(sample, context) + v * textureB()->lookUp(sample, context);	
-}
-
-
-
-const TPyObjectPtr Uv::doGetMixState() const
-{
-	return python::makeTuple();
-}
-
-
-
-void Uv::doSetMixState(const TPyObjectPtr&)
-{
 }
 
 

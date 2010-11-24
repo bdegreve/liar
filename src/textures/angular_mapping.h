@@ -30,38 +30,35 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_ANGULAR_MAPPING_H
 
 #include "textures_common.h"
-#include "../kernel/texture.h"
+#include "unary_operator.h"
 
 namespace liar
 {
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL AngularMapping: public Texture
+class LIAR_TEXTURES_DLL AngularMapping: public UnaryOperator
 {
-	PY_HEADER(Texture)
+	PY_HEADER(UnaryOperator)
 public:
 
 	AngularMapping(const TTexturePtr& texture);
 	AngularMapping(const TTexturePtr& texture, const TPoint3D& center);
 
-	const TTexturePtr& texture() const;
-	void setTexture(const TTexturePtr& texture);
-
 	const TPoint3D& center() const;
 	void setCenter(const TPoint3D& center);
 
-private:
-
-	const XYZ doLookUp(const Sample& sample, 
-		const IntersectionContext& context) const;
+protected:
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
+private:
+
+	const XYZ doLookUp(const Sample& sample, const IntersectionContext& context) const;
+
 	const TPoint2D uv(const TVector3D& dir) const;
 
-	TTexturePtr texture_;
 	TPoint3D center_;
 };
 

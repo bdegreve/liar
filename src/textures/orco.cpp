@@ -31,27 +31,12 @@ namespace textures
 
 PY_DECLARE_CLASS_DOC(OrCo, "use global texture parameters instead of local")
 PY_CLASS_CONSTRUCTOR_1(OrCo, const TTexturePtr&);
-PY_CLASS_MEMBER_RW(OrCo, texture, setTexture);
 
 // --- public --------------------------------------------------------------------------------------
 
 OrCo::OrCo(const TTexturePtr& texture):
-	texture_(texture)
+	UnaryOperator(texture)
 {
-}
-
-
-
-const TTexturePtr& OrCo::texture() const
-{
-	return texture_;
-}
-
-
-
-void OrCo::setTexture(const TTexturePtr& texture)
-{
-	texture_ = texture;
 }
 
 
@@ -66,7 +51,7 @@ const XYZ OrCo::doLookUp(const Sample& sample, const IntersectionContext& contex
 {
 	if (context.bounds().isEmpty())
 	{
-		return texture_->lookUp(sample, context);
+		return texture()->lookUp(sample, context);
 	}
 	const TPoint3D center = context.bounds().center().affine();
 	const TVector3D size = context.bounds().size();
@@ -81,21 +66,7 @@ const XYZ OrCo::doLookUp(const Sample& sample, const IntersectionContext& contex
 	temp.setDPoint_dU(context.dPoint_dU() * scale);
 	temp.setDPoint_dV(context.dPoint_dV() * scale);
 #pragma LASS_TODO("perhaps we need to transform other Uv dependent quantities as well [Brams]")
-	return texture_->lookUp(sample, temp);
-}
-
-
-
-const TPyObjectPtr OrCo::doGetState() const
-{
-	return python::makeTuple(texture_);
-}
-
-
-
-void OrCo::doSetState(const TPyObjectPtr& state)
-{
-	python::decodeTuple(state, texture_);
+	return texture()->lookUp(sample, temp);
 }
 
 

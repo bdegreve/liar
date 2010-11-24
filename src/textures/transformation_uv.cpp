@@ -31,30 +31,14 @@ namespace textures
 
 PY_DECLARE_CLASS_DOC(TransformationUv, "transform Uv coordinates")
 PY_CLASS_CONSTRUCTOR_2(TransformationUv, const TTexturePtr&, const TTransformation2D&);
-PY_CLASS_MEMBER_RW(TransformationUv, texture, setTexture);
 PY_CLASS_MEMBER_RW(TransformationUv, transformation, setTransformation);
 
 // --- public --------------------------------------------------------------------------------------
 
-TransformationUv::TransformationUv(
-		const TTexturePtr& texture, const TTransformation2D& transformation):
-	texture_(texture)
+TransformationUv::TransformationUv(const TTexturePtr& texture, const TTransformation2D& transformation):
+	UnaryOperator(texture)
 {
 	setTransformation(transformation);
-}
-
-
-
-const TTexturePtr& TransformationUv::texture() const
-{
-	return texture_;
-}
-
-
-
-void TransformationUv::setTexture(const TTexturePtr& texture)
-{
-	texture_ = texture;
 }
 
 
@@ -97,22 +81,24 @@ const XYZ TransformationUv::doLookUp(const Sample& sample, const IntersectionCon
 	temp.setDNormal_dU(context.dNormal_dU() * dUv_dS.x + context.dNormal_dV() * dUv_dS.y);
 	temp.setDNormal_dV(context.dNormal_dU() * dUv_dT.x + context.dNormal_dV() * dUv_dT.y);
 
-	return texture_->lookUp(sample, temp);
+	return texture()->lookUp(sample, temp);
 }
 
 
 
 const TPyObjectPtr TransformationUv::doGetState() const
 {
-	return python::makeTuple(texture_, forward_);
+	return python::makeTuple(UnaryOperator::doGetState(), forward_);
 }
 
 
 
 void TransformationUv::doSetState(const TPyObjectPtr& state)
 {
+	TPyObjectPtr parentState;
 	TTransformation2D transformation;
-	python::decodeTuple(state, texture_, transformation);
+	python::decodeTuple(state, parentState, transformation);
+	UnaryOperator::doSetState(parentState);
 	setTransformation(transformation);
 }
 

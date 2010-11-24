@@ -21,54 +21,58 @@
  *  http://liar.bramz.net/
  */
 
-/** @class liar::textures::Xyz
- *  @brief Much like Uv, this texture mixes three textures based.
- *	@author Bram de Greve (bramz@users.sourceforge.net)
- */
-
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_XYZ_H
-#define LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_XYZ_H
-
 #include "textures_common.h"
-#include "../kernel/texture.h"
+#include "unary_operator.h"
 
 namespace liar
 {
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL Xyz: public Texture
+PY_DECLARE_CLASS_DOC(UnaryOperator, "Base class for textures operating on one input texture.")
+PY_CLASS_MEMBER_RW(UnaryOperator, texture, setTexture);
+
+// --- public --------------------------------------------------------------------------------------
+
+void UnaryOperator::setTexture(const TTexturePtr& texture)
 {
-	PY_HEADER(Texture)
-public:
+	texture_ = texture;
+}
 
-	Xyz(const TTexturePtr& a, const TTexturePtr& b, const TTexturePtr& c);
 
-	const TTexturePtr& textureA() const;
-	const TTexturePtr& textureB() const;
-	const TTexturePtr& textureC() const;
-	void setTextureA(const TTexturePtr& a);
-	void setTextureB(const TTexturePtr& b);
-	void setTextureC(const TTexturePtr& c);
 
-protected:
+// --- protected -----------------------------------------------------------------------------------
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+UnaryOperator::UnaryOperator(const TTexturePtr& texture):
+	texture_(texture)
+{
+}
 
-private:
 
-	const XYZ doLookUp(const Sample& sample, const IntersectionContext& context) const;
 
-	TTexturePtr a_;
-	TTexturePtr b_;
-	TTexturePtr c_;
-};
+const TPyObjectPtr UnaryOperator::doGetState() const
+{
+	return python::makeTuple(texture_);
+}
+
+
+
+void UnaryOperator::doSetState(const TPyObjectPtr& state)
+{
+	python::decodeTuple(state, texture_);
+}
+
+
+
+// --- private -------------------------------------------------------------------------------------
+
+
+
+// --- free ----------------------------------------------------------------------------------------
 
 }
 
 }
-
-#endif
 
 // EOF
+

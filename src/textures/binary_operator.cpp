@@ -22,7 +22,7 @@
  */
 
 #include "textures_common.h"
-#include "mix_2.h"
+#include "binary_operator.h"
 #include "constant.h"
 
 namespace liar
@@ -30,20 +30,20 @@ namespace liar
 namespace textures
 {
 
-PY_DECLARE_CLASS_DOC(Mix2, "base class of textures mixing two input textures")
-PY_CLASS_MEMBER_RW_DOC(Mix2, textureA, setTextureA, "first texture")
-PY_CLASS_MEMBER_RW_DOC(Mix2, textureB, setTextureB, "second texture")
+PY_DECLARE_CLASS_DOC(BinaryOperator, "base class of textures mixing two input textures")
+PY_CLASS_MEMBER_RW_DOC(BinaryOperator, textureA, setTextureA, "first texture")
+PY_CLASS_MEMBER_RW_DOC(BinaryOperator, textureB, setTextureB, "second texture")
 
 // --- public --------------------------------------------------------------------------------------
 
-void Mix2::setTextureA(const TTexturePtr& a)
+void BinaryOperator::setTextureA(const TTexturePtr& a)
 {
 	a_ = a;
 }
 
 
 
-void Mix2::setTextureB(const TTexturePtr& b)
+void BinaryOperator::setTextureB(const TTexturePtr& b)
 {
 	b_ = b;
 }
@@ -51,16 +51,8 @@ void Mix2::setTextureB(const TTexturePtr& b)
 
 
 // --- protected -----------------------------------------------------------------------------------
-/*
-Mix2::Mix2():
-	a_(new Constant(rgb(1, 0, 0))),
-	b_(new Constant(rgb(0, 1, 0)))
-{
-}
-*/
 
-
-Mix2::Mix2(const TTexturePtr& a, const TTexturePtr& b):
+BinaryOperator::BinaryOperator(const TTexturePtr& a, const TTexturePtr& b):
 	a_(a),
 	b_(b)
 {
@@ -68,21 +60,21 @@ Mix2::Mix2(const TTexturePtr& a, const TTexturePtr& b):
 
 
 
+const TPyObjectPtr BinaryOperator::doGetState() const
+{
+	return python::makeTuple(a_, b_);
+}
+
+
+
+void BinaryOperator::doSetState(const TPyObjectPtr& state)
+{
+	python::decodeTuple(state, a_, b_);
+}
+
+
+
 // --- private -------------------------------------------------------------------------------------
-
-const TPyObjectPtr Mix2::doGetState() const
-{
-	return python::makeTuple(a_, b_, doGetMixState());
-}
-
-
-
-void Mix2::doSetState(const TPyObjectPtr& state)
-{
-	TPyObjectPtr wrappedState;
-	python::decodeTuple(state, a_, b_, wrappedState);
-	doSetMixState(wrappedState);
-}
 
 
 

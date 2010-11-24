@@ -32,13 +32,12 @@ namespace textures
 PY_DECLARE_CLASS_DOC(AngularMapping, "converts point to angular coordinates as used in light probes")
 PY_CLASS_CONSTRUCTOR_1(AngularMapping, const TTexturePtr&);
 PY_CLASS_CONSTRUCTOR_2(AngularMapping, const TTexturePtr&, const TPoint3D&);
-PY_CLASS_MEMBER_RW(AngularMapping, texture, setTexture);
 PY_CLASS_MEMBER_RW(AngularMapping, center, setCenter);
 
 // --- public --------------------------------------------------------------------------------------
 
 AngularMapping::AngularMapping(const TTexturePtr& texture):
-	texture_(texture),
+	UnaryOperator(texture),
 	center_(0, 0, 0)
 {
 }
@@ -46,23 +45,9 @@ AngularMapping::AngularMapping(const TTexturePtr& texture):
 
 
 AngularMapping::AngularMapping(const TTexturePtr& texture, const TPoint3D& center):
-	texture_(texture),
+	UnaryOperator(texture),
 	center_(center)
 {
-}
-
-
-
-const TTexturePtr& AngularMapping::texture() const
-{
-	return texture_;
-}
-
-
-
-void AngularMapping::setTexture(const TTexturePtr& texture)
-{
-	texture_ = texture;
 }
 
 
@@ -83,6 +68,20 @@ void AngularMapping::setCenter(const TPoint3D& center)
 
 // --- protected -----------------------------------------------------------------------------------
 
+const TPyObjectPtr AngularMapping::doGetState() const
+{
+	return python::makeTuple(UnaryOperator::doGetState(), center_);
+}
+
+
+
+void AngularMapping::doSetState(const TPyObjectPtr& state)
+{
+	TPyObjectPtr parentState;
+	python::decodeTuple(state, parentState, center_);
+	UnaryOperator::doSetState(parentState);
+}
+
 
 
 // --- private -------------------------------------------------------------------------------------
@@ -98,22 +97,9 @@ const XYZ AngularMapping::doLookUp(const Sample& sample, const IntersectionConte
 	temp.setDUv_dI(uvI - uv0);
 	temp.setDUv_dJ(uvJ - uv0);
 #pragma LASS_TODO("perhaps we need to transform other Uv dependent quantities as well [Brams]")
-	return texture_->lookUp(sample, temp);
+	return texture()->lookUp(sample, temp);
 }
 
-
-
-const TPyObjectPtr AngularMapping::doGetState() const
-{
-	return python::makeTuple(texture_, center_);
-}
-
-
-
-void AngularMapping::doSetState(const TPyObjectPtr& state)
-{
-	python::decodeTuple(state, texture_, center_);
-}
 
 
 inline const TPoint2D AngularMapping::uv(const TVector3D& dir) const

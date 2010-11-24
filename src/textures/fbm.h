@@ -50,12 +50,14 @@ public:
 	FBm(size_t numOctaves);
 	FBm(size_t numOctaves, TScalar falloff);
 
-private:
-
-	const XYZ doLookUp(const Sample& sample, const IntersectionContext& context) const;
+protected:
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
+
+private:
+
+	const XYZ doLookUp(const Sample& sample, const IntersectionContext& context) const;
 
 	void init(size_t numOctaves, TScalar falloff = .5);
 

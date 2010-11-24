@@ -31,27 +31,12 @@ namespace textures
 
 PY_DECLARE_CLASS_DOC(ScreenSpace, "set UV to screen space coordinates")
 PY_CLASS_CONSTRUCTOR_1(ScreenSpace, const TTexturePtr&);
-PY_CLASS_MEMBER_RW(ScreenSpace, texture, setTexture);
 
 // --- public --------------------------------------------------------------------------------------
 
 ScreenSpace::ScreenSpace(const TTexturePtr& texture):
-	texture_(texture)
+	UnaryOperator(texture)
 {
-}
-
-
-
-const TTexturePtr& ScreenSpace::texture() const
-{
-	return texture_;
-}
-
-
-
-void ScreenSpace::setTexture(const TTexturePtr& texture)
-{
-	texture_ = texture;
 }
 
 
@@ -72,21 +57,7 @@ const XYZ ScreenSpace::doLookUp(const Sample& sample, const IntersectionContext&
 	temp.setDPoint_dV(context.dPoint_dJ());
 	temp.setDNormal_dU(context.dNormal_dI());
 	temp.setDNormal_dV(context.dNormal_dJ());
-	return texture_->lookUp(sample, temp);
-}
-
-
-
-const TPyObjectPtr ScreenSpace::doGetState() const
-{
-	return python::makeTuple(texture_);
-}
-
-
-
-void ScreenSpace::doSetState(const TPyObjectPtr& state)
-{
-	python::decodeTuple(state, texture_);
+	return texture()->lookUp(sample, temp);
 }
 
 

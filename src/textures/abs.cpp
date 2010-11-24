@@ -31,27 +31,12 @@ namespace textures
 
 PY_DECLARE_CLASS_DOC(Abs, "absolute value of texture")
 PY_CLASS_CONSTRUCTOR_1(Abs, const TTexturePtr&);
-PY_CLASS_MEMBER_RW(Abs, texture, setTexture);
 
 // --- public --------------------------------------------------------------------------------------
 
 Abs::Abs(const TTexturePtr& texture):
-	texture_(texture)
+	UnaryOperator(texture)
 {
-}
-
-
-
-const TTexturePtr& Abs::texture() const
-{
-	return texture_;
-}
-
-
-
-void Abs::setTexture(const TTexturePtr& texture)
-{
-	texture_ = texture;
 }
 
 
@@ -64,21 +49,7 @@ void Abs::setTexture(const TTexturePtr& texture)
 
 const XYZ Abs::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
-	return abs(texture_->lookUp(sample, context));
-}
-
-
-
-const TPyObjectPtr Abs::doGetState() const
-{
-	return python::makeTuple(texture_);
-}
-
-
-
-void Abs::doSetState(const TPyObjectPtr& state)
-{
-	python::decodeTuple(state, texture_);
+	return abs(texture()->lookUp(sample, context));
 }
 
 
