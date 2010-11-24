@@ -28,7 +28,9 @@
 #include "ashikhmin_shirley.h"
 #include "bump_mapping.h"
 #include "dielectric.h"
+#include "flip.h"
 #include "lambert.h"
+#include "linear_interpolator.h"
 #include "mirror.h"
 //#include "null_shader.h"
 //#include "simple.h"
@@ -45,7 +47,9 @@ PY_DECLARE_MODULE_DOC(shaders, "surface shaders for LiAR")
 PY_MODULE_CLASS(shaders, AshikhminShirley)
 PY_MODULE_CLASS(shaders, BumpMapping)
 PY_MODULE_CLASS(shaders, Dielectric)
+PY_MODULE_CLASS(shaders, Flip)
 PY_MODULE_CLASS(shaders, Lambert)
+PY_MODULE_CLASS(shaders, LinearInterpolator)
 PY_MODULE_CLASS(shaders, Mirror)
 //PY_MODULE_CLASS(shaders, NullShader)
 //PY_MODULE_CLASS(shaders, Simple)

@@ -43,7 +43,6 @@ LinearInterpolator::LinearInterpolator():
 	keys_(),
 	control_(Texture::black())
 {
-	keys_.push_back(TKeyTexture(TNumTraits::zero, Texture::white()));
 }
 
 
@@ -117,6 +116,11 @@ void LinearInterpolator::addKey(const TScalar keyValue,
 const XYZ 
 LinearInterpolator::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
+	if (keys_.empty())
+	{
+		return XYZ(0);
+	}
+
 	const TScalar keyValue = average(control_->lookUp(sample, context));
 
 	TKeyTexture sentinel(keyValue, TTexturePtr());

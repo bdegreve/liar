@@ -25,11 +25,13 @@
 
 // keep in alphabetical order please! [Bramz]
 //
+#include "abs.h"
 #include "angular_mapping.h"
 #include "checker_board.h"
 #include "checker_volume.h"
 #include "constant.h"
 #include "cube_mapping.h"
+#include "fbm.h"
 #include "frequency.h"
 #include "global.h"
 #include "grid_board.h"
@@ -37,8 +39,10 @@
 #include "linear_interpolator.h"
 #include "mix_2.h"
 #include "orco.h"
+#include "perlin.h"
 #include "product.h"
 #include "screen_space.h"
+#include "sum.h"
 #include "time.h"
 #include "transformation_uv.h"
 #include "transformation_local.h"
@@ -52,14 +56,17 @@ PY_DECLARE_MODULE_DOC(textures, "textures for LiAR")
 // some base classes, keep in keep in alphabetical order please! [Bramz]
 //
 PY_MODULE_CLASS(textures, Mix2)
+PY_MODULE_CLASS(textures, Perlin)
 
 // keep in alphabetical order please! [Bramz]
 //
+PY_MODULE_CLASS(textures, Abs)
 PY_MODULE_CLASS(textures, AngularMapping)
 PY_MODULE_CLASS(textures, CheckerBoard)
 PY_MODULE_CLASS(textures, CheckerVolume)
 PY_MODULE_CLASS(textures, Constant)
 PY_MODULE_CLASS(textures, CubeMapping)
+PY_MODULE_CLASS(textures, FBm)
 PY_MODULE_CLASS(textures, Frequency)
 PY_MODULE_CLASS(textures, Global)
 PY_MODULE_CLASS(textures, GridBoard)
@@ -67,6 +74,7 @@ PY_MODULE_CLASS(textures, Image)
 PY_MODULE_CLASS(textures, LinearInterpolator)
 PY_MODULE_CLASS(textures, OrCo)
 PY_MODULE_CLASS(textures, Product)
+PY_MODULE_CLASS(textures, Sum)
 PY_MODULE_CLASS(textures, ScreenSpace)
 PY_MODULE_CLASS(textures, Time)
 PY_MODULE_CLASS(textures, TransformationUv)

@@ -78,12 +78,13 @@ public:
 	}
 
 	void requestSamples(const TSamplerPtr& sampler);
-	size_t numReflectionSamples() const;
-	size_t numTransmissionSamples() const;
 	int idReflectionSamples() const;
 	int idReflectionComponentSamples() const;
 	int idTransmissionSamples() const;
 	int idTransmissionComponentSamples() const;
+
+	size_t numReflectionSamples() const;
+	size_t numTransmissionSamples() const;
 
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const;

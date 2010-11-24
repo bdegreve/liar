@@ -31,6 +31,7 @@ namespace textures
 
 PY_DECLARE_CLASS_DOC(TransformationLocal, "transform local coordinates")
 PY_CLASS_CONSTRUCTOR_2(TransformationLocal, const TTexturePtr&, const TTransformation3D&);
+PY_CLASS_CONSTRUCTOR_2(TransformationLocal, const TTexturePtr&, const TPyTransformation3DPtr&);
 PY_CLASS_MEMBER_RW(TransformationLocal, texture, setTexture);
 PY_CLASS_MEMBER_RW(TransformationLocal, transformation, setTransformation);
 
@@ -40,6 +41,15 @@ TransformationLocal::TransformationLocal(
 		const TTexturePtr& texture, const TTransformation3D& transformation):
 	texture_(texture),
 	transformation_(transformation)
+{
+}
+
+
+
+TransformationLocal::TransformationLocal(
+		const TTexturePtr& texture, const TPyTransformation3DPtr& transformation):
+	texture_(texture),
+	transformation_(transformation->transformation())
 {
 }
 

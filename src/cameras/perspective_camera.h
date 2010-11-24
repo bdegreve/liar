@@ -92,6 +92,9 @@ public:
 	void setFNumber(TScalar fNumber);
 	void setLensRadius(TScalar radius);
 
+	TScalar falloffPower() const;
+	void setFalloffPower(TScalar power);
+
 	TTime shutterOpenDelta() const;
 	TTime shutterCloseDelta() const;
 	TTime shutterTime() const;
@@ -103,6 +106,7 @@ private:
 
 	const BoundedRay doGenerateRay(const Sample& sample, const TVector2D& screenSpaceDelta) const;
 	const TimePeriod doShutterDelta() const;
+	TScalar doWeight(const TRay3D& ray) const;
 	TScalar doAsDepth(const TRay3D& ray, TScalar t) const;
 
 	const TPyObjectPtr doGetState() const;
@@ -130,6 +134,7 @@ private:
 	TScalar focusDistance_;
 	TScalar fNumber_;
 	TScalar lensRadius_;
+	TScalar falloffPower_;
 
 	TVector3D directionBase_;
 };

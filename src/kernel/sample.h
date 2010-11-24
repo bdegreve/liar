@@ -60,7 +60,7 @@ public:
 	TScalar frequency() const;
 
 	TScalar weight() const;
-	void setWeight(TScalar iWeight);
+	void setWeight(TScalar weight);
 
 	const TSubSequence1D subSequence1D(int id) const;
 	const TSubSequence2D subSequence2D(int id) const;

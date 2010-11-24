@@ -78,6 +78,33 @@ const TBsdfPtr IntersectionContext::bsdf() const
 
 
 
+void IntersectionContext::setPoint(const TPoint3D& point) 
+{ 
+	point_ = point; 
+	hasDirtyBsdfToWorld_ = hasDirtyWorldToBsdf_ = true; 
+}
+
+
+
+void IntersectionContext::setGeometricNormal(const TVector3D& geometricNormal) 
+{ 
+	geometricNormal_ = geometricNormal; 
+}
+
+
+
+void IntersectionContext::setNormal(const TVector3D& normal)
+{ 
+	normal_ = normal; 
+	if (geometricNormal_.isZero())
+	{
+		geometricNormal_ = normal;
+	}
+	hasDirtyBsdfToWorld_ = hasDirtyWorldToBsdf_ = true; 
+}
+
+
+
 void IntersectionContext::setShader(const Shader* shader)
 {
 	shader_ = shader;

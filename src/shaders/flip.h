@@ -21,53 +21,49 @@
  *  http://liar.bramz.net/
  */
 
-/** @class liar::shaders::Sum
- *  @brief simple addition of multiple shaders
+/** @class liar::shaders::FlipHemisphere
+ *  @brief flips 
  *  @author Bram de Greve [Bramz]
- *
- *	@warning NOT THREAD SAFE, but thread safety is not a requirement for bsdfs.
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_SUM_H
-#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_SUM_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_FLIP_HEMISPHERE_H
+#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_FLIP_HEMISPHERE_H
 
 #include "shaders_common.h"
 #include "../kernel/shader.h"
-#include <lass/stde/static_vector.h>
+#include "../kernel/texture.h"
 
 namespace liar
 {
 namespace shaders
 {
 
-class LIAR_SHADERS_DLL Sum: public Shader
+class LIAR_SHADERS_DLL Flip: public Shader
 {
 	PY_HEADER(Shader)
 public:
 
-	enum { capacity = 8 };
+	Flip(const TShaderPtr& child);
 
-	typedef stde::static_vector<TShaderPtr, capacity> TChildren;
-
-	Sum(const TChildren& children);
+	const TShaderPtr& child() const;
+	void setChild(const TShaderPtr& child);
 
 private:
 
-	class SumBsdf: public Bsdf
+	class Bsdf: public kernel::Bsdf
 	{
 	public:
-		typedef stde::static_vector<TBsdfPtr, capacity> TComponents;
-		SumBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps);
+		Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TBsdfPtr& child);
+		static TBsdfCaps flip(TBsdfCaps caps);
+		static TVector3D flip(const TVector3D& omega);
 	private:
 		BsdfOut doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
-		TComponents components_;
-		mutable stde::static_vector<const Bsdf*, capacity> activeComponents_;
-		TBsdfCaps caps_;
-		mutable TBsdfCaps activeCaps_;
-		friend class Sum;
+		TBsdfPtr child_;
 	};
 
+	void doShadeContext(const Sample& sample, IntersectionContext& context) const;
+	const XYZ doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const;
 	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
 
 	void doRequestSamples(const TSamplerPtr& sampler);
@@ -77,7 +73,7 @@ private:
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-	TChildren children_;
+	TShaderPtr child_;
 };
 
 }

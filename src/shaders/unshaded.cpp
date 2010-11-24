@@ -81,17 +81,6 @@ const XYZ Unshaded::doEmission(const Sample& sample, const IntersectionContext& 
 
 
 
-void Unshaded::doBsdf(const Sample&, const IntersectionContext&, const TVector3D&, const BsdfIn*, const BsdfIn*, BsdfOut*) const
-{
-}
-
-
-void Unshaded::doSampleBsdf(const Sample&, const IntersectionContext&, const TVector3D&, const SampleBsdfIn*, const SampleBsdfIn*, SampleBsdfOut*) const
-{
-}
-
-
-
 const TPyObjectPtr Unshaded::doGetState() const
 {
 	return python::makeTuple(colour_);
@@ -104,6 +93,28 @@ void Unshaded::doSetState(const TPyObjectPtr& iState)
 	python::decodeTuple(iState, colour_);
 }
 
+
+
+// --- bsdf ----------------------------------------------------------------------------------------
+
+Unshaded::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps):
+	kernel::Bsdf(sample, context, caps)
+{
+}
+
+
+
+BsdfOut Unshaded::Bsdf::doCall(const TVector3D&, const TVector3D&, TBsdfCaps) const
+{
+	return BsdfOut();
+}
+
+
+
+SampleBsdfOut Unshaded::Bsdf::doSample(const TVector3D&, const TPoint2D&, TScalar, TBsdfCaps) const
+{
+	return SampleBsdfOut();
+}
 
 
 

@@ -64,13 +64,13 @@ protected:
 
 	Texture();
 
+	virtual const TPyObjectPtr doGetState() const = 0;
+	virtual void doSetState(const TPyObjectPtr& state) = 0;
+
 private:
 
 	virtual const XYZ doLookUp(const Sample& sample, 
 		const IntersectionContext& context) const = 0;
-
-	virtual const TPyObjectPtr doGetState() const = 0;
-	virtual void doSetState(const TPyObjectPtr& state) = 0;
 
 	static TTexturePtr black_;
 	static TTexturePtr white_;

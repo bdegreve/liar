@@ -26,8 +26,8 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_LINEAR_INTERPOLATOR_H
-#define LIAR_GUARDIAN_OF_INCLUSION_LINEAR_INTERPOLATOR_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_LINEAR_INTERPOLATOR_H
+#define LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_LINEAR_INTERPOLATOR_H
 
 #include "textures_common.h"
 #include "../kernel/texture.h"

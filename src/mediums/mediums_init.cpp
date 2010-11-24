@@ -29,6 +29,7 @@
 #include "bounded.h"
 #include "exponential_fog.h"
 #include "fog.h"
+#include "transformation.h"
 
 using namespace liar::mediums;
 
@@ -40,6 +41,7 @@ PY_MODULE_CLASS(mediums, Beer)
 PY_MODULE_CLASS(mediums, Bounded)
 PY_MODULE_CLASS(mediums, Fog)
 	PY_MODULE_CLASS(mediums, ExponentialFog)
+PY_MODULE_CLASS(mediums, Transformation)
 
 void mediumsPostInject(PyObject*)
 {

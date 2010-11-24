@@ -59,6 +59,18 @@ if (OPENEXR_FOUND)
 		)
 ENDIF()
 
+# libtiff: http://www.remotesensing.org/libtiff/
+find_package(TIFF)
+mark_as_advanced(CLEAR TIFF_INCLUDE_DIR TIFF_LIBRARY)
+if (TIFF_FOUND)
+	include_directories(
+		${TIFF_INCLUDE_DIR}
+		)
+	#add_liar_codec(tiff ${TIFF_LIBRARIES})
+	if (WIN32)
+	endif()
+endif()
+
 file(GLOB pyfiles "*.py")
 install(
 	FILES ${pyfiles}

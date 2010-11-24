@@ -94,7 +94,7 @@ Display::Display(const std::string& title, const TResolution2D& resolution):
 	maxSceneLuminance_(0),
 	sceneLuminanceCoverage_(0),
 	middleGrey_(.184f),
-	toneMapping_(tmExponentialY),
+	toneMapping_(tmExponentialXYZ),
 	autoExposure_(true),
 	refreshTitle_(false),
 	isQuiting_(false),

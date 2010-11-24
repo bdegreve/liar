@@ -50,6 +50,9 @@ public:
 
 	const DifferentialRay primaryRay(const Sample& sample, const TVector2D& screenSpaceDelta) const;
 	const TimePeriod shutterDelta() const { return doShutterDelta(); }
+	
+	TScalar weight(const TRay3D& ray) { return doWeight(ray); }
+	TScalar weight(const DifferentialRay& ray) { return doWeight(ray.centralRay().unboundedRay()); }
 
 	TScalar asDepth(const TRay3D& ray, TScalar t) { return doAsDepth(ray, t); }
 	TScalar asDepth(const DifferentialRay& ray, TScalar t) { return doAsDepth(ray.centralRay().unboundedRay(), t); }
@@ -66,6 +69,7 @@ private:
 
 	virtual const BoundedRay doGenerateRay(const Sample& sample, const TVector2D& screenSpaceDelta) const = 0;
 	virtual const TimePeriod doShutterDelta() const = 0;
+	virtual TScalar doWeight(const TRay3D& ray) const;
 	virtual TScalar doAsDepth(const TRay3D& ray, TScalar t) const = 0;
 
 	virtual const TPyObjectPtr doGetState() const = 0;

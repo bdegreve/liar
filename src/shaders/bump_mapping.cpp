@@ -42,7 +42,7 @@ BumpMapping::BumpMapping(const TShaderPtr& shader, const TTexturePtr& displaceme
 	Shader(shader->caps()),
 	shader_(shader),
 	displacement_(displacement),
-	scale_(0.01)
+	scale_(1)
 {
 }
 

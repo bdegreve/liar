@@ -23,14 +23,6 @@
 
 #include "tracers_common.h"
 #include "direct_lighting.h"
-/*
-#include "../kernel/per_thread_buffer.h"
-#include <lass/num/distribution.h>
-#include <lass/util/progress_indicator.h>
-#include <lass/stde/range_algorithm.h>
-#include <lass/stde/extended_iterator.h>
-#include <lass/util/thread.h>
-*/
 #include <lass/num/floating_point_comparison.h>
 
 #define EVAL(x) LASS_COUT << LASS_STRINGIFY(x) << ": " << (x) << std::endl
@@ -137,7 +129,7 @@ const XYZ DirectLighting::doCastRay(
 		const TPoint3D point = primaryRay.point(intersection.t());
 		const TVector3D normal = context.bsdfToWorld(TVector3D(0, 0, 1));
 		const TVector3D omega = context.worldToBsdf(-primaryRay.direction());
-		LASS_ASSERT(omega.z >= 0);
+		//LASS_ASSERT(omega.z >= 0);
 		result += transparency * doShadeSurface(sample, primaryRay, context, point, normal, omega, generation, highQuality);
 	}
 	else

@@ -31,6 +31,7 @@
 
 #include "textures_common.h"
 #include "../kernel/texture.h"
+#include "../kernel/transformation.h"
 
 namespace liar
 {
@@ -43,6 +44,7 @@ class LIAR_TEXTURES_DLL TransformationLocal: public Texture
 public:
 
 	TransformationLocal(const TTexturePtr& texture, const TTransformation3D& transformation);
+	TransformationLocal(const TTexturePtr& texture, const TPyTransformation3DPtr& transformation);
 
 	const TTexturePtr& texture() const;
 	void setTexture(const TTexturePtr& texture);

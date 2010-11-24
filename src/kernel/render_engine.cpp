@@ -362,6 +362,7 @@ void RenderEngine::Consumer::operator()(const Task& iTask)
 
 				sampler_->sample(i, k, timePeriod_, sample);
 				const DifferentialRay primaryRay = engine_->camera_->primaryRay(sample, pixelSize_);
+				sample.setWeight(engine_->camera_->weight(primaryRay));
 				TScalar alpha, tIntersection;
 				const XYZ radiance = rayTracer_->castRay(sample, primaryRay, tIntersection, alpha);
 				const TScalar depth = engine_->camera_->asDepth(primaryRay, tIntersection);

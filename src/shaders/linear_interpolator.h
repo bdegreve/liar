@@ -21,13 +21,13 @@
  *  http://liar.bramz.net/
  */
 
-/** @class liar::shaders::Unshaded
- *  @brief a shader that simply returns the texture value.
- *  @author Bram de Greve [Bramz]
+/** @class liar::shaders::LinearInterpolator
+ *  @brief interpolates between shaders based on gray value of control texture
+ *	@author Bram de Greve (bramz@users.sourceforge.net)
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_UNSHADED_H
-#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_UNSHADED_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_LINEAR_INTERPOLATOR_H
+#define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_LINEAR_INTERPOLATOR_H
 
 #include "shaders_common.h"
 #include "../kernel/shader.h"
@@ -38,35 +38,56 @@ namespace liar
 namespace shaders
 {
 
-class LIAR_SHADERS_DLL Unshaded: public Shader
+class LIAR_SHADERS_DLL LinearInterpolator: public Shader
 {
 	PY_HEADER(Shader)
 public:
 
-	Unshaded();
-	Unshaded(const TTexturePtr& iColour);
+	typedef std::pair<TScalar, TShaderPtr> TKeyShader;
+	typedef std::vector<TKeyShader> TKeyShaders;
 
-	const TTexturePtr& colour() const;
-	void setColour(const TTexturePtr& iColour);
+	LinearInterpolator();
+	LinearInterpolator(const TKeyShaders& keyShaders, const TTexturePtr& controlTexture);
+
+	const TKeyShaders& keys() const;
+	const TTexturePtr& control() const;
+
+	void setKeys(const TKeyShaders& keyShaders);
+	void setControl(const TTexturePtr& controlTexture);
+
+	void addKey(TScalar keyValue, const TShaderPtr& keyShader);
 
 private:
+
+	struct LesserKey
+	{
+		bool operator()(const TKeyShader& a, const TKeyShader& b) const { return a.first < b.first; }
+	};
 
 	class Bsdf: public kernel::Bsdf
 	{
 	public:
-		Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps);
+		Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TBsdfPtr& a, const TBsdfPtr& b, TScalar t);
 	private:
 		BsdfOut doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
+		TBsdfPtr a_;
+		TBsdfPtr b_;
+		TScalar t_;
 	};
 
-	const XYZ doEmission(const Sample& sample, const IntersectionContext& context,
-		const TVector3D& omegaOut) const;
+	const XYZ doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const;
+	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
+
+	void doRequestSamples(const TSamplerPtr& sampler);
+	size_t doNumReflectionSamples() const;
+	size_t doNumTransmissionSamples() const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-	TTexturePtr colour_;
+	TKeyShaders keys_;
+	TTexturePtr control_;
 };
 
 }
@@ -76,4 +97,3 @@ private:
 #endif
 
 // EOF
-

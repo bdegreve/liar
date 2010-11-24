@@ -56,13 +56,46 @@ Sum::Sum(const TChildren& children):
 
 TBsdfPtr Sum::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-	SumBsdf::TComponents components;
-	components.reserve(children_.size());
+	TBsdfPtr::Rebind<SumBsdf>::Type result(new SumBsdf(sample, context, caps()));
 	for (TChildren::const_iterator i = children_.begin(); i != children_.end(); ++i)
 	{
-		components.push_back((*i)->bsdf(sample, context));
+		result->components_.push_back((*i)->bsdf(sample, context));
 	}
-	return TBsdfPtr(new SumBsdf(sample, context, caps(), components));
+	return result;
+}
+
+
+
+void Sum::doRequestSamples(const TSamplerPtr& sampler)
+{
+	for (TChildren::const_iterator i = children_.begin(); i != children_.end(); ++i)
+	{
+		(*i)->requestSamples(sampler);
+	}
+}
+
+
+
+size_t Sum::doNumReflectionSamples() const
+{
+	size_t n = 0;
+	for (TChildren::const_iterator i = children_.begin(); i != children_.end(); ++i)
+	{
+		n = std::max(n, (*i)->numReflectionSamples());
+	}
+	return n;
+}
+
+
+
+size_t Sum::doNumTransmissionSamples() const
+{
+	size_t n = 0;
+	for (TChildren::const_iterator i = children_.begin(); i != children_.end(); ++i)
+	{
+		n = std::max(n, (*i)->numTransmissionSamples());
+	}
+	return n;
 }
 
 
@@ -82,9 +115,8 @@ void Sum::doSetState(const TPyObjectPtr& state)
 
 // --- bsdf ----------------------------------------------------------------------------------------
 
-Sum::SumBsdf::SumBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TComponents& components):
-	Bsdf(sample, context, caps),
-	components_(components)
+Sum::SumBsdf::SumBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps):
+	Bsdf(sample, context, caps)
 {
 }
 
@@ -109,8 +141,12 @@ BsdfOut Sum::SumBsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut
 	return out;
 }
 
+
+
 SampleBsdfOut Sum::SumBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const
 {
+	// this implementation is not thread safe, but that's OK, as a BSDF is not supposed to be shared between multiple threads.
+
 	if (allowedCaps != activeCaps_)
 	{
 		activeComponents_.clear();

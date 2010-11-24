@@ -50,6 +50,7 @@ PY_CLASS_MEMBER_RW(PerspectiveCamera, focusDistance, setFocusDistance)
 PY_CLASS_METHOD(PerspectiveCamera, focusAt)
 PY_CLASS_MEMBER_RW(PerspectiveCamera, fNumber, setFNumber)
 PY_CLASS_MEMBER_RW(PerspectiveCamera, lensRadius, setLensRadius)
+PY_CLASS_MEMBER_RW(PerspectiveCamera, falloffPower, setFalloffPower)
 PY_CLASS_MEMBER_RW(PerspectiveCamera, shutterOpenDelta, setShutterOpenDelta)
 PY_CLASS_MEMBER_RW(PerspectiveCamera, shutterCloseDelta, setShutterCloseDelta)
 PY_CLASS_MEMBER_RW(PerspectiveCamera, shutterTime, setShutterTime)
@@ -62,9 +63,10 @@ PerspectiveCamera::PerspectiveCamera():
 	shutterOpenDelta_(0),
 	shutterCloseDelta_(0),
 	width_(0.036f),
-	nearLimit_(TNumTraits::zero),
+	nearLimit_(0),
 	farLimit_(TNumTraits::max),
-	focusDistance_(TNumTraits::max)
+	focusDistance_(TNumTraits::max),
+	falloffPower_(0)
 {
 	setAspectRatio(4.f / 3.f);
 	setLensRadius(0);
@@ -345,6 +347,20 @@ void PerspectiveCamera::setLensRadius(TScalar radius)
 
 
 
+TScalar PerspectiveCamera::falloffPower() const
+{
+	return falloffPower_;
+}
+
+
+
+void PerspectiveCamera::setFalloffPower(TScalar power)
+{
+	falloffPower_ = std::max(power, TNumTraits::zero);
+}
+
+
+
 TTime PerspectiveCamera::shutterOpenDelta() const
 {
 	return shutterOpenDelta_;
@@ -432,6 +448,18 @@ const TimePeriod PerspectiveCamera::doShutterDelta() const
 
 
 
+TScalar PerspectiveCamera::doWeight(const TRay3D& ray) const
+{
+	if (falloffPower_ == 0)
+	{
+		return 1;
+	}
+	const TScalar cosTheta = prim::dot(ray.direction(), direction_.normal());
+	return num::pow(cosTheta, falloffPower_);
+}
+
+
+
 TScalar PerspectiveCamera::doAsDepth(const TRay3D& ray, TScalar t) const
 {
 	return t * prim::dot(ray.direction(), direction_.normal());
@@ -465,7 +493,8 @@ const TPyObjectPtr PerspectiveCamera::doGetState() const
 		nearLimit_,
 		farLimit_,
 		focusDistance_,
-		fNumber_);
+		fNumber_,
+		falloffPower_);
 }
 
 
@@ -486,7 +515,8 @@ void PerspectiveCamera::doSetState(const TPyObjectPtr& state)
 		nearLimit_,
 		farLimit_,
 		focusDistance_,
-		fNumber_
+		fNumber_,
+		falloffPower_
 	) == 0);
 
 	setWidth(width_);

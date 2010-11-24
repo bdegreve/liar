@@ -58,9 +58,9 @@ liar::TScalar tolerance()
 	return liar::tolerance;
 }
 
-void setTolerance(liar::TScalar iTolerance)
+void setTolerance(liar::TScalar tolerance)
 {
-	liar::tolerance = iTolerance;
+	liar::tolerance = tolerance;
 }
 
 PY_DECLARE_MODULE_DOC(kernel, "LiAR isn't a raytracer")

@@ -1,8 +1,11 @@
 import sys
 import os
 import math
-import warnings
+import logging
 import liar
+
+
+VERBOSITIES = QUIET, NORMAL, VERBOSE = range(3)
 
 
 def parse(path, *args, **kwargs):
@@ -12,18 +15,20 @@ def parse(path, *args, **kwargs):
 
 
 class PbrtScene(object):
-	def __init__(self, verbose=False, render_immediately=True, display=True, threads=None):
+	def __init__(self, verbosity=NORMAL, render_immediately=True, display=True, threads=None):
 		self.engine = liar.RenderEngine()
 		self.engine.numberOfThreads = threads or liar.RenderEngine.AUTO_NUMBER_OF_THREADS
 		self.Identity()
 		self.__state = _STATE_OPTIONS_BLOCK
 		self.__named_coordinate_systems = {}
 		self.__render_immediately = True
-		self.__verbose, self.__render_immediately, self.__display = verbose, render_immediately, display
+		self.__render_immediately, self.__display = render_immediately, display
 		self.Camera()
 		self.PixelFilter()
 		self.Film()
 		self.SurfaceIntegrator()
+		self.__logger = logging.getLogger("liar.tools.pbrt")
+		self.__logger.setLevel({QUIET: logging.CRITICAL, NORMAL: logging.INFO, VERBOSE: logging.DEBUG}[verbosity])
 	
 	def Identity(self):
 		self.__cur_transform = liar.Transformation3D.identity()
@@ -98,7 +103,7 @@ class PbrtScene(object):
 			try:
 				Display = liar.output.Display
 			except AttributeError:
-				warnings.warn("no display output possible, unsupported by LiAR installation")
+				self.__logger.warning("no display output possible, unsupported by LiAR installation")
 			else:
 				w = min(width, 800)
 				h = int(w / camera.aspectRatio)
@@ -168,7 +173,7 @@ class PbrtScene(object):
 		right, up, direction, position = [mat[k:12:4] for k in range(4)]
 		self.engine.camera = getattr(self, "_camera_" + name)(position, direction, up, right, **kwargs)
 	
-	def _camera_perspective(self, position, direction, up, right, hither=10e-3, yon=10e30, shutteropen=0, shutterclose=1, lensradius=0, focaldistance=10e30):
+	def _camera_perspective(self, position, direction, up, right, hither=10e-3, yon=10e30, shutteropen=0, shutterclose=1, lensradius=0, focaldistance=10e30, _falloff=0):
 		from liar.tools.geometry import negate
 		camera = liar.cameras.PerspectiveCamera()
 		camera.position, camera.sky, camera.direction = position, up, direction
@@ -176,13 +181,14 @@ class PbrtScene(object):
 		camera.nearLimit, camera.farLimit = hither, yon
 		camera.shutterOpenDelta, camera.shutterCloseDelta = shutteropen, shutterclose
 		camera.lensRadius, camera.focusDistance = lensradius, focaldistance
+		camera.falloffPower = _falloff
 		return camera
 	
 	
 	def Sampler(self, name="bestcandidate", **kwargs):
 		self.verify_options()
 		if name != "stratified":
-			warnings.warn("at this point, we only support stratified samplers.")
+			self.__logger.warning("at this point, we only support stratified samplers.")
 			name = "stratified"
 		self.engine.sampler = getattr(self, "_sampler_" + name)(**kwargs)
 	
@@ -264,7 +270,7 @@ class PbrtScene(object):
 		try:
 			self.__material = getattr(self, "_material_" + name)(**kwargs)
 		except AttributeError:
-			warnings.warn("unknown material %(name)r, defaulting to matte." % vars())
+			self.__logger.warning("unknown material %(name)r, defaulting to matte." % vars())
 			kwargs = _filter_dict(kwargs, lambda key: key in ('Kd', 'sigma'))
 			self.__material = self._material_matte(**kwargs)
 		if bumpmap:
@@ -276,7 +282,7 @@ class PbrtScene(object):
 	def _material_plastic(self, Kd=1, Ks=1, roughness=0.1):
 		#diffuse = liar.shaders.Lambert(self._get_texture(Kd))
 		#return liar.shaders.Sum([diffuse])
-		return self._material_substrate(Kd, Ks, roughness, roughness)
+		return self._material_substrate(Kd=Kd, Ks=Ks, uroughness=roughness, vroughness=roughness)
 
 	def _material_substrate(self, Kd=.5, Ks=.5, uroughness=.1, vroughness=.1):
 		shader = liar.shaders.AshikhminShirley(self._get_texture(Kd), self._get_texture(Ks))
@@ -298,12 +304,30 @@ class PbrtScene(object):
 	
 	def _material_clay(self):
 		return liar.shaders.Lambert(self._get_texture((.4, .3, .3)))
+		
+	def _material_uber(self, Kd=1, Ks=1, Kr=0, roughness=0.1, opacity=1):
+		layers = []
+		if Kd or Ks:
+			if Ks:
+				layers.append(self._material_substrate(Kd=Kd, Ks=Ks, uroughness=roughness, vroughness=roughness))
+			else:
+				layers.append(self._material_matte(Kd=Kd))
+		if Kr:
+			layers.append(self._material_mirror(Kr=Kr))
+		if len(layers) == 1:
+			mat = layers[0]
+		else:
+			mat = liar.shaders.Sum(layers)
+		if opacity != 1:
+			transparent = liar.shaders.Flip(liar.shaders.Mirror(self._get_texture(1)))
+			mat = liar.shaders.LinearInterpolator([(0, transparent), (1, mat)], self._get_texture(opacity))
+		return mat
 	
 	def Texture(self, name, type, class_, mapping="uv", uscale=1, vscale=1, udelta=0, vdelta=0, v1=(1,0,0), v2=(0,1,0), **kwargs):
 		self.verify_world()
 		tex = getattr(self, "_texture_" + class_)(**kwargs)
 		if mapping != "uv":
-			warnings.warn("at this point, we don't support mappings other than uv")
+			self.__logger.warning("at this point, we don't support mappings other than uv")
 		if (uscale, vscale, udelta, vdelta) != (1, 1, 0, 0):
 			transform = liar.Transformation2D([uscale, 0, udelta, 0, vscale, vdelta, 0, 0, 1])
 			if isinstance(tex, liar.textures.TransformationUv):
@@ -335,11 +359,16 @@ class PbrtScene(object):
 			tex = liar.textures.TransformationUv(tex, liar.Transformation2D.scaler(.5))
 		return tex
 	
+	def _texture_fbm(self, octaves=8, roughness=.5):
+		return liar.textures.FBm(octaves, roughness)
+	
 	def _texture_imagemap(self, filename, wrap="repeat", maxanisotropy=8, trilinear=False):
 		return liar.textures.Image(filename)
 	
 	def _texture_windy(self):
-		return self._get_texture(0) # to be implemented ...
+		waveHeight = liar.textures.FBm(6)
+		windStrength = liar.textures.Abs(liar.textures.TransformationLocal(liar.textures.FBm(3), liar.Transformation3D.scaler(.1)))
+		return liar.textures.Sum([waveHeight, windStrength])
 	
 	def _get_texture(self, arg):
 		# arg as a texture name
@@ -390,13 +419,15 @@ class PbrtScene(object):
 		except AttributeError:
 			pass
 		self.__volume = liar.mediums.Bounded(shader, (p0, p1))
+		if not self.__cur_transform.isIdentity():
+			self.__volume = liar.mediums.Transformation(self.__volume, self.__cur_transform)
 	
 	def _volume_exponential(self, sigma_a=0, sigma_s=0, g=0, Le=0, a=1, b=1, updir=(0,1,0)):
 		# let's start off with a simple one ...
 		sigma_e = (_avg(sigma_a) + _avg(sigma_s))
 		fog = liar.mediums.ExponentialFog(a * sigma_e, g)
-		fog.emission = Le
-		fog.color = _mul(sigma_s, 1 / sigma_e)
+		fog.emission = _mul(Le, a)
+		fog.color = _mul(sigma_s, 0) #_mul(sigma_s, 1 / sigma_e)
 		fog.decay = b
 		fog.up = updir
 		return fog
@@ -450,7 +481,7 @@ class PbrtScene(object):
 		tracer = liar.tracers.PhotonMapper()
 		tracer.globalMapSize = indirectphotons
 		tracer.causticsQuality = (100. * causticphotons) / indirectphotons
-		if self.__verbose:
+		if self.__verbosity:
 			print ("  causticsQuality=%r" % tracer.causticsQuality)
 		if finalgather or directwithphotons:
 			tracer.globalMapSize += directphotons
@@ -506,7 +537,7 @@ class PbrtScene(object):
 				if token == "Include":
 					token_type, token, line_number = next(tokens)
 					assert token_type == _STRING, "syntax error in file %(path)r, line %(line_number)d: Include must be followed by a string" % vars()
-					print ("Include %r" % token)
+					self.__logger.debug("Include %r" % token)
 					self.parse(token)
 				else:
 					identifier = token
@@ -538,8 +569,6 @@ class PbrtScene(object):
 			getattr(self, identifier)(*args, **kwargs)
 	
 	def __print_statement(self, identifier, args, kwargs):
-		if not self.__verbose:
-			return
 		def truncated_repr(x, n=80):
 			s = repr(x)
 			if len(s) <= n:
@@ -551,7 +580,7 @@ class PbrtScene(object):
 		import pprint
 		pretty_args = [truncated_repr(value) for value in args]
 		pretty_kwargs = ["%s=%s" % (key, truncated_repr(value)) for key, value in kwargs.items()]
-		print ("%s (%s)" % (identifier, ", ".join(pretty_args + pretty_kwargs)))
+		self.__logger.debug("%s (%s)" % (identifier, ", ".join(pretty_args + pretty_kwargs)))
 	
 	def render(self):
 		self.engine.render(self.cropwindow)
@@ -635,9 +664,11 @@ _is_string = lambda arg: isinstance(arg, _string_type)
 
 if __name__ == "__main__":
 	# use the module as a commandline script
+	logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 	from optparse import OptionParser
 	parser = OptionParser()
-	parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True)
+	parser.add_option("-q", "--quiet", action="store_const", const=QUIET, dest="verbosity", default=NORMAL)
+	parser.add_option("-v", "--verbose", action="store_const", const=VERBOSE, dest="verbosity")
 	parser.add_option("-d", "--display", action="store_true", dest="display", default=False, help="show progress in preview display [default=%default]")
 	parser.add_option("-t", "--threads", action="store", type="int", help="number of threads for rendering")
 	options, args = parser.parse_args()

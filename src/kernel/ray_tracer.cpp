@@ -201,7 +201,7 @@ const XYZ RayTracer::estimateLightContribution(
 	// what about indirect estimator caps???
 
 	XYZ result;
-	const TPoint3D start = target + 10 * liar::tolerance * targetNormal;
+	const TPoint3D start = target;// + 10 * liar::tolerance * targetNormal;
 	for (Sample::TSubSequence2D::iterator ls = lightSamples.begin(); ls != lightSamples.end(); ++ls)
 	{
 		BoundedRay shadowRay;
@@ -217,7 +217,7 @@ const XYZ RayTracer::estimateLightContribution(
 		{
 			continue;
 		}
-		const XYZ trans = mediumStack().transmittance(shadowRay);
+		const XYZ trans = 1;//mediumStack().transmittance(shadowRay);
 		const TScalar weight = isMultipleImportanceSampling ? temp::squaredHeuristic(nl * lightPdf, nb * out.pdf) : TNumTraits::one;
 		const TScalar cosTheta = omegaOut.z;
 		result += out.value * trans * radiance * (weight * num::abs(cosTheta) / (n * lightPdf));

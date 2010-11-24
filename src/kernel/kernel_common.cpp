@@ -26,7 +26,7 @@
 namespace liar
 {
 
-TScalar tolerance = 100 * TNumTraits::epsilon;
+TScalar tolerance = 1e-10;
 
 }
 

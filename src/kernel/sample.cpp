@@ -76,9 +76,9 @@ TScalar Sample::weight() const
 
 
 
-void Sample::setWeight(TScalar Weight)
+void Sample::setWeight(TScalar weight)
 {
-	weight_ = Weight;
+	weight_ = weight;
 }
 
 

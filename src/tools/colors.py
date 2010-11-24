@@ -17,8 +17,8 @@
 #
 # http://liar.bramz.net/
 
-import liar.kernel
-import liar.tools.colors
+import liar.kernel as _kernel
+import liar.tools.colors as _colors
 
 def _setDefaultSpaceWrapper(cls, rgbSpace):
 	_oldDefaultSpace(cls, rgbSpace)
@@ -26,10 +26,12 @@ def _setDefaultSpaceWrapper(cls, rgbSpace):
 	
 def _makeColors():
 	colors = {
-		'RED': rgb(1, 0, 0)
+		'RED': rgb(1, 0, 0),
+		'GREEN': rgb(1, 0, 0),
+		'BLUE' rgb(0, 0, 1),
 		}
-	liar.tools.colors.__dict__.update(colors)
+	_colors.update(colors)
 
-_oldDefaultSpace = liar.kernel.RgbSpace.setDefaultSpace
-liar.kernel.RgbSpace.setDefaultSpace = _setDefaultSpaceWrapper
+_oldDefaultSpace = _kernel.RgbSpace.setDefaultSpace
+_kernel.RgbSpace.setDefaultSpace = _setDefaultSpaceWrapper
 _makeColors()
