@@ -65,12 +65,17 @@ public:
 	const TVector3D& dPoint_dJ() const { return dPoint_dJ_; }
 	//}@
 
+	//@{
+	/** surface normal of intersection in the local space of the object that sets the shader.
+	 */
 	const TVector3D& geometricNormal() const { return geometricNormal_; }
 	const TVector3D& normal() const { return normal_; }
 	const TVector3D& dNormal_dU() const { return dNormal_dU_; }
 	const TVector3D& dNormal_dV() const { return dNormal_dV_; }
 	const TVector3D& dNormal_dI() const { return dNormal_dI_; }
 	const TVector3D& dNormal_dJ() const { return dNormal_dJ_; }
+	//}@
+
 	const TPoint2D& uv() const { return uv_; }
 	const TVector2D& dUv_dI() const { return dUv_dI_; }
 	const TVector2D& dUv_dJ() const { return dUv_dJ_; }
@@ -105,22 +110,25 @@ public:
 	void translateBy(const TVector3D& offset);
 	const TVector3D flipTo(const TVector3D& worldOmega);
 
+	const TTransformation3D& localToWorld() const { return localToWorld_; }
+	const TTransformation3D& worldToLocal() const;
+
+	const TTransformation3D& bsdfToLocal() const;
+	const TTransformation3D& localToBsdf() const;
+
 	const TTransformation3D& bsdfToWorld() const;
 	const TTransformation3D& worldToBsdf() const;
 	const TVector3D bsdfToWorld(const TVector3D& v) const { return prim::transform(v, bsdfToWorld()); }
 	const TVector3D worldToBsdf(const TVector3D& v) const { return prim::transform(v, worldToBsdf()); }
-
-	const TTransformation3D& localToWorld() const { return localToWorld_; }
-	const TTransformation3D& worldToLocal() const;
-	
-	//const TVector3D localToWorld(const TVector3D& v) const { return prim::transform(v, localToWorld()); }
-	//const TVector3D worldToLocal(const TVector3D& v) const { return prim::transform(v, worldToLocal()); }
 
 private:
 
 	void init(const SceneObject& object, const BoundedRay& primaryRay, const Intersection& intersection);
 	void setScreenSpaceDifferentialsI(const TRay3D& ray, TVector3D& dPoint, TVector3D& dNormal, TVector2D& dUv);
 	void generateShaderToWorld();
+
+	void localToWorldHasChanged();
+	void bsdfToLocalHasChanged();
 
 	TAabb3D bounds_;
 
@@ -147,14 +155,18 @@ private:
 	const kernel::Sample& sample_;
 
 	TTransformation3D localToWorld_;
-	mutable TTransformation3D bsdfToWorld_;
 	mutable TTransformation3D worldToLocal_;
+	mutable TTransformation3D bsdfToLocal_;
+	mutable TTransformation3D localToBsdf_;
+	mutable TTransformation3D bsdfToWorld_;
 	mutable TTransformation3D worldToBsdf_;
 
 	SolidEvent solidEvent_;
 	bool hasScreenSpaceDifferentials_;
-	mutable bool hasDirtyBsdfToWorld_;
 	mutable bool hasDirtyWorldToLocal_;
+	mutable bool hasDirtyBsdfToLocal_;
+	mutable bool hasDirtyLocalToBsdf_;
+	mutable bool hasDirtyBsdfToWorld_;
 	mutable bool hasDirtyWorldToBsdf_;
 };
 

@@ -81,26 +81,26 @@ const TBsdfPtr IntersectionContext::bsdf() const
 void IntersectionContext::setPoint(const TPoint3D& point) 
 { 
 	point_ = point; 
-	hasDirtyBsdfToWorld_ = hasDirtyWorldToBsdf_ = true; 
+	bsdfToLocalHasChanged(); 
 }
 
 
 
 void IntersectionContext::setGeometricNormal(const TVector3D& geometricNormal) 
 { 
-	geometricNormal_ = geometricNormal; 
+	geometricNormal_ = geometricNormal.normal(); 
 }
 
 
 
 void IntersectionContext::setNormal(const TVector3D& normal)
 { 
-	normal_ = normal; 
+	normal_ = normal.normal(); 
 	if (geometricNormal_.isZero())
 	{
-		geometricNormal_ = normal;
+		geometricNormal_ = normal_;
 	}
-	hasDirtyBsdfToWorld_ = hasDirtyWorldToBsdf_ = true; 
+	bsdfToLocalHasChanged(); 
 }
 
 
@@ -115,7 +115,7 @@ void IntersectionContext::setShader(const Shader* shader)
 void IntersectionContext::transformBy(const TTransformation3D& transformation)
 {
 	localToWorld_ = prim::concatenate(localToWorld_, transformation);
-	hasDirtyWorldToLocal_ = true;
+	localToWorldHasChanged();
 }
 
 
@@ -124,7 +124,7 @@ void IntersectionContext::translateBy(const TVector3D& offset)
 {
 	const TTransformation3D translation = TTransformation3D::translation(offset);
 	localToWorld_ = prim::concatenate(localToWorld_, translation);
-	hasDirtyWorldToLocal_ = true;
+	localToWorldHasChanged();
 }
 
 
@@ -133,14 +133,14 @@ void IntersectionContext::translateBy(const TVector3D& offset)
  */
 const TVector3D IntersectionContext::flipTo(const TVector3D& worldOmega)
 {
-	const TVector3D worldNormal =  prim::normalTransform(normal_, localToWorld_).normal();
+	const TVector3D worldNormal =  prim::normalTransform(normal_, localToWorld()).normal();
 	if (dot(worldNormal, worldOmega) < 0)
 	{
 		geometricNormal_ = -geometricNormal_;
 		normal_ = -normal_;
 		dNormal_dU_ = -dNormal_dU_;
 		dNormal_dV_ = -dNormal_dV_;
-		hasDirtyBsdfToWorld_ = hasDirtyWorldToBsdf_ = true;
+		bsdfToLocalHasChanged(); 
 		return -worldNormal;
 	}
 	return worldNormal;
@@ -148,35 +148,69 @@ const TVector3D IntersectionContext::flipTo(const TVector3D& worldOmega)
 
 
 
-const TTransformation3D& IntersectionContext::bsdfToWorld() const
+const TTransformation3D& IntersectionContext::worldToLocal() const
 {
-	if (!hasDirtyBsdfToWorld_)
+	if (hasDirtyWorldToLocal_)
 	{
-		return bsdfToWorld_;
+		worldToLocal_ = localToWorld().inverse();
+		hasDirtyWorldToLocal_ = false;
 	}
-	const TVector3D n = prim::normalTransform(normal_, localToWorld_).normal();
-	const TPoint3D o = prim::transform(point_, localToWorld_);
-	TVector3D u = n.reject(prim::transform(dPoint_dU_, localToWorld_));
+	return worldToLocal_;
+}
+
+
+
+const TTransformation3D& IntersectionContext::bsdfToLocal() const
+{
+	if (!hasDirtyBsdfToLocal_)
+	{
+		return bsdfToLocal_;
+	}
+	TVector3D u = normal_.reject(dPoint_dU_);
 	TVector3D v;
 	if (!u.isZero())
 	{
-		v = cross(n, u);
+		v = cross(normal_, u);
 	}
 	else
 	{
-		v = n.reject(prim::transform(dPoint_dV_, localToWorld_));
+		v = normal_.reject(dPoint_dV_);
 		if (!v.isZero())
 		{
-			u = cross(v, n);
+			u = cross(v, normal_);
 		}
 		else
 		{
-			prim::impl::Plane3DImplDetail::generateDirections(n, u, v);
+			prim::impl::Plane3DImplDetail::generateDirections(normal_, u, v);
 		}
 	}
-	bsdfToWorld_ = TTransformation3D(o, u.normal(), v.normal(), n);
-	hasDirtyBsdfToWorld_ = false;
-	hasDirtyWorldToBsdf_ = true;
+	bsdfToWorld_ = TTransformation3D(point_, u.normal(), v.normal(), normal_);
+	hasDirtyBsdfToLocal_ = false;
+	LASS_ASSERT(hasDirtyLocalToBsdf_ && hasDirtyBsdfToWorld_ && hasDirtyWorldToBsdf_);
+	return bsdfToWorld_;
+}
+
+
+
+const TTransformation3D& IntersectionContext::localToBsdf() const
+{
+	if (hasDirtyLocalToBsdf_)
+	{
+		localToBsdf_ = bsdfToLocal().inverse();
+		hasDirtyLocalToBsdf_ = false;
+	}
+	return localToBsdf_;
+}
+
+
+
+const TTransformation3D& IntersectionContext::bsdfToWorld() const
+{
+	if (hasDirtyBsdfToWorld_)
+	{
+		bsdfToWorld_ = prim::concatenate(bsdfToLocal(), localToWorld());
+		hasDirtyBsdfToWorld_ = false;
+	}
 	return bsdfToWorld_;
 }
 
@@ -194,18 +228,6 @@ const TTransformation3D& IntersectionContext::worldToBsdf() const
 
 
 
-const TTransformation3D& IntersectionContext::worldToLocal() const
-{
-	if (hasDirtyWorldToLocal_)
-	{
-		worldToLocal_ = localToWorld().inverse();
-		hasDirtyWorldToLocal_ = false;
-	}
-	return worldToLocal_;
-}
-
-
-
 // --- protected -----------------------------------------------------------------------------------
 
 // --- private -------------------------------------------------------------------------------------
@@ -219,7 +241,7 @@ void IntersectionContext::init(const SceneObject& object, const BoundedRay& ray,
 	hasScreenSpaceDifferentials_ = false;
 	localToWorld_ = worldToLocal_ = TTransformation3D::identity();
 	hasDirtyWorldToLocal_ = false;
-	hasDirtyBsdfToWorld_ = hasDirtyWorldToBsdf_ = true;
+	bsdfToLocalHasChanged();
 
 	object.localContext(sample_, ray, intersection, *this);
 	flipTo(-ray.direction());
@@ -259,33 +281,27 @@ void IntersectionContext::setScreenSpaceDifferentialsI(
 }
 
 
-/*
-void IntersectionContext::generateShaderToWorld()
+
+/** sets dirty flags caused by change in local to world transformation 
+ */
+void IntersectionContext::localToWorldHasChanged()
 {
-	if (shader_)
-	{
-		if (!dPoint_dU_.isZero())
-		{
-			const TVector3D v = cross(normal_, dPoint_dU_).normal();
-			const TVector3D u = cross(v, normal_);
-			shaderToWorld_ = TTransformation3D(point_, u, v, normal_);
-		}
-		else if (!dPoint_dV_.isZero())
-		{
-			const TVector3D u = cross(dPoint_dV_, normal_);
-			const TVector3D v = cross(normal_, u).normal();
-			shaderToWorld_ = TTransformation3D(point_, u, v, normal_);
-		}
-		else
-		{
-			TVector3D u;
-			TVector3D v;
-			generateOrthonormal(normal_, u, v);
-			shaderToWorld_ = TTransformation3D(point_, u, v, normal_);
-		}
-	}
+	hasDirtyWorldToLocal_ = true;
+	hasDirtyBsdfToWorld_ = true;
+	hasDirtyWorldToBsdf_ = true;
 }
-*/
+
+
+
+/** sets dirty flags caused by change in bsdf to local transformation 
+ */
+void IntersectionContext::bsdfToLocalHasChanged()
+{
+	hasDirtyBsdfToLocal_ = true;
+	hasDirtyLocalToBsdf_ = true;
+	hasDirtyBsdfToWorld_ = true;
+	hasDirtyWorldToBsdf_ = true;
+}
 
 
 
