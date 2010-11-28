@@ -120,7 +120,7 @@ Sum::SumBsdf::SumBsdf(const Sample& sample, const IntersectionContext& context, 
 {
 }
 
-BsdfOut Sum::SumBsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
+BsdfOut Sum::SumBsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
 {
 	size_t usedComponents = 0;
 	BsdfOut out;
@@ -131,7 +131,7 @@ BsdfOut Sum::SumBsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut
 		{
 			continue;
 		}
-		out += bsdf->call(omegaIn, omegaOut, allowedCaps);
+		out += bsdf->evaluate(omegaIn, omegaOut, allowedCaps);
 		++usedComponents;
 	}
 	if (usedComponents)

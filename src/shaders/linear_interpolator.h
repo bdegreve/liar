@@ -69,7 +69,7 @@ private:
 	public:
 		Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TBsdfPtr& a, const TBsdfPtr& b, TScalar t);
 	private:
-		BsdfOut doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
+		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
 		TBsdfPtr a_;
 		TBsdfPtr b_;

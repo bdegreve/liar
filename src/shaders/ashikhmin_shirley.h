@@ -71,7 +71,7 @@ public:
 	public:
 		Bsdf(const Sample& sample, const IntersectionContext& context, const XYZ& diffuse, const XYZ& specular, TScalar powerU, TScalar powerV);
 	private:
-		BsdfOut doCall(const TVector3D& k1, const TVector3D& k2, TBsdfCaps allowedCaps) const;
+		BsdfOut doEvaluate(const TVector3D& k1, const TVector3D& k2, TBsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
 		const XYZ rhoD(const TVector3D& k1, const TVector3D& k2) const;
 		const XYZ rhoS(const TVector3D& k1, const TVector3D& k2, const TVector3D& h, TScalar& pdf) const;

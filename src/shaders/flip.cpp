@@ -153,9 +153,9 @@ TVector3D Flip::Bsdf::flip(const TVector3D& omega)
 
 
 
-BsdfOut Flip::Bsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
+BsdfOut Flip::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
 {
-	return child_->call(omegaIn, flip(omegaOut), flip(allowedCaps));
+	return child_->evaluate(omegaIn, flip(omegaOut), flip(allowedCaps));
 }
 
 

@@ -237,7 +237,7 @@ AshikhminShirley::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& co
 
 
 
-BsdfOut AshikhminShirley::Bsdf::doCall(const TVector3D& k1, const TVector3D& k2, TBsdfCaps allowedCaps) const
+BsdfOut AshikhminShirley::Bsdf::doEvaluate(const TVector3D& k1, const TVector3D& k2, TBsdfCaps allowedCaps) const
 {
 	LASS_ASSERT(k1.z > 0);
 	if (k2.z <= 0)

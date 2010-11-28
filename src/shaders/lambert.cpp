@@ -102,7 +102,7 @@ LambertBsdf::LambertBsdf(const Sample& sample, const IntersectionContext& contex
 {
 }
 
-BsdfOut LambertBsdf::doCall(const TVector3D&, const TVector3D& omegaOut, TBsdfCaps LASS_UNUSED(allowedCaps)) const
+BsdfOut LambertBsdf::doEvaluate(const TVector3D&, const TVector3D& omegaOut, TBsdfCaps LASS_UNUSED(allowedCaps)) const
 {
 	LASS_ASSERT(shaders::hasCaps(allowedCaps, caps()));
 	const TScalar cosTheta = omegaOut.z;

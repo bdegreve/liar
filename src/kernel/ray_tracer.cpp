@@ -212,7 +212,7 @@ const XYZ RayTracer::estimateLightContribution(
 			continue;
 		}
 		const TVector3D& omegaOut = bsdf->worldToBsdf(shadowRay.direction());
-		const BsdfOut out = bsdf->call(omegaIn, omegaOut, caps);
+		const BsdfOut out = bsdf->evaluate(omegaIn, omegaOut, caps);
 		if (!out || scene()->isIntersecting(sample, shadowRay))
 		{
 			continue;

@@ -104,7 +104,7 @@ Unshaded::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, T
 
 
 
-BsdfOut Unshaded::Bsdf::doCall(const TVector3D&, const TVector3D&, TBsdfCaps) const
+BsdfOut Unshaded::Bsdf::doEvaluate(const TVector3D&, const TVector3D&, TBsdfCaps) const
 {
 	return BsdfOut();
 }

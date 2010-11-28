@@ -110,7 +110,7 @@ Mirror::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, con
 
 
 
-BsdfOut Mirror::Bsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
+BsdfOut Mirror::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
 {
 	return BsdfOut();
 }

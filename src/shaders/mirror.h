@@ -54,7 +54,7 @@ public:
 	public:
 		Bsdf(const Sample& sample, const IntersectionContext& context, const XYZ& reflectance);
 	private:
-		BsdfOut doCall(const TVector3D& k1, const TVector3D& k2, TBsdfCaps allowedCaps) const;
+		BsdfOut doEvaluate(const TVector3D& k1, const TVector3D& k2, TBsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
 		XYZ reflectance_;
 	};

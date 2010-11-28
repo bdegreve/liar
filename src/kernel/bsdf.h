@@ -142,13 +142,13 @@ public:
 	bool hasCaps(TBsdfCaps wantedCaps) const { return kernel::hasCaps(caps_, wantedCaps); }
 	bool compatibleCaps(TBsdfCaps allowedCaps) const { return kernel::compatibleCaps(caps_, allowedCaps); }
 
-	BsdfOut call(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
+	BsdfOut evaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
 	{
 		if (!compatibleCaps(allowedCaps))
 		{
 			return BsdfOut();
 		}
-		return doCall(omegaIn, omegaOut, allowedCaps);
+		return doEvaluate(omegaIn, omegaOut, allowedCaps);
 	}
 
 	SampleBsdfOut sample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const
@@ -165,7 +165,7 @@ public:
 
 private:
 
-	virtual BsdfOut doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
+	virtual BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
 	virtual SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
 
 	const Sample& sample_;

@@ -251,7 +251,7 @@ LinearInterpolator::Bsdf::Bsdf(
 
 
 
-BsdfOut LinearInterpolator::Bsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
+BsdfOut LinearInterpolator::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
 {
 	TScalar pa = a_->compatibleCaps(allowedCaps) ? (1 - t_) : 0;
 	TScalar pb = b_->compatibleCaps(allowedCaps) ? t_ : 0;
@@ -261,13 +261,13 @@ BsdfOut LinearInterpolator::Bsdf::doCall(const TVector3D& omegaIn, const TVector
 	BsdfOut out;
 	if (pa > 0)
 	{
-		out = a_->call(omegaIn, omegaOut, allowedCaps);
+		out = a_->evaluate(omegaIn, omegaOut, allowedCaps);
 		out.value *= (1 - t_);
 		out.pdf *= pa / ptot;
 	}
 	if (pb > 0)
 	{
-		const BsdfOut outB = b_->call(omegaIn, omegaOut, allowedCaps);
+		const BsdfOut outB = b_->evaluate(omegaIn, omegaOut, allowedCaps);
 		out.value += outB.value * t_;
 		out.pdf += outB.pdf * pa / ptot;
 	}

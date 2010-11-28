@@ -57,7 +57,7 @@ private:
 		static TBsdfCaps flip(TBsdfCaps caps);
 		static TVector3D flip(const TVector3D& omega);
 	private:
-		BsdfOut doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
+		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
 		TBsdfPtr child_;
 	};

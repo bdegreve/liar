@@ -70,7 +70,7 @@ const TVector3D Bsdf::worldToBsdf(const TVector3D& v) const
 
 /** fall back for old shaders
  */
-BsdfOut Bsdf::doCall(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
+BsdfOut Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
 {
 	LASS_ASSERT(context_.shader());
 	BsdfIn in;

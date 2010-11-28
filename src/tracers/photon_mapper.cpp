@@ -1076,7 +1076,7 @@ const XYZ PhotonMapper::gatherIndirect(
 			TScalar pdfHalfSphere;
 			out.omegaOut = num::uniformHemisphere(s, pdfHalfSphere).position();
 			out.pdf *= pdfHalfSphere;
-			out.value = bsdf->call(omegaIn, out.omegaOut, Bsdf::capsReflection | Bsdf::capsDiffuse).value;
+			out.value = bsdf->evaluate(omegaIn, out.omegaOut, Bsdf::capsReflection | Bsdf::capsDiffuse).value;
 		}
 		else
 		{
@@ -1243,7 +1243,7 @@ const XYZ PhotonMapper::estimateRadiance(
 		//if (dot(normal, nearest->normal) > 0.9)
 		{
 			sqrEstimationRadius = nearest->squaredEstimationRadius;
-			const BsdfOut out = bsdf->call(omegaOut, context.worldToBsdf(nearest->normal), Bsdf::capsAll);
+			const BsdfOut out = bsdf->evaluate(omegaOut, context.worldToBsdf(nearest->normal), Bsdf::capsAll);
 			return out ? out.value * nearest->irradiance : XYZ();
 		}
 	}
@@ -1263,7 +1263,7 @@ const XYZ PhotonMapper::estimateRadiance(
 	for (TPhotonNeighbourhood::const_iterator i = photonNeighbourhood_.begin(); i != last; ++i)
 	{
 		const TVector3D omegaPhoton = context.worldToBsdf(i->object()->omegaIn);
-		const BsdfOut out = bsdf->call(omegaOut, omegaPhoton, Bsdf::capsAll & ~Bsdf::capsSpecular & ~Bsdf::capsGlossy);
+		const BsdfOut out = bsdf->evaluate(omegaOut, omegaPhoton, Bsdf::capsAll & ~Bsdf::capsSpecular & ~Bsdf::capsGlossy);
 		if (out.pdf > 0 && out.value)
 		{
 			result += out.value * i->object()->power;
@@ -1306,7 +1306,7 @@ const XYZ PhotonMapper::estimateCaustics(
 	for (int i = 0; i < n; ++i)
 	{
 		const TVector3D omegaPhoton = context.worldToBsdf(photonNeighbourhood_[i].object()->omegaIn);
-		const BsdfOut out = bsdf->call(omegaIn, omegaPhoton, Bsdf::capsAllDiffuse);
+		const BsdfOut out = bsdf->evaluate(omegaIn, omegaPhoton, Bsdf::capsAllDiffuse);
 		if (out)
 		{
 			const TScalar sqrR = photonNeighbourhood_[i].squaredDistance();
