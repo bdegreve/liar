@@ -58,11 +58,15 @@ public:
 	/** 3D position of intersection in the local space of the object that sets the shader.
 	 */
 	const TPoint3D& point() const { return point_; }
-	void setPoint(const TPoint3D& point);
 	const TVector3D& dPoint_dU() const { return dPoint_dU_; }
 	const TVector3D& dPoint_dV() const { return dPoint_dV_; }
 	const TVector3D& dPoint_dI() const { return dPoint_dI_; }
 	const TVector3D& dPoint_dJ() const { return dPoint_dJ_; }
+	void setPoint(const TPoint3D& point);
+	void setDPoint_dU(const TVector3D& dPoint_dU);
+	void setDPoint_dV(const TVector3D& dPoint_dV);
+	void setDPoint_dI(const TVector3D& dPoint_dI);
+	void setDPoint_dJ(const TVector3D& dPoint_dJ);
 	//}@
 
 	//@{
@@ -85,10 +89,6 @@ public:
 	const Medium* interior() const { return interior_; }
 	SolidEvent solidEvent() const { return solidEvent_; }
 
-	void setDPoint_dU(const TVector3D& dPoint_dU) { dPoint_dU_ = dPoint_dU; hasDirtyBsdfToWorld_ = hasDirtyWorldToBsdf_ = true; }
-	void setDPoint_dV(const TVector3D& dPoint_dV) { dPoint_dV_ = dPoint_dV; hasDirtyBsdfToWorld_ = hasDirtyWorldToBsdf_ = true; }
-	void setDPoint_dI(const TVector3D& dPoint_dI) { dPoint_dI_ = dPoint_dI; }
-	void setDPoint_dJ(const TVector3D& dPoint_dJ) { dPoint_dJ_ = dPoint_dJ; }
 	void setGeometricNormal(const TVector3D& geometricNormal);
 	void setNormal(const TVector3D& normal);
 	void setDNormal_dU(const TVector3D& dNormal_dU) { dNormal_dU_ = dNormal_dU; }

@@ -110,34 +110,11 @@ private:
 	virtual const TPyObjectPtr doGetState() const = 0;
 	virtual void doSetState(const TPyObjectPtr& state) = 0;
 
-	void zeroBsdf(BsdfOut* first, BsdfOut* last) const;
-	void zeroSampleBsdf(SampleBsdfOut* first, SampleBsdfOut* last) const;
-
 	TBsdfCaps caps_;
 	int idReflectionSamples_;
 	int idReflectionComponentSamples_;
 	int idTransmissionSamples_;
 	int idTransmissionComponentSamples_;
-
-	// deprecated stuff ...
-	friend class Bsdf;
-	virtual void doBsdf(const Sample&, const IntersectionContext&, const TVector3D&, const BsdfIn*, const BsdfIn*, BsdfOut*) const { LASS_ENFORCE(false); }
-	virtual void doSampleBsdf(const Sample&, const IntersectionContext&, const TVector3D&, const SampleBsdfIn*, const SampleBsdfIn*, SampleBsdfOut*) const { LASS_ENFORCE(false); }
-	void bsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const
-	{
-		LASS_ASSERT(omegaIn.z >= 0);
-		zeroBsdf(result, result + (last - first));
-		doBsdf(sample, context, omegaIn, first, last, result);
-	}
-	void sampleBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
-	{
-		LASS_ASSERT(omegaIn.z >= 0);
-		zeroSampleBsdf(result, result + (last - first));
-		doSampleBsdf(sample, context, omegaIn, first, last, result);
-	}
-
 };
 
 typedef python::PyObjectPtr<Shader>::Type TShaderPtr;

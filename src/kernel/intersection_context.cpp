@@ -86,6 +86,36 @@ void IntersectionContext::setPoint(const TPoint3D& point)
 
 
 
+void IntersectionContext::setDPoint_dU(const TVector3D& dPoint_dU) 
+{ 
+	dPoint_dU_ = dPoint_dU; 
+	bsdfToLocalHasChanged(); 
+}
+
+
+
+void IntersectionContext::setDPoint_dV(const TVector3D& dPoint_dV) 
+{ 
+	dPoint_dV_ = dPoint_dV; 
+	bsdfToLocalHasChanged(); 
+}
+
+
+
+void IntersectionContext::setDPoint_dI(const TVector3D& dPoint_dI) 
+{ 
+	dPoint_dI_ = dPoint_dI; 
+}
+
+
+
+void IntersectionContext::setDPoint_dJ(const TVector3D& dPoint_dJ) 
+{ 
+	dPoint_dJ_ = dPoint_dJ; 
+}
+
+
+
 void IntersectionContext::setGeometricNormal(const TVector3D& geometricNormal) 
 { 
 	geometricNormal_ = geometricNormal.normal(); 
@@ -154,6 +184,7 @@ const TTransformation3D& IntersectionContext::worldToLocal() const
 	{
 		worldToLocal_ = localToWorld().inverse();
 		hasDirtyWorldToLocal_ = false;
+		LASS_ASSERT(hasDirtyWorldToBsdf_);
 	}
 	return worldToLocal_;
 }

@@ -142,32 +142,18 @@ public:
 	bool hasCaps(TBsdfCaps wantedCaps) const { return kernel::hasCaps(caps_, wantedCaps); }
 	bool compatibleCaps(TBsdfCaps allowedCaps) const { return kernel::compatibleCaps(caps_, allowedCaps); }
 
-	BsdfOut evaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
-	{
-		if (!compatibleCaps(allowedCaps))
-		{
-			return BsdfOut();
-		}
-		return doEvaluate(omegaIn, omegaOut, allowedCaps);
-	}
-
-	SampleBsdfOut sample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const
-	{
-		if (!compatibleCaps(allowedCaps))
-		{
-			return SampleBsdfOut();
-		}
-		return doSample(omegaIn, sample, componentSample, allowedCaps);
-	}
+	BsdfOut evaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
+	SampleBsdfOut sample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
 
 	const TVector3D bsdfToWorld(const TVector3D& v) const;
 	const TVector3D worldToBsdf(const TVector3D& v) const;
 
 private:
 
-	virtual BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
-	virtual SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
+	virtual BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const = 0;
+	virtual SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const = 0;
 
+	TVector3D omegaGeometricNormal_;
 	const Sample& sample_;
 	const IntersectionContext& context_;
 	TBsdfCaps caps_;

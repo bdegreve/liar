@@ -181,7 +181,7 @@ void Shader::doShadeContext(const Sample&, IntersectionContext&) const
 
 TBsdfPtr Shader::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-	return TBsdfPtr(new Bsdf(sample, context, caps()));
+	return TBsdfPtr();
 }
 
 
@@ -189,31 +189,6 @@ TBsdfPtr Shader::doBsdf(const Sample& sample, const IntersectionContext& context
 const XYZ Shader::doEmission(const Sample&, const IntersectionContext&, const TVector3D&) const
 {
 	return XYZ();
-}
-
-
-
-void Shader::zeroBsdf(BsdfOut* first, BsdfOut* last) const
-{
-	while (first != last)
-	{
-		first->value = XYZ();
-		first->pdf = 0;
-		++first;
-	}
-}
-
-
-
-void Shader::zeroSampleBsdf(SampleBsdfOut* first, SampleBsdfOut* last) const
-{
-	while (first != last)
-	{
-		first->omegaOut = TVector3D(0, 0, 1);
-		first->value = XYZ();
-		first->pdf = 0;
-		++first;
-	}
 }
 
 

@@ -134,104 +134,14 @@ size_t ThinDielectric::doNumTransmissionSamples() const
 
 
 
-void ThinDielectric::doBsdf(const Sample&, const IntersectionContext&, const TVector3D&, const BsdfIn*, const BsdfIn*, BsdfOut*) const
+TBsdfPtr ThinDielectric::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-}
-
-#define LIAR_WARN_ONCE_EX(x, uniqueName)\
-	do\
-	{\
-		static bool uniqueName = false;\
-		if (!uniqueName)\
-		{\
-			LASS_WARNING(x);\
-			uniqueName = true;\
-		}\
-	}\
-	while (false)
-
-#define LIAR_WARN_ONCE(x)\
-	LIAR_WARN_ONCE_EX(x, LASS_UNIQUENAME(liarWarnOnce))
-
-void ThinDielectric::doSampleBsdf(
-		const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn,
-		const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const
-{
-	TScalar ior1 = average(outerRefractionIndex_->lookUp(sample, context));
-	TScalar ior2 = average(innerRefractionIndex_->lookUp(sample, context));
+	// in theory, refractive indices must be at least 1
+	const TScalar ior1 = std::max(average(outerRefractionIndex_->lookUp(sample, context)), 1e-9);
+	const TScalar ior2 = std::max(average(innerRefractionIndex_->lookUp(sample, context)), 1e-9);
 	const XYZ transparency = clamp(transparency_->lookUp(sample, context), TNumTraits::zero, TNumTraits::one);
-
-	if (ior1 <= 0)
-	{
-		LIAR_WARN_ONCE("detected outerRefractionIndex evaluating to zero or less.  Defaulting to 1."
-			"See documentation");
-		ior1 = 1;
-	}
-	if (ior2 <= 0)
-	{
-		LIAR_WARN_ONCE("detected innerRefractionIndex evaluating to zero or less.  Defaulting to 1."
-			"See documentation");
-		ior2 = 1;
-	}
-
-	// http://users.skynet.be/bdegreve/writings/reflection_transmission.pdf
 	const TScalar ior = ior1 / ior2; 
-	const TScalar cosI = omegaIn.z;
-	LASS_ASSERT(cosI > 0);
-	const TScalar sinT2 = num::sqr(ior) * (1 - num::sqr(cosI));
-	XYZ R(TNumTraits::one);
-	XYZ T(TNumTraits::zero);
-	if (sinT2 < 1)
-	{
-		const TScalar cosT = num::sqrt(1 - sinT2);
-		LASS_ASSERT(cosT > 0);
-		const TScalar rOrth = (ior1 * cosI - ior2 * cosT) / (ior1 * cosI + ior2 * cosT);
-		const TScalar rPar = (ior2 * cosI - ior1 * cosT) / (ior2 * cosI + ior1 * cosT);
-		const TScalar r = (num::sqr(rOrth) + num::sqr(rPar)) / 2;
-		LASS_ASSERT(r < 1);
-		const XYZ t = pow(transparency, num::inv(cosT));
-		
-		R = r * (1 + sqr((1 - r) * t) / (1 - sqr(r * t)));
-		R = clamp(R, TNumTraits::zero, TNumTraits::one);
-		T = num::sqr(1 - r) * t / (1 - sqr(r * t));
-		T = clamp(T, TNumTraits::zero, TNumTraits::one);
-		//LASS_COUT << R << "\n";
-	}
-	else
-	{
-		LASS_COUT << "uhoh: cosI=" << cosI << ", sinT2=" << sinT2 << ", ior=" << ior << "\n";
-	}
-	const TScalar r = average(R);
-	const TScalar t = average(T);
-
-	while (first != last)
-	{
-		const bool doReflection = kernel::hasCaps(first->allowedCaps, Bsdf::capsReflection | Bsdf::capsSpecular);
-		const bool doTransmission = kernel::hasCaps(first->allowedCaps, Bsdf::capsTransmission | Bsdf::capsSpecular);
-		const TScalar sr = doReflection ? (doTransmission ? r : 1) : 0;
-		const TScalar st = doTransmission ? (doReflection ? t : 1) : 0;
-		if (sr > 0 || st > 0)
-		{
-			const TScalar pr = sr / (sr + st);
-
-			if (first->sample.x < pr)
-			{
-				result->omegaOut = TVector3D(-omegaIn.x, -omegaIn.y, omegaIn.z);
-				result->value = R;
-				result->pdf = pr;
-				result->usedCaps = Bsdf::capsReflection | Bsdf::capsSpecular;
-			}
-			else
-			{
-				result->omegaOut = -omegaIn;
-				result->value = T;
-				result->pdf = 1 - pr;
-				result->usedCaps = Bsdf::capsTransmission | Bsdf::capsSpecular;
-			}
-		}
-		++first;
-		++result;
-	}
+	return TBsdfPtr(new Bsdf(sample, context, caps(), ior, transparency));
 }
 
 
@@ -246,6 +156,84 @@ const TPyObjectPtr ThinDielectric::doGetState() const
 void ThinDielectric::doSetState(const TPyObjectPtr& state)
 {
 	python::decodeTuple(state, outerRefractionIndex_, innerRefractionIndex_, transparency_);
+}
+
+
+
+// --- bsdf ----------------------------------------------------------------------------------------
+
+ThinDielectric::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, TScalar ior, const XYZ& transparency):
+	kernel::Bsdf(sample, context, caps),
+	transparency_(transparency),
+	ior_(ior)
+{
+	LASS_ASSERT(ior_ > 0);
+}
+
+
+
+BsdfOut ThinDielectric::Bsdf::doEvaluate(const TVector3D&, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
+{
+	return BsdfOut();
+}
+
+
+
+SampleBsdfOut ThinDielectric::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D&, TScalar componentSample, TBsdfCaps allowedCaps) const
+{
+	// http://users.skynet.be/bdegreve/writings/reflection_transmission.pdf
+
+	enum
+	{
+		capsRefl = Bsdf::capsReflection | Bsdf::capsSpecular,
+		capsTrans = Bsdf::capsTransmission | Bsdf::capsSpecular
+	};
+
+	const TScalar cosI = omegaIn.z;
+	LASS_ASSERT(cosI > 0);
+	const TScalar sinT2 = num::sqr(ior_) * (1 - num::sqr(cosI));
+
+	XYZ R(TNumTraits::one);
+	XYZ T(TNumTraits::zero);
+	if (sinT2 < 1)
+	{
+		const TScalar cosT = num::sqrt(1 - sinT2);
+		LASS_ASSERT(cosT > 0);
+		const TScalar rOrth = (ior_ * cosI - cosT) / (ior_ * cosI + cosT);
+		const TScalar rPar = (cosI - ior_ * cosT) / (cosI + ior_ * cosT);
+		const TScalar r = (num::sqr(rOrth) + num::sqr(rPar)) / 2;
+		LASS_ASSERT(r < 1);
+		const XYZ t = pow(transparency_, num::inv(cosT));
+		
+		R = r * (1 + sqr((1 - r) * t) / (1 - sqr(r * t)));
+		R = clamp(R, TNumTraits::zero, TNumTraits::one);
+		T = num::sqr(1 - r) * t / (1 - sqr(r * t));
+		T = clamp(T, TNumTraits::zero, TNumTraits::one);
+	}
+	const TScalar r = average(R);
+	const TScalar t = average(T);
+
+	const bool doReflection = kernel::hasCaps(allowedCaps, capsRefl);
+	const bool doTransmission = kernel::hasCaps(allowedCaps, capsTrans);
+	const TScalar sr = doReflection ? (doTransmission ? r : 1) : 0;
+	const TScalar st = doTransmission ? (doReflection ? t : 1) : 0;
+	
+	LASS_ASSERT(sr >= 0 && st >= 0);
+	if (sr <= 0 && st <= 0)
+	{
+		return SampleBsdfOut();
+	}
+
+	const TScalar pr = sr / (sr + st);
+	if (componentSample < pr)
+	{
+		const TVector3D omegaOut = TVector3D(-omegaIn.x, -omegaIn.y, omegaIn.z);
+		return SampleBsdfOut(omegaOut, R, pr, capsRefl);
+	}
+	else
+	{
+		return SampleBsdfOut(-omegaIn, T, 1 - pr, capsTrans);
+	}
 }
 
 

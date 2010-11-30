@@ -193,12 +193,16 @@ Dielectric::DielectricBsdf::DielectricBsdf(const Sample& sample, const Intersect
 	LASS_ASSERT(ior_ > 0);
 }
 
+
+
 BsdfOut Dielectric::DielectricBsdf::doEvaluate(const TVector3D&, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
 {
 	return BsdfOut();
 }
 
-SampleBsdfOut Dielectric::DielectricBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const
+
+
+SampleBsdfOut Dielectric::DielectricBsdf::doSample(const TVector3D& omegaIn, const TPoint2D&, TScalar componentSample, TBsdfCaps allowedCaps) const
 {
 	enum
 	{

@@ -201,8 +201,12 @@ const XYZ DirectLighting::traceDirect(
 		const Sample& sample, const IntersectionContext&, const TBsdfPtr& bsdf,
 		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, bool highQuality) const
 {
-	XYZ result;
+	if (!bsdf)
+	{
+		return XYZ(0);
+	}
 
+	XYZ result;
 	if (highQuality)
 	{
 		const LightContexts::TIterator end = lights().end();

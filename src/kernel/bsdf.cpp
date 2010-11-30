@@ -34,6 +34,7 @@ namespace kernel
 // --- public --------------------------------------------------------------------------------------
 
 Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps):
+	omegaGeometricNormal_(prim::normalTransform(context.geometricNormal(), context.localToBsdf())),
 	sample_(sample),
 	context_(context),
 	caps_(caps)
@@ -44,6 +45,32 @@ Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps c
 
 Bsdf::~Bsdf()
 {
+}
+
+
+
+BsdfOut Bsdf::evaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
+{
+	// for reflection, omegaIn and omegaOut must lay in the same hemisphere determined by geometric normal
+	const bool reflective = (dot(omegaIn, omegaGeometricNormal_) > 0) == (dot(omegaOut, omegaGeometricNormal_) > 0);
+	util::clearMasked<TBsdfCaps>(allowedCaps, reflective ? capsTransmission : capsReflection);
+
+	if (!compatibleCaps(allowedCaps))
+	{
+		return BsdfOut();
+	}
+	return doEvaluate(omegaIn, omegaOut, allowedCaps);
+}
+
+
+
+SampleBsdfOut Bsdf::sample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const
+{
+	if (!compatibleCaps(allowedCaps))
+	{
+		return SampleBsdfOut();
+	}
+	return doSample(omegaIn, sample, componentSample, allowedCaps);
 }
 
 
@@ -67,33 +94,6 @@ const TVector3D Bsdf::worldToBsdf(const TVector3D& v) const
 
 
 // --- private -------------------------------------------------------------------------------------
-
-/** fall back for old shaders
- */
-BsdfOut Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
-{
-	LASS_ASSERT(context_.shader());
-	BsdfIn in;
-	in.omegaOut = omegaOut;
-	in.allowedCaps = allowedCaps;
-	BsdfOut out;
-	context_.shader()->bsdf(sample_, context_, omegaIn, &in, &in + 1, &out);
-	return out;
-}
-
-
-/** fall back for old shaders
- */
-SampleBsdfOut Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar /*componentSample*/, TBsdfCaps allowedCaps) const
-{
-	LASS_ASSERT(context_.shader());
-	SampleBsdfIn in;
-	in.sample = sample;
-	in.allowedCaps = allowedCaps;
-	SampleBsdfOut out;
-	context_.shader()->sampleBsdf(sample_, context_, omegaIn, &in, &in + 1, &out);
-	return out;
-}
 
 
 

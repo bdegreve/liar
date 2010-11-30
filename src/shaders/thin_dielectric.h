@@ -56,11 +56,20 @@ public:
 
 private:
 
+	class Bsdf: public kernel::Bsdf
+	{
+	public:
+		Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TScalar ior, const XYZ& transparency);
+	private:
+		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
+		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
+		XYZ transparency_;
+		TScalar ior_;
+	};
+
 	size_t doNumReflectionSamples() const;
 	size_t doNumTransmissionSamples() const;
-
-	void doBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn, const BsdfIn* first, const BsdfIn* last, BsdfOut* result) const;
-	void doSampleBsdf(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaIn, const SampleBsdfIn* first, const SampleBsdfIn* last, SampleBsdfOut* result) const;
+	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
