@@ -85,7 +85,7 @@ public:
 	const TVector2D& dUv_dJ() const { return dUv_dJ_; }
 	TScalar t() const { return t_; }
 	const Shader* shader() const { return shader_; }
-	const TBsdfPtr bsdf() const;
+	const TBsdfPtr& bsdf() const;
 	const Medium* interior() const { return interior_; }
 	SolidEvent solidEvent() const { return solidEvent_; }
 
@@ -108,10 +108,11 @@ public:
 
 	void transformBy(const TTransformation3D& transformation);
 	void translateBy(const TVector3D& offset);
-	const TVector3D flipTo(const TVector3D& worldOmega);
 
 	const TTransformation3D& localToWorld() const { return localToWorld_; }
 	const TTransformation3D& worldToLocal() const;
+	const TVector3D worldNormal() const;
+	const TVector3D worldGeometricNormal() const;
 
 	const TTransformation3D& bsdfToLocal() const;
 	const TTransformation3D& localToBsdf() const;
@@ -124,6 +125,7 @@ public:
 private:
 
 	void init(const SceneObject& object, const BoundedRay& primaryRay, const Intersection& intersection);
+	void flipTo(const TVector3D& worldOmega);
 	void setScreenSpaceDifferentialsI(const TRay3D& ray, TVector3D& dPoint, TVector3D& dNormal, TVector2D& dUv);
 	void generateShaderToWorld();
 
@@ -153,6 +155,7 @@ private:
 	const Shader* shader_;		/**< shader to be used */
 	const Medium* interior_;
 	const kernel::Sample& sample_;
+	mutable TBsdfPtr bsdf_;
 
 	TTransformation3D localToWorld_;
 	mutable TTransformation3D worldToLocal_;

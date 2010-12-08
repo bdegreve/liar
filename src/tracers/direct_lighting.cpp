@@ -127,9 +127,9 @@ const XYZ DirectLighting::doCastRay(
 	if (context.shader())
 	{
 		const TPoint3D point = primaryRay.point(intersection.t());
-		const TVector3D normal = context.bsdfToWorld(TVector3D(0, 0, 1));
+		const TVector3D normal = context.worldNormal();
 		const TVector3D omega = context.worldToBsdf(-primaryRay.direction());
-		//LASS_ASSERT(omega.z >= 0);
+		LASS_ASSERT(omega.z >= 0);
 		result += transparency * doShadeSurface(sample, primaryRay, context, point, normal, omega, generation, highQuality);
 	}
 	else

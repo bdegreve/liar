@@ -45,6 +45,7 @@ IntersectionContext::IntersectionContext(const SceneObject& object, const Sample
 	{
 		shader_->shadeContext(sample_, *this);
 	}
+	flipTo(-ray.direction());
 }
 
 
@@ -63,17 +64,18 @@ IntersectionContext::IntersectionContext(const SceneObject& object, const Sample
 	{
 		shader_->shadeContext(sample_, *this);
 	}
+	flipTo(-ray.direction());
 }
 
 
 
-const TBsdfPtr IntersectionContext::bsdf() const
+const TBsdfPtr& IntersectionContext::bsdf() const
 {
-	if (!shader_)
+	if (shader_ && !bsdf_)
 	{
-		return TBsdfPtr();
+		bsdf_ = shader_->bsdf(sample_, *this);
 	}
-	return shader_->bsdf(sample_, *this);
+	return bsdf_;
 }
 
 
@@ -159,25 +161,6 @@ void IntersectionContext::translateBy(const TVector3D& offset)
 
 
 
-/** flip the normal so that it -- in world space -- is in the same hemisphere as @a worldOmega.
- */
-const TVector3D IntersectionContext::flipTo(const TVector3D& worldOmega)
-{
-	const TVector3D worldNormal =  prim::normalTransform(normal_, localToWorld()).normal();
-	if (dot(worldNormal, worldOmega) < 0)
-	{
-		geometricNormal_ = -geometricNormal_;
-		normal_ = -normal_;
-		dNormal_dU_ = -dNormal_dU_;
-		dNormal_dV_ = -dNormal_dV_;
-		bsdfToLocalHasChanged(); 
-		return -worldNormal;
-	}
-	return worldNormal;
-}
-
-
-
 const TTransformation3D& IntersectionContext::worldToLocal() const
 {
 	if (hasDirtyWorldToLocal_)
@@ -191,6 +174,20 @@ const TTransformation3D& IntersectionContext::worldToLocal() const
 
 
 
+const TVector3D IntersectionContext::worldNormal() const
+{
+	return prim::normalTransform(normal_, localToWorld()).normal();
+}
+
+
+
+const TVector3D IntersectionContext::worldGeometricNormal() const
+{
+	return prim::normalTransform(geometricNormal_, localToWorld()).normal();
+}
+
+
+
 const TTransformation3D& IntersectionContext::bsdfToLocal() const
 {
 	if (!hasDirtyBsdfToLocal_)
@@ -198,27 +195,25 @@ const TTransformation3D& IntersectionContext::bsdfToLocal() const
 		return bsdfToLocal_;
 	}
 	TVector3D u = normal_.reject(dPoint_dU_);
-	TVector3D v;
-	if (!u.isZero())
+	TVector3D v = normal_.reject(dPoint_dV_);
+	const TScalar sqrU = u.squaredNorm();
+	const TScalar sqrV = v.squaredNorm();
+	if (std::max(sqrU, sqrV) < 1e-3f)
+	{
+		prim::impl::Plane3DImplDetail::generateDirections(normal_, u, v);
+	}
+	if (sqrU >= sqrV)
 	{
 		v = cross(normal_, u);
 	}
 	else
 	{
-		v = normal_.reject(dPoint_dV_);
-		if (!v.isZero())
-		{
-			u = cross(v, normal_);
-		}
-		else
-		{
-			prim::impl::Plane3DImplDetail::generateDirections(normal_, u, v);
-		}
+		u = cross(v, normal_);
 	}
-	bsdfToWorld_ = TTransformation3D(point_, u.normal(), v.normal(), normal_);
+	bsdfToLocal_ = TTransformation3D(point_, u.normal(), v.normal(), normal_);
 	hasDirtyBsdfToLocal_ = false;
 	LASS_ASSERT(hasDirtyLocalToBsdf_ && hasDirtyBsdfToWorld_ && hasDirtyWorldToBsdf_);
-	return bsdfToWorld_;
+	return bsdfToLocal_;
 }
 
 
@@ -270,12 +265,31 @@ void IntersectionContext::init(const SceneObject& object, const BoundedRay& ray,
 	interior_ = 0;
 	solidEvent_ = seNoEvent;
 	hasScreenSpaceDifferentials_ = false;
+	bsdf_ = TBsdfPtr();
 	localToWorld_ = worldToLocal_ = TTransformation3D::identity();
 	hasDirtyWorldToLocal_ = false;
 	bsdfToLocalHasChanged();
 
 	object.localContext(sample_, ray, intersection, *this);
-	flipTo(-ray.direction());
+}
+
+
+
+/** flip the normal so that it -- in world space -- is in the same hemisphere as @a worldOmega.
+ */
+void IntersectionContext::flipTo(const TVector3D& worldOmega)
+{
+	if (dot(worldNormal(), worldOmega) < 0)
+	{
+		normal_ = -normal_;
+		dNormal_dU_ = -dNormal_dU_;
+		dNormal_dV_ = -dNormal_dV_;
+		bsdfToLocalHasChanged(); 
+	}
+	if (dot(worldGeometricNormal(), worldOmega) < 0)
+	{
+		geometricNormal_ = -geometricNormal_;
+	}
 }
 
 
@@ -317,6 +331,7 @@ void IntersectionContext::setScreenSpaceDifferentialsI(
  */
 void IntersectionContext::localToWorldHasChanged()
 {
+	LASS_ASSERT(!bsdf_); // bsdf assumes bsdf space remains unchanged
 	hasDirtyWorldToLocal_ = true;
 	hasDirtyBsdfToWorld_ = true;
 	hasDirtyWorldToBsdf_ = true;
@@ -328,6 +343,7 @@ void IntersectionContext::localToWorldHasChanged()
  */
 void IntersectionContext::bsdfToLocalHasChanged()
 {
+	LASS_ASSERT(!bsdf_); // bsdf assumes bsdf space remains unchanged
 	hasDirtyBsdfToLocal_ = true;
 	hasDirtyLocalToBsdf_ = true;
 	hasDirtyBsdfToWorld_ = true;

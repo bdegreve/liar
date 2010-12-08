@@ -155,7 +155,7 @@ private:
 
 	TVector3D omegaGeometricNormal_;
 	const Sample& sample_;
-	const IntersectionContext& context_;
+	const IntersectionContext& context_; // no ownership!
 	TBsdfCaps caps_;
 
 public:

@@ -32,21 +32,21 @@ namespace kernel
 
 PY_DECLARE_CLASS_DOC(RgbSpace, 
 	"XYZ-RGB convertor\n"
-	"RgbSpace((x_red, y_red), (x_green, y_green), (x_blue, y_blue), (x_white, y_white), (gamma))"
+	"RgbSpace((x_red, y_red), (x_green, y_green), (x_blue, y_blue), (x_white, y_white), gamma)"
 	);
 PY_CLASS_CONSTRUCTOR_5(RgbSpace, const TPoint2D&, const TPoint2D&, const TPoint2D&, const TPoint2D&, TScalar);
-PY_CLASS_MEMBER_R(RgbSpace, red);
-PY_CLASS_MEMBER_R(RgbSpace, green);
-PY_CLASS_MEMBER_R(RgbSpace, blue);
-PY_CLASS_MEMBER_R(RgbSpace, white);
-PY_CLASS_MEMBER_R(RgbSpace, gamma);
+PY_CLASS_MEMBER_R_DOC(RgbSpace, red, "(x_red, y_red)");
+PY_CLASS_MEMBER_R_DOC(RgbSpace, green, "(x_green, y_green)");
+PY_CLASS_MEMBER_R_DOC(RgbSpace, blue, "(x_blue, y_blue)");
+PY_CLASS_MEMBER_R_DOC(RgbSpace, white, "(x_white, y_white)");
+PY_CLASS_MEMBER_R_DOC(RgbSpace, gamma, "float");
 PY_CLASS_METHOD_NAME(RgbSpace, operator==, python::methods::_eq_);
 PY_CLASS_METHOD_NAME(RgbSpace, operator!=, python::methods::_ne_);
 PY_CLASS_METHOD_NAME(RgbSpace, reduce, "__reduce__")
 PY_CLASS_METHOD_NAME(RgbSpace, getState, "__getstate__")
 PY_CLASS_METHOD_NAME(RgbSpace, setState, "__setstate__")
-PY_CLASS_STATIC_METHOD(RgbSpace, defaultSpace);
-PY_CLASS_STATIC_METHOD(RgbSpace, setDefaultSpace);
+PY_CLASS_STATIC_METHOD_DOC(RgbSpace, defaultSpace, "defaultSpace() -> RgbSpace");
+PY_CLASS_STATIC_METHOD_DOC(RgbSpace, setDefaultSpace, "defaultSpace(RgbSpace) -> None");
 
 //// load default RGB space.  We use the sRGB space here.
 //// you can find it here: http://www.brucelindbloom.com/index.html?WorkingSpaceInfo.html

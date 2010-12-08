@@ -579,7 +579,7 @@ class PbrtScene(object):
 			return s[:n-len(trunc)] + trunc
 		import pprint
 		pretty_args = [truncated_repr(value) for value in args]
-		pretty_kwargs = ["%s=%s" % (key, truncated_repr(value)) for key, value in kwargs.items()]
+		pretty_kwargs = ["%s=%s" % (key, truncated_repr(value)) for key, value in sorted(kwargs.items())]
 		self.__logger.debug("%s (%s)" % (identifier, ", ".join(pretty_args + pretty_kwargs)))
 	
 	def render(self):

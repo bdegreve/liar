@@ -150,10 +150,6 @@ inline void SceneObject::localContext(const Sample& sample, const BoundedRay& ra
 		result.setInterior(interior_);
 		result.setSolidEvent(intersection.solidEvent());
 	}
-	//if (intersection.level() == 0) // top level
-	//{
-	//	result.flipTo(-ray.direction());
-	//}
 }
 
 
