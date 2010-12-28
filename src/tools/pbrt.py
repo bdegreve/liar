@@ -285,9 +285,12 @@ class PbrtScene(object):
 		return self._material_substrate(Kd=Kd, Ks=Ks, uroughness=roughness, vroughness=roughness)
 
 	def _material_substrate(self, Kd=.5, Ks=.5, uroughness=.1, vroughness=.1):
+		from liar.textures import Division, Max
 		shader = liar.shaders.AshikhminShirley(self._get_texture(Kd), self._get_texture(Ks))
-		shader.specularPowerU = self._get_texture(1 / max(uroughness, 1e-6))
-		shader.specularPowerV = self._get_texture(1 / max(vroughness, 1e-6))
+		one = self._get_texture(1)
+		eps = self._get_texture(1e-6)
+		shader.specularPowerU = Division(one, Max(self._get_texture(uroughness), eps))
+		shader.specularPowerV = Division(one, Max(self._get_texture(vroughness), eps))
 		return shader
 	
 	def _material_mirror(self, Kr=1):
@@ -337,7 +340,7 @@ class PbrtScene(object):
 		self.__textures[name] = tex
 	
 	def _texture_constant(self, value):
-		return liar.textures.Constant(liar.rgb(value))
+		return self._get_texture(value)
 	
 	def _texture_scale(self, tex1=1, tex2=1):
 		tex1, tex2 = self._get_texture(tex1), self._get_texture(tex2)
