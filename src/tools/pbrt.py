@@ -369,9 +369,10 @@ class PbrtScene(object):
 		return liar.textures.Image(filename)
 	
 	def _texture_windy(self):
-		waveHeight = liar.textures.FBm(6)
-		windStrength = liar.textures.Abs(liar.textures.TransformationLocal(liar.textures.FBm(3), liar.Transformation3D.scaler(.1)))
-		return liar.textures.Sum([waveHeight, windStrength])
+		from liar.textures import Fbm, TransformationLocal, Abs, Product
+		waveHeight = Fbm(6)
+		windStrength = Abs(TransformationLocal(FBm(3), liar.Transformation3D.scaler(.1)))
+		return Product(waveHeight, windStrength)
 	
 	def _get_texture(self, arg):
 		# arg as a texture name
