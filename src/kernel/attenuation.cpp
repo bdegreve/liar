@@ -43,12 +43,12 @@ TAttenuationPtr Attenuation::defaultAttenuation_(new Attenuation);
 
 // --- public --------------------------------------------------------------------------------------
 
-/** Construct with default quadratic attenuation 1 / (2 * pi * r * r).
+/** Construct with default quadratic attenuation.
  */
 Attenuation::Attenuation():
 	constant_(TNumTraits::zero),
 	linear_(TNumTraits::zero),
-	quadratic_(2 * TNumTraits::pi)
+	quadratic_(TNumTraits::one)
 {
 }
 
