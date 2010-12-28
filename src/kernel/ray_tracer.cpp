@@ -191,7 +191,6 @@ const XYZ RayTracer::estimateLightContribution(
 	const TScalar nl = static_cast<TScalar>(lightSamples.size());
 	const TScalar nb = static_cast<TScalar>(bsdfSamples.size());
 	const bool isMultipleImportanceSampling = nb > 0 && !light.isSingular();
-	const TScalar n = isMultipleImportanceSampling ? nl + nb : nl;
 
 	TBsdfCaps caps = Bsdf::capsAllDiffuse | Bsdf::capsGlossy;
 	if (!light.isSingular())
@@ -217,10 +216,10 @@ const XYZ RayTracer::estimateLightContribution(
 		{
 			continue;
 		}
-		const XYZ trans = 1;//mediumStack().transmittance(shadowRay);
+		const XYZ trans = mediumStack().transmittance(shadowRay);
 		const TScalar weight = isMultipleImportanceSampling ? temp::squaredHeuristic(nl * lightPdf, nb * out.pdf) : TNumTraits::one;
 		const TScalar cosTheta = omegaOut.z;
-		result += out.value * trans * radiance * (weight * num::abs(cosTheta) / (n * lightPdf));
+		result += out.value * trans * radiance * (weight * num::abs(cosTheta) / (nl * lightPdf));
 	}
 
 	if (isMultipleImportanceSampling)
@@ -244,7 +243,7 @@ const XYZ RayTracer::estimateLightContribution(
 			const XYZ trans = mediumStack().transmittance(shadowRay);
 			const TScalar weight = temp::squaredHeuristic(nb * out.pdf, nl * lightPdf);
 			const TScalar cosTheta = out.omegaOut.z;
-			result += out.value * trans * radiance * (weight * abs(cosTheta) / (n * out.pdf));
+			result += out.value * trans * radiance * (weight * abs(cosTheta) / (nb * out.pdf));
 		}
 	}
 
