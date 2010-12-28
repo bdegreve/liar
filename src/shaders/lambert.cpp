@@ -75,8 +75,8 @@ void Lambert::setDiffuse(const TTexturePtr& diffuse)
 
 TBsdfPtr Lambert::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-	const XYZ diffuseOverPi = diffuse_->lookUp(sample, context) / TNumTraits::pi;
-	return TBsdfPtr(new LambertBsdf(sample, context, caps(), diffuseOverPi));
+	const XYZ diffuse = diffuse_->lookUp(sample, context);
+	return TBsdfPtr(new LambertBsdf(sample, context, caps(), diffuse));
 }
 
 
@@ -96,16 +96,16 @@ void Lambert::doSetState(const TPyObjectPtr& state)
 
 // --- bsdf ----------------------------------------------------------------------------------------
 
-LambertBsdf::LambertBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const XYZ& diffuseOverPi):
+LambertBsdf::LambertBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const XYZ& diffuse):
 	Bsdf(sample, context, caps),
-	diffuseOverPi_(diffuseOverPi)
+	diffuseOverPi_(diffuse / TNumTraits::pi)
 {
 }
 
 BsdfOut LambertBsdf::doEvaluate(const TVector3D&, const TVector3D& omegaOut, TBsdfCaps LASS_UNUSED(allowedCaps)) const
 {
 	LASS_ASSERT(shaders::hasCaps(allowedCaps, caps()));
-	const TScalar cosTheta = omegaOut.z;
+	const TScalar cosTheta = num::abs(omegaOut.z);
 	if (cosTheta <= 0)
 	{
 		return BsdfOut();
