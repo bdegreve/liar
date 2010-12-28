@@ -27,17 +27,19 @@
 //
 #include "abs.h"
 #include "angular_mapping.h"
+#include "binary_operator.h"
 #include "checker_board.h"
 #include "checker_volume.h"
 #include "constant.h"
 #include "cube_mapping.h"
+#include "division.h"
 #include "fbm.h"
 #include "frequency.h"
 #include "global.h"
 #include "grid_board.h"
 #include "image.h"
 #include "linear_interpolator.h"
-#include "binary_operator.h"
+#include "max.h"
 #include "orco.h"
 #include "perlin.h"
 #include "product.h"
@@ -68,12 +70,14 @@ PY_MODULE_CLASS(textures, CheckerBoard)
 PY_MODULE_CLASS(textures, CheckerVolume)
 PY_MODULE_CLASS(textures, Constant)
 PY_MODULE_CLASS(textures, CubeMapping)
+PY_MODULE_CLASS(textures, Division)
 PY_MODULE_CLASS(textures, FBm)
 PY_MODULE_CLASS(textures, Frequency)
 PY_MODULE_CLASS(textures, Global)
 PY_MODULE_CLASS(textures, GridBoard)
 PY_MODULE_CLASS(textures, Image)
 PY_MODULE_CLASS(textures, LinearInterpolator)
+PY_MODULE_CLASS(textures, Max)
 PY_MODULE_CLASS(textures, OrCo)
 PY_MODULE_CLASS(textures, Product)
 PY_MODULE_CLASS(textures, Sum)

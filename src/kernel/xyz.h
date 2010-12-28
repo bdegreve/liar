@@ -101,6 +101,11 @@ inline XYZ abs(const XYZ& a)
 	return XYZ(num::abs(a.x), num::abs(a.y), num::abs(a.z));
 }
 
+inline XYZ max(const XYZ& a, const XYZ& b)
+{
+	return XYZ(std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z));
+}
+
 inline TScalar average(const XYZ& a)
 {
 	return a.x + a.y + a.z / 3;

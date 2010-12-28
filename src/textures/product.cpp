@@ -32,12 +32,12 @@ namespace textures
 PY_DECLARE_CLASS_DOC(Product, "makes product of child textures")
 PY_CLASS_CONSTRUCTOR_0(Product);
 PY_CLASS_CONSTRUCTOR_1(Product, const Product::TFactors&)
+PY_CLASS_CONSTRUCTOR_2(Product, const TTexturePtr&, const TTexturePtr&)
 PY_CLASS_MEMBER_RW(Product, factors, setFactors);
 
 // --- public --------------------------------------------------------------------------------------
 
-Product::Product():
-	factors_()
+Product::Product()
 {
 }
 
@@ -48,7 +48,15 @@ Product::Product(const TFactors& factors):
 {
 }
 
-	
+
+
+Product::Product(const TTexturePtr& a, const TTexturePtr& b)
+{
+	factors_.push_back(a);
+	factors_.push_back(b);
+}
+
+
 
 const Product::TFactors& Product::factors() const
 {

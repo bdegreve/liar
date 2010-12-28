@@ -21,45 +21,33 @@
  *  http://liar.bramz.net/
  */
 
-/** @class liar::textures::Product
- *  @brief multiplies two or more textures ...
+/** @class liar::textures::Division
+ *  @brief max(a, b)
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_PRODUCT_H
-#define LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_PRODUCT_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_MAX_H
+#define LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_MAX_H
 
 #include "textures_common.h"
-#include "../kernel/texture.h"
+#include "binary_operator.h"
+#include <lass/util/dictionary.h>
 
 namespace liar
 {
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL Product: public Texture
+class LIAR_TEXTURES_DLL Max: public BinaryOperator
 {
-	PY_HEADER(Texture)
+	PY_HEADER(BinaryOperator)
 public:
 
-	typedef std::vector<TTexturePtr> TFactors;
-
-	Product();
-	explicit Product(const TFactors& factors);
-	Product(const TTexturePtr& a, const TTexturePtr& b);
-
-	const TFactors& factors() const;
-	void setFactors(const TFactors& factors);
+	Max(const TTexturePtr& a, const TTexturePtr& b);
 
 private:
 
-	const XYZ doLookUp(const Sample& sample, 
-		const IntersectionContext& context) const;
-
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
-
-	TFactors factors_;
+	const XYZ doLookUp(const Sample& sample, const IntersectionContext& context) const;
 };
 
 }

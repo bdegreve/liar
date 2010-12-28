@@ -46,6 +46,7 @@ public:
 
 	Sum();
 	explicit Sum(const TTerms& terms);
+	Sum(const TTexturePtr& a, const TTexturePtr& b);
 
 	const TTerms& terms() const;
 	void setTerms(const TTerms& terms);

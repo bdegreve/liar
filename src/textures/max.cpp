@@ -22,88 +22,32 @@
  */
 
 #include "textures_common.h"
-#include "sum.h"
+#include "max.h"
+#include <lass/stde/extended_string.h>
 
 namespace liar
 {
 namespace textures
 {
 
-PY_DECLARE_CLASS_DOC(Sum, "makes sum of child textures")
-PY_CLASS_CONSTRUCTOR_0(Sum);
-PY_CLASS_CONSTRUCTOR_1(Sum, const Sum::TTerms&)
-PY_CLASS_CONSTRUCTOR_2(Sum, const TTexturePtr&, const TTexturePtr&)
-PY_CLASS_MEMBER_RW(Sum, terms, setTerms);
+PY_DECLARE_CLASS_DOC(Max, "max(a, b)")
+PY_CLASS_CONSTRUCTOR_2(Max, const TTexturePtr&, const TTexturePtr&);
 
 // --- public --------------------------------------------------------------------------------------
 
-Sum::Sum()
+Max::Max(const TTexturePtr& a, const TTexturePtr& b):
+	BinaryOperator(a, b)
 {
 }
-
-
-
-Sum::Sum(const TTerms& terms):
-	terms_(terms)
-{
-}
-
-
-
-Sum::Sum(const TTexturePtr& a, const TTexturePtr& b)
-{
-	terms_.push_back(a);
-	terms_.push_back(b);
-}
-
-
-
-const Sum::TTerms& Sum::terms() const
-{
-	return terms_;
-}
-
-
-
-void Sum::setTerms(const TTerms& terms)
-{
-	terms_ = terms;
-}
-
-
-
-// --- protected -----------------------------------------------------------------------------------
 
 
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Sum::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const XYZ 
+Max::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
-	if (terms_.empty())
-	{
-		return XYZ();
-	}
-	XYZ result(0);
-	for (TTerms::const_iterator i = terms_.begin(); i != terms_.end(); ++i)
-	{
-		result += (*i)->lookUp(sample, context);
-	}
-	return result;
-}
-
-
-
-const TPyObjectPtr Sum::doGetState() const
-{
-	return python::makeTuple(terms_);
-}
-
-
-
-void Sum::doSetState(const TPyObjectPtr& state)
-{
-	python::decodeTuple(state, terms_);
+	return max(textureA()->lookUp(sample, context), textureB()->lookUp(sample, context));
 }
 
 
