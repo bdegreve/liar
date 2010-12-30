@@ -369,8 +369,8 @@ class PbrtScene(object):
 		return liar.textures.Image(filename)
 	
 	def _texture_windy(self):
-		from liar.textures import Fbm, TransformationLocal, Abs, Product
-		waveHeight = Fbm(6)
+		from liar.textures import FBm, TransformationLocal, Abs, Product
+		waveHeight = FBm(6)
 		windStrength = Abs(TransformationLocal(FBm(3), liar.Transformation3D.scaler(.1)))
 		return Product(waveHeight, windStrength)
 	
@@ -458,7 +458,12 @@ class PbrtScene(object):
 		return liar.scenery.LightDirectional(direction, L)
 	
 	def _lightsource_infinite(self, L=(1, 1, 1), nsamples=1, mapname=None):
-		tex = self._get_texture(mapname or L)
+		tex = self._get_texture(L)
+		if mapname:
+			if L == (1, 1, 1):
+				tex = self._get_texture(mapname)
+			else:
+				tex = liar.textures.Product(tex, self._get_texture(mapname))
 		try:
 			tex.mipMapping = 'none'
 		except AttributeError:
