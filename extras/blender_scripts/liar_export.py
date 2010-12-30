@@ -188,10 +188,13 @@ def encode_mesh_to_obj(vertices, normals, uvs, face_groups):
 
 
 def const_texture(colour, value = 1):
-	if value <= 0:
-		return None
-	colour = tuple(x * value for x in colour)
-	return "liar.textures.Constant(liar.rgb%r)" % (colour,)
+	try:
+		tuple(colour)
+	except TypeError:
+		return "liar.textures.Constant(%r)" % (value * colour)
+	else:
+		colour = tuple(x * value for x in colour)
+		return "liar.textures.Constant(liar.rgb%r)" % (colour,)
 
 
 class LiarExporter(object):
@@ -322,9 +325,10 @@ materials['MA:%(name)s'] = material
 ''' % vars())
 			return
 		
-		diffuse = const_texture(material.rgbCol, material.ref)
-		specular = const_texture(material.specCol, material.spec)
+		diffuse = material.ref and const_texture(material.rgbCol, material.ref)
+		specular = material.spec and const_texture(material.specCol, material.spec)
 		specular_power = "liar.textures.Constant(%r)" % material.hard
+		mirror = material.rayMirr and const_texture(material.mirCol, material.rayMirr)
 		bumpmap = None
 		
 		for channel in material.enabledTextures:
@@ -340,28 +344,39 @@ materials['MA:%(name)s'] = material
 				specular_power = tex
 			if mtex.mapto & Blender.Texture.MapTo['NOR']:
 				bumpmap = tex
+				
+		self.script_file.write(r'''
+# --- material MA:%(name)s ---
+texture_channels = {%(channels)s
+	}
+material_components = []
+''' % vars())
 		
 		if specular:
+			diff = diffuse or const_texture(0)
 			self.script_file.write(r'''
-# --- material MA:%(name)s ---
-material = liar.shaders.AshikhminShirley()
-texture_channels = {%(channels)s
-	}
-material.diffuse = %(diffuse)s
-material.specular = %(specular)s
-material.specularPowerU = material.specularPowerV = %(specular_power)s
+component = liar.shaders.AshikhminShirley()
+component.diffuse = %(diff)s
+component.specular = %(specular)s
+component.specularPowerU = component.specularPowerV = %(specular_power)s
+material_components.append(component)
 ''' % vars())
-		else:
+		elif diffuse:
 			self.script_file.write(r'''
-# --- material MA:%(name)s ---
-material = liar.shaders.Lambert()
-texture_channels = {%(channels)s
-	}
-material.diffuse = %(diffuse)s
+component = liar.shaders.Lambert()
+component.diffuse = %(diffuse)s
+material_components.append(component)
 ''' % vars())
-		if bumpmap:
-			self.script_file.write("material = liar.shaders.BumpMapping(material, %(bumpmap)s)\n" % vars())
-		self.script_file.write("materials['MA:%(name)s'] = material\n" % vars())
+		if mirror:
+			self.script_file.write(r'''
+component = liar.shaders.Mirror()
+component.reflectance = %(mirror)s
+material_components.append(component)
+''' % vars())
+		
+		self.script_file.write(r'''
+materials['MA:%(name)s'] = make_material(material_components, %(bumpmap)s)
+''' % vars())
 	
 	def write_mesh(self, obj):
 		mesh = obj.getData(False, True)
@@ -668,7 +683,16 @@ def int_or_none(s):
 	except:
 		return None
 
-
+def make_material(material_components, bumpmap=None):
+	if not material_components:
+		return None
+	try:
+		shader, = material_components
+	except ValueError:
+		shader = liar.shaders.Sum(material_components)
+	if bumpmap:
+		shader = liar.shaders.BumpMapping(shader, bumpmap)
+	return shader
 
 def group_scenery(scenery_objects):
 	assert len(scenery_objects) > 0
@@ -715,16 +739,15 @@ objects['WO:%(name)s'] = world
 		object_writers = {
 			'Mesh': LiarExporter.write_mesh,
 			'Lamp': LiarExporter.write_lamp,
-			'Camera': LiarExporter.write_camera
+			'Camera': LiarExporter.write_camera,
+			'Empty': LiarExporter.write_none,
 			}
 			
 		scene = Blender.Scene.GetCurrent()
 		visible_layers = set(scene.getLayers())
 		print "scene layers", visible_layers
-		children = scene.getChildren()
-		num_children = len(children)
 		
-		for obj, i in zip(children, range(num_children)):
+		for i, obj in enumerate(scene.objects):
 			if not visible_layers & set(obj.layers):
 				continue
 			obj_type = obj.getType()
@@ -736,6 +759,9 @@ objects['WO:%(name)s'] = world
 			else:
 				print("WARNING: Did not recognize object type '%(obj_type)s'" % vars())
 				
+			for key, value in obj.properties.iteritems():
+				print key, value
+				
 			ipo = obj.getIpo()
 			if ipo:
 				print(ipo)
@@ -744,7 +770,7 @@ objects['WO:%(name)s'] = world
 					print(curve)
 					print(curve.getPoints())
 					
-			self.draw_progress(float(i+1) / num_children)
+			self.draw_progress(float(i+1) / len(scene.objects))
 			
 		self.write_world(scene.render)		
 		self.write_context(scene.render)
