@@ -106,8 +106,8 @@ inline const TPoint2D AngularMapping::uv(const TVector3D& dir) const
 {
 	const TVector3D d = dir.normal();
 	const TScalar r = num::acos(d.y) / (TNumTraits::pi * num::sqrt(num::sqr(d.x) + num::sqr(d.z)));
-	const TScalar u = (dir.x * r + 1) / 2;
-	const TScalar v = (dir.z * r + 1) / 2;
+	const TScalar u = (d.x * r + 1) / 2;
+	const TScalar v = (d.z * r + 1) / 2;
 	return TPoint2D(u, v);
 }
 
