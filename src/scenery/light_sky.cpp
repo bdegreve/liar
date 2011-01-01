@@ -165,7 +165,9 @@ void LightSky::doLocalContext(const Sample&, const BoundedRay& ray, const Inters
 {
 	//LASS_ASSERT(intersection.t() == TNumTraits::max);
 	result.setT(intersection.t());
-	result.setPoint(ray.support() + ray.direction());
+
+	const TScalar maxDistance = num::sqrt(TNumTraits::max / 10);
+	result.setPoint(TPoint3D(maxDistance * ray.direction()));
 
 	//         [sin theta * cos phi]
 	// R = r * [sin theta * sin phi]
