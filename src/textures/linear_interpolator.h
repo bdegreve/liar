@@ -46,8 +46,8 @@ public:
 	typedef std::vector<TKeyTexture> TKeyTextures;
 
 	LinearInterpolator();
-	LinearInterpolator(const TKeyTextures& keyTextures, 
-		const TTexturePtr& controlTexture);
+	LinearInterpolator(const TTexturePtr& controlTexture);
+	LinearInterpolator(const TKeyTextures& keyTextures, const TTexturePtr& controlTexture);
 
 	const TKeyTextures& keys() const;
 	const TTexturePtr& control() const;

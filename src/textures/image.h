@@ -148,7 +148,7 @@ private:
 	mutable TMipMaps mipMaps_;
 	mutable size_t numLevelsU_;
 	mutable size_t numLevelsV_;
-	mutable util::CriticalSection mutex_;
+	mutable util::Semaphore mutex_;
 
 	static TAntiAliasingDictionary antiAliasingDictionary_;
 	static TMipMappingDictionary mipMappingDictionary_;

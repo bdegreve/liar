@@ -50,9 +50,13 @@ Global::Global(const TTexturePtr& texture):
 const XYZ Global::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	IntersectionContext global(context);
-	global.setShader(0);
-	global.transformBy(context.localToWorld());
-	global.setShader(context.shader());
+	const TTransformation3D& localToWorld = context.localToWorld();
+	global.setPoint(prim::transform(context.point(), localToWorld));
+	global.setDPoint_dI(prim::transform(context.dPoint_dI(), localToWorld));
+	global.setDPoint_dJ(prim::transform(context.dPoint_dJ(), localToWorld));
+	global.setDPoint_dU(prim::transform(context.dPoint_dU(), localToWorld));
+	global.setDPoint_dV(prim::transform(context.dPoint_dV(), localToWorld));
+#pragma LASS_TODO("perhaps we need to transform other Uv dependent quantities as well [Brams]")
 	return texture()->lookUp(sample, global);
 }
 

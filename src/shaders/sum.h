@@ -68,6 +68,7 @@ private:
 		friend class Sum;
 	};
 
+	const XYZ doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const;
 	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
 
 	void doRequestSamples(const TSamplerPtr& sampler);

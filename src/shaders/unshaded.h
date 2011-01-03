@@ -51,17 +51,7 @@ public:
 
 private:
 
-	class Bsdf: public kernel::Bsdf
-	{
-	public:
-		Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps);
-	private:
-		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
-		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
-	};
-
-	const XYZ doEmission(const Sample& sample, const IntersectionContext& context,
-		const TVector3D& omegaOut) const;
+	const XYZ doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);

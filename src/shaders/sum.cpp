@@ -54,6 +54,18 @@ Sum::Sum(const TChildren& children):
 
 // --- private -------------------------------------------------------------------------------------
 
+const XYZ Sum::doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const
+{
+	XYZ result;
+	for (TChildren::const_iterator i = children_.begin(); i != children_.end(); ++i)
+	{
+		result += (*i)->emission(sample, context, omegaOut);
+	}
+	return result;
+}
+
+
+
 TBsdfPtr Sum::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
 	TBsdfPtr::Rebind<SumBsdf>::Type result(new SumBsdf(sample, context, caps()));
@@ -127,6 +139,10 @@ BsdfOut Sum::SumBsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omeg
 	for (TComponents::const_iterator i = components_.begin(); i != components_.end(); ++i)
 	{
 		const Bsdf* bsdf = i->get();
+		if (!bsdf)
+		{
+			continue;
+		}
 		if (!bsdf->compatibleCaps(allowedCaps))
 		{
 			continue;
@@ -153,6 +169,10 @@ SampleBsdfOut Sum::SumBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& s
 		for (TComponents::const_iterator i = components_.begin(); i != components_.end(); ++i)
 		{
 			const Bsdf* bsdf = i->get();
+			if (!bsdf)
+			{
+				continue;
+			}
 			if (!bsdf->compatibleCaps(allowedCaps))
 			{
 				continue;

@@ -95,29 +95,6 @@ void Unshaded::doSetState(const TPyObjectPtr& iState)
 
 
 
-// --- bsdf ----------------------------------------------------------------------------------------
-
-Unshaded::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps):
-	kernel::Bsdf(sample, context, caps)
-{
-}
-
-
-
-BsdfOut Unshaded::Bsdf::doEvaluate(const TVector3D&, const TVector3D&, TBsdfCaps) const
-{
-	return BsdfOut();
-}
-
-
-
-SampleBsdfOut Unshaded::Bsdf::doSample(const TVector3D&, const TPoint2D&, TScalar, TBsdfCaps) const
-{
-	return SampleBsdfOut();
-}
-
-
-
 // --- free ----------------------------------------------------------------------------------------
 
 

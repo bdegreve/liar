@@ -32,6 +32,7 @@ namespace textures
 
 PY_DECLARE_CLASS_DOC(LinearInterpolator, "interpolates textures using gray value of control texture as parameter")
 PY_CLASS_CONSTRUCTOR_0(LinearInterpolator)
+PY_CLASS_CONSTRUCTOR_1(LinearInterpolator, const TTexturePtr&)
 PY_CLASS_CONSTRUCTOR_2(LinearInterpolator, const LinearInterpolator::TKeyTextures&, const TTexturePtr&)
 PY_CLASS_MEMBER_RW(LinearInterpolator, keys, setKeys)
 PY_CLASS_MEMBER_RW(LinearInterpolator, control, setControl)
@@ -47,8 +48,15 @@ LinearInterpolator::LinearInterpolator():
 
 
 
-LinearInterpolator::LinearInterpolator(const TKeyTextures& keyTextures, 
-									   const TTexturePtr& controlTexture):
+LinearInterpolator::LinearInterpolator(const TTexturePtr& controlTexture):
+	keys_(),
+	control_(controlTexture)
+{
+}
+
+
+
+LinearInterpolator::LinearInterpolator(const TKeyTextures& keyTextures, const TTexturePtr& controlTexture):
 	keys_(),
 	control_(controlTexture)
 {
@@ -96,8 +104,7 @@ void LinearInterpolator::setControl(const TTexturePtr& iContolTexture)
 
 /** add a key texture to the list
  */
-void LinearInterpolator::addKey(const TScalar keyValue, 
-								const TTexturePtr& keyTexture)
+void LinearInterpolator::addKey(const TScalar keyValue, const TTexturePtr& keyTexture)
 {
 	TKeyTexture key(keyValue, keyTexture);
 	TKeyTextures::iterator i = std::lower_bound(keys_.begin(), keys_.end(), key, LesserKey());

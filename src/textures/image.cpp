@@ -182,9 +182,12 @@ void Image::setDefaultMipMapping(const std::string& mode)
 
 const XYZ Image::doLookUp(const Sample&, const IntersectionContext& context) const
 {
-	if (mipMapping_ != currentMipMapping_)
+	LASS_LOCK(mutex_)
 	{
-		makeMipMaps(mipMapping_);
+		if (mipMapping_ != currentMipMapping_)
+		{
+			makeMipMaps(mipMapping_);
+		}
 	}
 
 	const TPoint2D& uv = context.uv();
@@ -271,69 +274,68 @@ void Image::doSetState(const TPyObjectPtr& state)
  *
  *  S. Guthe, P. Heckbert (2003): nVIDIA tech report: Non-Power-of-Two Mipmap Creation.
  *  http://developer.nvidia.com/object/np2_mipmapping.html
+ *
+ *  @warning not thread safe!  make sure you call it locked!
  */
 void Image::makeMipMaps(MipMapping mode) const
 {
-	LASS_LOCK(mutex_)
+	if (mipMapping_ == currentMipMapping_)
 	{
-		if (mipMapping_ == currentMipMapping_)
+		return;
+	}
+
+	TMipMaps mipMaps(1, MipMapLevel(image_, resolution_));
+	size_t numLevelsU = 0, numLevelsV = 0;
+
+	switch (mode)
+	{
+	case mmNone:
+		numLevelsU = 1;
+		numLevelsV = 1;
+		break;
+
+	case mmIsotropic:
+		numLevelsU = static_cast<size_t>(num::floor(num::log2(
+			static_cast<TScalar>(std::max(resolution_.x, resolution_.y))))) + 1;
+		numLevelsV = 1;
+		for (size_t i = 1; i < numLevelsU; ++i)
 		{
-			return;
+			const TScalar scale = TNumTraits::one / (1 << i);
+			const size_t width = static_cast<size_t>(num::floor(scale * resolution_.x));
+			const size_t height = static_cast<size_t>(num::floor(scale * resolution_.y));
+			MipMapLevel temp = makeMipMap(mipMaps.back(), 'x', width);
+			mipMaps.push_back(makeMipMap(temp, 'y', height));
 		}
+		break;
 
-		TMipMaps mipMaps(1, MipMapLevel(image_, resolution_));
-		size_t numLevelsU = 0, numLevelsV = 0;
-
-		switch (mode)
+	case mmAnisotropic:
+		numLevelsU = static_cast<size_t>(num::floor(num::log2(static_cast<TScalar>(resolution_.x))) + 1);
+		numLevelsV = static_cast<size_t>(num::floor(num::log2(static_cast<TScalar>(resolution_.y))) + 1);
+		for (size_t j = 0; j < numLevelsV; ++j)
 		{
-		case mmNone:
-			numLevelsU = 1;
-			numLevelsV = 1;
-			break;
-
-		case mmIsotropic:
-			numLevelsU = static_cast<size_t>(num::floor(num::log2(
-				static_cast<TScalar>(std::max(resolution_.x, resolution_.y))))) + 1;
-			numLevelsV = 1;
+			if (j > 0)
+			{
+				const size_t height = static_cast<size_t>(
+					num::floor(static_cast<TScalar>(resolution_.y) / (1 << j)));
+				mipMaps.push_back(makeMipMap(mipMaps[(j - 1) * numLevelsU], 'y', height));
+			}
 			for (size_t i = 1; i < numLevelsU; ++i)
 			{
-				const TScalar scale = TNumTraits::one / (1 << i);
-				const size_t width = static_cast<size_t>(num::floor(scale * resolution_.x));
-				const size_t height = static_cast<size_t>(num::floor(scale * resolution_.x));
-				MipMapLevel temp = makeMipMap(mipMaps.back(), 'x', width);
-				mipMaps.push_back(makeMipMap(temp, 'y', height));
+				const size_t width = static_cast<size_t>(
+					num::floor(static_cast<TScalar>(resolution_.x) / (1 << i)));
+				mipMaps.push_back(makeMipMap(mipMaps.back(), 'x', width));
 			}
-			break;
-
-		case mmAnisotropic:
-			numLevelsU = static_cast<size_t>(num::floor(num::log2(static_cast<TScalar>(resolution_.x))) + 1);
-			numLevelsV = static_cast<size_t>(num::floor(num::log2(static_cast<TScalar>(resolution_.y))) + 1);
-			for (size_t j = 0; j < numLevelsV; ++j)
-			{
-				if (j > 0)
-				{
-					const size_t height = static_cast<size_t>(
-						num::floor(static_cast<TScalar>(resolution_.y) / (1 << j)));
-					mipMaps.push_back(makeMipMap(mipMaps[(j - 1) * numLevelsU], 'y', height));
-				}
-				for (size_t i = 1; i < numLevelsU; ++i)
-				{
-					const size_t width = static_cast<size_t>(
-						num::floor(static_cast<TScalar>(resolution_.x) / (1 << i)));
-					mipMaps.push_back(makeMipMap(mipMaps.back(), 'x', width));
-				}
-			}
-			break;
-
-		default:
-			LASS_ASSERT_UNREACHABLE;
 		}
+		break;
 
-		mipMaps_.swap(mipMaps);
-		numLevelsU_ = numLevelsU;
-		numLevelsV_ = numLevelsV;
-		currentMipMapping_ = mode;
+	default:
+		LASS_ASSERT_UNREACHABLE;
 	}
+
+	mipMaps_.swap(mipMaps);
+	numLevelsU_ = numLevelsU;
+	numLevelsV_ = numLevelsV;
+	currentMipMapping_ = mode;
 }
 
 
