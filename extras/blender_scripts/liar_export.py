@@ -313,6 +313,8 @@ textures['TE:%(name)s'] = liar.Texture.black()
 					channel = "liar.textures.TransformationLocal(%(channel)s, [(%(sx)r, 0, 0, %(ox)r), (0, %(sy)r, 0, %(oy)r), (0, 0, %(sz)r, %(oz)r), (0, 0, 0, 1)])" % vars()
 				if mtex.texco == Blender.Texture.TexCo['ORCO']:
 					channel = "liar.textures.OrCo(%s)" % channel
+				elif mtex.texco == Blender.Texture.TexCo['WIN']:
+					channel = "make_projection_mapping(%s)" % channel
 			channels += "\n\t%(index)d: %(channel)s," % vars()
 		
 		if material.alpha == 0:
@@ -373,9 +375,20 @@ component = liar.shaders.Mirror()
 component.reflectance = %(mirror)s
 material_components.append(component)
 ''' % vars())
-		
+
+		if material.mode & Blender.Material.Modes['ONLYSHADOW']:
+			self.script_file.write(r'''
+component = liar.shaders.Unshaded(%(diffuse)s)
+material_components.append(component)
+''' % vars())
+
 		self.script_file.write(r'''
 materials['MA:%(name)s'] = make_material(material_components, %(bumpmap)s)
+''' % vars())
+
+		if material.mode & Blender.Material.Modes['ONLYSHADOW']:
+			self.script_file.write(r'''
+materials['MA:%(name)s'].subtractiveHack = True
 ''' % vars())
 	
 	def write_mesh(self, obj):
@@ -642,6 +655,7 @@ meshes = {}
 materials = {}
 textures = {}
 images = {}
+camera_projection_clients = []
 
 self_dir = os.path.dirname(os.path.abspath(__file__))
 def fix_path(path):
@@ -694,6 +708,40 @@ def make_material(material_components, bumpmap=None):
 		shader = liar.shaders.BumpMapping(shader, bumpmap)
 	return shader
 
+def make_projection_mapping(texture, use_camera_position=True):
+	global camera_projection_clients
+	proj = liar.textures.ProjectionMapping(texture, None)
+	camera_projection_clients.append((proj, use_camera_position))
+	return liar.textures.Global(proj)
+
+def make_backdrop(texture, path, use_camera_position=False):
+	global camera_projection_clients
+	image = liar.textures.Image(fix_path(path))
+	image.antiAliasing = liar.textures.Image.AA_BILINEAR
+	image.mipMapping = liar.textures.Image.MM_NONE
+	proj = liar.textures.ProjectionMapping(image, None)
+	camera_projection_clients.append((proj, use_camera_position))
+	backdrop = liar.textures.Global(proj)
+	generation_func = liar.textures.LinearInterpolator(liar.textures.RayGeneration())
+	generation_func.addKey(0.4, backdrop)
+	generation_func.addKey(0.6, texture)
+	return generation_func
+
+def broadcast_camera_projection(camera):
+	if not camera_projection_clients:
+		return
+	assert isinstance(camera, liar.cameras.PerspectiveCamera)
+	global_projection = liar.PerspectiveProjection()
+	camera_projection = liar.PerspectiveProjection()
+	global_projection.position = (0, 0, 0)
+	camera_projection.position = camera.position
+	global_projection.direction = camera_projection.direction = camera.direction
+	global_projection.right = camera_projection.right = camera.right
+	global_projection.down = camera_projection.down = camera.down
+	global_projection.fovAngle = camera_projection.fovAngle = camera.fovAngle
+	for client, use_camera_position in camera_projection_clients:
+		client.projection = (global_projection, camera_projection)[use_camera_position]
+
 def group_scenery(scenery_objects):
 	assert len(scenery_objects) > 0
 	if len(scenery_objects) == 1:
@@ -722,7 +770,11 @@ def group_scenery(scenery_objects):
 			return
 		shader = None
 		if context.alphaMode == 0:
-			shader = "liar.shaders.Unshaded(world.radiance)"
+			texture = "world.radiance"
+			if context.backbuf:
+				path = context.backbufPath
+				texture = "make_backdrop(%(texture)s, %(path)r)" % vars()
+			shader = "liar.shaders.Unshaded(%(texture)s)" % vars()
 		self.script_file.write(r'''
 # --- world WO:%(name)s ---
 world = liar.scenery.LightSky(%(horiz)s)
@@ -797,6 +849,7 @@ engine.scene = liar.scenery.AabpTree(list(objects.values()))
 engine.camera = cameras['CA:%(active_camera)s']
 engine.target = target
 engine.numberOfThreads = %(threads)s
+broadcast_camera_projection(engine.camera)
 
 def render():
 	engine.render(%(window)r)
