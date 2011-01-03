@@ -29,6 +29,8 @@
 #include "camera.h"
 #include "image_codec.h"
 #include "medium.h"
+#include "perspective_projection.h"
+#include "projection.h"
 #include "sampler.h"
 #include "scene_light.h"
 #include "scene_object.h"
@@ -72,6 +74,8 @@ PY_MODULE_CLASS(kernel, liar::kernel::Camera)
 PY_MODULE_CLASS(kernel, liar::kernel::ImageCodec)
 PY_MODULE_CLASS(kernel, liar::kernel::ImageCodecLass)
 PY_MODULE_CLASS(kernel, liar::kernel::Medium)
+PY_MODULE_CLASS(kernel, liar::kernel::Projection)
+	PY_MODULE_CLASS(kernel, liar::kernel::PerspectiveProjection)
 PY_MODULE_CLASS(kernel, liar::kernel::RgbSpace)
 PY_MODULE_CLASS(kernel, liar::kernel::RayTracer)
 PY_MODULE_CLASS(kernel, liar::kernel::RenderEngine)
