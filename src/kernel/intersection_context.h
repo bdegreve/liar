@@ -46,8 +46,8 @@ class LIAR_KERNEL_DLL IntersectionContext
 {
 public:
 
-	IntersectionContext(const SceneObject& object, const Sample& sample, const BoundedRay& primaryRay, const Intersection& intersection);
-	IntersectionContext(const SceneObject& object, const Sample& sample, const DifferentialRay& primaryRay, const Intersection& intersection);
+	IntersectionContext(const SceneObject& object, const Sample& sample, const BoundedRay& primaryRay, const Intersection& intersection, size_t rayGeneration);
+	IntersectionContext(const SceneObject& object, const Sample& sample, const DifferentialRay& primaryRay, const Intersection& intersection, size_t rayGeneration);
 
 	const kernel::Sample& sample() const { return sample_; }
 
@@ -88,6 +88,7 @@ public:
 	const TBsdfPtr& bsdf() const;
 	const Medium* interior() const { return interior_; }
 	SolidEvent solidEvent() const { return solidEvent_; }
+	size_t rayGeneration() const { return rayGeneration_; }
 
 	void setGeometricNormal(const TVector3D& geometricNormal);
 	void setNormal(const TVector3D& normal);
@@ -124,7 +125,7 @@ public:
 
 private:
 
-	void init(const SceneObject& object, const BoundedRay& primaryRay, const Intersection& intersection);
+	void init(const SceneObject& object, const BoundedRay& primaryRay, const Intersection& intersection, size_t rayGeneration);
 	void flipTo(const TVector3D& worldOmega);
 	void setScreenSpaceDifferentialsI(const TRay3D& ray, TVector3D& dPoint, TVector3D& dNormal, TVector2D& dUv);
 	void generateShaderToWorld();
@@ -164,6 +165,7 @@ private:
 	mutable TTransformation3D bsdfToWorld_;
 	mutable TTransformation3D worldToBsdf_;
 
+	size_t rayGeneration_;
 	SolidEvent solidEvent_;
 	bool hasScreenSpaceDifferentials_;
 	mutable bool hasDirtyWorldToLocal_;

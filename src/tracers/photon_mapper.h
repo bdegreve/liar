@@ -226,14 +226,14 @@ private:
 	// DirectLighting
 	const XYZ doShadeMedium(const kernel::Sample& sample, const kernel::BoundedRay& ray, XYZ& transparency) const;
 	const XYZ doShadeSurface(const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
-		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, int generation, bool highQuality) const;
+		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, bool highQuality) const;
 
 	bool hasFinalGather() const { return isRayTracingDirect_ && (numFinalGatherRays_ > 0); }
 	bool hasSecondaryGather() const { return hasFinalGather() && (numSecondaryGatherRays_ > 0); }
 
 	size_t fillPhotonMaps(const TSamplerPtr& sampler, const TimePeriod& period);
 	void emitPhoton(const LightContext& light, TScalar lightPdf, const Sample& sample, TRandomSecondary::TValue secondarySeed);
-	void tracePhoton(const Sample& sample, XYZ power, const BoundedRay& ray, int geneneration, TUniformSecondary& uniform, bool isCaustic = false);
+	void tracePhoton(const Sample& sample, XYZ power, const BoundedRay& ray, size_t geneneration, TUniformSecondary& uniform, bool isCaustic = false);
 	template <typename PhotonBuffer, typename PhotonMap> void buildPhotonMap(MapType mapType, PhotonBuffer& buffer, PhotonMap& map, TScalar powerScale);
 	void buildIrradianceMap(size_t numberOfThreads);
 	void buildVolumetricPhotonMap(const TPreliminaryVolumetricPhotonMap& preliminaryVolumetricMap, size_t numberOfThreads);
@@ -243,7 +243,7 @@ private:
 		const TScalar* firstComponentSample, const TScalar* firstVolumetricSample, size_t gatherStage = 0) const;
 	const XYZ gatherSecondary(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& target, const TVector3D& omegaOut) const;
-	const XYZ traceGatherRay(const Sample& sample, const BoundedRay& ray, bool gatherVolumetric, size_t gatherStage) const;
+	const XYZ traceGatherRay(const Sample& sample, const BoundedRay& ray, bool gatherVolumetric, size_t gatherStage, size_t rayGeneration) const;
 
 	const XYZ estimateIrradiance(const TPoint3D& point, const TVector3D& normal, TScalar& sqrEstimationRadius, size_t& estimationCount) const;
 	const XYZ estimateIrradiance(const TPoint3D& point, const TVector3D& normal) const 

@@ -34,6 +34,7 @@ PY_DECLARE_CLASS_DOC(Shader, "Abstract base class of shaders")
 PY_CLASS_METHOD_NAME(Shader, reduce, "__reduce__")
 PY_CLASS_METHOD_NAME(Shader, getState, "__getstate__")
 PY_CLASS_METHOD_NAME(Shader, setState, "__setstate__")
+PY_CLASS_MEMBER_RW(Shader, subtractiveHack, setSubtractiveHack)
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -115,7 +116,8 @@ Shader::Shader(TBsdfCaps capabilityFlags):
 	idReflectionSamples_(-1),
 	idReflectionComponentSamples_(-1),
 	idTransmissionSamples_(-1),
-	idTransmissionComponentSamples_(-1)
+	idTransmissionComponentSamples_(-1),
+	subtractiveHack_(false)
 {
 }
 

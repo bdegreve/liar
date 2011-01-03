@@ -101,7 +101,7 @@ namespace temp
 
 const XYZ DirectLighting::doCastRay(
 		const kernel::Sample& sample, const kernel::DifferentialRay& primaryRay,
-		TScalar& tIntersection, TScalar& alpha, int generation, bool highQuality) const
+		TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const
 {
 	Intersection intersection;
 	scene()->intersect(sample, primaryRay, intersection);
@@ -123,14 +123,14 @@ const XYZ DirectLighting::doCastRay(
 	}
 
 	XYZ surfaceResult;
-	IntersectionContext context(*scene(), sample, primaryRay, intersection);
+	IntersectionContext context(*scene(), sample, primaryRay, intersection, generation);
 	if (context.shader())
 	{
 		const TPoint3D point = primaryRay.point(intersection.t());
 		const TVector3D normal = context.worldNormal();
 		const TVector3D omega = context.worldToBsdf(-primaryRay.direction());
 		LASS_ASSERT(omega.z >= 0);
-		result += transparency * doShadeSurface(sample, primaryRay, context, point, normal, omega, generation, highQuality);
+		result += transparency * doShadeSurface(sample, primaryRay, context, point, normal, omega, highQuality);
 	}
 	else
 	{
@@ -175,14 +175,14 @@ const XYZ DirectLighting::doShadeMedium(const kernel::Sample& sample, const kern
 
 const XYZ DirectLighting::doShadeSurface(
 		const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
-		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, int generation, bool highQuality) const
+		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, bool highQuality) const
 {
 
 	const Shader* const shader = context.shader();
 	const TBsdfPtr bsdf = context.bsdf();
 
 	XYZ result;
-	if (generation == 0)
+	if (context.rayGeneration() == 0)
 	{
 		// actually, we block this because currently this is our way to include area lights in the camera rays only.
 		// we should always to the shader emission thing, but get the light emission seperately.

@@ -54,7 +54,7 @@ protected:
 
 	void doRequestSamples(const TSamplerPtr& sampler);
 	void doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads);
-	const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, int generation, bool highQuality) const;
+	const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const;
 	const TRayTracerPtr doClone() const;
 
 	const TPyObjectPtr doGetState() const;
@@ -62,7 +62,7 @@ protected:
 
 	virtual const XYZ doShadeMedium(const kernel::Sample& sample, const kernel::BoundedRay& ray, XYZ& transparency) const;
 	virtual const XYZ doShadeSurface(const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
-		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, int generation, bool highQuality) const;
+		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, bool highQuality) const;
 
 	const XYZ traceDirect(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn, bool highQuality) const;

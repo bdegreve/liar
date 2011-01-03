@@ -138,6 +138,8 @@ public:
 	Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps);
 	virtual ~Bsdf();
 
+	const IntersectionContext& context() const { return context_; }
+
 	TBsdfCaps caps() const { return caps_; }
 	bool hasCaps(TBsdfCaps wantedCaps) const { return kernel::hasCaps(caps_, wantedCaps); }
 	bool compatibleCaps(TBsdfCaps allowedCaps) const { return kernel::compatibleCaps(caps_, allowedCaps); }

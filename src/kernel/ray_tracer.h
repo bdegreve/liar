@@ -56,7 +56,7 @@ public:
 	virtual ~RayTracer();
 
 	const TSceneObjectPtr& scene() const;
-	int maxRayGeneration() const;
+	size_t maxRayGeneration() const;
 
 	void setScene(const TSceneObjectPtr& scene);
 	void setMaxRayGeneration(const int rayGeneration);
@@ -98,7 +98,7 @@ private:
 
 	virtual void doRequestSamples(const TSamplerPtr& sampler) = 0;
 	virtual void doPreProcess(const TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads) = 0;
-	virtual const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, int generation, bool highQuality) const = 0;
+	virtual const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const = 0;
 	virtual const TRayTracerPtr doClone() const = 0;
 
 	virtual const TPyObjectPtr doGetState() const = 0;
@@ -107,8 +107,8 @@ private:
 	class RayGenerationIncrementor: public util::NonCopyable
 	{
 	public:
-		RayGenerationIncrementor(const RayTracer& iRayTracer): 
-			rayTracer_(iRayTracer) 
+		RayGenerationIncrementor(const RayTracer& rayTracer): 
+			rayTracer_(rayTracer) 
 		{ 
 			++rayTracer_.rayGeneration_; 
 		}
@@ -124,8 +124,8 @@ private:
 
 	TSceneObjectPtr scene_;
 	LightContexts lights_;
-	int maxRayGeneration_;
-	mutable int rayGeneration_;
+	size_t maxRayGeneration_;
+	mutable size_t rayGeneration_;
 	mutable MediumStack mediumStack_;
 };
 

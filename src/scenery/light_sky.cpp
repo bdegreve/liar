@@ -455,7 +455,7 @@ const XYZ LightSky::lookUpRadiance(const Sample& sample, TScalar i, TScalar j) c
 
 	Intersection intersection;
 	this->intersect(sample, ray, intersection);
-	IntersectionContext context(*this, sample, ray, intersection);
+	IntersectionContext context(*this, sample, ray, intersection, 0);
 
 	return radiance_->lookUp(sample, context);
 }

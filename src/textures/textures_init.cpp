@@ -43,6 +43,8 @@
 #include "orco.h"
 #include "perlin.h"
 #include "product.h"
+#include "projection_mapping.h"
+#include "ray_generation.h"
 #include "screen_space.h"
 #include "sum.h"
 #include "time.h"
@@ -80,6 +82,8 @@ PY_MODULE_CLASS(textures, LinearInterpolator)
 PY_MODULE_CLASS(textures, Max)
 PY_MODULE_CLASS(textures, OrCo)
 PY_MODULE_CLASS(textures, Product)
+PY_MODULE_CLASS(textures, ProjectionMapping)
+PY_MODULE_CLASS(textures, RayGeneration)
 PY_MODULE_CLASS(textures, Sum)
 PY_MODULE_CLASS(textures, ScreenSpace)
 PY_MODULE_CLASS(textures, Time)

@@ -431,7 +431,7 @@ const XYZ PhotonMapper::doShadeMedium(const kernel::Sample& sample, const kernel
 
 const XYZ PhotonMapper::doShadeSurface(
 		const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
-		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, int generation, bool highQuality) const
+		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, bool highQuality) const
 {
 	if (isVisualizingPhotonMap_)
 	{
@@ -442,7 +442,7 @@ const XYZ PhotonMapper::doShadeSurface(
 	const TBsdfPtr bsdf = context.bsdf();
 
 	XYZ result = estimateCaustics(sample, context, bsdf, point, omega);
-	if (generation == 0)
+	if (context.rayGeneration() == 0)
 	{
 		// actually, we block this because currently this is our way to include area lights in the camera rays only.
 		// we should always to the shader emission thing, but get the light emission seperately.
@@ -604,7 +604,7 @@ void PhotonMapper::emitPhoton(
 
 void PhotonMapper::tracePhoton(
 		const Sample& sample, XYZ power, const BoundedRay& ray, 
-		int generation, TUniformSecondary& uniform, bool isCaustic)
+		size_t generation, TUniformSecondary& uniform, bool isCaustic)
 {
 	if (!power)
 	{
@@ -667,7 +667,7 @@ void PhotonMapper::tracePhoton(
 		return;
 	}
 
-	IntersectionContext context(*scene(), sample, ray, intersection);
+	IntersectionContext context(*scene(), sample, ray, intersection, generation);
 	const Shader* const shader = context.shader();
 	if (!shader)
 	{
@@ -1089,7 +1089,7 @@ const XYZ PhotonMapper::gatherIndirect(
 		const TVector3D direction = context.bsdfToWorld(out.omegaOut);
 		const BoundedRay ray(target, direction, liar::tolerance);
 		const bool gatherVolumetric = (volumetricGatherQuality_ > 0) && (*firstVolumetricSample <= volumetricGatherQuality_);
-		const XYZ radiance = traceGatherRay(sample, ray, gatherVolumetric, gatherStage);
+		const XYZ radiance = traceGatherRay(sample, ray, gatherVolumetric, gatherStage, context.rayGeneration() + 1);
 
 		result += radiance * out.value * (num::abs(out.omegaOut.z) / (n * out.pdf));
 	}
@@ -1098,7 +1098,7 @@ const XYZ PhotonMapper::gatherIndirect(
 
 
 
-const XYZ PhotonMapper::traceGatherRay(const Sample& sample, const BoundedRay& ray, bool gatherVolumetric, size_t gatherStage) const
+const XYZ PhotonMapper::traceGatherRay(const Sample& sample, const BoundedRay& ray, bool gatherVolumetric, size_t gatherStage, size_t rayGeneration) const
 {
 	Intersection intersection;
 	scene()->intersect(sample, ray, intersection);
@@ -1110,7 +1110,7 @@ const XYZ PhotonMapper::traceGatherRay(const Sample& sample, const BoundedRay& r
 	}
 	const XYZ transmittance = mediumStack().transmittance(ray, intersection.t());
 
-	IntersectionContext context(*scene(), sample, ray, intersection);
+	IntersectionContext context(*scene(), sample, ray, intersection, rayGeneration);
 	const Shader* const shader = context.shader();
 	XYZ radiance;
 	if (shader)
@@ -1131,7 +1131,7 @@ const XYZ PhotonMapper::traceGatherRay(const Sample& sample, const BoundedRay& r
 		// leaving or entering something
 		MediumChanger mediumChanger(mediumStack(), context.interior(), context.solidEvent());
 		const BoundedRay continuedRay = bound(ray, intersection.t() + liar::tolerance);
-		radiance = traceGatherRay(sample, continuedRay, gatherVolumetric, gatherStage);
+		radiance = traceGatherRay(sample, continuedRay, gatherVolumetric, gatherStage, rayGeneration + 1);
 	}
 
 

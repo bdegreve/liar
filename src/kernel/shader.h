@@ -86,6 +86,9 @@ public:
 	size_t numReflectionSamples() const;
 	size_t numTransmissionSamples() const;
 
+	bool subtractiveHack() const { return subtractiveHack_; }
+	void setSubtractiveHack(bool enable) { subtractiveHack_ = enable; }
+
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const;
 	void setState(const TPyObjectPtr& state);
@@ -115,6 +118,7 @@ private:
 	int idReflectionComponentSamples_;
 	int idTransmissionSamples_;
 	int idTransmissionComponentSamples_;
+	bool subtractiveHack_;
 };
 
 typedef python::PyObjectPtr<Shader>::Type TShaderPtr;

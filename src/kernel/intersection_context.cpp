@@ -36,10 +36,10 @@ namespace kernel
 
 // --- public --------------------------------------------------------------------------------------
 
-IntersectionContext::IntersectionContext(const SceneObject& object, const Sample& sample, const BoundedRay& ray, const Intersection& intersection):
+IntersectionContext::IntersectionContext(const SceneObject& object, const Sample& sample, const BoundedRay& ray, const Intersection& intersection, size_t rayGeneration):
 	sample_(sample)
 {
-	init(object, ray, intersection);
+	init(object, ray, intersection, rayGeneration);
 
 	if (shader_)
 	{
@@ -50,10 +50,10 @@ IntersectionContext::IntersectionContext(const SceneObject& object, const Sample
 
 
 
-IntersectionContext::IntersectionContext(const SceneObject& object, const Sample& sample, const DifferentialRay& ray, const Intersection& intersection):
+IntersectionContext::IntersectionContext(const SceneObject& object, const Sample& sample, const DifferentialRay& ray, const Intersection& intersection, size_t rayGeneration):
 	sample_(sample)
 {
-	init(object, ray.centralRay(), intersection);
+	init(object, ray.centralRay(), intersection, rayGeneration);
 
 	DifferentialRay localRay = transform(ray, worldToLocal());
 	setScreenSpaceDifferentialsI(localRay.differentialI(), dPoint_dI_, dNormal_dI_, dUv_dI_);
@@ -258,11 +258,12 @@ const TTransformation3D& IntersectionContext::worldToBsdf() const
 
 // --- private -------------------------------------------------------------------------------------
 
-void IntersectionContext::init(const SceneObject& object, const BoundedRay& ray, const Intersection& intersection)
+void IntersectionContext::init(const SceneObject& object, const BoundedRay& ray, const Intersection& intersection, size_t rayGeneration)
 {
 	t_ = 0;
 	shader_ = 0;
 	interior_ = 0;
+	rayGeneration_ = rayGeneration;
 	solidEvent_ = seNoEvent;
 	hasScreenSpaceDifferentials_ = false;
 	bsdf_ = TBsdfPtr();
