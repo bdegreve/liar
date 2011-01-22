@@ -188,11 +188,12 @@ const XYZ RayTracer::estimateLightContribution(
 {
 	LASS_ASSERT(bsdfSamples.size() == componentSamples.size());
 
-	const TScalar nl = static_cast<TScalar>(lightSamples.size());
-	const TScalar nb = static_cast<TScalar>(bsdfSamples.size());
-	const bool isMultipleImportanceSampling = nb > 0 && !light.isSingular();
 	const bool isShadowOnly = bsdf->context().shader()->subtractiveHack();
 	const TScalar sign = isShadowOnly ? -1 : 1;
+
+	const bool supportsBsdfSampling = !light.isSingular();
+	const TScalar nl = static_cast<TScalar>(lightSamples.size());
+	const TScalar nb = supportsBsdfSampling ? static_cast<TScalar>(bsdfSamples.size()) : 0;
 
 	TBsdfCaps caps = Bsdf::capsAllDiffuse | Bsdf::capsGlossy;
 	if (!light.isSingular())
@@ -203,28 +204,32 @@ const XYZ RayTracer::estimateLightContribution(
 
 	XYZ result;
 	const TPoint3D start = target;// + 10 * liar::tolerance * targetNormal;
-	for (Sample::TSubSequence2D::iterator ls = lightSamples.begin(); ls != lightSamples.end(); ++ls)
+
+	if (nl > 0)
 	{
-		BoundedRay shadowRay;
-		TScalar lightPdf;
-		const XYZ radiance = light.sampleEmission(sample, *ls, start, targetNormal, shadowRay, lightPdf);
-		if (lightPdf <= 0 || !radiance)
+		for (Sample::TSubSequence2D::iterator ls = lightSamples.begin(); ls != lightSamples.end(); ++ls)
 		{
-			continue;
+			BoundedRay shadowRay;
+			TScalar lightPdf;
+			const XYZ radiance = light.sampleEmission(sample, *ls, start, targetNormal, shadowRay, lightPdf);
+			if (lightPdf <= 0 || !radiance)
+			{
+				continue;
+			}
+			const TVector3D& omegaOut = bsdf->worldToBsdf(shadowRay.direction());
+			const BsdfOut out = bsdf->evaluate(omegaIn, omegaOut, caps);
+			if (!out || scene()->isIntersecting(sample, shadowRay) != isShadowOnly)
+			{
+				continue;
+			}
+			const XYZ trans = mediumStack().transmittance(shadowRay);
+			const TScalar weight = temp::squaredHeuristic(nl * lightPdf, nb * out.pdf);
+			const TScalar cosTheta = omegaOut.z;
+			result += out.value * trans * radiance * (sign * weight * num::abs(cosTheta) / (nl * lightPdf));
 		}
-		const TVector3D& omegaOut = bsdf->worldToBsdf(shadowRay.direction());
-		const BsdfOut out = bsdf->evaluate(omegaIn, omegaOut, caps);
-		if (!out || scene()->isIntersecting(sample, shadowRay) != isShadowOnly)
-		{
-			continue;
-		}
-		const XYZ trans = mediumStack().transmittance(shadowRay);
-		const TScalar weight = isMultipleImportanceSampling ? temp::squaredHeuristic(nl * lightPdf, nb * out.pdf) : TNumTraits::one;
-		const TScalar cosTheta = omegaOut.z;
-		result += out.value * trans * radiance * (sign * weight * num::abs(cosTheta) / (nl * lightPdf));
 	}
 
-	if (isMultipleImportanceSampling)
+	if (nb > 0)
 	{
 		Sample::TSubSequence1D::iterator cs = componentSamples.begin();
 		for (Sample::TSubSequence2D::iterator bs = bsdfSamples.begin(); bs != bsdfSamples.end(); ++bs, ++cs)
@@ -238,14 +243,18 @@ const XYZ RayTracer::estimateLightContribution(
 			BoundedRay shadowRay;
 			TScalar lightPdf;
 			const XYZ radiance = light.emission(sample, ray, shadowRay, lightPdf);
-			if (lightPdf <= 0 || !radiance || scene()->isIntersecting(sample, shadowRay) != isShadowOnly)
+			if (lightPdf <= 0 || !radiance)
+			{
+				continue;
+			}
+			if (scene()->isIntersecting(sample, shadowRay) != isShadowOnly)
 			{
 				continue;
 			}
 			const XYZ trans = mediumStack().transmittance(shadowRay);
 			const TScalar weight = temp::squaredHeuristic(nb * out.pdf, nl * lightPdf);
 			const TScalar cosTheta = out.omegaOut.z;
-			result += out.value * trans * radiance * (sign * weight * abs(cosTheta) / (nb * out.pdf));
+			result += out.value * trans * radiance * (sign * weight * num::abs(cosTheta) / (nb * out.pdf));
 		}
 	}
 
