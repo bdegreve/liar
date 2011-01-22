@@ -63,7 +63,7 @@ private:
 		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
 		TComponents components_;
 		mutable stde::static_vector<const Bsdf*, capacity> activeComponents_;
-		TBsdfCaps caps_;
+		//TBsdfCaps caps_;
 		mutable TBsdfCaps activeCaps_;
 		friend class Sum;
 	};

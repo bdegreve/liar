@@ -128,7 +128,8 @@ void Sum::doSetState(const TPyObjectPtr& state)
 // --- bsdf ----------------------------------------------------------------------------------------
 
 Sum::SumBsdf::SumBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps):
-	Bsdf(sample, context, caps)
+	Bsdf(sample, context, caps),
+	activeCaps_(0)
 {
 }
 
