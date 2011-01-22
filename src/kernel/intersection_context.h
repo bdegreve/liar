@@ -42,6 +42,24 @@ namespace kernel
 
 class DifferentialRay;
 
+namespace experimental
+{
+	template <typename T>
+	class ResetOnCopy
+	{
+	public:
+		ResetOnCopy(): value_() {}
+		ResetOnCopy(const T& x): value_(x) {}
+		ResetOnCopy(const ResetOnCopy& other): value_() {}
+		ResetOnCopy& operator=(const T& x) { value_ = x; return *this; }
+		ResetOnCopy& operator=(const ResetOnCopy& other) { value_ = T(); return *this; }
+		T& operator*() { return value_; }
+		bool operator!() const { return !value_; }
+	private:
+		T value_;
+	};
+}
+
 class LIAR_KERNEL_DLL IntersectionContext
 {
 public:
@@ -156,7 +174,7 @@ private:
 	const Shader* shader_;		/**< shader to be used */
 	const Medium* interior_;
 	const kernel::Sample& sample_;
-	mutable TBsdfPtr bsdf_;
+	mutable experimental::ResetOnCopy<TBsdfPtr> bsdf_;
 
 	TTransformation3D localToWorld_;
 	mutable TTransformation3D worldToLocal_;

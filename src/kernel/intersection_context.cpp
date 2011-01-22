@@ -75,7 +75,7 @@ const TBsdfPtr& IntersectionContext::bsdf() const
 	{
 		bsdf_ = shader_->bsdf(sample_, *this);
 	}
-	return bsdf_;
+	return *bsdf_;
 }
 
 
