@@ -172,7 +172,7 @@ ThinDielectric::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& cont
 
 
 
-BsdfOut ThinDielectric::Bsdf::doEvaluate(const TVector3D&, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
+BsdfOut ThinDielectric::Bsdf::doEvaluate(const TVector3D&, const TVector3D&, TBsdfCaps) const
 {
 	return BsdfOut();
 }

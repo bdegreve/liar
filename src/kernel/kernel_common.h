@@ -43,6 +43,8 @@
 #include <lass/num/num_traits.h>
 #include <lass/num/basic_ops.h>
 #include <lass/num/floating_point_comparison.h>
+#include <lass/num/random.h>
+#include <lass/num/distribution.h>
 #include <lass/prim/vector_2d.h>
 #include <lass/prim/vector_3d.h>
 #include <lass/prim/point_2d.h>

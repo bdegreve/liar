@@ -77,7 +77,7 @@ void SceneLight::doSetState(const TPyObjectPtr& state)
 
 
 
-void SceneLight::doSetSceneBound(const TAabb3D& bound, const TimePeriod& period)
+void SceneLight::doSetSceneBound(const TAabb3D&, const TimePeriod&)
 {
 }
 

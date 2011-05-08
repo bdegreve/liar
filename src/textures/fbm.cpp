@@ -69,7 +69,7 @@ void FBm::doSetState(const TPyObjectPtr& state)
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ FBm::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const XYZ FBm::doLookUp(const Sample&, const IntersectionContext& context) const
 {
 	const TScalar squaredFootprint = std::max(context.dPoint_dI().squaredNorm(), context.dPoint_dJ().squaredNorm());
 	const TScalar idealNumOctaves = 1 - num::log2(squaredFootprint) / 2;

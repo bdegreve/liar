@@ -110,14 +110,14 @@ Mirror::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, con
 
 
 
-BsdfOut Mirror::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
+BsdfOut Mirror::Bsdf::doEvaluate(const TVector3D&, const TVector3D&, TBsdfCaps) const
 {
 	return BsdfOut();
 }
 
 
 
-SampleBsdfOut Mirror::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const
+SampleBsdfOut Mirror::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D&, TScalar, TBsdfCaps) const
 {
 	LASS_ASSERT(omegaIn.z > 0);
 	LASS_ASSERT(kernel::hasCaps(allowedCaps, caps()));

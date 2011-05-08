@@ -72,7 +72,7 @@ const TPyObjectPtr Camera::reduce() const
 
 // --- private -------------------------------------------------------------------------------------
 
-TScalar Camera::doWeight(const TRay3D& ray) const
+TScalar Camera::doWeight(const TRay3D&) const
 {
 	return 1;
 }

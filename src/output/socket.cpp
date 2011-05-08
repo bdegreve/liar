@@ -40,8 +40,8 @@ Socket::Socket(const std::string& address, TPort port):
 	ostream_(socket_),
 	istream_(socket_),
 	specialToken_(-1),
-	isCanceling_(false),
-	isQuiting_(false)
+	isQuiting_(false),
+	isCanceling_(false)
 {
 	socket_.connect(address, port);
 }
@@ -62,13 +62,13 @@ Socket::~Socket()
 
 const TResolution2D Socket::doResolution() const
 {
+	num::Tuint32 width, height;
 	LASS_LOCK(socketLock_)
 	{
 		ostream_ << specialToken_ << "?resolution";
-		num::Tuint32 width, height;
 		istream_ >> width >> height;
-		return TResolution2D(width, height);
 	}
+	return TResolution2D(width, height);
 }
 
 

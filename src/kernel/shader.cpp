@@ -181,7 +181,7 @@ void Shader::doShadeContext(const Sample&, IntersectionContext&) const
 
 
 
-TBsdfPtr Shader::doBsdf(const Sample& sample, const IntersectionContext& context) const
+TBsdfPtr Shader::doBsdf(const Sample&, const IntersectionContext&) const
 {
 	return TBsdfPtr();
 }

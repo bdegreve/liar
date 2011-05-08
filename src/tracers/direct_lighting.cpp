@@ -177,8 +177,6 @@ const XYZ DirectLighting::doShadeSurface(
 		const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
 		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, bool highQuality) const
 {
-
-	const Shader* const shader = context.shader();
 	const TBsdfPtr bsdf = context.bsdf();
 
 	XYZ result;

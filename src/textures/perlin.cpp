@@ -87,7 +87,7 @@ TScalar Perlin::noise(const TPoint3D& point) const
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Perlin::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const XYZ Perlin::doLookUp(const Sample&, const IntersectionContext& context) const
 {
 	return XYZ(noise(context.point()));
 }

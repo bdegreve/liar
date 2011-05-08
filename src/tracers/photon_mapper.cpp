@@ -438,7 +438,6 @@ const XYZ PhotonMapper::doShadeSurface(
 		return estimateIrradiance(point, normal);
 	}
 
-	const Shader* const shader = context.shader();
 	const TBsdfPtr bsdf = context.bsdf();
 
 	XYZ result = estimateCaustics(sample, context, bsdf, point, omega);
@@ -1345,7 +1344,7 @@ namespace temp
 
 
 
-const XYZ PhotonMapper::estimateVolumetric(const Sample& sample, const kernel::BoundedRay& ray, bool dropDirectPhotons) const
+const XYZ PhotonMapper::estimateVolumetric(const Sample&, const kernel::BoundedRay& ray, bool dropDirectPhotons) const
 {
 	typedef Sample::TSubSequence1D::difference_type difference_type;
 

@@ -195,7 +195,7 @@ Dielectric::DielectricBsdf::DielectricBsdf(const Sample& sample, const Intersect
 
 
 
-BsdfOut Dielectric::DielectricBsdf::doEvaluate(const TVector3D&, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
+BsdfOut Dielectric::DielectricBsdf::doEvaluate(const TVector3D&, const TVector3D&, TBsdfCaps) const
 {
 	return BsdfOut();
 }

@@ -125,7 +125,7 @@ void LightSky::setSamplingResolution(const TResolution2D& resolution)
 
 // --- private -------------------------------------------------------------------------------------
 
-void LightSky::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod&)
+void LightSky::doPreProcess(const TSceneObjectPtr&, const TimePeriod&)
 {
 	/*if (!portal_)
 	{

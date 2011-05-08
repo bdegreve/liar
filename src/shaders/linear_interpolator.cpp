@@ -83,7 +83,7 @@ void LinearInterpolator::setKeys(const TKeyShaders& keyShaders)
 	keys_ = keyShaders;
 	std::sort(keys_.begin(), keys_.end(), LesserKey());
 
-	TBsdfCaps caps;
+	TBsdfCaps caps = 0;
 	for (TKeyShaders::const_iterator i = keys_.begin(); i != keys_.end(); ++i)
 	{
 		caps |= i->second->caps();

@@ -43,10 +43,9 @@ namespace textures
 class LIAR_TEXTURES_DLL Perlin: public Texture
 {
 	PY_HEADER(Texture)
-	typedef num::RandomParkMiller TRandom;
-
 public:
 
+	typedef num::RandomParkMiller TRandom;
 	typedef TRandom::TValue TSeed;
 
 	Perlin();

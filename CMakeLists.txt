@@ -59,7 +59,7 @@ if(MSVC)
 		set (liar_CFLAGS "${liar_CFLAGS} /MP")
 	endif()
 else()
-	set (liar_CFLAGS "${liar_CFLAGS} -fno-strict-aliasing -Wall -Wextra -Wformat=2 -Winit-self")
+	set (liar_CFLAGS "${liar_CFLAGS} -fno-strict-aliasing -Wall -Wextra -Wformat=2 -Winit-self -Wno-unknown-pragmas")
 endif()
 
 macro(list_remove_regex listvar regex)

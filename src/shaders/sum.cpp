@@ -38,7 +38,7 @@ Sum::Sum(const TChildren& children):
 	Shader(Bsdf::capsNone),
 	children_(children)
 {
-	TBsdfCaps caps;
+	TBsdfCaps caps = 0;
 	for (TChildren::const_iterator i = children.begin(); i != children.end(); ++i)
 	{
 		caps |= (*i)->caps();
