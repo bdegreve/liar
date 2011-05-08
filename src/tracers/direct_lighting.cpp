@@ -182,10 +182,10 @@ const XYZ DirectLighting::doShadeSurface(
 	const TBsdfPtr bsdf = context.bsdf();
 
 	XYZ result;
-	if (context.rayGeneration() == 0)
+	if (context.rayGeneration() == 0 || !context.object().asLight())
 	{
 		// actually, we block this because currently this is our way to include area lights in the camera rays only.
-		// we should always to the shader emission thing, but get the light emission seperately.
+		// we should always do the shader emission thing, but get the light emission seperately.
 		// and generation == 0 isn't a good discriminator eighter.
 		result += context.shader()->emission(sample, context, omega);
 	}

@@ -263,6 +263,7 @@ void IntersectionContext::init(const SceneObject& object, const BoundedRay& ray,
 	t_ = 0;
 	shader_ = 0;
 	interior_ = 0;
+	object_ = &object;
 	rayGeneration_ = rayGeneration;
 	solidEvent_ = seNoEvent;
 	hasScreenSpaceDifferentials_ = false;

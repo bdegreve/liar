@@ -68,6 +68,7 @@ public:
 	IntersectionContext(const SceneObject& object, const Sample& sample, const DifferentialRay& primaryRay, const Intersection& intersection, size_t rayGeneration);
 
 	const kernel::Sample& sample() const { return sample_; }
+	const SceneObject& object() const { LASS_ASSERT(object_); return *object_; }
 
 	const TAabb3D& bounds() const { return bounds_; }
 	void setBounds(const TAabb3D& bounds) { bounds_ = bounds; }
@@ -173,6 +174,7 @@ private:
 	TScalar t_;				/**< parameter of point_ on ray */
 	const Shader* shader_;		/**< shader to be used */
 	const Medium* interior_;
+	const SceneObject* object_;
 	const kernel::Sample& sample_;
 	mutable experimental::ResetOnCopy<TBsdfPtr> bsdf_;
 

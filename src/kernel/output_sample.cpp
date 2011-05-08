@@ -74,6 +74,15 @@ OutputSample::OutputSample(
 
 // --- free ----------------------------------------------------------------------------------------
 
+io::BinaryOStream& operator<<(io::BinaryOStream& stream, const OutputSample& sample)
+{
+	const short version = 1;
+	const XYZ& radiance = sample.radiance();
+	const TPoint2D& screenCoordinate = sample.screenCoordinate();
+	stream << version << screenCoordinate.x << screenCoordinate.y << radiance.x << radiance.y << radiance.z << sample.depth() << sample.alpha() << sample.weight();
+	return stream;
+}
+
 }
 
 }

@@ -31,6 +31,7 @@
 
 #include "kernel_common.h"
 #include "xyz.h"
+#include <lass/io/binary_o_stream.h>
 
 namespace liar
 {
@@ -65,6 +66,8 @@ private:
 };
 
 typedef std::vector<OutputSample> TOutputSamples;
+
+LIAR_KERNEL_DLL io::BinaryOStream& operator<<(io::BinaryOStream& stream, const OutputSample& sample);
 
 }
 
