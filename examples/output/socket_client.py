@@ -6,8 +6,11 @@
 # Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
 # http://liar.bramz.net/
 
+import sys
 from _scene import *
 
+address, port, x_left, x_right = sys.argv[1:]
+
 e = engine()
-e.target = output.Display("display.py", (width, height))
-e.render()
+e.target = output.SocketClient(address, int(port))
+e.render(((float(x_left), 0), (float(x_right), 1)))

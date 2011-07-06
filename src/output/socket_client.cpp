@@ -22,7 +22,8 @@
  */
 
 #include "output_common.h"
-#include "socket.h"
+#include "socket_client.h"
+#include "socket_helpers.h"
 #include <lass/util/thread_fun.h>
 
 namespace liar
@@ -30,25 +31,24 @@ namespace liar
 namespace output
 {
 
-PY_DECLARE_CLASS_DOC(Socket, "sends output samples over socket");
-PY_CLASS_CONSTRUCTOR_2(Socket, const std::string&, Socket::TPort)
+
+PY_DECLARE_CLASS_DOC(SocketClient, "sends output samples over socket");
+PY_CLASS_CONSTRUCTOR_2(SocketClient, const std::string&, SocketClient::TPort)
 
 // --- public --------------------------------------------------------------------------------------
 
-Socket::Socket(const std::string& address, TPort port):
-	socket_(),
-	ostream_(socket_),
-	istream_(socket_),
-	specialToken_(-1),
-	isQuiting_(false),
-	isCanceling_(false)
+SocketClient::SocketClient(const std::string& address, TPort port):
+	isCanceling_(false),
+	isQuiting_(false)
 {
 	socket_.connect(address, port);
+	istream_.setSocket(&socket_);
+	ostream_.setSocket(&socket_);
 }
 
 
 
-Socket::~Socket()
+SocketClient::~SocketClient()
 {
 	if (!isQuiting_)
 	{
@@ -60,49 +60,50 @@ Socket::~Socket()
 
 // --- private -------------------------------------------------------------------------------------
 
-const TResolution2D Socket::doResolution() const
+const TResolution2D SocketClient::doResolution() const
 {
-	num::Tuint32 width, height;
+	TResolution2D resolution;
 	LASS_LOCK(socketLock_)
 	{
-		ostream_ << specialToken_ << "?resolution";
-		istream_ >> width >> height;
+		writeCommand(ostream_, scResolution);
+		LASS_ENFORCE(readResolution(istream_, resolution));
 	}
-	return TResolution2D(width, height);
+	return resolution;
 }
 
 
 
-void Socket::doBeginRender()
+void SocketClient::doBeginRender()
 {
 	LASS_LOCK(socketLock_)
 	{
-		ostream_ << specialToken_ << "begin";
+		writeCommand(ostream_, scBeginRender);
 	}
-	isCancelingLoop_.reset(util::threadFun(util::makeCallback(this, &Socket::isCancelingLoop), util::threadJoinable));
+	isCancelingLoop_.reset(util::threadFun(util::makeCallback(this, &SocketClient::isCancelingLoop), util::threadJoinable));
 	isCancelingLoop_->run();
 }
 
 
 
-void Socket::doWriteRender(const OutputSample* first, const OutputSample* last)
+void SocketClient::doWriteRender(const OutputSample* first, const OutputSample* last)
 {
 	LASS_LOCK(socketLock_)
 	{
 		while (first != last)
 		{
-			ostream_ << *first++;
+			writeSample(ostream_, *first++);
 		}
+		ostream_.flush();
 	}
 }
 
 
 
-void Socket::doEndRender()
+void SocketClient::doEndRender()
 {
 	LASS_LOCK(socketLock_)
 	{
-		ostream_ << specialToken_ << "end";
+		writeCommand(ostream_, scEndRender);
 	}
 	isQuiting_ = true;
 	isCancelingLoop_->join();
@@ -110,25 +111,33 @@ void Socket::doEndRender()
 
 
 
-bool Socket::doIsCanceling() const
+bool SocketClient::doIsCanceling() const
 {
 	return isCanceling_;
 }
 
 
 
-void Socket::isCancelingLoop()
+void SocketClient::isCancelingLoop()
 {
 	while (!isQuiting_ && !isCanceling_)
 	{
-		bool isCanceling;
+		bool isCanceling = false;
 		LASS_LOCK(socketLock_)
 		{
-			ostream_ << specialToken_ << "?cancel";
-			istream_ >> isCanceling;
+			writeCommand(ostream_, scIsCanceling);
+			if (!ostream_.good())
+			{
+				isCanceling = true;
+			}
+			else
+			{
+				istream_ >> isCanceling;
+				isCanceling |= !istream_.good();
+			}
 		}
 		isCanceling_ = isCanceling;
-		util::Thread::sleep(1000);
+		util::Thread::sleep(500);
 	}
 }
 

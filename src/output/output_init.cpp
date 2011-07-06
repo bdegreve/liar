@@ -31,7 +31,8 @@
 #include "display.h"
 #include "filter_mitchell.h"
 #include "image.h"
-#include "socket.h"
+#include "socket_client.h"
+#include "socket_host.h"
 #include "splitter.h"
 
 using namespace liar::output;
@@ -50,7 +51,8 @@ PY_MODULE_CLASS(output, Display)
 #endif
 PY_MODULE_CLASS(output, FilterMitchell)
 PY_MODULE_CLASS(output, Image)
-PY_MODULE_CLASS(output, Socket)
+PY_MODULE_CLASS(output, SocketClient)
+PY_MODULE_CLASS(output, SocketHost)
 PY_MODULE_CLASS(output, Splitter)
 
 void outputPostInject(PyObject*)

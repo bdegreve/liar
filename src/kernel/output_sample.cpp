@@ -44,8 +44,19 @@ OutputSample::OutputSample():
 
 
 OutputSample::OutputSample(
-		const Sample& sample, const XYZ& radiance, TScalar depth, TScalar alpha, 
-		TScalar weight):
+		const TPoint2D& screenCoordinate, const XYZ& radiance, TScalar depth, TScalar alpha, TScalar weight):
+	radiance_(radiance),
+	screenCoordinate_(screenCoordinate),
+	depth_(depth),
+	alpha_(alpha),
+	weight_(weight)
+{
+}
+
+
+
+OutputSample::OutputSample(
+		const Sample& sample, const XYZ& radiance, TScalar depth, TScalar alpha, TScalar weight):
 	radiance_(radiance),
 	screenCoordinate_(sample.screenCoordinate()),
 	depth_(depth),
@@ -73,15 +84,6 @@ OutputSample::OutputSample(
 // --- private -------------------------------------------------------------------------------------
 
 // --- free ----------------------------------------------------------------------------------------
-
-io::BinaryOStream& operator<<(io::BinaryOStream& stream, const OutputSample& sample)
-{
-	const short version = 1;
-	const XYZ& radiance = sample.radiance();
-	const TPoint2D& screenCoordinate = sample.screenCoordinate();
-	stream << version << screenCoordinate.x << screenCoordinate.y << radiance.x << radiance.y << radiance.z << sample.depth() << sample.alpha() << sample.weight();
-	return stream;
-}
 
 }
 

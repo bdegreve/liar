@@ -72,11 +72,14 @@ void RenderTarget::beginRender()
 
 void RenderTarget::writeRender(const OutputSample* first, const OutputSample* last)
 {
-	if (!isRendering_)
+	LASS_LOCK(lock_)
 	{
-		beginRender();
+		if (!isRendering_)
+		{
+			beginRender();
+		}
+		doWriteRender(first, last);
 	}
-	doWriteRender(first, last);
 }
 
 

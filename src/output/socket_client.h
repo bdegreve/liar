@@ -21,13 +21,13 @@
  *  http://liar.bramz.net/
  */
 
-/** @class liar::output::Splitter
- *  @brief hook several RenderTargets on the output
+/** @class liar::output::SocketClient
+ *  @brief sends samples over TCP to a SocketHost
  *  @author Bram de Greve [Bramz]
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_OUTPUT_SOCKET_H
-#define LIAR_GUARDIAN_OF_INCLUSION_OUTPUT_SOCKET_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_OUTPUT_SOCKET_CLIENT_H
+#define LIAR_GUARDIAN_OF_INCLUSION_OUTPUT_SOCKET_CLIENT_H
 
 #include "output_common.h"
 #include "../kernel/render_target.h"
@@ -42,15 +42,15 @@ namespace liar
 namespace output
 {
 
-class LIAR_OUTPUT_DLL Socket: public RenderTarget
+class LIAR_OUTPUT_DLL SocketClient: public RenderTarget
 {
 	PY_HEADER(RenderTarget)
 public:
 
 	typedef io::Socket::TPort TPort;
 
-	Socket(const std::string& address, TPort port);
-	~Socket();
+	SocketClient(const std::string& address, TPort port);
+	~SocketClient();
 
 private:
 
@@ -65,14 +65,11 @@ private:
 	mutable util::CriticalSection socketLock_;
 	mutable io::BinaryOSocket ostream_;
 	mutable io::BinaryISocket istream_;
-	const short specialToken_;
 
 	util::ScopedPtr<util::Thread> isCancelingLoop_;
 	volatile bool isQuiting_;
 	volatile bool isCanceling_;
 };
-
-
 
 }
 

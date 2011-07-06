@@ -31,7 +31,6 @@
 
 #include "kernel_common.h"
 #include "xyz.h"
-#include <lass/io/binary_o_stream.h>
 
 namespace liar
 {
@@ -45,16 +44,16 @@ class LIAR_KERNEL_DLL OutputSample
 public:
 
 	OutputSample();
+	OutputSample(const TPoint2D& screenCoordinate, const XYZ& radiance, TScalar depth, TScalar alpha = 1, TScalar weight = 1);
 	OutputSample(const Sample& sample, const XYZ& radiance, TScalar depth, TScalar alpha = 1, TScalar weight = 1);
 	OutputSample(const OutputSample& other, const TPoint2D& screenCoordinate, TScalar weight);
 
-	const XYZ& radiance() const { return radiance_; }
 	const TPoint2D& screenCoordinate() const { return screenCoordinate_; }
+	const XYZ& radiance() const { return radiance_; }
+	void setRadiance(const XYZ& radiance) { radiance_ = radiance; }
 	TScalar depth() const { return depth_; }
 	TScalar alpha() const { return alpha_; }
 	TScalar weight() const { return weight_; }
-
-	void setRadiance(const XYZ& radiance) { radiance_ = radiance; }
 
 private:
 
@@ -66,8 +65,6 @@ private:
 };
 
 typedef std::vector<OutputSample> TOutputSamples;
-
-LIAR_KERNEL_DLL io::BinaryOStream& operator<<(io::BinaryOStream& stream, const OutputSample& sample);
 
 }
 

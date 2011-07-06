@@ -78,9 +78,14 @@ PY_CLASS_METHOD(Display, testGammut)
 PY_CLASS_STATIC_CONST(Display, "TM_LINEAR", "linear");
 PY_CLASS_STATIC_CONST(Display, "TM_COMPRESS_Y", "compress_y");
 PY_CLASS_STATIC_CONST(Display, "TM_COMPRESS_XYZ", "compress_xyz");
+PY_CLASS_STATIC_CONST(Display, "TM_COMPRESS_RGB", "compress_rgb");
 PY_CLASS_STATIC_CONST(Display, "TM_REINHARD2002_Y", "reinhard2002_y");
 PY_CLASS_STATIC_CONST(Display, "TM_EXPONENTIAL_Y", "exponential_y");
 PY_CLASS_STATIC_CONST(Display, "TM_EXPONENTIAL_XYZ", "exponential_xyz");
+PY_CLASS_STATIC_CONST(Display, "TM_EXPONENTIAL_RGB", "exponential_rgb");
+PY_CLASS_STATIC_CONST(Display, "TM_DUIKER_Y", "duiker_y");
+PY_CLASS_STATIC_CONST(Display, "TM_DUIKER_XYZ", "duiker_xyz");
+PY_CLASS_STATIC_CONST(Display, "TM_DUIKER_RGB", "duiker_rgb");
 
 Display::TToneMappingDictionary Display::toneMappingDictionary_ = Display::makeToneMappingDictionary();
 
@@ -94,10 +99,9 @@ Display::Display(const std::string& title, const TResolution2D& resolution):
 	maxSceneLuminance_(0),
 	sceneLuminanceCoverage_(0),
 	middleGrey_(.184f),
-	toneMapping_(tmExponentialXYZ),
+	toneMapping_(tmExponentialRGB),
 	autoExposure_(true),
 	refreshTitle_(false),
-	isQuiting_(false),
 	isCanceling_(false)
 {
 	setExposure(0);
@@ -108,9 +112,9 @@ Display::Display(const std::string& title, const TResolution2D& resolution):
 
 Display::~Display()
 {
-	if (!isQuiting_)
+	if (displayLoop_)
 	{
-		endRender();
+		displayLoop_->join();
 	}
 }
 
@@ -345,20 +349,23 @@ const TResolution2D Display::doResolution() const
 
 void Display::doBeginRender()
 {
-	LASS_LOCK(renderBufferLock_)
+	// TODO: don't need to reset display loop if it already has the right resolution.
+
+	if (displayLoop_)
 	{
-		const size_t n = resolution_.x * resolution_.y;
-		renderBuffer_.clear();
-		renderBuffer_.resize(n);
-		displayBuffer_.clear();
-		displayBuffer_.resize(n);
-		totalWeight_.clear();
-		totalWeight_.resize(n, 0);
-		renderDirtyBox_.clear();
-		displayDirtyBox_.clear();
-		isQuiting_ = false;
-		isCanceling_ = false;
-	}
+		cancel();
+		displayLoop_->join();
+	}	
+	
+	const size_t n = resolution_.x * resolution_.y;
+	renderBuffer_.clear();
+	renderBuffer_.resize(n);
+	displayBuffer_.clear();
+	displayBuffer_.resize(n);
+	totalWeight_.clear();
+	totalWeight_.resize(n, 0);
+	renderDirtyBox_.clear();
+	displayDirtyBox_.clear();
 	
 	displayLoop_.reset(
 		util::threadFun(util::makeCallback(this, &Display::displayLoop), util::threadJoinable));
@@ -413,8 +420,6 @@ void Display::doWriteRender(const OutputSample* first, const OutputSample* last)
 
 void Display::doEndRender()
 {
-	isQuiting_ = true;
-	displayLoop_->join();
 }
 
 
@@ -477,11 +482,16 @@ void Display::onKeyDown(PixelToaster::DisplayInterface& display, PixelToaster::K
 
 bool Display::onClose(PixelToaster::DisplayInterface&)
 {
-	isCanceling_ = true;
-	signal_.signal();
+	cancel();
 	return false;
 }
 
+
+void Display::cancel()
+{
+	isCanceling_ = true;
+	signal_.signal();
+}
 
 
 void printThirdStops(std::ostringstream& stream, int thirdStops)
@@ -523,12 +533,14 @@ const std::string Display::makeTitle() const
 
 void Display::displayLoop()
 {
+	isCanceling_ = false;
+
 	PixelToaster::Display display;
 	const int width = num::numCast<int>(resolution_.x);
 	const int height = num::numCast<int>(resolution_.y);
  	LASS_ENFORCE(display.open(makeTitle().c_str(), width, height, PixelToaster::Output::Windowed,	PixelToaster::Mode::FloatingPoint));
 	display.listener(this);
-
+	
 	LASS_ENFORCE(display.update(displayBuffer_)); // full update of initial buffer
 
 	while (!isCanceling_)
@@ -561,11 +573,35 @@ void Display::displayLoop()
 	display.close();
 }
 
+namespace
+{
+	inline double filmic(double x)
+	{
+		x = std::max(0., x - 0.004);
+		const double y = (x * (6.2 * x + .5)) / (x * (6.2 * x + 1.7) + 0.06); 
+		return num::pow(y, 2.2); // undo gamma
+	}
+	inline double invFilmic(double y)
+	{
+		y = std::max(0., std::min(y, 0.99999));
+		y = num::pow(y, 1. / 2.2); // apply gamma
+		// a*x*x + b*y + c == 0
+		const double a = 6.2f* y - 6.2;
+		const double b = 1.7 * y - .5;
+		const double c = .06 * y;
+		const double D = b * b - 4 * a * c;
+		const double x = (-b - num::sqrt(D)) / (2 * a);
+		return x + 0.004;
+	}
+}
 
 /** @internal
  */
 void Display::copyToDisplayBuffer()
 {
+	const TRgbSpacePtr linearSpace = rgbSpace_->withGamma(1);
+	const TRgbSpacePtr gammaSpace = CIEXYZ->withGamma(rgbSpace_->gamma());
+
 	LASS_LOCK(renderBufferLock_)
 	{
 		if (autoExposure_ && sceneLuminanceCoverage_ > 0)
@@ -582,12 +618,19 @@ void Display::copyToDisplayBuffer()
 					break;
 				case tmCompressY: // a = g * y / (1 + g * y)  ->  g * y = a / (1 - a)
 				case tmCompressXYZ: 
+				case tmCompressRGB: 
 				case tmReinhard2002Y:
 					g = a / (y * (1 - a));
 					break;
 				case tmExponentialY: // a = 1 - exp(-g * y)  ->  g * y = -ln(1 - a)
 				case tmExponentialXYZ:
+				case tmExponentialRGB:
 					g = -num::log(1 - a) / y;
+					break;
+				case tmDuikerY:
+				case tmDuikerXYZ:
+				case tmDuikerRGB:
+					g = invFilmic(a) / y;
 					break;
 				default:
 					LASS_ENFORCE_UNREACHABLE;
@@ -669,6 +712,27 @@ void Display::copyToDisplayBuffer()
 			}
 			break;
 
+		case tmCompressRGB:
+			for (size_t j = min.y; j <= max.y; ++j)
+			{
+				const size_t kBegin = j * resolution_.x + min.x;
+				const size_t kEnd = kBegin + nx;
+				for (size_t k = kBegin; k < kEnd; ++k)
+				{
+					const TScalar w = totalWeight_[k];
+					const XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
+					const prim::ColorRGBA linear = linearSpace->convert(xyz);
+					const XYZ tonemapped(linear.r / (1 + linear.r), linear.g / (1 + linear.g), linear.b / (1 + linear.b));
+					const prim::ColorRGBA rgb = gammaSpace->convert(tonemapped);
+					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+					p.a = 1;
+					p.b = rgb.b;
+					p.g = rgb.g;
+					p.r = rgb.r;
+				}			
+			}
+			break;
+
 		case tmReinhard2002Y:
 			for (size_t j = min.y; j <= max.y; ++j)
 			{
@@ -733,6 +797,90 @@ void Display::copyToDisplayBuffer()
 			}
 			break;
 
+		case tmExponentialRGB:
+			for (size_t j = min.y; j <= max.y; ++j)
+			{
+				const size_t kBegin = j * resolution_.x + min.x;
+				const size_t kEnd = kBegin + nx;
+				for (size_t k = kBegin; k < kEnd; ++k)
+				{
+					const TScalar w = totalWeight_[k];
+					const XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
+					const prim::ColorRGBA linear = linearSpace->convert(xyz);
+					const XYZ tonemapped(1 - num::exp(-linear.r), 1 - num::exp(-linear.g), 1 - num::exp(-linear.b));
+					const prim::ColorRGBA rgb = gammaSpace->convert(tonemapped);
+					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+					p.a = 1;
+					p.b = rgb.b;
+					p.g = rgb.g;
+					p.r = rgb.r;
+				}			
+			}
+			break;
+
+		case tmDuikerY:
+			for (size_t j = min.y; j <= max.y; ++j)
+			{
+				const size_t kBegin = j * resolution_.x + min.x;
+				const size_t kEnd = kBegin + nx;
+				for (size_t k = kBegin; k < kEnd; ++k)
+				{
+					const TScalar w = totalWeight_[k];
+					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
+					xyz *= filmic(xyz.y) / std::max(xyz.y, 0.004);
+					const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
+					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+					p.a = 1;
+					p.b = rgb.b;
+					p.g = rgb.g;
+					p.r = rgb.r;
+				}			
+			}
+			break;
+
+		case tmDuikerXYZ:
+			for (size_t j = min.y; j <= max.y; ++j)
+			{
+				const size_t kBegin = j * resolution_.x + min.x;
+				const size_t kEnd = kBegin + nx;
+				for (size_t k = kBegin; k < kEnd; ++k)
+				{
+					const TScalar w = totalWeight_[k];
+					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
+					xyz.x = filmic(xyz.x);
+					xyz.y = filmic(xyz.y);
+					xyz.z = filmic(xyz.z);
+					const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
+					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+					p.a = 1;
+					p.b = rgb.b;
+					p.g = rgb.g;
+					p.r = rgb.r;
+				}			
+			}
+			break;
+
+		case tmDuikerRGB:
+			for (size_t j = min.y; j <= max.y; ++j)
+			{
+				const size_t kBegin = j * resolution_.x + min.x;
+				const size_t kEnd = kBegin + nx;
+				for (size_t k = kBegin; k < kEnd; ++k)
+				{
+					const TScalar w = totalWeight_[k];
+					const XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
+					const prim::ColorRGBA linear = linearSpace->convert(xyz);
+					const XYZ tonemapped(filmic(linear.r), filmic(linear.g), filmic(linear.b));
+					const prim::ColorRGBA rgb = gammaSpace->convert(tonemapped);
+					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+					p.a = 1;
+					p.b = rgb.b;
+					p.g = rgb.g;
+					p.r = rgb.r;
+				}			
+			}
+			break;
+
 		default:
 			LASS_ENFORCE_UNREACHABLE;
 		}
@@ -751,9 +899,14 @@ Display::TToneMappingDictionary Display::makeToneMappingDictionary()
 	result.add("linear", tmLinear);
 	result.add("compress_y", tmCompressY);
 	result.add("compress_xyz", tmCompressXYZ);
+	result.add("compress_rgb", tmCompressRGB);
 	result.add("reinhard2002_y", tmReinhard2002Y);
 	result.add("exponential_y", tmExponentialY);
 	result.add("exponential_xyz", tmExponentialXYZ);
+	result.add("exponential_rgb", tmExponentialRGB);
+	result.add("duiker_y", tmDuikerY);
+	result.add("duiker_xyz", tmDuikerXYZ);
+	result.add("duiker_rgb", tmDuikerRGB);
 	return result;
 }
 

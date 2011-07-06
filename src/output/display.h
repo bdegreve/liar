@@ -92,9 +92,14 @@ private:
 		tmLinear = 0,
 		tmCompressY,
 		tmCompressXYZ,
+		tmCompressRGB,
 		tmReinhard2002Y,
 		tmExponentialY,
 		tmExponentialXYZ,
+		tmExponentialRGB,
+		tmDuikerY,
+		tmDuikerXYZ,
+		tmDuikerRGB,
 		numToneMapping
 	};
 	typedef util::Dictionary<std::string, ToneMapping> TToneMappingDictionary;
@@ -110,6 +115,7 @@ private:
 
 	void displayLoop();
 	void copyToDisplayBuffer();
+	void cancel();
 	const std::string makeTitle() const;
 
 	static TToneMappingDictionary makeToneMappingDictionary();
@@ -137,7 +143,6 @@ private:
 	ToneMapping toneMapping_;
 	bool autoExposure_;
 	bool refreshTitle_;
-	volatile bool isQuiting_;
 	volatile bool isCanceling_;
 
 	static TToneMappingDictionary toneMappingDictionary_;
