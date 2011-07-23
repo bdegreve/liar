@@ -152,9 +152,9 @@ template <typename RandomAccessIterator, typename Generator>
 void stratifier1D(RandomAccessIterator first, RandomAccessIterator last, Generator& generator)
 {
 	num::DistributionUniform<TScalar, num::RandomMT19937> uniform(generator);
-	const ptrdiff_t n = last - first;
+	const std::ptrdiff_t n = last - first;
 	const TScalar scale = num::inv(static_cast<TScalar>(n));
-	for (ptrdiff_t k = 0; k < n; ++k)
+	for (std::ptrdiff_t k = 0; k < n; ++k)
 	{
 		first[k] = scale * (k + uniform());
 	};
@@ -171,9 +171,9 @@ template <typename RandomAccessIterator, typename Generator>
 void latinHypercube2D(RandomAccessIterator first, RandomAccessIterator last, Generator& generator)
 {
 	num::DistributionUniform<TScalar, num::RandomMT19937> uniform(generator);
-	const ptrdiff_t n = last - first;
+	const std::ptrdiff_t n = last - first;
 	const TPoint2D::TValue scale = num::inv(static_cast<TPoint2D::TValue>(n));
-	for (ptrdiff_t k = 0; k < n; ++k)
+	for (std::ptrdiff_t k = 0; k < n; ++k)
 	{
 		first[k].x = scale * (k + uniform());
 		first[k].y = scale * (k + uniform());

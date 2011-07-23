@@ -111,8 +111,6 @@ void FilterMitchell::doWriteRender(const OutputSample* first, const OutputSample
 	OutputSample* output = begin;
 	while (first != last)
 	{
-		const XYZ radiance = first->radiance();
-
 		const TVector2D p = res * first->screenCoordinate().position();
 		const TVector2D p0 = p.transform(num::floor) + .5f;
 		const TVector2D dp = p - p0;

@@ -72,25 +72,35 @@ macro(list_remove_regex listvar regex)
 	list(REMOVE_ITEM ${listvar} ${_to_be_removed})
 endmacro()
 
-macro(add_liar_module name)
-	file(GLOB ${name}_HDRS *.h *.inl)
-	file(GLOB ${name}_SRCS *.cpp)
-	list(APPEND ${name}_LIBS libkernel)
-	set(_option)
+macro(_mark_target_as_python_module name)
+endmacro()
+
+macro(add_liar_module_ex name)
+	set(_srcs)
+	set(_libs)
+	set(_destination ".")
+	set(_list "_srcs")
 	foreach(_arg ${ARGN})
-		if("${_arg}" STREQUAL "IGNORE")
-			set(_option "IGNORE")
+		if("${_arg}" STREQUAL "SRCS")
+			set(_list "_srcs")
+		elseif("${_arg}" STREQUAL "LIBS")
+			set(_list "_libs")
+		elseif("${_arg}" STREQUAL "DESTINATION")
+			set(_list "_destination")
 		else()
-			if("${_option}" STREQUAL "IGNORE")
-				list_remove_regex(${name}_SRCS ${_arg})
+			if ("${_list}" STREQUAL "_destination")
+				set(${_list} "${_arg}")
 			else()
-				message(SEND_ERROR "unexpected argument")
+				list(APPEND ${_list} "${_arg}")
 			endif()
 		endif()
 	endforeach()
 	add_library(${name} MODULE 
-		${${name}_HDRS} 
-		${${name}_SRCS}
+		${_srcs}
+		)
+	target_link_libraries(${name} 
+		libkernel
+		${_libs}
 		)
 	set_target_properties(
 		${name}
@@ -103,14 +113,37 @@ macro(add_liar_module name)
 			PROPERTIES 
 			SUFFIX ".pyd"
 			)
+	else()
+		set_target_properties(
+			${name}
+			PROPERTIES 
+			PREFIX ""
+			)	
 	endif()
-	target_link_libraries(${name} 
-		${${name}_LIBS}
-		)
 	install(
 		TARGETS ${name}
-		DESTINATION .
+		DESTINATION "${_destination}"
 		)
+endmacro()
+
+macro(add_liar_module name)
+	file(GLOB ${name}_SRCS *.h *.inl *.cpp)
+	set(_option)
+	foreach(_arg ${ARGN})
+		if("${_arg}" STREQUAL "IGNORE")
+			set(_option "IGNORE")
+		else()
+			if("${_option}" STREQUAL "IGNORE")
+				list_remove_regex(${name}_SRCS ${_arg})
+			else()
+				message(SEND_ERROR "unexpected argument")
+			endif()
+		endif()
+	endforeach()
+	add_liar_module_ex(${name} 
+		SRCS ${${name}_SRCS}
+		LIBS ${${name}_LIBS}
+	)
 endmacro()
 
 add_subdirectory(src)

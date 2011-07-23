@@ -1,26 +1,8 @@
 macro(add_liar_codec name)
-	file(GLOB ${name}_SRCS ${name}.cpp)
-	set(${name}_LIBS libkernel ${ARGN})
-	add_library(${name} MODULE 
-		${${name}_SRCS}
-		)
-	set_target_properties(
+	add_liar_module_ex(
 		${name}
-		PROPERTIES 
-		COMPILE_FLAGS "${liar_CFLAGS}"
-		)
-	if (WIN32)
-		set_target_properties(
-			${name}
-			PROPERTIES 
-			SUFFIX ".pyd"
-			)
-	endif()
-	target_link_libraries(${name} 
-		${${name}_LIBS}
-		)
-	install(
-		TARGETS ${name}
+		SRCS "${name}.cpp"
+		LIBS ${ARGN}
 		DESTINATION codecs
 		)
 endmacro()
@@ -33,8 +15,6 @@ if (JPEG_FOUND)
 		${JPEG_INCLUDE_DIR}
 		)
 	add_liar_codec(jpeglib ${JPEG_LIBRARIES})
-	if (WIN32)
-	endif()
 endif()
 
 # openexr 1.6.1: http://www.openexr.com/

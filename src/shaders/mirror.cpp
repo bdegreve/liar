@@ -117,7 +117,7 @@ BsdfOut Mirror::Bsdf::doEvaluate(const TVector3D&, const TVector3D&, TBsdfCaps) 
 
 
 
-SampleBsdfOut Mirror::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D&, TScalar, TBsdfCaps) const
+SampleBsdfOut Mirror::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D&, TScalar, TBsdfCaps LASS_UNUSED(allowedCaps)) const
 {
 	LASS_ASSERT(omegaIn.z > 0);
 	LASS_ASSERT(kernel::hasCaps(allowedCaps, caps()));

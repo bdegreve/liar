@@ -193,9 +193,13 @@ bool RgbSpace::operator!=(const RgbSpace& other) const
 
 
 
-const RgbSpace RgbSpace::withGamma(TScalar gamma) const
+const TRgbSpacePtr RgbSpace::withGamma(TScalar gamma) const
 {
-	return RgbSpace(red_, green_, blue_, white_, gamma);
+	if (gamma == gamma_)
+	{
+		return python::fromNakedToSharedPtrCast<RgbSpace>(const_cast<RgbSpace*>(this));
+	}
+	return TRgbSpacePtr(new RgbSpace(red_, green_, blue_, white_, gamma));
 }
 
 

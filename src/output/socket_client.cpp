@@ -38,8 +38,8 @@ PY_CLASS_CONSTRUCTOR_2(SocketClient, const std::string&, SocketClient::TPort)
 // --- public --------------------------------------------------------------------------------------
 
 SocketClient::SocketClient(const std::string& address, TPort port):
-	isCanceling_(false),
-	isQuiting_(false)
+	isQuiting_(false),
+	isCanceling_(false)
 {
 	socket_.connect(address, port);
 	istream_.setSocket(&socket_);

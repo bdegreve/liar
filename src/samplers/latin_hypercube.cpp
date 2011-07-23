@@ -193,9 +193,9 @@ void LatinHypercube::doSampleFrequency(const TResolution2D& LASS_UNUSED(pixel), 
 
 void LatinHypercube::doSampleSubSequence1D(const TResolution2D& LASS_UNUSED(pixel), size_t, TSubSequenceId, TSample1D* first, TSample1D* last)
 {
-	const ptrdiff_t size = last - first;
+	const std::ptrdiff_t size = last - first;
 	const TScalar scale = 1.f / size;
-	for (ptrdiff_t k = 0; k < size; ++k)
+	for (std::ptrdiff_t k = 0; k < size; ++k)
 	{
 		first[k] = (k + jitterGenerator_()) * scale;
 	}
