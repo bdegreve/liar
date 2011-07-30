@@ -6,11 +6,20 @@ set(CMAKE_DEBUG_POSTFIX _d)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${liar_BINARY_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${liar_BINARY_DIR}/bin")
 
+macro(eval)
+	foreach(arg ${ARGN})
+		message(STATUS "${arg}: ${${arg}}")
+	endforeach()
+endmacro()
+
 find_package(Lass REQUIRED)
 include_directories(${Lass_INCLUDE_DIRS})
-foreach(_config RELEASE DEBUG MINSIZEREL RELWITHDEBINFO)
+foreach(_config ${CMAKE_CONFIGURATION_TYPES})
 	get_target_property(_location lass IMPORTED_LOCATION_${_config})
 	get_target_property(_location_python lass_python IMPORTED_LOCATION_${_config})
+	if (NOT _location OR NOT _location_python)
+		#message(SEND_ERROR "can't find lass libraries for ${_config} build")
+	endif()
 	install(
 		FILES "${_location}" "${_location_python}"
 		DESTINATION .
@@ -34,12 +43,14 @@ if (CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_DEBUG)
 		)
 endif()
 
+eval(Lass_PYTHON_EXECUTABLE CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 if (Lass_PYTHON_EXECUTABLE AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	execute_process(
 		COMMAND "${Lass_PYTHON_EXECUTABLE}" -c "from distutils import sysconfig; print sysconfig.get_python_lib(True)" 
 		OUTPUT_VARIABLE _python_site_packages
 		OUTPUT_STRIP_TRAILING_WHITESPACE
 	)
+	eval(_python_site_packages)
 	set (CMAKE_INSTALL_PREFIX "${_python_site_packages}/liar" CACHE PATH "liar install prefix" FORCE)
 endif ()
 
@@ -50,6 +61,7 @@ else()
 endif()
 
 set(liar_CFLAGS)
+set(liar_LDFLAGS)
 if(MSVC)
 	set (liar_CFLAGS "${liar_CFLAGS} /EHsc")
 	if(NOT CMAKE_CL_64)
@@ -60,6 +72,9 @@ if(MSVC)
 	endif()
 else()
 	set (liar_CFLAGS "${liar_CFLAGS} -fno-strict-aliasing -Wall -Wextra -Wformat=2 -Winit-self -Wno-unknown-pragmas")
+	if(APPLE)
+		set (liar_LDFLAGS "${liar_LDFLAGS} -Wl,-rpath,@loader_path/.")
+	endif()
 endif()
 
 macro(list_remove_regex listvar regex)
@@ -106,6 +121,7 @@ macro(add_liar_module_ex name)
 		${name}
 		PROPERTIES 
 		COMPILE_FLAGS "${liar_CFLAGS}"
+		LINK_FLAGS "${liar_LDFLAGS}"
 		)
 	if (WIN32)
 		set_target_properties(
@@ -127,21 +143,21 @@ macro(add_liar_module_ex name)
 endmacro()
 
 macro(add_liar_module name)
-	file(GLOB ${name}_SRCS *.h *.inl *.cpp)
+	file(GLOB _srcs *.h *.inl *.cpp)
 	set(_option)
 	foreach(_arg ${ARGN})
 		if("${_arg}" STREQUAL "IGNORE")
 			set(_option "IGNORE")
 		else()
 			if("${_option}" STREQUAL "IGNORE")
-				list_remove_regex(${name}_SRCS ${_arg})
+				list_remove_regex(_srcs ${_arg})
 			else()
 				message(SEND_ERROR "unexpected argument")
 			endif()
 		endif()
 	endforeach()
 	add_liar_module_ex(${name} 
-		SRCS ${${name}_SRCS}
+		SRCS ${${name}_SRCS} ${_srcs}
 		LIBS ${${name}_LIBS}
 	)
 endmacro()

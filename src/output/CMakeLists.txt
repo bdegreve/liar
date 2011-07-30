@@ -1,4 +1,5 @@
 set (_libraries)
+set (_srcs)
 
 find_path(
 	pixeltoaster_INCLUDE_DIR 
@@ -7,7 +8,7 @@ find_path(
 	PATHS "${CMAKE_CURRENT_SOURCE_DIR}/PixelToaster"
 	)
 if (pixeltoaster_INCLUDE_DIR)
-	set(_ok TRUE)
+	set(_ok FALSE)
 	if (WIN32)
 		find_path(D3DX9_INCLUDE_DIR
 			d3dx9.h
@@ -19,18 +20,48 @@ if (pixeltoaster_INCLUDE_DIR)
 			include_directories(
 				BEFORE ${D3DX9_INCLUDE_DIR}
 				)
-		else()
-			set(_ok FALSE)
+			set(_ok TRUE)
 		endif()
 	else()
-		find_package(X11)
-		if (X11_FOUND)
-			include_directories(
-				BEFORE ${X11_INCLUDE_DIR}
+		if(APPLE)
+			find_library(CORE_SERVICES_LIBRARY CoreServices)
+			find_library(COCOA_LIBRARY Cocoa)
+			find_package(OpenGL)
+			mark_as_advanced(CORE_SERVICES_LIBRARY COCOA_LIBRARY)
+			if(CORE_SERVICES_LIBRARY AND COCOA_LIBRARY AND OPENGL_FOUND)
+				set(_apple_use_x11 OFF)
+			else()
+				set(_apple_use_x11 ON)
+			endif()
+			option(
+				pixeltoaster_APPLE_USE_X11
+				"PixelToaster uses X11 implementation on Apple"
+				${_apple_use_x11}
 				)
-			list(APPEND output_LIBS ${X11_LIBRARIES})
-		else()
-			set(_ok FALSE)
+			set(PIXELTOASTER_APPLE_USE_X11 ${pixeltoaster_APPLE_USE_X11})
+				list(APPEND output_LIBS 
+					${CORE_SERVICES_LIBRARY}
+					${COCOA_LIBRARY}
+					${OPENGL_LIBRARIES}
+					)		
+			if(NOT pixeltoaster_APPLE_USE_X11)				
+				list(APPEND output_SRCS 
+					"PixelToaster/PixelToasterApple.mm"
+					)
+				set(_ok TRUE)
+			endif()
+		endif()
+		if (NOT _ok)
+			find_package(X11)
+			if (X11_FOUND)
+				include_directories(
+					BEFORE ${X11_INCLUDE_DIR}
+					)
+				list(APPEND output_LIBS 
+					${X11_LIBRARIES}
+					)
+				set(_ok TRUE)
+			endif()
 		endif()
 	endif()
 	if (_ok)

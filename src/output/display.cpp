@@ -94,7 +94,6 @@ Display::TToneMappingDictionary Display::toneMappingDictionary_ = Display::makeT
 Display::Display(const std::string& title, const TResolution2D& resolution):
 	title_(title),
 	resolution_(resolution),
-	rgbSpace_(RgbSpace::defaultSpace()),
 	totalLogSceneLuminance_(0),
 	maxSceneLuminance_(0),
 	sceneLuminanceCoverage_(0),
@@ -104,6 +103,7 @@ Display::Display(const std::string& title, const TResolution2D& resolution):
 	refreshTitle_(false),
 	isCanceling_(false)
 {
+	setRgbSpace(RgbSpace::defaultSpace());
 	setExposure(0);
 	setExposureCorrection(0);
 }
@@ -172,6 +172,8 @@ TScalar Display::middleGrey() const
 void Display::setRgbSpace(const TRgbSpacePtr& rgbSpace)
 {
 	rgbSpace_ = rgbSpace;
+	linearSpace_ = rgbSpace_->withGamma(1);
+	gammaSpace_ = CIEXYZ->withGamma(rgbSpace_->gamma());
 }
 
 
@@ -538,7 +540,7 @@ void Display::displayLoop()
 	PixelToaster::Display display;
 	const int width = num::numCast<int>(resolution_.x);
 	const int height = num::numCast<int>(resolution_.y);
- 	LASS_ENFORCE(display.open(makeTitle().c_str(), width, height, PixelToaster::Output::Windowed,	PixelToaster::Mode::FloatingPoint));
+ 	LASS_ENFORCE(display.open(makeTitle().c_str(), width, height, PixelToaster::Output::Windowed,	PixelToaster::Mode::TrueColor));
 	display.listener(this);
 	
 	LASS_ENFORCE(display.update(displayBuffer_)); // full update of initial buffer
@@ -599,9 +601,6 @@ namespace
  */
 void Display::copyToDisplayBuffer()
 {
-	const TRgbSpacePtr linearSpace = rgbSpace_->withGamma(1);
-	const TRgbSpacePtr gammaSpace = CIEXYZ->withGamma(rgbSpace_->gamma());
-
 	LASS_LOCK(renderBufferLock_)
 	{
 		if (autoExposure_ && sceneLuminanceCoverage_ > 0)
@@ -721,9 +720,9 @@ void Display::copyToDisplayBuffer()
 				{
 					const TScalar w = totalWeight_[k];
 					const XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
-					const prim::ColorRGBA linear = linearSpace->convert(xyz);
+					const prim::ColorRGBA linear = linearSpace_->convert(xyz);
 					const XYZ tonemapped(linear.r / (1 + linear.r), linear.g / (1 + linear.g), linear.b / (1 + linear.b));
-					const prim::ColorRGBA rgb = gammaSpace->convert(tonemapped);
+					const prim::ColorRGBA rgb = gammaSpace_->convert(tonemapped);
 					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
 					p.a = 1;
 					p.b = rgb.b;
@@ -806,9 +805,9 @@ void Display::copyToDisplayBuffer()
 				{
 					const TScalar w = totalWeight_[k];
 					const XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
-					const prim::ColorRGBA linear = linearSpace->convert(xyz);
+					const prim::ColorRGBA linear = linearSpace_->convert(xyz);
 					const XYZ tonemapped(1 - num::exp(-linear.r), 1 - num::exp(-linear.g), 1 - num::exp(-linear.b));
-					const prim::ColorRGBA rgb = gammaSpace->convert(tonemapped);
+					const prim::ColorRGBA rgb = gammaSpace_->convert(tonemapped);
 					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
 					p.a = 1;
 					p.b = rgb.b;
@@ -869,9 +868,9 @@ void Display::copyToDisplayBuffer()
 				{
 					const TScalar w = totalWeight_[k];
 					const XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
-					const prim::ColorRGBA linear = linearSpace->convert(xyz);
+					const prim::ColorRGBA linear = linearSpace_->convert(xyz);
 					const XYZ tonemapped(filmic(linear.r), filmic(linear.g), filmic(linear.b));
-					const prim::ColorRGBA rgb = gammaSpace->convert(tonemapped);
+					const prim::ColorRGBA rgb = gammaSpace_->convert(tonemapped);
 					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
 					p.a = 1;
 					p.b = rgb.b;

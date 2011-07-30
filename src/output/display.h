@@ -133,6 +133,8 @@ private:
 	TDirtyBox allTimeDirtyBox_;
 	TResolution2D resolution_;
 	TRgbSpacePtr rgbSpace_;
+	TRgbSpacePtr linearSpace_;
+	TRgbSpacePtr gammaSpace_;
 	TScalar totalLogSceneLuminance_;
 	TScalar maxSceneLuminance_;
 	int sceneLuminanceCoverage_;

@@ -7,8 +7,14 @@ list_remove_regex(libkernel_SRCS "kernel_init.cpp$")
 add_library(libkernel SHARED 
 	${libkernel_SRCS}
 	)
+if(APPLE)
+	set_target_properties(
+		libkernel
+		PROPERTIES 
+		INSTALL_NAME_DIR "@rpath"
+		)
+endif()
 target_link_libraries(libkernel 
-	lass 
 	lass_python
 	)
 install(
