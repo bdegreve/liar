@@ -197,7 +197,7 @@ images['IM:%(name)s'] = image
 # --- texture TE:%(name)s ---
 textures['TE:%(name)s'] = images['IM:%(image_name)s']
 ''' % vars())
-		elif texture.type != 'NONE':
+		else:
 			print("WARNING: Cannot handle %s textures!" % texture.type)
 			self.script_file.write('''
 # --- texture TE:%(name)s ---
@@ -411,12 +411,13 @@ lamps['LA:%(name)s'] = light
 			inner_angle = outer_angle * (1 - lamp.spot_blend)
 			self.script_file.write(r'''
 # --- lamp LA:%(name)s ---
+light = liar.scenery.LightSpot()
 light.position = (0, 0, 0)
 light.direction = (0, 0, -1)
 light.intensity = liar.rgb%(intensity)r
 light.attenuation = liar.Attenuation(0, %(attLin)r, %(attSqr)r)
 light.outerAngle = %(outer_angle)r
-light.innerAngle = (inner_angle)r
+light.innerAngle = %(inner_angle)r
 lamps['LA:%(name)s'] = light
 ''' % vars())
 
@@ -448,7 +449,7 @@ lamps['LA:%(name)s'] = light
 	def write_camera(self, obj, camera):
 		name = camera.name
 		type = {'PERSP':'PerspectiveCamera', 'ORTHO':'OrthographicCamera'}[camera.type]
-		position = obj.location
+		position = tuple(obj.location)
 		matrix = obj.matrix_world
 		direction = tuple(-matrix[2])[:3]
 		right = matrix[0][:3]
@@ -480,7 +481,7 @@ cameras['CA:%(name)s'] = camera
 		width = int(math.ceil(render_size * render.resolution_x))
 		height = int(math.ceil(render_size * render.resolution_y))
 		aspect_ratio = float(width * render.pixel_aspect_x) / (height * render.pixel_aspect_y)
-		samples_per_pixel = render.use_antialiasing and render.antialiasing_samples or 1
+		samples_per_pixel = int(render.use_antialiasing and render.antialiasing_samples or 1)
 		extension = file_formats.get(render.file_format, ".tga")
 		out_file = '//' + os.path.basename(os.path.splitext(self.script_path)[0]) + extension
 		options = ""
@@ -492,24 +493,36 @@ height = %(height)r
 samples_per_pixel = %(samples_per_pixel)r
 aspect_ratio = %(aspect_ratio)r
 out_file = fix_path(%(out_file)r)
-options = %(options)r
 
 for cam in cameras.values():
 	cam.aspectRatio = aspect_ratio
 sampler = liar.samplers.Stratifier((width, height), samples_per_pixel)
-target = liar.output.Image(out_file, (width, height))
-target.options = options
-target = liar.output.FilterMitchell(target)
 
-try:
-	Display = liar.output.Display
-except AttributeError:
-	print("no display output possible, unsupported by liar installation")
-else:
-	w = min(width, 1000)
-	h = int(w * height / float(width))
-	display = Display(out_file, (w, h))
-	target = liar.output.Splitter([target, liar.output.FilterMitchell(display)])
+def make_target(width=width, height=height, display=True, remote=None):
+	targets = []
+
+	target = liar.output.Image(out_file, (width, height))
+	target.options = %(options)r
+	targets.append(liar.output.FilterMitchell(target))
+
+	if display:
+		try:
+			Display = liar.output.Display
+		except AttributeError:
+			print("no display output possible, unsupported by liar installation")
+		else:
+			w = min(width, 1000)
+			h = int(w * height / float(width))
+			display = Display(out_file, (w, h))
+			targets.append(liar.output.FilterMitchell(display))
+
+	if remote:
+		targets.append(liar.output.Socket(*remote))
+
+	if len(targets) == 1:
+		return targets[0]
+	return liar.output.Splitter(targets)
+
 ''' % vars())
 
 	def write_header(self):
@@ -667,14 +680,23 @@ engine.tracer = liar.tracers.DirectLighting()
 engine.sampler = sampler
 engine.scene = liar.scenery.AabpTree(list(objects.values()))
 engine.camera = cameras['CA:%(active_camera)s']
-engine.target = target
 engine.numberOfThreads = %(threads)s
 
-def render():
+def render(display=True, remote=None):
+	engine.target = make_target(display=display, remote=remote)
 	engine.render(%(window)r)
 
 if __name__ == "__main__":
-	render()
+	from optparse import OptionParser
+	parser = OptionParser()
+	parser.add_option('', '--remote')
+	options, args = parser.parse_args()
+	if options.remote:
+	    ip, port = options.remote.split(':')
+	    remote = ip, int(port)
+	else:
+	    remote = None
+	render(display=True, remote=remote)
 ''' % vars())
 
 	def draw_progress(self, progress):

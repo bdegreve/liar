@@ -34,58 +34,17 @@ bl_info = {
 import bpy
 import extensions_framework
 
+# import sys
+# syspath = r'C:\Program Files (x86)\JetBrains\PyCharm 1.2.1\pycharm-debug.egg'
+# if not syspath in sys.path:
+    # sys.path.insert(0, syspath)
+# from pydev import pydevd
+
 def liar_log(str, popup=False):
     extensions_framework.log(str, popup=popup, module_name="render_liar") 
 
 LiarAddon = extensions_framework.Addon(bl_info)
 register, unregister = LiarAddon.init_functions()
 
-@LiarAddon.addon_register_class
-class RENDERENGINE_liar(bpy.types.RenderEngine):
-    '''
-    LiAR Engine Exporter/Integration class
-    '''
-    
-    bl_idname			= LiarAddon.BL_IDNAME
-    bl_label			= 'LiAR'
-    bl_use_preview		= False
-    
-    def render(self, scene):
-        scale = scene.render.resolution_percentage / 100.0
-        self.size_x = int(scene.render.resolution_x * scale)
-        self.size_y = int(scene.render.resolution_y * scale)
-
-        if scene.name == 'preview':
-            liar_log("render preview not supported")
-            return
-        else:
-            self.__render_scene(scene)
-
-    def __render_scene(self, scene):
-        from render_liar import export
-        path = export.export_scene(scene)
-    
-        pixel_count = self.size_x * self.size_y
-
-        # The framebuffer is defined as a list of pixels, each pixel
-        # itself being a list of R,G,B,A values
-        blue_rect = [[0.0, 0.0, 1.0, 1.0]] * pixel_count
-
-        # Here we write the pixel values to the RenderResult
-        result = self.begin_result(0, 0, self.size_x, self.size_y)
-        layer = result.layers[0]
-        layer.rect = blue_rect
-        self.end_result(result)
-
-# RenderEngines also need to tell UI Panels that they are compatible
-# Otherwise most of the UI will be empty when the engine is selected.
-# In this example, we need to see the main render image button and
-# the material preview panel.
-from bl_ui import properties_render
-properties_render.RENDER_PT_render.COMPAT_ENGINES.add(LiarAddon.BL_IDNAME)
-del properties_render
-
-from bl_ui import properties_material
-properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add(LiarAddon.BL_IDNAME)
-del properties_material
+from render_liar import render
 
