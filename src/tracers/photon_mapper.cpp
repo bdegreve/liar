@@ -438,9 +438,7 @@ const XYZ PhotonMapper::doShadeSurface(
 		return estimateIrradiance(point, normal);
 	}
 
-	const TBsdfPtr bsdf = context.bsdf();
-
-	XYZ result = estimateCaustics(sample, context, bsdf, point, omega);
+	XYZ result;
 	if (context.rayGeneration() == 0)
 	{
 		// actually, we block this because currently this is our way to include area lights in the camera rays only.
@@ -448,6 +446,14 @@ const XYZ PhotonMapper::doShadeSurface(
 		// and generation == 0 isn't a good discriminator eighter.
 		result += context.shader()->emission(sample, context, omega);
 	}
+
+	const TBsdfPtr bsdf = context.bsdf();
+	if (!bsdf)
+	{
+		return result;
+	}
+
+	result += estimateCaustics(sample, context, bsdf, point, omega);
 
 	if (isRayTracingDirect_)
 	{
@@ -680,7 +686,6 @@ void PhotonMapper::tracePhoton(
 		return tracePhoton(sample, power, newRay, generation + 1, uniform, isCaustic);
 	}
 	shader->shadeContext(sample, context);
-	const TBsdfPtr bsdf = shader->bsdf(sample, context);
 
 	if (shader->hasCaps(Bsdf::capsDiffuse))
 	{
@@ -710,6 +715,12 @@ void PhotonMapper::tracePhoton(
 		return;
 	}
 	LASS_ASSERT(generation < maxRayGeneration());
+
+	const TBsdfPtr bsdf = shader->bsdf(sample, context);
+	if (!bsdf)
+	{
+		return;
+	}
 
 	const TVector3D omegaIn = context.worldToBsdf(-ray.direction());
 	LASS_ASSERT(omegaIn.z > 0);
@@ -1023,9 +1034,14 @@ const XYZ PhotonMapper::gatherIndirect(
 		const TPoint3D& target, const TVector3D& omegaIn,
 		const TPoint2D* firstSample, const TPoint2D* lastSample, const TScalar* firstComponentSample, const TScalar* firstVolumetricSample,
 		size_t gatherStage) const
-{		
+{	
 	LASS_ASSERT(gatherStage < numGatherStages_);
-
+	
+	if (!bsdf)
+	{
+		return XYZ();
+	}
+	
 	const bool doImportanceGathering = false;
 	if (doImportanceGathering && gatherStage == 0)
 	{
@@ -1223,7 +1239,7 @@ const XYZ PhotonMapper::estimateRadiance(
 		const TPoint3D& point, const TVector3D& omegaOut, TScalar& sqrEstimationRadius) const
 {
 	const Shader* const shader = context.shader();
-	if (!shader || !shader->hasCaps(Bsdf::capsDiffuse))
+	if (!bsdf || !shader || !shader->hasCaps(Bsdf::capsDiffuse))
 	{
 		return XYZ();
 	}

@@ -9,7 +9,7 @@
 from liar import *
 import geometry
 
-if False:
+if True:
 	width = 1024
 	height = 1024
 	super_sampling = 9

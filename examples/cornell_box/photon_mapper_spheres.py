@@ -35,7 +35,7 @@ lights = geometry.getLights()
 glass_sphere = scenery.Sphere((1.86, 1, 1.20), 1)
 glass_sphere.shader = shaders.Dielectric()
 glass_sphere.shader.innerRefractionIndex = textures.Constant(2)
-glass_sphere.interior = shaders.Beer(rgb(0.5, 0.5, 0))
+glass_sphere.interior = mediums.Beer(rgb(0.5, 0.5, 0))
 
 blue_sphere = scenery.Sphere((3.69, 1, 3.51), 1)
 blue_sphere.shader = shaders.AshikhminShirley()
