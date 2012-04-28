@@ -70,6 +70,7 @@ public:
 	TScalar exposureCorrection() const;
 	bool autoExposure() const;
 	TScalar middleGrey() const;
+	bool showHistogram() const;
 
 	void setRgbSpace(const TRgbSpacePtr& rgbSpace);
 	void setToneMapping(const std::string& mode);
@@ -77,6 +78,7 @@ public:
 	void setExposureCorrection(TScalar stops);
 	void setAutoExposure(bool enable = true);
 	void setMiddleGrey(TScalar grey);
+	void setShowHistogram(bool enable = true);
 
 	void testGammut();
 
@@ -91,14 +93,12 @@ private:
 	{
 		tmLinear = 0,
 		tmCompressY,
-		tmCompressXYZ,
 		tmCompressRGB,
 		tmReinhard2002Y,
+		tmReinhard2002RGB,
 		tmExponentialY,
-		tmExponentialXYZ,
 		tmExponentialRGB,
 		tmDuikerY,
-		tmDuikerXYZ,
 		tmDuikerRGB,
 		numToneMapping
 	};
@@ -115,6 +115,8 @@ private:
 
 	void displayLoop();
 	void copyToDisplayBuffer();
+	void tonemap(const TDirtyBox& box);
+	void histogram();
 	void cancel();
 	const std::string makeTitle() const;
 
@@ -144,6 +146,8 @@ private:
 	int exposureCorrection_;
 	ToneMapping toneMapping_;
 	bool autoExposure_;
+	bool showHistogram_;
+	bool wasShowingHistogram_;
 	bool refreshTitle_;
 	volatile bool isCanceling_;
 

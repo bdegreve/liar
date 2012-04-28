@@ -74,6 +74,7 @@ PY_CLASS_MEMBER_RW(Display, exposure, setExposure)
 PY_CLASS_MEMBER_RW(Display, exposureCorrection, setExposureCorrection)
 PY_CLASS_MEMBER_RW(Display, autoExposure, setAutoExposure)
 PY_CLASS_MEMBER_RW(Display, middleGrey, setMiddleGrey);
+PY_CLASS_MEMBER_RW(Display, showHistogram, setShowHistogram);
 PY_CLASS_METHOD(Display, testGammut)
 PY_CLASS_STATIC_CONST(Display, "TM_LINEAR", "linear");
 PY_CLASS_STATIC_CONST(Display, "TM_COMPRESS_Y", "compress_y");
@@ -100,6 +101,8 @@ Display::Display(const std::string& title, const TResolution2D& resolution):
 	middleGrey_(.184f),
 	toneMapping_(tmExponentialRGB),
 	autoExposure_(true),
+	showHistogram_(false),
+	wasShowingHistogram_(false),
 	refreshTitle_(false),
 	isCanceling_(false)
 {
@@ -169,6 +172,12 @@ TScalar Display::middleGrey() const
 
 
 
+bool Display::showHistogram() const
+{
+	return showHistogram_;
+}
+
+
 void Display::setRgbSpace(const TRgbSpacePtr& rgbSpace)
 {
 	rgbSpace_ = rgbSpace;
@@ -183,7 +192,7 @@ void Display::setToneMapping(const std::string& toneMapping)
 	LASS_LOCK(renderBufferLock_)
 	{
 		toneMapping_ = toneMappingDictionary_[stde::tolower(toneMapping)];
-		renderDirtyBox_ = allTimeDirtyBox_;
+		renderDirtyBox_ += allTimeDirtyBox_;
 		refreshTitle_ = true;
 	}
 }
@@ -199,7 +208,7 @@ void Display::setExposure(TScalar fStops)
 		{
 			exposure_ = thirdStops;
 			gain_ = num::pow(TScalar(2), this->exposure() + this->exposureCorrection());
-			renderDirtyBox_ = allTimeDirtyBox_;
+			renderDirtyBox_ += allTimeDirtyBox_;
 			refreshTitle_ = true;
 		}
 	}
@@ -216,7 +225,7 @@ void Display::setExposureCorrection(TScalar fStops)
 		{
 			exposureCorrection_ = thirdStops;
 			gain_ = num::pow(TScalar(2), this->exposure() + this->exposureCorrection());
-			renderDirtyBox_ = allTimeDirtyBox_;
+			renderDirtyBox_ += allTimeDirtyBox_;
 			refreshTitle_ = true;
 		}
 	}
@@ -256,6 +265,13 @@ void Display::setAutoExposure(bool enable)
 	}
 	autoExposure_ = enable;
 	refreshTitle_ = true;
+}
+
+
+
+void Display::setShowHistogram(bool enable)
+{
+	showHistogram_ = enable;
 }
 
 
@@ -450,7 +466,12 @@ void Display::onKeyDown(PixelToaster::DisplayInterface& display, PixelToaster::K
 		setToneMapping(toneMappingDictionary_.key(static_cast<ToneMapping>((toneMapping_ + 1) % numToneMapping)));
 		break;
 
+	case Key::H:
+		setShowHistogram(!showHistogram_);
+		break;
+
 	case Key::Equals:
+	case Key::Add:
 		if (autoExposure_)
 		{
 			setExposureCorrection(exposureCorrection() + .33f);
@@ -462,6 +483,7 @@ void Display::onKeyDown(PixelToaster::DisplayInterface& display, PixelToaster::K
 		break;
 
 	case Key::Separator:
+	case Key::Subtract:
 		if (autoExposure_)
 		{
 			setExposureCorrection(exposureCorrection() - .33f);
@@ -616,18 +638,16 @@ void Display::copyToDisplayBuffer()
 					g = a / y;
 					break;
 				case tmCompressY: // a = g * y / (1 + g * y)  ->  g * y = a / (1 - a)
-				case tmCompressXYZ: 
 				case tmCompressRGB: 
 				case tmReinhard2002Y:
+				case tmReinhard2002RGB:
 					g = a / (y * (1 - a));
 					break;
 				case tmExponentialY: // a = 1 - exp(-g * y)  ->  g * y = -ln(1 - a)
-				case tmExponentialXYZ:
 				case tmExponentialRGB:
 					g = -num::log(1 - a) / y;
 					break;
 				case tmDuikerY:
-				case tmDuikerXYZ:
 				case tmDuikerRGB:
 					g = invFilmic(a) / y;
 					break;
@@ -639,257 +659,297 @@ void Display::copyToDisplayBuffer()
 			}
 		}
 
-		if (renderDirtyBox_.isEmpty())
-		{
-			return;
-		}
+		tonemap( renderDirtyBox_ );
+		histogram();
 
-		const TDirtyBox::TPoint min = renderDirtyBox_.min();
-		const TDirtyBox::TPoint max = renderDirtyBox_.max();
-		const size_t nx = max.x - min.x + 1;
-
-		switch (toneMapping_)
-		{
-		case tmLinear:
-			for (size_t j = min.y; j <= max.y; ++j)
-			{
-				const size_t kBegin = j * resolution_.x + min.x;
-				const size_t kEnd = kBegin + nx;
-				for (size_t k = kBegin; k < kEnd; ++k)
-				{
-					const TScalar w = totalWeight_[k];
-					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
-					const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
-					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
-					p.a = 1;
-					p.b = rgb.b;
-					p.g = rgb.g;
-					p.r = rgb.r;
-				}			
-			}
-			break;
-
-		case tmCompressY:
-			for (size_t j = min.y; j <= max.y; ++j)
-			{
-				const size_t kBegin = j * resolution_.x + min.x;
-				const size_t kEnd = kBegin + nx;
-				for (size_t k = kBegin; k < kEnd; ++k)
-				{
-					const TScalar w = totalWeight_[k];
-					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
-					xyz /= 1 + xyz.y;
-					const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
-					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
-					p.a = 1;
-					p.b = rgb.b;
-					p.g = rgb.g;
-					p.r = rgb.r;
-				}			
-			}
-			break;
-
-		case tmCompressXYZ:
-			for (size_t j = min.y; j <= max.y; ++j)
-			{
-				const size_t kBegin = j * resolution_.x + min.x;
-				const size_t kEnd = kBegin + nx;
-				for (size_t k = kBegin; k < kEnd; ++k)
-				{
-					const TScalar w = totalWeight_[k];
-					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
-					xyz.x /= 1 + xyz.x;
-					xyz.y /= 1 + xyz.y;
-					xyz.z /= 1 + xyz.z;
-					const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
-					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
-					p.a = 1;
-					p.b = rgb.b;
-					p.g = rgb.g;
-					p.r = rgb.r;
-				}			
-			}
-			break;
-
-		case tmCompressRGB:
-			for (size_t j = min.y; j <= max.y; ++j)
-			{
-				const size_t kBegin = j * resolution_.x + min.x;
-				const size_t kEnd = kBegin + nx;
-				for (size_t k = kBegin; k < kEnd; ++k)
-				{
-					const TScalar w = totalWeight_[k];
-					const XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
-					const prim::ColorRGBA linear = linearSpace_->convert(xyz);
-					const XYZ tonemapped(linear.r / (1 + linear.r), linear.g / (1 + linear.g), linear.b / (1 + linear.b));
-					const prim::ColorRGBA rgb = gammaSpace_->convert(tonemapped);
-					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
-					p.a = 1;
-					p.b = rgb.b;
-					p.g = rgb.g;
-					p.r = rgb.r;
-				}			
-			}
-			break;
-
-		case tmReinhard2002Y:
-			for (size_t j = min.y; j <= max.y; ++j)
-			{
-				const size_t kBegin = j * resolution_.x + min.x;
-				const size_t kEnd = kBegin + nx;
-				for (size_t k = kBegin; k < kEnd; ++k)
-				{
-					const TScalar w = totalWeight_[k];
-					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
-					const TScalar L = xyz.y;
-					const TScalar Lw = gain_ * maxSceneLuminance_;
-					xyz *= (1 + L / (Lw * Lw)) / (1 + L);
-					const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
-					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
-					p.a = 1;
-					p.b = rgb.b;
-					p.g = rgb.g;
-					p.r = rgb.r;
-				}			
-			}
-			break;
-
-		case tmExponentialY:
-			for (size_t j = min.y; j <= max.y; ++j)
-			{
-				const size_t kBegin = j * resolution_.x + min.x;
-				const size_t kEnd = kBegin + nx;
-				for (size_t k = kBegin; k < kEnd; ++k)
-				{
-					const TScalar w = totalWeight_[k];
-					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
-					xyz *= (1 - num::exp(-xyz.y)) / xyz.y;
-					const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
-					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
-					p.a = 1;
-					p.b = rgb.b;
-					p.g = rgb.g;
-					p.r = rgb.r;
-				}			
-			}
-			break;
-
-		case tmExponentialXYZ:
-			for (size_t j = min.y; j <= max.y; ++j)
-			{
-				const size_t kBegin = j * resolution_.x + min.x;
-				const size_t kEnd = kBegin + nx;
-				for (size_t k = kBegin; k < kEnd; ++k)
-				{
-					const TScalar w = totalWeight_[k];
-					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
-					xyz.x = 1 - num::exp(-xyz.x);
-					xyz.y = 1 - num::exp(-xyz.y);
-					xyz.z = 1 - num::exp(-xyz.z);
-					const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
-					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
-					p.a = 1;
-					p.b = rgb.b;
-					p.g = rgb.g;
-					p.r = rgb.r;
-				}			
-			}
-			break;
-
-		case tmExponentialRGB:
-			for (size_t j = min.y; j <= max.y; ++j)
-			{
-				const size_t kBegin = j * resolution_.x + min.x;
-				const size_t kEnd = kBegin + nx;
-				for (size_t k = kBegin; k < kEnd; ++k)
-				{
-					const TScalar w = totalWeight_[k];
-					const XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
-					const prim::ColorRGBA linear = linearSpace_->convert(xyz);
-					const XYZ tonemapped(1 - num::exp(-linear.r), 1 - num::exp(-linear.g), 1 - num::exp(-linear.b));
-					const prim::ColorRGBA rgb = gammaSpace_->convert(tonemapped);
-					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
-					p.a = 1;
-					p.b = rgb.b;
-					p.g = rgb.g;
-					p.r = rgb.r;
-				}			
-			}
-			break;
-
-		case tmDuikerY:
-			for (size_t j = min.y; j <= max.y; ++j)
-			{
-				const size_t kBegin = j * resolution_.x + min.x;
-				const size_t kEnd = kBegin + nx;
-				for (size_t k = kBegin; k < kEnd; ++k)
-				{
-					const TScalar w = totalWeight_[k];
-					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
-					xyz *= filmic(xyz.y) / std::max(xyz.y, 0.004);
-					const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
-					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
-					p.a = 1;
-					p.b = rgb.b;
-					p.g = rgb.g;
-					p.r = rgb.r;
-				}			
-			}
-			break;
-
-		case tmDuikerXYZ:
-			for (size_t j = min.y; j <= max.y; ++j)
-			{
-				const size_t kBegin = j * resolution_.x + min.x;
-				const size_t kEnd = kBegin + nx;
-				for (size_t k = kBegin; k < kEnd; ++k)
-				{
-					const TScalar w = totalWeight_[k];
-					XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
-					xyz.x = filmic(xyz.x);
-					xyz.y = filmic(xyz.y);
-					xyz.z = filmic(xyz.z);
-					const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
-					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
-					p.a = 1;
-					p.b = rgb.b;
-					p.g = rgb.g;
-					p.r = rgb.r;
-				}			
-			}
-			break;
-
-		case tmDuikerRGB:
-			for (size_t j = min.y; j <= max.y; ++j)
-			{
-				const size_t kBegin = j * resolution_.x + min.x;
-				const size_t kEnd = kBegin + nx;
-				for (size_t k = kBegin; k < kEnd; ++k)
-				{
-					const TScalar w = totalWeight_[k];
-					const XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
-					const prim::ColorRGBA linear = linearSpace_->convert(xyz);
-					const XYZ tonemapped(filmic(linear.r), filmic(linear.g), filmic(linear.b));
-					const prim::ColorRGBA rgb = gammaSpace_->convert(tonemapped);
-					PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
-					p.a = 1;
-					p.b = rgb.b;
-					p.g = rgb.g;
-					p.r = rgb.r;
-				}			
-			}
-			break;
-
-		default:
-			LASS_ENFORCE_UNREACHABLE;
-		}
-
-		displayDirtyBox_ = renderDirtyBox_;
 		renderDirtyBox_.clear();
 	}
-}	
+}
 
 
+void Display::tonemap(const TDirtyBox& box)
+{
+	const TDirtyBox::TPoint min = box.min();
+	const TDirtyBox::TPoint max = box.max();
+	const size_t nx = max.x - min.x + 1;
+
+	const TScalar Lw = gain_ * maxSceneLuminance_;
+	const TScalar invLwSquared = num::inv(Lw * Lw);
+
+	switch (toneMapping_)
+	{
+	case tmLinear:
+		for (size_t j = min.y; j <= max.y; ++j)
+		{
+			const size_t kBegin = j * resolution_.x + min.x;
+			const size_t kEnd = kBegin + nx;
+			for (size_t k = kBegin; k < kEnd; ++k)
+			{
+				const TScalar w = totalWeight_[k];
+				XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
+				const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
+				PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+				p.a = 1;
+				p.b = rgb.b;
+				p.g = rgb.g;
+				p.r = rgb.r;
+			}			
+		}
+		break;
+
+	case tmCompressY:
+		for (size_t j = min.y; j <= max.y; ++j)
+		{
+			const size_t kBegin = j * resolution_.x + min.x;
+			const size_t kEnd = kBegin + nx;
+			for (size_t k = kBegin; k < kEnd; ++k)
+			{
+				const TScalar w = totalWeight_[k];
+				XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
+				xyz /= 1 + xyz.y;
+				const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
+				PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+				p.a = 1;
+				p.b = rgb.b;
+				p.g = rgb.g;
+				p.r = rgb.r;
+			}			
+		}
+		break;
+
+	case tmCompressRGB:
+		for (size_t j = min.y; j <= max.y; ++j)
+		{
+			const size_t kBegin = j * resolution_.x + min.x;
+			const size_t kEnd = kBegin + nx;
+			for (size_t k = kBegin; k < kEnd; ++k)
+			{
+				const TScalar w = totalWeight_[k];
+				const XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
+				const prim::ColorRGBA linear = linearSpace_->convert(xyz);
+				const XYZ tonemapped(linear.r / (1 + linear.r), linear.g / (1 + linear.g), linear.b / (1 + linear.b));
+				const prim::ColorRGBA rgb = gammaSpace_->convert(tonemapped);
+				PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+				p.a = 1;
+				p.b = rgb.b;
+				p.g = rgb.g;
+				p.r = rgb.r;
+			}			
+		}
+		break;
+
+	case tmReinhard2002Y:
+		for (size_t j = min.y; j <= max.y; ++j)
+		{
+			const size_t kBegin = j * resolution_.x + min.x;
+			const size_t kEnd = kBegin + nx;
+			for (size_t k = kBegin; k < kEnd; ++k)
+			{
+				const TScalar w = totalWeight_[k];
+				XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
+				const TScalar L = xyz.y;
+				xyz *= (1 + L * invLwSquared) / (1 + L);
+				const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
+				PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+				p.a = 1;
+				p.b = rgb.b;
+				p.g = rgb.g;
+				p.r = rgb.r;
+			}
+		}
+		break;
+
+	case tmReinhard2002RGB:
+		for (size_t j = min.y; j <= max.y; ++j)
+		{
+			const size_t kBegin = j * resolution_.x + min.x;
+			const size_t kEnd = kBegin + nx;
+			for (size_t k = kBegin; k < kEnd; ++k)
+			{
+				const TScalar w = totalWeight_[k];
+				const XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
+				const prim::ColorRGBA linear = linearSpace_->convert(xyz);
+				const XYZ tonemapped(
+					linear.r * (1 + linear.r * invLwSquared) / (1 + linear.r), 
+					linear.g * (1 + linear.g * invLwSquared) / (1 + linear.g), 
+					linear.b * (1 + linear.b * invLwSquared) / (1 + linear.b));
+				const prim::ColorRGBA rgb = gammaSpace_->convert(tonemapped);
+				PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+				p.a = 1;
+				p.b = rgb.b;
+				p.g = rgb.g;
+				p.r = rgb.r;
+			}			
+		}
+		break;
+
+	case tmExponentialY:
+		for (size_t j = min.y; j <= max.y; ++j)
+		{
+			const size_t kBegin = j * resolution_.x + min.x;
+			const size_t kEnd = kBegin + nx;
+			for (size_t k = kBegin; k < kEnd; ++k)
+			{
+				const TScalar w = totalWeight_[k];
+				XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
+				xyz *= (1 - num::exp(-xyz.y)) / xyz.y;
+				const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
+				PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+				p.a = 1;
+				p.b = rgb.b;
+				p.g = rgb.g;
+				p.r = rgb.r;
+			}			
+		}
+		break;
+
+	case tmExponentialRGB:
+		for (size_t j = min.y; j <= max.y; ++j)
+		{
+			const size_t kBegin = j * resolution_.x + min.x;
+			const size_t kEnd = kBegin + nx;
+			for (size_t k = kBegin; k < kEnd; ++k)
+			{
+				const TScalar w = totalWeight_[k];
+				const XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
+				const prim::ColorRGBA linear = linearSpace_->convert(xyz);
+				const XYZ tonemapped(1 - num::exp(-linear.r), 1 - num::exp(-linear.g), 1 - num::exp(-linear.b));
+				const prim::ColorRGBA rgb = gammaSpace_->convert(tonemapped);
+				PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+				p.a = 1;
+				p.b = rgb.b;
+				p.g = rgb.g;
+				p.r = rgb.r;
+			}			
+		}
+		break;
+
+	case tmDuikerY:
+		for (size_t j = min.y; j <= max.y; ++j)
+		{
+			const size_t kBegin = j * resolution_.x + min.x;
+			const size_t kEnd = kBegin + nx;
+			for (size_t k = kBegin; k < kEnd; ++k)
+			{
+				const TScalar w = totalWeight_[k];
+				XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
+				xyz *= filmic(xyz.y) / std::max(xyz.y, 0.004);
+				const prim::ColorRGBA rgb = rgbSpace_->convert(xyz);
+				PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+				p.a = 1;
+				p.b = rgb.b;
+				p.g = rgb.g;
+				p.r = rgb.r;
+			}			
+		}
+		break;
+
+	case tmDuikerRGB:
+		for (size_t j = min.y; j <= max.y; ++j)
+		{
+			const size_t kBegin = j * resolution_.x + min.x;
+			const size_t kEnd = kBegin + nx;
+			for (size_t k = kBegin; k < kEnd; ++k)
+			{
+				const TScalar w = totalWeight_[k];
+				const XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
+				const prim::ColorRGBA linear = linearSpace_->convert(xyz);
+				const XYZ tonemapped(filmic(linear.r), filmic(linear.g), filmic(linear.b));
+				const prim::ColorRGBA rgb = gammaSpace_->convert(tonemapped);
+				PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+				p.a = 1;
+				p.b = rgb.b;
+				p.g = rgb.g;
+				p.r = rgb.r;
+			}
+		}
+		break;
+
+	default:
+		LASS_ENFORCE_UNREACHABLE;
+	}
+
+	displayDirtyBox_ += box;
+}
+
+namespace 
+{
+    size_t bucket( TScalar x, size_t maxBucket )
+    {
+        return std::min(static_cast<size_t>( std::max(num::round(x * maxBucket), TScalar(0)) ), maxBucket );
+    }
+}
+
+void Display::histogram()
+{
+    const size_t numBuckets = resolution_.x / 4;
+    const size_t height = resolution_.y / 5;
+
+    // overwrite area of previous histo with real image, so we can recompute
+    const TDirtyBox histoBox(TDirtyBox::TPoint( resolution_.x - numBuckets - 1, 0 ), TDirtyBox::TPoint( resolution_.x - 1, height ));
+
+    if (wasShowingHistogram_)
+    {
+        tonemap( histoBox );
+        wasShowingHistogram_ = false;
+    }
+
+    if (!showHistogram_)
+    {
+        return;
+    }
+
+    typedef prim::Vector3D<size_t> THistoSample;
+    std::vector<THistoSample> histo(numBuckets);
+    const size_t maxBucket = numBuckets - 1;
+    for (size_t k = 0, n = displayBuffer_.size(); k < n; ++k)
+    {
+        if (totalWeight_[k] <= 0)
+        {
+            continue;
+        }
+        const PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
+        histo[bucket(p.r, maxBucket)].x += 1;
+        histo[bucket(p.g, maxBucket)].y += 1;
+        histo[bucket(p.b, maxBucket)].z += 1;
+    }
+    size_t max = 0;
+    for (size_t k = 1; k < numBuckets; ++k)
+    {
+        max = std::max(histo[k].x, max);
+        max = std::max(histo[k].y, max);
+        max = std::max(histo[k].z, max);
+    }
+    const TScalar scale = max > 0 ? TScalar(height) / max : TScalar(0);
+    for (size_t k = 0; k < numBuckets; ++k)
+    {
+        histo[k].x = static_cast<size_t>(histo[k].x * scale);
+        histo[k].y = static_cast<size_t>(histo[k].y * scale);
+        histo[k].z = static_cast<size_t>(histo[k].z * scale);
+    }
+    for (size_t j = 0; j < height; ++j)
+    {
+        const size_t kBegin = j * resolution_.x + histoBox.min().x;
+        const size_t threshold = height - j;
+        displayBuffer_[kBegin] = PixelToaster::FloatingPointPixel(.25f, .25f, .25f, 1);
+        for (size_t k = 0; k < numBuckets; ++k)
+        {
+            PixelToaster::FloatingPointPixel& p = displayBuffer_[kBegin + k + 1];
+            p.a = 1;
+            p.b = histo[k].z >= threshold ? 1.f : p.b * .25f;
+            p.g = histo[k].y >= threshold ? 1.f : p.g * .25f;
+            p.r = histo[k].x >= threshold ? 1.f : p.r * .25f;
+        }
+    }
+    const size_t kBegin = height * resolution_.x + histoBox.min().x;
+    for (size_t k = 0; k <= numBuckets; ++k)
+    {
+        displayBuffer_[kBegin + k] = PixelToaster::FloatingPointPixel(.25f, .25f, .25f, 1);
+    }
+
+	displayDirtyBox_ += histoBox;
+    wasShowingHistogram_ = true;
+}
 
 Display::TToneMappingDictionary Display::makeToneMappingDictionary()
 {
@@ -897,14 +957,12 @@ Display::TToneMappingDictionary Display::makeToneMappingDictionary()
 	result.enableSuggestions();
 	result.add("linear", tmLinear);
 	result.add("compress_y", tmCompressY);
-	result.add("compress_xyz", tmCompressXYZ);
 	result.add("compress_rgb", tmCompressRGB);
 	result.add("reinhard2002_y", tmReinhard2002Y);
+	result.add("reinhard2002_rgb", tmReinhard2002RGB);
 	result.add("exponential_y", tmExponentialY);
-	result.add("exponential_xyz", tmExponentialXYZ);
 	result.add("exponential_rgb", tmExponentialRGB);
 	result.add("duiker_y", tmDuikerY);
-	result.add("duiker_xyz", tmDuikerXYZ);
 	result.add("duiker_rgb", tmDuikerRGB);
 	return result;
 }
