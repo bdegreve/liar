@@ -49,6 +49,8 @@ public:
 	Image(const std::string& filename, const TResolution2D& resolution);
 	~Image();
 
+	void save();
+
 	const std::string& filename() const;
 	const TRgbSpacePtr& rgbSpace() const;
 	const std::string& options() const;
@@ -80,7 +82,8 @@ private:
 	TWeightBuffer alphaBuffer_;
 	std::string filename_;
 	std::string options_;
-	util::CriticalSection lock_;
+	util::CriticalSection renderLock_;
+	util::CriticalSection saveLock_;
 	TResolution2D resolution_;
 	TRgbSpacePtr rgbSpace_;
 	TScalar exposure_;

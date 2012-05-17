@@ -33,6 +33,7 @@ namespace output
 
 PY_DECLARE_CLASS_DOC(Image, "simple image render target");
 PY_CLASS_CONSTRUCTOR_2(Image, std::string, const TResolution2D&)
+PY_CLASS_METHOD(Image, save)
 PY_CLASS_MEMBER_RW(Image, filename, setFilename)
 PY_CLASS_MEMBER_RW(Image, rgbSpace, setRgbSpace)
 PY_CLASS_MEMBER_RW(Image, exposure, setExposure)
@@ -65,6 +66,68 @@ Image::~Image()
 	}
 }
 
+
+
+void Image::save()
+{
+	TRenderBuffer render;
+	TWeightBuffer alpha, weight;
+
+	LASS_LOCK(saveLock_)
+	{
+		LASS_LOCK(renderLock_)
+		{
+			if (isSaved_)
+			{
+				return;
+			}
+			render = renderBuffer_;
+			alpha = alphaBuffer_;
+			weight = totalWeight_;
+			isSaved_ = true;
+		}
+
+		if (exposure_ > 0) 
+		{
+			for (size_t j = 0; j < resolution_.y; ++j)
+			{
+				for (size_t i = 0; i < resolution_.x; ++i)
+				{
+					const size_t k = j * resolution_.x + i;
+					const TScalar w = weight[k];
+					if (w > 0)
+					{
+						XYZ& xyz = render[k];
+						xyz *= gain_ / w;
+						xyz.x = 1 - num::exp(-exposure_ * xyz.x);
+						xyz.y = 1 - num::exp(-exposure_ * xyz.y);
+						xyz.z = 1 - num::exp(-exposure_ * xyz.z);
+						alpha[k] /= w;
+					}
+				}
+			}
+		}
+		else
+		{
+			for (size_t j = 0; j < resolution_.y; ++j)
+			{
+				for (size_t i = 0; i < resolution_.x; ++i)
+				{
+					const size_t k = j * resolution_.x + i;
+					const TScalar w = weight[k];
+					if (w > 0)
+					{
+						render[k] *= gain_ / w;
+						alpha[k] /= w;
+					}
+				}
+			}
+		}
+
+		ImageWriter writer(filename_, resolution_, rgbSpace_, options_);
+		writer.writeFull(&render[0], &alpha[0]);
+	}
+}
 
 
 const std::string& Image::filename() const
@@ -176,7 +239,7 @@ void Image::doWriteRender(const OutputSample* first, const OutputSample* last)
 {
 	LASS_ASSERT(resolution_.x > 0 && resolution_.y > 0);
 
-	LASS_LOCK(lock_)
+	LASS_LOCK(renderLock_)
 	{
 		while (first != last)
 		{
@@ -193,60 +256,16 @@ void Image::doWriteRender(const OutputSample* first, const OutputSample* last)
 			}
 			++first;
 		}
+		isSaved_ = false;
 	}
 
-	isSaved_ = false;
 }
 
 
 
 void Image::doEndRender()
 {
-	if (isSaved_)
-	{
-		return;
-	}
-
-	if (exposure_ > 0) 
-	{
-		for (size_t j = 0; j < resolution_.y; ++j)
-		{
-			for (size_t i = 0; i < resolution_.x; ++i)
-			{
-				const size_t k = j * resolution_.x + i;
-				const TScalar w = totalWeight_[j * resolution_.x + i];
-				if (w > 0)
-				{
-					XYZ& xyz = renderBuffer_[k];
-					xyz *= gain_ / w;
-					xyz.x = 1 - num::exp(-exposure_ * xyz.x);
-					xyz.y = 1 - num::exp(-exposure_ * xyz.y);
-					xyz.z = 1 - num::exp(-exposure_ * xyz.z);
-					alphaBuffer_[k] /= w;
-				}
-			}
-		}
-	}
-	else
-	{
-		for (size_t j = 0; j < resolution_.y; ++j)
-		{
-			for (size_t i = 0; i < resolution_.x; ++i)
-			{
-				const size_t k = j * resolution_.x + i;
-				const TScalar w = totalWeight_[j * resolution_.x + i];
-				if (w > 0)
-				{
-					renderBuffer_[k] *= gain_ / w;
-					alphaBuffer_[k] /= w;
-				}
-			}
-		}
-	}
-
-	ImageWriter writer(filename_, resolution_, rgbSpace_, options_);
-	writer.writeFull(&renderBuffer_[0], &alphaBuffer_[0]);
-	isSaved_ = true;
+	save();
 }
 
 
