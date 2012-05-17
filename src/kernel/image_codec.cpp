@@ -195,6 +195,10 @@ ImageCodec::TImageHandle ImageCodecLass::doCreate(const std::string& filename, c
 	std::auto_ptr<impl::LassImage> pimpl(new impl::LassImage);
 	pimpl->image.reset(resolution.y, resolution.x);
 	pimpl->rgbSpace = selectRgbSpace(rgbSpace);
+	if (!hasGammaCorrection_)
+	{
+		pimpl->rgbSpace = pimpl->rgbSpace->withGamma(1);
+	}
 	pimpl->filename = filename;
 	pimpl->saveOnClose = true;
 	RgbSpace& space = *pimpl->rgbSpace;
@@ -204,7 +208,7 @@ ImageCodec::TImageHandle ImageCodecLass::doCreate(const std::string& filename, c
 	colorSpace.green = TChromaticity(space.green());
 	colorSpace.blue = TChromaticity(space.blue());
 	colorSpace.white = TChromaticity(space.white());
-	colorSpace.gamma = static_cast<num::Tfloat32>(hasGammaCorrection_ ? space.gamma() : 1);
+	colorSpace.gamma = static_cast<num::Tfloat32>(space.gamma());
 	return pimpl.release();
 }
 
@@ -223,7 +227,11 @@ ImageCodec::TImageHandle ImageCodecLass::doOpen(const std::string& filename, con
 			TPoint2D(colorSpace.green), 
 			TPoint2D(colorSpace.blue), 
 			TPoint2D(colorSpace.white), 
-			hasGammaCorrection_ ? colorSpace.gamma : 1));
+			colorSpace.gamma));
+	}
+	if (!hasGammaCorrection_)
+	{
+		pimpl->rgbSpace = pimpl->rgbSpace->withGamma(1);
 	}
 	RgbSpace& space = *pimpl->rgbSpace;
 	LASS_COUT << "RGB open: " << space.red() << " " << space.green() << " " << space.blue() << " " << space.white() << "\n";
@@ -271,14 +279,7 @@ void ImageCodecLass::doReadLine(
 	for (size_t x = 0; x < image.cols(); ++x)
 	{
 		TScalar a;
-		if (hasGammaCorrection_)
-		{
-			*xyz++ = space.convertGamma(image(pimpl->y, x), a);
-		}
-		else
-		{
-			*xyz++ = space.convert(image(pimpl->y, x), a);
-		}
+		*xyz++ = space.convert(image(pimpl->y, x), a);
 		if (alpha) *alpha++ = a;
 	}
 	++pimpl->y;
@@ -296,14 +297,7 @@ void ImageCodecLass::doWriteLine(
 	for (size_t x = 0; x < image.cols(); ++x)
 	{
 		const TScalar a = alpha ? *alpha++ : 1;
-		if (hasGammaCorrection_)
-		{
-			image(pimpl->y, x) = space.convertGamma(*xyz++, a);
-		}
-		else
-		{
-			image(pimpl->y, x) = space.convert(*xyz++, a);
-		}
+		image(pimpl->y, x) = space.convert(*xyz++, a);
 	}
 	++pimpl->y;
 }

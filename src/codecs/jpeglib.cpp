@@ -216,6 +216,8 @@ struct WriteHandle: Handle
 		Handle(rgbSpace),
 		dest(path)
 	{
+		this->resolution = resolution;
+
 		io::ArgParser parser;
 		io::ArgValue<int> quality(parser, "q" ,"quality", "compression quality: 0-100");
 		parser.parse(options);
@@ -281,7 +283,7 @@ private:
 		for (size_t k = 0; k < n; k += 3)
 		{
 			const prim::ColorRGBA rgb(line[k] / 255.f, line[k + 1] / 255.f, line[k + 2] / 255.f);
-			*xyz++ = rgbSpace.convertGamma(rgb);
+			*xyz++ = rgbSpace.convert(rgb);
 		}
 		if (alpha)
 		{

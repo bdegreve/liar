@@ -55,10 +55,6 @@ public:
 	const XYZ convert(const prim::ColorRGBA& rgb, TScalar& alpha) const;
 	const prim::ColorRGBA convert(const XYZ& xyz) const;
 	const prim::ColorRGBA convert(const XYZ& xyz, TScalar alpha) const;
-	const XYZ convertGamma(const prim::ColorRGBA& rgb) const;
-	const XYZ convertGamma(const prim::ColorRGBA& rgb, TScalar& alpha) const;
-	const prim::ColorRGBA convertGamma(const XYZ& xyz) const;
-	const prim::ColorRGBA convertGamma(const XYZ& xyz, TScalar alpha) const;
 
 	const TPoint2D& red() const;
 	const TPoint2D& green() const;

@@ -84,40 +84,6 @@ const XYZ RgbSpace::convert(const prim::ColorRGBA& rgb) const
 
 const XYZ RgbSpace::convert(const prim::ColorRGBA& rgb, TScalar& alpha) const
 {
-	alpha = rgb.a;
-	return r_ * rgb.r + g_ * rgb.g + b_ * rgb.b;
-}
-
-
-
-const prim::ColorRGBA RgbSpace::convert(const XYZ& xyz) const
-{
-	return convert(xyz, TScalar(1));
-}
-
-
-
-const prim::ColorRGBA RgbSpace::convert(const XYZ& xyz, TScalar alpha) const
-{
-	return prim::ColorRGBA(
-		static_cast<RGBA::TValue>(x_.r * xyz.x + y_.r * xyz.y + z_.r * xyz.z),
-		static_cast<RGBA::TValue>(x_.g * xyz.x + y_.g * xyz.y + z_.g * xyz.z),
-		static_cast<RGBA::TValue>(x_.b * xyz.x + y_.b * xyz.y + z_.b * xyz.z),
-		static_cast<RGBA::TValue>(alpha));
-}
-
-
-
-const XYZ RgbSpace::convertGamma(const prim::ColorRGBA& rgb) const
-{
-	TScalar dummy;
-	return convertGamma(rgb, dummy);
-}
-
-
-
-const XYZ RgbSpace::convertGamma(const prim::ColorRGBA& rgb, TScalar& alpha) const
-{
 	alpha = num::clamp<TScalar>(rgb.a, 0, 1);
 	return r_ * num::pow(num::clamp<TScalar>(rgb.r, 0, 1), gamma_) 
 		+ g_ * num::pow(num::clamp<TScalar>(rgb.g, 0, 1), gamma_) 
@@ -126,14 +92,14 @@ const XYZ RgbSpace::convertGamma(const prim::ColorRGBA& rgb, TScalar& alpha) con
 
 
 
-const prim::ColorRGBA RgbSpace::convertGamma(const XYZ& xyz) const
+const prim::ColorRGBA RgbSpace::convert(const XYZ& xyz) const
 {
-	return convertGamma(xyz, 1);
+	return convert(xyz, 1);
 }
 
 
 
-const prim::ColorRGBA RgbSpace::convertGamma(const XYZ& xyz, TScalar alpha) const
+const prim::ColorRGBA RgbSpace::convert(const XYZ& xyz, TScalar alpha) const
 {
 	return RGBA(
 		num::pow(num::clamp<RGBA::TValue>(static_cast<RGBA::TValue>(x_.r * xyz.x + y_.r * xyz.y + z_.r * xyz.z), 0, 1), invGamma_),

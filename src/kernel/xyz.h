@@ -34,6 +34,8 @@ namespace kernel
 class XYZ
 {
 public:
+	typedef TScalar TValue;
+
 	TScalar x;
 	TScalar y;
 	TScalar z;
