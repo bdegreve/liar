@@ -76,7 +76,7 @@ private:
 		chromaticities.blue = point2DToV2f(pimpl->rgbSpace->blue());
 		chromaticities.white = point2DToV2f(pimpl->rgbSpace->white());
 		header.insert("chromaticities", Imf::ChromaticitiesAttribute(chromaticities));
-		header.insert("comments", Imf::StringAttribute("rendered by LiAR, http://liar.bramz.net/"));
+		header.insert("comments", Imf::StringAttribute("rendered by " LIAR_NAME_FULL ", " LIAR_WEBSITE));
 		pimpl->output.reset(new Imf::RgbaOutputFile(filename.c_str(), header, Imf::WRITE_RGBA, 0));
 		return pimpl.release();
 	}
