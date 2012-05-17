@@ -1,3 +1,30 @@
+macro(EVAL)
+	foreach(varname ${ARGN})
+		message(STATUS "+++ ${varname}: ${${varname}}")
+	endforeach()
+endmacro()
+
+
+
+find_package(LCMS2)
+EVAL(LCMS2_FOUND LCMS2_INCLUDE_DIRS LCMS2_LIBRARIES LCMS2_REDISTS LCMS2_DEBUG_REDISTS)
+if(LCMS2_FOUND)
+	add_definitions(-DLIAR_HAVE_LCMS2_H=1)
+	include_directories(${LCMS2_INCLUDE_DIRS})
+	install(
+		FILES ${LCMS2_REDISTS}
+		DESTINATION .
+		CONFIGURATIONS RELEASE MINSIZEREL RELWITHDEBINFO
+		)
+	install(
+		FILES ${LCMS2_DEBUG_REDISTS}
+		DESTINATION .
+		CONFIGURATIONS DEBUG 
+		)
+endif()
+
+
+
 file(GLOB libkernel_SRCS 
 	*.h 
 	*.inl
@@ -16,6 +43,7 @@ if(APPLE)
 endif()
 target_link_libraries(libkernel 
 	lass_python
+	${LCMS2_LIBRARIES}
 	)
 install(
 	TARGETS libkernel 
@@ -23,5 +51,4 @@ install(
 	)
 
 add_liar_module_ex(kernel kernel_init.cpp)
-
 
