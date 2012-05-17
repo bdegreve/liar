@@ -9,11 +9,6 @@
 #include <windowsx.h>
 
 #include <d3d9.h>
-
-#ifndef __MINGW32__ 
-#include <d3dx9.h> 
-#endif
-
 #include <gdiplus.h> // fallback when d3d9 is not available.
 
 #ifdef _MSC_VER
@@ -1256,15 +1251,12 @@ namespace PixelToaster
 			const float w = description.Width - 0.5f;
 			const float h = description.Height - 0.5f;
 
-			Vertex quad[4];
-			quad[0].pos = D3DXVECTOR4(-0.5f, -0.5f, 0.5f, 1.0f);
-			quad[0].tex = D3DXVECTOR2(0.f, 0.f);
-			quad[1].pos = D3DXVECTOR4(w, -0.5f, 0.5f, 1.0f);
-			quad[1].tex = D3DXVECTOR2(1.f, 0.f);
-			quad[2].pos = D3DXVECTOR4(-0.5f, h, 0.5f, 1.0f);
-			quad[2].tex = D3DXVECTOR2(0.f, 1.f);
-			quad[3].pos = D3DXVECTOR4(w, h, 0.5f, 1.0f);
-			quad[3].tex = D3DXVECTOR2(1.f, 1.f);
+			Vertex quad[4] = {
+				{ -0.5f, -0.5f, 0.5f, 1.0f, 0.f, 0.f },
+				{ w, -0.5f, 0.5f, 1.0f, 1.f, 0.f },
+				{ -0.5f, h, 0.5f, 1.0f, 0.f, 1.f },
+				{ w, h, 0.5f, 1.0f, 1.f, 1.f }
+			};
 
 			device->SetRenderState(D3DRS_ZENABLE, FALSE);
 			device->SetFVF(FVF);
@@ -1276,8 +1268,14 @@ namespace PixelToaster
 
 		struct Vertex 
 		{
-			D3DXVECTOR4 pos;
-			D3DXVECTOR2 tex;
+			// D3DFVF_XYZRHW
+			FLOAT x;
+			FLOAT y;
+			FLOAT z;
+			FLOAT w;
+			// D3DFVF_TEX1
+			FLOAT u;
+			FLOAT v;
 		};
 		enum { FVF = D3DFVF_XYZRHW | D3DFVF_TEX1 };
 
@@ -1288,7 +1286,6 @@ namespace PixelToaster
 		SmartI<IDirect3DDevice9> device;
 		SmartI<IDirect3DTexture9> primaryTexture;
 		SmartI<IDirect3DTexture9> thingy;
-		SmartI<ID3DXEffect> effect;
 
 		UINT width;
 		UINT height;

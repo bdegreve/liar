@@ -7,18 +7,19 @@ find_path(
 	DOC "path to PixelToaster.h"
 	PATHS "${CMAKE_CURRENT_SOURCE_DIR}/PixelToaster"
 	)
+mark_as_advanced(pixeltoaster_INCLUDE_DIR) 
 if (pixeltoaster_INCLUDE_DIR)
 	set(_ok FALSE)
 	if (WIN32)
-		find_path(D3DX9_INCLUDE_DIR
-			d3dx9.h
+		find_path(D3D9_INCLUDE_DIR
+			d3d9.h
 			HINTS ENV DXSDK_DIR ENV Include
 			PATH_SUFFIXES Include
-			DOC "path to d3dx9.h"
+			DOC "path to d3d9.h"
 			)
-		if (D3DX9_INCLUDE_DIR)
+		if (D3D9_INCLUDE_DIR)
 			include_directories(
-				BEFORE ${D3DX9_INCLUDE_DIR}
+				BEFORE ${D3D9_INCLUDE_DIR}
 				)
 			set(_ok TRUE)
 		endif()
@@ -44,7 +45,7 @@ if (pixeltoaster_INCLUDE_DIR)
 					${COCOA_LIBRARY}
 					${OPENGL_LIBRARIES}
 					)		
-			if(NOT pixeltoaster_APPLE_USE_X11)				
+			if(NOT pixeltoaster_APPLE_USE_X11)
 				list(APPEND output_SRCS 
 					"PixelToaster/PixelToasterApple.mm"
 					)
@@ -93,7 +94,7 @@ if (pixeltoaster_INCLUDE_DIR)
 endif()
 
 set(LIAR_OUTPUT_HAVE_PIXELTOASTER_H 
-	${pixeltoaster_INCLUDE_DIR}
+	${_ok}
 	)
 set(LIAR_OUTPUT_HAVE_PIXELTOASTER_DIRTYBOX 
 	${pixeltoaster_HAVE_DIRTYBOX}
