@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -30,7 +30,7 @@ namespace liar
 namespace shaders
 {
 
-PY_DECLARE_CLASS_DOC(Flip, 
+PY_DECLARE_CLASS_DOC(Flip,
 	"Flips reflection and transmission. The z component of omegaOut is\n"
 	"negated, so that reflective materials become transparent and the\n"
 	"other way around.\n"
@@ -59,6 +59,7 @@ const TShaderPtr& Flip::child() const
 void Flip::setChild(const TShaderPtr& child)
 {
 	child_ = child;
+	setCaps(Bsdf::flip(child->caps()));
 }
 
 
@@ -119,7 +120,9 @@ const TPyObjectPtr Flip::doGetState() const
 
 void Flip::doSetState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(state, child_);
+	TShaderPtr child;
+	python::decodeTuple(state, child);
+	setChild(child);
 }
 
 

@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -212,16 +212,14 @@ inline TScalar cutoffHeuristic(TScalar p1, TScalar p2, TScalar alpha)
 
 const TPyObjectPtr AshikhminShirley::doGetState() const
 {
-	return python::makeTuple(diffuse_, specular_, specularPowerU_, specularPowerV_,
-		numberOfSamples_);
+	return python::makeTuple(diffuse_, specular_, specularPowerU_, specularPowerV_, numberOfSamples_);
 }
 
 
 
 void AshikhminShirley::doSetState(const TPyObjectPtr& iState)
 {
-	python::decodeTuple(iState, diffuse_, specular_, specularPowerU_, specularPowerV_,
-		numberOfSamples_);
+	python::decodeTuple(iState, diffuse_, specular_, specularPowerU_, specularPowerV_, numberOfSamples_);
 }
 
 
@@ -346,11 +344,11 @@ const TVector3D AshikhminShirley::Bsdf::sampleH(const TPoint2D& sample) const
 	{
 		if (sample.x < .75f)
 		{
-			phi = TNumTraits::pi + num::atan(f * num::tan(2 * TNumTraits::pi * (sample.x - .5f))); 
+			phi = TNumTraits::pi + num::atan(f * num::tan(2 * TNumTraits::pi * (sample.x - .5f)));
 		}
 		else
 		{
-			phi = 2 * TNumTraits::pi - num::atan(f * num::tan(2 * TNumTraits::pi * (1.f - sample.x))); 
+			phi = 2 * TNumTraits::pi - num::atan(f * num::tan(2 * TNumTraits::pi * (1.f - sample.x)));
 		}
 	}
 

@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -58,7 +58,7 @@ LinearInterpolator::LinearInterpolator(const TKeyShaders& keyShaders, const TTex
 
 
 
-/** return list of key shaders 
+/** return list of key shaders
  */
 const LinearInterpolator::TKeyShaders& LinearInterpolator::keys() const
 {
@@ -104,8 +104,7 @@ void LinearInterpolator::setControl(const TTexturePtr& contolTexture)
 
 /** add a key texture to the list
  */
-void LinearInterpolator::addKey(const TScalar keyValue, 
-								const TShaderPtr& keyShader)
+void LinearInterpolator::addKey(const TScalar keyValue, const TShaderPtr& keyShader)
 {
 	TKeyShader key(keyValue, keyShader);
 	TKeyShaders::iterator i = std::lower_bound(keys_.begin(), keys_.end(), key, LesserKey());
@@ -133,7 +132,7 @@ const XYZ LinearInterpolator::doEmission(const Sample& sample, const Intersectio
 	const TScalar keyValue = average(control_->lookUp(sample, context));
 	TKeyShader sentinel(keyValue, TShaderPtr());
 	TKeyShaders::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), sentinel, LesserKey());
-	
+
 	if (i == keys_.begin())
 	{
 		return keys_.front().second->emission(sample, context, omegaOut);
@@ -142,12 +141,12 @@ const XYZ LinearInterpolator::doEmission(const Sample& sample, const Intersectio
 	{
 		return keys_.back().second->emission(sample, context, omegaOut);
 	}
-	
+
 	const TKeyShaders::const_iterator prevI = stde::prev(i);
 	LASS_ASSERT(prevI->first != i->first); // due to lower_bound
-	
+
 	const TScalar t = (keyValue - prevI->first) / (i->first - prevI->first);
-	
+
 	return lerp(
 		prevI->second->emission(sample, context, omegaOut),
 		i->second->emission(sample, context, omegaOut),
@@ -166,7 +165,7 @@ TBsdfPtr LinearInterpolator::doBsdf(const Sample& sample, const IntersectionCont
 	const TScalar keyValue = average(control_->lookUp(sample, context));
 	TKeyShader sentinel(keyValue, TShaderPtr());
 	TKeyShaders::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), sentinel, LesserKey());
-	
+
 	if (i == keys_.begin())
 	{
 		return keys_.front().second->bsdf(sample, context);
@@ -175,10 +174,10 @@ TBsdfPtr LinearInterpolator::doBsdf(const Sample& sample, const IntersectionCont
 	{
 		return keys_.back().second->bsdf(sample, context);
 	}
-	
+
 	const TKeyShaders::const_iterator prevI = stde::prev(i);
 	LASS_ASSERT(prevI->first != i->first); // due to lower_bound
-	
+
 	const TBsdfPtr a = prevI->second->bsdf(sample, context);
 	const TBsdfPtr b = i->second->bsdf(sample, context);
 	const TScalar t = (keyValue - prevI->first) / (i->first - prevI->first);
@@ -239,7 +238,7 @@ void LinearInterpolator::doSetState(const TPyObjectPtr& state)
 // --- bsdf ----------------------------------------------------------------------------------------
 
 LinearInterpolator::Bsdf::Bsdf(
-		const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, 
+		const Sample& sample, const IntersectionContext& context, TBsdfCaps caps,
 		const TBsdfPtr& a, const TBsdfPtr& b, TScalar t):
 	kernel::Bsdf(sample, context, caps),
 	a_(a),

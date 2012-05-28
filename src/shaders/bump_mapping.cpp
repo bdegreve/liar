@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -168,7 +168,9 @@ const TPyObjectPtr BumpMapping::doGetState() const
 
 void BumpMapping::doSetState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(state, shader_, displacement_, scale_);
+	TShaderPtr shader;
+	python::decodeTuple(state, shader, displacement_, scale_);
+	setShader(shader);
 }
 
 
@@ -202,12 +204,12 @@ const TVector2D BumpMapping::dDisplacement_dUv(
 		context.setUv(uv - .5 * context.dUv_dJ());
 		dD_dIj.y -= scale_ * average(displacement_->lookUp(sample, context));
 
-		const TScalar dUv_dIj[4] = 
+		const TScalar dUv_dIj[4] =
 		{
-			context.dUv_dI().x, context.dUv_dJ().x, 
+			context.dUv_dI().x, context.dUv_dJ().x,
 			context.dUv_dI().y, context.dUv_dJ().y
 		};
-		TScalar dIj_dUv[4] = 
+		TScalar dIj_dUv[4] =
 		{
 			1, 0,
 			0, 1
@@ -222,7 +224,7 @@ const TVector2D BumpMapping::dDisplacement_dUv(
 	const TScalar epsilon = 1e-3f;
 	/*
 	const TVector2D dUv = pointwiseMax(
-		TVector2D(epsilon, epsilon), 
+		TVector2D(epsilon, epsilon),
 		.1f * (context.dUv_dI().transform(num::abs) + context.dUv_dJ().transform(num::abs)) / 2);
 	/*/
 	const TVector2D dUv(epsilon, epsilon);
