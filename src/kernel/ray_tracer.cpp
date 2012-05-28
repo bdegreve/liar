@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -106,7 +106,7 @@ void RayTracer::setMaxRayGeneration(int iMaxRayGeneration)
 
 
 
-void RayTracer::requestSamples(const TSamplerPtr& sampler) 
+void RayTracer::requestSamples(const TSamplerPtr& sampler)
 {
 	if (scene_ && sampler)
 	{
@@ -114,7 +114,7 @@ void RayTracer::requestSamples(const TSamplerPtr& sampler)
 		lights_.requestSamples(sampler);
 		forAllObjects(scene_, impl::requestMemberSamples<Shader>(sampler, &SceneObject::shader));
 		forAllObjects(scene_, impl::requestMemberSamples<Medium>(sampler, &SceneObject::interior));
-		doRequestSamples(sampler); 
+		doRequestSamples(sampler);
 	}
 }
 
@@ -141,7 +141,7 @@ const TRayTracerPtr RayTracer::clone() const
 const TPyObjectPtr RayTracer::reduce() const
 {
 	return python::makeTuple(
-		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->_lassPyGetClassDef()->type())), 
+		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->_lassPyGetClassDef()->type())),
 		python::makeTuple(), this->getState());
 }
 
@@ -182,7 +182,7 @@ namespace temp
 
 
 const XYZ RayTracer::estimateLightContribution(
-		const Sample& sample, const TBsdfPtr& bsdf, const LightContext& light, 
+		const Sample& sample, const TBsdfPtr& bsdf, const LightContext& light,
 		const Sample::TSubSequence2D& lightSamples, const Sample::TSubSequence2D& bsdfSamples, const Sample::TSubSequence1D& componentSamples,
 		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn) const
 {
@@ -203,7 +203,7 @@ const XYZ RayTracer::estimateLightContribution(
 	// what about indirect estimator caps???
 
 	XYZ result;
-	const TPoint3D start = target;// + 10 * liar::tolerance * targetNormal;
+	const TPoint3D start = target + 10 * liar::tolerance * targetNormal;
 
 	if (nl > 0)
 	{
@@ -216,7 +216,7 @@ const XYZ RayTracer::estimateLightContribution(
 			{
 				continue;
 			}
-			const TVector3D& omegaOut = bsdf->worldToBsdf(shadowRay.direction());
+			const TVector3D omegaOut = bsdf->worldToBsdf(shadowRay.direction());
 			const BsdfOut out = bsdf->evaluate(omegaIn, omegaOut, caps);
 			if (!out || scene()->isIntersecting(sample, shadowRay) != isShadowOnly)
 			{

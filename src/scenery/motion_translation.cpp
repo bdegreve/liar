@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -79,11 +79,18 @@ void MotionTranslation::doPreProcess(const TSceneObjectPtr& scene, const TimePer
 	child_->preProcess(scene, period);
 
 	const TAabb3D localBox = child_->boundingBox();
+	if (localBox.isEmpty())
+	{
+	    aabb_ = localBox;
 
-	const TVector3D offsetBegin = localToWorldOffset(period.begin());
-	const TVector3D offsetEnd = localToWorldOffset(period.end());
-	aabb_ = TAabb3D(localBox.min() + offsetBegin, localBox.max() + offsetBegin);
-	aabb_ += TAabb3D(localBox.min() + offsetEnd, localBox.max() + offsetEnd);
+	}
+	else
+	{
+        const TVector3D offsetBegin = localToWorldOffset(period.begin());
+        const TVector3D offsetEnd = localToWorldOffset(period.end());
+        aabb_ = TAabb3D(localBox.min() + offsetBegin, localBox.max() + offsetBegin);
+        aabb_ += TAabb3D(localBox.min() + offsetEnd, localBox.max() + offsetEnd);
+	}
 }
 
 
@@ -121,7 +128,7 @@ void MotionTranslation::doLocalContext(const Sample& sample, const BoundedRay& r
 
 
 
-void MotionTranslation::doLocalSpace(TTime time, TTransformation3D& localToWorld) const 
+void MotionTranslation::doLocalSpace(TTime time, TTransformation3D& localToWorld) const
 {
 	localToWorld = concatenate(
 		TTransformation3D::translation(localToWorldOffset(time)), localToWorld);
