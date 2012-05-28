@@ -9,7 +9,7 @@
 from liar import *
 import geometry
 
-if True:
+if False:
 	width = 1024
 	height = 1024
 	super_sampling = 9
@@ -26,7 +26,7 @@ else:
 	caustics_quality = 1
 	raytrace_direct = True
 	scatter_direct = True
-	gather_rays = 0
+	gather_rays = 16
 
 camera = geometry.getCamera()
 walls = geometry.getWalls()
@@ -62,7 +62,7 @@ display = output.Display("Exponential Fog", (width, height))
 
 engine = RenderEngine()
 engine.tracer = photonMapper
-engine.tracer = tracers.DirectLighting()
+#engine.tracer = tracers.DirectLighting()
 engine.sampler = samplers.Stratifier((width, height), super_sampling)
 engine.scene = scenery.List(walls + blocks +  lights)
 engine.scene.interior = mediums.Bounded(fog, engine.scene.boundingBox())

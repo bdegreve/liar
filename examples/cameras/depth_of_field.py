@@ -9,12 +9,11 @@
 
 from __future__ import division
 from liar import *
+from liar.tools import scripting
 
-width = 320
-height = 240
-samples_per_pixel = 16
+options = scripting.renderOptions(width=900, height=600, samples_per_pixel=36)
+
 lens_radius = 0.5
-
 sphere_radius = 0.8
 grid_size = 20
 grid_step = 2
@@ -34,8 +33,8 @@ floor.d = 0
 floor.shader = shaders.Lambert(blue_checkers)
 
 sphere = scenery.Sphere((0, 0, sphere_radius), sphere_radius)
-sphere.shader = shaders.Simple(red, white)
-sphere.shader.specularPower = textures.Constant(200)
+sphere.shader = shaders.AshikhminShirley(red, textures.Constant(.01))
+sphere.shader.specularPowerU = sphere.shader.specularPowerV = textures.Constant(20)
 
 spheres = []
 for i in range(0, grid_size, grid_step):
@@ -58,7 +57,7 @@ backLight.intensity = rgb(50, 50, 100)
 
 engine = RenderEngine()
 engine.tracer = tracers.DirectLighting()
-engine.sampler = samplers.Stratifier((width, height), samples_per_pixel)
+engine.sampler = samplers.Stratifier((options.width, options.height), options.samples_per_pixel)
 engine.scene = scenery.List([scenery.AabbTree(spheres), floor, keyLight, fillLight, backLight])
 
 camera = cameras.PerspectiveCamera()
@@ -66,7 +65,7 @@ camera.position = (grid_size / 2, -6, 6)
 camera.lookAt((grid_size / 2, grid_size / 3, 1))
 engine.camera = camera
 
-engine.target = output.Image("depth_of_field.hdr", (width, height))
+engine.target = scripting.makeRenderTarget(options.width, options.height, "depth_of_field.hdr", "Camera Depth Of Field")
 
 camera.lensRadius = 0
 engine.render(((0, 0), (0.5, 1)))

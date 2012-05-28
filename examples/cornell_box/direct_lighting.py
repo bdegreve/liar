@@ -7,29 +7,15 @@
 # http://liar.bramz.net/
 
 from liar import *
-import geometry
+from liar.tools import scripting, cornell_box
 
-if True:
-	width = 800
-	height = 800
-	super_sampling = 9
-else:
-	width = 320
-	height = 320
-	super_sampling = 1
-
-camera = geometry.getCamera()
-walls = geometry.getWalls()
-blocks = geometry.getBlocks()
-lights = geometry.getLights()
-
-image = output.Image("direct_lighting.hdr", (width, height))
+options = scripting.renderOptions(width=800, height=800, super_sampling=9)
 
 engine = RenderEngine()
 engine.tracer = tracers.DirectLighting()
-engine.sampler = samplers.Stratifier((width, height), super_sampling)
-engine.scene = scenery.List(walls + blocks + lights)
-engine.camera = camera
-engine.target = image
+engine.sampler = samplers.Stratifier((options.width, options.height), options.super_sampling)
+engine.scene = cornell_box.scene()
+engine.camera = cornell_box.camera()
+engine.target = scripting.makeRenderTarget(options.width, options.height, "direct_lighting.hdr", "Cornell Box with Direct Lighting only")
 engine.render()
 

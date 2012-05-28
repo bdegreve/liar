@@ -13,10 +13,19 @@
 from liar import *
 import math
 
-_s = 0.01
+def scene():
+	return scenery.List(lights() + walls() + blocks())
 
-def _scale(*i):
-	return tuple(_s * x for x in i)
+
+def camera():
+	camera = cameras.PerspectiveCamera()
+	camera.aspectRatio = 1
+	camera.fovAngle = 2 * math.atan((0.025 / 0.035) / 2)
+	camera.position = _scale(278, 273, -800)
+	camera.sky = (0, 1, 0)
+	camera.direction = (0, 0, 1)
+	return camera
+
 
 def lights():
 	I = 20
@@ -29,6 +38,7 @@ def lights():
 	light.numberOfEmissionSamples = 16
 	light.shader = shaders.Unshaded(textures.Constant(light.radiance))
 	return [light]
+
 
 def walls():
 	hi = .7
@@ -53,6 +63,16 @@ def walls():
 	leftwall.shader = red
 
 	return [floor, ceiling, backwall, rightwall, leftwall]
+
+
+def blocks():
+	white = shaders.Lambert(textures.Constant(rgb(.7, .7, .7)))
+	short = _block([(130.0, 65.0), (82.0, 225.0), (240.0, 272.0), (290.0, 114.0)], [0.05, 165.0])
+	short.shader = white
+	tall = _block([(423.0, 247.0), (265.0, 296.0), (314.0, 456.0), (472.0, 406.0)], [0.05, 330.0])
+	tall.shader = white
+	return [short, tall]
+
 
 def _block(ps, hs):
 	def normal(a, b, c):
@@ -85,22 +105,8 @@ def _block(ps, hs):
 	triangles = [((t[0], n), (t[1], n), (t[2], n))for t, n in triangle_groups]
 	
 	return scenery.TriangleMesh(verts, normals, [], triangles)	
-	
-def blocks():
-	white = shaders.Lambert(textures.Constant(rgb(.7, .7, .7)))
-	short = _block([(130.0, 65.0), (82.0, 225.0), (240.0, 272.0), (290.0, 114.0)], [0.05, 165.0])
-	short.shader = white
-	tall = _block([(423.0, 247.0), (265.0, 296.0), (314.0, 456.0), (472.0, 406.0)], [0.05, 330.0])
-	tall.shader = white
-	return [short, tall]
 
-def camera():
-	camera = cameras.PerspectiveCamera()
-	camera.aspectRatio = 1
-	camera.fovAngle = 2 * math.atan((0.025 / 0.035) / 2)
-	camera.position = _scale(278, 273, -800)
-	camera.sky = (0, 1, 0)
-	camera.direction = (0, 0, 1)
-	return camera
 
-	
+def _scale(*i):
+	return tuple(0.01 * x for x in i)
+
