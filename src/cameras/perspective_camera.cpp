@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -121,7 +121,7 @@ const TVector3D& PerspectiveCamera::direction() const
 
 /** set @e direction of camera directly.
  */
-void PerspectiveCamera::setDirection(const TVector3D& direction) 
+void PerspectiveCamera::setDirection(const TVector3D& direction)
 {
 	directionNormal_ = direction.normal();
 	rightNormal_ = cross(directionNormal_, sky_).normal();
@@ -133,9 +133,9 @@ void PerspectiveCamera::setDirection(const TVector3D& direction)
 
 /** sets camera so it looks to @a target point.
  *  The PerspectiveCamera tilts around the @e sky vector towards @a target (
- *  so that @e position, @a target and the @e sky vector are coplanar), 
+ *  so that @e position, @a target and the @e sky vector are coplanar),
  *  and then pitches to line up @e direction with @a target.
- *  @e right and @e down are reset to be orthogonal to the direction and to 
+ *  @e right and @e down are reset to be orthogonal to the direction and to
  *  fit @e fovAngle and @e aspectRatio.
  */
 void PerspectiveCamera::lookAt(const TPoint3D& target)
@@ -194,7 +194,7 @@ TScalar PerspectiveCamera::height() const
  */
 TScalar PerspectiveCamera::aspectRatio() const
 {
-	return aspectRatio_;
+	return width_ / height_;
 }
 
 
@@ -202,8 +202,6 @@ TScalar PerspectiveCamera::aspectRatio() const
 void PerspectiveCamera::setWidth(TScalar width)
 {
 	width_ = width;
-	aspectRatio_ = width_ / height_;
-	fovAngle_ = 2 * num::atan((width_ / 2) / focalLength_);
 	initTransformation();
 }
 
@@ -212,7 +210,6 @@ void PerspectiveCamera::setWidth(TScalar width)
 void PerspectiveCamera::setHeight(TScalar height)
 {
 	height_ = height;
-	aspectRatio_ = width_ / height_;
 	initTransformation();
 }
 
@@ -222,8 +219,7 @@ void PerspectiveCamera::setHeight(TScalar height)
  */
 void PerspectiveCamera::setAspectRatio(TScalar ratio)
 {
-	aspectRatio_ = ratio;
-	height_ = width_ / aspectRatio_;
+	height_ = width_ / ratio;
 	initTransformation();
 }
 
@@ -240,7 +236,7 @@ TScalar PerspectiveCamera::focalLength() const
  */
 TScalar PerspectiveCamera::fovAngle() const
 {
-	return fovAngle_;
+	return 2 * num::atan((width_ / 2) / focalLength_);
 }
 
 
@@ -248,7 +244,6 @@ TScalar PerspectiveCamera::fovAngle() const
 void PerspectiveCamera::setFocalLength(TScalar length)
 {
 	focalLength_ = length;
-	fovAngle_ = 2 * num::atan((width_ / 2) / focalLength_);
 	setFNumber(fNumber_);
 	initTransformation();
 }
@@ -261,8 +256,7 @@ void PerspectiveCamera::setFocalLength(TScalar length)
  */
 void PerspectiveCamera::setFovAngle(TScalar radians)
 {
-	fovAngle_ = radians;
-	focalLength_ = (width_ / 2) / num::tan(fovAngle_ / 2);
+	focalLength_ = (width_ / 2) / num::tan(radians / 2);
 	setFNumber(fNumber_);
 	initTransformation();
 }
@@ -414,7 +408,7 @@ const BoundedRay PerspectiveCamera::doGenerateRay(const Sample& sample, const TV
 	const TPoint2D& screen = sample.screenCoordinate() + screenSpaceDelta;
 
 	TPoint3D raySupport = position_;
-	TVector3D rayDirection = directionBase_ + screen.x * right_ + screen.y * down_;
+	TVector3D rayDirection = direction_ + (screen.x - .5f) * right_ + (screen.y - .5f) * down_;
 	rayDirection.normalize();
 	TScalar rayFactor = num::inv(dot(rayDirection, directionNormal_));
 
@@ -425,7 +419,7 @@ const BoundedRay PerspectiveCamera::doGenerateRay(const Sample& sample, const TV
 		const TPoint2D& lens = num::uniformDisk(sample.lensCoordinate(), pdf);
 		const TPoint3D lensPoint = position_ +
 			lensRadius_ * lens.x * rightNormal_ +
-			lensRadius_ * lens.y * downNormal_;		
+			lensRadius_ * lens.y * downNormal_;
 		const TPoint3D focusPoint = position_ + (rayFactor * focusDistance_) * rayDirection;
 
 		raySupport = lensPoint;
@@ -433,8 +427,8 @@ const BoundedRay PerspectiveCamera::doGenerateRay(const Sample& sample, const TV
 		rayDirection.normalize();
 		rayFactor = num::inv(dot(rayDirection, directionNormal_));
 	}
-	
-	return BoundedRay(raySupport, rayDirection, 
+
+	return BoundedRay(raySupport, rayDirection,
 		std::max(tolerance, rayFactor * nearLimit_), rayFactor * farLimit_,
 		prim::IsAlreadyNormalized());
 }
@@ -472,7 +466,6 @@ void PerspectiveCamera::initTransformation()
 	direction_ = directionNormal_ * focalLength_;
 	right_ = rightNormal_ * width_;
 	down_ = downNormal_ * height_;
-	directionBase_ = direction_ - (down_ + right_) / 2;
 }
 
 
@@ -522,7 +515,7 @@ void PerspectiveCamera::doSetState(const TPyObjectPtr& state)
 	setWidth(width_);
 	setHeight(height_);
 	setFocalLength(focalLength_);
-	setFNumber(fNumber_);	
+	setFNumber(fNumber_);
 	initTransformation();
 }
 

@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -114,10 +114,8 @@ private:
 
 	void initTransformation();
 
+	// state vector
 	TPoint3D position_;
-	TVector3D right_;        /**< i unit */
-	TVector3D down_;         /**< j unit */
-	TVector3D direction_;    /**< k unit */
 	TVector3D sky_;
 	TVector3D directionNormal_;
 	TVector3D rightNormal_;
@@ -126,17 +124,18 @@ private:
  	TTime shutterCloseDelta_;
 	TScalar width_;
 	TScalar height_;
-	TScalar aspectRatio_;
 	TScalar focalLength_;
-	TScalar fovAngle_;
 	TScalar nearLimit_;
 	TScalar farLimit_;
 	TScalar focusDistance_;
 	TScalar fNumber_;
-	TScalar lensRadius_;
 	TScalar falloffPower_;
 
-	TVector3D directionBase_;
+	// derived quantities
+	TVector3D right_;        /**< i unit */
+	TVector3D down_;         /**< j unit */
+	TVector3D direction_;    /**< k unit */
+	TScalar lensRadius_;
 };
 
 }
