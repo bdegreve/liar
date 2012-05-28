@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -38,7 +38,7 @@ PY_CLASS_STATIC_METHOD(CheckerBoard, setDefaultAntiAliasing);
 PY_CLASS_STATIC_CONST(CheckerBoard, "AA_NONE", "none");
 PY_CLASS_STATIC_CONST(CheckerBoard, "AA_BILINEAR", "bilinear");
 
-CheckerBoard::TAntiAliasingDictionary CheckerBoard::antiAliasingDictionary_ = 
+CheckerBoard::TAntiAliasingDictionary CheckerBoard::antiAliasingDictionary_ =
 	CheckerBoard::makeAntiAliasingDictionary();
 CheckerBoard::AntiAliasing CheckerBoard::defaultAntiAliasing_ = CheckerBoard::aaBilinear;
 
@@ -92,7 +92,7 @@ void CheckerBoard::setDefaultAntiAliasing(const std::string& mode)
 
 const TPyObjectPtr CheckerBoard::doGetState() const
 {
-	return python::makeTuple(BinaryOperator::doGetState(), split_);
+	return python::makeTuple(BinaryOperator::doGetState(), split_, antiAliasing());
 }
 
 
@@ -100,7 +100,9 @@ const TPyObjectPtr CheckerBoard::doGetState() const
 void CheckerBoard::doSetState(const TPyObjectPtr& state)
 {
 	TPyObjectPtr parentState;
-	python::decodeTuple(state, parentState, split_);
+	std::string aa;
+	python::decodeTuple(state, parentState, split_, aa);
+	setAntiAliasing(aa);
 	BinaryOperator::doSetState(parentState);
 }
 
@@ -108,7 +110,7 @@ void CheckerBoard::doSetState(const TPyObjectPtr& state)
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ 
+const XYZ
 CheckerBoard::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 #pragma LASS_FIXME("points need transform too [Bramz]")
@@ -118,7 +120,7 @@ CheckerBoard::doLookUp(const Sample& sample, const IntersectionContext& context)
 	{
 	case aaNone:
 		return ((uv.x < split_.x) == (uv.y < split_.y) ? textureA() : textureB())->lookUp(sample, context);
-		
+
 	case aaBilinear:
 		{
 			const TVector2D dUv = prim::pointwiseMax(context.dUv_dI().transform(num::abs), context.dUv_dJ().transform(num::abs));
