@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -30,7 +30,7 @@ namespace liar
 namespace kernel
 {
 
-PY_DECLARE_CLASS_DOC(RgbSpace, 
+PY_DECLARE_CLASS_DOC(RgbSpace,
 	"XYZ-RGB convertor\n"
 	"RgbSpace((x_red, y_red), (x_green, y_green), (x_blue, y_blue), (x_white, y_white), gamma)"
 	);
@@ -53,12 +53,12 @@ PY_CLASS_STATIC_METHOD_DOC(RgbSpace, setDefaultSpace, "defaultSpace(RgbSpace) ->
 ////
 //TRgbSpacePtr RgbSpace::defaultSpace_ = TRgbSpacePtr(new RgbSpace(
 //	TVector3D(0.490, 0.177, 0.000),
-//	TVector3D(0.310, 0.812, 0.010), 
+//	TVector3D(0.310, 0.812, 0.010),
 //	TVector3D(0.200, 0.011, 0.990)));
 
 //TRgbSpacePtr RgbSpace::defaultSpace_ = TRgbSpacePtr(new RgbSpace(
 //	TVector3D(1.f, 0.f, 0.f),
-//	TVector3D(0.f, 1.f, 0.f), 
+//	TVector3D(0.f, 1.f, 0.f),
 //	TVector3D(0.f, 0.f, 1.f)));
 
 TRgbSpacePtr RgbSpace::defaultSpace_ = sRGB;
@@ -66,7 +66,7 @@ TRgbSpacePtr RgbSpace::defaultSpace_ = sRGB;
 
 
 RgbSpace::RgbSpace(
-		const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, 
+		const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue,
 		const TPoint2D& white, TScalar gamma)
 {
 	init(red, green, blue, white, gamma);
@@ -84,10 +84,10 @@ const XYZ RgbSpace::convert(const prim::ColorRGBA& rgb) const
 
 const XYZ RgbSpace::convert(const prim::ColorRGBA& rgb, TScalar& alpha) const
 {
-	alpha = num::clamp<TScalar>(rgb.a, 0, 1);
-	return r_ * num::pow(num::clamp<TScalar>(rgb.r, 0, 1), gamma_) 
-		+ g_ * num::pow(num::clamp<TScalar>(rgb.g, 0, 1), gamma_) 
-		+ b_ * num::pow(num::clamp<TScalar>(rgb.b, 0, 1), gamma_);
+	alpha = rgb.a;
+	return r_ * num::pow(rgb.r, gamma_)
+		+ g_ * num::pow(rgb.g, gamma_)
+		+ b_ * num::pow(rgb.b, gamma_);
 }
 
 
@@ -102,10 +102,10 @@ const prim::ColorRGBA RgbSpace::convert(const XYZ& xyz) const
 const prim::ColorRGBA RgbSpace::convert(const XYZ& xyz, TScalar alpha) const
 {
 	return RGBA(
-		num::pow(num::clamp<RGBA::TValue>(static_cast<RGBA::TValue>(x_.r * xyz.x + y_.r * xyz.y + z_.r * xyz.z), 0, 1), invGamma_),
-		num::pow(num::clamp<RGBA::TValue>(static_cast<RGBA::TValue>(x_.g * xyz.x + y_.g * xyz.y + z_.g * xyz.z), 0, 1), invGamma_),
-		num::pow(num::clamp<RGBA::TValue>(static_cast<RGBA::TValue>(x_.b * xyz.x + y_.b * xyz.y + z_.b * xyz.z), 0, 1), invGamma_),
-		num::clamp<RGBA::TValue>(static_cast<RGBA::TValue>(alpha), 0, 1));
+		num::pow(static_cast<RGBA::TValue>(x_.r * xyz.x + y_.r * xyz.y + z_.r * xyz.z), invGamma_),
+		num::pow(static_cast<RGBA::TValue>(x_.g * xyz.x + y_.g * xyz.y + z_.g * xyz.z), invGamma_),
+		num::pow(static_cast<RGBA::TValue>(x_.b * xyz.x + y_.b * xyz.y + z_.b * xyz.z), invGamma_),
+		static_cast<RGBA::TValue>(alpha));
 }
 
 
@@ -173,7 +173,7 @@ const TRgbSpacePtr RgbSpace::withGamma(TScalar gamma) const
 const TPyObjectPtr RgbSpace::reduce() const
 {
 	return python::makeTuple(
-		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->_lassPyGetClassDef()->type())), 
+		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->_lassPyGetClassDef()->type())),
 		python::makeTuple(), this->getState());
 }
 
@@ -218,7 +218,7 @@ void RgbSpace::setDefaultSpace(const TRgbSpacePtr& iDefault)
 std::string RgbSpace::doPyRepr() const
 {
 	std::ostringstream buffer;
-	buffer << "liar.RgbSpace(" << red_ << ", " << green_ << ", " << blue_ << ", " 
+	buffer << "liar.RgbSpace(" << red_ << ", " << green_ << ", " << blue_ << ", "
 		<< white_ << ", " << gamma_ << ")";
 	return buffer.str();
 }
