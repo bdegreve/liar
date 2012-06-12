@@ -5,6 +5,7 @@ find_path(OpenEXR_INCLUDE_DIR
 	HINTS ${_hints}
 	PATH_SUFFIXES include OpenEXR
 	)
+mark_as_advanced(OpenEXR_INCLUDE_DIR)
 
 if(NOT OpenEXR_DIR)
 	set(_root)
@@ -44,12 +45,14 @@ foreach(_comp ${_components})
 		HINTS ${_hints}
 		PATH_SUFFIXES lib "lib/${_subdir}"
 		)
+	mark_as_advanced(OpenEXR_${_comp}_LIBRARY)
 	if (MSVC_IDE)
 		find_library(OpenEXR_${_comp}_DEBUG_LIBRARY
 			NAMES ${_comp}
 			HINTS ${_hints}
 			PATH_SUFFIXES lib lib/Debug
 			)
+		mark_as_advanced(OpenEXR_${_comp}_DEBUG_LIBRARY)
 	endif()
 	if (WIN32)
 		find_file(OpenEXR_${_comp}_REDIST
@@ -62,6 +65,7 @@ foreach(_comp ${_components})
 			HINTS ${_hints}
 			PATH_SUFFIXES bin bin/Debug
 			)
+		mark_as_advanced(OpenEXR_${_comp}_REDIST OpenEXR_${_comp}_DEBUG_REDIST)
 	endif ()
 	
 	# add the found goodies to some lists.

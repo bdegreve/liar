@@ -9,7 +9,6 @@ endmacro()
 
 # jpeglib: http://www.ijg.org/
 find_package(JPEG)
-mark_as_advanced(CLEAR JPEG_INCLUDE_DIR JPEG_LIBRARY)
 if (JPEG_FOUND)
 	include_directories(
 		${JPEG_INCLUDE_DIR}
@@ -41,7 +40,6 @@ ENDIF()
 
 # libtiff: http://www.remotesensing.org/libtiff/
 find_package(TIFF)
-mark_as_advanced(CLEAR TIFF_INCLUDE_DIR TIFF_LIBRARY)
 if (TIFF_FOUND)
 	include_directories(
 		${TIFF_INCLUDE_DIR}

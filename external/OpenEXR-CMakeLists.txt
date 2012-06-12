@@ -9,151 +9,20 @@ if(BUILD_SHARED_LIBS)
     add_definitions(-DOPENEXR_DLL)
 endif()
 
-# Let's put the Deploy directory in roughly the same location the accompanying VS projects. 
-# That's next to this CMakeLists.txt
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    get_filename_component(_path "${CMAKE_SOURCE_DIR}/Deploy" ABSOLUTE)
+    get_filename_component(_path "${CMAKE_SOURCE_DIR}/../../Deploy" ABSOLUTE)
     set (CMAKE_INSTALL_PREFIX "${_path}" CACHE PATH "install prefix" FORCE)
 endif ()
 
-# Let's see if we can find the ilmbase-x.y and openexr-x.y source directories ...
-# The *.pc.in files themselves are not important.  They're just sentinels to find the exact directories.
-find_path(IlmBase_SRC_DIR 
-    IlmBase.pc.in
-    HINTS ilmbase* openexr*/ilmbase*
-    NO_DEFAULT_PATH
-    )    
-find_path(OpenEXR_SRC_DIR 
-    OpenEXR.pc.in
-    HINTS openexr* openexr*/openexr*
-    NO_DEFAULT_PATH
-    )    
-    
+include(IlmMacros.cmake)
+
+find_package(IlmBase)
+
 # we also need ZLIB.
 find_package(ZLIB)
-mark_as_advanced(CLEAR
-    ZLIB_INCLUDE_DIR
-    ZLIB_LIBRARY
+add_definitions(
+    -DZLIB_DLL
     )
-if (ZLIB_LIBRARY)
-    get_filename_component(ZLIB_LIBRARY_DIR "${ZLIB_LIBRARY}" PATH)
-endif()
-    
-macro(ILM_CREATE_DLL target srcdir)
-    if(BUILD_SHARED_LIBS)
-        string(TOUPPER "${target}" _TARGET)
-        set_target_properties("${target}"
-            PROPERTIES
-            LINK_FLAGS "/MAP /OPT:NOREF /OPT:ICF /INCREMENTAL:NO"
-            DEFINE_SYMBOL "${_TARGET}_EXPORTS"
-            )
-        set(_map "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${target}.map")
-        if (MSVC_IDE)
-            set(_libdirs "${CMAKE_CURRENT_BINARY_DIR}/${target}.dir/${CMAKE_CFG_INTDIR}")
-        else()
-            file(RELATIVE_PATH _relsrcdir "${CMAKE_CURRENT_SOURCE_DIR}" "${srcdir}")
-            set(_libdirs "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${target}.dir/${_relsrcdir}/${target}/")
-        endif()
-        list(APPEND _libdirs "${ZLIB_LIBRARY_DIR}")
-        set(_lib "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${target}.lib")
-        if (CMAKE_CL_64)
-            set(_machine "X64")
-        else()
-            set(_machine "X86")
-        endif()
-        add_custom_command(
-            TARGET "${target}"
-            POST_BUILD
-            COMMAND createDLL "-n${_map}" "-l${_libdirs}" "-i${_lib}" "-M${_machine}"
-            )
-    endif()
-endmacro()
-
-
-macro(ILM_INSTALL_TARGET target)
-    if (CMAKE_CONFIGURATION_TYPES)
-        set(_configs ${CMAKE_CONFIGURATION_TYPES})
-    else()
-        set(_configs "${CMAKE_BUILD_TYPE}")
-    endif()
-    foreach(_config ${_configs})
-        install(
-            TARGETS "${target}" 
-            EXPORT OpenEXR${_config}
-            RUNTIME DESTINATION "bin/${_config}" CONFIGURATIONS "${_config}"
-            LIBRARY DESTINATION "lib/${_config}" CONFIGURATIONS "${_config}"
-            ARCHIVE DESTINATION "lib/${_config}" CONFIGURATIONS "${_config}"            
-            )
-    endforeach()
-endmacro()
-
-
-macro(ILM_INSTALL_HEADERS headers)
-    install(
-        FILES ${headers} ${ARGN}
-        DESTINATION include
-        )
-endmacro()
-
-
-
-macro(_glob_sources_and_headers dirname srcs hdrs)
-    include_directories("${dirname}")
-    file(GLOB _srcs "${dirname}/*.cpp")
-    file(GLOB _hdrs "${dirname}/*.h")
-endmacro()
-
-
-macro(ILM_ADD_LIBRARY target srcdir)
-    _glob_sources_and_headers("${srcdir}/${target}" _srcs _hdrs)
-    add_library("${target}"
-        ${_srcs}
-        ${_hdrs}
-        )
-    ILM_CREATE_DLL("${target}" "${srcdir}")
-    ILM_INSTALL_TARGET("${target}")
-    ILM_INSTALL_HEADERS(${_hdrs})
-endmacro()
-
-
-macro(ILM_ADD_EXECUTABLE target srcdir)
-    _glob_sources_and_headers("${srcdir}/${target}" _srcs _hdrs)
-    add_executable("${target}"
-        ${_srcs}
-        ${_hdrs}
-        )
-    ILM_INSTALL_TARGET("${target}")
-endmacro()
- 
-
-macro(ILM_ADD_TEST libname srcdir)
-    set(_target "${libname}Test")
-    _glob_sources_and_headers("${srcdir}/${_target}" _srcs _hdrs)
-    add_executable("${_target}"
-        EXCLUDE_FROM_ALL
-        ${_srcs}
-        ${_hdrs}
-        )
-    target_link_libraries("${_target}"
-        ${libname}
-        )
-    add_custom_command(
-        TARGET "${_target}"
-        POST_BUILD
-        COMMAND "${_target}"
-        )
-endmacro()
-
-
-
-include_directories(
-    "${IlmBase_SRC_DIR}/config.windows"
-    "${OpenEXR_SRC_DIR}/config.windows"
-    "${IlmBase_SRC_DIR}/Half"
-    "${ZLIB_INCLUDE_DIRS}"
-    "${CMAKE_BINARY_DIR}"
-    )
-
 
 if (NOT CMAKE_CL_64)
     add_definitions(
@@ -161,93 +30,16 @@ if (NOT CMAKE_CL_64)
         )
 endif()
 
-
-# -- createDLL
-add_executable(createDLL
-    "${IlmBase_SRC_DIR}/vc/createDLL/createDLL.cpp"
-    "${IlmBase_SRC_DIR}/vc/createDLL/OptionParser.cpp"
-    "${IlmBase_SRC_DIR}/vc/createDLL/OptionParser.h"
-    )
-
-
-# -- Half
-add_executable(toFloat
-    "${IlmBase_SRC_DIR}/Half/toFloat.cpp"
-    )
-add_custom_command(
-    OUTPUT "${CMAKE_BINARY_DIR}/toFloat.h"
-    COMMAND toFloat > "${CMAKE_BINARY_DIR}/toFloat.h"
-    )
-add_executable(eLut
-    "${IlmBase_SRC_DIR}/Half/eLut.cpp"
-    )
-add_custom_command(
-    OUTPUT "${CMAKE_BINARY_DIR}/eLut.h"
-    COMMAND eLut > "${CMAKE_BINARY_DIR}/eLut.h"
-    )
-set(_srcs 
-    "${IlmBase_SRC_DIR}/Half/half.cpp"
-    )
-set(_hdrs 
-    "${IlmBase_SRC_DIR}/Half/half.h"
-    "${IlmBase_SRC_DIR}/Half/halfFunction.h"
-    "${IlmBase_SRC_DIR}/Half/halfLimits.h"
-    "${IlmBase_SRC_DIR}/config.windows/IlmBaseConfig.h"
-    "${CMAKE_BINARY_DIR}/toFloat.h"
-    "${CMAKE_BINARY_DIR}/eLut.h"
-    )
-add_library(Half
-    ${_srcs}
-    ${_hdrs}
-    )
-ILM_CREATE_DLL(Half "${IlmBase_SRC_DIR}")
-ILM_INSTALL_TARGET(Half)
-ILM_INSTALL_HEADERS(
-    ${_hdrs}
-    )
-ILM_ADD_TEST(Half "${IlmBase_SRC_DIR}")
-
-    
-# -- Iex
-ILM_ADD_LIBRARY(Iex "${IlmBase_SRC_DIR}")
-ILM_ADD_TEST(Iex "${IlmBase_SRC_DIR}")
-
-
-# --- IMath
-ILM_ADD_LIBRARY(IMath "${IlmBase_SRC_DIR}")
-target_link_libraries(IMath
-    Half
-    Iex
-    )
-ILM_ADD_TEST(IMath "${IlmBase_SRC_DIR}")
-
-# --- IlmThread
-ILM_ADD_LIBRARY(IlmThread "${IlmBase_SRC_DIR}")
-target_link_libraries(IlmThread
-    Iex
-    )
-    
-if (CMAKE_CONFIGURATION_TYPES)
-    set(_configs ${CMAKE_CONFIGURATION_TYPES})
-else()
-    set(_configs "${CMAKE_BUILD_TYPE}")
-endif()
-foreach(_config ${_configs})
-install(
-    EXPORT "OpenEXR${_config}"
-    DESTINATION cmake
-    CONFIGURATIONS "${_config}"
-    FILE OpenEXR.cmake
-    )
-endforeach()
-install(
-    FILES OpenEXRConfig.cmake 
-    DESTINATION cmake
+include_directories(
+    "config.windows"
+    "${IlmBase_INCLUDE_DIRS}"
+    "${ZLIB_INCLUDE_DIRS}"
+    "${CMAKE_BINARY_DIR}"
     )
 
 
 # --- IlmImf
-ILM_ADD_LIBRARY(IlmImf "${OpenEXR_SRC_DIR}")
+ILM_ADD_LIBRARY(IlmImf)
 target_link_libraries(IlmImf
     Half
     Iex
@@ -255,14 +47,14 @@ target_link_libraries(IlmImf
     IlmThread
     ${ZLIB_LIBRARIES}
     )
-ILM_ADD_TEST(IlmImf "${OpenEXR_SRC_DIR}")
+ILM_ADD_TEST(IlmImf)
 ILM_INSTALL_HEADERS(
-    "${OpenEXR_SRC_DIR}/config.windows/OpenEXRConfig.h"
+    "config.windows/OpenEXRConfig.h"
     )
 
 # --- exr*
 foreach (target exr2aces exrenvmap exrheader exrmakepreview exrmaketiled exrstdattr)
-    ILM_ADD_EXECUTABLE("${target}" "${OpenEXR_SRC_DIR}")
+    ILM_ADD_EXECUTABLE("${target}")
     target_link_libraries("${target}"
         IlmImf
         )

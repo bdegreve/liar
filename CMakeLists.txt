@@ -1,10 +1,11 @@
 project(liar)
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 list(APPEND CMAKE_MODULE_PATH "${liar_SOURCE_DIR}/cmake")
 
 set(CMAKE_DEBUG_POSTFIX _d)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${liar_BINARY_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${liar_BINARY_DIR}/bin")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${liar_BINARY_DIR}/lib")
 
 macro(eval)
 	foreach(arg ${ARGN})
@@ -24,7 +25,7 @@ foreach(_config ${_configs})
 	get_target_property(_location lass IMPORTED_LOCATION_${_CONFIG})
 	get_target_property(_location_python lass_python IMPORTED_LOCATION_${_CONFIG})
 	if (NOT _location OR NOT _location_python)
-		message(SEND_ERROR "can't find lass libraries for ${_config} build")
+		#message(SEND_ERROR "can't find lass libraries for ${_config} build")
 	endif()
 	install(
 		FILES "${_location}" "${_location_python}"
@@ -51,20 +52,24 @@ endif()
 
 if (Lass_PYTHON_EXECUTABLE AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	execute_process(
-		COMMAND "${Lass_PYTHON_EXECUTABLE}" -c "from distutils import sysconfig; print sysconfig.get_python_lib(True)" 
+		COMMAND "${Lass_PYTHON_EXECUTABLE}" -c "from distutils import sysconfig; print (sysconfig.get_python_lib(True))" 
 		OUTPUT_VARIABLE _python_site_packages
 		OUTPUT_STRIP_TRAILING_WHITESPACE
 	)
-	eval(_python_site_packages)
 	set (CMAKE_INSTALL_PREFIX "${_python_site_packages}/liar" CACHE PATH "liar install prefix" FORCE)
 endif ()
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}")
 
-if (MSVC_IDE)
-	option(BUILD_USING_MULTIPLE_PROCESSES ON)
+if (MSVC_IDE AND NOT MSVC_VERSION LESS 1400)
+	if (MSVC_VERSION LESS 1500)
+		set(_default_mp OFF)
+	else()
+		set(_default_mp ON)
+	endif()
+	option(BUILD_USING_MULTIPLE_PROCESSES "Enable parallel compilation within one project (/MP)" ${_default_mp})
 else()
 	set(BUILD_USING_MULTIPLE_PROCESSES OFF)
-endif()
+endif ()
 
 set(liar_CFLAGS)
 set(liar_LDFLAGS)
@@ -168,6 +173,7 @@ macro(add_liar_module name)
 	)
 endmacro()
 
+add_subdirectory(external)
 add_subdirectory(src)
 add_subdirectory(doc)
 

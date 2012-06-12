@@ -90,6 +90,7 @@ if (pixeltoaster_INCLUDE_DIR)
 			pixeltoaster_HAVE_DIRTYBOX 
 			"PixelToaster supports update with dirty box" 
 			${pixeltoaster_HAVE_RECTANGLE})
+		mark_as_advanced(pixeltoaster_HAVE_DIRTYBOX)
 	endif()
 endif()
 

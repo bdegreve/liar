@@ -1,0 +1,116 @@
+project(IlmBase)
+cmake_minimum_required(VERSION 2.8)
+
+# have an option to build static or dynamic libraries.
+# the exact name of this option seems to be important for CMake.
+# I always have it ON.  I suggest you do the same as the OFF state is not tested ...
+option(BUILD_SHARED_LIBS "build shared libraries" ON)
+if(BUILD_SHARED_LIBS)
+    add_definitions(-DOPENEXR_DLL)
+endif()
+
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    get_filename_component(_path "${CMAKE_SOURCE_DIR}/../../Deploy" ABSOLUTE)
+    set (CMAKE_INSTALL_PREFIX "${_path}" CACHE PATH "install prefix" FORCE)
+endif ()
+
+include(IlmMacros.cmake)
+
+if (NOT CMAKE_CL_64)
+    add_definitions(
+        /arch:SSE2
+        )
+endif()
+
+include_directories(
+    config.windows
+    Half
+    HalfTest
+    Iex
+    IexTest
+    IMath
+    IMathTest
+    "${CMAKE_BINARY_DIR}"
+    )
+
+# -- createDLL
+add_executable(createDLL
+    vc/createDLL/createDLL.cpp
+    vc/createDLL/OptionParser.cpp
+    vc/createDLL/OptionParser.h
+    )
+ILM_INSTALL_TARGET(createDLL)
+
+# -- Half
+add_executable(toFloat
+    Half/toFloat.cpp
+    )
+add_custom_command(
+    OUTPUT "${CMAKE_BINARY_DIR}/toFloat.h"
+    COMMAND toFloat > "${CMAKE_BINARY_DIR}/toFloat.h"
+    )
+add_executable(eLut
+    Half/eLut.cpp
+    )
+add_custom_command(
+    OUTPUT "${CMAKE_BINARY_DIR}/eLut.h"
+    COMMAND eLut > "${CMAKE_BINARY_DIR}/eLut.h"
+    )
+set(_srcs 
+    Half/half.cpp
+    )
+set(_hdrs 
+    Half/half.h
+    Half/halfFunction.h
+    Half/halfLimits.h
+    config.windows/IlmBaseConfig.h
+    "${CMAKE_BINARY_DIR}/toFloat.h"
+    "${CMAKE_BINARY_DIR}/eLut.h"
+    )
+add_library(Half 
+    ${_srcs}
+    ${_hdrs}
+    )
+ILM_CREATE_DLL(Half)
+ILM_INSTALL_TARGET(Half)
+ILM_INSTALL_HEADERS(
+    ${_hdrs}
+    )
+ILM_ADD_TEST(Half)
+
+    
+# -- Iex
+ILM_ADD_LIBRARY(Iex)
+ILM_ADD_TEST(Iex)
+
+
+# --- IMath
+ILM_ADD_LIBRARY(IMath)
+target_link_libraries(IMath
+    Iex
+    )
+ILM_ADD_TEST(IMath)
+
+# --- IlmThread
+ILM_ADD_LIBRARY(IlmThread)
+target_link_libraries(IlmThread
+    Iex
+    )
+    
+if (CMAKE_CONFIGURATION_TYPES)
+    set(_configs ${CMAKE_CONFIGURATION_TYPES})
+else()
+    set(_configs "${CMAKE_BUILD_TYPE}")
+endif()
+foreach(_config ${_configs})
+install(
+    EXPORT IlmBase${_config}
+    DESTINATION cmake
+    CONFIGURATIONS ${_config}
+    FILE IlmBase.cmake
+    )
+endforeach()
+install(
+    FILES IlmBaseConfig.cmake
+    DESTINATION cmake
+    )
