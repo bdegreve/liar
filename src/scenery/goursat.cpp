@@ -32,76 +32,178 @@ namespace scenery
 PY_DECLARE_CLASS_DOC(Goursat, "implicit distance field thing")
 PY_CLASS_CONSTRUCTOR_0(Goursat)
 PY_CLASS_CONSTRUCTOR_3(Goursat, TScalar, TScalar, TScalar)
+PY_CLASS_MEMBER_RW(Goursat, a, setA)
+PY_CLASS_MEMBER_RW(Goursat, b, setB)
+PY_CLASS_MEMBER_RW(Goursat, c, setC)
+PY_CLASS_MEMBER_RW(Goursat, useSphereTracing, setSphereTracing)
 
 Goursat::Goursat():
     a_(0),
     b_(-5),
-    c_(11.8f)
+    c_(11.8f),
+    useSphereTracing_(true)
 {
 }
 
 Goursat::Goursat(TScalar a, TScalar b, TScalar c):
     a_(a),
     b_(b),
-    c_(c)
+    c_(c),
+    useSphereTracing_(true)
 {
 }
+
+
+TScalar Goursat::a() const
+{
+    return a_;
+}
+
+
+TScalar Goursat::b() const
+{
+    return b_;
+}
+
+
+TScalar Goursat::c() const
+{
+    return c_;
+}
+
+
+void Goursat::setA(TScalar a)
+{
+    a_ = a;
+}
+
+
+void Goursat::setB(TScalar b)
+{
+    b_ = b;
+}
+
+
+void Goursat::setC(TScalar c)
+{
+    c_ = c;
+}
+
+
+bool Goursat::useSphereTracing() const
+{
+    return useSphereTracing_;
+}
+
+
+void Goursat::setSphereTracing(bool enabled)
+{
+    useSphereTracing_ = enabled;
+}
+
 
 void Goursat::doIntersect(const Sample&, const BoundedRay& ray, Intersection& result) const
 {
     TAabb3D bound = boundingBox();
-    TScalar tMin, tMax;
-    if (prim::intersect(bound, ray.unboundedRay(), tMin, ray.nearLimit()) == prim::rNone)
-    {
-        result = Intersection::empty();
-        return;
-    }
-    if (prim::intersect(bound, ray.unboundedRay(), tMax, tMin) == prim::rNone)
-    {
-        tMax = tMin;
-        tMin = ray.nearLimit();
-    }
-    if (tMin >= ray.farLimit())
-    {
-        result = Intersection::empty();
-        return;
-    }
+
+	TScalar tMin;
+	if (prim::intersect(bound, ray.unboundedRay(), tMin, ray.nearLimit()) == prim::rNone)
+	{
+		result = Intersection::empty();
+		return;
+	}
+	TScalar tMax;
+	if (prim::intersect(bound, ray.unboundedRay(), tMax, tMin) == prim::rNone)
+	{
+		tMax = tMin;
+		tMin = ray.nearLimit();
+	}
+	if (tMin > ray.farLimit())
+	{
+		result = Intersection::empty();
+		return;
+	}
     tMax = std::min(tMax, ray.farLimit());
     LASS_ASSERT(tMin >= ray.nearLimit() && tMax > tMin);
 
     const TScalar tStep = .1;
     const TScalar epsilon = 2 * liar::tolerance;
-    TScalar t1 = tMin;
-    TScalar v1 = potential(ray.point(t1));
-    while (t1 < tMax)
+
+    if (useSphereTracing_)
     {
-        TScalar t2 = t1 + tStep;
-        TScalar v2 = potential(ray.point(t2));
-        if (v1 * v2 <= 0)
+        TScalar t1 = tMin;
+        TPoint3D p1 = ray.point(t1);
+        TScalar v1 = potential(p1);
+        while (t1 < tMax)
         {
-            while (num::abs(t2 - t1) > epsilon)
+            const TScalar g1 = gradient(p1).norm();
+            const TScalar dt = g1 > 0 ? (std::abs(v1 / g1) / 2) : tStep;
+            TScalar t2 = t1 + std::max(dt, tStep);
+            TPoint3D p2 = ray.point(t2);
+            TScalar v2 = potential(p2);
+            if (v1 * v2 <= 0)
             {
-                const TScalar t3 = t2 - v2 * (t2 - t1) / (v2 - v1);
-                t1 = t2;
-                t2 = t3;
-                v1 = v2;
-                v2 = potential(ray.point(t2));
+                while (num::abs(t2 - t1) > epsilon)
+                {
+                    const TScalar t3 = t2 - v2 * (t2 - t1) / (v2 - v1);
+                    t1 = t2;
+                    t2 = t3;
+                    v1 = v2;
+                    v2 = potential(ray.point(t2));
+                }
+                const TScalar t = (t1 + t2) / 2;
+                if (t > tMin && t < tMax)
+                {
+                    const SolidEvent event = (t2 - t1) * (v2 - v1) < 0 ? seEntering : seLeaving;
+                    result = Intersection(this, t, event);
+                }
+                else
+                {
+                    result = Intersection::empty();
+                }
+                return;
             }
-            const TScalar t = (t1 + t2) / 2;
-            if (t > tMin && t < tMax)
-            {
-                const SolidEvent event = (t2 - t1) * (v2 - v1) < 0 ? seEntering : seLeaving;
-                result = Intersection(this, t, event);
-            }
-            else
-            {
-                result = Intersection::empty();
-            }
-            return;
+            t1 = t2;
+            p1 = p2;
         }
-        t1 = t2;
+        result = Intersection::empty();
+
     }
-    result = Intersection::empty();
+    else
+    {
+        TScalar t1 = tMin;
+        TScalar v1 = potential(ray.point(t1));
+        while (t1 < tMax)
+        {
+            TScalar t2 = t1 + tStep;
+            TScalar v2 = potential(ray.point(t2));
+            if (v1 * v2 <= 0)
+            {
+                while (num::abs(t2 - t1) > epsilon)
+                {
+                    const TScalar t3 = t2 - v2 * (t2 - t1) / (v2 - v1);
+                    t1 = t2;
+                    t2 = t3;
+                    v1 = v2;
+                    v2 = potential(ray.point(t2));
+                }
+                const TScalar t = (t1 + t2) / 2;
+                if (t > tMin && t < tMax)
+                {
+                    const SolidEvent event = (t2 - t1) * (v2 - v1) < 0 ? seEntering : seLeaving;
+                    result = Intersection(this, t, event);
+                }
+                else
+                {
+                    result = Intersection::empty();
+                }
+                return;
+            }
+            t1 = t2;
+        }
+        result = Intersection::empty();
+    }
+
 }
 
 
@@ -124,7 +226,7 @@ void Goursat::doLocalContext(const Sample&, const BoundedRay& ray, const Interse
 	result.setPoint(point);
 
     const TVector3D g = gradient(point);
-    result.setNormal(g.normal());
+    result.setNormal(-g.normal());
 
     result.setUv(TPoint2D());
 	result.setDPoint_dU(TVector3D());
@@ -144,7 +246,7 @@ bool Goursat::doContains(const Sample&, const TPoint3D& point) const
 
 const TAabb3D Goursat::doBoundingBox() const
 {
-    TScalar s = 2.3;
+    TScalar s = 10; // 2.27;
 	return TAabb3D(TPoint3D(-s, -s, -s), TPoint3D(s, s, s));
 }
 

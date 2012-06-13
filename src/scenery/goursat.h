@@ -46,6 +46,16 @@ public:
     Goursat();
     Goursat(TScalar a, TScalar b, TScalar c);
 
+    TScalar a() const;
+    TScalar b() const;
+    TScalar c() const;
+    void setA(TScalar a);
+    void setB(TScalar b);
+    void setC(TScalar c);
+
+    bool useSphereTracing() const;
+    void setSphereTracing(bool enabled);
+
 private:
 
 	LASS_UTIL_VISITOR_DO_ACCEPT
@@ -67,6 +77,7 @@ private:
     TScalar a_;
     TScalar b_;
     TScalar c_;
+    bool useSphereTracing_;
 };
 
 }
