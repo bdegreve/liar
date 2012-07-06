@@ -8,6 +8,7 @@
 
 from liar import *
 from liar.tools import cornell_box, scripting
+import math
 
 #if False:
 #	width = 800
@@ -25,14 +26,24 @@ from liar.tools import cornell_box, scripting
 #	raytrace_direct = True
 #	gather_rays = 9
 
-options = scripting.renderOptions(
-    width=400,
-    height=400,
-    super_sampling=1,
-    global_size = 20000,
-    caustics_quality=1.,
-    gather_rays = 36
-    )
+if True:
+    options = scripting.renderOptions(
+        width=800,
+        height=800,
+        super_sampling=16,
+        global_size = 200000,
+        caustics_quality=1.,
+        gather_rays = 81
+        )
+else:
+    options = scripting.renderOptions(
+        width=400,
+        height=400,
+        super_sampling=1,
+        global_size = 20000,
+        caustics_quality=1.,
+        gather_rays = 25
+        )
 
 raytrace_direct = True
 
@@ -53,15 +64,21 @@ goursat.shader = shaders.AshikhminShirley()
 goursat.shader.diffuse = textures.Constant(rgb(0.1, 0.1, 0.9))
 goursat.shader.specular = textures.Constant(0.05)
 goursat.shader.specularPowerU = goursat.shader.specularPowerV = textures.Constant(1000)
-objects.append(goursat)
+
+goursat = scenery.MotionRotation(goursat, (0, 0, 1), math.radians(15), math.radians(5))
+#goursat = scenery.MotionTranslation(goursat, (0, 0, 0), (0, 1, 0))
+
+y = 2.26
+objects.append(scenery.Translation(goursat, (2.78, 2.26, 2.795)))
 
 
 engine = RenderEngine()
 engine.tracer = photonMapper
 engine.sampler = samplers.Stratifier((options.width, options.height), options.super_sampling)
-engine.sampler.jittered = False
-engine.scene = cornell_box.scene()
+engine.sampler.jittered = True
+engine.scene = scenery.List(objects)
 engine.camera = cornell_box.camera()
+engine.camera.shutterTime = 1
 engine.target = scripting.makeRenderTarget(options.width, options.height, "photon_mapper_classic.hdr", "Classic Cornell box with PhotonMapper")
 engine.render()
 

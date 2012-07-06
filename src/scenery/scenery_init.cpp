@@ -37,6 +37,7 @@
 #include "light_sky.h"
 #include "light_spot.h"
 #include "list.h"
+#include "motion_rotation.h"
 #include "motion_translation.h"
 #include "object_trees.h"
 #include "parallelogram.h"
@@ -70,6 +71,7 @@ PY_MODULE_CLASS(scenery, LightPoint)
 PY_MODULE_CLASS(scenery, LightSky)
 PY_MODULE_CLASS(scenery, LightSpot)
 PY_MODULE_CLASS(scenery, List)
+PY_MODULE_CLASS(scenery, MotionRotation)
 PY_MODULE_CLASS(scenery, MotionTranslation)
 PY_MODULE_CLASS(scenery, OctTree)
 PY_MODULE_CLASS(scenery, Parallelogram)
