@@ -2,7 +2,6 @@ project(liar)
 cmake_minimum_required(VERSION 2.8)
 list(APPEND CMAKE_MODULE_PATH "${liar_SOURCE_DIR}/cmake")
 
-set(CMAKE_DEBUG_POSTFIX _d)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${liar_BINARY_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${liar_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${liar_BINARY_DIR}/lib")
@@ -33,6 +32,9 @@ foreach(_config ${_configs})
 		CONFIGURATIONS ${_config}
 		)
 endforeach()
+if (Lass_PYTHON_DEBUG_LIBRARY)
+	set(CMAKE_DEBUG_POSTFIX _d)
+endif()
 
 set (CMAKE_INSTALL_DEBUG_LIBRARIES 1)
 set (CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP 1)
