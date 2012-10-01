@@ -45,7 +45,7 @@ class LIAR_SCENERY_DLL Goursat: public SceneObject
 public:
     Goursat();
     Goursat(TScalar a, TScalar b, TScalar c);
-
+    
     TScalar a() const;
     TScalar b() const;
     TScalar c() const;
@@ -53,30 +53,39 @@ public:
     void setB(TScalar b);
     void setC(TScalar c);
 
+    const TPoint3D& parameters() const;
+    void setParameters(const TPoint3D& parameters);
+    const TVector3D& parameterSpeed() const;
+    void setParameterSpeed(const TVector3D& speed);
+    TTime timeOffset() const;
+    void setTimeOffset(TTime timeOffset);
+
     bool useSphereTracing() const;
     void setSphereTracing(bool enabled);
 
 private:
 
-	LASS_UTIL_VISITOR_DO_ACCEPT
+    LASS_UTIL_VISITOR_DO_ACCEPT
 
-	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
-	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
-	void doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const;
-	bool doContains(const Sample& sample, const TPoint3D& point) const;
-	const TAabb3D doBoundingBox() const;
-	TScalar doArea() const;
-	TScalar doArea(const TVector3D& normal) const;
+    void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
+    bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
+    void doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const;
+    bool doContains(const Sample& sample, const TPoint3D& point) const;
+    const TAabb3D doBoundingBox() const;
+    TScalar doArea() const;
+    TScalar doArea(const TVector3D& normal) const;
+    bool doHasMotion() const;
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+    const TPyObjectPtr doGetState() const;
+    void doSetState(const TPyObjectPtr& state);
 
-    TScalar potential(const TPoint3D& point) const;
-    TVector3D gradient(const TPoint3D& point) const;
+    TPoint3D abc(TTime t) const;
+    TScalar potential(const TPoint3D& point, const TPoint3D& abc) const;
+    TVector3D gradient(const TPoint3D& point, const TPoint3D& abc) const;
 
-    TScalar a_;
-    TScalar b_;
-    TScalar c_;
+    TPoint3D abc0_;
+    TVector3D dAbc_;
+    TTime t0_;
     bool useSphereTracing_;
 };
 
