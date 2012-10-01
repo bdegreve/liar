@@ -85,9 +85,7 @@ const XYZ RgbSpace::convert(const prim::ColorRGBA& rgb) const
 const XYZ RgbSpace::convert(const prim::ColorRGBA& rgb, TScalar& alpha) const
 {
 	alpha = rgb.a;
-	return r_ * num::pow(rgb.r, gamma_)
-		+ g_ * num::pow(rgb.g, gamma_)
-		+ b_ * num::pow(rgb.b, gamma_);
+	return r_ * num::pow(static_cast<TScalar>(rgb.r), gamma_) + g_ * num::pow(static_cast<TScalar>(rgb.g), gamma_) + b_ * num::pow(static_cast<TScalar>(rgb.b), gamma_);
 }
 
 
@@ -163,11 +161,17 @@ const TRgbSpacePtr RgbSpace::withGamma(TScalar gamma) const
 {
 	if (gamma == gamma_)
 	{
-		return python::fromNakedToSharedPtrCast<RgbSpace>(const_cast<RgbSpace*>(this));
+		return TRgbSpacePtr(new RgbSpace(*this));
 	}
 	return TRgbSpacePtr(new RgbSpace(red_, green_, blue_, white_, gamma));
 }
 
+
+
+const TRgbSpacePtr RgbSpace::linearSpace() const
+{
+	return withGamma(1);
+}
 
 
 const TPyObjectPtr RgbSpace::reduce() const
