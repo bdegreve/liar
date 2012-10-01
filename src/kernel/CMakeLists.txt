@@ -34,6 +34,11 @@ list_remove_regex(libkernel_SRCS "kernel_init.cpp$")
 add_library(libkernel SHARED 
 	${libkernel_SRCS}
 	)
+set_target_properties(
+	libkernel
+	PROPERTIES 
+	COMPILE_FLAGS "${liar_CFLAGS}"
+	)
 if(APPLE)
 	set_target_properties(
 		libkernel
