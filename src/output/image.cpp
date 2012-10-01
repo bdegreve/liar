@@ -32,7 +32,7 @@ namespace output
 {
 
 PY_DECLARE_CLASS_DOC(Image, "simple image render target");
-PY_CLASS_CONSTRUCTOR_2(Image, std::string, const TResolution2D&)
+PY_CLASS_CONSTRUCTOR_2(Image, std::wstring, const TResolution2D&)
 PY_CLASS_METHOD(Image, save)
 PY_CLASS_MEMBER_RW(Image, filename, setFilename)
 PY_CLASS_MEMBER_RW(Image, rgbSpace, setRgbSpace)
@@ -45,7 +45,7 @@ PY_CLASS_MEMBER_RW(Image, options, setOptions)
 
 // --- public --------------------------------------------------------------------------------------
 
-Image::Image(const std::string& filename, const TResolution2D& resolution):
+Image::Image(const std::wstring& filename, const TResolution2D& resolution):
 	filename_(filename),
 	options_(""),
 	resolution_(resolution),
@@ -130,7 +130,7 @@ void Image::save()
 }
 
 
-const std::string& Image::filename() const
+const std::wstring& Image::filename() const
 {
 	return filename_;
 }
@@ -171,7 +171,7 @@ const std::string& Image::options() const
 }
 
 
-void Image::setFilename(const std::string& filename)
+void Image::setFilename(const std::wstring& filename)
 {
 	filename_ = filename;
 }

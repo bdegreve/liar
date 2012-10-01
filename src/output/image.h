@@ -46,12 +46,12 @@ class LIAR_OUTPUT_DLL Image: public RenderTarget
 	PY_HEADER(RenderTarget)
 public:
 
-	Image(const std::string& filename, const TResolution2D& resolution);
+	Image(const std::wstring& filename, const TResolution2D& resolution);
 	~Image();
 
 	void save();
 
-	const std::string& filename() const;
+	const std::wstring& filename() const;
 	const TRgbSpacePtr& rgbSpace() const;
 	const std::string& options() const;
 	TScalar exposure() const;
@@ -59,7 +59,7 @@ public:
 	TScalar gain() const;
 	TScalar gamma() const;
 
-	void setFilename(const std::string& filename);
+	void setFilename(const std::wstring& filename);
 	void setRgbSpace(const TRgbSpacePtr& rgbSpace);
 	void setExposure(TScalar exposure);
 	void setFStops(TScalar fStops);
@@ -80,7 +80,7 @@ private:
 	TRenderBuffer renderBuffer_;
 	TWeightBuffer totalWeight_;
 	TWeightBuffer alphaBuffer_;
-	std::string filename_;
+	std::wstring filename_;
 	std::string options_;
 	util::CriticalSection renderLock_;
 	util::CriticalSection saveLock_;

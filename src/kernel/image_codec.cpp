@@ -39,9 +39,9 @@ PY_DECLARE_CLASS_DOC(ImageCodecLass, "Lass based image codec")
 PY_CLASS_CONSTRUCTOR_0(ImageCodecLass)
 LASS_EXECUTE_BEFORE_MAIN_EX(ImageCodecLass,
 	TImageCodecMap& map = imageCodecs();
-	map["tga"] = map["targa"] = TImageCodecPtr(new ImageCodecLass);
-	map["lass"] = map["hdr"] = map["pic"] = map["rgbe"] = TImageCodecPtr(new ImageCodecLass(false));
-	map["igi"] = TImageCodecPtr(new ImageCodecLass(false, CIEXYZ));
+	map[L"tga"] = map[L"targa"] = TImageCodecPtr(new ImageCodecLass);
+	map[L"lass"] = map[L"hdr"] = map[L"pic"] = map[L"rgbe"] = TImageCodecPtr(new ImageCodecLass(false));
+	map[L"igi"] = TImageCodecPtr(new ImageCodecLass(false, CIEXYZ));
 )
 
 // --- ImageCodec ----------------------------------------------------------------------------------
@@ -59,19 +59,19 @@ TImageCodecMap& imageCodecs()
 
 
 
-const TImageCodecPtr& imageCodec(const std::string& extension)
+const TImageCodecPtr& imageCodec(const std::wstring& extension)
 {
 	const TImageCodecMap& codecs = imageCodecs();
 	const TImageCodecMap::const_iterator candidate = codecs.find(stde::tolower(extension));
 	if (candidate == codecs.end())
 	{
-		LASS_THROW("No image codec registered for the extension '" << extension << "'");
+		LASS_THROW("No image codec registered for the extension '" << util::wcharToUtf8(extension) << "'");
 	}
 	return candidate->second;
 }
 
 
-void transcodeImage(const std::string& source, const std::string& dest, const TRgbSpacePtr& sourceSpace, const TRgbSpacePtr& destSpace)
+void transcodeImage(const std::wstring& source, const std::wstring& dest, const TRgbSpacePtr& sourceSpace, const TRgbSpacePtr& destSpace)
 {
 	ImageReader reader(source, sourceSpace);
 	const size_t nx = reader.resolution().x;
@@ -94,11 +94,11 @@ void transcodeImage(const std::string& source, const std::string& dest, const TR
 // --- ImageReader ---------------------------------------------------------------------------------
 
 ImageReader::ImageReader(
-		const std::string& filename, const TRgbSpacePtr& rgbSpace, const std::string& options):
-	codec_(imageCodec(io::fileExtension(filename))),
+		const std::wstring& path, const TRgbSpacePtr& rgbSpace, const std::string& options):
+	codec_(imageCodec(io::fileExtension(path))),
 	handle_(0)
 {
-	handle_ = codec_->open(filename, rgbSpace, options);
+	handle_ = codec_->open(path, rgbSpace, options);
 }
 
 ImageReader::~ImageReader()
@@ -122,12 +122,12 @@ void ImageReader::readFull(XYZ* xyz, TScalar* alpha) const
 // --- ImageWriter ---------------------------------------------------------------------------------
 
 ImageWriter::ImageWriter(
-		const std::string& filename, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, 
+		const std::wstring& path, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, 
 		const std::string& options):
-	codec_(imageCodec(io::fileExtension(filename))),
+	codec_(imageCodec(io::fileExtension(path))),
 	handle_(0)
 {
-	handle_ = codec_->create(filename, resolution, rgbSpace, options);
+	handle_ = codec_->create(path, resolution, rgbSpace, options);
 }
 
 ImageWriter::~ImageWriter()
@@ -156,7 +156,7 @@ namespace impl
 	{
 		io::Image image;
 		TRgbSpacePtr rgbSpace;
-		std::string filename;
+		std::wstring path;
 		size_t y;
 		bool saveOnClose;
 		LassImage(): y(0) {}
@@ -188,7 +188,7 @@ TRgbSpacePtr ImageCodecLass::selectRgbSpace(const TRgbSpacePtr& customSpace) con
 
 
 
-ImageCodec::TImageHandle ImageCodecLass::doCreate(const std::string& filename, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string&) const
+ImageCodec::TImageHandle ImageCodecLass::doCreate(const std::wstring& path, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string&) const
 {
 	typedef io::Image::TChromaticity TChromaticity;
 
@@ -199,7 +199,7 @@ ImageCodec::TImageHandle ImageCodecLass::doCreate(const std::string& filename, c
 	{
 		pimpl->rgbSpace = pimpl->rgbSpace->withGamma(1);
 	}
-	pimpl->filename = filename;
+	pimpl->path = path;
 	pimpl->saveOnClose = true;
 	RgbSpace& space = *pimpl->rgbSpace;
 	LASS_COUT << "RGB create: " << space.red() << " " << space.green() << " " << space.blue() << " " << space.white() << "\n";
@@ -214,10 +214,10 @@ ImageCodec::TImageHandle ImageCodecLass::doCreate(const std::string& filename, c
 
 
 
-ImageCodec::TImageHandle ImageCodecLass::doOpen(const std::string& filename, const TRgbSpacePtr& rgbSpace, const std::string&) const
+ImageCodec::TImageHandle ImageCodecLass::doOpen(const std::wstring& path, const TRgbSpacePtr& rgbSpace, const std::string&) const
 {
 	std::auto_ptr<impl::LassImage> pimpl(new impl::LassImage);
-	pimpl->image.open(filename);
+	pimpl->image.open(path);
 	pimpl->rgbSpace = rgbSpace;
 	if (!pimpl->rgbSpace)
 	{
@@ -235,7 +235,7 @@ ImageCodec::TImageHandle ImageCodecLass::doOpen(const std::string& filename, con
 	}
 	RgbSpace& space = *pimpl->rgbSpace;
 	LASS_COUT << "RGB open: " << space.red() << " " << space.green() << " " << space.blue() << " " << space.white() << "\n";
-	pimpl->filename = filename;
+	pimpl->path = path;
 	pimpl->saveOnClose = false;
 	return pimpl.release();
 }
@@ -247,7 +247,7 @@ void ImageCodecLass::doClose(TImageHandle handle) const
 	impl::LassImage* impl = static_cast<impl::LassImage*>(handle);
 	if (impl->saveOnClose)
 	{
-		impl->image.save(impl->filename);
+		impl->image.save(impl->path);
 	}
 	delete impl;
 }

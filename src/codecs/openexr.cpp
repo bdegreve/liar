@@ -30,11 +30,37 @@
 
 #include <ImfRgbaFile.h>
 #include <ImfStandardAttributes.h>
+#include <ImfIO.h>
+#include <lass/io/binary_i_file.h>
+#include <lass/io/binary_o_file.h>
 
 namespace liar
 {
 namespace openexr
 {
+
+class LassIStream: public Imf::IStream
+{
+public:
+	LassIStream(const std::wstring& path): Imf::IStream(util::wcharToUtf8(path).c_str()), file_(path) {}
+	bool read(char c[/*n*/], int n) { file_.read(c, n); return true; }
+	Imf::Int64 tellg() { return file_.tellg(); }
+	void seekg(Imf::Int64 pos) { file_.seekg( num::numCast<long>(pos) ); }
+	void clear() {}
+private:
+	lass::io::BinaryIFile file_;
+};
+
+class LassOStream: public Imf::OStream
+{
+public:
+	LassOStream(const std::wstring& path): Imf::OStream(util::wcharToUtf8(path).c_str()), file_(path) {}
+	void write(const char c[], int n) { file_.write(c, n); }
+	Imf::Int64 tellp() { return file_.tellp(); }
+	void seekp(Imf::Int64 pos) { file_.seekp( num::numCast<long>(pos) ); }
+private:
+	lass::io::BinaryOFile file_;
+};
 
 struct Handle
 {
@@ -42,6 +68,8 @@ struct Handle
 	kernel::TRgbSpacePtr rgbSpace;
 	TResolution2D resolution;
 	TLine line;
+	util::ScopedPtr<LassIStream> istream;
+	util::ScopedPtr<LassOStream> ostream;
 	util::ScopedPtr<Imf::RgbaInputFile> input;
 	util::ScopedPtr<Imf::RgbaOutputFile> output;
 	int y;
@@ -65,7 +93,7 @@ inline TPoint2D V2fToPoint2D(const Imath::V2f& p)
 class ImageCodecOpenEXR: public kernel::ImageCodec
 {
 private:
-	TImageHandle doCreate(const std::string& filename, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
+	TImageHandle doCreate(const std::wstring& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
 	{
 		std::auto_ptr<Handle> pimpl(new Handle(resolution, rgbSpace));
 		pimpl->line.resize(resolution.x);
@@ -77,19 +105,22 @@ private:
 		chromaticities.white = point2DToV2f(pimpl->rgbSpace->white());
 		header.insert("chromaticities", Imf::ChromaticitiesAttribute(chromaticities));
 		header.insert("comments", Imf::StringAttribute("rendered by " LIAR_NAME_FULL ", " LIAR_WEBSITE));
-		pimpl->output.reset(new Imf::RgbaOutputFile(filename.c_str(), header, Imf::WRITE_RGBA, 0));
+		pimpl->ostream.reset(new LassOStream(path));
+		pimpl->output.reset(new Imf::RgbaOutputFile(*pimpl->ostream, header, Imf::WRITE_RGBA, 0));
 		return pimpl.release();
 	}
 
-	TImageHandle doOpen(const std::string& filename, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
+	TImageHandle doOpen(const std::wstring& path, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
 	{
-		util::ScopedPtr<Imf::RgbaInputFile> input(new Imf::RgbaInputFile(filename.c_str(), 0));
+		util::ScopedPtr<LassIStream> istream(new LassIStream(path));
+		util::ScopedPtr<Imf::RgbaInputFile> input(new Imf::RgbaInputFile(*istream, 0));
 		const Imath::Box2i& dispWin = input->header().displayWindow();
 		const Imath::Box2i& dataWin = input->header().dataWindow();
 		const TResolution2D resolution(dispWin.max.x - dispWin.min.x + 1, dispWin.max.y - dispWin.min.y + 1);
 		const kernel::TRgbSpacePtr space = determineRgbSpaceForOpenFile(input->header(), rgbSpace);
 		std::auto_ptr<Handle> pimpl(new Handle(resolution, space));
 		pimpl->line.resize(dataWin.max.x - dataWin.min.x + 1);
+		pimpl->istream.swap(istream);
 		pimpl->input.swap(input);
 		pimpl->y = dispWin.min.y;
 		return pimpl.release();
@@ -191,7 +222,7 @@ private:
 void postInject(PyObject*)
 {
 	liar::kernel::TImageCodecMap& map = liar::kernel::imageCodecs();
-	map["exr"] = liar::kernel::TImageCodecPtr(new liar::openexr::ImageCodecOpenEXR);
+	map[L"exr"] = liar::kernel::TImageCodecPtr(new liar::openexr::ImageCodecOpenEXR);
 	LASS_COUT << "liar.codecs.openexr imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n";
 }
 

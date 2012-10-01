@@ -48,7 +48,7 @@ namespace jpeglib
 class SourceMgr: public jpeg_source_mgr
 {
 public:
-	SourceMgr(const std::string& path):
+	SourceMgr(const std::wstring& path):
 		file_(path),
 		buffer_(bufferLength)
 	{
@@ -120,7 +120,7 @@ private:
 class DestMgr: public jpeg_destination_mgr
 {
 public:
-	DestMgr(const std::string& path):
+	DestMgr(const std::wstring& path):
 		file_(path),
 		buffer_(bufferLength)
 	{
@@ -187,7 +187,7 @@ struct ReadHandle: Handle
 {
 	jpeg_decompress_struct cinfo;
 	SourceMgr src;
-	ReadHandle(const std::string& path, const kernel::TRgbSpacePtr& rgbSpace):
+	ReadHandle(const std::wstring& path, const kernel::TRgbSpacePtr& rgbSpace):
 		Handle(rgbSpace),
 		src(path)
 	{
@@ -212,7 +212,7 @@ struct WriteHandle: Handle
 {
 	jpeg_compress_struct cinfo;
 	DestMgr dest;
-	WriteHandle(const std::string& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string& options):
+	WriteHandle(const std::wstring& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string& options):
 		Handle(rgbSpace),
 		dest(path)
 	{
@@ -247,12 +247,12 @@ struct WriteHandle: Handle
 class ImageCodecJpeg: public kernel::ImageCodec
 {
 private:
-	TImageHandle doCreate(const std::string& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string& options) const
+	TImageHandle doCreate(const std::wstring& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string& options) const
 	{
 		return new WriteHandle(path, resolution, rgbSpace, options);
 	}
 
-	TImageHandle doOpen(const std::string& path, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
+	TImageHandle doOpen(const std::wstring& path, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
 	{
 		return new ReadHandle(path, rgbSpace);
 	}
@@ -320,7 +320,7 @@ private:
 void postInject(PyObject*)
 {
 	liar::kernel::TImageCodecMap& map = liar::kernel::imageCodecs();
-	map["jpg"] = map["jpeg"] = liar::kernel::TImageCodecPtr(new liar::jpeglib::ImageCodecJpeg);
+	map[L"jpg"] = map[L"jpeg"] = liar::kernel::TImageCodecPtr(new liar::jpeglib::ImageCodecJpeg);
 	LASS_COUT << "liar.codecs.jpeglib imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n";
 }
 

@@ -46,15 +46,15 @@ class LIAR_TEXTURES_DLL Image: public Texture
 	PY_HEADER(Texture)
 public:
 
-	explicit Image(const std::string& filename);
-	Image(const std::string& filename, const TRgbSpacePtr& rgbSpace);
-	Image(const std::string& filename, const std::string& antiAliasing, 
+	explicit Image(const std::wstring& filename);
+	Image(const std::wstring& filename, const TRgbSpacePtr& rgbSpace);
+	Image(const std::wstring& filename, const std::string& antiAliasing, 
 		const std::string& mipMapping);
-	Image(const std::string& filename, const std::string& antiAliasing, 
+	Image(const std::wstring& filename, const std::string& antiAliasing, 
 		const std::string& mipMapping, const TRgbSpacePtr& rgbSpace);
 
-	void loadFile(const std::string& filename);
-	void loadFile(const std::string& filename, const TRgbSpacePtr& rgbSpace);
+	void loadFile(const std::wstring& filename);
+	void loadFile(const std::wstring& filename, const TRgbSpacePtr& rgbSpace);
 
 	const TResolution2D& resolution() const;
 
@@ -138,7 +138,7 @@ private:
 	static TAntiAliasingDictionary makeAntiAliasingDictionary();
 	static TMipMappingDictionary makeMipMappingDictionary();
 
-	std::string filename_;
+	std::wstring filename_;
 	TRgbSpacePtr rgbSpace_;
 	TPixels image_;
 	TResolution2D resolution_;
