@@ -35,6 +35,7 @@
 #include "output_common.h"
 #include "../kernel/render_target.h"
 #include "../kernel/rgb_space.h"
+#include <lass/util/dictionary.h>
 
 namespace liar
 {
@@ -43,53 +44,87 @@ namespace output
 
 class LIAR_OUTPUT_DLL Image: public RenderTarget
 {
-	PY_HEADER(RenderTarget)
+    PY_HEADER(RenderTarget)
 public:
 
-	Image(const std::wstring& filename, const TResolution2D& resolution);
-	~Image();
+    Image(const std::wstring& filename, const TResolution2D& resolution);
+    ~Image();
 
-	void save();
+    void save();
 
-	const std::wstring& filename() const;
-	const TRgbSpacePtr& rgbSpace() const;
-	const std::string& options() const;
-	TScalar exposure() const;
-	TScalar fStops() const;
-	TScalar gain() const;
-	TScalar gamma() const;
+    const std::wstring& path() const;
+    const std::string& options() const;
+    const TRgbSpacePtr& rgbSpace() const;
+    const std::string toneMapping() const;
+    TScalar exposureStops() const;
+    TScalar exposureCorrectionStops() const;
+    bool autoExposure() const;
+    TScalar middleGrey() const;
 
-	void setFilename(const std::wstring& filename);
-	void setRgbSpace(const TRgbSpacePtr& rgbSpace);
-	void setExposure(TScalar exposure);
-	void setFStops(TScalar fStops);
-	void setGamma(TScalar gammaExponent);
-	void setGain(TScalar gain);
-	void setOptions(const std::string& options);
+    void setPath(const std::wstring& path);
+    void setOptions(const std::string& options);
+    void setRgbSpace(const TRgbSpacePtr& rgbSpace);
+    void setToneMapping(const std::string& mode);
+    void setExposureStops(TScalar fStops);
+    void setExposureCorrectionStops(TScalar stops);
+    void setAutoExposure(bool enable = true);
+    void setMiddleGrey(TScalar grey);
+
+protected:
+
+    typedef std::vector<XYZ> TRenderBuffer;
+    typedef std::vector<TScalar> TWeightBuffer;
+    typedef prim::Aabb2D<size_t> TDirtyBox;
+ 
+    void tonemap(const TRenderBuffer &source, const TWeightBuffer &weight, TRenderBuffer &dest, const TDirtyBox& box, TScalar gain);
+    TScalar sceneGain() const;
 
 private:
 
-	typedef std::vector<XYZ> TRenderBuffer;
-	typedef std::vector<TScalar> TWeightBuffer;
 
-	const TResolution2D doResolution() const;
-	void doBeginRender();
-	void doWriteRender(const OutputSample* first, const OutputSample* last);
-	void doEndRender();
+    enum ToneMapping
+    {
+        tmLinear = 0,
+        tmCompressY,
+        tmCompressRGB,
+        tmReinhard2002Y,
+        tmReinhard2002RGB,
+        tmExponentialY,
+        tmExponentialRGB,
+        tmDuikerY,
+        tmDuikerRGB,
+        numToneMapping
+    };
+    typedef util::Dictionary<std::string, ToneMapping> TToneMappingDictionary;
 
-	TRenderBuffer renderBuffer_;
-	TWeightBuffer totalWeight_;
-	TWeightBuffer alphaBuffer_;
-	std::wstring filename_;
-	std::string options_;
-	util::CriticalSection renderLock_;
-	util::CriticalSection saveLock_;
-	TResolution2D resolution_;
-	TRgbSpacePtr rgbSpace_;
-	TScalar exposure_;
-	TScalar gain_;
-	bool isQuiting_;
-	bool isSaved_;
+    const TResolution2D doResolution() const;
+    void doBeginRender();
+    void doWriteRender(const OutputSample* first, const OutputSample* last);
+    void doEndRender();
+ 
+    TScalar maxSceneLuminance(const TRenderBuffer &scene, const TWeightBuffer &weight) const;
+
+    static TToneMappingDictionary makeToneMappingDictionary();
+
+    TRenderBuffer renderBuffer_;
+    TWeightBuffer totalWeight_;
+    TWeightBuffer alphaBuffer_;
+    std::wstring path_;
+    std::string options_;
+    mutable util::CriticalSection renderLock_;
+    util::CriticalSection saveLock_;
+    TResolution2D resolution_;
+    TRgbSpacePtr rgbSpace_;
+    TRgbSpacePtr linearSpace_;
+    ToneMapping toneMapping_;
+    mutable TScalar exposureStops_;
+    TScalar exposureCorrectionStops_;
+    TScalar middleGrey_;
+    bool autoExposure_;
+    mutable bool isDirtyAutoExposure_;
+    bool isSaved_;
+    
+    static TToneMappingDictionary toneMappingDictionary_;
 };
 
 
