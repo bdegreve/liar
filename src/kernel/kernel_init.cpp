@@ -35,6 +35,7 @@
 #include "scene_light.h"
 #include "scene_object.h"
 #include "shader.h"
+#include "spline.h"
 #include "ray_tracer.h"
 #include "render_engine.h"
 #include "render_target.h"
@@ -81,6 +82,9 @@ PY_MODULE_CLASS(kernel, liar::kernel::RayTracer)
 PY_MODULE_CLASS(kernel, liar::kernel::RenderEngine)
 PY_MODULE_CLASS(kernel, liar::kernel::RenderTarget)
 PY_MODULE_CLASS(kernel, liar::kernel::Sampler)
+PY_MODULE_CLASS(kernel, liar::kernel::ScalarSpline)
+	PY_MODULE_CLASS(kernel, liar::kernel::LinearScalarSpline)
+	PY_MODULE_CLASS(kernel, liar::kernel::CubicScalarSpline)
 PY_MODULE_CLASS(kernel, liar::kernel::SceneObject)
 	PY_MODULE_CLASS(kernel, liar::kernel::SceneLight)
 PY_MODULE_CLASS(kernel, liar::kernel::Shader)
