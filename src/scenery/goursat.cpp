@@ -179,7 +179,18 @@ void Goursat::doIntersect(const Sample& sample, const BoundedRay& ray, Intersect
         while (t1 < tMax)
         {
             const TScalar g1 = gradient(p1, abc).norm();
-            const TScalar dt = g1 > 0 ? (std::abs(v1 / g1) / 2) : tStep;
+            const TScalar dt = g1 > 0 ? (std::abs(v1 / g1) / 2) : 0;
+            /*
+            TScalar t2 = t1 + dt;
+            TPoint3D p2 = ray.point(t2);
+            TScalar v2 = potential(p2, abc);
+            if ( dt < tolerance )
+            {
+                const SolidEvent event = v2 <= v1 ? seEntering : seLeaving;
+                result = Intersection(this, t2, event);
+                return;
+            }
+            /*/
             TScalar t2 = t1 + std::max(dt, tStep);
             TPoint3D p2 = ray.point(t2);
             TScalar v2 = potential(p2, abc);
@@ -211,8 +222,10 @@ void Goursat::doIntersect(const Sample& sample, const BoundedRay& ray, Intersect
                 }
                 return;
             }
+            /**/
             t1 = t2;
             p1 = p2;
+            v1 = v2;
         }
         result = Intersection::empty();
 
@@ -300,7 +313,7 @@ bool Goursat::doContains(const Sample& sample, const TPoint3D& point) const
 
 const TAabb3D Goursat::doBoundingBox() const
 {
-    TScalar s = 10; // 2.27;
+    TScalar s = 100; // 2.27;
     return TAabb3D(TPoint3D(-s, -s, -s), TPoint3D(s, s, s));
 }
 
@@ -357,14 +370,26 @@ inline TScalar Goursat::potential(const TPoint3D& point, const TPoint3D& abc) co
 
 inline TVector3D Goursat::gradient(const TPoint3D& point, const TPoint3D& abc) const
 {
+    //*
     const TScalar x2 = num::sqr(point.x);
     const TScalar y2 = num::sqr(point.y);
     const TScalar z2 = num::sqr(point.z);
+    const TScalar alpha = 4 * abc.x * (x2 + y2 + z2) + 2 * abc.y;
     return TVector3D(
-        (2 * x2 + abc.x * 2 * (x2 + y2 + z2) + abc.y) * 2 * point.x,
-        (2 * y2 + abc.x * 2 * (x2 + y2 + z2) + abc.y) * 2 * point.y,
-        (2 * z2 + abc.x * 2 * (x2 + y2 + z2) + abc.y) * 2 * point.z
+        (4 * x2 + alpha) * point.x,
+        (4 * y2 + alpha) * point.y,
+        (4 * z2 + alpha) * point.z
         );
+    /*/
+    const TScalar dt = 0.1;
+    const TVector3D dx(dt, 0, 0);
+    const TVector3D dy(0, dt, 0);
+    const TVector3D dz(0, 0, dt);
+    return TVector3D(
+        potential( point + dx, abc ) - potential( point - dx, abc ),
+        potential( point + dy, abc ) - potential( point - dy, abc ),
+        potential( point + dz, abc ) - potential( point - dz, abc ) ) / ( 2 * dt );
+    /**/
 }
 
 }
