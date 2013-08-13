@@ -70,10 +70,12 @@ PY_DECLARE_CLASS_DOC(Display, "Render target in a window"
 PY_CLASS_CONSTRUCTOR_2(Display, const std::string&, const TResolution2D&)
 PY_CLASS_MEMBER_R(Display, title)
 PY_CLASS_MEMBER_RW(Display, rgbSpace, setRgbSpace)
+PY_CLASS_MEMBER_RW(Display, toneMapping, setToneMapping)
 PY_CLASS_MEMBER_RW(Display, exposure, setExposure)
 PY_CLASS_MEMBER_RW(Display, exposureCorrection, setExposureCorrection)
-PY_CLASS_MEMBER_RW(Display, autoExposure, setAutoExposure)
 PY_CLASS_MEMBER_RW(Display, middleGrey, setMiddleGrey);
+PY_CLASS_MEMBER_RW(Display, autoExposure, setAutoExposure)
+PY_CLASS_MEMBER_RW(Display, autoUpdate, setAutoUpdate)
 PY_CLASS_MEMBER_RW(Display, showHistogram, setShowHistogram);
 PY_CLASS_METHOD(Display, testGammut)
 PY_CLASS_STATIC_CONST(Display, "TM_LINEAR", "linear");
@@ -95,16 +97,21 @@ Display::TToneMappingDictionary Display::toneMappingDictionary_ = Display::makeT
 Display::Display(const std::string& title, const TResolution2D& resolution):
 	title_(title),
 	resolution_(resolution),
+	currentResolution_(0, 0),
 	totalLogSceneLuminance_(0),
 	maxSceneLuminance_(0),
 	sceneLuminanceCoverage_(0),
 	middleGrey_(.184f),
+	exposure_(-100),
+	exposureCorrection_(-100),
 	toneMapping_(tmExponentialRGB),
 	autoExposure_(true),
 	showHistogram_(false),
 	wasShowingHistogram_(false),
 	refreshTitle_(false),
-	isCanceling_(false)
+	isCanceling_(false),
+	isClosing_(false),
+	autoUpdate_(true)
 {
 	setRgbSpace(RgbSpace::defaultSpace());
 	setExposure(0);
@@ -161,6 +168,13 @@ TScalar Display::exposureCorrection() const
 bool Display::autoExposure() const
 {
 	return autoExposure_;
+}
+
+
+
+bool Display::autoUpdate() const
+{
+	return autoUpdate_;
 }
 
 
@@ -267,6 +281,13 @@ void Display::setAutoExposure(bool enable)
 
 
 
+void Display::setAutoUpdate(bool enable)
+{
+	autoUpdate_ = enable;
+}
+
+
+
 void Display::setShowHistogram(bool enable)
 {
 	showHistogram_ = enable;
@@ -365,27 +386,33 @@ const TResolution2D Display::doResolution() const
 
 void Display::doBeginRender()
 {
-	// TODO: don't need to reset display loop if it already has the right resolution.
-
-	if (displayLoop_)
+	if (displayLoop_ && currentResolution_ != resolution_)
 	{
-		cancel();
-		displayLoop_->join();
+		close();
 	}	
-	
 	const size_t n = resolution_.x * resolution_.y;
-	renderBuffer_.clear();
-	renderBuffer_.resize(n);
-	displayBuffer_.clear();
-	displayBuffer_.resize(n);
-	totalWeight_.clear();
-	totalWeight_.resize(n, 0);
-		renderDirtyBox_.clear();
-	displayDirtyBox_.clear();
 	
+	LASS_LOCK(renderBufferLock_)
+	{
+		renderBuffer_.assign(n, XYZ());
+		totalWeight_.assign(n, 0);
+
+		totalLogSceneLuminance_ = 0;
+		maxSceneLuminance_ = 0;
+		sceneLuminanceCoverage_ = 0;
+
+		renderDirtyBox_.clear();
+		allTimeDirtyBox_.clear();
+	}
+	
+	if (!displayLoop_)
+	{
+		displayBuffer_.assign(n, PixelToaster::FloatingPointPixel());
 		displayLoop_.reset(
 			util::threadFun(util::makeCallback(this, &Display::displayLoop), util::threadJoinable));
 		displayLoop_->run();
+		currentResolution_ = resolution_;
+	}
 }
 
 
@@ -436,6 +463,8 @@ void Display::doWriteRender(const OutputSample* first, const OutputSample* last)
 
 void Display::doEndRender()
 {
+	copyToDisplayBuffer();
+	signal_.signal();
 }
 
 
@@ -502,6 +531,32 @@ void Display::onKeyDown(PixelToaster::DisplayInterface& display, PixelToaster::K
 
 
 
+void Display::onMouseButtonDown(PixelToaster::DisplayInterface& display, PixelToaster::Mouse mouse)
+{
+    if ( mouse.buttons.left )
+    {
+        beginDrag_.x = mouse.x / resolution_.x;
+        beginDrag_.y = mouse.y / resolution_.y;
+    }
+    else
+    {
+        beginDrag_.x = TNumTraits::qNaN;
+    }
+}
+
+
+
+void Display::onMouseButtonUp(PixelToaster::DisplayInterface& display, PixelToaster::Mouse mouse)
+{
+    if ( !num::isNaN( beginDrag_.x ) )
+    {
+        TPoint2D endDrag((mouse.x + 1) / resolution_.x, (mouse.y + 1) / resolution_.y);
+        LASS_CERR << "\nselected area: (" << beginDrag_ << ", " << endDrag << ")\n";
+    }
+}
+
+
+
 bool Display::onClose(PixelToaster::DisplayInterface&)
 {
 	cancel();
@@ -512,7 +567,15 @@ bool Display::onClose(PixelToaster::DisplayInterface&)
 void Display::cancel()
 {
 	isCanceling_ = true;
+	isClosing_ = true;
+}
+
+
+void Display::close()
+{
+	isClosing_ = true;
 	signal_.signal();
+	displayLoop_->join();
 }
 
 
@@ -556,6 +619,7 @@ const std::string Display::makeTitle() const
 void Display::displayLoop()
 {
 	isCanceling_ = false;
+	isClosing_ = false;
 
 	PixelToaster::Display display;
 	const int width = num::numCast<int>(resolution_.x);
@@ -565,9 +629,12 @@ void Display::displayLoop()
 	
 	LASS_ENFORCE(display.update(displayBuffer_)); // full update of initial buffer
 
-	while (!isCanceling_)
+	while (!isClosing_)
 	{
+		if (autoUpdate_)
+		{
 			copyToDisplayBuffer();
+		}
 
 		if (refreshTitle_)
 		{
@@ -597,23 +664,23 @@ void Display::displayLoop()
 
 namespace
 {
-	inline double filmic(double x)
+	inline float filmic(float x)
 	{
-		x = std::max(0., x - 0.004);
-		const double y = (x * (6.2 * x + .5)) / (x * (6.2 * x + 1.7) + 0.06); 
-		return num::pow(y, 2.2); // undo gamma
+		x = std::max(0.f, x - 0.004f);
+		const float y = (x * (6.2f * x + .5f)) / (x * (6.2f * x + 1.7f) + 0.06f); 
+		return num::pow(y, 2.2f); // undo gamma
 	}
-	inline double invFilmic(double y)
+	inline float invFilmic(float y)
 	{
-		y = std::max(0., std::min(y, 0.99999));
-		y = num::pow(y, 1. / 2.2); // apply gamma
+		y = std::max(0.f, std::min(y, 0.99999f));
+		y = num::pow(y, 1.f / 2.2f); // apply gamma
 		// a*x*x + b*y + c == 0
-		const double a = 6.2f* y - 6.2;
-		const double b = 1.7 * y - .5;
-		const double c = .06 * y;
-		const double D = b * b - 4 * a * c;
-		const double x = (-b - num::sqrt(D)) / (2 * a);
-		return x + 0.004;
+		const float a = 6.2f * y - 6.2f;
+		const float b = 1.7f * y - .5f;
+		const float c = .06f * y;
+		const float D = b * b - 4 * a * c;
+		const float x = (-b - num::sqrt(D)) / (2 * a);
+		return x + 0.004f;
 	}
 }
 

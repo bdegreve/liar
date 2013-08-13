@@ -1,6 +1,6 @@
 _MAX_DISPLAY_WIDTH, _MAX_DISPLAY_HEIGHT = 1500, 1000 # is there a may to figure this out dynamically?
 
-def makeRenderTarget(width, height, filename=None, title=None, display=True, fStops=None, rgbSpace=None):
+def makeRenderTarget(width, height, filename=None, title=None, display=True, fStops=None, rgbSpace=None, toneMapping=None):
     '''
     Width and height are mandatory.
     If supported, a Display will be made with a maximum size of 800 pixels
@@ -14,7 +14,9 @@ def makeRenderTarget(width, height, filename=None, title=None, display=True, fSt
         image = output.Image(filename, (width, height))
         if not fStops is None:
             image.exposureStops = fStops
-        image.rgbSpace = rgbSpace
+            image.autoExposure = False
+        image.toneMapping = toneMapping or "linear"
+        image.rgbSpace = rgbSpace or sRGB
         targets.append(image)
     
     if display:
@@ -30,9 +32,10 @@ def makeRenderTarget(width, height, filename=None, title=None, display=True, fSt
                 resolution = width, height
             display = output.Display(title or filename or "", resolution)
             display.rgbSpace = rgbSpace or sRGB
-            #if not fStops is None:
-            #    display.autoExposure = False
-            #    display.exposure = fStops
+            if not fStops is None:
+                display.autoExposure = False
+                display.exposure = fStops
+            display.toneMapping = toneMapping or "linear"
             targets.append(display)
     
     assert targets, "Failed to create any kind of render target"

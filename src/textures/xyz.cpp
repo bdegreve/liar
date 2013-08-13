@@ -108,10 +108,8 @@ void Xyz::doSetState(const TPyObjectPtr& state)
 
 const XYZ Xyz::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
-	const TScalar x = num::abs(context.normal().x);
-	const TScalar y = num::abs(context.normal().y);
-	const TScalar z = num::abs(context.normal().z);
-	return x * a_->lookUp(sample, context) + y * b_->lookUp(sample, context) + z * c_->lookUp(sample, context);
+	const TPoint3D& p = context.point();
+	return p.x * a_->lookUp(sample, context) + p.y * b_->lookUp(sample, context) + p.z * c_->lookUp(sample, context);
 }
 
 

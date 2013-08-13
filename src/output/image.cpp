@@ -60,23 +60,23 @@ Image::TToneMappingDictionary Image::toneMappingDictionary_ = Image::makeToneMap
  
 namespace
 {
-    inline double filmic(double x)
+	inline float filmic(float x)
 	{
-        x = std::max(0., x - 0.004);
-        const double y = (x * (6.2 * x + .5)) / (x * (6.2 * x + 1.7) + 0.06); 
-        return num::pow(y, 2.2); // undo gamma
+		x = std::max(0.f, x - 0.004f);
+		const float y = (x * (6.2f * x + .5f)) / (x * (6.2f * x + 1.7f) + 0.06f); 
+		return num::pow(y, 2.2f); // undo gamma
 	}
-    inline double invFilmic(double y)
+	inline float invFilmic(float y)
 	{
-        y = std::max(0., std::min(y, 0.99999));
-        y = num::pow(y, 1. / 2.2); // apply gamma
+		y = std::max(0.f, std::min(y, 0.99999f));
+		y = num::pow(y, 1.f / 2.2f); // apply gamma
 		// a*x*x + b*y + c == 0
-        const double a = 6.2f* y - 6.2;
-        const double b = 1.7 * y - .5;
-        const double c = .06 * y;
-        const double D = b * b - 4 * a * c;
-        const double x = (-b - num::sqrt(D)) / (2 * a);
-        return x + 0.004;
+		const float a = 6.2f * y - 6.2f;
+		const float b = 1.7f * y - .5f;
+		const float c = .06f * y;
+		const float D = b * b - 4 * a * c;
+		const float x = (-b - num::sqrt(D)) / (2 * a);
+		return x + 0.004f;
 	}
 }
 
@@ -507,13 +507,15 @@ const TResolution2D Image::doResolution() const
 
 void Image::doBeginRender()
 {
+    LASS_LOCK(renderLock_)
+    {
         const size_t n = resolution_.x * resolution_.y;
-    renderBuffer_.clear();
-    renderBuffer_.resize(n);
-    totalWeight_.clear();
-    totalWeight_.resize(n);
-    alphaBuffer_.clear();
-    alphaBuffer_.resize(n);
+        renderBuffer_.assign(n, XYZ());
+        totalWeight_.assign(n, 0);
+        alphaBuffer_.assign(n, 0);
+        isDirtyAutoExposure_ = true;
+        isSaved_ = false;
+    }
 }
 
 

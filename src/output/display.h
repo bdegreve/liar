@@ -71,6 +71,7 @@ public:
 	bool autoExposure() const;
 	TScalar middleGrey() const;
 	bool showHistogram() const;
+	bool autoUpdate() const;
 
 	void setRgbSpace(const TRgbSpacePtr& rgbSpace);
 	void setToneMapping(const std::string& mode);
@@ -79,6 +80,7 @@ public:
 	void setAutoExposure(bool enable = true);
 	void setMiddleGrey(TScalar grey);
 	void setShowHistogram(bool enable = true);
+	void setAutoUpdate(bool enable = true);
 
 	void testGammut();
 
@@ -111,6 +113,8 @@ private:
 	bool doIsCanceling() const;
 	
 	void onKeyDown(PixelToaster::DisplayInterface& display, PixelToaster::Key key);
+	void onMouseButtonDown(PixelToaster::DisplayInterface& display, PixelToaster::Mouse );
+	void onMouseButtonUp(PixelToaster::DisplayInterface& display, PixelToaster::Mouse );
 	bool onClose(PixelToaster::DisplayInterface& display);
 
 	void displayLoop();
@@ -118,6 +122,7 @@ private:
 	void tonemap(const TDirtyBox& box);
 	void histogram();
 	void cancel();
+	void close();
 	const std::string makeTitle() const;
 
 	static TToneMappingDictionary makeToneMappingDictionary();
@@ -134,6 +139,7 @@ private:
 	TDirtyBox displayDirtyBox_;
 	TDirtyBox allTimeDirtyBox_;
 	TResolution2D resolution_;
+	TResolution2D currentResolution_;
 	TRgbSpacePtr rgbSpace_;
 	TScalar totalLogSceneLuminance_;
 	TScalar maxSceneLuminance_;
@@ -147,7 +153,10 @@ private:
 	bool showHistogram_;
 	bool wasShowingHistogram_;
 	bool refreshTitle_;
+	bool autoUpdate_;
 	volatile bool isCanceling_;
+	volatile bool isClosing_;
+	TPoint2D beginDrag_;
 
 	static TToneMappingDictionary toneMappingDictionary_;
 };
