@@ -107,3 +107,23 @@ if(OpenEXR_BUILD)
         endforeach()
     endif()
 endif()
+
+option(LCMS2_BUILD OFF)
+if(LCMS2_BUILD)
+    set(LCMS2_URL "http://downloads.sourceforge.net/project/lcms/lcms/2.4/lcms2-2.4.zip" CACHE STRING "URL to LCMS2 library source code")
+    ExternalProject_Add(
+        external_lcms2
+        PREFIX lcms2
+        URL "${LCMS2_URL}"
+        PATCH_COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/Lcms2-CMakeList.txt" "./CMakeLists.txt"
+        CMAKE_CACHE_ARGS 
+            "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}"
+            "-DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>"
+        INSTALL_COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --config RelWithDebInfo --target install
+        )
+    set(_lcms2dir "${CMAKE_CURRENT_BINARY_DIR}/lcms2")
+    _set_if_empty(LCMS2_INCLUDE_DIR "${_lcms2dir}/include" PATH)
+    _set_if_empty(LCMS2_LIBRARY "${_lcms2dir}/lib/RelWithDebInfo/lcms2.lib" FILEPATH)
+    _set_if_empty(LCMS2_REDIST "${_lcms2dir}/bin/RelWithDebInfo/lcms2.dll" FILEPATH)
+    mark_as_advanced(LCMS2_URL LCMS2_INCLUDE_DIR LCMS2_LIBRARY LCMS2_REDIST)
+endif()

@@ -193,7 +193,6 @@ TIccSpacePtr IccSpace::withGamma(TScalar gamma) const
 
 const TPyObjectPtr IccSpace::reduce() const
 {
-	cmsSaveProfileToMem(pimpl_->iccProfile(), 0, &size);
 	return python::makeTuple(
 		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->_lassPyGetClassDef()->type())), 
 		python::makeTuple(), this->getState());

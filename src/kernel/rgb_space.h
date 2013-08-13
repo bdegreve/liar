@@ -31,8 +31,6 @@
 
 #include "kernel_common.h"
 #include "xyz.h"
-//#include "spectrum_format.h"
-#include "xyz.h"
 
 namespace liar
 {
@@ -42,6 +40,13 @@ namespace kernel
 class RgbSpace;
 typedef python::PyObjectPtr<RgbSpace>::Type TRgbSpacePtr;
 
+#ifdef LIAR_HAVE_LCMS2_H
+namespace impl
+{
+	class IccSpaceImpl;
+}
+#endif
+
 class LIAR_KERNEL_DLL RgbSpace: public python::PyObjectPlus
 {
 	PY_HEADER(python::PyObjectPlus)
@@ -49,12 +54,19 @@ public:
 
 	typedef prim::ColorRGBA RGBA;
 
-	RgbSpace(const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, const TPoint2D& white, TScalar gamma = 1);
+	RgbSpace(const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, const TPoint2D& white, RGBA::TValue gamma = 1);
 	
-	const XYZ convert(const prim::ColorRGBA& rgb) const;
-	const XYZ convert(const prim::ColorRGBA& rgb, TScalar& alpha) const;
-	const prim::ColorRGBA convert(const XYZ& xyz) const;
-	const prim::ColorRGBA convert(const XYZ& xyz, TScalar alpha) const;
+	const XYZ convert(const RGBA& rgb) const;
+	const XYZ convert(const RGBA& rgb, TScalar& alpha) const;
+	const RGBA convert(const XYZ& xyz) const;
+	const RGBA convert(const XYZ& xyz, TScalar alpha) const;
+
+	const XYZ linearConvert(const RGBA& rgba) const;
+	const XYZ linearConvert(const RGBA& rgba, TScalar& alpha) const;
+	const RGBA linearConvert(const XYZ& xyz) const;
+	const RGBA linearConvert(const XYZ& xyz, TScalar alpha) const;
+	const RGBA toGamma(const RGBA& rgba) const;
+	const RGBA toLinear(const RGBA& rgba) const;
 
 	const TPoint2D& red() const;
 	const TPoint2D& green() const;
@@ -65,7 +77,6 @@ public:
 	bool operator==(const RgbSpace& other) const;
 	bool operator!=(const RgbSpace& other) const;
 
-	const TRgbSpacePtr withGamma(TScalar gamma) const;
 	const TRgbSpacePtr linearSpace() const;
 
 	const TPyObjectPtr reduce() const;
@@ -79,30 +90,34 @@ private:
 
 	std::string doPyRepr() const;
 
-	void init(const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, const TPoint2D& white, TScalar gamma);
+	void init(const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, const TPoint2D& white, RGBA::TValue gamma);
 	void enforceChromaticity(const TPoint2D& c, const char* name) const;
 
-	prim::ColorRGBA x_;
-	prim::ColorRGBA y_;
-	prim::ColorRGBA z_;
+#ifdef LIAR_HAVE_LCMS2_H
+	impl::IccSpaceImpl* icc_;
+#else:
+	RGBA x_;
+	RGBA y_;
+	RGBA z_;
 	XYZ r_;
 	XYZ g_;
 	XYZ b_;
+#endif
 	TPoint2D red_;
 	TPoint2D green_;
 	TPoint2D blue_;
 	TPoint2D white_;
-	TScalar gamma_;
+	RGBA::TValue gamma_;
 	RGBA::TValue invGamma_;
 
 	static TRgbSpacePtr defaultSpace_;
 };
 
 
-LIAR_KERNEL_DLL XYZ rgb(const prim::ColorRGBA& rgb);
-LIAR_KERNEL_DLL XYZ rgb(const prim::ColorRGBA& rgb, const TRgbSpacePtr& rgbSpace);
-LIAR_KERNEL_DLL XYZ rgb(prim::ColorRGBA::TValue red, prim::ColorRGBA::TValue green, prim::ColorRGBA::TValue blue);
-LIAR_KERNEL_DLL XYZ rgb(prim::ColorRGBA::TValue red, prim::ColorRGBA::TValue green, prim::ColorRGBA::TValue blue, const TRgbSpacePtr& rgbSpace);
+LIAR_KERNEL_DLL XYZ rgb(const RgbSpace::RGBA& rgb);
+LIAR_KERNEL_DLL XYZ rgb(const RgbSpace::RGBA& rgb, const TRgbSpacePtr& rgbSpace);
+LIAR_KERNEL_DLL XYZ rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue);
+LIAR_KERNEL_DLL XYZ rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue, const TRgbSpacePtr& rgbSpace);
 
 /*
 LIAR_KERNEL_DLL XYZ rgb(const prim::ColorRGBA& rgb, 

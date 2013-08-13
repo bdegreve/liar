@@ -25,6 +25,11 @@
 #include "rgb_space.h"
 #include <lass/num/impl/matrix_solve.h>
 
+#ifdef LIAR_HAVE_LCMS2_H
+#	define CMS_DLL
+#	include <lcms2.h>
+#endif
+
 namespace liar
 {
 namespace kernel
@@ -34,7 +39,7 @@ PY_DECLARE_CLASS_DOC(RgbSpace,
 	"XYZ-RGB convertor\n"
 	"RgbSpace((x_red, y_red), (x_green, y_green), (x_blue, y_blue), (x_white, y_white), gamma)"
 	);
-PY_CLASS_CONSTRUCTOR_5(RgbSpace, const TPoint2D&, const TPoint2D&, const TPoint2D&, const TPoint2D&, TScalar);
+PY_CLASS_CONSTRUCTOR_5(RgbSpace, const TPoint2D&, const TPoint2D&, const TPoint2D&, const TPoint2D&, RgbSpace::RGBA::TValue);
 PY_CLASS_MEMBER_R_DOC(RgbSpace, red, "(x_red, y_red)");
 PY_CLASS_MEMBER_R_DOC(RgbSpace, green, "(x_green, y_green)");
 PY_CLASS_MEMBER_R_DOC(RgbSpace, blue, "(x_blue, y_blue)");
@@ -63,11 +68,64 @@ PY_CLASS_STATIC_METHOD_DOC(RgbSpace, setDefaultSpace, "defaultSpace(RgbSpace) ->
 
 TRgbSpacePtr RgbSpace::defaultSpace_ = sRGB;
 
+#ifdef LIAR_HAVE_LCMS2_H
 
+namespace impl
+{
+
+template < typename T, typename R, R (CMSEXPORT *destructor) (T) >
+class AutoHandle
+{
+public:
+	AutoHandle(T handle = 0): handle_(handle) {}
+	AutoHandle(AutoHandle& other): handle_(other.handle_) { other.handle_ = 0; }
+	~AutoHandle() { if (handle_) destructor(handle_); }
+	AutoHandle& operator=(AutoHandle other) { swap(other); return *this; } // by copy
+	void swap(AutoHandle& other) { std::swap(handle_, other.handle_); }
+	T operator*() const { return handle_; }
+private:
+	T handle_;
+};
+
+typedef AutoHandle<cmsHPROFILE, cmsBool, cmsCloseProfile> AutoHPROFILE;
+typedef AutoHandle<cmsHTRANSFORM, void, cmsDeleteTransform> AutoHTRANSFORM;
+typedef AutoHandle<cmsToneCurve*, void, cmsFreeToneCurve> AutoToneCurve;
+
+template <typename T, cmsUInt32Number flt, cmsUInt32Number dbl> struct SelectFormat;
+template <cmsUInt32Number flt, cmsUInt32Number dbl> struct SelectFormat<float, flt, dbl> { enum { value=flt }; };
+template <cmsUInt32Number flt, cmsUInt32Number dbl> struct SelectFormat<double, flt, dbl> { enum { value=dbl }; };
+
+class IccSpaceImpl: public util::NonCopyable
+{
+public:
+	IccSpaceImpl(AutoHPROFILE& iccProfile): iccProfile_(iccProfile)
+	{
+		cmsUInt32Number flags = cmsFLAGS_NOCACHE;
+		AutoHPROFILE xyzProfile(cmsCreateXYZProfile());
+		toXYZtransform_ = cmsCreateTransform(*iccProfile_, rgbFormat_, *xyzProfile, xyzFormat_, INTENT_PERCEPTUAL, flags);
+		fromXYZtransform_ = cmsCreateTransform(*xyzProfile, xyzFormat_, *iccProfile_, rgbFormat_, INTENT_PERCEPTUAL, flags);
+	}
+	cmsHPROFILE iccProfile() const { return *iccProfile_; }
+	cmsHTRANSFORM toXYZtransform() const { return *toXYZtransform_; }
+	cmsHTRANSFORM fromXYZtransform() const { return *fromXYZtransform_; }
+private:
+	enum
+	{
+		rgbFormat_ = SelectFormat<prim::ColorRGBA::TValue, TYPE_RGB_FLT, TYPE_RGB_DBL>::value,
+		xyzFormat_ = SelectFormat<XYZ::TValue, TYPE_XYZ_FLT, TYPE_XYZ_DBL>::value,
+	};
+	AutoHPROFILE iccProfile_;
+	AutoHTRANSFORM toXYZtransform_;
+	AutoHTRANSFORM fromXYZtransform_;
+};
+
+}
+
+#endif
 
 RgbSpace::RgbSpace(
 		const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue,
-		const TPoint2D& white, TScalar gamma)
+		const TPoint2D& white, RGBA::TValue gamma)
 {
 	init(red, green, blue, white, gamma);
 }
@@ -82,10 +140,16 @@ const XYZ RgbSpace::convert(const prim::ColorRGBA& rgb) const
 
 
 
-const XYZ RgbSpace::convert(const prim::ColorRGBA& rgb, TScalar& alpha) const
+const XYZ RgbSpace::convert(const prim::ColorRGBA& rgba, TScalar& alpha) const
 {
-	alpha = rgb.a;
-	return r_ * num::pow(static_cast<TScalar>(rgb.r), gamma_) + g_ * num::pow(static_cast<TScalar>(rgb.g), gamma_) + b_ * num::pow(static_cast<TScalar>(rgb.b), gamma_);
+#ifdef LIAR_HAVE_LCMS2_H
+	alpha = rgba.a;
+	XYZ xyz;
+	cmsDoTransform(icc_->toXYZtransform(), &rgba, &xyz, 1);
+	return xyz;
+#else
+	return linearConvert(toLinear(rgba), alpha);
+#endif
 }
 
 
@@ -99,11 +163,68 @@ const prim::ColorRGBA RgbSpace::convert(const XYZ& xyz) const
 
 const prim::ColorRGBA RgbSpace::convert(const XYZ& xyz, TScalar alpha) const
 {
+#ifdef LIAR_HAVE_LCMS2_H
+	prim::ColorRGBA rgb;
+	cmsDoTransform(icc_->fromXYZtransform(), &xyz, &rgb, 1);
+	rgb.a = static_cast<prim::ColorRGBA::TValue>(alpha);
+	return rgb;
+#else
+	return toGamma(linearConvert(xyz, alpha));
+#endif
+}
+
+
+
+const XYZ RgbSpace::linearConvert(const RGBA& rgb) const
+{
+	TScalar dummy;
+	return linearConvert(rgb, dummy);
+}
+
+
+
+const XYZ RgbSpace::linearConvert(const RGBA& rgb, TScalar& alpha) const
+{
+	alpha = rgb.a;
+	return r_ * rgb.r + g_ * rgb.g + b_ * rgb.b;
+}
+
+
+
+const RgbSpace::RGBA RgbSpace::linearConvert(const XYZ& xyz) const
+{
+	return linearConvert(xyz, 1);
+}
+
+
+
+const RgbSpace::RGBA RgbSpace::linearConvert(const XYZ& xyz, TScalar alpha) const
+{
+	RGBA temp = x_ * static_cast<RGBA::TValue>(xyz.x) + y_ * static_cast<RGBA::TValue>(xyz.y) + z_ * static_cast<RGBA::TValue>(xyz.z);
+	temp.a = static_cast<RGBA::TValue>(alpha);
+	return temp;
+}
+
+
+
+const RgbSpace::RGBA RgbSpace::toGamma(const RGBA& rgba) const
+{
 	return RGBA(
-		num::pow(static_cast<RGBA::TValue>(x_.r * xyz.x + y_.r * xyz.y + z_.r * xyz.z), invGamma_),
-		num::pow(static_cast<RGBA::TValue>(x_.g * xyz.x + y_.g * xyz.y + z_.g * xyz.z), invGamma_),
-		num::pow(static_cast<RGBA::TValue>(x_.b * xyz.x + y_.b * xyz.y + z_.b * xyz.z), invGamma_),
-		static_cast<RGBA::TValue>(alpha));
+		num::pow(std::max<RGBA::TValue>(rgba.r, 0), invGamma_),
+		num::pow(std::max<RGBA::TValue>(rgba.g, 0), invGamma_),
+		num::pow(std::max<RGBA::TValue>(rgba.b, 0), invGamma_),
+		rgba.a);
+}
+
+
+
+const RgbSpace::RGBA RgbSpace::toLinear(const RGBA& rgba) const
+{
+	return RGBA(
+		num::pow(std::max<RGBA::TValue>(rgba.r, 0), gamma_),
+		num::pow(std::max<RGBA::TValue>(rgba.g, 0), gamma_),
+		num::pow(std::max<RGBA::TValue>(rgba.b, 0), gamma_),
+		rgba.a);
 }
 
 
@@ -145,7 +266,7 @@ TScalar RgbSpace::gamma() const
 
 bool RgbSpace::operator==(const RgbSpace& other) const
 {
-	return r_ == other.r_ && g_ == other.g_ && b_ == other.b_;
+	return red_ == other.red_ && green_ == other.green_ && blue_ == other.blue_ && white_ == other.white_ && gamma_ == other.gamma_;
 }
 
 
@@ -157,20 +278,13 @@ bool RgbSpace::operator!=(const RgbSpace& other) const
 
 
 
-const TRgbSpacePtr RgbSpace::withGamma(TScalar gamma) const
+const TRgbSpacePtr RgbSpace::linearSpace() const
 {
-	if (gamma == gamma_)
+	if (gamma_ == 1)
 	{
 		return TRgbSpacePtr(new RgbSpace(*this));
 	}
-	return TRgbSpacePtr(new RgbSpace(red_, green_, blue_, white_, gamma));
-}
-
-
-
-const TRgbSpacePtr RgbSpace::linearSpace() const
-{
-	return withGamma(1);
+	return TRgbSpacePtr(new RgbSpace(red_, green_, blue_, white_, 1));
 }
 
 
@@ -193,7 +307,7 @@ const TPyObjectPtr RgbSpace::getState() const
 void RgbSpace::setState(const TPyObjectPtr& state)
 {
 	TPoint2D red, green, blue, white;
-	TScalar gamma;
+	RGBA::TValue gamma;
 	LASS_ENFORCE(python::decodeTuple(state, red, green, blue, white, gamma));
 	init(red, green, blue, white, gamma);
 }
@@ -231,7 +345,7 @@ std::string RgbSpace::doPyRepr() const
 
 void RgbSpace::init(
 		const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, const TPoint2D& white,
-		TScalar gamma)
+		RGBA::TValue gamma)
 {
 	enforceChromaticity(red, "red");
 	enforceChromaticity(green, "green");
@@ -245,6 +359,40 @@ void RgbSpace::init(
 	{
 		LASS_THROW("Invalid gamma: " << gamma << ". Must be strictly positive.");
 	}
+
+	red_ = red;
+	green_ = green;
+	blue_ = blue;
+	white_ = white;
+	gamma_ = gamma;
+	invGamma_ = static_cast<RGBA::TValue>(num::inv(gamma));
+
+#ifdef LIAR_HAVE_LCMS2_H
+
+	cmsCIExyY whitePoint;
+	whitePoint.x = white.x;
+	whitePoint.y = white.y;
+	whitePoint.Y = 1;
+
+	cmsCIExyYTRIPLE primaries;
+	primaries.Red.x = red.x;
+	primaries.Red.y = red.y;
+	primaries.Red.Y = 1;
+	primaries.Green.x = green.x;
+	primaries.Green.y = green.y;
+	primaries.Green.Y = 1;
+	primaries.Blue.x = blue.x;
+	primaries.Blue.y = blue.y;
+	primaries.Blue.Y = 1;
+	
+	impl::AutoToneCurve transferFunction = cmsBuildGamma(0, gamma);
+	cmsToneCurve* transferFunctions[3] = { *transferFunction, *transferFunction, *transferFunction };
+
+	impl::AutoHPROFILE iccProfile = cmsCreateRGBProfile(&whitePoint, &primaries, transferFunctions);
+
+	icc_ = new impl::IccSpaceImpl(iccProfile);
+
+#else
 
 	// see:
 	// http://www.babelcolor.com/download/A%20comparison%20of%20four%20multimedia%20RGB%20spaces.pdf
@@ -298,12 +446,7 @@ void RgbSpace::init(
 	y_ = RGBA(static_cast<RGBA::TValue>(invMat[1]), static_cast<RGBA::TValue>(invMat[5]), static_cast<RGBA::TValue>(invMat[9]));
 	z_ = RGBA(static_cast<RGBA::TValue>(invMat[2]), static_cast<RGBA::TValue>(invMat[6]), static_cast<RGBA::TValue>(invMat[10]));
 
-	red_ = red;
-	green_ = green;
-	blue_ = blue;
-	white_ = white;
-	gamma_ = gamma;
-	invGamma_ = static_cast<RGBA::TValue>(num::inv(gamma));
+#endif
 }
 
 
@@ -321,22 +464,22 @@ void RgbSpace::enforceChromaticity(const TPoint2D& c, const char* name) const
 
 // --- free ----------------------------------------------------------------------------------------
 
-XYZ rgb(const prim::ColorRGBA& rgba)
+XYZ rgb(const RgbSpace::RGBA& rgba)
 {
 	return RgbSpace::defaultSpace()->convert(rgba);
 }
 
-XYZ rgb(const prim::ColorRGBA& rgba, const TRgbSpacePtr& rgbSpace)
+XYZ rgb(const RgbSpace::RGBA& rgba, const TRgbSpacePtr& rgbSpace)
 {
 	return rgbSpace->convert(rgba);
 }
 
-XYZ rgb(prim::ColorRGBA::TValue red, prim::ColorRGBA::TValue green, prim::ColorRGBA::TValue blue)
+XYZ rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue)
 {
 	return RgbSpace::defaultSpace()->convert(prim::ColorRGBA(red, green, blue));
 }
 
-XYZ rgb(prim::ColorRGBA::TValue red, prim::ColorRGBA::TValue green, prim::ColorRGBA::TValue blue, const TRgbSpacePtr& rgbSpace)
+XYZ rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue, const TRgbSpacePtr& rgbSpace)
 {
 	return rgbSpace->convert(prim::ColorRGBA(red, green, blue));
 }

@@ -115,7 +115,6 @@ private:
     util::CriticalSection saveLock_;
     TResolution2D resolution_;
     TRgbSpacePtr rgbSpace_;
-    TRgbSpacePtr linearSpace_;
     ToneMapping toneMapping_;
     mutable TScalar exposureStops_;
     TScalar exposureCorrectionStops_;

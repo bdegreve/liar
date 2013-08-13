@@ -79,6 +79,10 @@ private:
 	void enforceChromaticity(const TPoint2D& c, const char* name) const;
 
 	impl::IccSpaceImpl* pimpl_;
+	XYZ r_;
+	XYZ g_;
+	XYZ b_;
+	TScalar gamma_;
 };
 
 }

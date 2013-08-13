@@ -181,8 +181,6 @@ bool Display::showHistogram() const
 void Display::setRgbSpace(const TRgbSpacePtr& rgbSpace)
 {
 	rgbSpace_ = rgbSpace;
-	linearSpace_ = rgbSpace_->withGamma(1);
-	gammaSpace_ = CIEXYZ->withGamma(rgbSpace_->gamma());
 }
 
 
@@ -382,12 +380,12 @@ void Display::doBeginRender()
 	displayBuffer_.resize(n);
 	totalWeight_.clear();
 	totalWeight_.resize(n, 0);
-	renderDirtyBox_.clear();
+		renderDirtyBox_.clear();
 	displayDirtyBox_.clear();
 	
-	displayLoop_.reset(
-		util::threadFun(util::makeCallback(this, &Display::displayLoop), util::threadJoinable));
-	displayLoop_->run();
+		displayLoop_.reset(
+			util::threadFun(util::makeCallback(this, &Display::displayLoop), util::threadJoinable));
+		displayLoop_->run();
 }
 
 
@@ -569,7 +567,7 @@ void Display::displayLoop()
 
 	while (!isCanceling_)
 	{
-		copyToDisplayBuffer();
+			copyToDisplayBuffer();
 
 		if (refreshTitle_)
 		{
@@ -726,9 +724,9 @@ void Display::tonemap(const TDirtyBox& box)
 			{
 				const TScalar w = totalWeight_[k];
 				const XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
-				const prim::ColorRGBA linear = linearSpace_->convert(xyz);
-				const XYZ tonemapped(linear.r / (1 + linear.r), linear.g / (1 + linear.g), linear.b / (1 + linear.b));
-				const prim::ColorRGBA rgb = gammaSpace_->convert(tonemapped);
+				const prim::ColorRGBA linear = rgbSpace_->linearConvert(xyz);
+				const prim::ColorRGBA tonemapped(linear.r / (1 + linear.r), linear.g / (1 + linear.g), linear.b / (1 + linear.b));
+				const prim::ColorRGBA rgb = rgbSpace_->toGamma(tonemapped);
 				PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
 				p.a = 1;
 				p.b = rgb.b;
@@ -768,12 +766,12 @@ void Display::tonemap(const TDirtyBox& box)
 			{
 				const TScalar w = totalWeight_[k];
 				const XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
-				const prim::ColorRGBA linear = linearSpace_->convert(xyz);
-				const XYZ tonemapped(
+				const prim::ColorRGBA linear = rgbSpace_->linearConvert(xyz);
+				const prim::ColorRGBA tonemapped(
 					linear.r * (1 + linear.r * invLwSquared) / (1 + linear.r), 
 					linear.g * (1 + linear.g * invLwSquared) / (1 + linear.g), 
 					linear.b * (1 + linear.b * invLwSquared) / (1 + linear.b));
-				const prim::ColorRGBA rgb = gammaSpace_->convert(tonemapped);
+				const prim::ColorRGBA rgb = rgbSpace_->toGamma(tonemapped);
 				PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
 				p.a = 1;
 				p.b = rgb.b;
@@ -812,9 +810,9 @@ void Display::tonemap(const TDirtyBox& box)
 			{
 				const TScalar w = totalWeight_[k];
 				const XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
-				const prim::ColorRGBA linear = linearSpace_->convert(xyz);
-				const XYZ tonemapped(1 - num::exp(-linear.r), 1 - num::exp(-linear.g), 1 - num::exp(-linear.b));
-				const prim::ColorRGBA rgb = gammaSpace_->convert(tonemapped);
+				const prim::ColorRGBA linear = rgbSpace_->linearConvert(xyz);
+				const prim::ColorRGBA tonemapped(1 - num::exp(-linear.r), 1 - num::exp(-linear.g), 1 - num::exp(-linear.b));
+				const prim::ColorRGBA rgb = rgbSpace_->toGamma(tonemapped);
 				PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
 				p.a = 1;
 				p.b = rgb.b;
@@ -853,9 +851,9 @@ void Display::tonemap(const TDirtyBox& box)
 			{
 				const TScalar w = totalWeight_[k];
 				const XYZ xyz = w > 0 ? renderBuffer_[k] * (gain_ / w) : 0;
-				const prim::ColorRGBA linear = linearSpace_->convert(xyz);
-				const XYZ tonemapped(filmic(linear.r), filmic(linear.g), filmic(linear.b));
-				const prim::ColorRGBA rgb = gammaSpace_->convert(tonemapped);
+				const prim::ColorRGBA linear = rgbSpace_->linearConvert(xyz);
+				const prim::ColorRGBA tonemapped(filmic(linear.r), filmic(linear.g), filmic(linear.b));
+				const prim::ColorRGBA rgb = rgbSpace_->toGamma(tonemapped);
 				PixelToaster::FloatingPointPixel& p = displayBuffer_[k];
 				p.a = 1;
 				p.b = rgb.b;

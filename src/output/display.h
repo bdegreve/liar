@@ -109,7 +109,7 @@ private:
 	void doWriteRender(const OutputSample* first, const OutputSample* last);
 	void doEndRender();
 	bool doIsCanceling() const;
-		
+	
 	void onKeyDown(PixelToaster::DisplayInterface& display, PixelToaster::Key key);
 	bool onClose(PixelToaster::DisplayInterface& display);
 
@@ -135,8 +135,6 @@ private:
 	TDirtyBox allTimeDirtyBox_;
 	TResolution2D resolution_;
 	TRgbSpacePtr rgbSpace_;
-	TRgbSpacePtr linearSpace_;
-	TRgbSpacePtr gammaSpace_;
 	TScalar totalLogSceneLuminance_;
 	TScalar maxSceneLuminance_;
 	int sceneLuminanceCoverage_;

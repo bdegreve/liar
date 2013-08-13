@@ -61,23 +61,23 @@ Image::TToneMappingDictionary Image::toneMappingDictionary_ = Image::makeToneMap
 namespace
 {
     inline double filmic(double x)
-    {
+	{
         x = std::max(0., x - 0.004);
         const double y = (x * (6.2 * x + .5)) / (x * (6.2 * x + 1.7) + 0.06); 
         return num::pow(y, 2.2); // undo gamma
-    }
+	}
     inline double invFilmic(double y)
-    {
+	{
         y = std::max(0., std::min(y, 0.99999));
         y = num::pow(y, 1. / 2.2); // apply gamma
-        // a*x*x + b*y + c == 0
+		// a*x*x + b*y + c == 0
         const double a = 6.2f* y - 6.2;
         const double b = 1.7 * y - .5;
         const double c = .06 * y;
         const double D = b * b - 4 * a * c;
         const double x = (-b - num::sqrt(D)) / (2 * a);
         return x + 0.004;
-    }
+	}
 }
 
 
@@ -89,7 +89,6 @@ Image::Image(const std::wstring& path, const TResolution2D& resolution):
     options_(""),
     resolution_(resolution),
     rgbSpace_(),
-    linearSpace_( RgbSpace::defaultSpace()->linearSpace() ),
     toneMapping_(tmLinear),
     exposureStops_(0.f),
     exposureCorrectionStops_(0.f),
@@ -274,7 +273,6 @@ void Image::setOptions(const std::string& options)
 void Image::setRgbSpace(const TRgbSpacePtr& rgbSpace)
 {
     rgbSpace_ = rgbSpace;
-    linearSpace_ = ( rgbSpace_ ? rgbSpace_ : RgbSpace::defaultSpace() ) ->linearSpace();
 }
 
 
@@ -360,9 +358,9 @@ void Image::tonemap(const TRenderBuffer &source, const TWeightBuffer &weight, TR
             for (size_t k = kBegin; k < kEnd; ++k)
             {
                 const TScalar w = weight[k];
-                const prim::ColorRGBA linear = linearSpace_->convert(w > 0 ? source[k] * (gain / w) : XYZ(0));
+                const prim::ColorRGBA linear = rgbSpace_->linearConvert(w > 0 ? source[k] * (gain / w) : XYZ(0));
                 const prim::ColorRGBA tonemapped(linear.r / (1 + linear.r), linear.g / (1 + linear.g), linear.b / (1 + linear.b));
-                dest[k] = linearSpace_->convert(tonemapped);
+                dest[k] = rgbSpace_->linearConvert(tonemapped);
             }
         }
         break;
@@ -397,12 +395,12 @@ void Image::tonemap(const TRenderBuffer &source, const TWeightBuffer &weight, TR
                 for (size_t k = kBegin; k < kEnd; ++k)
                 {
                     const TScalar w = weight[k];
-                    const prim::ColorRGBA linear = linearSpace_->convert(w > 0 ? source[k] * (gain / w) : XYZ(0));
+                    const prim::ColorRGBA linear = rgbSpace_->linearConvert(w > 0 ? source[k] * (gain / w) : XYZ(0));
                     const prim::ColorRGBA tonemapped(
                         static_cast<prim::ColorRGBA::TValue>(linear.r * (1 + linear.r * invLwSquared) / (1 + linear.r)), 
                         static_cast<prim::ColorRGBA::TValue>(linear.g * (1 + linear.g * invLwSquared) / (1 + linear.g)), 
                         static_cast<prim::ColorRGBA::TValue>(linear.b * (1 + linear.b * invLwSquared) / (1 + linear.b)));
-                    dest[k] = linearSpace_->convert(tonemapped);
+                    dest[k] = rgbSpace_->linearConvert(tonemapped);
                 }
             }
         }
@@ -430,9 +428,9 @@ void Image::tonemap(const TRenderBuffer &source, const TWeightBuffer &weight, TR
             for (size_t k = kBegin; k < kEnd; ++k)
             {
                 const TScalar w = weight[k];
-                const prim::ColorRGBA linear = linearSpace_->convert(w > 0 ? source[k] * (gain / w) : XYZ(0));
+                const prim::ColorRGBA linear = rgbSpace_->linearConvert(w > 0 ? source[k] * (gain / w) : XYZ(0));
                 const prim::ColorRGBA tonemapped(-num::expm1(-linear.r), -num::expm1(-linear.g), -num::expm1(-linear.b));
-                dest[k] = linearSpace_->convert(tonemapped);
+                dest[k] = rgbSpace_->linearConvert(tonemapped);
             }
         }
         break;
@@ -459,12 +457,9 @@ void Image::tonemap(const TRenderBuffer &source, const TWeightBuffer &weight, TR
             for (size_t k = kBegin; k < kEnd; ++k)
             {
                 const TScalar w = weight[k];
-                const prim::ColorRGBA linear = linearSpace_->convert(w > 0 ? source[k] * (gain / w) : XYZ(0));
-                const prim::ColorRGBA tonemapped(
-                    static_cast<prim::ColorRGBA::TValue>(filmic(linear.r)), 
-                    static_cast<prim::ColorRGBA::TValue>(filmic(linear.g)), 
-                    static_cast<prim::ColorRGBA::TValue>(filmic(linear.b)));
-                dest[k] = linearSpace_->convert(tonemapped);
+                const prim::ColorRGBA linear = rgbSpace_->linearConvert(w > 0 ? source[k] * (gain / w) : XYZ(0));
+                const prim::ColorRGBA tonemapped(filmic(linear.r), filmic(linear.g), filmic(linear.b));
+                dest[k] = rgbSpace_->linearConvert(tonemapped);
             }
         }
         break;
@@ -512,7 +507,7 @@ const TResolution2D Image::doResolution() const
 
 void Image::doBeginRender()
 {
-    const size_t n = resolution_.x * resolution_.y;
+        const size_t n = resolution_.x * resolution_.y;
     renderBuffer_.clear();
     renderBuffer_.resize(n);
     totalWeight_.clear();

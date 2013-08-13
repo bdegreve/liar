@@ -74,7 +74,7 @@ struct Handle
 	util::ScopedPtr<Imf::RgbaOutputFile> output;
 	int y;
 	Handle(const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace):
-		rgbSpace((rgbSpace ? rgbSpace : kernel::sRGB)->withGamma(1)),
+		rgbSpace((rgbSpace ? rgbSpace : kernel::sRGB)->linearSpace()),
 		resolution(resolution)
 	{	
 	}

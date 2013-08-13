@@ -197,7 +197,7 @@ ImageCodec::TImageHandle ImageCodecLass::doCreate(const std::wstring& path, cons
 	pimpl->rgbSpace = selectRgbSpace(rgbSpace);
 	if (!hasGammaCorrection_)
 	{
-		pimpl->rgbSpace = pimpl->rgbSpace->withGamma(1);
+		pimpl->rgbSpace = pimpl->rgbSpace->linearSpace();
 	}
 	pimpl->path = path;
 	pimpl->saveOnClose = true;
@@ -231,7 +231,7 @@ ImageCodec::TImageHandle ImageCodecLass::doOpen(const std::wstring& path, const 
 	}
 	if (!hasGammaCorrection_)
 	{
-		pimpl->rgbSpace = pimpl->rgbSpace->withGamma(1);
+		pimpl->rgbSpace = pimpl->rgbSpace->linearSpace();
 	}
 	RgbSpace& space = *pimpl->rgbSpace;
 	LASS_COUT << "RGB open: " << space.red() << " " << space.green() << " " << space.blue() << " " << space.white() << "\n";
