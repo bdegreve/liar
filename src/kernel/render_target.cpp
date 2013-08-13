@@ -30,6 +30,9 @@ namespace kernel
 {
 
 PY_DECLARE_CLASS_DOC(RenderTarget, "Abstract base class of render targets")
+PY_CLASS_MEMBER_R(RenderTarget, isRendering)
+PY_CLASS_MEMBER_R(RenderTarget, isCanceling)
+PY_CLASS_METHOD(RenderTarget, endRender)
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -86,10 +89,13 @@ void RenderTarget::writeRender(const OutputSample* first, const OutputSample* la
 
 void RenderTarget::endRender()
 {
-	if (isRendering_)
+	LASS_LOCK(lock_)
 	{
-		doEndRender();
-		isRendering_ = false;
+		if (isRendering_)
+		{
+			doEndRender();
+			isRendering_ = false;
+		}
 	}
 }
 
