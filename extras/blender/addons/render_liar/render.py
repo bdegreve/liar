@@ -1,76 +1,135 @@
-# LiAR isn't a raytracer
-# Copyright (C) 2004-2011  Bram de Greve (bramz@users.sourceforge.net)
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#
-# http://liar.bramz.net/
+import asyncore
+import socket
+import struct
 
-import bpy
-from render_liar import LiarAddon, liar_log
+class BufferUnderflow(Exception):
+    pass
 
+class EchoHandler(asyncore.dispatcher):
+    def __init__(self, sock, renderengine):
+        self.__recvsize = 4096
+        self.__readbuffer = bytearray()
+        self.__writebuffer = bytearray()
+        asyncore.dispatcher.__init__(self, sock=sock)
+        self.__renderengine = renderengine
+        self.__result = None
 
-@LiarAddon.addon_register_class
-class RENDERENGINE_liar(bpy.types.RenderEngine):
-    '''
-    LiAR Engine Exporter/Integration class
-    '''
-    
-    bl_idname = LiarAddon.BL_IDNAME
-    bl_label = 'LiAR'
-    bl_use_preview = False
-    
-    def render(self, scene):
-        #pydevd.settrace('localhost', port=1234, stdoutToServer=True, stderrToServer=True)
-        scale = scene.render.resolution_percentage / 100.0
-        self.size_x = int(scene.render.resolution_x * scale)
-        self.size_y = int(scene.render.resolution_y * scale)
+    def handle_read(self):
+        received = self.recv(self.__recvsize)
+        if not received:
+            self.close()
+        self.__readbuffer += received
+        while True:
+            try:
+                buffer = self.__readbuffer
+                self.__process_buffer()
+            except BufferUnderflow:
+                self.__readbuffer = buffer
+                return
 
-        if scene.name == 'preview':
-            liar_log("render preview not supported")
-            return
+    def handle_write(self):
+        buffer = self.__writebuffer
+        n = self.send(buffer)
+        self.__writebuffer = buffer[n:]
+
+    def handle_close(self):
+        if self.__result:
+            self.__renderengine.end_result(self.__result)
+
+    def __process_buffer(self):
+        engine = self.__renderengine
+        code, = self.__readstruct("<h")
+        print ("code={}".format(code))
+        if code == 0: # scSample
+            x, y, r, g, b, z, a, w = self.__readstruct("<dddddddd")
+            i, j = int(x * engine.size_x), int(y * engine.size_y)
+            address = j * engine.size_x + i
+            p = self.__displayBuffer[address]
+            p[0] += 1.0
+            p[1] += g
+            p[2] += b
+            p[3] += a
+            self.__weightBuffer[address] += w
+            self.__result.layers[0].rect = [[x * w for x in p] for p, w in zip(self.__displayBuffer, self.__weightBuffer)]
+        elif code == 4: # scIsCanceling 
+            self.send(struct.pack("<B", 0))
+        elif code == 1: # scBeginRender 
+            pixel_count = engine.size_x * engine.size_y
+            self.__result = engine.begin_result(0, 0, engine.size_x, engine.size_y)
+            self.__displayBuffer = [[0.0, 0.0, 0.0, 0.0] for k in range(pixel_count)]
+            self.__weightBuffer = [0] * pixel_count
+        elif code == 2: # scEndRender 
+            self.close()
+        elif code == 3: # scResolution 
+            self.send(struct.pack("<II", engine.size_x, engine.size_y))
         else:
-            self.__render_scene(scene)
+            print("OOPS, unexpected code {}".format(code))
+            self.close()
+        
 
-    def __render_scene(self, scene):
-        from render_liar import render_helper
-        from imp import reload
-        reload(render_helper)
-        render_helper.render_helper(self, scene)
+    def __readstruct(self, fmt):
+        n = struct.calcsize(fmt)
+        buf = self.__readn(n)
+        assert len(buf) == n
+        return struct.unpack(fmt, buf)
 
-        pixel_count = self.size_x * self.size_y
+    def __readstring(self):
+        n, = self.__readstruct("<Q")
+        return self.__readn(n)
 
-        # The framebuffer is defined as a list of pixels, each pixel
-        # itself being a list of R,G,B,A values
-        blue_rect = [[0.0, 0.0, 1.0, 1.0]] * pixel_count
+    def __readn(self, n):
+        buffer = self.__readbuffer
+        while len(buffer) < n:
+            raise BufferUnderflow()
+        result, self.__readbuffer = buffer[:n], buffer[n:]
+        return result
 
-        # Here we write the pixel values to the RenderResult
-        result = self.begin_result(0, 0, self.size_x, self.size_y)
-        layer = result.layers[0]
-        layer.rect = blue_rect
 
-        self.end_result(result)
+class ServerThing(asyncore.dispatcher):
+    def __init__(self, renderengine):
+        asyncore.dispatcher.__init__(self)
+        self.renderengine = renderengine
+        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.set_reuse_addr()
+        self.bind(('localhost', 0))
+        self.address = self.socket.getsockname()
+        self.listen(1)
 
-# RenderEngines also need to tell UI Panels that they are compatible
-# Otherwise most of the UI will be empty when the engine is selected.
-# In this example, we need to see the main render image button and
-# the material preview panel.
-from bl_ui import properties_render
-properties_render.RENDER_PT_render.COMPAT_ENGINES.add(LiarAddon.BL_IDNAME)
-del properties_render
+    def handle_accepted(self, sock, addr):
+        print('Incoming connection from %s' % repr(addr))
+        EchoHandler(sock, self.renderengine)
+        self.handle_close()
 
-from bl_ui import properties_material
-properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add(LiarAddon.BL_IDNAME)
-del properties_material
+    def handle_close(self):
+        self.close()
 
+
+def render_scene(self, scene):
+    from render_liar import export
+    import bpy
+    import subprocess
+    
+    addon_prefs = bpy.context.user_preferences.addons[__package__].preferences
+    python_binary = addon_prefs.python_binary
+    if not _test_liar(python_binary):
+        self.report({'ERROR'}, "{!r} is not a valid path to a Python binary with the LiAR package installed. Adjust the path in User Preferences, and try again.".format(python_binary))
+        return False
+
+    path = export.export_scene(scene)
+    port = 8215
+
+    server = ServerThing(self)
+    process = subprocess.Popen([python_binary, path, "--remote", "%s:%d" % server.address])
+    asyncore.loop()
+    process.wait()
+    return True
+    
+    
+def _test_liar(python_binary):
+    import subprocess
+    try:
+        output = subprocess.check_output([python_binary, "-c", "import liar"])
+    except (subprocess.CalledProcessError, OSError):
+        return False
+    else:
+        return True
