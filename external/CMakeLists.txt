@@ -8,16 +8,32 @@ endmacro()
 
 option(JPEG_BUILD OFF)
 if(JPEG_BUILD)
-    set(JPEG_URL "http://www.ijg.org/files/jpegsrc.v8d.tar.gz" CACHE STRING "URL to JPEG library source code")
+    set(JPEG_URL "http://www.ijg.org/files/jpegsrc.v9.tar.gz" CACHE STRING "URL to JPEG library source code")
+    set(_configure)
     if (MSVC)
         set(_make nmake -fmakefile.vc nodebug=1 libjpeg.lib)
-        set(_jconfig jconfig.vc)
+        list(APPEND _configure
+            "${CMAKE_COMMAND}" -E copy_if_different jconfig.vc jconfig.h
+        )
+        if (MSVC11)
+            # oh great, they dropped win32.mak 
+            find_file(JPEG_WIN32_MAK "Win32.Mak"
+                HINTS "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Include"
+                )
+            if (JPEG_WIN32_MAK)
+                list(APPEND _configure
+                    && "${CMAKE_COMMAND}" -E copy_if_different "${JPEG_WIN32_MAK}" Win32.Mak
+                    )  
+            else()
+                message(WARNING "No Win32.Mak, building libjpeg may fail. set JPEG_WIN32_MAK")
+            endif()
+        endif()
     endif()
     ExternalProject_Add(
         external_jpeg
         PREFIX jpeg
         URL "${JPEG_URL}"
-        CONFIGURE_COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${_jconfig}" jconfig.h
+        CONFIGURE_COMMAND ${_configure}
         BUILD_COMMAND ${_make}
         BUILD_IN_SOURCE 1
         INSTALL_COMMAND ""
@@ -30,7 +46,7 @@ endif()
 
 option(ZLIB_BUILD OFF)
 if(ZLIB_BUILD)
-    set(ZLIB_URL "http://zlib.net/zlib-1.2.7.tar.gz" CACHE STRING "URL to zlib source code")
+    set(ZLIB_URL "http://zlib.net/zlib-1.2.8.tar.gz" CACHE STRING "URL to zlib source code")
     mark_as_advanced(ZLIB_URL)
     ExternalProject_Add(
         external_zlib
