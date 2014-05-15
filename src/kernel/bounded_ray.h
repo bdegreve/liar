@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -41,13 +41,13 @@ class LIAR_KERNEL_DLL BoundedRay
 public:
 
 	BoundedRay();
-	BoundedRay(const TRay3D& unboundedRay, 
+	BoundedRay(const TRay3D& unboundedRay,
 		TScalar nearLimit = liar::TNumTraits::zero, TScalar farLimit = liar::TNumTraits::infinity);
-	BoundedRay(const TPoint3D& support, const TVector3D& direction, 
+	BoundedRay(const TPoint3D& support, const TVector3D& direction,
 		TScalar nearLimit = liar::TNumTraits::zero, TScalar farLimit = liar::TNumTraits::infinity);
-	BoundedRay(const TPoint3D& support, const TVector3D& normalizedDirection, 
+	BoundedRay(const TPoint3D& support, const TVector3D& normalizedDirection,
 		TScalar nearLimit, TScalar farLimit, prim::IsAlreadyNormalized);
-	BoundedRay(const TPoint3D& support, const TPoint3D& iLookAt, 
+	BoundedRay(const TPoint3D& support, const TPoint3D& iLookAt,
 		TScalar nearLimit = liar::TNumTraits::zero, TScalar farLimit = liar::TNumTraits::infinity);
 
 	const TRay3D& unboundedRay() const { return unboundedRay_; }
@@ -63,9 +63,9 @@ public:
 	const TPoint3D farPoint() const { return point(nearLimit_); }
 
 	/** return true if @a t is between the scalar bounds of the ray */
-	bool inRange(TScalar t) const 
-	{ 
-		//return num::almostInOpenRange(t, nearLimit_, farLimit_, tolerance); 
+	bool inRange(TScalar t) const
+	{
+		//return num::almostInOpenRange(t, nearLimit_, farLimit_, tolerance);
 		return t > nearLimit_ * (TNumTraits::one + tolerance) &&
 			t < farLimit_ * (TNumTraits::one - tolerance);
 	}
@@ -84,6 +84,7 @@ LIAR_KERNEL_DLL BoundedRay transform(const BoundedRay& ray, const TTransformatio
 LIAR_KERNEL_DLL BoundedRay transform(const BoundedRay& ray, const TTransformation3D& transformation, TScalar& parameter);
 LIAR_KERNEL_DLL BoundedRay translate(const BoundedRay& ray, const TVector3D& offset);
 LIAR_KERNEL_DLL BoundedRay bound(const BoundedRay& ray, TScalar nearLimit, TScalar farLimit = TNumTraits::infinity);
+LIAR_KERNEL_DLL BoundedRay bound(const BoundedRay& ray, const TAabb3D& box);
 
 }
 

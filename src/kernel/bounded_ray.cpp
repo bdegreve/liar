@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -31,12 +31,12 @@ namespace kernel
 
 // --- public --------------------------------------------------------------------------------------
 
-/** construct an empty bounded ray 
+/** construct an empty bounded ray
  */
 BoundedRay::BoundedRay():
 	unboundedRay_(),
-	nearLimit_(TNumTraits::zero),
-	farLimit_(TNumTraits::zero)
+	nearLimit_(TNumTraits::infinity),
+	farLimit_(-TNumTraits::infinity)
 {
 }
 
@@ -111,12 +111,12 @@ BoundedRay::BoundedRay(const TPoint3D& support, const TPoint3D& lookAt, TScalar 
 /** @relates BoundedRay
  *  Transform a bounded ray, renormalize and adjust its bounds.
  *
- *	The scalar bounds must be adjusted because of the renormalization, so that the 
+ *	The scalar bounds must be adjusted because of the renormalization, so that the
  *	following equation is valid for both limits (equations shows us the nearLimit only):
  *
  *	@code
  *	BoundedRay newRay = transform(ray, transformation);
- *	LASS_ASSERT(newRay.point(newRay.nearLimit()) == 
+ *	LASS_ASSERT(newRay.point(newRay.nearLimit()) ==
  *		prim::transform(ray.point(ray.nearLimit()), transformation));
  *	@endcode.
  */
@@ -138,7 +138,7 @@ BoundedRay transform(const BoundedRay& ray, const TTransformation3D& transformat
  *	@code
  *	TScalar newParameter = parameter;
  *	BoundedRay newRay = transform(ray, transformation, newParameter);
- *	LASS_ASSERT(newRay.point(newParameter) == 
+ *	LASS_ASSERT(newRay.point(newParameter) ==
  *		prim::transform(ray.point(parameter), transformation));
  *	@endcode.
 
@@ -171,6 +171,30 @@ BoundedRay translate(const BoundedRay& ray, const TVector3D& offset)
 BoundedRay bound(const BoundedRay& ray, TScalar nearLimit, TScalar farLimit)
 {
 	return BoundedRay(ray.unboundedRay(), std::max(ray.nearLimit(), nearLimit), std::min(ray.farLimit(), farLimit));
+}
+
+
+
+/** @relates BoundedRay
+ */
+BoundedRay bound(const BoundedRay& ray, const TAabb3D& box)
+{
+	TScalar tNear;
+	if (prim::intersect(box, ray.unboundedRay(), tNear, ray.nearLimit()) == prim::rNone)
+	{
+		return BoundedRay();
+	}
+	TScalar tFar;
+	if (prim::intersect(box, ray.unboundedRay(), tFar, tNear) == prim::rNone)
+	{
+		tFar = tNear;
+		tNear = ray.nearLimit();
+	}
+	if (tNear > ray.farLimit())
+	{
+		return BoundedRay();
+	}
+	return bound(ray, tNear, tFar);
 }
 
 }
