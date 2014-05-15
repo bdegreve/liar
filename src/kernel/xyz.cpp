@@ -304,7 +304,6 @@ const Observer::TFrequencyRange Observer::frequencyRange() const
 const XYZ Observer::tristimulus(TFrequency frequency) const
 {
 	const TScalar wavelength = c0 / frequency;
-	typedef const Node TConstNode;
 	const TNodes::const_iterator i = std::lower_bound(
 		stde::const_member_iterator(nodes_.begin(), &Node::wavelength),
 		stde::const_member_iterator(nodes_.end(), &Node::wavelength),

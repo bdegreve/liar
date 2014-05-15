@@ -95,7 +95,7 @@ private:
 
 #ifdef LIAR_HAVE_LCMS2_H
 	impl::IccSpaceImpl* icc_;
-#else:
+#else
 	RGBA x_;
 	RGBA y_;
 	RGBA z_;

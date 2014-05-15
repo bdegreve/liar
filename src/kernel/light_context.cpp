@@ -52,7 +52,7 @@ LightContext::LightContext(const TObjectPath& objectPathToLight, const SceneLigh
 
 
 
-void LightContext::setSceneBound(const TAabb3D& bound, const TimePeriod& period)
+void LightContext::setSceneBound(const TAabb3D& /*bound*/, const TimePeriod& /*period*/)
 {
 	//light_->setSceneBound(bound, period);
 }
