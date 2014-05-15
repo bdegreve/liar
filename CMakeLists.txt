@@ -12,6 +12,12 @@ macro(eval)
 	endforeach()
 endmacro()
 
+# if CMAKE_INSTALL_PREFIX is initialized by default, empty it, so it can be set later
+# when we figure out what python to use.
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+	set (CMAKE_INSTALL_PREFIX "" CACHE PATH "liar install prefix" FORCE)
+endif ()
+
 find_package(Lass REQUIRED)
 include_directories(${Lass_INCLUDE_DIRS})
 if (CMAKE_CONFIGURATION_TYPES)
@@ -52,7 +58,7 @@ if (CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_DEBUG)
 		)
 endif()
 
-if (Lass_PYTHON_EXECUTABLE AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+if (Lass_PYTHON_EXECUTABLE AND NOT CMAKE_INSTALL_PREFIX)
 	execute_process(
 		COMMAND "${Lass_PYTHON_EXECUTABLE}" -c "from distutils import sysconfig; print (sysconfig.get_python_lib(True))" 
 		OUTPUT_VARIABLE _python_site_packages
