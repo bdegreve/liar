@@ -109,9 +109,9 @@ Display::Display(const std::string& title, const TResolution2D& resolution):
 	showHistogram_(false),
 	wasShowingHistogram_(false),
 	refreshTitle_(false),
+	autoUpdate_(true),
 	isCanceling_(false),
-	isClosing_(false),
-	autoUpdate_(true)
+	isClosing_(false)
 {
 	setRgbSpace(RgbSpace::defaultSpace());
 	setExposure(0);
@@ -531,7 +531,7 @@ void Display::onKeyDown(PixelToaster::DisplayInterface& display, PixelToaster::K
 
 
 
-void Display::onMouseButtonDown(PixelToaster::DisplayInterface& display, PixelToaster::Mouse mouse)
+void Display::onMouseButtonDown(PixelToaster::DisplayInterface&, PixelToaster::Mouse mouse)
 {
     if ( mouse.buttons.left )
     {
@@ -546,7 +546,7 @@ void Display::onMouseButtonDown(PixelToaster::DisplayInterface& display, PixelTo
 
 
 
-void Display::onMouseButtonUp(PixelToaster::DisplayInterface& display, PixelToaster::Mouse mouse)
+void Display::onMouseButtonUp(PixelToaster::DisplayInterface&, PixelToaster::Mouse mouse)
 {
     if ( !num::isNaN( beginDrag_.x ) )
     {
@@ -690,10 +690,10 @@ void Display::copyToDisplayBuffer()
 {
 	LASS_LOCK(renderBufferLock_)
 	{
-		if (autoExposure_ && sceneLuminanceCoverage_ > 0)
+		if (autoExposure_)
 		{
 			const TScalar a = middleGrey_;
-			const TScalar y = num::exp(totalLogSceneLuminance_ / sceneLuminanceCoverage_);
+			const TScalar y = averageSceneLuminance();
 			if (y > 0)
 			{
 				TScalar g = 1;
@@ -729,6 +729,16 @@ void Display::copyToDisplayBuffer()
 
 		renderDirtyBox_.clear();
 	}
+}
+
+
+TScalar Display::averageSceneLuminance() const
+{
+	if (!sceneLuminanceCoverage_)
+	{
+		return 0;
+	}
+	return num::exp(totalLogSceneLuminance_ / sceneLuminanceCoverage_);
 }
 
 

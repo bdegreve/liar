@@ -119,6 +119,7 @@ private:
 
 	void displayLoop();
 	void copyToDisplayBuffer();
+	TScalar averageSceneLuminance() const;
 	void tonemap(const TDirtyBox& box);
 	void histogram();
 	void cancel();
