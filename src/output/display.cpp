@@ -98,9 +98,7 @@ Display::Display(const std::string& title, const TResolution2D& resolution):
 	title_(title),
 	resolution_(resolution),
 	currentResolution_(0, 0),
-	totalLogSceneLuminance_(0),
 	maxSceneLuminance_(0),
-	sceneLuminanceCoverage_(0),
 	middleGrey_(.184f),
 	exposure_(-100),
 	exposureCorrection_(-100),
@@ -247,34 +245,6 @@ void Display::setExposureCorrection(TScalar fStops)
 
 void Display::setAutoExposure(bool enable)
 {
-	if (enable && !autoExposure_)
-	{
-		LASS_LOCK(renderBufferLock_)
-		{
-			const TDirtyBox::TPoint min = allTimeDirtyBox_.min();
-			const TDirtyBox::TPoint max = allTimeDirtyBox_.max();
-			const size_t nx = max.x - min.x + 1;
-			const TScalar minY = 1e-10f;
-			totalLogSceneLuminance_ = 0;
-			sceneLuminanceCoverage_ = 0;
-			for (size_t j = min.y; j <= max.y; ++j)
-			{
-				const size_t kBegin = j * resolution_.x + min.x;
-				const size_t kEnd = kBegin + nx;
-				for (size_t k = kBegin; k < kEnd; ++k)
-				{
-					const TScalar w = totalWeight_[k];
-					const XYZ xyz = renderBuffer_[k];
-					if (w > 0 && xyz.y > 0)
-					{
-						totalLogSceneLuminance_ += num::log(std::max(xyz.y / w, minY));
-						maxSceneLuminance_ = std::max(xyz.y / w, maxSceneLuminance_);
-						++sceneLuminanceCoverage_;
-					}
-				}			
-			}
-		}
-	}
 	autoExposure_ = enable;
 	refreshTitle_ = true;
 }
@@ -396,13 +366,9 @@ void Display::doBeginRender()
 	{
 		renderBuffer_.assign(n, XYZ());
 		totalWeight_.assign(n, 0);
-
-		totalLogSceneLuminance_ = 0;
-		maxSceneLuminance_ = 0;
-		sceneLuminanceCoverage_ = 0;
-
 		renderDirtyBox_.clear();
 		allTimeDirtyBox_.clear();
+		maxSceneLuminance_ = 0;
 	}
 	
 	if (!displayLoop_)
@@ -421,8 +387,6 @@ void Display::doWriteRender(const OutputSample* first, const OutputSample* last)
 {
 	LASS_ASSERT(static_cast<int>(resolution_.x) > 0 && static_cast<int>(resolution_.y) > 0);
 
-	const TScalar minY = 1e-10f;
-
 	LASS_LOCK(renderBufferLock_)
 	{
 		while (first != last)
@@ -435,22 +399,13 @@ void Display::doWriteRender(const OutputSample* first, const OutputSample* last)
 			{
 				XYZ& xyz = renderBuffer_[j * resolution_.x + i];
 				TScalar& w = totalWeight_[j * resolution_.x + i];
-				const TScalar oldY = xyz.y;
-				const TScalar oldW = w;
 				xyz += first->radiance() * first->alpha() * first->weight();
 				w += first->weight();
 				renderDirtyBox_ += TDirtyBox::TPoint(i, j);
 
-				if (autoExposure_ && w > 0 && xyz.y > 0)
+				if (w > 0 && xyz.y > 0)
 				{
 					maxSceneLuminance_ = std::max(xyz.y / w, maxSceneLuminance_);
-					if (oldW > 0 && oldY > 0)
-					{
-						totalLogSceneLuminance_ -= num::log(std::max(oldY / oldW, minY));
-						--sceneLuminanceCoverage_;
-					}
-					totalLogSceneLuminance_ += num::log(std::max(xyz.y / w, minY));
-					++sceneLuminanceCoverage_;
 				}
 			}
 			++first;
@@ -734,11 +689,24 @@ void Display::copyToDisplayBuffer()
 
 TScalar Display::averageSceneLuminance() const
 {
-	if (!sceneLuminanceCoverage_)
+	TScalar sumLogY = 0;
+	size_t coverage = 0;
+	for (size_t k = 0, n = renderBuffer_.size(); k < n; ++k)
+	{
+		const TScalar w = totalWeight_[k];
+		const TScalar y = renderBuffer_[k].y;
+		if (w > 0 && y > 0)
+		{
+			sumLogY += num::log(y / w);
+			++coverage;
+		}
+	}
+	if (!coverage)
 	{
 		return 0;
 	}
-	return num::exp(totalLogSceneLuminance_ / sceneLuminanceCoverage_);
+	const TScalar avgLogY = sumLogY / coverage;
+	return num::exp(avgLogY);
 }
 
 

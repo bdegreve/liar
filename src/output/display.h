@@ -142,9 +142,7 @@ private:
 	TResolution2D resolution_;
 	TResolution2D currentResolution_;
 	TRgbSpacePtr rgbSpace_;
-	TScalar totalLogSceneLuminance_;
 	TScalar maxSceneLuminance_;
-	int sceneLuminanceCoverage_;
 	TScalar gain_;
 	TScalar middleGrey_;
 	int exposure_;
