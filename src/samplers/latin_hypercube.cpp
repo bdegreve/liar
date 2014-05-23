@@ -24,6 +24,7 @@
 #include "samplers_common.h"
 #include "latin_hypercube.h"
 #include "../kernel/xyz.h"
+#include "../kernel/observer.h"
 #include <lass/stde/range_algorithm.h>
 #include <lass/stde/access_iterator.h>
 
@@ -124,7 +125,7 @@ void LatinHypercube::doSetSamplesPerPixel(size_t samplesPerPixel)
 	samplesPerPixel_ = samplesPerPixel; 
 	stratumSize_ = TNumTraits::one / samplesPerPixel_;
 	timeStrata_.resize(samplesPerPixel_);
-	frequencyStrata_.resize(samplesPerPixel_);
+	wavelengthStrata_.resize(samplesPerPixel_);
 	screenStrataX_.resize(samplesPerPixel_);
 	screenStrataY_.resize(samplesPerPixel_);
 	lensStrataX_.resize(samplesPerPixel_);
@@ -139,7 +140,7 @@ void LatinHypercube::doSetSamplesPerPixel(size_t samplesPerPixel)
 		lensStrataX_[i] = x;
 		lensStrataY_[i] = x;
 		timeStrata_[i] = x;
-		frequencyStrata_[i] = x;
+		wavelengthStrata_[i] = x;
 	}
 }
 
@@ -180,13 +181,13 @@ void LatinHypercube::doSampleTime(const TResolution2D& LASS_UNUSED(pixel), size_
 
 
 
-void LatinHypercube::doSampleFrequency(const TResolution2D& LASS_UNUSED(pixel), size_t subPixel, TScalar& frequency)
+void LatinHypercube::doSampleWavelength(const TResolution2D& LASS_UNUSED(pixel), size_t subPixel, TWavelength& wavelength)
 {
 	LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
-	const TScalar phi = sampleStratum(subPixel, frequencyStrata_);
+	const TScalar phi = sampleStratum(subPixel, wavelengthStrata_);
 	XYZ xyz;
 	TScalar pdf;
-	frequency = standardObserver().sample(XYZ(1, 1, 1), phi, xyz, pdf);
+	wavelength = standardObserver().sample(XYZ(1, 1, 1), phi, xyz, pdf);
 }
 
 

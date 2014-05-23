@@ -57,7 +57,7 @@ public:
 	const TSample2D& screenCoordinate() const;
 	const TSample2D& lensCoordinate() const;
 	TTime time() const;
-	TScalar frequency() const;
+	TScalar wavelength() const;
 
 	TScalar weight() const;
 	void setWeight(TScalar weight);
@@ -72,7 +72,7 @@ private:
 	TSample2D screenCoordinate_;
 	TSample2D lensCoordinate_;
 	TTime time_;
-	TScalar frequency_;
+	TWavelength wavelength_;
 	TScalar weight_;
 	std::vector<TSample1D> subSequences1D_;
 	std::vector<TSample2D> subSequences2D_;

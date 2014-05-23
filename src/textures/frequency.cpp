@@ -26,6 +26,7 @@
 
 namespace liar
 {
+
 namespace textures
 {
 
@@ -59,7 +60,8 @@ void Frequency::doSetState(const TPyObjectPtr&)
 
 const XYZ Frequency::doLookUp(const Sample& sample, const IntersectionContext&) const
 {
-	const TScalar f = static_cast<TScalar>(sample.frequency());
+	const TWavelength c0 = 299792458; // speed of light in vacuum
+	const TScalar f = static_cast<TScalar>(c0 / sample.wavelength());
 	return XYZ(f, f, f);
 }
 

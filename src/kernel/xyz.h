@@ -173,48 +173,11 @@ inline bool operator==(const XYZ& a, const XYZ& b)
 	return a.x == b.x && a.y == b.y && a.z == b.z;
 }
 
-class LIAR_KERNEL_DLL Observer
+inline const XYZ chromaticity(const XYZ& xyz)
 {
-public:
-	typedef std::pair<TFrequency, TFrequency> TFrequencyRange;
-
-	template <typename InputIteratorWavelength, typename InputIteratorXYZ>
-	Observer(InputIteratorWavelength firstW, InputIteratorWavelength lastW, InputIteratorXYZ firstXYZ)
-	{
-		while (firstW != lastW)
-		{
-			nodes_.push_back(Node(*firstW++, *firstXYZ++));
-		}
-		init();
-	}
-
-	const TFrequencyRange frequencyRange() const;
-	const XYZ tristimulus(TFrequency frequency) const;
-	const XYZ chromaticity(TFrequency frequency) const;
-	TFrequency sample(const XYZ& power, TScalar sample, XYZ& chromaticity, TScalar& pdf) const;
-
-private:
-	struct Node
-	{
-		TScalar wavelength;
-		XYZ xyz;
-		XYZ dxyz_dw;
-		XYZ cdf;
-		Node(TScalar w, XYZ xyz): wavelength(w), xyz(xyz) {}
-	};
-	typedef std::vector<Node> TNodes;
-
-	void init();
-
-	TNodes nodes_;
-};
-
-LIAR_KERNEL_DLL const XYZ chromaticity(const XYZ& xyz);
-
-LIAR_KERNEL_DLL const Observer& standardObserver();
-LIAR_KERNEL_DLL const XYZ tristimulus(TFrequency frequency);
-LIAR_KERNEL_DLL const XYZ chromaticity(TFrequency frequency);
-LIAR_KERNEL_DLL TFrequency sampleFrequency(const XYZ& power, TScalar sample, XYZ& chromaticity, TScalar& pdf);
+	const TScalar sum = xyz.x + xyz.y + xyz.z;
+	return sum == 0 ? 0 : xyz / sum;	
+}
 
 }
 }

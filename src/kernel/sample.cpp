@@ -62,9 +62,9 @@ TTime Sample::time() const
 }
 
 
-TScalar Sample::frequency() const
+TWavelength Sample::wavelength() const
 {
-	return frequency_;
+	return wavelength_;
 }
 
 

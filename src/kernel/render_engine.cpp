@@ -366,7 +366,6 @@ void RenderEngine::Consumer::operator()(const Task& iTask)
 				TScalar alpha, tIntersection;
 				const XYZ radiance = rayTracer_->castRay(sample, primaryRay, tIntersection, alpha);
 				const TScalar depth = engine_->camera_->asDepth(primaryRay, tIntersection);
-				const XYZ freqFilter(3 * chromaticity(sample.frequency()));
 
 				outputSamples[outputIndex++] = OutputSample(sample, radiance, depth, alpha);
 				if (outputIndex == outputSize)

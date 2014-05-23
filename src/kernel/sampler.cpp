@@ -118,7 +118,7 @@ void Sampler::sample(const TResolution2D& pixel, size_t subPixel, const TimePeri
 	doSampleScreen(pixel, subPixel, sample.screenCoordinate_);
 	doSampleLens(pixel, subPixel, sample.lensCoordinate_);
 	doSampleTime(pixel, subPixel, period, sample.time_);
-	doSampleFrequency(pixel, subPixel, sample.frequency_);
+	doSampleWavelength(pixel, subPixel, sample.wavelength_);
 
 	sample.subSequences1D_.resize(totalSubSequenceSize1D_);
 	const size_t n1D = subSequenceSize1D_.size();

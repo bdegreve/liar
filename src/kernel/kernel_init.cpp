@@ -29,6 +29,7 @@
 #include "camera.h"
 #include "image_codec.h"
 #include "medium.h"
+#include "observer.h"
 #include "perspective_projection.h"
 #include "projection.h"
 #include "sampler.h"
@@ -76,6 +77,7 @@ PY_MODULE_CLASS(kernel, liar::kernel::Camera)
 PY_MODULE_CLASS(kernel, liar::kernel::ImageCodec)
 PY_MODULE_CLASS(kernel, liar::kernel::ImageCodecLass)
 PY_MODULE_CLASS(kernel, liar::kernel::Medium)
+PY_MODULE_CLASS(kernel, liar::kernel::Observer)
 PY_MODULE_CLASS(kernel, liar::kernel::Projection)
 	PY_MODULE_CLASS(kernel, liar::kernel::PerspectiveProjection)
 PY_MODULE_CLASS(kernel, liar::kernel::RgbSpace)
@@ -142,6 +144,7 @@ void kernelPostInject(PyObject*)
 {
 	PY_INJECT_OBJECT_IN_MODULE_EX(liar::kernel::CIEXYZ, kernel, "CIEXYZ")
 	PY_INJECT_OBJECT_IN_MODULE_EX(liar::kernel::sRGB, kernel, "sRGB")
+	PY_INJECT_OBJECT_IN_MODULE_EX(liar::kernel::standardObserver(), kernel, "standardObserver")
 
 	LASS_COUT << liar::name << " v" << liar::version << " ("
 		<< LASS_LIB_PLATFORM "_" LASS_LIB_COMPILER LASS_LIB_DEBUG << ")\n"

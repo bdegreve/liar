@@ -78,7 +78,7 @@ using namespace lass;
 typedef LIAR_SCALAR TScalar;
 typedef LIAR_TIME TTime;
 typedef LIAR_TIME_DELTA TTimeDelta;
-typedef TScalar TFrequency;
+typedef TScalar TWavelength;
 
 typedef num::NumTraits<TScalar> TNumTraits;
 

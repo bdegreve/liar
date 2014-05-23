@@ -71,7 +71,7 @@ private:
 	virtual void doSampleScreen(const TResolution2D& pixel, size_t subPixel, TSample2D& screenCoordinate);
 	virtual void doSampleLens(const TResolution2D& pixel, size_t subPixel, TSample2D& lensCoordinate);
 	virtual void doSampleTime(const TResolution2D& pixel, size_t subPixel, const TimePeriod& period, TTime& time);
-	virtual void doSampleFrequency(const TResolution2D& pixel, size_t subPixel, TScalar& frequency);
+	virtual void doSampleWavelength(const TResolution2D& pixel, size_t subPixel, TScalar& wavelength);
 	virtual void doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, TSubSequenceId id, TSample1D* first, TSample1D* last);
 	virtual void doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, TSubSequenceId id, TSample2D* first, TSample2D* last);
 
@@ -96,7 +96,7 @@ private:
 	TStrata lensStrataX_;
 	TStrata lensStrataY_;
 	TStrata timeStrata_;
-	TStrata frequencyStrata_;
+	TStrata wavelengthStrata_;
 	TSubSequence2DList subSequences2d_;
 	size_t samplesPerPixel_;
 	bool isJittered_;

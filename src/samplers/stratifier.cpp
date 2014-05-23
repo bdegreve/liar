@@ -24,6 +24,7 @@
 #include "samplers_common.h"
 #include "stratifier.h"
 #include "../kernel/xyz.h"
+#include "../kernel/observer.h"
 #include <lass/stde/range_algorithm.h>
 
 namespace liar
@@ -131,7 +132,7 @@ void Stratifier::doSetSamplesPerPixel(size_t samplesPerPixel)
 	stratum1DSize_ = TNumTraits::one / strataPerPixel_;
 	stratum2DSize_ = TVector2D(TNumTraits::one, TNumTraits::one) / static_cast<TScalar>(strataPerAxis);
 	timeStrata_.resize(strataPerPixel_);
-	frequencyStrata_.resize(strataPerPixel_);
+	wavelengthStrata_.resize(strataPerPixel_);
 	screenStrata_.resize(strataPerPixel_);
 	lensStrata_.resize(strataPerPixel_);
 	subSequences2d_.clear();
@@ -139,7 +140,7 @@ void Stratifier::doSetSamplesPerPixel(size_t samplesPerPixel)
 	for (size_t i = 0; i < strataPerPixel_; ++i)
 	{
 		timeStrata_[i] = static_cast<TSample1D>(i);
-		frequencyStrata_[i] = static_cast<TSample1D>(i);
+		wavelengthStrata_[i] = static_cast<TSample1D>(i);
 	}
 
 	for (size_t j = 0; j < strataPerAxis; ++j)
@@ -189,13 +190,13 @@ void Stratifier::doSampleTime(const TResolution2D& LASS_UNUSED(pixel), size_t su
 
 
 
-void Stratifier::doSampleFrequency(const TResolution2D& LASS_UNUSED(pixel), size_t subPixel, TScalar& frequency)
+void Stratifier::doSampleWavelength(const TResolution2D& LASS_UNUSED(pixel), size_t subPixel, TWavelength& wavelength)
 {
 	LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
-	const TScalar phi = sampleStratum(subPixel, frequencyStrata_);
+	const TScalar phi = sampleStratum(subPixel, wavelengthStrata_);
 	XYZ xyz;
 	TScalar pdf;
-	frequency = standardObserver().sample(XYZ(1, 1, 1), phi, xyz, pdf);
+	wavelength = standardObserver().sample(XYZ(1, 1, 1), phi, xyz, pdf);
 }
 
 
