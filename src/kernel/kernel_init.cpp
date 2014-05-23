@@ -48,12 +48,13 @@
 #include <lass/io/logger.h>
 #include <lass/stde/extended_string.h>
 #include <lass/util/process.h>
+#include <lass/python/utilities.h>
 
 void license()
 {
 	std::string text = lass::stde::replace_all(
 		liar::license, std::string("\n"), std::string("\\n"));
-		PyRun_SimpleString( std::string("print \"" + text + "\"\n").c_str());
+	lass::python::execute("print \"" + text + "\"\n");
 }
 
 liar::TScalar tolerance()
