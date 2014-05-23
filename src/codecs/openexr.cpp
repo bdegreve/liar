@@ -141,12 +141,15 @@ private:
 		return static_cast<Handle*>(handle)->rgbSpace;
 	}
 
-	void doReadLine(TImageHandle handle, kernel::XYZ* xyz, TScalar* alpha) const
+	void doReadLine(TImageHandle handle, prim::ColorRGBA* out) const
 	{
+		const prim::ColorRGBA nodata(0, 0, 0, 0);
+
 		Handle* pimpl = static_cast<Handle*>(handle);
 		const Imath::Box2i& dispWin = pimpl->input->displayWindow();
 		const Imath::Box2i& dataWin = pimpl->input->dataWindow();
 		LASS_ENFORCE(pimpl->y <= dispWin.max.y);
+
 		if (pimpl->y >= dataWin.min.y && pimpl->y <= dataWin.max.y)
 		{
 			Handle::TLine& line = pimpl->line;
@@ -154,45 +157,34 @@ private:
 			pimpl->input->readPixels(pimpl->y);
 			for (int x = dispWin.min.x; x <= dispWin.max.x; ++x)
 			{
-				TScalar a = 0;
 				if (x >= dataWin.min.x && x <= dataWin.max.x)
 				{
-					const Imf::Rgba& rgba = line[x - dataWin.min.x];
-					*xyz++ = pimpl->rgbSpace->convert(prim::ColorRGBA(rgba.r, rgba.g, rgba.b, rgba.a), a);
+					const Imf::Rgba& pixel = line[x - dataWin.min.x];
+					*out++ = prim::ColorRGBA(pixel.r, pixel.g, pixel.b, pixel.a);
 				}
 				else
 				{
-					*xyz++ = kernel::XYZ();
-				}
-				if (alpha)
-				{
-					*alpha++ = a;
+					*out++ = nodata;
 				}
 			}
 		}
 		else
 		{
-			std::fill_n(xyz, pimpl->resolution.x, kernel::XYZ());
-			if (alpha)
-			{
-				std::fill_n(alpha, pimpl->resolution.x, 0);
-			}
+			std::fill_n(out, pimpl->resolution.x, nodata);
 		}
 		++pimpl->y;
 	}
 
-	void doWriteLine(TImageHandle handle, const kernel::XYZ* xyz, const TScalar* alpha) const
+	void doWriteLine(TImageHandle handle, const prim::ColorRGBA* in) const
 	{
 		Handle* pimpl = static_cast<Handle*>(handle);
 		Imf::RgbaOutputFile& output = *pimpl->output;
-		const kernel::RgbSpace& rgbSpace = *pimpl->rgbSpace;
 		Handle::TLine& line = pimpl->line;
 		const size_t n = pimpl->resolution.x;
 		for (size_t x = 0; x < n; ++x)
 		{
-			const TScalar a = alpha ? *alpha++ : 1;
-			const prim::ColorRGBA rgba = rgbSpace.convert(*xyz++, a);
-			line[x] = Imf::Rgba(rgba.r, rgba.g, rgba.b, rgba.a);
+			const prim::ColorRGBA& pixel = *in++;
+			line[x] = Imf::Rgba(pixel.r, pixel.g, pixel.b, pixel.a);
 		}
 		output.setFrameBuffer(&line[0] - output.currentScanLine() * line.size(), 1, line.size());
 		output.writePixels(1);

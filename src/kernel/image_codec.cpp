@@ -71,22 +71,31 @@ const TImageCodecPtr& imageCodec(const std::wstring& extension)
 }
 
 
-void transcodeImage(const std::wstring& source, const std::wstring& dest, const TRgbSpacePtr& sourceSpace, const TRgbSpacePtr& destSpace)
+void transcodeImage(const std::wstring& source, const std::wstring& dest, TRgbSpacePtr sourceSpace, const TRgbSpacePtr& destSpace)
 {
 	ImageReader reader(source, sourceSpace);
+	sourceSpace = reader.rgbSpace(); // use actual source space
 	const size_t nx = reader.resolution().x;
 	const size_t ny = reader.resolution().y;
 	if (nx == 0 || ny == 0)
 	{
 		return;
 	}
-	ImageWriter writer(dest, reader.resolution(), destSpace ? destSpace : reader.rgbSpace());
-	std::vector<XYZ> xyz(nx);
-	std::vector<TScalar> alpha(nx);
+	ImageWriter writer(dest, reader.resolution(), destSpace ? destSpace : sourceSpace);
+	std::vector<prim::ColorRGBA> line(nx);
 	for (size_t i = 0; i < ny; ++i)
 	{
-		reader.readLine(&xyz[0], &alpha[0]);
-		writer.writeLine(&xyz[0], &alpha[0]);
+		reader.readLine(&line[0]);
+		if (destSpace)
+		{
+			for (size_t k = 0; k < nx; ++k)
+			{
+				TScalar alpha;
+				const XYZ xyz = sourceSpace->convert(line[k], alpha);
+				line[k] = destSpace->convert(xyz, alpha);
+			}
+		}
+		writer.writeLine(&line[0]);
 	}
 }
 
@@ -107,13 +116,13 @@ ImageReader::~ImageReader()
 	handle_ = 0;
 }
 
-void ImageReader::readFull(XYZ* xyz, TScalar* alpha) const
+void ImageReader::readFull(prim::ColorRGBA* out) const
 {
 	const TResolution2D res = resolution();
 	const size_t size = res.x * res.y;
 	for (size_t k = 0; k < size; k += res.x)
 	{
-		readLine(xyz + k, alpha ? alpha + k : 0);
+		readLine(out + k);
 	}
 }
 
@@ -136,13 +145,13 @@ ImageWriter::~ImageWriter()
 	handle_ = 0;
 }
 
-void ImageWriter::writeFull(XYZ* xyz, TScalar* alpha) const
+void ImageWriter::writeFull(const prim::ColorRGBA* in) const
 {
 	const TResolution2D res = resolution();
 	const size_t size = res.x * res.y;
 	for (size_t k = 0; k < size; k += res.x)
 	{
-		writeLine(xyz + k, alpha ? alpha + k : 0);
+		writeLine(in + k);
 	}
 }
 
@@ -269,18 +278,14 @@ const TRgbSpacePtr ImageCodecLass::doRgbSpace(TImageHandle handle) const
 
 
 
-void ImageCodecLass::doReadLine(
-		TImageHandle handle, XYZ* xyz, TScalar* alpha) const
+void ImageCodecLass::doReadLine(TImageHandle handle, prim::ColorRGBA* out) const
 {
 	impl::LassImage* pimpl = static_cast<impl::LassImage*>(handle);
 	const io::Image& image = pimpl->image;
-	const RgbSpace& space = *pimpl->rgbSpace;
 	LASS_ENFORCE(pimpl->y < image.rows());
 	for (size_t x = 0; x < image.cols(); ++x)
 	{
-		TScalar a;
-		*xyz++ = space.convert(image(pimpl->y, x), a);
-		if (alpha) *alpha++ = a;
+		*out++ = image(pimpl->y, x);
 	}
 	++pimpl->y;
 }
@@ -288,16 +293,14 @@ void ImageCodecLass::doReadLine(
 
 
 void ImageCodecLass::doWriteLine(
-		TImageHandle handle, const XYZ* xyz, const TScalar* alpha) const
+		TImageHandle handle, const prim::ColorRGBA* in) const
 {
 	impl::LassImage* pimpl = static_cast<impl::LassImage*>(handle);
 	io::Image& image = pimpl->image;
-	const RgbSpace& space = *pimpl->rgbSpace;
 	LASS_ENFORCE(pimpl->y < image.rows());
 	for (size_t x = 0; x < image.cols(); ++x)
 	{
-		const TScalar a = alpha ? *alpha++ : 1;
-		image(pimpl->y, x) = space.convert(*xyz++, a);
+		image(pimpl->y, x) = *in++;
 	}
 	++pimpl->y;
 }

@@ -65,13 +65,13 @@ public:
 		return doRgbSpace(handle);
 	}
 
-	void readLine(TImageHandle handle, XYZ* xyz, TScalar* alpha) const
+	void readLine(TImageHandle handle, prim::ColorRGBA* out) const
 	{
-		doReadLine(handle, xyz, alpha);
+		doReadLine(handle, out);
 	}
-	void writeLine(TImageHandle handle, const XYZ* xyz, const TScalar* alpha) const
+	void writeLine(TImageHandle handle, const prim::ColorRGBA* in) const
 	{
-		doWriteLine(handle, xyz, alpha);
+		doWriteLine(handle, in);
 	}
 
 private:
@@ -82,8 +82,8 @@ private:
 	virtual const TResolution2D doResolution(TImageHandle handle) const = 0;
 	virtual const TRgbSpacePtr doRgbSpace(TImageHandle handle) const = 0;
 	
-	virtual void doReadLine(TImageHandle handle, XYZ* xyz, TScalar* alpha) const = 0;
-	virtual void doWriteLine(TImageHandle handle, const XYZ* xyz, const TScalar* alpha) const = 0;
+	virtual void doReadLine(TImageHandle handle, prim::ColorRGBA* out) const = 0;
+	virtual void doWriteLine(TImageHandle handle, const prim::ColorRGBA* in) const = 0;
 };
 
 typedef python::PyObjectPtr<ImageCodec>::Type TImageCodecPtr;
@@ -92,7 +92,7 @@ typedef std::map<std::wstring, TImageCodecPtr> TImageCodecMap;
 LIAR_KERNEL_DLL TImageCodecMap& LASS_CALL imageCodecs();
 LIAR_KERNEL_DLL const TImageCodecPtr& LASS_CALL imageCodec(const std::wstring& extension);
 
-LIAR_KERNEL_DLL void transcodeImage(const std::wstring& source, const std::wstring& dest, const TRgbSpacePtr& sourceSpace, const TRgbSpacePtr& destSpace);
+LIAR_KERNEL_DLL void transcodeImage(const std::wstring& source, const std::wstring& dest, TRgbSpacePtr sourceSpace, const TRgbSpacePtr& destSpace);
 
 class LIAR_KERNEL_DLL ImageReader: util::NonCopyable
 {
@@ -103,8 +103,8 @@ public:
 
 	const TResolution2D resolution() const { return codec_->resolution(handle_); }
 	const TRgbSpacePtr rgbSpace() const { return codec_->rgbSpace(handle_); }
-	void readLine(XYZ* xyz, TScalar* alpha = 0) const { codec_->readLine(handle_, xyz, alpha); }
-	void readFull(XYZ* xyz, TScalar* alpha = 0) const;
+	void readLine(prim::ColorRGBA* out) const { codec_->readLine(handle_, out); }
+	void readFull(prim::ColorRGBA* out) const;
 private:
 	TImageCodecPtr codec_;
 	ImageCodec::TImageHandle handle_;
@@ -121,8 +121,8 @@ public:
 
 	const TResolution2D resolution() const { return codec_->resolution(handle_); }
 	const TRgbSpacePtr rgbSpace() const { return codec_->rgbSpace(handle_); }
-	void writeLine(const XYZ* xyz, const TScalar* alpha) const { codec_->writeLine(handle_, xyz, alpha); }
-	void writeFull(XYZ* xyz, TScalar* alpha = 0) const;
+	void writeLine(const prim::ColorRGBA* in) const { codec_->writeLine(handle_, in); }
+	void writeFull(const prim::ColorRGBA* in) const;
 private:
 	TImageCodecPtr codec_;
 	ImageCodec::TImageHandle handle_;
@@ -145,8 +145,8 @@ private:
 
 	virtual const TResolution2D doResolution(TImageHandle handle) const;
 	virtual const TRgbSpacePtr doRgbSpace(TImageHandle handle) const;
-	virtual void doReadLine(TImageHandle handle, XYZ* xyz, TScalar* alpha) const;	
-	virtual void doWriteLine(TImageHandle handle, const XYZ* xyz, const TScalar* alpha) const;
+	virtual void doReadLine(TImageHandle handle, prim::ColorRGBA* out) const;	
+	virtual void doWriteLine(TImageHandle handle, const prim::ColorRGBA* in) const;
 
 	TRgbSpacePtr defaultCodecSpace_;
 	bool hasGammaCorrection_;

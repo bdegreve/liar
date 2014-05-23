@@ -113,13 +113,28 @@ void Image::loadFile(const std::wstring& filename, const TRgbSpacePtr& rgbSpace)
 {
 	ImageReader reader(filename, rgbSpace, "");
 	TResolution2D resolution = reader.resolution();
-	TPixels image(new TPixel[resolution.x * resolution.y]);
-	reader.readFull(image.get());
-
+	if (resolution.x == 0 || resolution.y == 0)
+	{
+		LASS_THROW("bad image resolution");
+	}
 	filename_ = filename;
-	rgbSpace_ = rgbSpace;
-	image_.swap(image);
 	resolution_ = resolution;
+	rgbSpace_ = reader.rgbSpace();
+
+	TPixels image(new TPixel[resolution.x * resolution.y]);
+	std::vector<prim::ColorRGBA> line(resolution.x);
+	TPixel* pixel = &image[0];
+	for (size_t i = 0; i < resolution.y; ++i)
+	{
+		reader.readLine(&line[0]);
+		for (size_t k = 0; k < resolution.x; ++k)
+		{
+			*pixel++ = rgbSpace_->convert(line[k]);
+		}
+	}
+
+	image_.swap(image);
+
 	currentMipMapping_ = mmUninitialized;
 	mipMaps_.clear();
 }

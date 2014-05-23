@@ -272,22 +272,17 @@ private:
 		return static_cast<Handle*>(handle)->rgbSpace;
 	}
 
-	void doReadLine(TImageHandle handle, kernel::XYZ* xyz, TScalar* alpha) const
+	void doReadLine(TImageHandle handle, prim::ColorRGBA* out) const
 	{
 		ReadHandle* pimpl = static_cast<ReadHandle*>(handle);
 		LASS_ENFORCE(pimpl->cinfo.output_scanline < pimpl->cinfo.output_height);
 		JSAMPLE* line = &pimpl->line[0];
 		jpeg_read_scanlines(&pimpl->cinfo, &line, 1);
-		const kernel::RgbSpace& rgbSpace = *pimpl->rgbSpace;
 		const size_t n = pimpl->line.size();
 		for (size_t k = 0; k < n; k += 3)
 		{
-			const prim::ColorRGBA rgb(line[k] / 255.f, line[k + 1] / 255.f, line[k + 2] / 255.f);
-			*xyz++ = rgbSpace.convert(rgb);
-		}
-		if (alpha)
-		{
-			std::fill_n(alpha, pimpl->resolution.x, 1);
+			const prim::ColorRGBA pixel(line[k] / 255.f, line[k + 1] / 255.f, line[k + 2] / 255.f, 1.f);
+			*out++ = pixel;
 		}
 		if (pimpl->cinfo.output_scanline == pimpl->cinfo.output_height)
 		{
@@ -295,19 +290,18 @@ private:
 		}
 	}
 
-	void doWriteLine(TImageHandle handle, const kernel::XYZ* xyz, const TScalar* alpha) const
+	void doWriteLine(TImageHandle handle, const prim::ColorRGBA* in) const
 	{
 		WriteHandle* pimpl = static_cast<WriteHandle*>(handle);
 		LASS_ENFORCE(pimpl->cinfo.next_scanline < pimpl->cinfo.image_height);
 		JSAMPLE* line = &pimpl->line[0];
-		const kernel::RgbSpace& rgbSpace = *pimpl->rgbSpace;
 		const size_t n = pimpl->line.size();
 		for (size_t k = 0; k < n; k += 3)
 		{
-			const prim::ColorRGBA rgba = rgbSpace.convert(*xyz++, alpha ? *alpha++ : 1);
-			line[k] = static_cast<JSAMPLE>(num::clamp<TScalar>(255 * rgba.r, 0, 255));
-			line[k + 1] = static_cast<JSAMPLE>(num::clamp<TScalar>(255 * rgba.g, 0, 255));
-			line[k + 2] = static_cast<JSAMPLE>(num::clamp<TScalar>(255 * rgba.b, 0, 255));
+			const prim::ColorRGBA& pixel = *in++;
+			line[k] = static_cast<JSAMPLE>(num::clamp<TScalar>(255 * pixel.r, 0, 255));
+			line[k + 1] = static_cast<JSAMPLE>(num::clamp<TScalar>(255 * pixel.g, 0, 255));
+			line[k + 2] = static_cast<JSAMPLE>(num::clamp<TScalar>(255 * pixel.b, 0, 255));
 		}
 		jpeg_write_scanlines(&pimpl->cinfo, &line, 1);
 		if (pimpl->cinfo.next_scanline == pimpl->cinfo.image_height)

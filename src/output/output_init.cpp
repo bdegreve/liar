@@ -28,9 +28,10 @@
 // keep in alphabetical order please! [Bramz]
 //
 #include "depth_channel.h"
-#include "display.h"
 #include "filter_mitchell.h"
-#include "image.h"
+#include "raster.h"
+#	include "display.h"
+#	include "image.h"
 #include "socket_client.h"
 #include "socket_host.h"
 #include "splitter.h"
@@ -46,11 +47,12 @@ PY_DECLARE_MODULE_DOC(output,
 // keep in alphabetical order please! [Bramz]
 //
 PY_MODULE_CLASS(output, DepthChannel)
-#if LIAR_OUTPUT_HAVE_PIXELTOASTER_H
-PY_MODULE_CLASS(output, Display)
-#endif
 PY_MODULE_CLASS(output, FilterMitchell)
-PY_MODULE_CLASS(output, Image)
+PY_MODULE_CLASS(output, Raster)
+#if LIAR_OUTPUT_HAVE_PIXELTOASTER_H
+	PY_MODULE_CLASS(output, Display)
+#endif
+	PY_MODULE_CLASS(output, Image)
 PY_MODULE_CLASS(output, SocketClient)
 PY_MODULE_CLASS(output, SocketHost)
 PY_MODULE_CLASS(output, Splitter)

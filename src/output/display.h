@@ -32,8 +32,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_OUTPUT_DISPLAY_H
 
 #include "output_common.h"
-#include "../kernel/render_target.h"
-#include "../kernel/rgb_space.h"
+#include "raster.h"
 #include <lass/prim/aabb_2d.h>
 #include <lass/stde/extended_string.h>
 #include <lass/util/dictionary.h>
@@ -55,60 +54,26 @@ namespace output
 {
 
 
-class LIAR_OUTPUT_DLL Display: public RenderTarget, PixelToaster::Listener
+class LIAR_OUTPUT_DLL Display: public Raster, PixelToaster::Listener
 {
-    PY_HEADER(RenderTarget)
+    PY_HEADER(Raster)
 public:
 
 	Display(const std::string& title, const TResolution2D& resolution);
 	~Display();
 
 	const std::string& title() const;
-	const TRgbSpacePtr& rgbSpace() const;
-	const std::string toneMapping() const;
-	TScalar exposure() const;
-	TScalar exposureCorrection() const;
-	bool autoExposure() const;
-	TScalar middleGrey() const;
 	bool showHistogram() const;
 	bool autoUpdate() const;
 
-	void setRgbSpace(const TRgbSpacePtr& rgbSpace);
-	void setToneMapping(const std::string& mode);
-	void setExposure(TScalar fStops);
-	void setExposureCorrection(TScalar stops);
-	void setAutoExposure(bool enable = true);
-	void setMiddleGrey(TScalar grey);
 	void setShowHistogram(bool enable = true);
 	void setAutoUpdate(bool enable = true);
 
-	void testGammut();
-
 private:
 
-	typedef std::vector<XYZ> TRenderBuffer;
-	typedef std::vector<TScalar> TWeightBuffer;
 	typedef std::vector<PixelToaster::FloatingPointPixel> TDisplayBuffer;
-	typedef prim::Aabb2D<size_t> TDirtyBox;
 
-	enum ToneMapping
-	{
-		tmLinear = 0,
-		tmCompressY,
-		tmCompressRGB,
-		tmReinhard2002Y,
-		tmReinhard2002RGB,
-		tmExponentialY,
-		tmExponentialRGB,
-		tmDuikerY,
-		tmDuikerRGB,
-		numToneMapping
-	};
-	typedef util::Dictionary<std::string, ToneMapping> TToneMappingDictionary;
-
-	const TResolution2D doResolution() const;
 	void doBeginRender();
-	void doWriteRender(const OutputSample* first, const OutputSample* last);
 	void doEndRender();
 	bool doIsCanceling() const;
 	
@@ -118,46 +83,25 @@ private:
 	bool onClose(PixelToaster::DisplayInterface& display);
 
 	void displayLoop();
-	void copyToDisplayBuffer();
-	TScalar averageSceneLuminance() const;
-	void tonemap(const TDirtyBox& box);
+	void copyToDisplayBuffer(const TDirtyBox& box);
 	void histogram();
 	void cancel();
 	void close();
 	const std::string makeTitle() const;
 
-	static TToneMappingDictionary makeToneMappingDictionary();
-
 	Listener listener_;
-	TRenderBuffer renderBuffer_;
-	TWeightBuffer totalWeight_;
 	TDisplayBuffer displayBuffer_;
 	util::ScopedPtr<util::Thread> displayLoop_;
-	util::CriticalSection renderBufferLock_;
 	util::Condition signal_;
 	std::string title_;
-	TDirtyBox renderDirtyBox_;
 	TDirtyBox displayDirtyBox_;
-	TDirtyBox allTimeDirtyBox_;
-	TResolution2D resolution_;
 	TResolution2D currentResolution_;
-	TRgbSpacePtr rgbSpace_;
-	TScalar maxSceneLuminance_;
-	TScalar gain_;
-	TScalar middleGrey_;
-	int exposure_;
-	int exposureCorrection_;
-	ToneMapping toneMapping_;
-	bool autoExposure_;
 	bool showHistogram_;
 	bool wasShowingHistogram_;
-	bool refreshTitle_;
 	bool autoUpdate_;
 	volatile bool isCanceling_;
 	volatile bool isClosing_;
 	TPoint2D beginDrag_;
-
-	static TToneMappingDictionary toneMappingDictionary_;
 };
 
 
