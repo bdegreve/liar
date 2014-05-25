@@ -110,12 +110,7 @@ inline XYZ max(const XYZ& a, const XYZ& b)
 
 inline TScalar average(const XYZ& a)
 {
-	return a.x + a.y + a.z / 3;
-}
-
-inline TScalar positiveAverage(const XYZ& a)
-{
-	return std::max<TScalar>(average(a), 0);
+	return (a.x + a.y + a.z) / 3;
 }
 
 inline TScalar dot(const XYZ& a, const XYZ& b)

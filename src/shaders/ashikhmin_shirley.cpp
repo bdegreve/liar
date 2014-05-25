@@ -165,8 +165,8 @@ TBsdfPtr AshikhminShirley::doBsdf(const Sample& sample, const IntersectionContex
 {
 	const XYZ Rd = diffuse_->lookUp(sample, context);
 	const XYZ Rs = specular_->lookUp(sample, context);
-	const TScalar nu = positiveAverage(specularPowerU_->lookUp(sample, context));
-	const TScalar nv = positiveAverage(specularPowerV_->lookUp(sample, context));
+	const TScalar nu = std::max<TScalar>(average(specularPowerU_->lookUp(sample, context)), 0);
+	const TScalar nv = std::max<TScalar>(average(specularPowerV_->lookUp(sample, context)), 0);
 	return TBsdfPtr(new Bsdf(sample, context, Rd, Rs, nu, nv));
 }
 
