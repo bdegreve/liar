@@ -45,6 +45,10 @@ PY_CLASS_MEMBER_R_DOC(RgbSpace, green, "(x_green, y_green)");
 PY_CLASS_MEMBER_R_DOC(RgbSpace, blue, "(x_blue, y_blue)");
 PY_CLASS_MEMBER_R_DOC(RgbSpace, white, "(x_white, y_white)");
 PY_CLASS_MEMBER_R_DOC(RgbSpace, gamma, "float");
+PY_CLASS_METHOD_QUALIFIED_NAME_1(RgbSpace, convert, const XYZ, const RgbSpace::RGBA&, "toXYZ")
+PY_CLASS_METHOD_QUALIFIED_NAME_1(RgbSpace, convert, const RgbSpace::RGBA, const XYZ&, "toRGBA")
+PY_CLASS_METHOD_QUALIFIED_NAME_1(RgbSpace, linearConvert, const XYZ, const RgbSpace::RGBA&, "toXYZlinear")
+PY_CLASS_METHOD_QUALIFIED_NAME_1(RgbSpace, linearConvert, const RgbSpace::RGBA, const XYZ&, "toRGBAlinear")
 PY_CLASS_METHOD_DOC(RgbSpace, linearSpace, "return RGB space with gamma=1");
 PY_CLASS_METHOD_NAME(RgbSpace, operator==, python::methods::_eq_);
 PY_CLASS_METHOD_NAME(RgbSpace, operator!=, python::methods::_ne_);
