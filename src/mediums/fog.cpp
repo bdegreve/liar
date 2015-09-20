@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -92,28 +92,28 @@ void Fog::setAssymetry(TScalar g)
  *  -> sigma_a = (1 - color) * sigma_e
  *  @endcode
  */
-const XYZ& Fog::color() const
+const Spectrum& Fog::color() const
 {
 	return color_;
 }
 
 
 
-void Fog::setColor(const XYZ& color)
+void Fog::setColor(const Spectrum& color)
 {
 	color_ = color;
 }
 
 
 
-const XYZ& Fog::emission() const
+const Spectrum& Fog::emission() const
 {
 	return emission_;
 }
 
 
 
-void Fog::setEmission(const XYZ& emission)
+void Fog::setEmission(const Spectrum& emission)
 {
 	emission_ = emission;
 }
@@ -140,17 +140,17 @@ size_t Fog::doNumScatterSamples() const
 
 
 
-const XYZ Fog::doTransmittance(const BoundedRay& ray) const
+const Spectrum Fog::doTransmittance(const BoundedRay& ray) const
 {
 	const TScalar d = ray.farLimit() - ray.nearLimit();
 	LASS_ASSERT(d >= 0 && extinction_ >= 0);
 	const TScalar thickness = extinction_ * d;
-	return XYZ(num::exp(-thickness)); 
+	return Spectrum(num::exp(-thickness));
 }
 
 
 
-const XYZ Fog::doEmission(const BoundedRay& ray) const
+const Spectrum Fog::doEmission(const BoundedRay& ray) const
 {
 	const TScalar d = ray.farLimit() - ray.nearLimit();
 	LASS_ASSERT(d >= 0 && extinction_ >= 0);
@@ -166,31 +166,31 @@ const XYZ Fog::doEmission(const BoundedRay& ray) const
 
 
 
-const XYZ Fog::doScatterOut(const BoundedRay& ray) const
+const Spectrum Fog::doScatterOut(const BoundedRay& ray) const
 {
 	return extinction_ * transmittance(ray);
 }
 
 
 
-const XYZ Fog::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const Spectrum Fog::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	const TScalar dMax = ray.farLimit() - ray.nearLimit();
 	const TScalar attMax = 1 - num::exp(-extinction_ * dMax);
 	if (attMax <= 0)
 	{
 		pdf = 0;
-		return XYZ();
+		return Spectrum();
 	}
 	TScalar p;
 	const TScalar d = num::uniformToExponential(sample * attMax, extinction_, p);
 	tScatter = std::min(ray.nearLimit() + d, ray.farLimit());
 	pdf = p / attMax;
-	return XYZ(p);
+	return Spectrum(p);
 }
 
 
-const XYZ Fog::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const Spectrum Fog::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	pdf = 1;
 	const TScalar dMax = ray.farLimit() - ray.nearLimit();
@@ -200,17 +200,17 @@ const XYZ Fog::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRa
 		// full transmission
 		tScatter = ray.farLimit();
 		pdf = num::exp(-extinction_ * dMax); // = 1 - cdf(tMax);
-		return XYZ(pdf);
+		return Spectrum(pdf);
 	}
 
 	// the photon has hit a particle. we always assume it's scattered.
 	// the callee has to russian roulette for absorption himself.
 	tScatter = ray.nearLimit() + d;
-	return XYZ(pdf);
+	return Spectrum(pdf);
 }
 
 
-const XYZ Fog::doPhase(const TPoint3D&, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
+const Spectrum Fog::doPhase(const TPoint3D&, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
 {
 	const TScalar cosTheta = dot(dirIn, dirOut);
 	const TScalar g = assymetry_;
@@ -230,11 +230,11 @@ const XYZ Fog::doPhase(const TPoint3D&, const TVector3D& dirIn, const TVector3D&
 
 
 
-const XYZ Fog::doSamplePhase(const TPoint2D& sample, const TPoint3D&, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
+const Spectrum Fog::doSamplePhase(const TPoint2D& sample, const TPoint3D&, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
 {
 	const TScalar g = assymetry_;
 	const TScalar p = 2 * sample.x - 1;
-	
+
 	TScalar cosTheta = g;
 	pdf = 1;
 	if (g == 0)
@@ -263,7 +263,7 @@ const XYZ Fog::doSamplePhase(const TPoint2D& sample, const TPoint3D&, const TVec
 
 
 
-void Fog::init(TScalar extinction, TScalar assymetry, const XYZ& color, const XYZ& emission, size_t numSamples)
+void Fog::init(TScalar extinction, TScalar assymetry, const Spectrum& color, const Spectrum& emission, size_t numSamples)
 {
 	setExtinction(extinction);
 	setEmission(emission);

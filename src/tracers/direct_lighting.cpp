@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -99,7 +99,7 @@ namespace temp
 
 
 
-const XYZ DirectLighting::doCastRay(
+const Spectrum DirectLighting::doCastRay(
 		const kernel::Sample& sample, const kernel::DifferentialRay& primaryRay,
 		TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const
 {
@@ -115,14 +115,14 @@ const XYZ DirectLighting::doCastRay(
 
 	const BoundedRay mediumRay = bound(primaryRay.centralRay(), primaryRay.centralRay().nearLimit(), tIntersection);
 	LASS_ENFORCE(!mediumRay.isEmpty());
-	XYZ transparency;
-	XYZ result = doShadeMedium(sample, mediumRay, transparency);
+	Spectrum transparency;
+	Spectrum result = doShadeMedium(sample, mediumRay, transparency);
 	if (!transparency || !intersection)
 	{
 		return result;
 	}
 
-	XYZ surfaceResult;
+	Spectrum surfaceResult;
 	IntersectionContext context(*scene(), sample, primaryRay, intersection, generation);
 	if (context.shader())
 	{
@@ -165,7 +165,7 @@ void DirectLighting::doSetState(const TPyObjectPtr&)
 
 
 
-const XYZ DirectLighting::doShadeMedium(const kernel::Sample& sample, const kernel::BoundedRay& ray, XYZ& transparency) const
+const Spectrum DirectLighting::doShadeMedium(const kernel::Sample& sample, const kernel::BoundedRay& ray, Spectrum& transparency) const
 {
 	transparency = mediumStack().transmittance(ray);
 	return mediumStack().emission(ray) + traceSingleScattering(sample, ray);
@@ -173,13 +173,13 @@ const XYZ DirectLighting::doShadeMedium(const kernel::Sample& sample, const kern
 
 
 
-const XYZ DirectLighting::doShadeSurface(
+const Spectrum DirectLighting::doShadeSurface(
 		const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
 		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, bool highQuality) const
 {
 	const TBsdfPtr bsdf = context.bsdf();
 
-	XYZ result;
+	Spectrum result;
 	if (context.rayGeneration() == 0 || !context.object().asLight())
 	{
 		// actually, we block this because currently this is our way to include area lights in the camera rays only.
@@ -195,16 +195,16 @@ const XYZ DirectLighting::doShadeSurface(
 
 
 
-const XYZ DirectLighting::traceDirect(
+const Spectrum DirectLighting::traceDirect(
 		const Sample& sample, const IntersectionContext&, const TBsdfPtr& bsdf,
 		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, bool highQuality) const
 {
 	if (!bsdf)
 	{
-		return XYZ(0);
+		return Spectrum(0);
 	}
 
-	XYZ result;
+	Spectrum result;
 	if (highQuality)
 	{
 		const LightContexts::TIterator end = lights().end();
@@ -236,9 +236,9 @@ const XYZ DirectLighting::traceDirect(
 			{
 				continue;
 			}
-			const XYZ radiance = RayTracer::estimateLightContribution(
-				sample, bsdf, *light, 
-				Sample::TSubSequence2D(lightSamples + k, lightSamples + k + 1), 
+			const Spectrum radiance = RayTracer::estimateLightContribution(
+				sample, bsdf, *light,
+				Sample::TSubSequence2D(lightSamples + k, lightSamples + k + 1),
 				Sample::TSubSequence2D(bsdfSamples + k, bsdfSamples + k + 1),
 				Sample::TSubSequence1D(componentSamples + k, componentSamples + k + 1),
 				point, normal, omega);
@@ -251,7 +251,7 @@ const XYZ DirectLighting::traceDirect(
 
 
 
-const XYZ DirectLighting::traceSpecularAndGlossy(
+const Spectrum DirectLighting::traceSpecularAndGlossy(
 		const Sample& sample, const kernel::DifferentialRay& primaryRay, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, bool highQuality) const
 {
@@ -260,7 +260,7 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 
 	if (!(shader->hasCaps(Bsdf::capsSpecular) || shader->hasCaps(Bsdf::capsGlossy)))
 	{
-		return XYZ();
+		return Spectrum(0);
 	}
 
 	const TVector3D dNormal_dI = prim::normalTransform(context.dNormal_dI(), context.localToWorld());
@@ -268,7 +268,7 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 	const TVector3D dPoint_dI = prim::transform(context.dPoint_dI(), context.localToWorld());
 	const TVector3D dPoint_dJ = prim::transform(context.dPoint_dJ(), context.localToWorld());
 
-	XYZ result;
+	Spectrum result;
 	if (bsdf->hasCaps(Bsdf::capsReflection) && shader->idReflectionSamples() != -1)
 	{
 		const TPoint3D beginCentral = point + 10 * liar::tolerance * normal;
@@ -310,7 +310,7 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 				TRay3D(beginI, directionI),
 				TRay3D(beginJ, directionJ));
 			TScalar t, a;
-			const XYZ reflected = castRay(sample, reflectedRay, t, a, highQuality && (out.usedCaps & Bsdf::capsSpecular));
+			const Spectrum reflected = castRay(sample, reflectedRay, t, a, highQuality && (out.usedCaps & Bsdf::capsSpecular));
 			result += out.value * reflected * (a * num::abs(out.omegaOut.z) / (n * out.pdf));
 		}
 	}
@@ -341,7 +341,7 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 				TRay3D(beginCentral, directionCentral),
 				TRay3D(beginCentral, directionCentral));
 			TScalar t, a;
-			const XYZ transmitted = castRay(sample, transmittedRay, t, a, highQuality && (out.usedCaps & Bsdf::capsSpecular));
+			const Spectrum transmitted = castRay(sample, transmittedRay, t, a, highQuality && (out.usedCaps & Bsdf::capsSpecular));
 			result += out.value * transmitted * (a * num::abs(out.omegaOut.z) / (n * out.pdf));
 		}
 	}
@@ -350,27 +350,27 @@ const XYZ DirectLighting::traceSpecularAndGlossy(
 }
 
 
-const XYZ DirectLighting::traceSingleScattering(const Sample& sample, const kernel::BoundedRay& ray) const
+const Spectrum DirectLighting::traceSingleScattering(const Sample& sample, const kernel::BoundedRay& ray) const
 {
 	typedef Sample::TSubSequence1D::difference_type difference_type;
 
 	const Medium* medium = mediumStack().medium();
 	if (!medium)
 	{
-		return XYZ();
+		return Spectrum();
 	}
 
 	const Sample::TSubSequence1D stepSamples = sample.subSequence1D(medium->idStepSamples()); // these are unsorted!!!
 	const Sample::TSubSequence1D lightSamples = sample.subSequence1D(medium->idLightSamples());
 	const Sample::TSubSequence2D surfaceSamples = sample.subSequence2D(medium->idSurfaceSamples());
 
-	XYZ result;
+	Spectrum result;
 	const difference_type n = stepSamples.size();
 	LASS_ASSERT(lightSamples.size() == n && surfaceSamples.size() == n);
 	for (difference_type k = 0; k < n; ++k)
 	{
 		TScalar tScatter, tPdf;
-		const XYZ transRay = medium->sampleScatterOut(stepSamples[k], ray, tScatter, tPdf);
+		const Spectrum transRay = medium->sampleScatterOut(stepSamples[k], ray, tScatter, tPdf);
 		if (tPdf <= 0)
 		{
 			continue;
@@ -384,17 +384,17 @@ const XYZ DirectLighting::traceSingleScattering(const Sample& sample, const kern
 		}
 		BoundedRay shadowRay;
 		TScalar surfacePdf;
-		const XYZ radiance = light->sampleEmission(sample, surfaceSamples[k], point, shadowRay, surfacePdf);
+		const Spectrum radiance = light->sampleEmission(sample, surfaceSamples[k], point, shadowRay, surfacePdf);
 		if (surfacePdf <= 0 || !radiance)
 		{
 			continue;
 		}
-		const XYZ phase = medium->phase(point, ray.direction(), shadowRay.direction());
+		const Spectrum phase = medium->phase(point, ray.direction(), shadowRay.direction());
 		if (scene()->isIntersecting(sample, shadowRay))
 		{
 			continue;
 		}
-		const XYZ transShadow = medium->transmittance(shadowRay);
+		const Spectrum transShadow = medium->transmittance(shadowRay);
 		result += transRay * transShadow * phase * radiance / (n * tPdf * lightPdf * surfacePdf);
 	}
 

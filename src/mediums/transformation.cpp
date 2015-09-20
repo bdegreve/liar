@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -96,92 +96,92 @@ size_t Transformation::doNumScatterSamples() const
 
 
 
-const XYZ Transformation::doTransmittance(const BoundedRay& ray) const
+const Spectrum Transformation::doTransmittance(const BoundedRay& ray) const
 {
 	if (!child_)
 	{
-		return XYZ(1);
+		return Spectrum(1);
 	}
 	return child_->transmittance(transform(ray, worldToLocal_));
 }
 
 
 
-const XYZ Transformation::doEmission(const BoundedRay& ray) const
+const Spectrum Transformation::doEmission(const BoundedRay& ray) const
 {
 	if (!child_)
 	{
-		return XYZ(0);
+		return Spectrum(0);
 	}
 	return child_->emission(transform(ray, worldToLocal_));
 }
 
 
 
-const XYZ Transformation::doScatterOut(const BoundedRay& ray) const
+const Spectrum Transformation::doScatterOut(const BoundedRay& ray) const
 {
 	if (!child_)
 	{
-		return XYZ(0);
+		return Spectrum(0);
 	}
 	return child_->scatterOut(transform(ray, worldToLocal_));
 }
 
 
 
-const XYZ Transformation::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const Spectrum Transformation::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	if (!child_)
 	{
 		pdf = 0;
-		return XYZ(0);
+		return Spectrum(0);
 	}
 	TScalar scale = 1;
 	const BoundedRay local = transform(ray, worldToLocal_, scale);
-	const XYZ result = child_->sampleScatterOut(sample, local, tScatter, pdf);
+	const Spectrum result = child_->sampleScatterOut(sample, local, tScatter, pdf);
 	tScatter /= scale;
 	return result;
 }
 
 
 
-const XYZ Transformation::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const Spectrum Transformation::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	if (!child_)
 	{
 		tScatter = ray.farLimit();
 		pdf = 1;
-		return XYZ(1);
+		return Spectrum(1);
 	}
 	TScalar scale = 1;
 	const BoundedRay local = transform(ray, worldToLocal_, scale);
-	const XYZ result = child_->sampleScatterOutOrTransmittance(sample, local, tScatter, pdf);
+	const Spectrum result = child_->sampleScatterOutOrTransmittance(sample, local, tScatter, pdf);
 	tScatter /= scale;
 	return result;
 }
 
 
-const XYZ Transformation::doPhase(const TPoint3D& pos, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
+const Spectrum Transformation::doPhase(const TPoint3D& pos, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
 {
 	if (!child_)
 	{
 		pdf = 0;
-		return XYZ(0);
+		return Spectrum(0);
 	}
 	return child_->phase(transform(pos, worldToLocal_), transform(dirIn, worldToLocal_), transform(dirOut, worldToLocal_), pdf);
 }
 
 
 
-const XYZ Transformation::doSamplePhase(const TPoint2D& sample, const TPoint3D& pos, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
+const Spectrum Transformation::doSamplePhase(const TPoint2D& sample, const TPoint3D& pos, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
 {
 	if (!child_)
 	{
 		pdf = 0;
 		dirOut = dirIn;
-		return XYZ(0);
+		return Spectrum(0);
 	}
-	const XYZ result = child_->samplePhase(sample, transform(pos, worldToLocal_), transform(dirIn, worldToLocal_), dirOut, pdf);
+	const Spectrum result = child_->samplePhase(sample, transform(pos, worldToLocal_), transform(dirIn, worldToLocal_), dirOut, pdf);
 	dirOut = transform(dirOut, localToWorld_);
 	return result;
 }

@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -43,22 +43,22 @@ class LIAR_MEDIUMS_DLL Beer: public Medium
 public:
 
 	Beer();
-	Beer(const XYZ& transparency);
+	Beer(const Spectrum& transparency);
 
-	const XYZ& transparency() const;
-	void setTransparency(const XYZ& transparency);
+	const Spectrum& transparency() const;
+	void setTransparency(const Spectrum& transparency);
 
 private:
 
-	const XYZ doTransmittance(const BoundedRay& ray) const;
-	const XYZ doEmission(const BoundedRay& ray) const;
-	const XYZ doScatterOut(const BoundedRay& ray) const;
-	const XYZ doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
-	const XYZ doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
-	const XYZ doPhase(const TPoint3D&, const TVector3D&, const TVector3D&, TScalar&) const;
-	const XYZ doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const;
+	const Spectrum doTransmittance(const BoundedRay& ray) const;
+	const Spectrum doEmission(const BoundedRay& ray) const;
+	const Spectrum doScatterOut(const BoundedRay& ray) const;
+	const Spectrum doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
+	const Spectrum doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
+	const Spectrum doPhase(const TPoint3D&, const TVector3D&, const TVector3D&, TScalar&) const;
+	const Spectrum doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const;
 
-	XYZ transparency_;
+	Spectrum transparency_;
 };
 
 }
@@ -68,4 +68,3 @@ private:
 #endif
 
 // EOF
-

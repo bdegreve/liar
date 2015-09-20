@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -45,7 +45,7 @@ public:
 
 	Simple();
 	Simple(const TTexturePtr& iDiffuse);
-	Simple(const TTexturePtr& iDiffuse, const TTexturePtr& iSpecular); 
+	Simple(const TTexturePtr& iDiffuse, const TTexturePtr& iSpecular);
 
 	const TTexturePtr& diffuse() const;
 	void setDiffuse(const TTexturePtr& iDiffuse);
@@ -69,7 +69,7 @@ public:
 
 private:
 
-	const XYZ doShade(const Sample& sample,	const DifferentialRay& primaryRay, 
+	const Spectrum doShade(const Sample& sample,	const DifferentialRay& primaryRay, 
 		const Intersection& intersection, const IntersectionContext& context) const;
 
 	const TPyObjectPtr doGetState() const;
@@ -90,4 +90,3 @@ private:
 #endif
 
 // EOF
-

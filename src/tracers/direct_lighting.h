@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -54,22 +54,22 @@ protected:
 
 	void doRequestSamples(const TSamplerPtr& sampler);
 	void doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads);
-	const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const;
+	const Spectrum doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const;
 	const TRayTracerPtr doClone() const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-	virtual const XYZ doShadeMedium(const kernel::Sample& sample, const kernel::BoundedRay& ray, XYZ& transparency) const;
-	virtual const XYZ doShadeSurface(const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
+	virtual const Spectrum doShadeMedium(const kernel::Sample& sample, const kernel::BoundedRay& ray, Spectrum& transparency) const;
+	virtual const Spectrum doShadeSurface(const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
 		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, bool highQuality) const;
 
-	const XYZ traceDirect(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
+	const Spectrum traceDirect(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn, bool highQuality) const;
-	const XYZ traceSpecularAndGlossy(
+	const Spectrum traceSpecularAndGlossy(
 		const Sample& sample, const kernel::DifferentialRay& primaryRay, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn, bool highQuality) const;
-	const XYZ traceSingleScattering(const Sample& sample, const kernel::BoundedRay& ray) const;
+	const Spectrum traceSingleScattering(const Sample& sample, const kernel::BoundedRay& ray) const;
 
 	TRandomSecondary& secondarySampler() const { return secondarySampler_; }
 

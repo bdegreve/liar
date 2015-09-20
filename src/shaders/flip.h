@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -22,7 +22,7 @@
  */
 
 /** @class liar::shaders::FlipHemisphere
- *  @brief flips 
+ *  @brief flips
  *  @author Bram de Greve [Bramz]
  */
 
@@ -63,7 +63,7 @@ private:
 	};
 
 	void doShadeContext(const Sample& sample, IntersectionContext& context) const;
-	const XYZ doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const;
+	const Spectrum doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const;
 	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
 
 	void doRequestSamples(const TSamplerPtr& sampler);
@@ -83,4 +83,3 @@ private:
 #endif
 
 // EOF
-

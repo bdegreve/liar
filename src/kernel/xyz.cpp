@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -28,6 +28,15 @@ namespace liar
 {
 namespace kernel
 {
+
+PY_DECLARE_CLASS_NAME_DOC(PyXYZ, "XYZ", "XYZ triplet")
+PY_CLASS_CONSTRUCTOR_0(PyXYZ)
+PY_CLASS_CONSTRUCTOR_1(PyXYZ, XYZ::TValue)
+PY_CLASS_CONSTRUCTOR_3(PyXYZ, XYZ::TValue, XYZ::TValue, XYZ::TValue)
+PY_CLASS_PUBLIC_MEMBER(PyXYZ, x)
+PY_CLASS_PUBLIC_MEMBER(PyXYZ, y)
+PY_CLASS_PUBLIC_MEMBER(PyXYZ, z)
+
 }
 }
 

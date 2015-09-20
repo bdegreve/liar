@@ -144,7 +144,7 @@ void BumpMapping::doShadeContext(const Sample& sample, IntersectionContext& cont
 
 
 
-const XYZ BumpMapping::doEmission(const Sample& sample, const IntersectionContext& context,
+const Spectrum BumpMapping::doEmission(const Sample& sample, const IntersectionContext& context,
 		const TVector3D& omegaOut) const
 {
 	return shader_->emission(sample, context, omegaOut);

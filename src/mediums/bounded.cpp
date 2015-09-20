@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -92,87 +92,87 @@ size_t Bounded::doNumScatterSamples() const
 
 
 
-const XYZ Bounded::doTransmittance(const BoundedRay& ray) const
+const Spectrum Bounded::doTransmittance(const BoundedRay& ray) const
 {
 	BoundedRay bounded;
 	if (!child_ || !bound(ray, bounded))
 	{
-		return XYZ(1);
+		return Spectrum(1);
 	}
 	return child_->transmittance(bounded);
 }
 
 
 
-const XYZ Bounded::doEmission(const BoundedRay& ray) const
+const Spectrum Bounded::doEmission(const BoundedRay& ray) const
 {
 	BoundedRay bounded;
 	if (!child_ || !bound(ray, bounded))
 	{
-		return XYZ(0);
+		return Spectrum(0);
 	}
 	return child_->emission(bounded);
 }
 
 
 
-const XYZ Bounded::doScatterOut(const BoundedRay& ray) const
+const Spectrum Bounded::doScatterOut(const BoundedRay& ray) const
 {
 	BoundedRay bounded;
 	if (!child_ || !bound(ray, bounded))
 	{
-		return XYZ(0);
+		return Spectrum(0);
 	}
 	return child_->scatterOut(bounded);
 }
 
 
 
-const XYZ Bounded::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const Spectrum Bounded::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	BoundedRay bounded;
 	if (!child_ || !bound(ray, bounded))
 	{
 		pdf = 0;
-		return XYZ(0);
+		return Spectrum(0);
 	}
 	return child_->sampleScatterOut(sample, bounded, tScatter, pdf);
 }
 
 
 
-const XYZ Bounded::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const Spectrum Bounded::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	BoundedRay bounded;
 	if (!child_ || !bound(ray, bounded))
 	{
 		tScatter = ray.farLimit();
 		pdf = 1;
-		return XYZ(1);
+		return Spectrum(1);
 	}
 	return child_->sampleScatterOutOrTransmittance(sample, bounded, tScatter, pdf);
 }
 
 
-const XYZ Bounded::doPhase(const TPoint3D& pos, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
+const Spectrum Bounded::doPhase(const TPoint3D& pos, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
 {
 	if (!child_ || !bounds_.contains(pos))
 	{
 		pdf = 0;
-		return XYZ(0);
+		return Spectrum(0);
 	}
 	return child_->phase(pos, dirIn, dirOut, pdf);
 }
 
 
 
-const XYZ Bounded::doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
+const Spectrum Bounded::doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
 {
 	if (!child_ || !bounds_.contains(position))
 	{
 		pdf = 0;
 		dirOut = dirIn;
-		return XYZ(0);
+		return Spectrum(0);
 	}
 	return child_->samplePhase(sample, position, dirIn, dirOut, pdf);
 }
@@ -195,7 +195,7 @@ bool Bounded::bound(const BoundedRay& ray, BoundedRay& bounded) const
 	if (tNear > ray.farLimit())
 	{
 		return false;
-	}	
+	}
 	bounded = kernel::bound(ray, tNear, tFar);
 	return true;
 }

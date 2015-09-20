@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -99,11 +99,11 @@ private:
 
 	struct Photon
 	{
-		Photon(const TPoint3D& position, const TVector3D& omegaIn, const XYZ& power):
+		Photon(const TPoint3D& position, const TVector3D& omegaIn, const Spectrum& power):
 			position(position), omegaIn(omegaIn), power(power) {}
 		TPoint3D position;
 		TVector3D omegaIn;
-		XYZ power;
+		Spectrum power;
 	};
 	typedef std::vector<Photon> TPhotonBuffer;
 
@@ -113,7 +113,7 @@ private:
 			position(position), normal(normal), irradiance(), squaredEstimationRadius(0) {}
 		TPoint3D position;
 		TVector3D normal;
-		XYZ irradiance;
+		Spectrum irradiance;
 		TScalar squaredEstimationRadius;
 	};
 	typedef std::vector<Irradiance> TIrradianceBuffer;
@@ -139,8 +139,8 @@ private:
 	template <typename Buffer>
 	struct ObjectTraits: spat::DefaultObjectTraits<typename Buffer::value_type, TAabb3D, meta::NullType, typename Buffer::const_iterator>
 	{
-		static const TAabb objectAabb(TObjectIterator it) 
-		{ 
+		static const TAabb objectAabb(TObjectIterator it)
+		{
 			return aabb(it->position);
 		}
 		static const TValue objectSquaredDistance(TObjectIterator it, const TPoint& point, const TInfo* /* info */)
@@ -161,11 +161,11 @@ private:
 		bool isDirect;
 	};
 	typedef std::vector<VolumetricPhoton> TVolumetricPhotonBuffer;
-	
+
 	struct VolumetricPhotonTraits: spat::DefaultObjectTraits<VolumetricPhoton, TAabb3D, TRay3D, TVolumetricPhotonBuffer::const_iterator>
 	{
-		static const TAabb objectAabb(TObjectIterator it) 
-		{ 
+		static const TAabb objectAabb(TObjectIterator it)
+		{
 			const TPoint3D center = it->position;
 			const TVector3D halfExtent = TVector3D(it->radius, it->radius, it->radius);
 			return TAabb(center - halfExtent, center + halfExtent);
@@ -224,8 +224,8 @@ private:
 	void doSetState(const TPyObjectPtr& state);
 
 	// DirectLighting
-	const XYZ doShadeMedium(const kernel::Sample& sample, const kernel::BoundedRay& ray, XYZ& transparency) const;
-	const XYZ doShadeSurface(const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
+	const Spectrum doShadeMedium(const kernel::Sample& sample, const kernel::BoundedRay& ray, Spectrum& transparency) const;
+	const Spectrum doShadeSurface(const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
 		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, bool highQuality) const;
 
 	bool hasFinalGather() const { return isRayTracingDirect_ && (numFinalGatherRays_ > 0); }
@@ -233,42 +233,42 @@ private:
 
 	size_t fillPhotonMaps(const TSamplerPtr& sampler, const TimePeriod& period);
 	void emitPhoton(const LightContext& light, TScalar lightPdf, const Sample& sample, TRandomSecondary::TValue secondarySeed);
-	void tracePhoton(const Sample& sample, XYZ power, const BoundedRay& ray, size_t geneneration, TUniformSecondary& uniform, bool isCaustic = false);
+	void tracePhoton(const Sample& sample, Spectrum power, const BoundedRay& ray, size_t geneneration, TUniformSecondary& uniform, bool isCaustic = false);
 	template <typename PhotonBuffer, typename PhotonMap> void buildPhotonMap(MapType mapType, PhotonBuffer& buffer, PhotonMap& map, TScalar powerScale);
 	void buildIrradianceMap(size_t numberOfThreads);
 	void buildVolumetricPhotonMap(const TPreliminaryVolumetricPhotonMap& preliminaryVolumetricMap, size_t numberOfThreads);
 
-	const XYZ gatherIndirect(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
-		const TPoint3D& target, const TVector3D& omegaOut, const TPoint2D* firstSample, const TPoint2D* lastSample, 
+	const Spectrum gatherIndirect(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
+		const TPoint3D& target, const TVector3D& omegaOut, const TPoint2D* firstSample, const TPoint2D* lastSample,
 		const TScalar* firstComponentSample, const TScalar* firstVolumetricSample, size_t gatherStage = 0) const;
-	const XYZ gatherSecondary(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
+	const Spectrum gatherSecondary(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& target, const TVector3D& omegaOut) const;
-	const XYZ traceGatherRay(const Sample& sample, const BoundedRay& ray, bool gatherVolumetric, size_t gatherStage, size_t rayGeneration) const;
+	const Spectrum traceGatherRay(const Sample& sample, const BoundedRay& ray, bool gatherVolumetric, size_t gatherStage, size_t rayGeneration) const;
 
-	const XYZ estimateIrradiance(const TPoint3D& point, const TVector3D& normal, TScalar& sqrEstimationRadius, size_t& estimationCount) const;
-	const XYZ estimateIrradiance(const TPoint3D& point, const TVector3D& normal) const 
-	{ 
+	const Spectrum estimateIrradiance(const TPoint3D& point, const TVector3D& normal, TScalar& sqrEstimationRadius, size_t& estimationCount) const;
+	const Spectrum estimateIrradiance(const TPoint3D& point, const TVector3D& normal) const
+	{
 		TScalar sqrRadius;
 		size_t count;
 		return estimateIrradiance(point, normal, sqrRadius, count);
 	}
-	const XYZ estimateIrradianceImpl(TPhotonNeighbourhood& neighbourhood, const TPoint3D& point, const TVector3D& normal, TScalar& sqrEstimationRadius, size_t& estimationCount) const;
+	const Spectrum estimateIrradianceImpl(TPhotonNeighbourhood& neighbourhood, const TPoint3D& point, const TVector3D& normal, TScalar& sqrEstimationRadius, size_t& estimationCount) const;
 
-	const XYZ estimateRadiance(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf, 
+	const Spectrum estimateRadiance(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& point, const TVector3D& omegaOut, TScalar& sqrEstimationRadius) const;
-	const XYZ estimateRadiance(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf, 
+	const Spectrum estimateRadiance(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& point, const TVector3D& omegaOut) const
 	{
 		TScalar sqrRadius;
 		return estimateRadiance(sample, context, bsdf, point, omegaOut, sqrRadius);
 	}
 
-	const XYZ estimateCaustics(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf, 
+	const Spectrum estimateCaustics(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& point, const TVector3D& omegaOut) const;
 	void updateActualEstimationRadius(MapType mapType, TScalar radius) const;
 	void updateStorageProbabilities();
 
-	const XYZ estimateVolumetric(const Sample& sample, const kernel::BoundedRay& ray, bool dropDirectPhotons = false) const;
+	const Spectrum estimateVolumetric(const Sample& sample, const kernel::BoundedRay& ray, bool dropDirectPhotons = false) const;
 
 	struct SharedData
 	{

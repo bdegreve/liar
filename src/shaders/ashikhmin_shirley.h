@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -25,7 +25,7 @@
  *  @brief Anisotropic Phong BRDF model by Ashikhmin and Shirley (2001)
  *
  *  @par reference:
- *		@arg M. Ashikhmin, P. Shirley, <i>An Anisotropic Phong BRDF Model</i>, 
+ *		@arg M. Ashikhmin, P. Shirley, <i>An Anisotropic Phong BRDF Model</i>,
  *		Journal of Graphics Tools, <b>5</b> (2), 25--32 (2001).
  *
  *  @author Bram de Greve [Bramz]
@@ -69,15 +69,15 @@ public:
 	class Bsdf: public kernel::Bsdf
 	{
 	public:
-		Bsdf(const Sample& sample, const IntersectionContext& context, const XYZ& diffuse, const XYZ& specular, TScalar powerU, TScalar powerV);
+		Bsdf(const Sample& sample, const IntersectionContext& context, const Spectrum& diffuse, const Spectrum& specular, TScalar powerU, TScalar powerV);
 	private:
 		BsdfOut doEvaluate(const TVector3D& k1, const TVector3D& k2, TBsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
 		const XYZ rhoD(const TVector3D& k1, const TVector3D& k2) const;
 		const XYZ rhoS(const TVector3D& k1, const TVector3D& k2, const TVector3D& h, TScalar& pdf) const;
 		const TVector3D sampleH(const TPoint2D& sample) const;
-		XYZ diffuse_;
-		XYZ specular_;
+		Spectrum diffuse_;
+		Spectrum specular_;
 		TScalar powerU_;
 		TScalar powerV_;
 	};
@@ -87,7 +87,7 @@ private:
 	size_t doNumReflectionSamples() const;
 
 	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
-	
+
 	const TVector3D sampleH(const TPoint2D& sample, TScalar nu, TScalar nv/*, TScalar& pdf*/) const ;
 
 	const TPyObjectPtr doGetState() const;
@@ -107,4 +107,3 @@ private:
 #endif
 
 // EOF
-

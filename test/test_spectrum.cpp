@@ -68,7 +68,6 @@ int test_spectrum(int, char*[])
 		rgb(.8, .5, .2, sRGB),	
 	};
 	const size_t numTests = sizeof(tests) / sizeof(XYZ);
-	std::cerr << numTests << " tests\n";
 
 	int errors = 0;
 	for (size_t k = 0; k < numTests; ++k)
@@ -78,6 +77,8 @@ int test_spectrum(int, char*[])
 			++errors;
 		}
 	}
+
+	std::cerr << errors << "/" << numTests << " failed\n";
 
 	return errors;
 }

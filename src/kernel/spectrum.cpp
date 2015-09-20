@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -28,6 +28,12 @@ namespace liar
 {
 namespace kernel
 {
+
+PY_DECLARE_CLASS_NAME_DOC(PySpectrum, "Spectrum", "Represents spectral data")
+PY_CLASS_CONSTRUCTOR_0(PySpectrum)
+PY_CLASS_CONSTRUCTOR_1(PySpectrum, Spectrum::TValue)
+PY_CLASS_CONSTRUCTOR_1(PySpectrum, const XYZ&)
+PY_CLASS_CONVERTOR(PySpectrum, XYZ)
 
 #if LIAR_FULL_SPECTRAL
 
@@ -59,7 +65,7 @@ Spectrum::Spectrum(const XYZ& xyz)
 			*this += (rgb.b - rgb.r) * cyan_;
 			*this += (rgb.g - rgb.b) * green_;
 		}
-	}	
+	}
 	else if (rgb.g <= rgb.b)
 	{
 		std::fill(v_, v_ + numBands, rgb.g);
@@ -86,7 +92,7 @@ Spectrum::Spectrum(const XYZ& xyz)
 		{
 			*this += (rgb.g - rgb.b) * yellow_;
 			*this += (rgb.r - rgb.g) * red_;
-		}		
+		}
 	}
 	inplaceClamp(0, 1);
 }
@@ -275,7 +281,7 @@ TRgbSpacePtr Spectrum::initData()
 	    TPoint2D(0.150000f, 0.0600000f),
 	    TPoint2D(0.333333f, 0.333333f),
 	    1.00000f));
-	
+
 	const XYZ A[10] =
 	{
 	    XYZ(0.00179643f, 5.03579e-05f, 0.00850556f),
@@ -289,7 +295,7 @@ TRgbSpacePtr Spectrum::initData()
 	    XYZ(0.000648948f, 0.000234413f, 0.00000f),
 	    XYZ(2.84654e-05f, 1.02801e-05f, 0.00000f),
 	};
-	
+
 	const TWavelength w[11] =
 	{
 	    3.60000e-07f,
@@ -304,7 +310,7 @@ TRgbSpacePtr Spectrum::initData()
 	    7.56000e-07f,
 	    8.00000e-07f,
 	};
-	
+
 	const TScalar yellow[10] =
 	{
 	    0.00787763f,
@@ -318,7 +324,7 @@ TRgbSpacePtr Spectrum::initData()
 	    0.957981f,
 	    0.969991f,
 	};
-	
+
 	const TScalar magenta[10] =
 	{
 	    0.991654f,
@@ -332,7 +338,7 @@ TRgbSpacePtr Spectrum::initData()
 	    0.999411f,
 	    0.997143f,
 	};
-	
+
 	const TScalar cyan[10] =
 	{
 	    0.949163f,
@@ -346,7 +352,7 @@ TRgbSpacePtr Spectrum::initData()
 	    0.0225910f,
 	    0.0394559f,
 	};
-	
+
 	const TScalar red[10] =
 	{
 	    0.0508371f,
@@ -360,7 +366,7 @@ TRgbSpacePtr Spectrum::initData()
 	    0.977409f,
 	    0.960544f,
 	};
-	
+
 	const TScalar green[10] =
 	{
 	    0.00834648f,
@@ -374,7 +380,7 @@ TRgbSpacePtr Spectrum::initData()
 	    0.000589059f,
 	    0.00285692f,
 	};
-	
+
 	const TScalar blue[10] =
 	{
 	    0.992122f,
@@ -402,7 +408,7 @@ TRgbSpacePtr Spectrum::initData()
 		blue_[k] = blue[k];
 	}
 	bands_[numBands] = w[numBands];
-	
+
 	return rgbSpace;
 }
 

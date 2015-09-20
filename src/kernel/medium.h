@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -31,7 +31,7 @@
 
 #include "kernel_common.h"
 #include "differential_ray.h"
-#include "xyz.h"
+#include "spectrum.h"
 #include "solid_event.h"
 #include "sampler.h"
 
@@ -47,9 +47,9 @@ public:
 
 	virtual ~Medium();
 
-	const XYZ& refractionIndex() const;
-	void setRefractionIndex(const XYZ& refractionIndex);
-	
+	const Spectrum& refractionIndex() const;
+	void setRefractionIndex(const Spectrum& refractionIndex);
+
 	size_t priority() const;
 	void setPriority(size_t priority);
 
@@ -58,38 +58,38 @@ public:
 	{
 		return doNumScatterSamples();
 	}
-	Sampler::TSubSequenceId idStepSamples() const 
-	{ 
-		return idStepSamples_; 
-	}
-	Sampler::TSubSequenceId idLightSamples() const 
-	{ 
-		return idLightSamples_; 
-	}
-	Sampler::TSubSequenceId idSurfaceSamples() const 
-	{ 
-		return idSurfaceSamples_; 
-	}
-
-	const XYZ transmittance(const BoundedRay& ray) const
+	Sampler::TSubSequenceId idStepSamples() const
 	{
-		return doTransmittance(ray); 
+		return idStepSamples_;
+	}
+	Sampler::TSubSequenceId idLightSamples() const
+	{
+		return idLightSamples_;
+	}
+	Sampler::TSubSequenceId idSurfaceSamples() const
+	{
+		return idSurfaceSamples_;
 	}
 
-	const XYZ emission(const BoundedRay& ray) const
+	const Spectrum transmittance(const BoundedRay& ray) const
+	{
+		return doTransmittance(ray);
+	}
+
+	const Spectrum emission(const BoundedRay& ray) const
 	{
 		return doEmission(ray);
 	}
 
-	const XYZ scatterOut(const BoundedRay& ray) const
+	const Spectrum scatterOut(const BoundedRay& ray) const
 	{
-		return doScatterOut(ray); 
+		return doScatterOut(ray);
 	}
 
 	/** @param tScatter [out] position along ray where photon hits particle
 	 *  @returns attenuation due to transmition only, does not include scattering at tScatter.
 	 */
-	const XYZ sampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+	const Spectrum sampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 	{
 		return doSampleScatterOut(sample, ray, tScatter, pdf);
 	}
@@ -97,7 +97,7 @@ public:
 	/** @param tScatter [out] position along ray where photon hits particle
 	 *  @returns attenuation due to transmition only, does not include scattering at tScatter.
 	 */
-	const XYZ sampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+	const Spectrum sampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 	{
 		return doSampleScatterOutOrTransmittance(sample, ray, tScatter, pdf);
 	}
@@ -105,17 +105,17 @@ public:
 	/** @param dirIn: incoming direction @e towards @a position.
 	 *  @param dirOut: incoming direction away from @a position.
 	 */
-	const XYZ phase(const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut) const
+	const Spectrum phase(const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut) const
 	{
 		TScalar pdf;
 		return doPhase(position, dirIn, dirOut, pdf);
 	}
-	const XYZ phase(const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
+	const Spectrum phase(const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
 	{
 		return doPhase(position, dirIn, dirOut, pdf);
 	}
 
-	const XYZ samplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
+	const Spectrum samplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
 	{
 		return doSamplePhase(sample, position, dirIn, dirOut, pdf);
 	}
@@ -128,15 +128,15 @@ private:
 
 	virtual void doRequestSamples(const TSamplerPtr& sampler);
 	virtual size_t doNumScatterSamples() const;
-	virtual const XYZ doTransmittance(const BoundedRay& ray) const = 0;
-	virtual const XYZ doEmission(const BoundedRay& ray) const = 0;
-	virtual const XYZ doScatterOut(const BoundedRay& ray) const = 0;
-	virtual const XYZ doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const = 0;
-	virtual const XYZ doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const = 0;
-	virtual const XYZ doPhase(const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const = 0;
-	virtual const XYZ doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const = 0;
+	virtual const Spectrum doTransmittance(const BoundedRay& ray) const = 0;
+	virtual const Spectrum doEmission(const BoundedRay& ray) const = 0;
+	virtual const Spectrum doScatterOut(const BoundedRay& ray) const = 0;
+	virtual const Spectrum doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const = 0;
+	virtual const Spectrum doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const = 0;
+	virtual const Spectrum doPhase(const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const = 0;
+	virtual const Spectrum doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const = 0;
 
-	XYZ refractionIndex_;
+	Spectrum refractionIndex_;
 	size_t priority_;
 	Sampler::TSubSequenceId idStepSamples_;
 	Sampler::TSubSequenceId idLightSamples_;
@@ -152,18 +152,18 @@ class LIAR_KERNEL_DLL MediumStack
 public:
 	MediumStack(const TMediumPtr& defaultMedium = TMediumPtr());
 	const Medium* medium() const;
-	const XYZ transmittance(const BoundedRay& ray) const;
-	const XYZ transmittance(const BoundedRay& ray, TScalar farLimit) const;
-	const XYZ transmittance(const DifferentialRay& ray, TScalar farLimit) const;
-	const XYZ emission(const BoundedRay& ray) const;
-	const XYZ sampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
-	const XYZ sampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
-	const XYZ samplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dir, TScalar& pdf) const;
+	const Spectrum transmittance(const BoundedRay& ray) const;
+	const Spectrum transmittance(const BoundedRay& ray, TScalar farLimit) const;
+	const Spectrum transmittance(const DifferentialRay& ray, TScalar farLimit) const;
+	const Spectrum emission(const BoundedRay& ray) const;
+	const Spectrum sampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
+	const Spectrum sampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
+	const Spectrum samplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dir, TScalar& pdf) const;
 
 private:
 	friend class MediumChanger;
 	typedef std::vector<const Medium*> TStack;
-	
+
 	//void push(const Medium* medium);
 	//void pop(const Medium* medium);
 
@@ -189,4 +189,3 @@ private:
 #endif
 
 // EOF
-

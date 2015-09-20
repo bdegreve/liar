@@ -224,7 +224,7 @@ void AshikhminShirley::doSetState(const TPyObjectPtr& iState)
 
 
 
-AshikhminShirley::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, const XYZ& diffuse, const XYZ& specular, TScalar powerU, TScalar powerV):
+AshikhminShirley::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, const Spectrum& diffuse, const Spectrum& specular, TScalar powerU, TScalar powerV):
 	kernel::Bsdf(sample, context, Bsdf::capsReflection | Bsdf::capsDiffuse | Bsdf::capsGlossy),
 	diffuse_(diffuse),
 	specular_(specular),

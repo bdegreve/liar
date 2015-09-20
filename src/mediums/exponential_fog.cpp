@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -116,7 +116,7 @@ void ExponentialFog::setDecay(TScalar decay)
 
 // --- private -------------------------------------------------------------------------------------
 
-namespace 
+namespace
 {
 
 inline TScalar sigma(TScalar alpha, TScalar beta, TScalar t)
@@ -158,22 +158,22 @@ inline TScalar invCdf(TScalar uniform, TScalar alpha, TScalar beta, TScalar& pdf
 
 }
 
-const XYZ ExponentialFog::doTransmittance(const BoundedRay& ray) const
+const Spectrum ExponentialFog::doTransmittance(const BoundedRay& ray) const
 {
 	const TScalar d = ray.farLimit() - ray.nearLimit();
 	const TScalar a = alpha(ray);
 	const TScalar b = beta(ray);
 	LASS_ASSERT(d >= 0 && decay_ >= 0);
-	return XYZ(trans(a, b, d));
+	return Spectrum(trans(a, b, d));
 }
 
 
 
-const XYZ ExponentialFog::doEmission(const BoundedRay& ray) const
+const Spectrum ExponentialFog::doEmission(const BoundedRay& ray) const
 {
 	if (!emission())
 	{
-		return XYZ();
+		return Spectrum();
 	}
 
 	const TScalar d = ray.farLimit() - ray.nearLimit();
@@ -194,18 +194,18 @@ const XYZ ExponentialFog::doEmission(const BoundedRay& ray) const
 }
 
 
-const XYZ ExponentialFog::doScatterOut(const BoundedRay& ray) const
+const Spectrum ExponentialFog::doScatterOut(const BoundedRay& ray) const
 {
 	const TScalar d = ray.farLimit() - ray.nearLimit();
 	const TScalar a = alpha(ray);
 	const TScalar b = beta(ray);
 	LASS_ASSERT(d >= 0 && decay_ >= 0);
-	return XYZ(sigma(a, b, d) * trans(a, b, d));
+	return Spectrum(sigma(a, b, d) * trans(a, b, d));
 }
 
 
 
-const XYZ ExponentialFog::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const Spectrum ExponentialFog::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	const TScalar dMax = ray.farLimit() - ray.nearLimit();
 	const TScalar a = alpha(ray);
@@ -216,18 +216,18 @@ const XYZ ExponentialFog::doSampleScatterOut(TScalar sample, const BoundedRay& r
 	if (attMax <= 0)
 	{
 		pdf = 0;
-		return XYZ();
+		return Spectrum();
 	}
 
 	TScalar p;
 	const TScalar d = invCdf(sample * attMax, a, b, p);
 	tScatter = std::min(ray.nearLimit() + d, ray.farLimit());
 	pdf = p / attMax;
-	return XYZ(p);
+	return Spectrum(p);
 }
 
 
-const XYZ ExponentialFog::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const Spectrum ExponentialFog::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	const TScalar dMax = ray.farLimit() - ray.nearLimit();
 	const TScalar a = alpha(ray);
@@ -238,7 +238,7 @@ const XYZ ExponentialFog::doSampleScatterOutOrTransmittance(TScalar sample, cons
 	if (attMax <= 0)
 	{
 		pdf = 0;
-		return XYZ();
+		return Spectrum();
 	}
 
 	TScalar p;
@@ -248,14 +248,14 @@ const XYZ ExponentialFog::doSampleScatterOutOrTransmittance(TScalar sample, cons
 		// full transmission
 		tScatter = ray.farLimit();
 		pdf = trans(a, b, dMax); // = 1 - cdf(tMax);
-		return XYZ(pdf);
+		return Spectrum(pdf);
 	}
 
 	// the photon has hit a particle. we always assume it's scattered.
 	// the callee has to russian roulette for absorption himself.
 	tScatter = ray.nearLimit() + d;
 	pdf = p / attMax;
-	return XYZ(p);
+	return Spectrum(p);
 }
 
 

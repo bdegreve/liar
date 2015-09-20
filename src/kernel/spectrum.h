@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -46,7 +46,7 @@ public:
 
 	Spectrum();
 	Spectrum(TScalar f);
-	explicit Spectrum(const XYZ& xyz);
+	Spectrum(const XYZ& xyz);
 
 	const XYZ xyz() const;
 	operator XYZ() const { return xyz(); }
@@ -91,14 +91,14 @@ private:
 	static TRgbSpacePtr initData();
 };
 
-inline Spectrum abs(const Spectrum& a) 
+inline Spectrum abs(const Spectrum& a)
 {
 	Spectrum r(a);
 	r.inplaceAbs();
 	return r;
 }
 
-inline Spectrum max(const Spectrum& a, const Spectrum& b) 
+inline Spectrum max(const Spectrum& a, const Spectrum& b)
 {
 	Spectrum r(a);
 	r.inplaceMax(b);
@@ -184,12 +184,12 @@ private:
 	XYZ xyz_;
 };
 
-inline Spectrum abs(const Spectrum& a) 
+inline Spectrum abs(const Spectrum& a)
 {
 	return Spectrum(abs(a.xyz());
 }
 
-inline Spectrum max(const Spectrum& a, const Spectrum& b) 
+inline Spectrum max(const Spectrum& a, const Spectrum& b)
 {
 	return Spectrum(max(a.xyz(), b.xyz());
 }
@@ -231,38 +231,40 @@ inline TScalar average(const Spectrum& a)
 	return a.average();
 }
 
-inline Spectrum operator+(const Spectrum& a, const Spectrum& b) 
+inline Spectrum operator+(const Spectrum& a, const Spectrum& b)
 {
 	Spectrum r(a);
 	r += b;
 	return r;
 }
 
-inline Spectrum operator-(const Spectrum& a, const Spectrum& b) 
+inline Spectrum operator-(const Spectrum& a, const Spectrum& b)
 {
 	Spectrum r(a);
 	r -= b;
 	return r;
 }
 
-inline Spectrum operator*(const Spectrum& a, const Spectrum& b) 
+inline Spectrum operator*(const Spectrum& a, const Spectrum& b)
 {
 	Spectrum r(a);
 	r *= b;
 	return r;
 }
 
-inline Spectrum operator/(const Spectrum& a, const Spectrum& b) 
+inline Spectrum operator/(const Spectrum& a, const Spectrum& b)
 {
 	Spectrum r(a);
 	r /= b;
 	return r;
 }
 
+PY_SHADOW_CLASS(LIAR_KERNEL_DLL, PySpectrum, Spectrum)
 
 }
 }
 
+PY_SHADOW_CASTERS(liar::kernel::PySpectrum)
 
 #endif
 

@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -40,8 +40,8 @@ namespace liar
 namespace kernel
 {
 
-/** 
- *  @warning THREAD UNSAFE!  Each thread should have its own copy of the light contexts, 
+/**
+ *  @warning THREAD UNSAFE!  Each thread should have its own copy of the light contexts,
  *		and LightContext must have a deep copy for at least the mutable parts.
  */
 class LIAR_KERNEL_DLL LightContext
@@ -62,18 +62,18 @@ public:
 	void setSceneBound(const TAabb3D& bound, const TimePeriod& period);
 	void requestSamples(const TSamplerPtr& sampler);
 
-	const XYZ emission(const Sample& cameraSample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
-	const XYZ sampleEmission(
+	const Spectrum emission(const Sample& cameraSample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
+	const Spectrum sampleEmission(
 			const Sample& cameraSample, const TPoint2D& sample, const TPoint3D& target,
 			BoundedRay& shadowRay, TScalar& pdf) const;
-	const XYZ sampleEmission(
-			const Sample& cameraSample, const TPoint2D& sample, const TPoint3D& target, 
+	const Spectrum sampleEmission(
+			const Sample& cameraSample, const TPoint2D& sample, const TPoint3D& target,
 			const TVector3D& targetNormal, BoundedRay& shadowRay, TScalar& pdf) const;
-	const XYZ sampleEmission(
-			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
+	const Spectrum sampleEmission(
+			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
 			BoundedRay& emissionRay, TScalar& pdf) const;
 
-	const XYZ totalPower() const;
+	const Spectrum totalPower() const;
 	bool isSingular() const;
 
 private:
@@ -85,7 +85,7 @@ private:
 	mutable TTime timeOfTransformation_;		/**< time localToWorld_ was calculated for */
 	TObjectPath objectPath_;					/**< path in object tree to light (light included) */
 	const SceneLight* light_;					/**< pointer to actual light object */
-	int idLightSamples_;			
+	int idLightSamples_;
 	int idBsdfSamples_;
 	int idBsdfComponentSamples_;
 	bool hasMotion_;							/**< does light move in time? */
@@ -110,7 +110,7 @@ public:
 	TIterator begin() const;
 	TIterator end() const;
 	size_t size() const;
-	const XYZ totalPower() const;
+	const Spectrum totalPower() const;
 private:
 	TContexts contexts_;
 	std::vector<TScalar> cdf_;
