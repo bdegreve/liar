@@ -48,7 +48,7 @@ CubeMapping::CubeMapping(const TTexturePtr& texture):
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ CubeMapping::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectrum CubeMapping::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	const TVector3D& n = context.geometricNormal();
 	size_t i, j;

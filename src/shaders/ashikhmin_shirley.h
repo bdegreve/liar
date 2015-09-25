@@ -73,8 +73,8 @@ public:
 	private:
 		BsdfOut doEvaluate(const TVector3D& k1, const TVector3D& k2, TBsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
-		const XYZ rhoD(const TVector3D& k1, const TVector3D& k2) const;
-		const XYZ rhoS(const TVector3D& k1, const TVector3D& k2, const TVector3D& h, TScalar& pdf) const;
+		const Spectrum rhoD(const TVector3D& k1, const TVector3D& k2) const;
+		const Spectrum rhoS(const TVector3D& k1, const TVector3D& k2, const TVector3D& h, TScalar& pdf) const;
 		const TVector3D sampleH(const TPoint2D& sample) const;
 		Spectrum diffuse_;
 		Spectrum specular_;

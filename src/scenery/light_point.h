@@ -44,14 +44,14 @@ class LIAR_SCENERY_DLL LightPoint: public SceneLight
 public:
 
 	LightPoint();
-	LightPoint(const TPoint3D& iPosition, const XYZ& iIntensity);
+	LightPoint(const TPoint3D& iPosition, const Spectrum& iIntensity);
 
 	const TPoint3D& position() const;
-	const XYZ& intensity() const;
+	const Spectrum& intensity() const;
 	const TAttenuationPtr& attenuation() const;
 
 	void setPosition(const TPoint3D& iPosition);
-	void setIntensity(const XYZ& iIntensity);
+	void setIntensity(const Spectrum& iIntensity);
 	void setAttenuation(const TAttenuationPtr& iAttenuation);
 
 private:
@@ -66,14 +66,14 @@ private:
 	TScalar doArea() const;
 	TScalar doArea(const TVector3D& normal) const;
 
-	const XYZ doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
-	const XYZ doSampleEmission(
+	const Spectrum doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
+	const Spectrum doSampleEmission(
 			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
 			BoundedRay& shadowRay, TScalar& pdf) const;
-	const XYZ doSampleEmission(
+	const Spectrum doSampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 			BoundedRay& emissionRay, TScalar& pdf) const;
-	const XYZ doTotalPower() const;
+	const Spectrum doTotalPower() const;
 	size_t doNumberOfEmissionSamples() const;
 	bool doIsSingular() const;
 
@@ -81,7 +81,7 @@ private:
 	void doSetLightState(const TPyObjectPtr& state);
 
 	TPoint3D position_;
-	XYZ intensity_;
+	Spectrum intensity_;
 	TAttenuationPtr attenuation_;
 };
 

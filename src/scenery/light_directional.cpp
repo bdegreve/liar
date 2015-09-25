@@ -63,7 +63,7 @@ const TVector3D& LightDirectional::direction() const
 
 
 
-const XYZ& LightDirectional::radiance() const
+const Spectrum& LightDirectional::radiance() const
 {
 	return radiance_;
 }
@@ -78,7 +78,7 @@ void LightDirectional::setDirection(const TVector3D& direction)
 
 
 
-void LightDirectional::setRadiance(const XYZ& radiance)
+void LightDirectional::setRadiance(const Spectrum& radiance)
 {
 	radiance_ = radiance;
 }
@@ -149,16 +149,16 @@ TScalar LightDirectional::doArea(const TVector3D&) const
 
 
 
-const XYZ LightDirectional::doEmission(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+const Spectrum LightDirectional::doEmission(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	shadowRay = ray;
 	pdf = 0;
-	return XYZ();
+	return Spectrum();
 }
 
 
 
-const XYZ LightDirectional::doSampleEmission(const Sample&, const TPoint2D&, const TPoint3D& target, BoundedRay& shadowRay, TScalar& pdf) const
+const Spectrum LightDirectional::doSampleEmission(const Sample&, const TPoint2D&, const TPoint3D& target, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	shadowRay = BoundedRay(target, -direction_, tolerance, TNumTraits::infinity, prim::IsAlreadyNormalized());
 	pdf = TNumTraits::one;
@@ -167,7 +167,7 @@ const XYZ LightDirectional::doSampleEmission(const Sample&, const TPoint2D&, con
 
 
 
-const XYZ LightDirectional::doSampleEmission(const Sample&, const TPoint2D& lightSampleA, const TPoint2D&, BoundedRay& emissionRay, TScalar& pdf) const
+const Spectrum LightDirectional::doSampleEmission(const Sample&, const TPoint2D& lightSampleA, const TPoint2D&, BoundedRay& emissionRay, TScalar& pdf) const
 {
 	const TPoint2D uv = num::uniformDisk(lightSampleA, pdf);
 	const TPoint3D begin = boundingSphere_.center() + boundingSphere_.radius() * (tangentU_ * uv.x + tangentV_ * uv.y - direction_);
@@ -178,7 +178,7 @@ const XYZ LightDirectional::doSampleEmission(const Sample&, const TPoint2D& ligh
 
 
 
-const XYZ LightDirectional::doTotalPower() const
+const Spectrum LightDirectional::doTotalPower() const
 {
 	return (2 * TNumTraits::pi * num::sqr(boundingSphere_.radius())) * radiance_;
 }

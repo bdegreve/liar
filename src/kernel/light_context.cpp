@@ -237,7 +237,7 @@ void LightContexts::clear()
 {
 	contexts_.clear();
 	cdf_.clear();
-	totalPower_ = 0;
+	totalPower_ = Spectrum(0);
 }
 
 
@@ -265,7 +265,7 @@ void LightContexts::setSceneBound(const TAabb3D& bound, const TimePeriod& period
 		return;
 	}
 	cdf_.resize(n);
-	totalPower_ = 0;
+	totalPower_ = Spectrum(0);
 	for (size_t k = 0; k < n; ++k)
 	{
 		contexts_[k].setSceneBound(bound, period);

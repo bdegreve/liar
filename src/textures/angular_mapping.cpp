@@ -86,7 +86,7 @@ void AngularMapping::doSetState(const TPyObjectPtr& state)
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ AngularMapping::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectrum AngularMapping::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	IntersectionContext temp(context);
 	const TVector3D dir0 = context.point() - center_;

@@ -163,8 +163,8 @@ size_t AshikhminShirley::doNumReflectionSamples() const
 
 TBsdfPtr AshikhminShirley::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-	const XYZ Rd = diffuse_->lookUp(sample, context);
-	const XYZ Rs = specular_->lookUp(sample, context);
+	const Spectrum Rd = diffuse_->lookUp(sample, context);
+	const Spectrum Rs = specular_->lookUp(sample, context);
 	const TScalar nu = std::max<TScalar>(average(specularPowerU_->lookUp(sample, context)), 0);
 	const TScalar nv = std::max<TScalar>(average(specularPowerV_->lookUp(sample, context)), 0);
 	return TBsdfPtr(new Bsdf(sample, context, Rd, Rs, nu, nv));
@@ -302,7 +302,7 @@ SampleBsdfOut AshikhminShirley::Bsdf::doSample(const TVector3D& k1, const TPoint
 
 
 
-const XYZ AshikhminShirley::Bsdf::rhoD(const TVector3D& k1, const TVector3D& k2) const
+const Spectrum AshikhminShirley::Bsdf::rhoD(const TVector3D& k1, const TVector3D& k2) const
 {
 	const TScalar a = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k1.z / 2));
 	const TScalar b = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k2.z / 2));
@@ -311,13 +311,13 @@ const XYZ AshikhminShirley::Bsdf::rhoD(const TVector3D& k1, const TVector3D& k2)
 
 
 
-const XYZ AshikhminShirley::Bsdf::rhoS(const TVector3D& k1, const TVector3D& k2, const TVector3D& h, TScalar& pdf) const
+const Spectrum AshikhminShirley::Bsdf::rhoS(const TVector3D& k1, const TVector3D& k2, const TVector3D& h, TScalar& pdf) const
 {
 	const TScalar c = num::sqrt((powerU_ + 1) * (powerV_ + 1)) / (8 * TNumTraits::pi);
 	const TScalar n = powerU_ * num::sqr(h.x) + powerV_ * num::sqr(h.y);
 	const TScalar nn = h.z == 1 ? 0 : n / (1 - num::sqr(h.z));
 	const TScalar hk = dot(h, k1);
-	const XYZ F = specular_ + (1 - specular_) * temp::pow5(1 - hk);
+	const Spectrum F = specular_ + (1 - specular_) * temp::pow5(1 - hk);
 	const TScalar pdfH = 4 * c * num::pow(h.z, n);
 	pdf = pdfH / (4 * hk);
 	return F * (c * num::pow(h.z, nn) / (hk * std::max(k1.z, k2.z)));

@@ -139,7 +139,7 @@ TBsdfPtr ThinDielectric::doBsdf(const Sample& sample, const IntersectionContext&
 	// in theory, refractive indices must be at least 1
 	const TScalar ior1 = std::max(average(outerRefractionIndex_->lookUp(sample, context)), 1e-9);
 	const TScalar ior2 = std::max(average(innerRefractionIndex_->lookUp(sample, context)), 1e-9);
-	const XYZ transparency = clamp(transparency_->lookUp(sample, context), TNumTraits::zero, TNumTraits::one);
+	const Spectrum transparency = clamp(transparency_->lookUp(sample, context), TNumTraits::zero, TNumTraits::one);
 	const TScalar ior = ior1 / ior2; 
 	return TBsdfPtr(new Bsdf(sample, context, caps(), ior, transparency));
 }
@@ -162,7 +162,7 @@ void ThinDielectric::doSetState(const TPyObjectPtr& state)
 
 // --- bsdf ----------------------------------------------------------------------------------------
 
-ThinDielectric::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, TScalar ior, const XYZ& transparency):
+ThinDielectric::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, TScalar ior, const Spectrum& transparency) :
 	kernel::Bsdf(sample, context, caps),
 	transparency_(transparency),
 	ior_(ior)
@@ -193,8 +193,8 @@ SampleBsdfOut ThinDielectric::Bsdf::doSample(const TVector3D& omegaIn, const TPo
 	LASS_ASSERT(cosI > 0);
 	const TScalar sinT2 = num::sqr(ior_) * (1 - num::sqr(cosI));
 
-	XYZ R(TNumTraits::one);
-	XYZ T(TNumTraits::zero);
+	Spectrum R(TNumTraits::one);
+	Spectrum T(TNumTraits::zero);
 	if (sinT2 < 1)
 	{
 		const TScalar cosT = num::sqrt(1 - sinT2);
@@ -203,7 +203,7 @@ SampleBsdfOut ThinDielectric::Bsdf::doSample(const TVector3D& omegaIn, const TPo
 		const TScalar rPar = (cosI - ior_ * cosT) / (cosI + ior_ * cosT);
 		const TScalar r = (num::sqr(rOrth) + num::sqr(rPar)) / 2;
 		LASS_ASSERT(r < 1);
-		const XYZ t = pow(transparency_, num::inv(cosT));
+		const Spectrum t = pow(transparency_, num::inv(cosT));
 		
 		R = r * (1 + sqr((1 - r) * t) / (1 - sqr(r * t)));
 		R = clamp(R, TNumTraits::zero, TNumTraits::one);

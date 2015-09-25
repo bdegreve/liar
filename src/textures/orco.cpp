@@ -47,7 +47,7 @@ OrCo::OrCo(const TTexturePtr& texture):
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ OrCo::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectrum OrCo::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	if (context.bounds().isEmpty())
 	{

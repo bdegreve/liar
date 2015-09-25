@@ -46,29 +46,29 @@ public:
 
 	void setSceneBound(const TAabb3D& bound, const TimePeriod& period);
 
-	const XYZ emission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+	const Spectrum emission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 	{
 		return doEmission(sample, ray, shadowRay, pdf);
 	}
-	const XYZ sampleEmission(
+	const Spectrum sampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSample, const TPoint3D& target,
 			BoundedRay& shadowRay, TScalar& pdf) const
 	{ 
 		return doSampleEmission(cameraSample, lightSample, target, shadowRay, pdf);
 	}
-	const XYZ sampleEmission(
+	const Spectrum sampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D& targetNormal, 
 			BoundedRay& shadowRay, TScalar& pdf) const
 	{ 
 		return doSampleEmission(cameraSample, lightSample, target, targetNormal, shadowRay, pdf);
 	}
-	const XYZ sampleEmission(
+	const Spectrum sampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 			BoundedRay& emissionRay, TScalar& pdf) const
 	{
 		return doSampleEmission(cameraSample, lightSampleA, lightSampleB, emissionRay, pdf);
 	}
-	const XYZ totalPower() const
+	const Spectrum totalPower() const
 	{
 		return doTotalPower();
 	}
@@ -99,17 +99,17 @@ private:
 	void doSetState(const TPyObjectPtr& state);
 	
 	virtual void doSetSceneBound(const TAabb3D& bound, const TimePeriod& period);
-	virtual const XYZ doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const = 0;
-	virtual const XYZ doSampleEmission(
+	virtual const Spectrum doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const = 0;
+	virtual const Spectrum doSampleEmission(
 			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
 			BoundedRay& shadowRay, TScalar& pdf) const = 0;
-	virtual const XYZ doSampleEmission(
+	virtual const Spectrum doSampleEmission(
 			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D& targetNormal, 
 			BoundedRay& shadowRay, TScalar& pdf) const;
-	virtual const XYZ doSampleEmission(
+	virtual const Spectrum doSampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 			BoundedRay& emissionRay, TScalar& pdf) const = 0;
-	virtual const XYZ doTotalPower() const = 0;
+	virtual const Spectrum doTotalPower() const = 0;
 	virtual size_t doNumberOfEmissionSamples() const = 0;
 	virtual bool doIsSingular() const = 0;
 	

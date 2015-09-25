@@ -114,7 +114,7 @@ public:
 private:
 	TContexts contexts_;
 	std::vector<TScalar> cdf_;
-	XYZ totalPower_;
+	Spectrum totalPower_;
 };
 
 }

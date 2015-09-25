@@ -35,68 +35,75 @@ PY_CLASS_CONSTRUCTOR_1(PySpectrum, Spectrum::TValue)
 PY_CLASS_CONSTRUCTOR_1(PySpectrum, const XYZ&)
 PY_CLASS_CONVERTOR(PySpectrum, XYZ)
 
-#if LIAR_FULL_SPECTRAL
-
 Spectrum::Spectrum()
 {
-	std::fill(v_, v_ + numBands, 0);
 }
 
 
-Spectrum::Spectrum(TValue f)
+Spectrum::Spectrum(TValue f):
+	v_(f)
 {
-	std::fill(v_, v_ + numBands, f);
 }
 
+
+#if LIAR_SPECTRAL_BANDS
 
 Spectrum::Spectrum(const XYZ& xyz)
 {
 	const prim::ColorRGBA rgb = rgbSpace_->linearConvert(xyz);
-	if (rgb.r <= rgb.g && rgb.r <= rgb.b)
+	
+	if (rgb.r <= rgb.g)
 	{
-		std::fill(v_, v_ + numBands, rgb.r);
-		if (rgb.g <= rgb.b)
+		if (rgb.r <= rgb.b) 
 		{
-			*this += (rgb.g - rgb.r) * cyan_;
-			*this += (rgb.b - rgb.g) * blue_;
+			if (rgb.g <= rgb.b)
+			{
+				LASS_ASSERT(rgb.r <= rgb.g && rgb.r <= rgb.b && rgb.g <= rgb.b);
+				v_.fill(rgb.r);
+				this->fma(rgb.g - rgb.r, cyan_);
+				this->fma(rgb.b - rgb.g, blue_);
+			}
+			else
+			{
+				LASS_ASSERT(rgb.r <= rgb.b && rgb.r <= rgb.g && rgb.b <= rgb.g);
+				v_.fill(rgb.r);
+				this->fma(rgb.b - rgb.r, cyan_);
+				this->fma(rgb.g - rgb.b, green_);
+			}
 		}
 		else
 		{
-			*this += (rgb.b - rgb.r) * cyan_;
-			*this += (rgb.g - rgb.b) * green_;
+			LASS_ASSERT(rgb.b <= rgb.r && rgb.b <= rgb.g && rgb.r <= rgb.g);
+			v_.fill(rgb.b);
+			this->fma(rgb.r - rgb.b, yellow_);
+			this->fma(rgb.g - rgb.r, green_);
 		}
 	}
 	else if (rgb.g <= rgb.b)
 	{
-		std::fill(v_, v_ + numBands, rgb.g);
 		if (rgb.r <= rgb.b)
 		{
-			*this += (rgb.r - rgb.g) * magenta_;
-			*this += (rgb.b - rgb.r) * blue_;
+			LASS_ASSERT(rgb.g <= rgb.r && rgb.g <= rgb.b && rgb.r <= rgb.b);
+			v_.fill(rgb.g);
+			this->fma(rgb.r - rgb.g, magenta_);
+			this->fma(rgb.b - rgb.r, blue_);
 		}
 		else
 		{
-			*this += (rgb.b - rgb.g) * magenta_;
-			*this += (rgb.r - rgb.b) * red_;
+			LASS_ASSERT(rgb.g <= rgb.b && rgb.g <= rgb.r && rgb.b <= rgb.r);
+			v_.fill(rgb.g);
+			this->fma(rgb.b - rgb.g, magenta_);
+			this->fma(rgb.r - rgb.b, red_);
 		}
 	}
 	else
 	{
-		std::fill(v_, v_ + numBands, rgb.b);
-		if (rgb.r <= rgb.g)
-		{
-			*this += (rgb.r - rgb.b) * yellow_;
-			*this += (rgb.g - rgb.r) * green_;
-		}
-		else
-		{
-			*this += (rgb.g - rgb.b) * yellow_;
-			*this += (rgb.r - rgb.g) * red_;
-		}
+		LASS_ASSERT(rgb.b <= rgb.g && rgb.b <= rgb.r && rgb.g <= rgb.r);
+		v_.fill(rgb.b);
+		this->fma(rgb.g - rgb.b, yellow_);
+		this->fma(rgb.r - rgb.g, red_);
 	}
-	inplaceClamp(0, 1);
 }
-
 
 const XYZ Spectrum::xyz() const
 {
@@ -108,291 +115,128 @@ const XYZ Spectrum::xyz() const
 	return sum;
 }
 
-
-Spectrum& Spectrum::operator+=(const Spectrum& other)
-{
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] += other.v_[k];
-	}
-	return *this;
-}
-
-
-Spectrum& Spectrum::operator-=(const Spectrum& other)
-{
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] -= other.v_[k];
-	}
-	return *this;
-}
-
-
-Spectrum& Spectrum::operator*=(const Spectrum& other)
-{
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] *= other.v_[k];
-	}
-	return *this;
-}
-
-
-Spectrum& Spectrum::operator/=(const Spectrum& other)
-{
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] *= other.v_[k];
-	}
-	return *this;
-}
-
-
-
-TScalar Spectrum::total() const
-{
-	TScalar sum = 0;
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		sum += v_[k];
-	}
-	return sum;
-}
-
-
-
-TScalar Spectrum::absTotal() const
-{
-	TScalar sum = 0;
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		sum += num::abs(v_[k]);
-	}
-	return sum;
-}
-
-
-
-bool Spectrum::isZero() const
-{
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		if (v_[k] != 0)
-		{
-			return false;
-		}
-	}
-	return true;
-}
-
-
-Spectrum& Spectrum::inplaceAbs()
-{
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] = num::abs(v_[k]);
-	}
-	return *this;
-}
-
-
-Spectrum& Spectrum::inplaceMax(const Spectrum& other)
-{
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] = std::max(v_[k], other.v_[k]);
-	}
-	return *this;
-}
-
-
-Spectrum& Spectrum::inplacePow(TScalar f)
-{
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] = std::pow(v_[k], f);
-	}
-	return *this;
-}
-
-
-Spectrum& Spectrum::inplaceExp()
-{
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] = std::exp(v_[k]);
-	}
-	return *this;
-}
-
-
-Spectrum& Spectrum::inplaceClamp(TScalar min, TScalar max)
-{
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] = num::clamp(v_[k], min, max);
-	}
-	return *this;
-}
-
-
-Spectrum& Spectrum::inplaceLerp(const Spectrum& other, TScalar f)
-{
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] = num::lerp(v_[k], other.v_[k], f);
-	}
-	return *this;
-}
-
-
-bool Spectrum::operator==(const Spectrum& other) const
-{
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		if (v_[k] != other.v_[k])
-		{
-			return false;
-		}
-	}
-	return true;
-}
-
-
-TScalar dot(const Spectrum& a, const Spectrum& b)
-{
-	TScalar sum = 0;
-	for (size_t k = 0; k < Spectrum::numBands; ++k)
-	{
-		sum += a[k] * b[k];
-	}
-	return sum;
-}
-
-
 TRgbSpacePtr Spectrum::initData()
 {
 	/* start autogen block initData */
 	// Generated by generate_spectrum_data.py with 10 bins from 3.6e-07 to 8e-07, using 100000 iterations, fitall=False
 	TRgbSpacePtr rgbSpace(new RgbSpace(
-	    TPoint2D(0.640000f, 0.330000f),
-	    TPoint2D(0.300000f, 0.600000f),
-	    TPoint2D(0.150000f, 0.0600000f),
-	    TPoint2D(0.333333f, 0.333333f),
-	    1.00000f));
+		TPoint2D(0.640000f, 0.330000f),
+		TPoint2D(0.300000f, 0.600000f),
+		TPoint2D(0.150000f, 0.0600000f),
+		TPoint2D(0.333333f, 0.333333f),
+		1.00000f));
 
 	const XYZ A[10] =
 	{
-	    XYZ(0.00179643f, 5.03579e-05f, 0.00850556f),
-	    XYZ(0.0855167f, 0.00471796f, 0.423513f),
-	    XYZ(0.0787251f, 0.0429831f, 0.500759f),
-	    XYZ(0.0263265f, 0.239723f, 0.0636773f),
-	    XYZ(0.233830f, 0.396741f, 0.00321433f),
-	    XYZ(0.404543f, 0.248992f, 0.000305128f),
-	    XYZ(0.155119f, 0.0616462f, 8.50378e-06f),
-	    XYZ(0.0134617f, 0.00490018f, 0.00000f),
-	    XYZ(0.000648948f, 0.000234413f, 0.00000f),
-	    XYZ(2.84654e-05f, 1.02801e-05f, 0.00000f),
+		XYZ(0.00179643f, 5.03579e-05f, 0.00850556f),
+		XYZ(0.0855167f, 0.00471796f, 0.423513f),
+		XYZ(0.0787251f, 0.0429831f, 0.500759f),
+		XYZ(0.0263265f, 0.239723f, 0.0636773f),
+		XYZ(0.233830f, 0.396741f, 0.00321433f),
+		XYZ(0.404543f, 0.248992f, 0.000305128f),
+		XYZ(0.155119f, 0.0616462f, 8.50378e-06f),
+		XYZ(0.0134617f, 0.00490018f, 0.00000f),
+		XYZ(0.000648948f, 0.000234413f, 0.00000f),
+		XYZ(2.84654e-05f, 1.02801e-05f, 0.00000f),
 	};
 
 	const TWavelength w[11] =
 	{
-	    3.60000e-07f,
-	    4.04000e-07f,
-	    4.48000e-07f,
-	    4.92000e-07f,
-	    5.36000e-07f,
-	    5.80000e-07f,
-	    6.24000e-07f,
-	    6.68000e-07f,
-	    7.12000e-07f,
-	    7.56000e-07f,
-	    8.00000e-07f,
+		3.60000e-07f,
+		4.04000e-07f,
+		4.48000e-07f,
+		4.92000e-07f,
+		5.36000e-07f,
+		5.80000e-07f,
+		6.24000e-07f,
+		6.68000e-07f,
+		7.12000e-07f,
+		7.56000e-07f,
+		8.00000e-07f,
 	};
 
 	const TScalar yellow[10] =
 	{
-	    0.00787763f,
-	    -5.55112e-17f,
-	    0.149163f,
-	    0.911415f,
-	    0.999910f,
-	    0.999438f,
-	    0.957385f,
-	    0.962723f,
-	    0.957981f,
-	    0.969991f,
+		0.00787763f,
+		-5.55112e-17f,
+		0.149163f,
+		0.911415f,
+		0.999910f,
+		0.999438f,
+		0.957385f,
+		0.962723f,
+		0.957981f,
+		0.969991f,
 	};
 
 	const TScalar magenta[10] =
 	{
-	    0.991654f,
-	    0.999989f,
-	    0.906348f,
-	    0.0136420f,
-	    0.0131883f,
-	    0.814659f,
-	    0.999976f,
-	    0.998238f,
-	    0.999411f,
-	    0.997143f,
+		0.991654f,
+		0.999989f,
+		0.906348f,
+		0.0136420f,
+		0.0131883f,
+		0.814659f,
+		0.999976f,
+		0.998238f,
+		0.999411f,
+		0.997143f,
 	};
 
 	const TScalar cyan[10] =
 	{
-	    0.949163f,
-	    0.922302f,
-	    1.01817f,
-	    1.01819f,
-	    1.01810f,
-	    0.190733f,
-	    -4.85723e-17f,
-	    0.0224848f,
-	    0.0225910f,
-	    0.0394559f,
+		0.949163f,
+		0.922302f,
+		1.01817f,
+		1.01819f,
+		1.01810f,
+		0.190733f,
+		-4.85723e-17f,
+		0.0224848f,
+		0.0225910f,
+		0.0394559f,
 	};
 
 	const TScalar red[10] =
 	{
-	    0.0508371f,
-	    0.0776981f,
-	    -0.0181744f,
-	    -0.0181913f,
-	    -0.0180974f,
-	    0.809267f,
-	    1.00000f,
-	    0.977515f,
-	    0.977409f,
-	    0.960544f,
+		0.0508371f,
+		0.0776981f,
+		-0.0181744f,
+		-0.0181913f,
+		-0.0180974f,
+		0.809267f,
+		1.00000f,
+		0.977515f,
+		0.977409f,
+		0.960544f,
 	};
 
 	const TScalar green[10] =
 	{
-	    0.00834648f,
-	    1.11093e-05f,
-	    0.0936516f,
-	    0.986358f,
-	    0.986812f,
-	    0.185341f,
-	    2.42438e-05f,
-	    0.00176182f,
-	    0.000589059f,
-	    0.00285692f,
+		0.00834648f,
+		1.11093e-05f,
+		0.0936516f,
+		0.986358f,
+		0.986812f,
+		0.185341f,
+		2.42438e-05f,
+		0.00176182f,
+		0.000589059f,
+		0.00285692f,
 	};
 
 	const TScalar blue[10] =
 	{
-	    0.992122f,
-	    1.00000f,
-	    0.850837f,
-	    0.0885851f,
-	    8.97977e-05f,
-	    0.000561824f,
-	    0.0426151f,
-	    0.0372773f,
-	    0.0420186f,
-	    0.0300094f,
+		0.992122f,
+		1.00000f,
+		0.850837f,
+		0.0885851f,
+		8.97977e-05f,
+		0.000561824f,
+		0.0426151f,
+		0.0372773f,
+		0.0420186f,
+		0.0300094f,
 	};
 	/* end autogen block initData */
 
@@ -421,6 +265,19 @@ Spectrum Spectrum::red_;
 Spectrum Spectrum::green_;
 Spectrum Spectrum::blue_;
 TRgbSpacePtr Spectrum::rgbSpace_ = Spectrum::initData(); // must be the last one.
+
+#else
+
+Spectrum::Spectrum(const XYZ& xyz) :
+v_(xyz.x, xyz.y, xyz.z)
+{
+}
+
+
+const XYZ Spectrum::xyz() const
+{
+	return XYZ(v_[0], v_[1], v_[2]);
+}
 
 #endif
 

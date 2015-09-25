@@ -48,9 +48,9 @@ class LIAR_KERNEL_DLL Texture: public python::PyObjectPlus
 public:
 
 	virtual ~Texture();
-	const XYZ lookUp(const Sample& sample, const IntersectionContext& context) const 
+	const Spectrum lookUp(const Sample& sample, const IntersectionContext& context) const
 	{ 
-		return doLookUp(sample, context); 
+		return doLookUp(sample, context);
 	}
 
 	static const TTexturePtr& black();
@@ -69,7 +69,7 @@ protected:
 
 private:
 
-	virtual const XYZ doLookUp(const Sample& sample, 
+	virtual const Spectrum doLookUp(const Sample& sample,
 		const IntersectionContext& context) const = 0;
 
 	static TTexturePtr black_;
@@ -86,9 +86,9 @@ namespace impl
 	public:
 		TextureBlack() {}
 	private:
-		const XYZ doLookUp(const Sample&, const IntersectionContext&) const 
+		const Spectrum doLookUp(const Sample&, const IntersectionContext&) const
 		{ 
-			return XYZ(0, 0, 0); 
+			return Spectrum(0);
 		}
 		const TPyObjectPtr doGetState() const { return python::makeTuple(); }
 		void doSetState(const TPyObjectPtr&) {}
@@ -100,9 +100,9 @@ namespace impl
 	public:
 		TextureWhite() {}
 	private:
-		const XYZ doLookUp(const Sample&, const IntersectionContext&) const 
+		const Spectrum doLookUp(const Sample&, const IntersectionContext&) const
 		{ 
-			return XYZ(1, 1, 1); 
+			return Spectrum(1);
 		}
 		const TPyObjectPtr doGetState() const { return python::makeTuple(); }
 		void doSetState(const TPyObjectPtr&) {}

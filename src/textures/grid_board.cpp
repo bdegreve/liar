@@ -77,7 +77,7 @@ void GridBoard::doSetState(const TPyObjectPtr& state)
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ GridBoard::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectrum GridBoard::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	const TScalar u = num::fractional(context.uv().x);
 	const TScalar v = num::fractional(context.uv().y);

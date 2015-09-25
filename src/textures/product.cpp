@@ -78,13 +78,13 @@ void Product::setFactors(const TFactors& factors)
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Product::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectrum Product::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	if (factors_.empty())
 	{
-		return XYZ();
+		return Spectrum();
 	}
-	XYZ result(1, 1, 1);
+	Spectrum result(1);
 	for (TFactors::const_iterator i = factors_.begin(); i != factors_.end(); ++i)
 	{
 		result *= (*i)->lookUp(sample, context);

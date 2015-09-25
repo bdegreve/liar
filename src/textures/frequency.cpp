@@ -58,11 +58,11 @@ void Frequency::doSetState(const TPyObjectPtr&)
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Frequency::doLookUp(const Sample& sample, const IntersectionContext&) const
+const Spectrum Frequency::doLookUp(const Sample& sample, const IntersectionContext&) const
 {
 	const TWavelength c0 = 299792458; // speed of light in vacuum
 	const TScalar f = static_cast<TScalar>(c0 / sample.wavelength());
-	return XYZ(f, f, f);
+	return Spectrum(f);
 }
 
 

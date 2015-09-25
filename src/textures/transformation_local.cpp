@@ -72,7 +72,7 @@ void TransformationLocal::setTransformation(const TTransformation3D& transformat
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ TransformationLocal::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectrum TransformationLocal::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	IntersectionContext temp(context);
 	temp.setPoint(prim::transform(context.point(), transformation_));

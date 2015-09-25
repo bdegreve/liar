@@ -69,7 +69,7 @@ void FBm::doSetState(const TPyObjectPtr& state)
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ FBm::doLookUp(const Sample&, const IntersectionContext& context) const
+const Spectrum FBm::doLookUp(const Sample&, const IntersectionContext& context) const
 {
 	const TScalar squaredFootprint = std::max(context.dPoint_dI().squaredNorm(), context.dPoint_dJ().squaredNorm());
 	const TScalar idealNumOctaves = 1 - num::log2(squaredFootprint) / 2;
@@ -94,7 +94,7 @@ const XYZ FBm::doLookUp(const Sample&, const IntersectionContext& context) const
 		result += fracOctaves * weight * noise(TPoint3D(p * frequency));
 	}
 
-	return XYZ(result);
+	return Spectrum(result);
 }
 
 

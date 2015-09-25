@@ -75,14 +75,14 @@ private:
 	TScalar doArea() const;
 	TScalar doArea(const TVector3D& normal) const;
 
-	const XYZ doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
-	const XYZ doSampleEmission(
+	const Spectrum doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
+	const Spectrum doSampleEmission(
 			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
 			BoundedRay& shadowRay, TScalar& pdf) const;
-	const XYZ doSampleEmission(
+	const Spectrum doSampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 			BoundedRay& emissionRay, TScalar& pdf) const;
-	const XYZ doTotalPower() const;
+	const Spectrum doTotalPower() const;
 	size_t doNumberOfEmissionSamples() const;
 	bool doIsSingular() const;
 

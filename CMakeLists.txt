@@ -184,6 +184,19 @@ macro(add_liar_module name)
 	)
 endmacro()
 
+option(ENABLE_SPECTRAL "Use spectral bands for computations, rather than XYZ triplets" ON)
+if (ENABLE_SPECTRAL)
+  set(LIAR_SPECTRAL_BANDS 10)
+else()
+  unset(LIAR_SPECTRAL_BANDS)
+endif()
+
+configure_file(
+    "${CMAKE_CURRENT_LIST_DIR}/src/config.h.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/config.h"
+    )
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+
 add_subdirectory(external)
 add_subdirectory(src)
 add_subdirectory(doc)

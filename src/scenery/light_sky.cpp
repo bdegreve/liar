@@ -233,13 +233,13 @@ TScalar LightSky::doArea(const TVector3D&) const
 
 
 
-const XYZ LightSky::doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+const Spectrum LightSky::doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	shadowRay = BoundedRay(ray, tolerance, TNumTraits::infinity);
 	if (portal_ && !portal_->isIntersecting(sample, shadowRay))
 	{
 		pdf = 0;
-		return XYZ();
+		return Spectrum();
 	}
 	const TVector3D dir = ray.direction();
 	const TScalar i = num::atan2(dir.y, dir.x) * resolution_.x / (2 * TNumTraits::pi);
@@ -256,12 +256,12 @@ const XYZ LightSky::doEmission(const Sample& sample, const TRay3D& ray, BoundedR
 	const TScalar condPdfV = condCdfV[jj] - v0;
 
 	pdf = margPdfU * condPdfV * (resolution_.x * resolution_.y) / (4 * TNumTraits::pi);
-	return radianceMap_[ii * resolution_.y + jj];
+	return Spectrum(radianceMap_[ii * resolution_.y + jj]);
 }
 
 
 
-const XYZ LightSky::doSampleEmission(
+const Spectrum LightSky::doSampleEmission(
 		const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
 		BoundedRay& shadowRay, TScalar& pdf) const
 {
@@ -274,17 +274,17 @@ const XYZ LightSky::doSampleEmission(
 	if (portal_ && !portal_->isIntersecting(sample, shadowRay))
 	{
 		pdf = 0;
-		return XYZ();
+		return Spectrum();
 	}
 
 	const size_t ii = std::min(static_cast<size_t>(num::floor(i)), resolution_.x - 1);
 	const size_t jj = std::min(static_cast<size_t>(num::floor(j)), resolution_.y - 1);
-	return radianceMap_[ii * resolution_.y + jj];
+	return Spectrum(radianceMap_[ii * resolution_.y + jj]);
 }
 
 
 
-const XYZ LightSky::doSampleEmission(
+const Spectrum LightSky::doSampleEmission(
 		const Sample&, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
 		BoundedRay& emissionRay, TScalar& pdf) const
 {
@@ -299,19 +299,19 @@ const XYZ LightSky::doSampleEmission(
 	if (cosTheta <= 0)
 	{
 		pdf = 0;
-		return XYZ();
+		return Spectrum();
 	}
 
 	emissionRay = BoundedRay(begin, dir, tolerance);
 	pdf = pdfA * pdfB / cosTheta;
-	return radianceMap_[static_cast<size_t>(num::floor(i)) * resolution_.y + static_cast<size_t>(num::floor(j))];
+	return Spectrum(radianceMap_[static_cast<size_t>(num::floor(i)) * resolution_.y + static_cast<size_t>(num::floor(j))]);
 }
 
 
 
-const XYZ LightSky::doTotalPower() const
+const Spectrum LightSky::doTotalPower() const
 {
-	return power_;
+	return Spectrum(power_);
 }
 
 

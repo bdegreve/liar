@@ -118,7 +118,7 @@ private:
 	};		
 	typedef std::vector<MipMapLevel> TMipMaps;
 
-	const XYZ doLookUp(const Sample& sample, 
+	const Spectrum doLookUp(const Sample& sample,
 		const IntersectionContext& context) const;
 
 	const TPyObjectPtr doGetState() const;

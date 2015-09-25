@@ -74,7 +74,7 @@ public:
 		{
 			return doCastRay(sample, primaryRay, tIntersection, alpha, rayGeneration_, highQuality);
 		}
-		return XYZ();
+		return Spectrum();
 	}
 
 	const TRayTracerPtr clone() const;
