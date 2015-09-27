@@ -87,7 +87,7 @@ const Sample::TSubSequence1D Sample::subSequence1D(int id) const
 {
 	if (id < 0)
 	{
-		return TSubSequence1D();
+		return TSubSequence1D(0 ,0);
 	}
 	LASS_ASSERT(sampler_);
 	const size_t k = sampler_->subSequenceOffset1D(id);
@@ -101,7 +101,7 @@ const Sample::TSubSequence2D Sample::subSequence2D(int id) const
 {
 	if (id < 0)
 	{
-		return TSubSequence2D();
+		return TSubSequence2D(0, 0);
 	}
 	LASS_ASSERT(sampler_);
 	const size_t k = sampler_->subSequenceOffset2D(id);

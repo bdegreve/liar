@@ -98,8 +98,6 @@ private:
 	TBands v_;
 
 #if LIAR_SPECTRAL_BANDS
-	typedef Bands< LIAR_SPECTRAL_BANDS , TValue> TBands;
-
 	static XYZ observer_[numBands];
 	static TWavelength bands_[numBands + 1];
 	static Spectrum yellow_;
