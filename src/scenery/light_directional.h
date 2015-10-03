@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -21,7 +21,7 @@
  *  http://liar.bramz.net/
  */
 
-/** @class liar::scenery::LightLightDirectional 
+/** @class liar::scenery::LightLightDirectional
  *  @brief model of a directional light like the sun
  *  @author Bram de Greve [Bramz]
  */
@@ -48,9 +48,11 @@ public:
 
 	const TVector3D& direction() const;
 	const Spectrum& radiance() const;
+	const TSceneObjectPtr& portal() const;
 
 	void setDirection(const TVector3D& direction);
 	void setRadiance(const Spectrum& radiance);
+	void setPortal(const TSceneObjectPtr& portal);
 
 private:
 
@@ -67,10 +69,10 @@ private:
 
 	const Spectrum doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
 	const Spectrum doSampleEmission(
-			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
+			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target,
 			BoundedRay& shadowRay, TScalar& pdf) const;
 	const Spectrum doSampleEmission(
-			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
+			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
 			BoundedRay& emissionRay, TScalar& pdf) const;
 	const Spectrum doTotalPower() const;
 	size_t doNumberOfEmissionSamples() const;
@@ -80,10 +82,9 @@ private:
 	void doSetLightState(const TPyObjectPtr& state);
 
 	TVector3D direction_;
-	TVector3D tangentU_;
-	TVector3D tangentV_;
 	Spectrum radiance_;
-	prim::Sphere3D<TScalar> boundingSphere_;
+	TSceneObjectPtr userPortal_;
+	TSceneObjectPtr defaultPortal_;
 };
 
 }

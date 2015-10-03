@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -89,7 +89,7 @@ void Plane::doIntersect(const Sample&, const BoundedRay& ray, Intersection& resu
 {
 	TScalar t;
 	const prim::Result hit = prim::intersect(plane_, ray.unboundedRay(), t, ray.nearLimit());
-	if (hit == prim::rOne && ray.inRange(t)) 
+	if (hit == prim::rOne && ray.inRange(t))
 	{
 		result = Intersection(this, t, seNoEvent);
 	}
@@ -122,7 +122,7 @@ void Plane::doLocalContext(const Sample&, const BoundedRay& ray, const Intersect
 	result.setNormal(plane_.normal());
 	result.setDNormal_dU(TVector3D());
 	result.setDNormal_dV(TVector3D());
-	
+
 	result.setGeometricNormal(result.normal());
 
 	result.setUv(plane_.uv(result.point()));
@@ -187,7 +187,7 @@ const TPyObjectPtr Plane::doGetState() const
 void Plane::doSetState(const TPyObjectPtr& state)
 {
 	TVector3D normal;
-	TScalar d;
+	TScalar d = 0;
 	LASS_ENFORCE(python::decodeTuple(state, normal, d));
 	plane_ = TPlane3D(normal, d);
 }

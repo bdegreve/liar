@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -23,6 +23,7 @@
 
 #include "scenery_common.h"
 #include "light_directional.h"
+#include "disk.h"
 #include <lass/num/distribution_transformations.h>
 #include <lass/prim/impl/plane_3d_impl_detail.h>
 
@@ -36,6 +37,7 @@ PY_CLASS_CONSTRUCTOR_0(LightDirectional)
 PY_CLASS_CONSTRUCTOR_2(LightDirectional, const TVector3D&, const XYZ&)
 PY_CLASS_MEMBER_RW(LightDirectional, direction, setDirection)
 PY_CLASS_MEMBER_RW(LightDirectional, radiance, setRadiance)
+PY_CLASS_MEMBER_RW(LightDirectional, portal, setPortal)
 
 
 // --- public --------------------------------------------------------------------------------------
@@ -70,10 +72,16 @@ const Spectrum& LightDirectional::radiance() const
 
 
 
+const TSceneObjectPtr& LightDirectional::portal() const
+{
+	return userPortal_;
+}
+
+
+
 void LightDirectional::setDirection(const TVector3D& direction)
 {
 	direction_ = direction.normal();
-	generateOrthonormal(direction_, tangentU_, tangentV_);
 }
 
 
@@ -85,6 +93,16 @@ void LightDirectional::setRadiance(const Spectrum& radiance)
 
 
 
+void LightDirectional::setPortal(const TSceneObjectPtr& portal)
+{
+	if (portal && !portal->hasSurfaceSampling())
+	{
+		throw python::PythonException(PyExc_TypeError, "portal must support surface sampling", LASS_PRETTY_FUNCTION);
+	}
+	userPortal_	= portal;
+}
+
+
 
 // --- protected -----------------------------------------------------------------------------------
 
@@ -94,7 +112,9 @@ void LightDirectional::setRadiance(const Spectrum& radiance)
 
 void LightDirectional::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod&)
 {
-	boundingSphere_ = prim::boundingSphere(scene->boundingBox());
+	const prim::Sphere3D<TScalar> bounds = prim::boundingSphere(scene->boundingBox());
+	const TPoint3D diskCenter = bounds.center() - bounds.radius() * direction_;
+	defaultPortal_.reset(new Disk(diskCenter, direction_, bounds.radius()));
 }
 
 
@@ -130,7 +150,7 @@ bool LightDirectional::doContains(const Sample&, const TPoint3D&) const
 
 const TAabb3D LightDirectional::doBoundingBox() const
 {
-	return TAabb3D();
+	return userPortal_ ? userPortal_->boundingBox() : TAabb3D();
 }
 
 
@@ -158,9 +178,14 @@ const Spectrum LightDirectional::doEmission(const Sample&, const TRay3D& ray, Bo
 
 
 
-const Spectrum LightDirectional::doSampleEmission(const Sample&, const TPoint2D&, const TPoint3D& target, BoundedRay& shadowRay, TScalar& pdf) const
+const Spectrum LightDirectional::doSampleEmission(const Sample& sample, const TPoint2D&, const TPoint3D& target, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	shadowRay = BoundedRay(target, -direction_, tolerance, TNumTraits::infinity, prim::IsAlreadyNormalized());
+	if (userPortal_ && !userPortal_->isIntersecting(sample, shadowRay))
+	{
+		pdf = 0;
+		return Spectrum(0);
+	}
 	pdf = TNumTraits::one;
 	return radiance_;
 }
@@ -169,18 +194,31 @@ const Spectrum LightDirectional::doSampleEmission(const Sample&, const TPoint2D&
 
 const Spectrum LightDirectional::doSampleEmission(const Sample&, const TPoint2D& lightSampleA, const TPoint2D&, BoundedRay& emissionRay, TScalar& pdf) const
 {
-	const TPoint2D uv = num::uniformDisk(lightSampleA, pdf);
-	const TPoint3D begin = boundingSphere_.center() + boundingSphere_.radius() * (tangentU_ * uv.x + tangentV_ * uv.y - direction_);
-	emissionRay = BoundedRay(begin, direction_, tolerance);
-	pdf /= num::sqr(boundingSphere_.radius());
-	return radiance_;
+	TVector3D normal;
+	const TSceneObjectPtr& port = userPortal_ ? userPortal_ : defaultPortal_;
+	LASS_ASSERT(port);
+	const TPoint3D begin = port->sampleSurface(lightSampleA, direction_, normal, pdf);
+	const TScalar cosTheta = dot(direction_, normal);
+	if (pdf > 0 && cosTheta > 0)
+	{
+		emissionRay = BoundedRay(begin, direction_, tolerance);
+		pdf /= cosTheta;
+		return radiance_;
+	}
+	else
+	{
+		pdf = 0;
+		return Spectrum(0);
+	}
 }
 
 
 
 const Spectrum LightDirectional::doTotalPower() const
 {
-	return (2 * TNumTraits::pi * num::sqr(boundingSphere_.radius())) * radiance_;
+	const TSceneObjectPtr& port = userPortal_ ? userPortal_ : defaultPortal_;
+	LASS_ASSERT(port);
+	return port->area(direction_) * radiance_;
 }
 
 
@@ -201,14 +239,14 @@ bool LightDirectional::doIsSingular() const
 
 const TPyObjectPtr LightDirectional::doGetLightState() const
 {
-	return python::makeTuple(direction_, radiance_);
+	return python::makeTuple(direction_, radiance_, userPortal_);
 }
 
 
 
 void LightDirectional::doSetLightState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(state, direction_, radiance_);
+	python::decodeTuple(state, direction_, radiance_, userPortal_);
 }
 
 
