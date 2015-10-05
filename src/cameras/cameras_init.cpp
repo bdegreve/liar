@@ -22,10 +22,12 @@
  */
 
 #include "cameras_common.h"
+#include "orthographic_camera.h"
 #include "perspective_camera.h"
 #include <lass/io/proxy_man.h>
 
 PY_DECLARE_MODULE(cameras)
+PY_MODULE_CLASS(cameras, liar::cameras::OrthographicCamera)
 PY_MODULE_CLASS(cameras, liar::cameras::PerspectiveCamera)
 
 void camerasPostInject(PyObject*)
