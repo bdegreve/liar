@@ -161,7 +161,15 @@ public:
 		}
 		return *this;
 	}
-	Bands& inppow(TScalar f)
+	Bands& inppow(const Bands& other)
+	{
+		for (size_t i = 0; i < N; ++i)
+		{
+			v_[i] = num::pow(v_[i], other.v_[i]);
+		}
+		return *this;
+	}
+	Bands& inppow(TParam f)
 	{
 		for (size_t i = 0; i < N; ++i)
 		{
@@ -374,6 +382,13 @@ public:
 		v_[0] = std::max(v_[0], other.v_[0]);
 		v_[1] = std::max(v_[1], other.v_[1]);
 		v_[2] = std::max(v_[2], other.v_[2]);
+		return *this;
+	}
+	Bands& inppow(const Bands& other)
+	{
+		v_[0] = num::pow(v_[0], other.v_[0]);
+		v_[1] = num::pow(v_[1], other.v_[1]);
+		v_[2] = num::pow(v_[2], other.v_[2]);
 		return *this;
 	}
 	Bands& inppow(TScalar f)

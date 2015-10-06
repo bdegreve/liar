@@ -86,6 +86,7 @@ public:
 
 	Spectrum& inpabs() { v_.inpabs(); return *this; }
 	Spectrum& inpmax(const Spectrum& other) { v_.inpmax(other.v_); return *this; }
+	Spectrum& inppow(const Spectrum& other) { v_.inppow(other.v_); return *this; }
 	Spectrum& inppow(TParam f) { v_.inppow(f); return *this; }
 	Spectrum& inpsqrt() { v_.inpsqrt(); return *this; }
 	Spectrum& inpexp() { v_.inpexp(); return *this; }
@@ -134,6 +135,12 @@ inline Spectrum sqr(const Spectrum& a)
 	Spectrum r(a);
 	r *= a;
 	return r;
+}
+
+inline Spectrum pow(const Spectrum& a, const Spectrum& b)
+{
+	Spectrum r(a);
+	return r.inppow(b);
 }
 
 inline Spectrum pow(const Spectrum& a, TScalar b)
