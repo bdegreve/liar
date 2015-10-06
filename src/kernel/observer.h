@@ -58,6 +58,8 @@ public:
 
 	TWavelength sample(const XYZ& power, TScalar sample, XYZ& chromaticity, TScalar& pdf) const;
 
+	const std::vector<TWavelength> wavelengths() const;
+
 private:
 	struct Node
 	{

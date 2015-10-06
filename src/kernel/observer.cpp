@@ -37,6 +37,7 @@ PY_CLASS_METHOD_QUALIFIED_1(Observer, tristimulus, const XYZ, TWavelength)
 PY_CLASS_METHOD_QUALIFIED_1(Observer, tristimulus, const XYZ, Observer::TWavelengthRange)
 PY_CLASS_METHOD_QUALIFIED_1(Observer, chromaticity, const XYZ, TWavelength)
 PY_CLASS_METHOD_QUALIFIED_1(Observer, chromaticity, const XYZ, const Observer::TWavelengthRange&)
+PY_CLASS_MEMBER_R(Observer, wavelengths)
 //PY_CLASS_METHOD(Observer, sample)
 
 namespace
@@ -365,6 +366,18 @@ TWavelength Observer::sample(const XYZ& weight, TScalar sample, XYZ& chromaticit
 	chromaticity = kernel::chromaticity(xyz);	
 	pdf = p;
 	return wavelength;
+}
+
+
+const std::vector<TWavelength> Observer::wavelengths() const
+{
+	std::vector<TWavelength> w(nodes_.size());
+	w.reserve(nodes_.size());
+	for (size_t k = 0, n = nodes_.size(); k < n; ++k)
+	{
+		w[k] = nodes_[k].wavelength;
+	}
+	return w;
 }
 
 
