@@ -109,18 +109,18 @@ public:
 
 	void intersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
 	void intersect(const Sample& sample, const DifferentialRay& ray, Intersection& result) const;
-	bool isIntersecting(const Sample& sample, const BoundedRay& ray) const ;
+	bool isIntersecting(const Sample& sample, const BoundedRay& ray) const;
 	bool isIntersecting(const Sample& sample, const DifferentialRay& ray) const;
 	void localContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const;
 	bool contains(const Sample& sample, const TPoint3D& point) const;
 	void localSpace(TTime time, TTransformation3D& localToWorld) const;
 
 	bool hasSurfaceSampling() const;
-	void fun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
 	const TPoint3D sampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const;
 	const TPoint3D sampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const;
 	const TPoint3D sampleSurface(const TPoint2D& sample, const TPoint3D& target, const TVector3D& targetNormal, TVector3D& normal, TScalar& pdf) const;
 	const TPoint3D sampleSurface(const TPoint2D& sample, const TVector3D& viewDirection, TVector3D& normal, TScalar& pdf) const;
+	TScalar angularPdf(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TVector3D& normal) const;
 
 	const TAabb3D boundingBox() const;
 	bool hasMotion() const;
@@ -162,11 +162,11 @@ private:
 	virtual bool doContains(const Sample& sample, const TPoint3D& point) const = 0;
 
 	virtual bool doHasSurfaceSampling() const;
-	virtual void doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
 	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const;
 	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const;
 	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, const TPoint3D& target, const TVector3D& targetNormal, TVector3D& normal, TScalar& pdf) const;
 	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, const TVector3D& viewDirection, TVector3D& normal, TScalar& pdf) const;
+	virtual TScalar doAngularPdf(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TVector3D& normal) const;
 
 	virtual const TAabb3D doBoundingBox() const = 0;
 	virtual TScalar doArea() const = 0;

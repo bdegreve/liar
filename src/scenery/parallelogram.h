@@ -59,7 +59,7 @@ private:
 
 	bool doHasSurfaceSampling() const;
 	const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const;
-	void doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
+	TScalar doAngularPdf(const TRay3D& ray, BoundedRay& shadowRay, TVector3D& normal) const;
 
 	const TAabb3D doBoundingBox() const;
 	TScalar doArea() const;

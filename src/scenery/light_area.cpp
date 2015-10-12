@@ -185,11 +185,17 @@ TScalar LightArea::doArea(const TVector3D& normal) const
 
 
 
-const Spectrum LightArea::doEmission(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+const Spectrum LightArea::doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
-	surface_->fun(ray, shadowRay, pdf);
+	TVector3D normalLight;
+	pdf = surface_->angularPdf(sample, ray, shadowRay, normalLight);
 	if (pdf <= 0)
 	{
+		return Spectrum();
+	}
+	if (isSingleSided_ && dot(normalLight, shadowRay.direction()) > 0)
+	{
+		pdf = 0;
 		return Spectrum();
 	}
 	return radiance_;
@@ -254,6 +260,17 @@ const Spectrum LightArea::doSampleEmission(
 	TScalar originPdf;
 	const TPoint3D origin = surface_->sampleSurface(lightSampleA, originNormal, originPdf);
 
+	TPoint2D directionSample = lightSampleB;
+	if (!isSingleSided_)
+	{
+		directionSample.x *= 2;
+		if (directionSample.x >= 1)
+		{
+			originNormal = -originNormal;
+			directionSample.x -= 1;
+		}
+	}
+
 	TVector3D originU, originV;
 	generateOrthonormal(originNormal, originU, originV);
 	
@@ -271,7 +288,8 @@ const Spectrum LightArea::doSampleEmission(
 
 const Spectrum LightArea::doTotalPower() const
 {
-	return (TNumTraits::pi * surface_->area()) * radiance_;
+	const Spectrum singleSidedPower = (TNumTraits::pi * surface_->area()) * radiance_;
+	return isSingleSided_ ? singleSidedPower : 2 * singleSidedPower;
 }
 
 

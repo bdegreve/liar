@@ -72,7 +72,7 @@ private:
 	const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const;
 	//const TPoint3D doSampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const;
 	//const TPoint3D doSampleSurface(const TPoint2D& sample, const TVector3D& view, TVector3D& normal, TScalar& pdf) const;
-	void doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
+	TScalar doAngularPdf(const TRay3D& ray, BoundedRay& shadowRay, TVector3D& normal) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);

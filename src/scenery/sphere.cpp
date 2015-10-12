@@ -311,26 +311,26 @@ const TPoint3D Sphere::doSampleSurface(const TPoint2D& sample, const TVector3D& 
 */
 
 
-void Sphere::doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+TScalar Sphere::doAngularPdf(const TRay3D& ray, BoundedRay& shadowRay, TVector3D& normal) const
 {
 	TScalar t = 0;
 	const prim::Result r = prim::intersect(sphere_, ray, t, tolerance);
 	if (r == prim::rNone)
 	{
-		pdf = 0;
-		return;
+		return 0;
 	}
 	shadowRay = BoundedRay(ray, tolerance, t);
+	const TPoint3D intersection = ray.point(t);
+	normal = (intersection - sphere_.center()).normal();
 	if (sphere_.contains(ray.support()))
 	{
 		LASS_ASSERT(r == prim::rOne);
-		pdf = num::inv(4 * TNumTraits::pi);
-		return;
+		return num::inv(4 * TNumTraits::pi);
 	}
 	const TScalar sqrDistance = (sphere_.center() - ray.support()).squaredNorm();
 	const TScalar cosThetaMax = num::sqrt(
 		std::max(TNumTraits::zero, 1 - num::sqr(sphere_.radius()) / sqrDistance));
-	pdf = num::inv(2 * TNumTraits::pi * (1 - cosThetaMax));
+	return num::inv(2 * TNumTraits::pi * (1 - cosThetaMax));
 }
 
 

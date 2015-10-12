@@ -198,12 +198,13 @@ const TPoint3D Translation::doSampleSurface(const TPoint2D& sample, const TVecto
 
 
 
-void Translation::doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+TScalar Translation::doAngularPdf(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TVector3D& normal) const
 {
 	const TRay3D localRay(ray.support() - localToWorld_, ray.direction());
 	BoundedRay localShadow;
-	child_->fun(localRay, localShadow, pdf);
+	const TScalar pdf = child_->angularPdf(sample, localRay, localShadow, normal);
 	shadowRay = translate(localShadow, localToWorld_);
+	return pdf;
 }
 
 

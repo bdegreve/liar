@@ -183,20 +183,12 @@ bool SceneObject::doHasSurfaceSampling() const
 
 
 
-void SceneObject::doFun(const TRay3D&, BoundedRay&, TScalar&) const
-{
-	LASS_ASSERT(hasSurfaceSampling() == false);
-	LASS_THROW("surface sampling is unimplemented for scene objects '" << typeid(*this).name() << "'.");
-}
-
-
-
 /** If an object can sample its surface, it must at least override this function.
  *  Using the (u,v) coordinates in @a sample, it must generate a point on that surface,
  *  store the normal of the surface in that point in @a normal, store its probability
  *  density in @a pdf and return that point.
  */
-const TPoint3D SceneObject::doSampleSurface(const TPoint2D&, TVector3D&, TScalar&) const
+const TPoint3D SceneObject::doSampleSurface(const TPoint2D& /* sample */, TVector3D& /* normal */, TScalar& /* pdf */) const
 {
 	LASS_ASSERT(hasSurfaceSampling() == false);
 	LASS_THROW("surface sampling is unimplemented for scene objects '" << typeid(*this).name() << "'.");
@@ -230,7 +222,7 @@ const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TPoint
  *  If they have, they can override this function, if not, the more general one will 
  *  be called by default.
  */
-const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TPoint3D& target, const TVector3D&, TVector3D& normal, TScalar& pdf) const
+const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TPoint3D& target, const TVector3D& /* targetNormal */, TVector3D& normal, TScalar& pdf) const
 {
 	return doSampleSurface(sample, target, normal, pdf);
 }
@@ -249,6 +241,26 @@ const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TVecto
 		pdf = 0;
 	}
 	return result;
+}
+
+
+
+TScalar SceneObject::doAngularPdf(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TVector3D& normal) const
+{
+	LASS_ASSERT(hasSurfaceSampling() == false);
+	LASS_THROW("surface sampling is unimplemented for scene objects '" << typeid(*this).name() << "'.");
+
+	Intersection intersection;
+	this->intersect(sample, ray, intersection);
+	if (!intersection)
+	{
+		return 0;
+	}
+	shadowRay = BoundedRay(ray, tolerance, intersection.t());
+	IntersectionContext context(*this, sample, shadowRay, intersection, 0);
+	normal = context.geometricNormal();
+
+	return num::sqr(intersection.t()) / num::abs(this->area() * dot(ray.direction(), normal));
 }
 
 

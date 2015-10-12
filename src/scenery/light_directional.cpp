@@ -181,11 +181,17 @@ const Spectrum LightDirectional::doEmission(const Sample&, const TRay3D& ray, Bo
 const Spectrum LightDirectional::doSampleEmission(const Sample& sample, const TPoint2D&, const TPoint3D& target, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	shadowRay = BoundedRay(target, -direction_, tolerance, TNumTraits::infinity, prim::IsAlreadyNormalized());
-	if (userPortal_ && !userPortal_->isIntersecting(sample, shadowRay))
+	if (userPortal_)
 	{
-		pdf = 0;
-		return Spectrum(0);
-	}
+		Intersection intersection;
+		userPortal_->intersect(sample, shadowRay, intersection);
+		if (!intersection)
+		{
+			pdf = 0;
+			return Spectrum(0);
+		}
+		shadowRay = BoundedRay(target, -direction_, tolerance, intersection.t(), prim::IsAlreadyNormalized());
+	} 
 	pdf = TNumTraits::one;
 	return radiance_;
 }
@@ -197,11 +203,11 @@ const Spectrum LightDirectional::doSampleEmission(const Sample&, const TPoint2D&
 	TVector3D normal;
 	const TSceneObjectPtr& port = userPortal_ ? userPortal_ : defaultPortal_;
 	LASS_ASSERT(port);
-	const TPoint3D begin = port->sampleSurface(lightSampleA, direction_, normal, pdf);
+	const TPoint3D begin = port->sampleSurface(lightSampleA, -direction_, normal, pdf);
+	emissionRay = BoundedRay(begin, direction_, tolerance);
 	const TScalar cosTheta = dot(direction_, normal);
 	if (pdf > 0 && cosTheta > 0)
 	{
-		emissionRay = BoundedRay(begin, direction_, tolerance);
 		pdf /= cosTheta;
 		return radiance_;
 	}

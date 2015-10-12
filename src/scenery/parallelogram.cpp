@@ -119,23 +119,6 @@ const TPoint3D Parallelogram::doSampleSurface(
 
 
 
-void Parallelogram::doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
-{
-	TScalar t;
-	if (prim::intersect(parallelogram_, ray, t, tolerance) == prim::rOne)
-	{
-		shadowRay = BoundedRay(ray, tolerance, t);
-		pdf = invArea_ * num::sqr(t) / num::abs(dot(ray.direction(), normal_));
-	}
-	else
-	{
-		shadowRay = BoundedRay(ray, tolerance);
-		pdf = 0;
-	}
-}
-
-
-
 const TAabb3D Parallelogram::doBoundingBox() const
 {
 	return prim::aabb(parallelogram_);

@@ -292,10 +292,11 @@ inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, const T
 }
 
 
-
-inline void SceneObject::fun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+/**
+ */
+inline TScalar SceneObject::angularPdf(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TVector3D& normal) const
 {
-	doFun(ray, shadowRay, pdf);
+	return doAngularPdf(sample, ray, shadowRay, normal);
 }
 
 

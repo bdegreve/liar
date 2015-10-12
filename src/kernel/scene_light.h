@@ -46,32 +46,48 @@ public:
 
 	void setSceneBound(const TAabb3D& bound, const TimePeriod& period);
 
+	/** Return radiance emitted by this light source and received at ray.support() along that ray.
+		Adjusts shadowRay to be bounded by ray.support() and the point of emission.
+		Sets pdf to the the same value it would be if sampleEmssion(cameraSample, lightSample, target, shadowRay, pdf)
+		would result the same shadowRay.
+	 */
 	const Spectrum emission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 	{
 		return doEmission(sample, ray, shadowRay, pdf);
 	}
+
+	/** Sample radiance emitted by this light source and received at target (to be used as shadowRay.support()) 
+	 */
 	const Spectrum sampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSample, const TPoint3D& target,
 			BoundedRay& shadowRay, TScalar& pdf) const
 	{ 
 		return doSampleEmission(cameraSample, lightSample, target, shadowRay, pdf);
 	}
+
+	/** Sample radiance emitted by this light source and received at target (to be used as shadowRay.support()) with known normal.
+	 */
 	const Spectrum sampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D& targetNormal, 
 			BoundedRay& shadowRay, TScalar& pdf) const
 	{ 
 		return doSampleEmission(cameraSample, lightSample, target, targetNormal, shadowRay, pdf);
 	}
+
+	/** Generate an emissionRay.
+	 */
 	const Spectrum sampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 			BoundedRay& emissionRay, TScalar& pdf) const
 	{
 		return doSampleEmission(cameraSample, lightSampleA, lightSampleB, emissionRay, pdf);
 	}
+
 	const Spectrum totalPower() const
 	{
 		return doTotalPower();
 	}
+
 	size_t numberOfEmissionSamples() const 
 	{ 
 		return doNumberOfEmissionSamples(); 
