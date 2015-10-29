@@ -35,7 +35,7 @@
 #include "scene_object.h"
 #include "light_context.h"
 #include "light_sample.h"
-#include "spectrum.h"
+#include "spectral.h"
 
 namespace liar
 {
@@ -67,14 +67,14 @@ public:
 
 	/** @warning castRay is NOT THREAD SAFE!
 	 */
-	const Spectrum castRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, bool highQuality = true) const
+	const Spectral castRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, bool highQuality = true) const
 	{ 
 		RayGenerationIncrementor incrementor(*this);
 		if (rayGeneration_ < maxRayGeneration_)
 		{
 			return doCastRay(sample, primaryRay, tIntersection, alpha, rayGeneration_, highQuality);
 		}
-		return Spectrum();
+		return Spectral();
 	}
 
 	const TRayTracerPtr clone() const;
@@ -90,7 +90,7 @@ protected:
 	const LightContexts& lights() const { return lights_; }
 	MediumStack& mediumStack() const { return mediumStack_; }
 
-	const Spectrum estimateLightContribution(
+	const Spectral estimateLightContribution(
 			const Sample& sample, const TBsdfPtr& bsdf, const LightContext& light, 
 			const Sample::TSubSequence2D& lightSamples,  const Sample::TSubSequence2D& bsdfSamples, const Sample::TSubSequence1D& componentSamples, 
 			const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn) const;
@@ -99,7 +99,7 @@ private:
 
 	virtual void doRequestSamples(const TSamplerPtr& sampler) = 0;
 	virtual void doPreProcess(const TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads) = 0;
-	virtual const Spectrum doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const = 0;
+	virtual const Spectral doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const = 0;
 	virtual const TRayTracerPtr doClone() const = 0;
 
 	virtual const TPyObjectPtr doGetState() const = 0;

@@ -51,7 +51,7 @@ public:
 
 private:
 
-	const Spectrum doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const;
+	const Spectral doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);

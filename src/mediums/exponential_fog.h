@@ -57,11 +57,11 @@ public:
 
 private:
 
-	const Spectrum doTransmittance(const BoundedRay& ray) const;
-	const Spectrum doEmission(const BoundedRay& ray) const;
-	const Spectrum doScatterOut(const BoundedRay& ray) const;
-	const Spectrum doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
-	const Spectrum doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
+	const Spectral doTransmittance(const BoundedRay& ray) const;
+	const Spectral doEmission(const BoundedRay& ray) const;
+	const Spectral doScatterOut(const BoundedRay& ray) const;
+	const Spectral doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
+	const Spectral doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
 
 	void init(TScalar decay = 1);
 	TScalar alpha(const BoundedRay& ray) const;

@@ -77,7 +77,7 @@ void CheckerVolume::doSetState(const TPyObjectPtr& state)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum
+const Spectral
 CheckerVolume::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	const TScalar x = num::fractional(context.point().x);

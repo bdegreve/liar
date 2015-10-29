@@ -63,7 +63,7 @@ private:
 	};
 
 	void doShadeContext(const Sample& sample, IntersectionContext& context) const;
-	const Spectrum doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const;
+	const Spectral doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const;
 	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
 
 	void doRequestSamples(const TSamplerPtr& sampler);

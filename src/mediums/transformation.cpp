@@ -96,92 +96,92 @@ size_t Transformation::doNumScatterSamples() const
 
 
 
-const Spectrum Transformation::doTransmittance(const BoundedRay& ray) const
+const Spectral Transformation::doTransmittance(const BoundedRay& ray) const
 {
 	if (!child_)
 	{
-		return Spectrum(1);
+		return Spectral(1);
 	}
 	return child_->transmittance(transform(ray, worldToLocal_));
 }
 
 
 
-const Spectrum Transformation::doEmission(const BoundedRay& ray) const
+const Spectral Transformation::doEmission(const BoundedRay& ray) const
 {
 	if (!child_)
 	{
-		return Spectrum(0);
+		return Spectral(0);
 	}
 	return child_->emission(transform(ray, worldToLocal_));
 }
 
 
 
-const Spectrum Transformation::doScatterOut(const BoundedRay& ray) const
+const Spectral Transformation::doScatterOut(const BoundedRay& ray) const
 {
 	if (!child_)
 	{
-		return Spectrum(0);
+		return Spectral(0);
 	}
 	return child_->scatterOut(transform(ray, worldToLocal_));
 }
 
 
 
-const Spectrum Transformation::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const Spectral Transformation::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	if (!child_)
 	{
 		pdf = 0;
-		return Spectrum(0);
+		return Spectral(0);
 	}
 	TScalar scale = 1;
 	const BoundedRay local = transform(ray, worldToLocal_, scale);
-	const Spectrum result = child_->sampleScatterOut(sample, local, tScatter, pdf);
+	const Spectral result = child_->sampleScatterOut(sample, local, tScatter, pdf);
 	tScatter /= scale;
 	return result;
 }
 
 
 
-const Spectrum Transformation::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const Spectral Transformation::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	if (!child_)
 	{
 		tScatter = ray.farLimit();
 		pdf = 1;
-		return Spectrum(1);
+		return Spectral(1);
 	}
 	TScalar scale = 1;
 	const BoundedRay local = transform(ray, worldToLocal_, scale);
-	const Spectrum result = child_->sampleScatterOutOrTransmittance(sample, local, tScatter, pdf);
+	const Spectral result = child_->sampleScatterOutOrTransmittance(sample, local, tScatter, pdf);
 	tScatter /= scale;
 	return result;
 }
 
 
-const Spectrum Transformation::doPhase(const TPoint3D& pos, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
+const Spectral Transformation::doPhase(const TPoint3D& pos, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
 {
 	if (!child_)
 	{
 		pdf = 0;
-		return Spectrum(0);
+		return Spectral(0);
 	}
 	return child_->phase(transform(pos, worldToLocal_), transform(dirIn, worldToLocal_), transform(dirOut, worldToLocal_), pdf);
 }
 
 
 
-const Spectrum Transformation::doSamplePhase(const TPoint2D& sample, const TPoint3D& pos, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
+const Spectral Transformation::doSamplePhase(const TPoint2D& sample, const TPoint3D& pos, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
 {
 	if (!child_)
 	{
 		pdf = 0;
 		dirOut = dirIn;
-		return Spectrum(0);
+		return Spectral(0);
 	}
-	const Spectrum result = child_->samplePhase(sample, transform(pos, worldToLocal_), transform(dirIn, worldToLocal_), dirOut, pdf);
+	const Spectral result = child_->samplePhase(sample, transform(pos, worldToLocal_), transform(dirIn, worldToLocal_), dirOut, pdf);
 	dirOut = transform(dirOut, localToWorld_);
 	return result;
 }

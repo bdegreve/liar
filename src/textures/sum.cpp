@@ -78,13 +78,13 @@ void Sum::setTerms(const TTerms& terms)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum Sum::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral Sum::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	if (terms_.empty())
 	{
-		return Spectrum();
+		return Spectral();
 	}
-	Spectrum result(0);
+	Spectral result(0);
 	for (TTerms::const_iterator i = terms_.begin(); i != terms_.end(); ++i)
 	{
 		result += (*i)->lookUp(sample, context);

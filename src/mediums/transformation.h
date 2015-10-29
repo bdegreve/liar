@@ -54,13 +54,13 @@ public:
 
 private:
 	size_t doNumScatterSamples() const;
-	const Spectrum doTransmittance(const BoundedRay& ray) const;
-	const Spectrum doEmission(const BoundedRay& ray) const;
-	const Spectrum doScatterOut(const BoundedRay& ray) const;
-	const Spectrum doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
-	const Spectrum doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
-	const Spectrum doPhase(const TPoint3D&, const TVector3D&, const TVector3D&, TScalar& pdf) const;
-	const Spectrum doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const;
+	const Spectral doTransmittance(const BoundedRay& ray) const;
+	const Spectral doEmission(const BoundedRay& ray) const;
+	const Spectral doScatterOut(const BoundedRay& ray) const;
+	const Spectral doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
+	const Spectral doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
+	const Spectral doPhase(const TPoint3D&, const TVector3D&, const TVector3D&, TScalar& pdf) const;
+	const Spectral doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const;
 
 	bool bound(const BoundedRay& ray, BoundedRay& bounded) const;
 

@@ -51,29 +51,29 @@ public:
 	TScalar assymetry() const;
 	void setAssymetry(TScalar g);
 
-	const Spectrum& color() const;
-	void setColor(const Spectrum& color);
+	const Spectral& color() const;
+	void setColor(const Spectral& color);
 
-	const Spectrum& emission() const;
-	void setEmission(const Spectrum& emission);
+	const Spectral& emission() const;
+	void setEmission(const Spectral& emission);
 
 	void setNumScatterSamples(size_t n);
 
 private:
 
 	size_t doNumScatterSamples() const;
-	const Spectrum doTransmittance(const BoundedRay& ray) const;
-	const Spectrum doEmission(const BoundedRay& ray) const;
-	const Spectrum doScatterOut(const BoundedRay& ray) const;
-	const Spectrum doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
-	const Spectrum doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
-	const Spectrum doPhase(const TPoint3D&, const TVector3D&, const TVector3D&, TScalar& pdf) const;
-	const Spectrum doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const;
+	const Spectral doTransmittance(const BoundedRay& ray) const;
+	const Spectral doEmission(const BoundedRay& ray) const;
+	const Spectral doScatterOut(const BoundedRay& ray) const;
+	const Spectral doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
+	const Spectral doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
+	const Spectral doPhase(const TPoint3D&, const TVector3D&, const TVector3D&, TScalar& pdf) const;
+	const Spectral doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const;
 
-	void init(TScalar extinction = 0, TScalar assymetry = 0, const Spectrum& color = Spectrum(1), const Spectrum& emission = Spectrum(0), size_t numSamples = 1);
+	void init(TScalar extinction = 0, TScalar assymetry = 0, const Spectral& color = Spectral(1), const Spectral& emission = Spectral(0), size_t numSamples = 1);
 
-	Spectrum color_;
-	Spectrum emission_;
+	Spectral color_;
+	Spectral emission_;
 	TScalar extinction_;
 	TScalar assymetry_;
 	size_t numSamples_;

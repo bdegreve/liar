@@ -66,7 +66,7 @@ public:
 private:
 	BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
 	SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
-	Spectrum diffuseOverPi_;
+	Spectral diffuseOverPi_;
 };
 
 }

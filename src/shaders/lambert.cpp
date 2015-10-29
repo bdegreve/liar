@@ -75,7 +75,7 @@ void Lambert::setDiffuse(const TTexturePtr& diffuse)
 
 TBsdfPtr Lambert::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-	const Spectrum diffuse = diffuse_->lookUp(sample, context);
+	const Spectral diffuse = diffuse_->lookUp(sample, context);
 	return TBsdfPtr(new LambertBsdf(sample, context, caps(), diffuse));
 }
 

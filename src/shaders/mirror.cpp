@@ -102,7 +102,7 @@ void Mirror::doSetState(const TPyObjectPtr& state)
 
 // --- Bsdf ----------------------------------------------------------------------------------------
 
-Mirror::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, const Spectrum& reflectance):
+Mirror::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& reflectance):
 	kernel::Bsdf(sample, context, Bsdf::capsReflection | Bsdf::capsSpecular),
 	reflectance_(reflectance)
 {

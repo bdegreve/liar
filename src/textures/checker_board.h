@@ -69,7 +69,7 @@ private:
 
 	typedef util::Dictionary<std::string, AntiAliasing> TAntiAliasingDictionary;
 
-	const Spectrum doLookUp(const Sample& sample, const IntersectionContext& context) const;
+	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context) const;
 
 	TScalar integrate(const TVector2D& min, const TVector2D& max) const;
 

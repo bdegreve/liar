@@ -1,4 +1,4 @@
-#include "kernel/spectrum.h"
+#include "kernel/spectral.h"
 #include <iostream>
 
 namespace
@@ -39,12 +39,12 @@ struct Tester
 	{
 		check(message, num::almostEqual(a, b, TScalar(1e-3f)));
 	}
-	void checkClose(const char* message, const Spectrum& a, const Spectrum& b)
+	void checkClose(const char* message, const Spectral& a, const Spectral& b)
 	{
 		bool ok = true;
-		for (size_t i = 0; i < Spectrum::numBands; ++i)
+		for (size_t i = 0; i < Spectral::numBands; ++i)
 		{
-			ok &= num::almostEqual<Spectrum::TValue>(a[i], b[i], 1e-3f);
+			ok &= num::almostEqual<Spectral::TValue>(a[i], b[i], 1e-3f);
 		}
 		check(message, ok);
 	}
@@ -56,7 +56,7 @@ struct Tester
 
 bool test_xyz(const XYZ& xyz)
 {
-	const Spectrum spectrum(xyz);
+	const Spectral spectrum(xyz);
 	const XYZ test = spectrum.xyz();
 	const TScalar error = num::sqrt(sqr(xyz - test).total());
 	if (error < 1e-3)
@@ -137,22 +137,22 @@ int test_interface()
 {
 	Tester t;
 
-	t.check("Spectrum::numBands",
+	t.check("Spectral::numBands",
 #ifdef LIAR_SPECTRAL_BANDS
-		Spectrum::numBands == LIAR_SPECTRAL_BANDS
+		Spectral::numBands == LIAR_SPECTRAL_BANDS
 #else
-		Spectrum::numBands == 3
+		Spectral::numBands == 3
 #endif
 	);
 
-	Spectrum zero;
+	Spectral zero;
 	t.check("Default constructor", zero.total() == 0);
 
-	Spectrum one(1);
-	t.check("Scalar constructor ", one.total() == Spectrum::numBands);
+	Spectral one(1);
+	t.check("Scalar constructor ", one.total() == Spectral::numBands);
 
-	Spectrum a, b, c, d, e, f, g, h, k, m, n, o;
-	for (size_t i = 0; i < Spectrum::numBands; ++i)
+	Spectral a, b, c, d, e, f, g, h, k, m, n, o;
+	for (size_t i = 0; i < Spectral::numBands; ++i)
 	{
 		const TScalar x = static_cast<TScalar>(i + 1);
 		a[i] = x;
@@ -183,16 +183,16 @@ int test_interface()
 	t.checkClose("operator* (scalar, spectrum)", 2 * a, c);
 	t.checkClose("operator/ (scalar, spectrum)", 2 / a, k);
 
-	Spectrum y = one;
+	Spectral y = one;
 	t.checkClose("fma (spectrum, spectrum)", y.fma(a, b), f);
 	y = one;
 	t.checkClose("fma (spectrum, scalar)", y.fma(a, 2), g);
 	y = one;
 	t.checkClose("fma (scalar, spectrum)", y.fma(2, a), g);
 
-	t.checkClose("total", a.total(), (Spectrum::numBands + 1.f) * Spectrum::numBands / 2.f);
-	t.checkClose("absTotal", b.absTotal(), (Spectrum::numBands + 1.f) * Spectrum::numBands / 2.f);
-	t.checkClose("average", b.average(), -(Spectrum::numBands + 1.f) / 2.f);
+	t.checkClose("total", a.total(), (Spectral::numBands + 1.f) * Spectral::numBands / 2.f);
+	t.checkClose("absTotal", b.absTotal(), (Spectral::numBands + 1.f) * Spectral::numBands / 2.f);
+	t.checkClose("average", b.average(), -(Spectral::numBands + 1.f) / 2.f);
 	t.checkClose("dot", a.dot(b), (a * b).total());
 
 	t.check("isZero", zero.isZero());

@@ -47,14 +47,14 @@ public:
 
 	const TPoint3D& position() const;
 	const TVector3D& direction() const;
-	const Spectrum& intensity() const;
+	const Spectral& intensity() const;
 	const TAttenuationPtr& attenuation() const;
 	TScalar outerAngle() const;
 	TScalar innerAngle() const;
 
 	void setPosition(const TPoint3D& iPosition);
 	void setDirection(const TVector3D& direction);
-	void setIntensity(const Spectrum& iIntensity);
+	void setIntensity(const Spectral& iIntensity);
 	void setAttenuation(const TAttenuationPtr& iAttenuation);
 	void setOuterAngle(TScalar iRadians);
 	void setInnerAngle(TScalar iRadians);
@@ -73,14 +73,14 @@ private:
 	TScalar doArea() const;
 	TScalar doArea(const TVector3D& normal) const;
 
-	const Spectrum doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
-	const Spectrum doSampleEmission(
+	const Spectral doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
+	const Spectral doSampleEmission(
 			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
 			BoundedRay& shadowRay, TScalar& pdf) const;
-	const Spectrum doSampleEmission(
+	const Spectral doSampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 			BoundedRay& emissionRay, TScalar& pdf) const;
-	const Spectrum doTotalPower() const;
+	const Spectral doTotalPower() const;
 	size_t doNumberOfEmissionSamples() const;
 	bool doIsSingular() const;
 
@@ -94,7 +94,7 @@ private:
 	TVector3D direction_;
 	TVector3D tangentU_;
 	TVector3D tangentV_;
-	Spectrum intensity_;
+	Spectral intensity_;
 	TAttenuationPtr attenuation_;
 	TScalar cosOuterAngle_;
 	TScalar cosInnerAngle_;

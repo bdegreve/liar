@@ -66,7 +66,7 @@ public:
 		doShadeContext(sample, context);
 	}
 
-	const Spectrum emission(const Sample& sample, const IntersectionContext& context, 
+	const Spectral emission(const Sample& sample, const IntersectionContext& context, 
 		const TVector3D& omegaOut) const
 	{
 		return doEmission(sample, context, omegaOut);
@@ -102,7 +102,7 @@ protected:
 private:
 
 	virtual void doShadeContext(const Sample& sample, IntersectionContext& context) const;
-	virtual const Spectrum doEmission(const Sample& sample, const IntersectionContext& context,
+	virtual const Spectral doEmission(const Sample& sample, const IntersectionContext& context,
 		const TVector3D& omegaOut) const;
 	virtual TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
 	

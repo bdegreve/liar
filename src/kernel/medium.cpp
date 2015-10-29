@@ -39,14 +39,14 @@ Medium::~Medium()
 
 
 
-const Spectrum& Medium::refractionIndex() const
+const Spectral& Medium::refractionIndex() const
 {
 	return refractionIndex_;
 }
 
 
 
-void Medium::setRefractionIndex(const Spectrum& refractionIndex)
+void Medium::setRefractionIndex(const Spectral& refractionIndex)
 {
 	refractionIndex_ = refractionIndex;
 }
@@ -123,66 +123,66 @@ MediumStack::MediumStack(const TMediumPtr& defaultMedium):
 
 
 
-const Spectrum MediumStack::transmittance(const BoundedRay& ray) const
+const Spectral MediumStack::transmittance(const BoundedRay& ray) const
 {
-	return medium() ? medium()->transmittance(ray) : Spectrum(1);
+	return medium() ? medium()->transmittance(ray) : Spectral(1);
 }
 
 
 
-const Spectrum MediumStack::transmittance(const BoundedRay& ray, TScalar farLimit) const
+const Spectral MediumStack::transmittance(const BoundedRay& ray, TScalar farLimit) const
 {
 	return transmittance(bound(ray, ray.nearLimit(), farLimit));
 }
 
 
 
-const Spectrum MediumStack::transmittance(const DifferentialRay& ray, TScalar farLimit) const
+const Spectral MediumStack::transmittance(const DifferentialRay& ray, TScalar farLimit) const
 {
 	return transmittance(ray.centralRay(), farLimit);
 }
 
 
 
-const Spectrum MediumStack::emission(const BoundedRay& ray) const
+const Spectral MediumStack::emission(const BoundedRay& ray) const
 {
-	return medium() ? medium()->emission(ray) : Spectrum(0);
+	return medium() ? medium()->emission(ray) : Spectral(0);
 }
 
 
 
-const Spectrum MediumStack::sampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const Spectral MediumStack::sampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	if (!medium())
 	{
 		pdf = 0;
-		return Spectrum(0);
+		return Spectral(0);
 	}
 	return medium()->sampleScatterOut(sample, ray, tScatter, pdf);
 }
 
 
 
-const Spectrum MediumStack::sampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const Spectral MediumStack::sampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	if (!medium())
 	{
 		tScatter = ray.farLimit();
 		pdf = 1;
-		return Spectrum(1);
+		return Spectral(1);
 	}
 	return medium()->sampleScatterOutOrTransmittance(sample, ray, tScatter, pdf);
 }
 
 
 
-const Spectrum MediumStack::samplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
+const Spectral MediumStack::samplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
 {
 	if (!medium())
 	{
 		pdf = 0;
 		dirOut = TVector3D();
-		return Spectrum(0);
+		return Spectral(0);
 	}
 	return medium()->samplePhase(sample, position, dirIn, dirOut, pdf);
 }

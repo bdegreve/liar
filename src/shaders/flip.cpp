@@ -78,7 +78,7 @@ void Flip::doShadeContext(const Sample& sample, IntersectionContext& context) co
 
 
 
-const Spectrum Flip::doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const
+const Spectral Flip::doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const
 {
 	return child_->emission(sample, context, Bsdf::flip(omegaOut));
 }

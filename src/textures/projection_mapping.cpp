@@ -77,7 +77,7 @@ void ProjectionMapping::doSetState(const TPyObjectPtr& state)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum ProjectionMapping::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral ProjectionMapping::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	IntersectionContext temp(context);
 	const TPoint2D uv0 = (PY_ENFORCE_POINTER(projection_))->uv(context.point());

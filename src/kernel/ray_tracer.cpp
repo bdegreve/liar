@@ -181,7 +181,7 @@ namespace temp
 
 
 
-const Spectrum RayTracer::estimateLightContribution(
+const Spectral RayTracer::estimateLightContribution(
 		const Sample& sample, const TBsdfPtr& bsdf, const LightContext& light,
 		const Sample::TSubSequence2D& lightSamples, const Sample::TSubSequence2D& bsdfSamples, const Sample::TSubSequence1D& componentSamples,
 		const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn) const
@@ -202,7 +202,7 @@ const Spectrum RayTracer::estimateLightContribution(
 	}
 	// what about indirect estimator caps???
 
-	Spectrum result;
+	Spectral result;
 	const TPoint3D start = target + 10 * liar::tolerance * targetNormal;
 
 	if (nl > 0)
@@ -211,7 +211,7 @@ const Spectrum RayTracer::estimateLightContribution(
 		{
 			BoundedRay shadowRay;
 			TScalar lightPdf;
-			const Spectrum radiance = light.sampleEmission(sample, *ls, start, targetNormal, shadowRay, lightPdf);
+			const Spectral radiance = light.sampleEmission(sample, *ls, start, targetNormal, shadowRay, lightPdf);
 			if (lightPdf <= 0 || !radiance)
 			{
 				continue;
@@ -222,7 +222,7 @@ const Spectrum RayTracer::estimateLightContribution(
 			{
 				continue;
 			}
-			const Spectrum trans = mediumStack().transmittance(shadowRay);
+			const Spectral trans = mediumStack().transmittance(shadowRay);
 			const TScalar weight = temp::squaredHeuristic(nl * lightPdf, nb * out.pdf);
 			const TScalar cosTheta = omegaOut.z;
 			result += out.value * trans * radiance * (sign * weight * num::abs(cosTheta) / (nl * lightPdf));
@@ -242,7 +242,7 @@ const Spectrum RayTracer::estimateLightContribution(
 			const TRay3D ray(start, bsdf->bsdfToWorld(out.omegaOut).normal());
 			BoundedRay shadowRay;
 			TScalar lightPdf;
-			const Spectrum radiance = light.emission(sample, ray, shadowRay, lightPdf);
+			const Spectral radiance = light.emission(sample, ray, shadowRay, lightPdf);
 			if (lightPdf <= 0 || !radiance)
 			{
 				continue;
@@ -251,7 +251,7 @@ const Spectrum RayTracer::estimateLightContribution(
 			{
 				continue;
 			}
-			const Spectrum trans = mediumStack().transmittance(shadowRay);
+			const Spectral trans = mediumStack().transmittance(shadowRay);
 			const TScalar weight = temp::squaredHeuristic(nb * out.pdf, nl * lightPdf);
 			const TScalar cosTheta = out.omegaOut.z;
 			result += out.value * trans * radiance * (sign * weight * num::abs(cosTheta) / (nb * out.pdf));

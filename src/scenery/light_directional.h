@@ -47,11 +47,11 @@ public:
 	LightDirectional(const TVector3D& direction, const XYZ& radiance);
 
 	const TVector3D& direction() const;
-	const Spectrum& radiance() const;
+	const Spectral& radiance() const;
 	const TSceneObjectPtr& portal() const;
 
 	void setDirection(const TVector3D& direction);
-	void setRadiance(const Spectrum& radiance);
+	void setRadiance(const Spectral& radiance);
 	void setPortal(const TSceneObjectPtr& portal);
 
 private:
@@ -67,14 +67,14 @@ private:
 	TScalar doArea() const;
 	TScalar doArea(const TVector3D& normal) const;
 
-	const Spectrum doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
-	const Spectrum doSampleEmission(
+	const Spectral doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
+	const Spectral doSampleEmission(
 			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target,
 			BoundedRay& shadowRay, TScalar& pdf) const;
-	const Spectrum doSampleEmission(
+	const Spectral doSampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
 			BoundedRay& emissionRay, TScalar& pdf) const;
-	const Spectrum doTotalPower() const;
+	const Spectral doTotalPower() const;
 	size_t doNumberOfEmissionSamples() const;
 	bool doIsSingular() const;
 
@@ -82,7 +82,7 @@ private:
 	void doSetLightState(const TPyObjectPtr& state);
 
 	TVector3D direction_;
-	Spectrum radiance_;
+	Spectral radiance_;
 	TSceneObjectPtr userPortal_;
 	TSceneObjectPtr defaultPortal_;
 };

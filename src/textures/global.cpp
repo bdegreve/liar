@@ -47,7 +47,7 @@ Global::Global(const TTexturePtr& texture):
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum Global::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral Global::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	IntersectionContext global(context);
 	const TTransformation3D& localToWorld = context.localToWorld();

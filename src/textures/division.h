@@ -47,7 +47,7 @@ public:
 
 private:
 
-	const Spectrum doLookUp(const Sample& sample, const IntersectionContext& context) const;
+	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context) const;
 };
 
 }

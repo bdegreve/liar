@@ -120,12 +120,12 @@ void LinearInterpolator::addKey(const TScalar keyValue, const TTexturePtr& keyTe
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum
+const Spectral
 LinearInterpolator::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	if (keys_.empty())
 	{
-		return Spectrum();
+		return Spectral();
 	}
 
 	const TScalar keyValue = average(control_->lookUp(sample, context));

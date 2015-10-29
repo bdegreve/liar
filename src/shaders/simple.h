@@ -69,7 +69,7 @@ public:
 
 private:
 
-	const Spectrum doShade(const Sample& sample,	const DifferentialRay& primaryRay, 
+	const Spectral doShade(const Sample& sample,	const DifferentialRay& primaryRay, 
 		const Intersection& intersection, const IntersectionContext& context) const;
 
 	const TPyObjectPtr doGetState() const;

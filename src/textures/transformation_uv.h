@@ -57,7 +57,7 @@ protected:
 
 private:
 
-	const Spectrum doLookUp(const Sample& sample, const IntersectionContext& context) const;
+	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context) const;
 
 	TTransformation2D forward_;
 	TTransformation2D inverse_;

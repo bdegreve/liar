@@ -46,12 +46,12 @@ public:
 	LightArea(const TSceneObjectPtr& iSurface);
 
 	const TSceneObjectPtr& surface() const;
-	const Spectrum& radiance() const;
+	const Spectral& radiance() const;
 	const TAttenuationPtr& attenuation() const;
 	// const unsigned numberOfEmissionSamples() const; [via SceneLight]
 	bool isDoubleSided() const;
 
-	void setRadiance(const Spectrum& radiance);
+	void setRadiance(const Spectral& radiance);
 	void setAttenuation(const TAttenuationPtr& iAttenuation);
 	void setNumberOfEmissionSamples(unsigned iNumberOfSamples);
 	void setDoubleSided(bool iIsDoubleSided);
@@ -69,17 +69,17 @@ private:
 	TScalar doArea() const;
 	TScalar doArea(const TVector3D& normal) const;
 
-	const Spectrum doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
-	const Spectrum doSampleEmission(
+	const Spectral doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
+	const Spectral doSampleEmission(
 			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target,
 			BoundedRay& shadowRay, TScalar& pdf) const;
-	const Spectrum doSampleEmission(
+	const Spectral doSampleEmission(
 			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D& targetNormal, 
 			BoundedRay& shadowRay, TScalar& pdf) const;
-	const Spectrum doSampleEmission(
+	const Spectral doSampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 			BoundedRay& emissionRay, TScalar& pdf) const;
-	const Spectrum doTotalPower() const;
+	const Spectral doTotalPower() const;
 	size_t doNumberOfEmissionSamples() const;
 	bool doIsSingular() const;
 
@@ -87,7 +87,7 @@ private:
 	void doSetLightState(const TPyObjectPtr& state);
 
 	TSceneObjectPtr surface_;
-	Spectrum radiance_;
+	Spectral radiance_;
 	TAttenuationPtr attenuation_;
 	unsigned numberOfEmissionSamples_;
 	bool isSingleSided_;

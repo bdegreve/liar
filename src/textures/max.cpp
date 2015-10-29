@@ -44,7 +44,7 @@ Max::Max(const TTexturePtr& a, const TTexturePtr& b):
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum
+const Spectral
 Max::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	return max(textureA()->lookUp(sample, context), textureB()->lookUp(sample, context));

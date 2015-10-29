@@ -54,9 +54,9 @@ Sum::Sum(const TChildren& children):
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum Sum::doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const
+const Spectral Sum::doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const
 {
-	Spectrum result;
+	Spectral result;
 	for (TChildren::const_iterator i = children_.begin(); i != children_.end(); ++i)
 	{
 		result += (*i)->emission(sample, context, omegaOut);

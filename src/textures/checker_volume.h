@@ -54,7 +54,7 @@ protected:
 
 private:
 
-	const Spectrum doLookUp(const Sample& sample,
+	const Spectral doLookUp(const Sample& sample,
 		const IntersectionContext& context) const;
 
 	TVector3D split_;

@@ -69,7 +69,7 @@ void LightContext::requestSamples(const TSamplerPtr& sampler)
 
 
 
-const Spectrum LightContext::sampleEmission(
+const Spectral LightContext::sampleEmission(
 		const Sample& cameraSample, const TPoint2D& lightSample, const TPoint3D& target,
 		BoundedRay& shadowRay, TScalar& pdf) const
 {
@@ -78,7 +78,7 @@ const Spectrum LightContext::sampleEmission(
 	const TPoint3D localTarget = transform(target, worldToLocal_);
 
 	BoundedRay localRay;
-	const Spectrum radiance = light_->sampleEmission(cameraSample, lightSample, localTarget, localRay, pdf);
+	const Spectral radiance = light_->sampleEmission(cameraSample, lightSample, localTarget, localRay, pdf);
 
 	// we must transform back to world space.  But we already do know the starting point, so don't rely
 	// on recalculating that one
@@ -90,7 +90,7 @@ const Spectrum LightContext::sampleEmission(
 
 
 
-const Spectrum LightContext::sampleEmission(
+const Spectral LightContext::sampleEmission(
 		const Sample& cameraSample, const TPoint2D& lightSample,
 		const TPoint3D& target,	const TVector3D& targetNormal,
 		BoundedRay& shadowRay, TScalar& pdf) const
@@ -101,7 +101,7 @@ const Spectrum LightContext::sampleEmission(
 	const TVector3D localNormal = normalTransform(targetNormal, worldToLocal_).normal();
 
 	BoundedRay localRay;
-	const Spectrum radiance = light_->sampleEmission(
+	const Spectral radiance = light_->sampleEmission(
 		cameraSample, lightSample, localTarget, localNormal, localRay, pdf);
 
 	// we must transform back to world space.  But we already do know the starting point, so don't rely
@@ -114,14 +114,14 @@ const Spectrum LightContext::sampleEmission(
 
 
 
-const Spectrum LightContext::sampleEmission(
+const Spectral LightContext::sampleEmission(
 		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
 		BoundedRay& emissionRay, TScalar& pdf) const
 {
 	setTime(cameraSample.time());
 
 	BoundedRay localRay;
-	const Spectrum radiance = light_->sampleEmission(cameraSample, lightSampleA, lightSampleB, localRay, pdf);
+	const Spectral radiance = light_->sampleEmission(cameraSample, lightSampleA, lightSampleB, localRay, pdf);
 
 	emissionRay = transform(localRay, localToWorld_);
 	return radiance;
@@ -129,7 +129,7 @@ const Spectrum LightContext::sampleEmission(
 
 
 
-const Spectrum LightContext::emission(
+const Spectral LightContext::emission(
 		const Sample& cameraSample, const TRay3D& ray,
 		BoundedRay& shadowRay, TScalar& pdf) const
 {
@@ -138,7 +138,7 @@ const Spectrum LightContext::emission(
 	const TRay3D localRay = prim::transform(ray, worldToLocal_, scale);
 
 	BoundedRay localShadowRay;
-	const Spectrum radiance = light_->emission(cameraSample, localRay, localShadowRay, pdf);
+	const Spectral radiance = light_->emission(cameraSample, localRay, localShadowRay, pdf);
 
 	shadowRay = BoundedRay(
 		ray, localShadowRay.nearLimit() / scale, localShadowRay.farLimit() / scale);
@@ -147,7 +147,7 @@ const Spectrum LightContext::emission(
 
 
 
-const Spectrum LightContext::totalPower() const
+const Spectral LightContext::totalPower() const
 {
 	return light_->totalPower();
 }
@@ -237,7 +237,7 @@ void LightContexts::clear()
 {
 	contexts_.clear();
 	cdf_.clear();
-	totalPower_ = Spectrum(0);
+	totalPower_ = Spectral(0);
 }
 
 
@@ -265,11 +265,11 @@ void LightContexts::setSceneBound(const TAabb3D& bound, const TimePeriod& period
 		return;
 	}
 	cdf_.resize(n);
-	totalPower_ = Spectrum(0);
+	totalPower_ = Spectral(0);
 	for (size_t k = 0; k < n; ++k)
 	{
 		contexts_[k].setSceneBound(bound, period);
-		const Spectrum power = contexts_[k].totalPower();
+		const Spectral power = contexts_[k].totalPower();
 		totalPower_ += power;
 		cdf_[k] = totalPower_.total();
 	}
@@ -330,7 +330,7 @@ size_t LightContexts::size() const
 
 
 
-const Spectrum LightContexts::totalPower() const
+const Spectral LightContexts::totalPower() const
 {
 	return totalPower_;
 }

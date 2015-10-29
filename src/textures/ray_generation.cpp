@@ -46,10 +46,10 @@ RayGeneration::RayGeneration()
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum RayGeneration::doLookUp(const Sample&, const IntersectionContext& context) const
+const Spectral RayGeneration::doLookUp(const Sample&, const IntersectionContext& context) const
 {
 	const TScalar t = static_cast<TScalar>(context.rayGeneration());
-	return Spectrum(t);
+	return Spectral(t);
 }
 
 

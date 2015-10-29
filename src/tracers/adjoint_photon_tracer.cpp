@@ -56,7 +56,7 @@ void AdjointPhotonTracer::doPreProcess(const kernel::TSamplerPtr&, const TimePer
 
 
 
-const Spectrum AdjointPhotonTracer::doCastRay(
+const Spectral AdjointPhotonTracer::doCastRay(
 		const kernel::Sample& sample, const kernel::DifferentialRay& primaryRay,
 		TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const
 {
@@ -73,8 +73,8 @@ const Spectrum AdjointPhotonTracer::doCastRay(
 	
 	const TPoint3D hitPoint = ray.point(tIntersection);
 	TScalar tScatter, pdf;
-	const Spectrum transmittance = mediumStack().sampleScatterOutOrTransmittance(uniform(), bound(ray, ray.nearLimit(), tIntersection), tScatter, pdf);
-	Spectrum transmittedPower = power * transmittance / pdf;
+	const Spectral transmittance = mediumStack().sampleScatterOutOrTransmittance(uniform(), bound(ray, ray.nearLimit(), tIntersection), tScatter, pdf);
+	Spectral transmittedPower = power * transmittance / pdf;
 	const TScalar transmittanceProbability = std::min(transmittedPower.absTotal() / power.absTotal(), TNumTraits::one);
 	if (!russianRoulette(transmittedPower, transmittanceProbability, uniform()))
 	{
@@ -92,12 +92,12 @@ const Spectrum AdjointPhotonTracer::doCastRay(
 		const TPoint3D scatterPoint = ray.point(tScatter);
 		TVector3D dirOut;
 		TScalar pdfOut;
-		const Spectrum reflectance = mediumStack().samplePhase(TPoint2D(uniform(), uniform()), scatterPoint, ray.direction(), dirOut, pdfOut);
+		const Spectral reflectance = mediumStack().samplePhase(TPoint2D(uniform(), uniform()), scatterPoint, ray.direction(), dirOut, pdfOut);
 		if (pdfOut <= 0 || !reflectance)
 		{
 			return;
 		}
-		Spectrum scatteredPower = transmittedPower * reflectance / pdfOut;
+		Spectral scatteredPower = transmittedPower * reflectance / pdfOut;
 		const TScalar scatteredProbability = std::min(scatteredPower.absTotal() / transmittedPower.absTotal(), TNumTraits::one);
 		if (!russianRoulette(scatteredPower, scatteredProbability, uniform()))
 		{
@@ -122,11 +122,11 @@ const Spectrum AdjointPhotonTracer::doCastRay(
 	SampleBsdfOut out = bsdf->sample(omegaIn, sample, Bsdf::capsAll);
 	if (!out)
 	{
-		return Spectrum();
+		return Spectral();
 	}
 	
 	we*/
-	return Spectrum();
+	return Spectral();
 }
 
 

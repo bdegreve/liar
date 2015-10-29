@@ -47,7 +47,7 @@ ScreenSpace::ScreenSpace(const TTexturePtr& texture):
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum ScreenSpace::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral ScreenSpace::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	IntersectionContext temp(context);
 	temp.setUv(sample.screenCoordinate());

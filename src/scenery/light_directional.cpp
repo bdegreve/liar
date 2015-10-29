@@ -65,7 +65,7 @@ const TVector3D& LightDirectional::direction() const
 
 
 
-const Spectrum& LightDirectional::radiance() const
+const Spectral& LightDirectional::radiance() const
 {
 	return radiance_;
 }
@@ -86,7 +86,7 @@ void LightDirectional::setDirection(const TVector3D& direction)
 
 
 
-void LightDirectional::setRadiance(const Spectrum& radiance)
+void LightDirectional::setRadiance(const Spectral& radiance)
 {
 	radiance_ = radiance;
 }
@@ -169,16 +169,16 @@ TScalar LightDirectional::doArea(const TVector3D&) const
 
 
 
-const Spectrum LightDirectional::doEmission(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+const Spectral LightDirectional::doEmission(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	shadowRay = ray;
 	pdf = 0;
-	return Spectrum();
+	return Spectral();
 }
 
 
 
-const Spectrum LightDirectional::doSampleEmission(const Sample& sample, const TPoint2D&, const TPoint3D& target, BoundedRay& shadowRay, TScalar& pdf) const
+const Spectral LightDirectional::doSampleEmission(const Sample& sample, const TPoint2D&, const TPoint3D& target, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	shadowRay = BoundedRay(target, -direction_, tolerance, TNumTraits::infinity, prim::IsAlreadyNormalized());
 	if (userPortal_)
@@ -188,7 +188,7 @@ const Spectrum LightDirectional::doSampleEmission(const Sample& sample, const TP
 		if (!intersection)
 		{
 			pdf = 0;
-			return Spectrum(0);
+			return Spectral(0);
 		}
 		shadowRay = BoundedRay(target, -direction_, tolerance, intersection.t(), prim::IsAlreadyNormalized());
 	} 
@@ -198,7 +198,7 @@ const Spectrum LightDirectional::doSampleEmission(const Sample& sample, const TP
 
 
 
-const Spectrum LightDirectional::doSampleEmission(const Sample&, const TPoint2D& lightSampleA, const TPoint2D&, BoundedRay& emissionRay, TScalar& pdf) const
+const Spectral LightDirectional::doSampleEmission(const Sample&, const TPoint2D& lightSampleA, const TPoint2D&, BoundedRay& emissionRay, TScalar& pdf) const
 {
 	TVector3D normal;
 	const TSceneObjectPtr& port = userPortal_ ? userPortal_ : defaultPortal_;
@@ -214,13 +214,13 @@ const Spectrum LightDirectional::doSampleEmission(const Sample&, const TPoint2D&
 	else
 	{
 		pdf = 0;
-		return Spectrum(0);
+		return Spectral(0);
 	}
 }
 
 
 
-const Spectrum LightDirectional::doTotalPower() const
+const Spectral LightDirectional::doTotalPower() const
 {
 	const TSceneObjectPtr& port = userPortal_ ? userPortal_ : defaultPortal_;
 	LASS_ASSERT(port);

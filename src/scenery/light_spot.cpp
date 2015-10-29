@@ -69,7 +69,7 @@ const TVector3D& LightSpot::direction() const
 
 
 
-const Spectrum& LightSpot::intensity() const
+const Spectral& LightSpot::intensity() const
 {
 	return intensity_;
 }
@@ -115,7 +115,7 @@ void LightSpot::setDirection(const TVector3D& direction)
 
 
 
-void LightSpot::setIntensity(const Spectrum& iIntensity)
+void LightSpot::setIntensity(const Spectral& iIntensity)
 {
 	intensity_ = iIntensity;
 }
@@ -206,7 +206,7 @@ TScalar LightSpot::doArea(const TVector3D&) const
 
 
 
-const Spectrum LightSpot::doSampleEmission(const Sample&, const TPoint2D&, const TPoint3D& target, BoundedRay& shadowRay, TScalar& pdf) const
+const Spectral LightSpot::doSampleEmission(const Sample&, const TPoint2D&, const TPoint3D& target, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	TVector3D toLight = position_ - target;
 	const TScalar squaredDistance = toLight.squaredNorm();
@@ -218,7 +218,7 @@ const Spectrum LightSpot::doSampleEmission(const Sample&, const TPoint2D&, const
 	if (multiplier == TNumTraits::zero)
 	{
 		pdf = TNumTraits::zero;
-		return Spectrum();
+		return Spectral();
 	}
 	multiplier /= attenuation_->attenuation(distance, squaredDistance);
 	
@@ -230,16 +230,16 @@ const Spectrum LightSpot::doSampleEmission(const Sample&, const TPoint2D&, const
 
 
 
-const Spectrum LightSpot::doEmission(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+const Spectral LightSpot::doEmission(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	shadowRay = ray;
 	pdf = 0;
-	return Spectrum();
+	return Spectral();
 }
 
 
 
-const Spectrum LightSpot::doSampleEmission(const Sample&, const TPoint2D& lightSampleA, const TPoint2D&, BoundedRay& emissionRay, TScalar& pdf) const
+const Spectral LightSpot::doSampleEmission(const Sample&, const TPoint2D& lightSampleA, const TPoint2D&, BoundedRay& emissionRay, TScalar& pdf) const
 {
 	const TPoint3D local = num::uniformCone(lightSampleA, cosOuterAngle_, pdf);
 	const TVector3D direction = tangentU_ * local.x + tangentV_ * local.y + direction_ * local.z;
@@ -250,7 +250,7 @@ const Spectrum LightSpot::doSampleEmission(const Sample&, const TPoint2D& lightS
 
 
 
-const Spectrum LightSpot::doTotalPower() const
+const Spectral LightSpot::doTotalPower() const
 {
 	const TScalar factor = ((1 - cosInnerAngle_) + (cosInnerAngle_ - cosOuterAngle_) / 4);
 	return (2 * TNumTraits::pi * factor) * intensity_;

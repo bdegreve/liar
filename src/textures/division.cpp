@@ -44,7 +44,7 @@ Division::Division(const TTexturePtr& a, const TTexturePtr& b):
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum
+const Spectral
 Division::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	return textureA()->lookUp(sample, context) / textureB()->lookUp(sample, context);

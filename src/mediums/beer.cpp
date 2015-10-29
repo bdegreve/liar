@@ -31,7 +31,7 @@ namespace mediums
 
 PY_DECLARE_CLASS_DOC(Beer, "Beer's Law")
 PY_CLASS_CONSTRUCTOR_0(Beer)
-PY_CLASS_CONSTRUCTOR_1(Beer, const Spectrum&)
+PY_CLASS_CONSTRUCTOR_1(Beer, const Spectral&)
 PY_CLASS_MEMBER_RW(Beer, transparency, setTransparency)
 
 // --- public --------------------------------------------------------------------------------------
@@ -43,21 +43,21 @@ Beer::Beer():
 
 
 
-Beer::Beer(const Spectrum& transparency):
+Beer::Beer(const Spectral& transparency):
 	transparency_(transparency)
 {
 }
 
 
 
-const Spectrum& Beer::transparency() const
+const Spectral& Beer::transparency() const
 {
 	return transparency_;
 }
 
 
 
-void Beer::setTransparency(const Spectrum& transparency)
+void Beer::setTransparency(const Spectral& transparency)
 {
 	transparency_ = transparency;
 }
@@ -70,7 +70,7 @@ void Beer::setTransparency(const Spectrum& transparency)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum Beer::doTransmittance(const BoundedRay& ray) const
+const Spectral Beer::doTransmittance(const BoundedRay& ray) const
 {
 	const TScalar t = ray.farLimit() - ray.nearLimit();
 	LASS_ASSERT(t >= 0);
@@ -79,30 +79,30 @@ const Spectrum Beer::doTransmittance(const BoundedRay& ray) const
 
 
 
-const Spectrum Beer::doEmission(const BoundedRay&) const
+const Spectral Beer::doEmission(const BoundedRay&) const
 {
-	return Spectrum(0);
+	return Spectral(0);
 }
 
 
-const Spectrum Beer::doScatterOut(const BoundedRay&) const
+const Spectral Beer::doScatterOut(const BoundedRay&) const
 {
-	return Spectrum(0);
+	return Spectral(0);
 }
 
 
 
-const Spectrum Beer::doSampleScatterOut(TScalar, const BoundedRay&, TScalar&, TScalar& pdf) const
+const Spectral Beer::doSampleScatterOut(TScalar, const BoundedRay&, TScalar&, TScalar& pdf) const
 {
 	pdf = 0;
-	return Spectrum(0);
+	return Spectral(0);
 }
 
 
 
 /** As we don't do any scattering in Beer, all incoming photons exit at the end (albeit attenuated)
  */
-const Spectrum Beer::doSampleScatterOutOrTransmittance(TScalar, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const Spectral Beer::doSampleScatterOutOrTransmittance(TScalar, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	tScatter = ray.farLimit();
 	pdf = 1;
@@ -111,18 +111,18 @@ const Spectrum Beer::doSampleScatterOutOrTransmittance(TScalar, const BoundedRay
 
 
 
-const Spectrum Beer::doPhase(const TPoint3D&, const TVector3D&, const TVector3D&, TScalar& pdf) const
+const Spectral Beer::doPhase(const TPoint3D&, const TVector3D&, const TVector3D&, TScalar& pdf) const
 {
 	pdf = 0;
-	return Spectrum(0);
+	return Spectral(0);
 }
 
 
 
-const Spectrum Beer::doSamplePhase(const TPoint2D&, const TPoint3D&, const TVector3D&, TVector3D&, TScalar& pdf) const
+const Spectral Beer::doSamplePhase(const TPoint2D&, const TPoint3D&, const TVector3D&, TVector3D&, TScalar& pdf) const
 {
 	pdf = 0;
-	return Spectrum(0);
+	return Spectral(0);
 }
 
 

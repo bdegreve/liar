@@ -62,18 +62,18 @@ public:
 	void setSceneBound(const TAabb3D& bound, const TimePeriod& period);
 	void requestSamples(const TSamplerPtr& sampler);
 
-	const Spectrum emission(const Sample& cameraSample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
-	const Spectrum sampleEmission(
+	const Spectral emission(const Sample& cameraSample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
+	const Spectral sampleEmission(
 			const Sample& cameraSample, const TPoint2D& sample, const TPoint3D& target,
 			BoundedRay& shadowRay, TScalar& pdf) const;
-	const Spectrum sampleEmission(
+	const Spectral sampleEmission(
 			const Sample& cameraSample, const TPoint2D& sample, const TPoint3D& target,
 			const TVector3D& targetNormal, BoundedRay& shadowRay, TScalar& pdf) const;
-	const Spectrum sampleEmission(
+	const Spectral sampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
 			BoundedRay& emissionRay, TScalar& pdf) const;
 
-	const Spectrum totalPower() const;
+	const Spectral totalPower() const;
 	bool isSingular() const;
 
 private:
@@ -110,11 +110,11 @@ public:
 	TIterator begin() const;
 	TIterator end() const;
 	size_t size() const;
-	const Spectrum totalPower() const;
+	const Spectral totalPower() const;
 private:
 	TContexts contexts_;
 	std::vector<TScalar> cdf_;
-	Spectrum totalPower_;
+	Spectral totalPower_;
 };
 
 }

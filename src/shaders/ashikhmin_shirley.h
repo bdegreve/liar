@@ -69,15 +69,15 @@ public:
 	class Bsdf: public kernel::Bsdf
 	{
 	public:
-		Bsdf(const Sample& sample, const IntersectionContext& context, const Spectrum& diffuse, const Spectrum& specular, TScalar powerU, TScalar powerV);
+		Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& diffuse, const Spectral& specular, TScalar powerU, TScalar powerV);
 	private:
 		BsdfOut doEvaluate(const TVector3D& k1, const TVector3D& k2, TBsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
-		const Spectrum rhoD(const TVector3D& k1, const TVector3D& k2) const;
-		const Spectrum rhoS(const TVector3D& k1, const TVector3D& k2, const TVector3D& h, TScalar& pdf) const;
+		const Spectral rhoD(const TVector3D& k1, const TVector3D& k2) const;
+		const Spectral rhoS(const TVector3D& k1, const TVector3D& k2, const TVector3D& h, TScalar& pdf) const;
 		const TVector3D sampleH(const TPoint2D& sample) const;
-		Spectrum diffuse_;
-		Spectrum specular_;
+		Spectral diffuse_;
+		Spectral specular_;
 		TScalar powerU_;
 		TScalar powerV_;
 	};

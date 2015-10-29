@@ -195,7 +195,7 @@ void Image::setDefaultMipMapping(const std::string& mode)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectrum Image::doLookUp(const Sample&, const IntersectionContext& context) const
+const Spectral Image::doLookUp(const Sample&, const IntersectionContext& context) const
 {
 	LASS_LOCK(mutex_)
 	{
@@ -259,7 +259,7 @@ const Spectrum Image::doLookUp(const Sample&, const IntersectionContext& context
 		LASS_ASSERT_UNREACHABLE;
 	}
 
-	return Spectrum(result);
+	return Spectral(result);
 }
 
 

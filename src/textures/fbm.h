@@ -57,7 +57,7 @@ protected:
 
 private:
 
-	const Spectrum doLookUp(const Sample& sample, const IntersectionContext& context) const;
+	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context) const;
 
 	void init(size_t numOctaves, TScalar falloff = .5);
 

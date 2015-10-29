@@ -188,9 +188,9 @@ TBsdfPtr Shader::doBsdf(const Sample&, const IntersectionContext&) const
 
 
 
-const Spectrum Shader::doEmission(const Sample&, const IntersectionContext&, const TVector3D&) const
+const Spectral Shader::doEmission(const Sample&, const IntersectionContext&, const TVector3D&) const
 {
-	return Spectrum();
+	return Spectral();
 }
 
 
