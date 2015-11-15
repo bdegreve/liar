@@ -271,7 +271,7 @@ void LightContexts::setSceneBound(const TAabb3D& bound, const TimePeriod& period
 		contexts_[k].setSceneBound(bound, period);
 		const XYZ power = contexts_[k].totalPower();
 		totalPower_ += power;
-		cdf_[k] = positiveAverage(power);
+		cdf_[k] = power.absTotal();
 	}
 	std::partial_sum(cdf_.begin(), cdf_.end(), cdf_.begin());
 	std::transform(cdf_.begin(), cdf_.end(), cdf_.begin(), std::bind2nd(std::divides<TScalar>(), cdf_.back()));
