@@ -31,6 +31,7 @@
 
 #include "textures_common.h"
 #include "../kernel/texture.h"
+#include "../kernel/spectrum.h"
 
 namespace liar
 {
@@ -42,22 +43,24 @@ class LIAR_TEXTURES_DLL Constant: public Texture
 	PY_HEADER(Texture)
 public:
 
+	explicit Constant(const TSpectrumPtr& value);
 	explicit Constant(const XYZ& value);
 	explicit Constant(TScalar scalar);
 
-	const XYZ& value() const;
-	void setValue(const XYZ& value);
+	const TSpectrumPtr& value() const;
+	void setValue(const TSpectrumPtr& value);
 
 protected:
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 private:
 
-	const XYZ doLookUp(const Sample& sample, const IntersectionContext& context) const;
+	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context) const override;
+	TScalar doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
 
-	XYZ value_;
+	TSpectrumPtr value_;
 };
 
 }

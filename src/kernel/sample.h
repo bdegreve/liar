@@ -30,6 +30,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SAMPLE_H
 
 #include "kernel_common.h"
+#include "bands.h"
 #include <lass/prim/point_2d.h>
 #include <lass/stde/iterator_range.h>
 
@@ -57,7 +58,7 @@ public:
 	const TSample2D& screenCoordinate() const;
 	const TSample2D& lensCoordinate() const;
 	TTime time() const;
-	TScalar wavelength() const;
+	TWavelength wavelength() const;
 
 	TScalar weight() const;
 	void setWeight(TScalar weight);

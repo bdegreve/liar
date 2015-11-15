@@ -83,7 +83,7 @@ void SceneLight::doSetSceneBound(const TAabb3D&, const TimePeriod&)
 
 
 
-const XYZ SceneLight::doSampleEmission(
+const Spectral SceneLight::doSampleEmission(
 		const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D&, 
 		BoundedRay& shadowRay, TScalar& pdf) const
 {

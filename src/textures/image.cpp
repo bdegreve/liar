@@ -195,7 +195,19 @@ void Image::setDefaultMipMapping(const std::string& mode)
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Image::doLookUp(const Sample&, const IntersectionContext& context) const
+const Spectral Image::doLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	return Spectral::fromXYZ(lookUp(context), sample);
+}
+
+
+TScalar Image::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	return Spectral::absAverageFromXYZ(lookUp(context));
+}
+
+
+const Image::TPixel Image::lookUp(const IntersectionContext& context) const
 {
 	LASS_LOCK(mutex_)
 	{

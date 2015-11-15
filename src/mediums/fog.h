@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -31,6 +31,7 @@
 
 #include "mediums_common.h"
 #include "../kernel/medium.h"
+#include "../kernel/spectrum.h"
 
 namespace liar
 {
@@ -51,29 +52,29 @@ public:
 	TScalar assymetry() const;
 	void setAssymetry(TScalar g);
 
-	const XYZ& color() const;
-	void setColor(const XYZ& color);
+	const TSpectrumPtr& color() const;
+	void setColor(const TSpectrumPtr& color);
 
-	const XYZ& emission() const;
-	void setEmission(const XYZ& emission);
+	const TSpectrumPtr& emission() const;
+	void setEmission(const TSpectrumPtr& emission);
 
 	void setNumScatterSamples(size_t n);
 
 private:
 
-	size_t doNumScatterSamples() const;
-	const XYZ doTransmittance(const BoundedRay& ray) const;
-	const XYZ doEmission(const BoundedRay& ray) const;
-	const XYZ doScatterOut(const BoundedRay& ray) const;
-	const XYZ doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
-	const XYZ doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
-	const XYZ doPhase(const TPoint3D&, const TVector3D&, const TVector3D&, TScalar& pdf) const;
-	const XYZ doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const;
+	size_t doNumScatterSamples() const override;
+	const Spectral doTransmittance(const Sample& sample, const BoundedRay& ray) const override;
+	const Spectral doEmission(const Sample& sample, const BoundedRay& ray) const override;
+	const Spectral doScatterOut(const Sample& sample, const BoundedRay& ray) const override;
+	const Spectral doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const override;
+	const Spectral doSampleScatterOutOrTransmittance(const Sample& sample, TScalar scatterSample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const override;
+	const Spectral doPhase(const Sample& sample, const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const override;
+	const Spectral doSamplePhase(const Sample& sample, const TPoint2D& phaseSample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const override;
 
-	void init(TScalar extinction = 0, TScalar assymetry = 0, const XYZ& color = XYZ(1), const XYZ& emission = XYZ(0), size_t numSamples = 1);
+	void init(TScalar extinction = 0, TScalar assymetry = 0, const TSpectrumPtr& color = Spectrum::white(), const TSpectrumPtr& emission = Spectrum::black(), size_t numSamples = 1);
 
-	XYZ color_;
-	XYZ emission_;
+	TSpectrumPtr color_;
+	TSpectrumPtr emission_;
 	TScalar extinction_;
 	TScalar assymetry_;
 	size_t numSamples_;
@@ -86,4 +87,3 @@ private:
 #endif
 
 // EOF
-

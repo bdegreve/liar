@@ -30,7 +30,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_PROJECTION_MAPPING_H
 
 #include "textures_common.h"
-#include "unary_operator.h"
+#include "context_mapping.h"
 #include "../kernel/projection.h"
 
 namespace liar
@@ -38,9 +38,9 @@ namespace liar
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL ProjectionMapping: public UnaryOperator
+class LIAR_TEXTURES_DLL ProjectionMapping: public ContextMapping
 {
-	PY_HEADER(UnaryOperator)
+	PY_HEADER(ContextMapping)
 public:
 
 	ProjectionMapping(const TTexturePtr& texture, const TProjectionPtr& center);
@@ -49,13 +49,11 @@ public:
 	void setProjection(const TProjectionPtr& projection);
 
 protected:
-
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
 private:
-
-	const XYZ doLookUp(const Sample& sample, const IntersectionContext& context) const;
+	void doTransformContext(const Sample& sample, IntersectionContext& context) const override;
 
 	TProjectionPtr projection_;
 };

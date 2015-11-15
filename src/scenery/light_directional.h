@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -21,7 +21,7 @@
  *  http://liar.bramz.net/
  */
 
-/** @class liar::scenery::LightLightDirectional 
+/** @class liar::scenery::LightLightDirectional
  *  @brief model of a directional light like the sun
  *  @author Bram de Greve [Bramz]
  */
@@ -31,6 +31,7 @@
 
 #include "scenery_common.h"
 #include "../kernel/scene_light.h"
+#include "../kernel/spectrum.h"
 #include <lass/prim/sphere_3d.h>
 
 namespace liar
@@ -44,13 +45,15 @@ class LIAR_SCENERY_DLL LightDirectional: public SceneLight
 public:
 
 	LightDirectional();
-	LightDirectional(const TVector3D& direction, const XYZ& radiance);
+	LightDirectional(const TVector3D& direction, const TSpectrumPtr& radiance);
 
 	const TVector3D& direction() const;
-	const XYZ& radiance() const;
+	const TSpectrumPtr& radiance() const;
+	const TSceneObjectPtr& portal() const;
 
 	void setDirection(const TVector3D& direction);
-	void setRadiance(const XYZ& radiance);
+	void setRadiance(const TSpectrumPtr& radiance);
+	void setPortal(const TSceneObjectPtr& portal);
 
 private:
 
@@ -65,14 +68,14 @@ private:
 	TScalar doArea() const;
 	TScalar doArea(const TVector3D& normal) const;
 
-	const XYZ doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
-	const XYZ doSampleEmission(
-			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
+	const Spectral doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
+	const Spectral doSampleEmission(
+			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target,
 			BoundedRay& shadowRay, TScalar& pdf) const;
-	const XYZ doSampleEmission(
-			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
+	const Spectral doSampleEmission(
+			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
 			BoundedRay& emissionRay, TScalar& pdf) const;
-	const XYZ doTotalPower() const;
+	TScalar doTotalPower() const;
 	size_t doNumberOfEmissionSamples() const;
 	bool doIsSingular() const;
 
@@ -80,10 +83,9 @@ private:
 	void doSetLightState(const TPyObjectPtr& state);
 
 	TVector3D direction_;
-	TVector3D tangentU_;
-	TVector3D tangentV_;
-	XYZ radiance_;
-	prim::Sphere3D<TScalar> boundingSphere_;
+	TSpectrumPtr radiance_;
+	TSceneObjectPtr userPortal_;
+	TSceneObjectPtr defaultPortal_;
 };
 
 }

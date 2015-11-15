@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -44,35 +44,35 @@ public:
 	XYZ(TScalar f): x(f), y(f), z(f) {}
 	XYZ(TScalar x, TScalar y, TScalar z): x(x), y(y), z(z) {}
 
-	XYZ& operator+=(const XYZ& other) 
+	XYZ& operator+=(const XYZ& other)
 	{
 		x += other.x;
 		y += other.y;
 		z += other.z;
 		return *this;
 	}
-	XYZ& operator-=(const XYZ& other) 
+	XYZ& operator-=(const XYZ& other)
 	{
 		x -= other.x;
 		y -= other.y;
 		z -= other.z;
 		return *this;
 	}
-	XYZ& operator*=(const XYZ& other) 
+	XYZ& operator*=(const XYZ& other)
 	{
 		x *= other.x;
 		y *= other.y;
 		z *= other.z;
 		return *this;
 	}
-	XYZ& operator/=(const XYZ& other) 
+	XYZ& operator/=(const XYZ& other)
 	{
 		x /= other.x;
 		y /= other.y;
 		z /= other.z;
 		return *this;
 	}
-	TScalar total() const 
+	TScalar total() const
 	{
 		return x + y + z;
 	}
@@ -118,26 +118,26 @@ inline TScalar dot(const XYZ& a, const XYZ& b)
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-inline XYZ operator+(const XYZ& a, const XYZ& b) 
+inline XYZ operator+(const XYZ& a, const XYZ& b)
 {
 	XYZ r(a);
 	r += b;
 	return r;
 }
 
-inline XYZ operator-(const XYZ& a, const XYZ& b) 
+inline XYZ operator-(const XYZ& a, const XYZ& b)
 {
 	XYZ r(a);
 	r -= b;
 	return r;
 }
-inline XYZ operator*(const XYZ& a, const XYZ& b) 
+inline XYZ operator*(const XYZ& a, const XYZ& b)
 {
 	XYZ r(a);
 	r *= b;
 	return r;
 }
-inline XYZ operator/(const XYZ& a, const XYZ& b) 
+inline XYZ operator/(const XYZ& a, const XYZ& b)
 {
 	XYZ r(a);
 	r /= b;
@@ -171,30 +171,15 @@ inline bool operator==(const XYZ& a, const XYZ& b)
 inline const XYZ chromaticity(const XYZ& xyz)
 {
 	const TScalar sum = xyz.x + xyz.y + xyz.z;
-	return sum == 0 ? 0 : xyz / sum;	
+	return sum == 0 ? 0 : xyz / sum;
 }
+
+PY_SHADOW_CLASS(LIAR_KERNEL_DLL, PyXYZ, XYZ)
 
 }
 }
 
-namespace lass
-{
-namespace python
-{
-template <>
-struct PyExportTraits<liar::kernel::XYZ>
-{
-	static PyObject* build(const liar::kernel::XYZ& v)
-	{
-		return fromSharedPtrToNakedCast(python::makeTuple(v.x, v.y, v.z));
-	}
-	static int get(PyObject* obj, liar::kernel::XYZ& v)
-	{
-		return python::decodeTuple(obj, v.x, v.y, v.z);
-	}
-};
-}
-}
+PY_SHADOW_CASTERS(liar::kernel::PyXYZ)
 
 #endif
 

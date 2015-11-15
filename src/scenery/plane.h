@@ -48,10 +48,18 @@ public:
 	Plane(const TVector3D& normal, TScalar d);
 
 	const TVector3D& normal() const;
-	void setNormal(const TVector3D& normal);
-
 	TScalar d() const;
+	const TPoint3D& support() const;
+	const TVector3D& directionU() const;
+	const TVector3D& directionV() const;
+
+	void setNormal(const TVector3D& normal);
 	void setD(TScalar d);
+	void setSupport(const TPoint3D& support);
+	void setDirectionU(const TVector3D& directionU);
+	void setDirectionV(const TVector3D& directionV);
+
+	void setDirections(const TVector3D& directionU, const TVector3D& directionV);
 
 private:
 

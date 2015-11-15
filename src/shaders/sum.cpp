@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -54,9 +54,9 @@ Sum::Sum(const TChildren& children):
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Sum::doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const
+const Spectral Sum::doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const
 {
-	XYZ result;
+	Spectral result;
 	for (TChildren::const_iterator i = children_.begin(); i != children_.end(); ++i)
 	{
 		result += (*i)->emission(sample, context, omegaOut);
@@ -177,7 +177,7 @@ SampleBsdfOut Sum::SumBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& s
 			if (!bsdf->compatibleCaps(allowedCaps))
 			{
 				continue;
-			}			
+			}
 			activeComponents_.push_back(bsdf);
 		}
 		activeCaps_ = allowedCaps;

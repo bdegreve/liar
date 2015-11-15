@@ -30,7 +30,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_TRANSFORMATION_LOCAL_H
 
 #include "textures_common.h"
-#include "unary_operator.h"
+#include "context_mapping.h"
 #include "../kernel/transformation.h"
 
 namespace liar
@@ -38,9 +38,9 @@ namespace liar
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL TransformationLocal: public UnaryOperator
+class LIAR_TEXTURES_DLL TransformationLocal: public ContextMapping
 {
-	PY_HEADER(UnaryOperator)
+	PY_HEADER(ContextMapping)
 public:
 
 	TransformationLocal(const TTexturePtr& texture, const TTransformation3D& transformation);
@@ -50,13 +50,11 @@ public:
 	void setTransformation(const TTransformation3D& transformation);
 
 protected:
-
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
 private:
-
-	const XYZ doLookUp(const Sample& sample, const IntersectionContext& context) const;
+	void doTransformContext(const Sample& sample, IntersectionContext& context) const override;
 
 	TTransformation3D transformation_;
 };

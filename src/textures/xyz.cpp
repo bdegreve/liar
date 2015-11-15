@@ -106,10 +106,18 @@ void Xyz::doSetState(const TPyObjectPtr& state)
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Xyz::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral Xyz::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	const TPoint3D& p = context.point();
 	return p.x * a_->lookUp(sample, context) + p.y * b_->lookUp(sample, context) + p.z * c_->lookUp(sample, context);
+}
+
+
+
+TScalar Xyz::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	const TPoint3D& p = context.point();
+	return p.x * a_->scalarLookUp(sample, context) + p.y * b_->scalarLookUp(sample, context) + p.z * c_->scalarLookUp(sample, context);
 }
 
 

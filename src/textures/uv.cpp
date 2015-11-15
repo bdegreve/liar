@@ -47,11 +47,20 @@ Uv::Uv(const TTexturePtr& a, const TTexturePtr& b):
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Uv::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral Uv::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	const TScalar u = num::mod(context.uv().x, TNumTraits::one);
 	const TScalar v = num::mod(context.uv().y, TNumTraits::one);
 	return u * textureA()->lookUp(sample, context) + v * textureB()->lookUp(sample, context);	
+}
+
+
+
+TScalar Uv::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	const TScalar u = num::mod(context.uv().x, TNumTraits::one);
+	const TScalar v = num::mod(context.uv().y, TNumTraits::one);
+	return u * textureA()->scalarLookUp(sample, context) + v * textureB()->scalarLookUp(sample, context);
 }
 
 

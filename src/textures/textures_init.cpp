@@ -63,6 +63,7 @@ PY_DECLARE_MODULE_DOC(textures, "textures for LiAR")
 PY_MODULE_CLASS(textures, BinaryOperator)
 PY_MODULE_CLASS(textures, Perlin)
 PY_MODULE_CLASS(textures, UnaryOperator)
+	PY_MODULE_CLASS(textures, ContextMapping)
 
 // keep in alphabetical order please! [Bramz]
 //

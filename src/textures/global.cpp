@@ -35,7 +35,7 @@ PY_CLASS_CONSTRUCTOR_1(Global, const TTexturePtr&);
 // --- public --------------------------------------------------------------------------------------
 
 Global::Global(const TTexturePtr& texture):
-	UnaryOperator(texture)
+	ContextMapping(texture)
 {
 }
 
@@ -47,17 +47,15 @@ Global::Global(const TTexturePtr& texture):
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Global::doLookUp(const Sample& sample, const IntersectionContext& context) const
+void Global::doTransformContext(const Sample&, IntersectionContext& context) const
 {
-	IntersectionContext global(context);
 	const TTransformation3D& localToWorld = context.localToWorld();
-	global.setPoint(prim::transform(context.point(), localToWorld));
-	global.setDPoint_dI(prim::transform(context.dPoint_dI(), localToWorld));
-	global.setDPoint_dJ(prim::transform(context.dPoint_dJ(), localToWorld));
-	global.setDPoint_dU(prim::transform(context.dPoint_dU(), localToWorld));
-	global.setDPoint_dV(prim::transform(context.dPoint_dV(), localToWorld));
+	context.setPoint(prim::transform(context.point(), localToWorld));
+	context.setDPoint_dI(prim::transform(context.dPoint_dI(), localToWorld));
+	context.setDPoint_dJ(prim::transform(context.dPoint_dJ(), localToWorld));
+	context.setDPoint_dU(prim::transform(context.dPoint_dU(), localToWorld));
+	context.setDPoint_dV(prim::transform(context.dPoint_dV(), localToWorld));
 #pragma LASS_TODO("perhaps we need to transform other Uv dependent quantities as well [Brams]")
-	return texture()->lookUp(sample, global);
 }
 
 

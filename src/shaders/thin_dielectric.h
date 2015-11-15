@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -59,11 +59,11 @@ private:
 	class Bsdf: public kernel::Bsdf
 	{
 	public:
-		Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TScalar ior, const XYZ& transparency);
+		Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TScalar ior, const Spectral& transparency);
 	private:
 		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
-		XYZ transparency_;
+		Spectral transparency_;
 		TScalar ior_;
 	};
 
@@ -86,4 +86,3 @@ private:
 #endif
 
 // EOF
-

@@ -125,16 +125,22 @@ void LightSky::setSamplingResolution(const TResolution2D& resolution)
 
 // --- private -------------------------------------------------------------------------------------
 
-void LightSky::doPreProcess(const TSceneObjectPtr&, const TimePeriod&)
+void LightSky::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod&)
 {
 	/*if (!portal_)
 	{
 		portal_.reset(new Sphere(boundingSphere(scene->boundingBox())));
 	}*/
+	
+	sceneBounds_ = boundingSphere(scene->boundingBox());
+
+	// intersections with sky are always this distance removed from any point.
+	fixedDistance_ = 1e3 * sceneBounds_.radius();
+	
 
 	util::ProgressIndicator progress("Preprocessing environment map");
 	TMap pdf;
-	buildPdf(pdf, radianceMap_, power_, progress);
+	buildPdf(pdf, /*radianceMap_,*/ power_, progress);
 	buildCdf(pdf, marginalCdfU_, conditionalCdfV_, progress);
 }
 
@@ -142,9 +148,9 @@ void LightSky::doPreProcess(const TSceneObjectPtr&, const TimePeriod&)
 
 void LightSky::doIntersect(const Sample&, const BoundedRay& ray, Intersection& result) const
 {
-	if (ray.nearLimit() < ray.farLimit())
+	if (ray.inRange(fixedDistance_))
 	{
-		result = Intersection(this, ray.farLimit(), seLeaving);
+		result = Intersection(this, fixedDistance_, seLeaving);
 	}
 	else
 	{
@@ -154,20 +160,18 @@ void LightSky::doIntersect(const Sample&, const BoundedRay& ray, Intersection& r
 
 
 
-bool LightSky::doIsIntersecting(const Sample&, const BoundedRay&) const
+bool LightSky::doIsIntersecting(const Sample&, const BoundedRay& ray) const
 {
-	return false; //return ray.inRange(TNumTraits::max);
+	return ray.inRange(fixedDistance_);
 }
 
 
 
 void LightSky::doLocalContext(const Sample&, const BoundedRay& ray, const Intersection& LASS_UNUSED(intersection), IntersectionContext& result) const
 {
-	//LASS_ASSERT(intersection.t() == TNumTraits::max);
-	result.setT(intersection.t());
-
-	const TScalar maxDistance = num::sqrt(TNumTraits::max / 10);
-	result.setPoint(TPoint3D(maxDistance * ray.direction()));
+	//LASS_ASSERT(intersection.t() == diameter_);
+	result.setT(fixedDistance_);
+	result.setPoint(sceneBounds_.center() + fixedDistance_ * ray.direction());
 
 	//         [sin theta * cos phi]
 	// R = r * [sin theta * sin phi]
@@ -198,8 +202,8 @@ void LightSky::doLocalContext(const Sample&, const BoundedRay& ray, const Inters
 	result.setDNormal_dU(dNormal_dU);
 	result.setDNormal_dV(dNormal_dV);
 	
-	result.setDPoint_dU(-dNormal_dU);
-	result.setDPoint_dV(-dNormal_dV);
+	result.setDPoint_dU(fixedDistance_ * -dNormal_dU);
+	result.setDPoint_dV(fixedDistance_ * -dNormal_dV);
 }
 
 
@@ -233,17 +237,22 @@ TScalar LightSky::doArea(const TVector3D&) const
 
 
 
-const XYZ LightSky::doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+const Spectral LightSky::doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
-	shadowRay = BoundedRay(ray, tolerance, TNumTraits::infinity);
+	shadowRay = BoundedRay(ray, tolerance, fixedDistance_);
 	if (portal_ && !portal_->isIntersecting(sample, shadowRay))
 	{
 		pdf = 0;
-		return XYZ();
+		return Spectral();
 	}
+
+	Intersection intersection(this, fixedDistance_, seLeaving);
+	IntersectionContext context(*this, sample, shadowRay, intersection, 0);
+
 	const TVector3D dir = ray.direction();
-	const TScalar i = num::atan2(dir.y, dir.x) * resolution_.x / (2 * TNumTraits::pi);
-	const TScalar j = (dir.z + 1) * resolution_.y / 2;
+	const TScalar i = context.uv().x * resolution_.x;
+	LASS_ASSERT(num::almostEqual(i, num::atan2(dir.y, dir.x) * resolution_.x / (2 * TNumTraits::pi), 1e-5));
+	const TScalar j = (dir.z + 1) * resolution_.y / 2; // cylindrical coordinate.
 
 	const size_t ii = static_cast<size_t>(num::floor(i > 0 ? i : i + resolution_.x)) % resolution_.x;
 	const TScalar u0 = ii > 0 ? marginalCdfU_[ii - 1] : TNumTraits::zero;
@@ -256,12 +265,13 @@ const XYZ LightSky::doEmission(const Sample& sample, const TRay3D& ray, BoundedR
 	const TScalar condPdfV = condCdfV[jj] - v0;
 
 	pdf = margPdfU * condPdfV * (resolution_.x * resolution_.y) / (4 * TNumTraits::pi);
-	return radianceMap_[ii * resolution_.y + jj];
+
+	return radiance_->lookUp(sample, context);
 }
 
 
 
-const XYZ LightSky::doSampleEmission(
+const Spectral LightSky::doSampleEmission(
 		const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
 		BoundedRay& shadowRay, TScalar& pdf) const
 {
@@ -269,47 +279,65 @@ const XYZ LightSky::doSampleEmission(
 	sampleMap(lightSample, i, j, pdf);
 
 	const TVector3D dir = direction(i, j);
-	shadowRay = BoundedRay(target, dir, tolerance, TNumTraits::infinity, prim::IsAlreadyNormalized());
+	shadowRay = BoundedRay(target, dir, tolerance, fixedDistance_, prim::IsAlreadyNormalized());
 
 	if (portal_ && !portal_->isIntersecting(sample, shadowRay))
 	{
 		pdf = 0;
-		return XYZ();
+		return Spectral();
 	}
 
-	const size_t ii = std::min(static_cast<size_t>(num::floor(i)), resolution_.x - 1);
-	const size_t jj = std::min(static_cast<size_t>(num::floor(j)), resolution_.y - 1);
-	return radianceMap_[ii * resolution_.y + jj];
+	Intersection intersection(this, fixedDistance_, seLeaving);
+	IntersectionContext context(*this, sample, shadowRay, intersection, 0);
+	return radiance_->lookUp(sample, context);
 }
 
 
 
-const XYZ LightSky::doSampleEmission(
-		const Sample&, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
+const Spectral LightSky::doSampleEmission(
+		const Sample& sample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
 		BoundedRay& emissionRay, TScalar& pdf) const
 {
 	TScalar i, j, pdfA;
 	sampleMap(lightSampleA, i, j, pdfA);
-	const TVector3D dir = -direction(i, j);
+	const TVector3D dir = direction(i, j);
 
 	TScalar pdfB;
-	TVector3D normal;
-	const TPoint3D begin = portal_->sampleSurface(lightSampleB, dir, normal, pdfB);
-	const TScalar cosTheta = -prim::dot(dir, normal);
-	if (cosTheta <= 0)
+	TPoint3D begin;
+	if (portal_)
 	{
-		pdf = 0;
-		return XYZ();
+		TVector3D normal;
+		begin = portal_->sampleSurface(lightSampleB, dir, normal, pdfB);
+		const TScalar cosTheta = -prim::dot(dir, normal);
+		if (cosTheta <= 0)
+		{
+			pdf = 0;
+			return Spectral();
+		}
+		pdfB /= cosTheta; // is this required?
+	}
+	else
+	{
+		// assume a big round disk as portal, fit it around the center, but moved aside by dir * radius_
+		TVector3D tangentU, tangentV;
+		lass::prim::impl::Plane3DImplDetail::generateDirections(dir, tangentU, tangentV);
+		const TPoint2D uv = num::uniformDisk(lightSampleB, pdfB);
+		begin = sceneBounds_.center() + sceneBounds_.radius() * (tangentU * uv.x + tangentV * uv.y - dir);
+		pdfB /= num::sqr(sceneBounds_.radius());
 	}
 
-	emissionRay = BoundedRay(begin, dir, tolerance);
-	pdf = pdfA * pdfB / cosTheta;
-	return radianceMap_[static_cast<size_t>(num::floor(i)) * resolution_.y + static_cast<size_t>(num::floor(j))];
+	emissionRay = BoundedRay(begin, -dir, tolerance);
+	pdf = pdfA * pdfB;
+
+	BoundedRay shadowRay(begin - fixedDistance_ * dir, dir, tolerance, fixedDistance_, prim::IsAlreadyNormalized());
+	Intersection intersection(this, fixedDistance_, seLeaving);
+	IntersectionContext context(*this, sample, shadowRay, intersection, 0);
+	return radiance_->lookUp(sample, context);
 }
 
 
 
-const XYZ LightSky::doTotalPower() const
+TScalar LightSky::doTotalPower() const
 {
 	return power_;
 }
@@ -353,14 +381,14 @@ void LightSky::init(const TTexturePtr& radiance)
 
 
 
-void LightSky::buildPdf(TMap& pdf, TXYZMap& radianceMap, XYZ& power, util::ProgressIndicator& progress) const
+void LightSky::buildPdf(TMap& pdf, /*TXYZMap& radianceMap,*/ TScalar& power, util::ProgressIndicator& progress) const
 {
 	Sample dummy;
 
 	const size_t n = resolution_.x * resolution_.y;
 	TMap tempPdf(n);
-	TXYZMap radMap(n);
-	XYZ totalIntensity = 0;
+	//TXYZMap radMap(n);
+	TScalar averageIntensity = 0;
 	for (size_t i = 0; i < resolution_.x; ++i)
 	{
 		const TScalar fi = static_cast<TScalar>(i) + .5f;
@@ -368,17 +396,19 @@ void LightSky::buildPdf(TMap& pdf, TXYZMap& radianceMap, XYZ& power, util::Progr
 		for (size_t j = 0; j < resolution_.y; ++j)
 		{
 			const TScalar fj = static_cast<TScalar>(j) + .5f;
-			const XYZ radiance = lookUpRadiance(dummy, fi, fj);
-			const TScalar projectedArea = portal_ ? portal_->area(direction(fi, fj)) : TNumTraits::pi;
-			const XYZ intensity = radiance * projectedArea;
-			radMap[i * resolution_.y + j] = radiance;
-			tempPdf[i * resolution_.y + j] = intensity.absTotal();
-			totalIntensity += intensity;
+			const TScalar radiance = lookUpRadiance(dummy, fi, fj).absAverage();
+			const TScalar projectedArea = portal_ ? portal_->area(direction(fi, fj)) : (TNumTraits::pi * num::sqr(sceneBounds_.radius()));
+			const TScalar intensity = radiance * projectedArea;
+			//radMap[i * resolution_.y + j] = radiance;
+			tempPdf[i * resolution_.y + j] = intensity;
+			averageIntensity += intensity;
 		}
 	}
-	radianceMap.swap(radMap);
+	averageIntensity /= n;
+
+	//radianceMap.swap(radMap);
 	pdf.swap(tempPdf);
-	power = totalIntensity * (4 * TNumTraits::pi / static_cast<TScalar>(n));
+	power = averageIntensity * (4 * TNumTraits::pi);
 }
 
 
@@ -445,16 +475,14 @@ const TVector3D LightSky::direction(TScalar i, TScalar j) const
 
 
 
-const XYZ LightSky::lookUpRadiance(const Sample& sample, TScalar i, TScalar j) const
+const Spectral LightSky::lookUpRadiance(const Sample& sample, TScalar i, TScalar j) const
 {
-	const TPoint3D origin;
-	const BoundedRay centralRay(origin, direction(i, j));
-	const TRay3D differentialI(origin, direction(i + 1, j));
-	const TRay3D differentialJ(origin, direction(i, j + 1));
+	const BoundedRay centralRay(sceneBounds_.center(), direction(i, j));
+	const TRay3D differentialI(sceneBounds_.center(), direction(i + 1, j));
+	const TRay3D differentialJ(sceneBounds_.center(), direction(i, j + 1));
 	const DifferentialRay ray(centralRay, differentialI, differentialJ);
 
-	Intersection intersection;
-	this->intersect(sample, ray, intersection);
+	Intersection intersection(this, fixedDistance_, seLeaving);
 	IntersectionContext context(*this, sample, ray, intersection, 0);
 
 	return radiance_->lookUp(sample, context);

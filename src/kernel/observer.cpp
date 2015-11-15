@@ -37,6 +37,7 @@ PY_CLASS_METHOD_QUALIFIED_1(Observer, tristimulus, const XYZ, TWavelength)
 PY_CLASS_METHOD_QUALIFIED_1(Observer, tristimulus, const XYZ, Observer::TWavelengthRange)
 PY_CLASS_METHOD_QUALIFIED_1(Observer, chromaticity, const XYZ, TWavelength)
 PY_CLASS_METHOD_QUALIFIED_1(Observer, chromaticity, const XYZ, const Observer::TWavelengthRange&)
+PY_CLASS_MEMBER_R(Observer, wavelengths)
 //PY_CLASS_METHOD(Observer, sample)
 
 namespace
@@ -368,27 +369,54 @@ TWavelength Observer::sample(const XYZ& weight, TScalar sample, XYZ& chromaticit
 }
 
 
+const std::vector<TWavelength> Observer::wavelengths() const
+{
+	std::vector<TWavelength> w(nodes_.size());
+	w.reserve(nodes_.size());
+	for (size_t k = 0, n = nodes_.size(); k < n; ++k)
+	{
+		w[k] = nodes_[k].wavelength;
+	}
+	return w;
+}
+
+
 // --- private ----------------------------------------------------------------
 
 void Observer::init()
 {
-	for (TNodes::iterator i = nodes_.begin(), last = stde::prev(nodes_.end()); i != last; ++i)
+	const size_t n = nodes_.size();
+
+	for (size_t k = 0; k < (n - 1); ++k)
 	{
-		Node& node = *i;
-		const Node& next = *stde::next(i);
+		Node& node = nodes_[k];
+		const Node& next = nodes_[k + 1];
 		const TWavelength dw = next.wavelength - node.wavelength;
 		node.dxyz_dw = (next.xyz - node.xyz) / dw;
 	}
-	nodes_.back().dxyz_dw = XYZ();
+	nodes_[n - 1].dxyz_dw = XYZ();
 
-	nodes_.front().cdf = XYZ();
-	for (TNodes::iterator i = stde::next(nodes_.begin()), last = nodes_.end(); i != last; ++i)
+	nodes_[0].cdf = XYZ();
+	for (size_t k = 1; k < n; ++k)
 	{
-		Node& node = *i;
-		const Node& prev = *stde::prev(i);
+		Node& node = nodes_[k];
+		const Node& prev = nodes_[k - 1];
 		const TWavelength dw = node.wavelength - prev.wavelength;
 		node.cdf = prev.cdf + (prev.xyz + node.xyz) * (dw / 2);
 	}
+
+	// dw for integration. Since we linearly interpolate between sample points, we also need triangular integration.
+	// so dw is half of distance between prev and next.
+	// Question: can we use cdf for integration?
+	nodes_[0].dw_mid = (nodes_[1].wavelength - nodes_[0].wavelength) / 2;
+	for (size_t k = 1; k < (n - 1); ++k)
+	{
+		Node& node = nodes_[k];
+		const Node& prev = nodes_[k - 1];
+		const Node& next = nodes_[k + 1];
+		node.dw_mid = (next.wavelength - prev.wavelength) / 2;
+	}
+	nodes_[n - 1].dw_mid = (nodes_[n - 1].wavelength - nodes_[n - 2].wavelength) / 2;
 }
 
 

@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -36,9 +36,9 @@ namespace kernel
  *	@remark you can't rely on the scene being preprocessed when this function is called,
  *		since this function is called at the very same monent scene _is_ preprocessed!
  */
-inline void SceneObject::preProcess(const TSceneObjectPtr& scene, const TimePeriod& period) 
-{ 
-	doPreProcess(scene, period); 
+inline void SceneObject::preProcess(const TSceneObjectPtr& scene, const TimePeriod& period)
+{
+	doPreProcess(scene, period);
 }
 
 
@@ -52,9 +52,9 @@ inline void SceneObject::preProcess(const TSceneObjectPtr& scene, const TimePeri
  *  @param result [out]
  *		information on intersection.
  */
-inline void SceneObject::intersect(const Sample& sample, const BoundedRay& ray, 
+inline void SceneObject::intersect(const Sample& sample, const BoundedRay& ray,
 		Intersection& result) const
-{ 
+{
 	doIntersect(sample, ray, result);
 	LASS_ASSERT(!result || result.object() == this);
 }
@@ -72,17 +72,17 @@ inline void SceneObject::intersect(const Sample& sample, const BoundedRay& ray,
  *
  *  Intersection with differential ray is equivalent to intersection with its central ray.
  */
-inline void SceneObject::intersect(const Sample& sample, const DifferentialRay& ray, 
+inline void SceneObject::intersect(const Sample& sample, const DifferentialRay& ray,
 		Intersection& result) const
-{ 
-	doIntersect(sample, ray.centralRay(), result); 
+{
+	doIntersect(sample, ray.centralRay(), result);
 	if (result.t() > ray.farLimit())
 	{
 		result = Intersection::empty();
 	}
 	LASS_ASSERT(!result || result.object() == this);
 }
-	
+
 
 
 /** check if object intersects with BoundedRay.
@@ -102,7 +102,7 @@ inline bool SceneObject::isIntersecting(const Sample& sample, const BoundedRay& 
 {
 	return doIsIntersecting(sample, ray);
 }
-	
+
 
 
 /** check if object intersects with DifferentialRay.
@@ -119,9 +119,9 @@ inline bool SceneObject::isIntersecting(const Sample& sample, const BoundedRay& 
  *  If you're only interested in whether a ray intersects an object, this method may be cheaper
  *  than a full intersection test.
  */
-inline bool SceneObject::isIntersecting(const Sample& sample, const DifferentialRay& ray) const 
+inline bool SceneObject::isIntersecting(const Sample& sample, const DifferentialRay& ray) const
 {
-	return doIsIntersecting(sample, ray.centralRay()); 
+	return doIsIntersecting(sample, ray.centralRay());
 }
 
 
@@ -155,7 +155,7 @@ inline void SceneObject::localContext(const Sample& sample, const BoundedRay& ra
 
 
 /** check if object contains a point.
- *	
+ *
  *	@param sample [in]
  *		sample information
  *	@param point [in]
@@ -164,9 +164,9 @@ inline void SceneObject::localContext(const Sample& sample, const BoundedRay& ra
  *	@return
  *		true if point is inside object, false if it is not.
  */
-inline bool SceneObject::contains(const Sample& sample, const TPoint3D& point) const 
-{ 
-	return doContains(sample, point); 
+inline bool SceneObject::contains(const Sample& sample, const TPoint3D& point) const
+{
+	return doContains(sample, point);
 }
 
 
@@ -178,9 +178,9 @@ inline bool SceneObject::contains(const Sample& sample, const TPoint3D& point) c
  *	@param localToWorld [in,out]
  *		transformation from local space to world space.
  */
-inline void SceneObject::localSpace(TTime time, TTransformation3D& localToWorld) const 
-{ 
-	doLocalSpace(time, localToWorld); 
+inline void SceneObject::localSpace(TTime time, TTransformation3D& localToWorld) const
+{
+	doLocalSpace(time, localToWorld);
 }
 
 
@@ -192,9 +192,9 @@ inline void SceneObject::localSpace(TTime time, TTransformation3D& localToWorld)
  *
  *  Surface sampling is necessary for using an object as the surface of an area light.
  */
-inline bool SceneObject::hasSurfaceSampling() const 
-{ 
-	return doHasSurfaceSampling(); 
+inline bool SceneObject::hasSurfaceSampling() const
+{
+	return doHasSurfaceSampling();
 }
 
 
@@ -210,7 +210,7 @@ inline bool SceneObject::hasSurfaceSampling() const
  *
  *  This is also a fallback for sampleSurface with target position.
  */
-inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, TVector3D& normal, 
+inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, TVector3D& normal,
 		TScalar& pdf) const
 {
 	LASS_ASSERT(hasSurfaceSampling());
@@ -233,7 +233,7 @@ inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, TVector
  *  This is used to sample a point on an area light to illuminate a target point.  This way
  *	we can avoid sampling points that won't contribute.
  *
- *  Scene objects that do not implement this will fallback on sampleSurface without target 
+ *  Scene objects that do not implement this will fallback on sampleSurface without target
  *	position.  This is also a fallback for sampleSurface with target position and target normal.
  */
 inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const
@@ -259,7 +259,7 @@ inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, const T
  *  This is used to sample a point on an area light to illuminate a target point.  This way
  *	we can avoid sampling points that won't contribute.
  *
- *  Scene objects that do not implement this will fallback on sampleSurface with only a target 
+ *  Scene objects that do not implement this will fallback on sampleSurface with only a target
  *	point.
  */
 inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, const TPoint3D& target, const TVector3D& targetNormal, TVector3D& normal, TScalar& pdf) const
@@ -283,31 +283,32 @@ inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, const T
  *  This is used to sample a point on an area light to illuminate a target point.  This way
  *	we can avoid sampling points that won't contribute.
  *
- *  Scene objects that do not implement this will fallback on sampleSurface with only a target 
+ *  Scene objects that do not implement this will fallback on sampleSurface with only a target
  *	point.
  */
-inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, const TVector3D& view, TVector3D& normal, TScalar& pdf) const
+inline const TPoint3D SceneObject::sampleSurface(const TPoint2D& sample, const TVector3D& viewDirection, TVector3D& normal, TScalar& pdf) const
 {
-	return doSampleSurface(sample, view, normal, pdf);
+	return doSampleSurface(sample, viewDirection, normal, pdf);
 }
 
 
-
-inline void SceneObject::fun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+/**
+ */
+inline TScalar SceneObject::angularPdf(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TVector3D& normal) const
 {
-	doFun(ray, shadowRay, pdf);
+	return doAngularPdf(sample, ray, shadowRay, normal);
 }
 
 
 
 /** get AABB of object
  *
- *  @return 
+ *  @return
  *		AABB of object
  */
-inline const TAabb3D SceneObject::boundingBox() const 
-{ 
-	return doBoundingBox(); 
+inline const TAabb3D SceneObject::boundingBox() const
+{
+	return doBoundingBox();
 }
 
 
@@ -317,9 +318,9 @@ inline const TAabb3D SceneObject::boundingBox() const
  *  @return
  *		true if object moves, false otherwise.
  */
-inline bool SceneObject::hasMotion() const 
-{ 
-	return doHasMotion(); 
+inline bool SceneObject::hasMotion() const
+{
+	return doHasMotion();
 }
 
 
@@ -329,9 +330,9 @@ inline bool SceneObject::hasMotion() const
  *  @return
  *		total area.
  */
-inline TScalar SceneObject::area() const 
-{ 
-	return doArea(); 
+inline TScalar SceneObject::area() const
+{
+	return doArea();
 }
 
 
@@ -341,9 +342,9 @@ inline TScalar SceneObject::area() const
  *  @return
  *		total area.
  */
-inline TScalar SceneObject::area(const TVector3D& normal) const 
-{ 
-	return doArea(normal); 
+inline TScalar SceneObject::area(const TVector3D& normal) const
+{
+	return doArea(normal);
 }
 
 

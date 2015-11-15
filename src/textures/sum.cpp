@@ -78,16 +78,32 @@ void Sum::setTerms(const TTerms& terms)
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Sum::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral Sum::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	if (terms_.empty())
 	{
-		return XYZ();
+		return Spectral();
 	}
-	XYZ result(0);
+	Spectral result(0);
 	for (TTerms::const_iterator i = terms_.begin(); i != terms_.end(); ++i)
 	{
 		result += (*i)->lookUp(sample, context);
+	}
+	return result;
+}
+
+
+
+TScalar Sum::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	if (terms_.empty())
+	{
+		return 0;
+	}
+	TScalar result = 0;
+	for (TTerms::const_iterator i = terms_.begin(); i != terms_.end(); ++i)
+	{
+		result += (*i)->scalarLookUp(sample, context);
 	}
 	return result;
 }

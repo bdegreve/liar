@@ -58,6 +58,19 @@ public:
 
 	TWavelength sample(const XYZ& power, TScalar sample, XYZ& chromaticity, TScalar& pdf) const;
 
+	template <typename Func> 
+	const XYZ integrate(Func func) const
+	{
+		XYZ acc;
+		for (TNodes::const_iterator i = nodes_.begin(); i != nodes_.end(); ++i)
+		{
+			acc += i->xyz * (func(i->wavelength) * i->dw_mid);
+		}
+		return acc;
+	}
+
+	const std::vector<TWavelength> wavelengths() const;
+
 private:
 	struct Node
 	{
@@ -65,6 +78,7 @@ private:
 		XYZ xyz;
 		XYZ dxyz_dw;
 		XYZ cdf;
+		TScalar dw_mid;
 
 		Node(TWavelength w, XYZ xyz): wavelength(w), xyz(xyz) {}
 		const XYZ interpolate(TWavelength w) const;

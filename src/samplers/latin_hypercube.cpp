@@ -192,15 +192,47 @@ void LatinHypercube::doSampleWavelength(const TResolution2D& LASS_UNUSED(pixel),
 
 
 
-void LatinHypercube::doSampleSubSequence1D(const TResolution2D& LASS_UNUSED(pixel), size_t, TSubSequenceId, TSample1D* first, TSample1D* last)
+void LatinHypercube::doSampleSubSequence1D(const TResolution2D&, size_t subPixel, TSubSequenceId id, TSample1D* first, TSample1D* last)
 {
-	const std::ptrdiff_t size = last - first;
-	const TScalar scale = 1.f / size;
-	for (std::ptrdiff_t k = 0; k < size; ++k)
+	const size_t nSubPixels = this->samplesPerPixel();
+	const size_t subSeqSize = this->subSequenceSize1D(id);
+	const size_t size = nSubPixels * subSeqSize;
+
+	if (static_cast<size_t>(id) >= subSequences1d_.size())
 	{
-		first[k] = (k + jitterGenerator_()) * scale;
+		subSequences1d_.resize(id + 1);
 	}
+
+	if (subPixel == 0)
+	{
+		subSequences1d_[id].resize(size);
+		const TScalar scale = TNumTraits::one / size;
+
+		// generate interleaved samples: stratum1,subpixel1, stratum1,subpixel2, ... stratum2,subpixel1,stratum2,subpixel2
+		TSubSequence1D::iterator p = subSequences1d_[id].begin();
+		for (size_t i = 0; i < subSeqSize; ++i)
+		{
+			// sample one stratum for all subpixels
+			TSubSequence1D::iterator start = p;
+			for (size_t di = 0; di < nSubPixels; ++di)
+			{
+				*p++ = ((i * nSubPixels + di) + jitterGenerator_()) * scale;
+			}
+			std::random_shuffle(start, p, numberGenerator_);
+		}
+	}
+
+	// pick a subpixel worth of samples
+	//
+	LASS_ASSERT(last - first == subSeqSize);
+	TSubSequence1D::iterator p = subSequences1d_[id].begin();
+	for (size_t k = 0; k < subSeqSize; ++k)
+	{
+		first[k] = p[k * nSubPixels + subPixel];
+	}
+	std::random_shuffle(first, last, numberGenerator_); // to avoid inter-sequence coherence
 }
+
 
 
 void LatinHypercube::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixel), size_t subPixel, TSubSequenceId id, TSample2D* first, TSample2D* last)
@@ -251,20 +283,6 @@ void LatinHypercube::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixe
 	//
 	std::random_shuffle(stde::member_iterator(first, &TSample2D::x), stde::member_iterator(last, &TSample2D::x), numberGenerator_);
 	std::random_shuffle(stde::member_iterator(first, &TSample2D::y), stde::member_iterator(last, &TSample2D::y), numberGenerator_);
-}
-
-
-
-size_t LatinHypercube::doRoundSize1D(size_t requestedSize) const
-{
-	return requestedSize;
-}
-
-
-
-size_t LatinHypercube::doRoundSize2D(size_t requestedSize) const
-{
-	return requestedSize;
 }
 
 

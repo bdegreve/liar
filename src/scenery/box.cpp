@@ -221,7 +221,7 @@ void Box::doLocalContext(const Sample&, const BoundedRay& ray, const Intersectio
 	TScalar t = 0;
 	prim::XYZ axis;
 	const bool LASS_UNUSED(hit) = impl::intersect(bounds_, ray, t, axis);
-	LASS_ASSERT(hit && ray.inRange(t) && int(axis) >= 0);
+	LASS_ASSERT(hit && ray.inRange(t) && static_cast<int>(axis) >= 0);
 	LASS_ASSERT(t == intersection.t());
 	const TPoint3D point = ray.point(intersection.t());
 

@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -75,7 +75,7 @@ void Lambert::setDiffuse(const TTexturePtr& diffuse)
 
 TBsdfPtr Lambert::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-	const XYZ diffuse = diffuse_->lookUp(sample, context);
+	const Spectral diffuse = diffuse_->lookUp(sample, context);
 	return TBsdfPtr(new LambertBsdf(sample, context, caps(), diffuse));
 }
 
@@ -96,7 +96,7 @@ void Lambert::doSetState(const TPyObjectPtr& state)
 
 // --- bsdf ----------------------------------------------------------------------------------------
 
-LambertBsdf::LambertBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const XYZ& diffuse):
+LambertBsdf::LambertBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const Spectral& diffuse) :
 	Bsdf(sample, context, caps),
 	diffuseOverPi_(diffuse / TNumTraits::pi)
 {

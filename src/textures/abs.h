@@ -46,7 +46,8 @@ public:
 
 private:
 
-	const XYZ doLookUp(const Sample& sample, const IntersectionContext& context) const;
+	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context) const override;
+	TScalar doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
 };
 
 }

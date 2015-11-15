@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -69,16 +69,16 @@ void LightContext::requestSamples(const TSamplerPtr& sampler)
 
 
 
-const XYZ LightContext::sampleEmission(
+const Spectral LightContext::sampleEmission(
 		const Sample& cameraSample, const TPoint2D& lightSample, const TPoint3D& target,
 		BoundedRay& shadowRay, TScalar& pdf) const
 {
 	setTime(cameraSample.time());
 
 	const TPoint3D localTarget = transform(target, worldToLocal_);
-	
+
 	BoundedRay localRay;
-	const XYZ radiance = light_->sampleEmission(cameraSample, lightSample, localTarget, localRay, pdf);
+	const Spectral radiance = light_->sampleEmission(cameraSample, lightSample, localTarget, localRay, pdf);
 
 	// we must transform back to world space.  But we already do know the starting point, so don't rely
 	// on recalculating that one
@@ -90,64 +90,72 @@ const XYZ LightContext::sampleEmission(
 
 
 
-const XYZ LightContext::sampleEmission(
-		const Sample& cameraSample, const TPoint2D& lightSample, 
-		const TPoint3D& target,	const TVector3D& targetNormal,		
+const Spectral LightContext::sampleEmission(
+		const Sample& cameraSample, const TPoint2D& lightSample,
+		const TPoint3D& target,	const TVector3D& targetNormal,
 		BoundedRay& shadowRay, TScalar& pdf) const
 {
 	setTime(cameraSample.time());
 
 	const TPoint3D localTarget = transform(target, worldToLocal_);
 	const TVector3D localNormal = normalTransform(targetNormal, worldToLocal_).normal();
-	
+
 	BoundedRay localRay;
-	const XYZ radiance = light_->sampleEmission(
+	const Spectral radiance = light_->sampleEmission(
 		cameraSample, lightSample, localTarget, localNormal, localRay, pdf);
 
-	// we must transform back to world space.  But we already do know the starting point, so don't rely
-	// on recalculating that one
-	shadowRay = transform(localRay, localToWorld_);
-	shadowRay.support() = target;
+	if (pdf)
+	{
+		// we must transform back to world space.  But we already do know the starting point, so don't rely
+		// on recalculating that one
+		shadowRay = transform(localRay, localToWorld_);
+		shadowRay.support() = target;
+	}
 
 	return radiance;
 }
 
 
 
-const XYZ LightContext::sampleEmission(
-		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
+const Spectral LightContext::sampleEmission(
+		const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
 		BoundedRay& emissionRay, TScalar& pdf) const
 {
 	setTime(cameraSample.time());
 
 	BoundedRay localRay;
-	const XYZ radiance = light_->sampleEmission(cameraSample, lightSampleA, lightSampleB, localRay, pdf);
-	
-	emissionRay = transform(localRay, localToWorld_);
+	const Spectral radiance = light_->sampleEmission(cameraSample, lightSampleA, lightSampleB, localRay, pdf);
+
+	if (pdf)
+	{
+		emissionRay = transform(localRay, localToWorld_);
+	}
 	return radiance;
 }
 
 
 
-const XYZ LightContext::emission(
-		const Sample& cameraSample, const TRay3D& ray,
-		BoundedRay& shadowRay, TScalar& pdf) const
+const Spectral LightContext::emission(
+	const Sample& cameraSample, const TRay3D& ray,
+	BoundedRay& shadowRay, TScalar& pdf) const
 {
 	setTime(cameraSample.time());
 	TScalar scale = 1;
 	const TRay3D localRay = prim::transform(ray, worldToLocal_, scale);
 
 	BoundedRay localShadowRay;
-	const XYZ radiance = light_->emission(cameraSample, localRay, localShadowRay, pdf);
+	const Spectral radiance = light_->emission(cameraSample, localRay, localShadowRay, pdf);
 
-	shadowRay = BoundedRay(
-		ray, localShadowRay.nearLimit() / scale, localShadowRay.farLimit() / scale);
+	if (pdf)
+	{
+		shadowRay = BoundedRay(ray, localShadowRay.nearLimit() / scale, localShadowRay.farLimit() / scale);
+	}
 	return radiance;
 }
 
 
 
-const XYZ LightContext::totalPower() const
+TScalar LightContext::totalPower() const
 {
 	return light_->totalPower();
 }
@@ -190,7 +198,7 @@ void LightContext::setTime(TTime time) const
 
 namespace impl
 {
-	class LightContextGatherer: 
+	class LightContextGatherer:
 		public util::VisitorBase,
 		public util::Visitor<SceneObject>,
 		public util::Visitor<SceneLight>
@@ -207,7 +215,7 @@ namespace impl
 			scene->accept(*this);
 		}
 	private:
-	  
+
 		void doPreVisit(SceneObject& object)
 		{
 			objectPath_.push_back(python::fromNakedToSharedPtrCast<SceneObject>(&object));
@@ -269,11 +277,9 @@ void LightContexts::setSceneBound(const TAabb3D& bound, const TimePeriod& period
 	for (size_t k = 0; k < n; ++k)
 	{
 		contexts_[k].setSceneBound(bound, period);
-		const XYZ power = contexts_[k].totalPower();
-		totalPower_ += power;
-		cdf_[k] = power.absTotal();
+		totalPower_ += contexts_[k].totalPower();
+		cdf_[k] = totalPower_;
 	}
-	std::partial_sum(cdf_.begin(), cdf_.end(), cdf_.begin());
 	std::transform(cdf_.begin(), cdf_.end(), cdf_.begin(), std::bind2nd(std::divides<TScalar>(), cdf_.back()));
 }
 
@@ -331,7 +337,7 @@ size_t LightContexts::size() const
 
 
 
-const XYZ LightContexts::totalPower() const
+TScalar LightContexts::totalPower() const
 {
 	return totalPower_;
 }

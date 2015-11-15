@@ -35,7 +35,7 @@ PY_CLASS_CONSTRUCTOR_1(ScreenSpace, const TTexturePtr&);
 // --- public --------------------------------------------------------------------------------------
 
 ScreenSpace::ScreenSpace(const TTexturePtr& texture):
-	UnaryOperator(texture)
+	ContextMapping(texture)
 {
 }
 
@@ -47,17 +47,15 @@ ScreenSpace::ScreenSpace(const TTexturePtr& texture):
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ ScreenSpace::doLookUp(const Sample& sample, const IntersectionContext& context) const
+void ScreenSpace::doTransformContext(const Sample& sample, IntersectionContext& context) const
 {
-	IntersectionContext temp(context);
-	temp.setUv(sample.screenCoordinate());
-	temp.setDUv_dI(TVector2D(1, 0));
-	temp.setDUv_dJ(TVector2D(0, 1));
-	temp.setDPoint_dU(context.dPoint_dI());
-	temp.setDPoint_dV(context.dPoint_dJ());
-	temp.setDNormal_dU(context.dNormal_dI());
-	temp.setDNormal_dV(context.dNormal_dJ());
-	return texture()->lookUp(sample, temp);
+	context.setUv(sample.screenCoordinate());
+	context.setDUv_dI(TVector2D(1, 0));
+	context.setDUv_dJ(TVector2D(0, 1));
+	context.setDPoint_dU(context.dPoint_dI());
+	context.setDPoint_dV(context.dPoint_dJ());
+	context.setDNormal_dU(context.dNormal_dI());
+	context.setDNormal_dV(context.dNormal_dJ());
 }
 
 

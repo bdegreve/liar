@@ -79,7 +79,7 @@ void Parallelogram::doLocalContext(const kernel::Sample&, const BoundedRay& ray,
 	TPoint2D uv;
 	TScalar t;
 	const prim::Result LASS_UNUSED(hit) = prim::intersect(parallelogram_, ray.unboundedRay(), uv.x, uv.y, t, ray.nearLimit());
-	LASS_ASSERT(hit == prim::rOne && ray.inRange(t));
+	LASS_ASSERT(hit == prim::rOne);// && ray.inRange(t));
 	LASS_ASSERT(t == intersection.t());
 
 	result.setPoint(ray.point(intersection.t()));
@@ -115,23 +115,6 @@ const TPoint3D Parallelogram::doSampleSurface(
 	normal = normal_;
 	pdf = invArea_;
 	return parallelogram_.point(sample.x, sample.y);
-}
-
-
-
-void Parallelogram::doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
-{
-	TScalar t;
-	if (prim::intersect(parallelogram_, ray, t, tolerance) == prim::rOne)
-	{
-		shadowRay = BoundedRay(ray, tolerance, t);
-		pdf = invArea_ * num::sqr(t) / num::abs(dot(ray.direction(), normal_));
-	}
-	else
-	{
-		shadowRay = BoundedRay(ray, tolerance);
-		pdf = 0;
-	}
 }
 
 

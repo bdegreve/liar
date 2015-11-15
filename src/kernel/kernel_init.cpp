@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -33,14 +33,15 @@
 #include "perspective_projection.h"
 #include "projection.h"
 #include "sampler.h"
-#include "scene_light.h"
-#include "scene_object.h"
-#include "shader.h"
-#include "spline.h"
 #include "ray_tracer.h"
 #include "render_engine.h"
 #include "render_target.h"
 #include "rgb_space.h"
+#include "scene_light.h"
+#include "scene_object.h"
+#include "shader.h"
+#include "spectrum.h"
+#include "spline.h"
 #include "xyz.h"
 #include "texture.h"
 #include "transformation.h"
@@ -91,9 +92,11 @@ PY_MODULE_CLASS(kernel, liar::kernel::ScalarSpline)
 PY_MODULE_CLASS(kernel, liar::kernel::SceneObject)
 	PY_MODULE_CLASS(kernel, liar::kernel::SceneLight)
 PY_MODULE_CLASS(kernel, liar::kernel::Shader)
+PY_MODULE_CLASS(kernel, liar::kernel::Spectrum)
 PY_MODULE_CLASS(kernel, liar::kernel::Texture)
 PY_MODULE_CLASS(kernel, liar::kernel::impl::ShadowTransformation2D)
 PY_MODULE_CLASS(kernel, liar::kernel::PyTransformation3D)
+PY_MODULE_CLASS(kernel, liar::kernel::PyXYZ)
 
 PY_MODULE_FUNCTION(kernel, license)
 PY_MODULE_FUNCTION(kernel, tolerance)
@@ -105,15 +108,15 @@ PY_MODULE_FUNCTION_QUALIFIED_DOC_1(kernel, setProcessPriority, void, const std::
 
 
 using liar::kernel::rgb;
-using liar::kernel::XYZ;
+using liar::kernel::TSpectrumPtr;
 using lass::prim::ColorRGBA;
 using liar::kernel::TRgbSpacePtr;
-PY_MODULE_FUNCTION_QUALIFIED_DOC_1(kernel, rgb, XYZ, const ColorRGBA&,
+PY_MODULE_FUNCTION_QUALIFIED_DOC_1(kernel, rgb, TSpectrumPtr, const ColorRGBA&,
 	"rgb({<R>, <G>, <B>} | <(R, G, B)>} [, <RgbSpace>] [, <SpectrumFormat>])\n"
 	"Create an XYZ from RGB color value\n");
-PY_MODULE_FUNCTION_QUALIFIED_2(kernel, rgb, XYZ, const ColorRGBA&, const TRgbSpacePtr&)
-PY_MODULE_FUNCTION_QUALIFIED_3(kernel, rgb, XYZ, ColorRGBA::TValue, ColorRGBA::TValue, ColorRGBA::TValue)
-PY_MODULE_FUNCTION_QUALIFIED_4(kernel, rgb, XYZ, ColorRGBA::TValue, ColorRGBA::TValue, ColorRGBA::TValue, const TRgbSpacePtr&)
+PY_MODULE_FUNCTION_QUALIFIED_2(kernel, rgb, TSpectrumPtr, const ColorRGBA&, const TRgbSpacePtr&)
+PY_MODULE_FUNCTION_QUALIFIED_3(kernel, rgb, TSpectrumPtr, ColorRGBA::TValue, ColorRGBA::TValue, ColorRGBA::TValue)
+PY_MODULE_FUNCTION_QUALIFIED_4(kernel, rgb, TSpectrumPtr, ColorRGBA::TValue, ColorRGBA::TValue, ColorRGBA::TValue, const TRgbSpacePtr&)
 
 
 using liar::kernel::imageCodecs;

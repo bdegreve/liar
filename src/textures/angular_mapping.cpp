@@ -37,7 +37,7 @@ PY_CLASS_MEMBER_RW(AngularMapping, center, setCenter);
 // --- public --------------------------------------------------------------------------------------
 
 AngularMapping::AngularMapping(const TTexturePtr& texture):
-	UnaryOperator(texture),
+	ContextMapping(texture),
 	center_(0, 0, 0)
 {
 }
@@ -45,7 +45,7 @@ AngularMapping::AngularMapping(const TTexturePtr& texture):
 
 
 AngularMapping::AngularMapping(const TTexturePtr& texture, const TPoint3D& center):
-	UnaryOperator(texture),
+	ContextMapping(texture),
 	center_(center)
 {
 }
@@ -86,20 +86,17 @@ void AngularMapping::doSetState(const TPyObjectPtr& state)
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ AngularMapping::doLookUp(const Sample& sample, const IntersectionContext& context) const
+void AngularMapping::doTransformContext(const Sample&, IntersectionContext& context) const
 {
-	IntersectionContext temp(context);
 	const TVector3D dir0 = context.point() - center_;
 	const TPoint2D uv0 = uv(dir0);
 	const TPoint2D uvI = uv(dir0 + context.dPoint_dI());
 	const TPoint2D uvJ = uv(dir0 + context.dPoint_dJ());
-	temp.setUv(uv0);
-	temp.setDUv_dI(uvI - uv0);
-	temp.setDUv_dJ(uvJ - uv0);
+	context.setUv(uv0);
+	context.setDUv_dI(uvI - uv0);
+	context.setDUv_dJ(uvJ - uv0);
 #pragma LASS_TODO("perhaps we need to transform other Uv dependent quantities as well [Brams]")
-	return texture()->lookUp(sample, temp);
 }
-
 
 
 inline const TPoint2D AngularMapping::uv(const TVector3D& dir) const

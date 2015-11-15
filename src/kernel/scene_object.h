@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -96,8 +96,8 @@ typedef python::PyObjectPtr<SceneObject>::Type TSceneObjectPtr;
 
 
 
-class LIAR_KERNEL_DLL SceneObject: 
-	public python::PyObjectPlus, 
+class LIAR_KERNEL_DLL SceneObject:
+	public python::PyObjectPlus,
 	public lass::util::VisitableBase<impl::TryParent>
 {
 	PY_HEADER(python::PyObjectPlus)
@@ -109,18 +109,18 @@ public:
 
 	void intersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
 	void intersect(const Sample& sample, const DifferentialRay& ray, Intersection& result) const;
-	bool isIntersecting(const Sample& sample, const BoundedRay& ray) const ;
+	bool isIntersecting(const Sample& sample, const BoundedRay& ray) const;
 	bool isIntersecting(const Sample& sample, const DifferentialRay& ray) const;
 	void localContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const;
 	bool contains(const Sample& sample, const TPoint3D& point) const;
 	void localSpace(TTime time, TTransformation3D& localToWorld) const;
 
 	bool hasSurfaceSampling() const;
-	void fun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
 	const TPoint3D sampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const;
 	const TPoint3D sampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const;
 	const TPoint3D sampleSurface(const TPoint2D& sample, const TPoint3D& target, const TVector3D& targetNormal, TVector3D& normal, TScalar& pdf) const;
 	const TPoint3D sampleSurface(const TPoint2D& sample, const TVector3D& viewDirection, TVector3D& normal, TScalar& pdf) const;
+	TScalar angularPdf(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TVector3D& normal) const;
 
 	const TAabb3D boundingBox() const;
 	bool hasMotion() const;
@@ -146,7 +146,7 @@ public:
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const;
 	void setState(const TPyObjectPtr& state);
-	
+
 protected:
 
 	SceneObject();
@@ -154,7 +154,7 @@ protected:
 private:
 
 	LASS_UTIL_VISITOR_DO_ACCEPT;
-	
+
 	virtual void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
 	virtual void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const = 0;
 	virtual bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const = 0;
@@ -162,15 +162,15 @@ private:
 	virtual bool doContains(const Sample& sample, const TPoint3D& point) const = 0;
 
 	virtual bool doHasSurfaceSampling() const;
-	virtual void doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
 	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const;
 	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const;
 	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, const TPoint3D& target, const TVector3D& targetNormal, TVector3D& normal, TScalar& pdf) const;
 	virtual const TPoint3D doSampleSurface(const TPoint2D& sample, const TVector3D& viewDirection, TVector3D& normal, TScalar& pdf) const;
-	
+	virtual TScalar doAngularPdf(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TVector3D& normal) const;
+
 	virtual const TAabb3D doBoundingBox() const = 0;
 	virtual TScalar doArea() const = 0;
-	virtual TScalar doArea(const TVector3D& normal) const = 0;
+	virtual TScalar doArea(const TVector3D& viewDirection) const = 0;
 	virtual void doLocalSpace(TTime time, TTransformation3D& localToWorld) const;
 	virtual bool doHasMotion() const;
 	virtual const SceneLight* doAsLight() const;
@@ -182,7 +182,7 @@ private:
 	TMediumPtr interior_;
 	bool isOverridingShader_;
 	bool isOverridingInterior_;
-	
+
 	static TShaderPtr defaultShader_;
 };
 
@@ -197,7 +197,7 @@ namespace impl
 		void doPreVisit(SceneObject& object) { functor_(object); }
 		Functor functor_;
 	};
-	
+
 	template <typename Functor>
 	class ForUniqueVisitor: public util::VisitorBase, public util::Visitor<SceneObject>
 	{

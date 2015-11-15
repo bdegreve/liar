@@ -56,7 +56,7 @@ void AdjointPhotonTracer::doPreProcess(const kernel::TSamplerPtr&, const TimePer
 
 
 
-const XYZ AdjointPhotonTracer::doCastRay(
+const Spectral AdjointPhotonTracer::doCastRay(
 		const kernel::Sample& sample, const kernel::DifferentialRay& primaryRay,
 		TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const
 {
@@ -73,9 +73,9 @@ const XYZ AdjointPhotonTracer::doCastRay(
 	
 	const TPoint3D hitPoint = ray.point(tIntersection);
 	TScalar tScatter, pdf;
-	const XYZ transmittance = mediumStack().sampleScatterOutOrTransmittance(uniform(), bound(ray, ray.nearLimit(), tIntersection), tScatter, pdf);
-	XYZ transmittedPower = power * transmittance / pdf;
-	const TScalar transmittanceProbability = std::min(transmittedPower.absTotal() / power.absTotal(), TNumTraits::one);
+	const Spectral transmittance = mediumStack().sampleScatterOutOrTransmittance(uniform(), bound(ray, ray.nearLimit(), tIntersection), tScatter, pdf);
+	Spectral transmittedPower = power * transmittance / pdf;
+	const TScalar transmittanceProbability = std::min(transmittedPower.absAverage() / power.absAverage(), TNumTraits::one);
 	if (!russianRoulette(transmittedPower, transmittanceProbability, uniform()))
 	{
 		return;
@@ -92,13 +92,13 @@ const XYZ AdjointPhotonTracer::doCastRay(
 		const TPoint3D scatterPoint = ray.point(tScatter);
 		TVector3D dirOut;
 		TScalar pdfOut;
-		const XYZ reflectance = mediumStack().samplePhase(TPoint2D(uniform(), uniform()), scatterPoint, ray.direction(), dirOut, pdfOut);
+		const Spectral reflectance = mediumStack().samplePhase(TPoint2D(uniform(), uniform()), scatterPoint, ray.direction(), dirOut, pdfOut);
 		if (pdfOut <= 0 || !reflectance)
 		{
 			return;
 		}
-		XYZ scatteredPower = transmittedPower * reflectance / pdfOut;
-		const TScalar scatteredProbability = std::min(scatteredPower.absTotal() / transmittedPower.absTotal(), TNumTraits::one);
+		Spectral scatteredPower = transmittedPower * reflectance / pdfOut;
+		const TScalar scatteredProbability = std::min(scatteredPower.absAverage() / transmittedPower.absAverage(), TNumTraits::one);
 		if (!russianRoulette(scatteredPower, scatteredProbability, uniform()))
 		{
 			return;
@@ -122,11 +122,11 @@ const XYZ AdjointPhotonTracer::doCastRay(
 	SampleBsdfOut out = bsdf->sample(omegaIn, sample, Bsdf::capsAll);
 	if (!out)
 	{
-		return XYZ();
+		return Spectral();
 	}
 	
 	we*/
-	return XYZ();
+	return Spectral();
 }
 
 

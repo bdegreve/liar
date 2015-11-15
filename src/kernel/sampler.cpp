@@ -56,17 +56,11 @@ int Sampler::requestSubSequence1D(size_t requestedSize)
 	{
 		return -1;
 	}
-	const size_t size = doRoundSize1D(requestedSize);
-	totalSubSequenceSize1D_ += size;
-	subSequenceSize1D_.push_back(size);
-	subSequenceOffset1D_.push_back(subSequenceOffset1D_.back() + size);
+	totalSubSequenceSize1D_ += requestedSize;
+	subSequenceSize1D_.push_back(requestedSize);
+	subSequenceOffset1D_.push_back(subSequenceOffset1D_.back() + requestedSize);
 	const int id = static_cast<int>(subSequenceSize1D_.size()) - 1;
 	LASS_ASSERT(id >= 0);
-
-	if (size != requestedSize)
-	{
-		LASS_COUT << "Sampler warning: 1D subsequence " << id << ": using size " << size << " instead of " << requestedSize << std::endl;
-	}
 
 	return id;
 }
@@ -216,13 +210,6 @@ Sampler::Sampler():
 
 
 // --- private -------------------------------------------------------------------------------------
-
-size_t Sampler::doRoundSize1D(size_t requestedSize) const
-{
-	return requestedSize;
-}
-
-
 
 size_t Sampler::doRoundSize2D(size_t requestedSize) const
 {

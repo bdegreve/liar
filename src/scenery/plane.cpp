@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -34,6 +34,10 @@ PY_CLASS_CONSTRUCTOR_0(Plane)
 PY_CLASS_CONSTRUCTOR_2(Plane, TVector3D, TScalar)
 PY_CLASS_MEMBER_RW(Plane, normal, setNormal)
 PY_CLASS_MEMBER_RW(Plane, d, setD)
+PY_CLASS_MEMBER_RW(Plane, support, setSupport)
+PY_CLASS_MEMBER_RW(Plane, directionU, setDirectionU)
+PY_CLASS_MEMBER_RW(Plane, directionV, setDirectionV)
+PY_CLASS_METHOD(Plane, setDirections)
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -58,13 +62,6 @@ const TVector3D& Plane::normal() const
 
 
 
-void Plane::setNormal(const TVector3D& normal)
-{
-	plane_ = TPlane3D(normal, plane_.d());
-}
-
-
-
 TScalar Plane::d() const
 {
 	return plane_.d();
@@ -72,9 +69,65 @@ TScalar Plane::d() const
 
 
 
+const TPoint3D& Plane::support() const
+{
+	return plane_.support();
+}
+
+
+
+const TVector3D& Plane::directionU() const
+{
+	return plane_.directionU();
+}
+
+
+
+const TVector3D& Plane::directionV() const
+{
+	return plane_.directionV();
+}
+
+
+
+void Plane::setNormal(const TVector3D& normal)
+{
+	plane_ = TPlane3D(normal, plane_.d());
+}
+
+
+
 void Plane::setD(TScalar d)
 {
 	plane_ = TPlane3D(plane_.normal(), d);
+}
+
+
+
+void Plane::setSupport(const TPoint3D& support)
+{
+	plane_ = TPlane3D(plane_.normal(), support);
+}
+
+
+
+void Plane::setDirectionU(const TVector3D& directionU)
+{
+	plane_ = TPlane3D(plane_.support(), directionU, plane_.directionV());
+}
+
+
+
+void Plane::setDirectionV(const TVector3D& directionV)
+{
+	plane_ = TPlane3D(plane_.support(), plane_.directionU(), directionV);
+}
+
+
+
+void Plane::setDirections(const TVector3D& directionU, const TVector3D& directionV)
+{
+	plane_ = TPlane3D(plane_.support(), directionU, directionV);
 }
 
 
@@ -89,7 +142,7 @@ void Plane::doIntersect(const Sample&, const BoundedRay& ray, Intersection& resu
 {
 	TScalar t;
 	const prim::Result hit = prim::intersect(plane_, ray.unboundedRay(), t, ray.nearLimit());
-	if (hit == prim::rOne && ray.inRange(t)) 
+	if (hit == prim::rOne && ray.inRange(t))
 	{
 		result = Intersection(this, t, seNoEvent);
 	}
@@ -122,7 +175,7 @@ void Plane::doLocalContext(const Sample&, const BoundedRay& ray, const Intersect
 	result.setNormal(plane_.normal());
 	result.setDNormal_dU(TVector3D());
 	result.setDNormal_dV(TVector3D());
-	
+
 	result.setGeometricNormal(result.normal());
 
 	result.setUv(plane_.uv(result.point()));
@@ -187,7 +240,7 @@ const TPyObjectPtr Plane::doGetState() const
 void Plane::doSetState(const TPyObjectPtr& state)
 {
 	TVector3D normal;
-	TScalar d;
+	TScalar d = 0;
 	LASS_ENFORCE(python::decodeTuple(state, normal, d));
 	plane_ = TPlane3D(normal, d);
 }

@@ -54,7 +54,9 @@ private:
 
 	typedef std::vector<TSample1D> TStrata;
 
+	typedef std::vector<TSample1D> TSubSequence1D;
 	typedef std::vector<TSample2D> TSubSequence2D;
+	typedef std::vector<TSubSequence1D> TSubSequence1DList;
 	typedef std::vector<TSubSequence2D> TSubSequence2DList;
 
 	typedef num::RandomMT19937 TNumberGenerator;
@@ -75,9 +77,6 @@ private:
 	virtual void doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, TSubSequenceId id, TSample1D* first, TSample1D* last);
 	virtual void doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, TSubSequenceId id, TSample2D* first, TSample2D* last);
 
-	virtual size_t doRoundSize1D(size_t requestedSize) const;
-	virtual size_t doRoundSize2D(size_t requestedSize) const;
-
 	virtual const TSamplerPtr doClone() const;
 
 	virtual const TPyObjectPtr doGetState() const;
@@ -97,6 +96,7 @@ private:
 	TStrata lensStrataY_;
 	TStrata timeStrata_;
 	TStrata wavelengthStrata_;
+	TSubSequence1DList subSequences1d_;
 	TSubSequence2DList subSequences2d_;
 	size_t samplesPerPixel_;
 	bool isJittered_;

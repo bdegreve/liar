@@ -101,11 +101,67 @@ Texture::Texture()
 
 // --- private -------------------------------------------------------------------------------------
 
+TScalar Texture::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	return lookUp(sample, context).absAverage();
+}
 
 
 // --- free ----------------------------------------------------------------------------------------
 
 
+
+namespace impl
+{
+
+TextureBlack::TextureBlack()
+{
+}
+
+const Spectral TextureBlack::doLookUp(const Sample&, const IntersectionContext&) const
+{
+	return Spectral(0);
+}
+
+TScalar TextureBlack::doScalarLookUp(const Sample&, const IntersectionContext&) const
+{
+	return 0;
+}
+
+const TPyObjectPtr TextureBlack::doGetState() const
+{
+	return python::makeTuple();
+}
+
+void TextureBlack::doSetState(const TPyObjectPtr&)
+{
+}
+
+
+TextureWhite::TextureWhite()
+{
+}
+
+const Spectral TextureWhite::doLookUp(const Sample&, const IntersectionContext&) const
+{
+	return Spectral(1);
+}
+
+TScalar TextureWhite::doScalarLookUp(const Sample&, const IntersectionContext&) const
+{
+	return 1;
+}
+
+const TPyObjectPtr TextureWhite::doGetState() const
+{
+	return python::makeTuple();
+}
+
+void TextureWhite::doSetState(const TPyObjectPtr&)
+{
+}
+
+}
 
 }
 

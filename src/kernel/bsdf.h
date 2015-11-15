@@ -31,7 +31,7 @@
 
 #include "kernel_common.h"
 #include "bsdf_caps.h"
-#include "xyz.h"
+#include "spectral.h"
 #include <lass/util/allocator.h>
 
 namespace liar
@@ -56,9 +56,9 @@ struct BsdfIn
 
 struct BsdfOut
 {
-	XYZ value;
+	Spectral value;
 	TScalar pdf;
-	BsdfOut(const XYZ& value = XYZ(), TScalar pdf = 0): value(value), pdf(pdf) {}
+	BsdfOut(const Spectral& value = Spectral(), TScalar pdf = 0): value(value), pdf(pdf) {}
 	bool operator!() const { return !(pdf > 0 && value); }
 	operator num::SafeBool() const { return !*this ? num::safeFalse : num::safeTrue; }
 	BsdfOut& operator+=(const BsdfOut& other) 
@@ -80,10 +80,10 @@ struct SampleBsdfIn
 struct SampleBsdfOut
 {
 	TVector3D omegaOut;
-	XYZ value;
+	Spectral value;
 	TScalar pdf;
 	TBsdfCaps usedCaps;
-	SampleBsdfOut(const TVector3D& omegaOut = TVector3D(), const XYZ& value = XYZ(), TScalar pdf = 0, TBsdfCaps usedCaps = 0):
+	SampleBsdfOut(const TVector3D& omegaOut = TVector3D(), const Spectral& value = Spectral(), TScalar pdf = 0, TBsdfCaps usedCaps = 0):
 		omegaOut(omegaOut), value(value), pdf(pdf), usedCaps(usedCaps) {}
 	SampleBsdfOut(const TVector3D& omegaOut, const BsdfOut& bsdf, TBsdfCaps usedCaps):
 		omegaOut(omegaOut), value(bsdf.value), pdf(bsdf.pdf), usedCaps(usedCaps) {}

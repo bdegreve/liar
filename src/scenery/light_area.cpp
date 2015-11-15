@@ -45,7 +45,7 @@ PY_CLASS_MEMBER_RW(LightArea, isDoubleSided, setDoubleSided)
 
 LightArea::LightArea(const TSceneObjectPtr& iSurface):
 	surface_(LASS_ENFORCE_POINTER(iSurface)),
-	radiance_(XYZ(1, 1, 1)),
+	radiance_(Spectrum::white()),
 	attenuation_(Attenuation::defaultAttenuation()),
 	numberOfEmissionSamples_(9),
 	isSingleSided_(true)
@@ -68,7 +68,7 @@ const TSceneObjectPtr& LightArea::surface() const
 
 
 
-const XYZ& LightArea::radiance() const
+const TSpectrumPtr& LightArea::radiance() const
 {
 	return radiance_;
 }
@@ -89,7 +89,7 @@ bool LightArea::isDoubleSided() const
 
 
 
-void LightArea::setRadiance(const XYZ& radiance)
+void LightArea::setRadiance(const TSpectrumPtr& radiance)
 {
 	radiance_ = radiance;
 }
@@ -185,20 +185,26 @@ TScalar LightArea::doArea(const TVector3D& normal) const
 
 
 
-const XYZ LightArea::doEmission(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+const Spectral LightArea::doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
-	surface_->fun(ray, shadowRay, pdf);
+	TVector3D normalLight;
+	pdf = surface_->angularPdf(sample, ray, shadowRay, normalLight);
 	if (pdf <= 0)
 	{
-		return XYZ();
+		return Spectral();
 	}
-	return radiance_;
+	if (isSingleSided_ && dot(normalLight, shadowRay.direction()) > 0)
+	{
+		pdf = 0;
+		return Spectral();
+	}
+	return radiance_->evaluate(sample);
 }
 
 
 
-const XYZ LightArea::doSampleEmission(
-		const Sample&, const TPoint2D& lightSample, const TPoint3D& target,
+const Spectral LightArea::doSampleEmission(
+	const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target,
 		BoundedRay& shadowRay, TScalar& pdf) const
 {
 	LASS_ASSERT(surface_);
@@ -212,17 +218,17 @@ const XYZ LightArea::doSampleEmission(
 	if (isSingleSided_ && dot(normalLight, toLight) > 0)
 	{
 		pdf = 0;
-		return XYZ();
+		return Spectral(0);
 	}
 
 	shadowRay = BoundedRay(target, toLight, tolerance, distance, prim::IsAlreadyNormalized());
-	return radiance_ ;
+	return radiance_->evaluate(sample);
 }
 
 
 
-const XYZ LightArea::doSampleEmission(
-		const Sample&, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D& normalTarget, 
+const Spectral LightArea::doSampleEmission(
+		const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D& normalTarget,
 		BoundedRay& shadowRay, TScalar& pdf) const
 {
 	LASS_ASSERT(surface_);
@@ -237,22 +243,33 @@ const XYZ LightArea::doSampleEmission(
 	if ((dot(normalTarget, toLight) <= 0) || (isSingleSided_ && dot(normalLight, toLight) > 0))
 	{
 		pdf = 0;
-		return XYZ();
+		return Spectral(0);
 	}
 
 	shadowRay = BoundedRay(target, toLight, tolerance, distance, prim::IsAlreadyNormalized());
-	return radiance_ ;
+	return radiance_->evaluate(sample);
 }
 
 
 
-const XYZ LightArea::doSampleEmission(
-		const Sample&, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
+const Spectral LightArea::doSampleEmission(
+		const Sample& sample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 		BoundedRay& emissionRay, TScalar& pdf) const
 {
 	TVector3D originNormal;
 	TScalar originPdf;
 	const TPoint3D origin = surface_->sampleSurface(lightSampleA, originNormal, originPdf);
+
+	TPoint2D directionSample = lightSampleB;
+	if (!isSingleSided_)
+	{
+		directionSample.x *= 2;
+		if (directionSample.x >= 1)
+		{
+			originNormal = -originNormal;
+			directionSample.x -= 1;
+		}
+	}
 
 	TVector3D originU, originV;
 	generateOrthonormal(originNormal, originU, originV);
@@ -264,14 +281,15 @@ const XYZ LightArea::doSampleEmission(
 
 	emissionRay = BoundedRay(origin, direction, tolerance);
 	pdf = originPdf * directionPdf;
-	return radiance_ * localDirection.z;
+	return radiance_->evaluate(sample) * localDirection.z;
 }
 
 
 
-const XYZ LightArea::doTotalPower() const
+TScalar LightArea::doTotalPower() const
 {
-	return (TNumTraits::pi * surface_->area()) * radiance_;
+	const TScalar singleSidedPower = (TNumTraits::pi * surface_->area()) * radiance_->absAverage();
+	return isSingleSided_ ? singleSidedPower : 2 * singleSidedPower;
 }
 
 

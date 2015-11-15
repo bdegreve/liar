@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -107,7 +107,7 @@ void Sphere::doIntersect(const Sample&, const BoundedRay& ray, Intersection& res
 	const prim::Result hit = prim::intersect(sphere_, ray.unboundedRay(), t, ray.nearLimit());
 	if (hit == prim::rOne && ray.inRange(t))
 	{
-		SolidEvent event = 
+		SolidEvent event =
 			sphere_.contains(ray.point(ray.nearLimit())) ? seLeaving : seEntering;
 		result = Intersection(this, t, event);
 	}
@@ -212,7 +212,7 @@ const TPyObjectPtr Sphere::doGetState() const
 void Sphere::doSetState(const TPyObjectPtr& state)
 {
 	TPoint3D center;
-	TScalar radius;
+	TScalar radius = 0;
 	LASS_ENFORCE(python::decodeTuple(state, center, radius));
 	sphere_ = TSphere3D(center, radius);
 	invRadius_ = num::inv(radius);
@@ -262,8 +262,8 @@ const TPoint3D Sphere::doSampleSurface(const TPoint2D& sample, const TPoint3D& t
 		std::max(TNumTraits::zero, 1 - num::sqr(sphere_.radius()) / sqrDistance));
 	const TScalar cosTheta = 1 - sample.x * (1 - cosThetaMax);
 	const TScalar phi = 2 * TNumTraits::pi * sample.y;
-	const TVector3D dir = cosTheta * k + 
-		num::sqrt(std::max(TNumTraits::zero, 1 - num::sqr(cosTheta))) * 
+	const TVector3D dir = cosTheta * k +
+		num::sqrt(std::max(TNumTraits::zero, 1 - num::sqr(cosTheta))) *
 			(num::cos(phi) * i + num::sin(phi) * j);
 
 	// http://flipcode.dxbug.com/wiki/index.php?title=Line-Sphere_%28Collision%29
@@ -311,26 +311,26 @@ const TPoint3D Sphere::doSampleSurface(const TPoint2D& sample, const TVector3D& 
 */
 
 
-void Sphere::doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+TScalar Sphere::doAngularPdf(const TRay3D& ray, BoundedRay& shadowRay, TVector3D& normal) const
 {
 	TScalar t = 0;
 	const prim::Result r = prim::intersect(sphere_, ray, t, tolerance);
 	if (r == prim::rNone)
 	{
-		pdf = 0;
-		return;
+		return 0;
 	}
 	shadowRay = BoundedRay(ray, tolerance, t);
+	const TPoint3D intersection = ray.point(t);
+	normal = (intersection - sphere_.center()).normal();
 	if (sphere_.contains(ray.support()))
 	{
 		LASS_ASSERT(r == prim::rOne);
-		pdf = num::inv(4 * TNumTraits::pi);
-		return;
+		return num::inv(4 * TNumTraits::pi);
 	}
 	const TScalar sqrDistance = (sphere_.center() - ray.support()).squaredNorm();
 	const TScalar cosThetaMax = num::sqrt(
 		std::max(TNumTraits::zero, 1 - num::sqr(sphere_.radius()) / sqrDistance));
-	pdf = num::inv(2 * TNumTraits::pi * (1 - cosThetaMax));		
+	return num::inv(2 * TNumTraits::pi * (1 - cosThetaMax));
 }
 
 

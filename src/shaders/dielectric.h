@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -60,12 +60,12 @@ public:
 	class DielectricBsdf: public Bsdf
 	{
 	public:
-		DielectricBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TScalar ior, const XYZ& reflectance, const XYZ& transmittance);
+		DielectricBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TScalar ior, const Spectral& reflectance, const Spectral& transmittance);
 	private:
 		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
-		XYZ reflectance_;
-		XYZ transmittance_;
+		Spectral reflectance_;
+		Spectral transmittance_;
 		TScalar ior_;
 	};
 
@@ -79,7 +79,7 @@ private:
 	void doSetState(const TPyObjectPtr& state);
 
 	void init(
-		const TTexturePtr& innerRefractionIndex = Texture::white(), const TTexturePtr& outerRefractionIndex = Texture::white(), 
+		const TTexturePtr& innerRefractionIndex = Texture::white(), const TTexturePtr& outerRefractionIndex = Texture::white(),
 		const TTexturePtr& reflectance = Texture::white(), const TTexturePtr& transmittance = Texture::white());
 
 	TTexturePtr innerRefractionIndex_;
@@ -95,4 +95,3 @@ private:
 #endif
 
 // EOF
-

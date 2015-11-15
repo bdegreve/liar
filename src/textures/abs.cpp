@@ -47,11 +47,16 @@ Abs::Abs(const TTexturePtr& texture):
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Abs::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral Abs::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	return abs(texture()->lookUp(sample, context));
 }
 
+
+TScalar Abs::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	return num::abs(texture()->scalarLookUp(sample, context));
+}
 
 
 // --- free ----------------------------------------------------------------------------------------

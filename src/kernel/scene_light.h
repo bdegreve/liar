@@ -46,32 +46,50 @@ public:
 
 	void setSceneBound(const TAabb3D& bound, const TimePeriod& period);
 
-	const XYZ emission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+	/** Return radiance emitted by this light source and received at ray.support() along that ray.
+		Adjusts shadowRay to be bounded by ray.support() and the point of emission.
+		Sets pdf to the the same value it would be if sampleEmssion(cameraSample, lightSample, target, shadowRay, pdf)
+		would result the same shadowRay.
+	 */
+	const Spectral emission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 	{
 		return doEmission(sample, ray, shadowRay, pdf);
 	}
-	const XYZ sampleEmission(
+
+	/** Sample radiance emitted by this light source and received at target (to be used as shadowRay.support()) 
+	 */
+	const Spectral sampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSample, const TPoint3D& target,
 			BoundedRay& shadowRay, TScalar& pdf) const
 	{ 
 		return doSampleEmission(cameraSample, lightSample, target, shadowRay, pdf);
 	}
-	const XYZ sampleEmission(
+
+	/** Sample radiance emitted by this light source and received at target (to be used as shadowRay.support()) with known normal.
+	 */
+	const Spectral sampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D& targetNormal, 
 			BoundedRay& shadowRay, TScalar& pdf) const
 	{ 
 		return doSampleEmission(cameraSample, lightSample, target, targetNormal, shadowRay, pdf);
 	}
-	const XYZ sampleEmission(
+
+	/** Generate an emissionRay.
+	 */
+	const Spectral sampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 			BoundedRay& emissionRay, TScalar& pdf) const
 	{
 		return doSampleEmission(cameraSample, lightSampleA, lightSampleB, emissionRay, pdf);
 	}
-	const XYZ totalPower() const
+
+	/** Return total power output for light, but averaged over all frequencies 
+	 */ 
+	TScalar totalPower() const
 	{
 		return doTotalPower();
 	}
+
 	size_t numberOfEmissionSamples() const 
 	{ 
 		return doNumberOfEmissionSamples(); 
@@ -99,17 +117,17 @@ private:
 	void doSetState(const TPyObjectPtr& state);
 	
 	virtual void doSetSceneBound(const TAabb3D& bound, const TimePeriod& period);
-	virtual const XYZ doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const = 0;
-	virtual const XYZ doSampleEmission(
+	virtual const Spectral doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const = 0;
+	virtual const Spectral doSampleEmission(
 			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
 			BoundedRay& shadowRay, TScalar& pdf) const = 0;
-	virtual const XYZ doSampleEmission(
+	virtual const Spectral doSampleEmission(
 			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D& targetNormal, 
 			BoundedRay& shadowRay, TScalar& pdf) const;
-	virtual const XYZ doSampleEmission(
+	virtual const Spectral doSampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 			BoundedRay& emissionRay, TScalar& pdf) const = 0;
-	virtual const XYZ doTotalPower() const = 0;
+	virtual TScalar doTotalPower() const = 0;
 	virtual size_t doNumberOfEmissionSamples() const = 0;
 	virtual bool doIsSingular() const = 0;
 	

@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -53,14 +53,14 @@ public:
 	void setLocalToWorld(const TTransformation3D& localToWorld);
 
 private:
-	size_t doNumScatterSamples() const;
-	const XYZ doTransmittance(const BoundedRay& ray) const;
-	const XYZ doEmission(const BoundedRay& ray) const;
-	const XYZ doScatterOut(const BoundedRay& ray) const;
-	const XYZ doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
-	const XYZ doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
-	const XYZ doPhase(const TPoint3D&, const TVector3D&, const TVector3D&, TScalar& pdf) const;
-	const XYZ doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const;
+	size_t doNumScatterSamples() const override;
+	const Spectral doTransmittance(const Sample& sample, const BoundedRay& ray) const override;
+	const Spectral doEmission(const Sample& sample, const BoundedRay& ray) const override;
+	const Spectral doScatterOut(const Sample& sample, const BoundedRay& ray) const override;
+	const Spectral doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const override;
+	const Spectral doSampleScatterOutOrTransmittance(const Sample& sample, TScalar scatterSample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const override;
+	const Spectral doPhase(const Sample& sample, const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const override;
+	const Spectral doSamplePhase(const Sample& sample, const TPoint2D& phaseSample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const override;
 
 	bool bound(const BoundedRay& ray, BoundedRay& bounded) const;
 
@@ -76,4 +76,3 @@ private:
 #endif
 
 // EOF
-

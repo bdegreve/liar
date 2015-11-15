@@ -78,16 +78,24 @@ void Product::setFactors(const TFactors& factors)
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Product::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral Product::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
-	if (factors_.empty())
-	{
-		return XYZ();
-	}
-	XYZ result(1, 1, 1);
+	Spectral result(1);
 	for (TFactors::const_iterator i = factors_.begin(); i != factors_.end(); ++i)
 	{
 		result *= (*i)->lookUp(sample, context);
+	}
+	return result;
+}
+
+
+
+TScalar Product::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	TScalar result = 1;
+	for (TFactors::const_iterator i = factors_.begin(); i != factors_.end(); ++i)
+	{
+		result *= (*i)->scalarLookUp(sample, context);
 	}
 	return result;
 }

@@ -4,7 +4,7 @@ endif()
 
 set(_hints "${LCMS2_DIR}")
 
-find_path(LCMS2_INCLUDE_DIR 
+find_path(LCMS2_INCLUDE_DIR
     lcms2.h
     HINTS ${_hints}
     PATH_SUFFIXES include
@@ -15,7 +15,7 @@ if(NOT LCMS2_DIR)
     if(LCMS2_INCLUDE_DIR)
         get_filename_component(_root "${LCMS2_INCLUDE_DIR}" PATH)
     endif()
-    set(LCMS2_DIR "${_root}" CACHE PATH "LitleCMS2 root directory containing include, lib, bin, ...")
+    set(LCMS2_DIR "${_root}" CACHE PATH "LitleCMS2 root directory containing include, lib, bin, ..." FORCE)
 endif()
 
 find_library(LCMS2_LIBRARY
@@ -42,9 +42,9 @@ if (WIN32)
         )
 endif ()
 
-mark_as_advanced( 
+mark_as_advanced(
     LCMS2_INCLUDE_DIR
-    LCMS2_LIBRARY 
+    LCMS2_LIBRARY
     LCMS2_DEBUG_LIBRARY
     LCMS2_REDIST
     LCMS2_DEBUG_REDIST

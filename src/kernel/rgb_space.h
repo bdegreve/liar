@@ -32,10 +32,14 @@
 #include "kernel_common.h"
 #include "xyz.h"
 
+
 namespace liar
 {
 namespace kernel
 {
+
+class Spectrum;
+typedef python::PyObjectPtr<Spectrum>::Type TSpectrumPtr;
 
 class RgbSpace;
 typedef python::PyObjectPtr<RgbSpace>::Type TRgbSpacePtr;
@@ -114,21 +118,11 @@ private:
 };
 
 
-LIAR_KERNEL_DLL XYZ rgb(const RgbSpace::RGBA& rgb);
-LIAR_KERNEL_DLL XYZ rgb(const RgbSpace::RGBA& rgb, const TRgbSpacePtr& rgbSpace);
-LIAR_KERNEL_DLL XYZ rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue);
-LIAR_KERNEL_DLL XYZ rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue, const TRgbSpacePtr& rgbSpace);
+LIAR_KERNEL_DLL TSpectrumPtr rgb(const RgbSpace::RGBA& rgb);
+LIAR_KERNEL_DLL TSpectrumPtr rgb(const RgbSpace::RGBA& rgb, const TRgbSpacePtr& rgbSpace);
+LIAR_KERNEL_DLL TSpectrumPtr rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue);
+LIAR_KERNEL_DLL TSpectrumPtr rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue, const TRgbSpacePtr& rgbSpace);
 
-/*
-LIAR_KERNEL_DLL XYZ rgb(const prim::ColorRGBA& rgb, 
-	const TSpectrumFormatPtr& iSpectrumFormat);
-LIAR_KERNEL_DLL XYZ rgb(const prim::ColorRGBA& rgb, const TRgbSpacePtr& rgbSpace, 
-	const TSpectrumFormatPtr& iSpectrumFormat);
-LIAR_KERNEL_DLL XYZ rgb(TScalar red, TScalar green, TScalar blue, 
-	const TSpectrumFormatPtr& iSpectrumFormat);
-LIAR_KERNEL_DLL XYZ rgb(TScalar red, TScalar green, TScalar blue, const TRgbSpacePtr& rgbSpace, 
-	const TSpectrumFormatPtr& iSpectrumFormat);
-*/
 
 // built-in rgb spaces
 

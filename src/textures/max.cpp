@@ -44,10 +44,15 @@ Max::Max(const TTexturePtr& a, const TTexturePtr& b):
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ 
-Max::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral Max::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	return max(textureA()->lookUp(sample, context), textureB()->lookUp(sample, context));
+}
+
+
+TScalar Max::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	return std::max(textureA()->scalarLookUp(sample, context), textureB()->scalarLookUp(sample, context));
 }
 
 

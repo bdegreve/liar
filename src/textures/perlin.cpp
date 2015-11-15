@@ -87,9 +87,16 @@ TScalar Perlin::noise(const TPoint3D& point) const
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ Perlin::doLookUp(const Sample&, const IntersectionContext& context) const
+const Spectral Perlin::doLookUp(const Sample&, const IntersectionContext& context) const
 {
-	return XYZ(noise(context.point()));
+	return Spectral(noise(context.point()));
+}
+
+
+
+TScalar Perlin::doScalarLookUp(const Sample&, const IntersectionContext& context) const
+{
+	return noise(context.point());
 }
 
 

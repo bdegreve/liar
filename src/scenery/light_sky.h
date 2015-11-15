@@ -34,6 +34,7 @@
 #include "../kernel/scene_light.h"
 #include "../kernel/texture.h"
 #include <lass/util/progress_indicator.h>
+#include <lass/prim/sphere_3d.h>
 
 namespace liar
 {
@@ -75,14 +76,14 @@ private:
 	TScalar doArea() const;
 	TScalar doArea(const TVector3D& normal) const;
 
-	const XYZ doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
-	const XYZ doSampleEmission(
+	const Spectral doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
+	const Spectral doSampleEmission(
 			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
 			BoundedRay& shadowRay, TScalar& pdf) const;
-	const XYZ doSampleEmission(
+	const Spectral doSampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 			BoundedRay& emissionRay, TScalar& pdf) const;
-	const XYZ doTotalPower() const;
+	TScalar doTotalPower() const;
 	size_t doNumberOfEmissionSamples() const;
 	bool doIsSingular() const;
 
@@ -90,22 +91,24 @@ private:
 	void doSetLightState(const TPyObjectPtr& state);
 
 	void init(const TTexturePtr& radiance);
-	void buildPdf(TMap& pdf, TXYZMap& radianceMap, XYZ& power, util::ProgressIndicator& progress) const;
+	void buildPdf(TMap& pdf, /*TXYZMap& radianceMap,*/ TScalar& power, util::ProgressIndicator& progress) const;
 	void buildCdf(const TMap& iPdf, TMap& oMarginalCdfU, TMap& oConditionalCdfV, util::ProgressIndicator& progress) const;
 	void sampleMap(const TPoint2D& sample, TScalar&, TScalar& j, TScalar& pdf) const;
 	const TVector3D direction(TScalar i, TScalar j) const;
-	const XYZ lookUpRadiance(const Sample& sample, TScalar i, TScalar j) const;
+	const Spectral lookUpRadiance(const Sample& sample, TScalar i, TScalar j) const;
 
-	XYZ power_;
+	TScalar power_;
 	TTexturePtr radiance_;
 	TSceneObjectPtr portal_;
 	TMap marginalCdfU_;
 	TMap conditionalCdfV_;
-	TXYZMap radianceMap_;
+	//TXYZMap radianceMap_;
 	unsigned numberOfSamples_;
 	TResolution2D resolution_;
 	TVector2D invResolution_;
-	TScalar radius_;
+
+	prim::Sphere3D<TScalar> sceneBounds_;
+	TScalar fixedDistance_;
 };
 
 }

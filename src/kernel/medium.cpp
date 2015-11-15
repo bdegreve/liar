@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -39,14 +39,14 @@ Medium::~Medium()
 
 
 
-const XYZ& Medium::refractionIndex() const
+const Spectral& Medium::refractionIndex() const
 {
 	return refractionIndex_;
 }
 
 
 
-void Medium::setRefractionIndex(const XYZ& refractionIndex)
+void Medium::setRefractionIndex(const Spectral& refractionIndex)
 {
 	refractionIndex_ = refractionIndex;
 }
@@ -84,7 +84,7 @@ void Medium::requestSamples(const TSamplerPtr& sampler)
 // --- protected -----------------------------------------------------------------------------------
 
 Medium::Medium():
-	refractionIndex_(1, 1, 1),
+	refractionIndex_(1),
 	priority_(0),
 	idStepSamples_(-1),
 	idLightSamples_(-1),
@@ -123,68 +123,68 @@ MediumStack::MediumStack(const TMediumPtr& defaultMedium):
 
 
 
-const XYZ MediumStack::transmittance(const BoundedRay& ray) const
+const Spectral MediumStack::transmittance(const Sample& sample, const BoundedRay& ray) const
 {
-	return medium() ? medium()->transmittance(ray) : XYZ(1);
+	return medium() ? medium()->transmittance(sample, ray) : Spectral(1);
 }
 
 
 
-const XYZ MediumStack::transmittance(const BoundedRay& ray, TScalar farLimit) const
+const Spectral MediumStack::transmittance(const Sample& sample, const BoundedRay& ray, TScalar farLimit) const
 {
-	return transmittance(bound(ray, ray.nearLimit(), farLimit));
+	return transmittance(sample, bound(ray, ray.nearLimit(), farLimit));
 }
 
 
 
-const XYZ MediumStack::transmittance(const DifferentialRay& ray, TScalar farLimit) const
+const Spectral MediumStack::transmittance(const Sample& sample, const DifferentialRay& ray, TScalar farLimit) const
 {
-	return transmittance(ray.centralRay(), farLimit);
+	return transmittance(sample, ray.centralRay(), farLimit);
 }
 
 
 
-const XYZ MediumStack::emission(const BoundedRay& ray) const
+const Spectral MediumStack::emission(const Sample& sample, const BoundedRay& ray) const
 {
-	return medium() ? medium()->emission(ray) : XYZ(0);
+	return medium() ? medium()->emission(sample, ray) : Spectral(0);
 }
 
 
 
-const XYZ MediumStack::sampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const Spectral MediumStack::sampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	if (!medium())
 	{
 		pdf = 0;
-		return XYZ(0);
+		return Spectral(0);
 	}
 	return medium()->sampleScatterOut(sample, ray, tScatter, pdf);
 }
 
 
 
-const XYZ MediumStack::sampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const Spectral MediumStack::sampleScatterOutOrTransmittance(const Sample& sample, TScalar scatterSample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	if (!medium())
 	{
 		tScatter = ray.farLimit();
 		pdf = 1;
-		return XYZ(1);
+		return Spectral(1);
 	}
-	return medium()->sampleScatterOutOrTransmittance(sample, ray, tScatter, pdf);
+	return medium()->sampleScatterOutOrTransmittance(sample, scatterSample, ray, tScatter, pdf);
 }
 
 
 
-const XYZ MediumStack::samplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
+const Spectral MediumStack::samplePhase(const Sample& sample, const TPoint2D& phaseSample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
 {
 	if (!medium())
 	{
 		pdf = 0;
 		dirOut = TVector3D();
-		return XYZ(0);
+		return Spectral(0);
 	}
-	return medium()->samplePhase(sample, position, dirIn, dirOut, pdf);
+	return medium()->samplePhase(sample, phaseSample, position, dirIn, dirOut, pdf);
 }
 
 /*

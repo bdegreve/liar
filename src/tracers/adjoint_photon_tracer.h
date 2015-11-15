@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -21,13 +21,12 @@
  *  http://liar.bramz.net/
  */
 
-/** @class liar::tracers::DirectLighting
- *  @brief a ray tracer that only uses direct lighting.
+/** @class liar::tracers::AdjointPhotonTracer
  *  @author Bram de Greve [Bramz]
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_TRACERS_DIRECT_LIGHTING_H
-#define LIAR_GUARDIAN_OF_INCLUSION_TRACERS_DIRECT_LIGHTING_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_TRACERS_ADJOINT_PHOTON_TRACER_H
+#define LIAR_GUARDIAN_OF_INCLUSION_TRACERS_ADJOINT_PHOTON_TRACER_H
 
 #include "tracers_common.h"
 #include "../kernel/ray_tracer.h"
@@ -48,7 +47,7 @@ private:
 
 	void doRequestSamples(const TSamplerPtr& sampler);
 	void doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads);
-	const XYZ doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const;
+	const Spectral doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const;
 	const TRayTracerPtr doClone() const;
 
 	const TPyObjectPtr doGetState() const;

@@ -1,25 +1,25 @@
 /** @file
- *  @author Bram de Greve (bramz@users.sourceforge.net)
- *
- *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- * 
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *  http://liar.bramz.net/
- */
+*  @author Bram de Greve (bramz@users.sourceforge.net)
+*
+*  LiAR isn't a raytracer
+*  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+*
+*  This program is free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+*
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+*
+*  You should have received a copy of the GNU General Public License
+*  along with this program; if not, write to the Free Software
+*  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*
+*  http://liar.bramz.net/
+*/
 
 #include "kernel_common.h"
 #include "spectrum.h"
@@ -29,395 +29,159 @@ namespace liar
 namespace kernel
 {
 
-#if LIAR_FULL_SPECTRAL
+PY_DECLARE_CLASS_DOC(Spectrum, "Abstract base class of spectrum definitionas")
+	PY_CLASS_METHOD_NAME(Spectrum, reduce, "__reduce__")
+	PY_CLASS_METHOD_NAME(Spectrum, getState, "__getstate__")
+	PY_CLASS_METHOD_NAME(Spectrum, setState, "__setstate__")
+
+	typedef impl::SpectrumFlat TSpectrumFlat;
+PY_DECLARE_CLASS_NAME(TSpectrumFlat, "SpectrumFlat");
+PY_CLASS_INNER_CLASS_NAME(Spectrum, TSpectrumFlat, "Flat");
+PY_CLASS_MEMBER_R(TSpectrumFlat, value)
+
+	TSpectrumPtr Spectrum::white_(new TSpectrumFlat(1));
+TSpectrumPtr Spectrum::black_(new TSpectrumFlat(0));
+
+typedef impl::SpectrumXYZ TSpectrumXYZ;
+PY_DECLARE_CLASS_NAME(TSpectrumXYZ, "SpectrumXYZ");
+PY_CLASS_INNER_CLASS_NAME(Spectrum, TSpectrumXYZ, "XYZ");
+PY_CLASS_MEMBER_R(TSpectrumXYZ, value)
+
+
+
+
+	// --- public --------------------------------------------------------------------------------------
+
+	Spectrum::~Spectrum()
+{
+}
+
+
+TSpectrumPtr Spectrum::make(TScalar value)
+{
+	return TSpectrumPtr(new impl::SpectrumFlat(value));
+}
+
+
+TSpectrumPtr Spectrum::make(const XYZ& value)
+{
+	return TSpectrumPtr(new impl::SpectrumXYZ(value));
+}
+
+
+const TSpectrumPtr& Spectrum::white()
+{
+	return white_;
+}
+
+
+const TSpectrumPtr& Spectrum::black()
+{
+	return black_;
+}
+
+
+const TPyObjectPtr Spectrum::reduce() const
+{
+	return python::makeTuple(
+		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->_lassPyGetClassDef()->type())),
+		python::makeTuple(), this->getState());
+}
+
+
+
+const TPyObjectPtr Spectrum::getState() const
+{
+	return doGetState();
+}
+
+
+
+void Spectrum::setState(const TPyObjectPtr& state)
+{
+	doSetState(state);
+}
+
+
+// --- protected -----------------------------------------------------------------------------------
 
 Spectrum::Spectrum()
 {
-	std::fill(v_, v_ + numBands, 0);
 }
 
 
-Spectrum::Spectrum(TValue f)
+
+// --- private -------------------------------------------------------------------------------------
+
+
+
+// --- impl ----------------------------------------------------------------------------------------
+
+namespace impl
 {
-	std::fill(v_, v_ + numBands, f);
-}
 
-
-Spectrum::Spectrum(const XYZ& xyz)
+SpectrumFlat::SpectrumFlat(TScalar value) :
+	value_(value)
 {
-	const prim::ColorRGBA rgb = rgbSpace_->linearConvert(xyz);
-	if (rgb.r <= rgb.g && rgb.r <= rgb.b)
-	{
-		std::fill(v_, v_ + numBands, rgb.r);
-		if (rgb.g <= rgb.b)
-		{
-			*this += (rgb.g - rgb.r) * cyan_;
-			*this += (rgb.b - rgb.g) * blue_;
-		}
-		else
-		{
-			*this += (rgb.b - rgb.r) * cyan_;
-			*this += (rgb.g - rgb.b) * green_;
-		}
-	}	
-	else if (rgb.g <= rgb.b)
-	{
-		std::fill(v_, v_ + numBands, rgb.g);
-		if (rgb.r <= rgb.b)
-		{
-			*this += (rgb.r - rgb.g) * magenta_;
-			*this += (rgb.b - rgb.r) * blue_;
-		}
-		else
-		{
-			*this += (rgb.b - rgb.g) * magenta_;
-			*this += (rgb.r - rgb.b) * red_;
-		}
-	}
-	else
-	{
-		std::fill(v_, v_ + numBands, rgb.b);
-		if (rgb.r <= rgb.g)
-		{
-			*this += (rgb.r - rgb.b) * yellow_;
-			*this += (rgb.g - rgb.r) * green_;
-		}
-		else
-		{
-			*this += (rgb.g - rgb.b) * yellow_;
-			*this += (rgb.r - rgb.g) * red_;
-		}		
-	}
-	inplaceClamp(0, 1);
 }
 
-
-const XYZ Spectrum::xyz() const
+TScalar SpectrumFlat::value() const
 {
-	XYZ sum = 0;
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		sum += observer_[k] * v_[k];
-	}
-	return sum;
+	return value_;
 }
 
-
-Spectrum& Spectrum::operator+=(const Spectrum& other)
+const Spectral SpectrumFlat::doEvaluate(const Sample&) const
 {
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] += other.v_[k];
-	}
-	return *this;
+	return Spectral(value_);
 }
 
-
-Spectrum& Spectrum::operator-=(const Spectrum& other)
+TScalar SpectrumFlat::doAbsAverage() const
 {
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] -= other.v_[k];
-	}
-	return *this;
+	return num::abs(value_);
 }
 
-
-Spectrum& Spectrum::operator*=(const Spectrum& other)
+const TPyObjectPtr SpectrumFlat::doGetState() const
 {
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] *= other.v_[k];
-	}
-	return *this;
+	return python::makeTuple(value_);
 }
 
-
-Spectrum& Spectrum::operator/=(const Spectrum& other)
+void SpectrumFlat::doSetState(const TPyObjectPtr& state)
 {
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] *= other.v_[k];
-	}
-	return *this;
+	python::decodeTuple(state, value_);
 }
 
 
-
-TScalar Spectrum::total() const
+SpectrumXYZ::SpectrumXYZ(const XYZ& value) :
+	value_(value)
 {
-	TScalar sum = 0;
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		sum += v_[k];
-	}
-	return sum;
 }
 
-
-
-TScalar Spectrum::absTotal() const
+const XYZ& SpectrumXYZ::value() const
 {
-	TScalar sum = 0;
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		sum += num::abs(v_[k]);
-	}
-	return sum;
+	return value_;
 }
 
-
-
-bool Spectrum::isZero() const
+const Spectral SpectrumXYZ::doEvaluate(const Sample& sample) const
 {
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		if (v_[k] != 0)
-		{
-			return false;
-		}
-	}
-	return true;
+	return Spectral::fromXYZ(value_, sample);
 }
 
-
-Spectrum& Spectrum::inplaceAbs()
+TScalar SpectrumXYZ::doAbsAverage() const
 {
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] = num::abs(v_[k]);
-	}
-	return *this;
+	return Spectral::absAverageFromXYZ(value_);
 }
 
-
-Spectrum& Spectrum::inplaceMax(const Spectrum& other)
+const TPyObjectPtr SpectrumXYZ::doGetState() const
 {
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] = std::max(v_[k], other.v_[k]);
-	}
-	return *this;
+	return python::makeTuple(value_);
 }
 
-
-Spectrum& Spectrum::inplacePow(TScalar f)
+void SpectrumXYZ::doSetState(const TPyObjectPtr& state)
 {
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] = std::pow(v_[k], f);
-	}
-	return *this;
+	python::decodeTuple(state, value_);
 }
 
-
-Spectrum& Spectrum::inplaceExp()
-{
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] = std::exp(v_[k]);
-	}
-	return *this;
 }
-
-
-Spectrum& Spectrum::inplaceClamp(TScalar min, TScalar max)
-{
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] = num::clamp(v_[k], min, max);
-	}
-	return *this;
-}
-
-
-Spectrum& Spectrum::inplaceLerp(const Spectrum& other, TScalar f)
-{
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		v_[k] = num::lerp(v_[k], other.v_[k], f);
-	}
-	return *this;
-}
-
-
-bool Spectrum::operator==(const Spectrum& other) const
-{
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		if (v_[k] != other.v_[k])
-		{
-			return false;
-		}
-	}
-	return true;
-}
-
-
-TScalar dot(const Spectrum& a, const Spectrum& b)
-{
-	TScalar sum = 0;
-	for (size_t k = 0; k < Spectrum::numBands; ++k)
-	{
-		sum += a[k] * b[k];
-	}
-	return sum;
-}
-
-
-TRgbSpacePtr Spectrum::initData()
-{
-	/* start autogen block initData */
-	// Generated by generate_spectrum_data.py with 10 bins from 3.6e-07 to 8e-07, using 100000 iterations, fitall=False
-	TRgbSpacePtr rgbSpace(new RgbSpace(
-	    TPoint2D(0.640000f, 0.330000f),
-	    TPoint2D(0.300000f, 0.600000f),
-	    TPoint2D(0.150000f, 0.0600000f),
-	    TPoint2D(0.333333f, 0.333333f),
-	    1.00000f));
-	
-	const XYZ A[10] =
-	{
-	    XYZ(0.00179643f, 5.03579e-05f, 0.00850556f),
-	    XYZ(0.0855167f, 0.00471796f, 0.423513f),
-	    XYZ(0.0787251f, 0.0429831f, 0.500759f),
-	    XYZ(0.0263265f, 0.239723f, 0.0636773f),
-	    XYZ(0.233830f, 0.396741f, 0.00321433f),
-	    XYZ(0.404543f, 0.248992f, 0.000305128f),
-	    XYZ(0.155119f, 0.0616462f, 8.50378e-06f),
-	    XYZ(0.0134617f, 0.00490018f, 0.00000f),
-	    XYZ(0.000648948f, 0.000234413f, 0.00000f),
-	    XYZ(2.84654e-05f, 1.02801e-05f, 0.00000f),
-	};
-	
-	const TWavelength w[11] =
-	{
-	    3.60000e-07f,
-	    4.04000e-07f,
-	    4.48000e-07f,
-	    4.92000e-07f,
-	    5.36000e-07f,
-	    5.80000e-07f,
-	    6.24000e-07f,
-	    6.68000e-07f,
-	    7.12000e-07f,
-	    7.56000e-07f,
-	    8.00000e-07f,
-	};
-	
-	const TScalar yellow[10] =
-	{
-	    0.00787763f,
-	    -5.55112e-17f,
-	    0.149163f,
-	    0.911415f,
-	    0.999910f,
-	    0.999438f,
-	    0.957385f,
-	    0.962723f,
-	    0.957981f,
-	    0.969991f,
-	};
-	
-	const TScalar magenta[10] =
-	{
-	    0.991654f,
-	    0.999989f,
-	    0.906348f,
-	    0.0136420f,
-	    0.0131883f,
-	    0.814659f,
-	    0.999976f,
-	    0.998238f,
-	    0.999411f,
-	    0.997143f,
-	};
-	
-	const TScalar cyan[10] =
-	{
-	    0.949163f,
-	    0.922302f,
-	    1.01817f,
-	    1.01819f,
-	    1.01810f,
-	    0.190733f,
-	    -4.85723e-17f,
-	    0.0224848f,
-	    0.0225910f,
-	    0.0394559f,
-	};
-	
-	const TScalar red[10] =
-	{
-	    0.0508371f,
-	    0.0776981f,
-	    -0.0181744f,
-	    -0.0181913f,
-	    -0.0180974f,
-	    0.809267f,
-	    1.00000f,
-	    0.977515f,
-	    0.977409f,
-	    0.960544f,
-	};
-	
-	const TScalar green[10] =
-	{
-	    0.00834648f,
-	    1.11093e-05f,
-	    0.0936516f,
-	    0.986358f,
-	    0.986812f,
-	    0.185341f,
-	    2.42438e-05f,
-	    0.00176182f,
-	    0.000589059f,
-	    0.00285692f,
-	};
-	
-	const TScalar blue[10] =
-	{
-	    0.992122f,
-	    1.00000f,
-	    0.850837f,
-	    0.0885851f,
-	    8.97977e-05f,
-	    0.000561824f,
-	    0.0426151f,
-	    0.0372773f,
-	    0.0420186f,
-	    0.0300094f,
-	};
-	/* end autogen block initData */
-
-	for (size_t k = 0; k < numBands; ++k)
-	{
-		observer_[k] = A[k];
-		bands_[k] = w[k];
-		yellow_[k] = yellow[k];
-		magenta_[k] = magenta[k];
-		cyan_[k] = cyan[k];
-		red_[k] = red[k];
-		green_[k] = green[k];
-		blue_[k] = blue[k];
-	}
-	bands_[numBands] = w[numBands];
-	
-	return rgbSpace;
-}
-
-XYZ Spectrum::observer_[Spectrum::numBands] = {};
-TWavelength Spectrum::bands_[Spectrum::numBands + 1] = {};
-Spectrum Spectrum::yellow_;
-Spectrum Spectrum::magenta_;
-Spectrum Spectrum::cyan_;
-Spectrum Spectrum::red_;
-Spectrum Spectrum::green_;
-Spectrum Spectrum::blue_;
-TRgbSpacePtr Spectrum::rgbSpace_ = Spectrum::initData(); // must be the last one.
-
-#endif
-
 }
 }
 

@@ -46,7 +46,7 @@ PY_CLASS_METHOD(LightSpot, lookAt);
 LightSpot::LightSpot():
 	position_(TPoint3D()),
 	direction_(TVector3D(0, 0, -1)),
-	intensity_(XYZ(1, 1, 1)),
+	intensity_(Spectrum::white()),
 	attenuation_(Attenuation::defaultAttenuation()),
 	cosOuterAngle_(num::cos(TNumTraits::pi / 4)),
 	cosInnerAngle_(num::cos(TNumTraits::pi / 6))
@@ -69,7 +69,7 @@ const TVector3D& LightSpot::direction() const
 
 
 
-const XYZ& LightSpot::intensity() const
+const TSpectrumPtr& LightSpot::intensity() const
 {
 	return intensity_;
 }
@@ -115,7 +115,7 @@ void LightSpot::setDirection(const TVector3D& direction)
 
 
 
-void LightSpot::setIntensity(const XYZ& iIntensity)
+void LightSpot::setIntensity(const TSpectrumPtr& iIntensity)
 {
 	intensity_ = iIntensity;
 }
@@ -206,7 +206,7 @@ TScalar LightSpot::doArea(const TVector3D&) const
 
 
 
-const XYZ LightSpot::doSampleEmission(const Sample&, const TPoint2D&, const TPoint3D& target, BoundedRay& shadowRay, TScalar& pdf) const
+const Spectral LightSpot::doSampleEmission(const Sample& sample, const TPoint2D&, const TPoint3D& target, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	TVector3D toLight = position_ - target;
 	const TScalar squaredDistance = toLight.squaredNorm();
@@ -218,42 +218,42 @@ const XYZ LightSpot::doSampleEmission(const Sample&, const TPoint2D&, const TPoi
 	if (multiplier == TNumTraits::zero)
 	{
 		pdf = TNumTraits::zero;
-		return XYZ();
+		return Spectral();
 	}
 	multiplier /= attenuation_->attenuation(distance, squaredDistance);
 	
 	shadowRay = BoundedRay(target, toLight, tolerance, distance, 
 		prim::IsAlreadyNormalized());
 	pdf = TNumTraits::one;
-	return intensity_ * multiplier;
+	return intensity_->evaluate(sample) * multiplier;
 }
 
 
 
-const XYZ LightSpot::doEmission(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
+const Spectral LightSpot::doEmission(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
 {
 	shadowRay = ray;
 	pdf = 0;
-	return XYZ();
+	return Spectral(0);
 }
 
 
 
-const XYZ LightSpot::doSampleEmission(const Sample&, const TPoint2D& lightSampleA, const TPoint2D&, BoundedRay& emissionRay, TScalar& pdf) const
+const Spectral LightSpot::doSampleEmission(const Sample& sample, const TPoint2D& lightSampleA, const TPoint2D&, BoundedRay& emissionRay, TScalar& pdf) const
 {
 	const TPoint3D local = num::uniformCone(lightSampleA, cosOuterAngle_, pdf);
 	const TVector3D direction = tangentU_ * local.x + tangentV_ * local.y + direction_ * local.z;
 	emissionRay = BoundedRay(position_, direction, tolerance);
 	const TScalar cosTheta = local.z;
-	return intensity_ * fallOff(cosTheta);
+	return intensity_->evaluate(sample) * fallOff(cosTheta);
 }
 
 
 
-const XYZ LightSpot::doTotalPower() const
+TScalar LightSpot::doTotalPower() const
 {
 	const TScalar factor = ((1 - cosInnerAngle_) + (cosInnerAngle_ - cosOuterAngle_) / 4);
-	return (2 * TNumTraits::pi * factor) * intensity_;
+	return (2 * TNumTraits::pi * factor) * intensity_->absAverage();
 }
 
 

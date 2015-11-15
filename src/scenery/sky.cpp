@@ -33,11 +33,12 @@ PY_DECLARE_CLASS_DOC(Sky, "sky sphere")
 PY_CLASS_CONSTRUCTOR_0(Sky)
 
 
+TScalar Sky::radius_ = num::sqrt(TNumTraits::max / 10);
+
 
 // --- public --------------------------------------------------------------------------------------
 
-Sky::Sky():
-	radius_(1e5f)
+Sky::Sky()
 {
 }
 
@@ -53,7 +54,7 @@ void Sky::doIntersect(const Sample&, const BoundedRay& ray, Intersection& result
 {
 	if (ray.inRange(radius_))
 	{
-		result = Intersection(this, TNumTraits::infinity, seLeaving);
+		result = Intersection(this, radius_, seLeaving);
 	}
 	else
 	{
@@ -72,9 +73,9 @@ bool Sky::doIsIntersecting(const Sample&, const BoundedRay& ray) const
 
 void Sky::doLocalContext(const Sample&, const BoundedRay& ray, const Intersection&, IntersectionContext& result) const
 {
-	//LASS_ASSERT(intersection.t() == radius_);
+	//LASS_ASSERT(intersection.t() == diameter_);
 	result.setT(radius_);
-	result.setPoint(ray.point(radius_));
+	result.setPoint(TPoint3D(radius_ * ray.direction()));
 
 	//         [sin theta * cos phi]
 	// R = r * [sin theta * sin phi]
@@ -119,7 +120,7 @@ bool Sky::doContains(const Sample&, const TPoint3D&) const
 
 const TAabb3D Sky::doBoundingBox() const
 {
-    return TAabb3D(TPoint3D(-radius_, -radius_, -radius_), TPoint3D(radius_, radius_, radius_));
+    return TAabb3D();
 }
 
 
@@ -140,14 +141,14 @@ TScalar Sky::doArea(const TVector3D&) const
 
 const TPyObjectPtr Sky::doGetState() const
 {
-	return python::makeTuple(radius_);
+	return python::makeTuple();
 }
 
 
 
 void Sky::doSetState(const TPyObjectPtr& state)
 {
-	LASS_ENFORCE(python::decodeTuple(state, radius_));
+	LASS_ENFORCE(python::decodeTuple(state));
 }
 
 

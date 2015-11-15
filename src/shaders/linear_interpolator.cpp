@@ -122,11 +122,11 @@ void LinearInterpolator::addKey(const TScalar keyValue, const TShaderPtr& keySha
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ LinearInterpolator::doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const
+const Spectral LinearInterpolator::doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const
 {
 	if (keys_.empty())
 	{
-		return XYZ();
+		return Spectral();
 	}
 
 	const TScalar keyValue = average(control_->lookUp(sample, context));
@@ -316,4 +316,3 @@ SampleBsdfOut LinearInterpolator::Bsdf::doSample(const TVector3D& omegaIn, const
 }
 
 // EOF
-

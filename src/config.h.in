@@ -37,7 +37,7 @@
 #define LIAR_TIME double
 #define LIAR_TIME_DELTA double
 
-#define LIAR_FULL_SPECTRAL 1
+#cmakedefine LIAR_SPECTRAL_BANDS ${LIAR_SPECTRAL_BANDS}
 
 #endif 
 

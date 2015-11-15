@@ -120,12 +120,11 @@ void LinearInterpolator::addKey(const TScalar keyValue, const TTexturePtr& keyTe
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ 
-LinearInterpolator::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral LinearInterpolator::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	if (keys_.empty())
 	{
-		return XYZ(0);
+		return Spectral();
 	}
 
 	const TScalar keyValue = average(control_->lookUp(sample, context));
@@ -150,6 +149,40 @@ LinearInterpolator::doLookUp(const Sample& sample, const IntersectionContext& co
 	return lerp(
 		prevI->second->lookUp(sample, context),
 		i->second->lookUp(sample, context),
+		t);
+}
+
+
+
+TScalar LinearInterpolator::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	if (keys_.empty())
+	{
+		return 0;
+	}
+
+	const TScalar keyValue = average(control_->lookUp(sample, context));
+
+	TKeyTexture sentinel(keyValue, TTexturePtr());
+	TKeyTextures::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), sentinel, LesserKey());
+
+	if (i == keys_.begin())
+	{
+		return keys_.front().second->scalarLookUp(sample, context);
+	}
+	if (i == keys_.end())
+	{
+		return keys_.back().second->scalarLookUp(sample, context);
+	}
+
+	TKeyTextures::const_iterator prevI = stde::prev(i);
+	LASS_ASSERT(prevI->first != i->first); // due to lower_bound
+
+	const TScalar t = (keyValue - prevI->first) / (i->first - prevI->first);
+
+	return num::lerp(
+		prevI->second->scalarLookUp(sample, context),
+		i->second->scalarLookUp(sample, context),
 		t);
 }
 

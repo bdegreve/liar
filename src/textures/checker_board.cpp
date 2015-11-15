@@ -110,8 +110,43 @@ void CheckerBoard::doSetState(const TPyObjectPtr& state)
 
 // --- private -------------------------------------------------------------------------------------
 
-const XYZ
-CheckerBoard::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral CheckerBoard::doLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	const TScalar wA = weightA(context);
+	if (wA >= 1)
+	{
+		return textureA()->lookUp(sample, context);
+	}
+	else if (wA <= 0)
+	{
+		return textureB()->lookUp(sample, context);
+	}
+	else
+	{
+		return wA * textureA()->lookUp(sample, context) + (1 - wA) * textureB()->lookUp(sample, context);
+	}
+}
+
+
+TScalar CheckerBoard::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	const TScalar wA = weightA(context);
+	if (wA >= 1)
+	{
+		return textureA()->scalarLookUp(sample, context);
+	}
+	else if (wA <= 0)
+	{
+		return textureB()->scalarLookUp(sample, context);
+	}
+	else
+	{
+		return wA * textureA()->scalarLookUp(sample, context) + (1 - wA) * textureB()->scalarLookUp(sample, context);
+	}
+}
+
+
+TScalar CheckerBoard::weightA(const IntersectionContext& context) const
 {
 #pragma LASS_FIXME("points need transform too [Bramz]")
 	const TVector2D uv = context.uv().position().transform(num::fractional);
@@ -119,31 +154,30 @@ CheckerBoard::doLookUp(const Sample& sample, const IntersectionContext& context)
 	switch (antiAliasing_)
 	{
 	case aaNone:
-		return ((uv.x < split_.x) == (uv.y < split_.y) ? textureA() : textureB())->lookUp(sample, context);
+		return (uv.x < split_.x) == (uv.y < split_.y) ? 1 : 0;
 
 	case aaBilinear:
+	{
+		const TVector2D dUv = prim::pointwiseMax(context.dUv_dI().transform(num::abs), context.dUv_dJ().transform(num::abs));
+		const TVector2D uvMin = uv - dUv / 2;
+		const TVector2D uvMax = uv + dUv / 2;
+		const TScalar area = dUv.x * dUv.y;
+		if (area > 0)
 		{
-			const TVector2D dUv = prim::pointwiseMax(context.dUv_dI().transform(num::abs), context.dUv_dJ().transform(num::abs));
-			const TVector2D uvMin = uv - dUv / 2;
-			const TVector2D uvMax = uv + dUv / 2;
-			const TScalar area = dUv.x * dUv.y;
-			if (area > 0)
-			{
-				const TScalar areaA = integrate(uvMin, uvMax);
-				const TScalar weightA = num::clamp(areaA / area, TNumTraits::zero, TNumTraits::one);
-				return weightA * textureA()->lookUp(sample, context) + (1 - weightA) * textureB()->lookUp(sample, context);
-			}
-			else
-			{
-				return ((uv.x < split_.x) == (uv.y < split_.y) ? textureA() : textureB())->lookUp(sample, context);
-			}
+			const TScalar areaA = integrate(uvMin, uvMax);
+			return num::clamp(areaA / area, TNumTraits::zero, TNumTraits::one);
 		}
+		else
+		{
+			return (uv.x < split_.x) == (uv.y < split_.y) ? 1 : 0;
+		}
+	}
 
 	default:
 		LASS_ASSERT_UNREACHABLE;
 	}
 
-	return XYZ();
+	return 1;
 }
 
 

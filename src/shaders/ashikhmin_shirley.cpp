@@ -163,10 +163,10 @@ size_t AshikhminShirley::doNumReflectionSamples() const
 
 TBsdfPtr AshikhminShirley::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-	const XYZ Rd = diffuse_->lookUp(sample, context);
-	const XYZ Rs = specular_->lookUp(sample, context);
-	const TScalar nu = std::max<TScalar>(average(specularPowerU_->lookUp(sample, context)), 0);
-	const TScalar nv = std::max<TScalar>(average(specularPowerV_->lookUp(sample, context)), 0);
+	const Spectral Rd = diffuse_->lookUp(sample, context);
+	const Spectral Rs = specular_->lookUp(sample, context);
+	const TScalar nu = std::max<TScalar>(specularPowerU_->scalarLookUp(sample, context), 0);
+	const TScalar nv = std::max<TScalar>(specularPowerV_->scalarLookUp(sample, context), 0);
 	return TBsdfPtr(new Bsdf(sample, context, Rd, Rs, nu, nv));
 }
 
@@ -224,7 +224,7 @@ void AshikhminShirley::doSetState(const TPyObjectPtr& iState)
 
 
 
-AshikhminShirley::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, const XYZ& diffuse, const XYZ& specular, TScalar powerU, TScalar powerV):
+AshikhminShirley::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& diffuse, const Spectral& specular, TScalar powerU, TScalar powerV):
 	kernel::Bsdf(sample, context, Bsdf::capsReflection | Bsdf::capsDiffuse | Bsdf::capsGlossy),
 	diffuse_(diffuse),
 	specular_(specular),
@@ -242,8 +242,8 @@ BsdfOut AshikhminShirley::Bsdf::doEvaluate(const TVector3D& k1, const TVector3D&
 	{
 		return BsdfOut();
 	}
-	const TScalar pd = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsDiffuse) ? diffuse_.absTotal() : 0;
-	const TScalar ps = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsGlossy) ? specular_.absTotal() : 0;
+	const TScalar pd = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsDiffuse) ? diffuse_.absAverage() : 0;
+	const TScalar ps = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsGlossy) ? specular_.absAverage() : 0;
 	LASS_ASSERT(pd >= 0 && ps >= 0);
 	const TScalar ptot = pd + ps;
 
@@ -267,8 +267,8 @@ BsdfOut AshikhminShirley::Bsdf::doEvaluate(const TVector3D& k1, const TVector3D&
 SampleBsdfOut AshikhminShirley::Bsdf::doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const
 {
 	LASS_ASSERT(k1.z > 0);
-	TScalar pd = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsDiffuse) ? diffuse_.absTotal() : 0;
-	TScalar ps = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsGlossy) ? specular_.absTotal() : 0;
+	TScalar pd = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsDiffuse) ? diffuse_.absAverage() : 0;
+	TScalar ps = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsGlossy) ? specular_.absAverage() : 0;
 	const TScalar ptot = pd + ps;
 	if (ptot <= 0)
 	{
@@ -302,7 +302,7 @@ SampleBsdfOut AshikhminShirley::Bsdf::doSample(const TVector3D& k1, const TPoint
 
 
 
-const XYZ AshikhminShirley::Bsdf::rhoD(const TVector3D& k1, const TVector3D& k2) const
+const Spectral AshikhminShirley::Bsdf::rhoD(const TVector3D& k1, const TVector3D& k2) const
 {
 	const TScalar a = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k1.z / 2));
 	const TScalar b = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k2.z / 2));
@@ -311,13 +311,13 @@ const XYZ AshikhminShirley::Bsdf::rhoD(const TVector3D& k1, const TVector3D& k2)
 
 
 
-const XYZ AshikhminShirley::Bsdf::rhoS(const TVector3D& k1, const TVector3D& k2, const TVector3D& h, TScalar& pdf) const
+const Spectral AshikhminShirley::Bsdf::rhoS(const TVector3D& k1, const TVector3D& k2, const TVector3D& h, TScalar& pdf) const
 {
 	const TScalar c = num::sqrt((powerU_ + 1) * (powerV_ + 1)) / (8 * TNumTraits::pi);
 	const TScalar n = powerU_ * num::sqr(h.x) + powerV_ * num::sqr(h.y);
 	const TScalar nn = h.z == 1 ? 0 : n / (1 - num::sqr(h.z));
 	const TScalar hk = dot(h, k1);
-	const XYZ F = specular_ + (1 - specular_) * temp::pow5(1 - hk);
+	const Spectral F = specular_ + (1 - specular_) * temp::pow5(1 - hk);
 	const TScalar pdfH = 4 * c * num::pow(h.z, n);
 	pdf = pdfH / (4 * hk);
 	return F * (c * num::pow(h.z, nn) / (hk * std::max(k1.z, k2.z)));

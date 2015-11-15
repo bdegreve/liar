@@ -228,23 +228,6 @@ const TPoint3D Disk::doSampleSurface(const TPoint2D& sample, TVector3D& normal, 
 
 
 
-void Disk::doFun(const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const
-{
-	TScalar t;
-	if (prim::intersect(disk_, ray, t, tolerance) == prim::rOne)
-	{
-		shadowRay = BoundedRay(ray, tolerance, t);
-		pdf = num::sqr(t) / num::abs(disk_.area() * dot(ray.direction(), disk_.normal()));
-	}
-	else
-	{
-		shadowRay = BoundedRay(ray, tolerance);
-		pdf = 0;
-	}
-}
-
-
-
 // --- free ----------------------------------------------------------------------------------------
 
 
