@@ -21,59 +21,61 @@ class PbrtScene(object):
 		self.Identity()
 		self.__state = _STATE_OPTIONS_BLOCK
 		self.__named_coordinate_systems = {}
-		self.__render_immediately = True
-		self.__render_immediately, self.__display = render_immediately, display
+		self.__verbosity = verbosity
+		self.__render_immediately = render_immediately
+		self.__display = display
 		self.Camera()
 		self.PixelFilter()
 		self.Film()
 		self.SurfaceIntegrator()
 		self.__logger = logging.getLogger("liar.tools.pbrt")
 		self.__logger.setLevel({QUIET: logging.CRITICAL, NORMAL: logging.INFO, VERBOSE: logging.DEBUG}[verbosity])
-	
+
 	def Identity(self):
 		self.__cur_transform = liar.Transformation3D.identity()
-	
+
 	def Translate(self, x, y, z):
 		self.__cur_transform = liar.Transformation3D.translation((x, y, z)).concatenate(self.__cur_transform)
-	
+
 	def Scale(self, x, y, z):
 		self.__cur_transform = liar.Transformation3D.scaler((x, y, z)).concatenate(self.__cur_transform)
-	
+
 	def Rotate(self, angle, x, y, z):
 		self.__cur_transform = liar.Transformation3D.rotation((x, y, z), math.radians(angle)).concatenate(self.__cur_transform)
-	
+
 	def LookAt(self, ex, ey, ez, lx, ly, lz, ux, uy, uz):
 		# defining a LHS using RHS operations?  wtf? pretend like nothing happened!
-		from liar.tools.geometry import cross_product, normalize, subtract
+		from liar.tools.geometry import cross_product, normalize, subtract, negate
 		eye = ex, ey, ez
 		lookat = lx, ly, lz
 		up = ux, uy, uz
 		dir = normalize(subtract(lookat, eye))
 		right = normalize(cross_product(dir, up))
 		up = cross_product(right, dir)
-		self.__cur_transform = liar.Transformation3D(eye, right, up, dir).inverse().concatenate(self.__cur_transform)
-	
+		left = negate(right)
+		self.__cur_transform = liar.Transformation3D(eye, left, up, dir).inverse().concatenate(self.__cur_transform)
+
 	def CoordinateSystem(self, name):
 		self.__named_coordinate_systems[name] = self.__cur_transform
-	
+
 	def CoordSysTransform(self, name):
 		self.__cur_transform = self.__named_coordinate_systems[name]
-	
+
 	def Transform(self, *m):
 		m = _unwrap(m)
 		assert len(m) == 16
 		self.__cur_transform = liar.Transformation3D(_transpose(m))
-	
+
 	def ConcatTransform(self, *m):
 		m = _unwrap(m)
 		assert len(m) == 16
 		self.__cur_transform = liar.Transformation3D(_transpose(m)).concatenate(self.__cur_transform)
-	
+
 	def ReverseOrientation(self):
 		# quick hack
 		self.Scale(-1, -1, -1)
-	
-	
+
+
 	def WorldBegin(self):
 		self.verify_options()
 		self.Identity()
@@ -89,7 +91,7 @@ class PbrtScene(object):
 		self.__instances = {}
 		self.__cur_instance = None
 		self.Material()
-	
+
 	def WorldEnd(self):
 		engine, camera = self.engine, self.engine.camera
 		width, height = engine.sampler.resolution = self.resolution
@@ -115,45 +117,45 @@ class PbrtScene(object):
 		engine.scene.interior = self.__volume
 		if self.__render_immediately:
 			self.render()
-	
-	
+
+
 	def TransformBegin(self):
 		self.verify_world()
 		self.__pushed_transforms.append(self.__cur_transform)
-	
+
 	def TransformEnd(self):
 		self.verify_world()
 		self.__cur_transform = self.__pushed_transforms.pop()
-	
+
 	def AttributeBegin(self):
 		self.TransformBegin()
 		self.__pushed_states.append((self.__textures.copy(), self.__material, self.__area_light))
-		
+
 	def AttributeEnd(self):
 		self.TransformEnd()
 		self.__textures, self.__material, self.__area_light = self.__pushed_states.pop()
-	
+
 	def ObjectBegin(self, name):
 		self.AttributeBegin()
 		assert self.__cur_instance is None, "ObjectBegin called inside of instance definition"
 		self.__cur_instance = self.__instances[name] = []
-	
+
 	def ObjectEnd(self):
 		self.AttributeEnd()
 		self.__cur_instance = None
-	
+
 	def ObjectInstance(self, name):
 		self.verify_world()
 		for shape in self.__instances[name]:
 			self.__add_shape(shape)
-	
+
 	def __add_shape(self, shape):
 		self.verify_world()
 		shape = self.__with_cur_transform(shape)
 		if not self.__cur_instance is None:
 			self.__cur_instance.append(shape)
 		self.__objects.append(shape)
-	
+
 	def __with_cur_transform(self, shape):
 		# todo: merge __cur_transform with shape's transform.
 		if self.__cur_transform.isIdentity():
@@ -162,8 +164,8 @@ class PbrtScene(object):
 			matrix = self.__cur_transform.matrix
 			return liar.scenery.Translation(shape, matrix[3:12:4])
 		return liar.scenery.Transformation(shape, self.__cur_transform)
-	
-	
+
+
 	def Camera(self, name="perspective", frameaspectratio=None, screenwindow=None, fov=90, **kwargs):
 		self.verify_options()
 		self.__frameaspectratio, self.__screenwindow, self.__fov = frameaspectratio, screenwindow, fov
@@ -172,7 +174,7 @@ class PbrtScene(object):
 		mat = camera_space.matrix
 		right, up, direction, position = [mat[k:12:4] for k in range(4)]
 		self.engine.camera = getattr(self, "_camera_" + name)(position, direction, up, right, **kwargs)
-	
+
 	def _camera_perspective(self, position, direction, up, right, hither=10e-3, yon=10e30, shutteropen=0, shutterclose=1, lensradius=0, focaldistance=10e30, _falloff=0):
 		from liar.tools.geometry import negate
 		camera = liar.cameras.PerspectiveCamera()
@@ -183,44 +185,46 @@ class PbrtScene(object):
 		camera.lensRadius, camera.focusDistance = lensradius, focaldistance
 		camera.falloffPower = _falloff
 		return camera
-	
-	
+
+
 	def Sampler(self, name="bestcandidate", **kwargs):
 		self.verify_options()
 		if name != "stratified":
 			self.__logger.warning("at this point, we only support stratified samplers.")
 			name = "stratified"
 		self.engine.sampler = getattr(self, "_sampler_" + name)(**kwargs)
-	
+
 	def _sampler_stratified(self, jitter=True, xsamples=2, ysamples=2, pixelsamples=0):
 		sampler = liar.samplers.Stratifier()
 		sampler.jittered = jitter
 		sampler.samplesPerPixel = pixelsamples or (xsamples * ysamples)
 		return sampler
-	
-	
+
+
 	def Film(self, name="image", xresolution=640, yresolution=480, cropwindow=(0,1,0,1), **kwargs):
 		self.verify_options()
 		self.resolution = (xresolution, yresolution)
 		xstart, xend, ystart, yend = cropwindow
 		self.cropwindow = (xstart, ystart), (xend, yend)
 		self.__film = getattr(self, "_film_" + name)(**kwargs)
-	
+
 	def _film_image(self, filename="pbrt.exr", writefrequency=-1, premultiplyalpha=True):
-		return liar.output.Image(filename, self.resolution)
-	
-	
+		image = liar.output.Image(filename, self.resolution)
+		image.rgbSpace = liar.CIEXYZ
+		return image
+
+
 	def PixelFilter(self, name="mitchell", **kwargs):
 		self.verify_options()
 		self.__pixelFilter = getattr(self, "_pixelfilter_" + name)(**kwargs)
-	
+
 	def _pixelfilter_box(self):
 		return None
-	
+
 	def _pixelfilter_mitchell(self, xwidth=2, ywidth=2, B=1./3, C=None):
 		return liar.output.FilterMitchell(None, B)
-	
-	
+
+
 	def Shape(self, name, **kwargs):
 		self.verify_world()
 		shape = getattr(self, "_shape_" + name)(**kwargs)
@@ -230,13 +234,13 @@ class PbrtScene(object):
 			shape = getattr(self, "_lightsource_" + light_name)(shape=shape, **light_kwargs)
 			shape.surface.shader = liar.shaders.Unshaded(liar.textures.Constant(shape.radiance))
 		self.__add_shape(shape)
-	
+
 	def _shape_disk(self, height=0, radius=1):
 		return liar.scenery.Disk((0, 0, height), (0, 0, 1), radius)
-	
+
 	def _shape_sphere(self, radius=1):
 		return liar.scenery.Sphere((0, 0, 0), radius)
-	
+
 	def _shape_trianglemesh(self, indices, P, N=None, uv=None, st=None):
 		def split_as_tuples(xs, n):
 			assert len(xs) % n == 0
@@ -257,14 +261,19 @@ class PbrtScene(object):
 		uvs = split_as_tuples(uv or [], 2)
 		triangles = split_as_tuples([as_vertex_index(i) for i in indices], 3)
 		return liar.scenery.TriangleMesh(verts, normals, uvs, triangles)
-	
+
 	def _shape_loopsubdiv(self, nlevels=3, *args, **kwargs):
 		mesh = self._shape_trianglemesh(*args, **kwargs)
 		mesh.loopSubdivision(nlevels)
 		mesh.smoothNormals()
 		return mesh
-	
-	
+
+
+	def Accelerator(self, *args, **kwargs):
+		self.verify_options()
+		# we ignore this
+
+
 	def Material(self, name="matte", bumpmap=None, **kwargs):
 		self.verify_world()
 		try:
@@ -275,10 +284,10 @@ class PbrtScene(object):
 			self.__material = self._material_matte(**kwargs)
 		if bumpmap:
 			self.__material = liar.shaders.BumpMapping(self.__material, self._get_texture(bumpmap))
-	
+
 	def _material_matte(self, Kd=1, sigma=0):
 		return liar.shaders.Lambert(self._get_texture(Kd))
-	
+
 	def _material_plastic(self, Kd=1, Ks=1, roughness=0.1):
 		#diffuse = liar.shaders.Lambert(self._get_texture(Kd))
 		#return liar.shaders.Sum([diffuse])
@@ -292,22 +301,22 @@ class PbrtScene(object):
 		shader.specularPowerU = Division(one, Max(self._get_texture(uroughness), eps))
 		shader.specularPowerV = Division(one, Max(self._get_texture(vroughness), eps))
 		return shader
-	
+
 	def _material_mirror(self, Kr=1):
 		return liar.shaders.Mirror(self._get_texture(Kr))
-	
+
 	def _material_glass(self, Kr=1, Kt=1, index=1.5):
 		glass = liar.shaders.Dielectric(self._get_texture(index))
 		glass.reflectance = self._get_texture(Kr)
 		glass.transmittance = self._get_texture(Kt)
 		return glass
-	
+
 	def _material_bluepaint(self):
 		return liar.shaders.Lambert(self._get_texture((.3, .4, .7)))
-	
+
 	def _material_clay(self):
 		return liar.shaders.Lambert(self._get_texture((.4, .3, .3)))
-		
+
 	def _material_uber(self, Kd=1, Ks=1, Kr=0, roughness=0.1, opacity=1):
 		layers = []
 		if Kd or Ks:
@@ -325,7 +334,7 @@ class PbrtScene(object):
 			transparent = liar.shaders.Flip(liar.shaders.Mirror(self._get_texture(1)))
 			mat = liar.shaders.LinearInterpolator([(0, transparent), (1, mat)], self._get_texture(opacity))
 		return mat
-	
+
 	def Texture(self, name, type, class_, mapping="uv", uscale=1, vscale=1, udelta=0, vdelta=0, v1=(1,0,0), v2=(0,1,0), **kwargs):
 		self.verify_world()
 		tex = getattr(self, "_texture_" + class_)(**kwargs)
@@ -338,18 +347,18 @@ class PbrtScene(object):
 			else:
 				tex = liar.textures.TransformationUv(tex, transform)
 		self.__textures[name] = tex
-	
+
 	def _texture_constant(self, value):
 		return self._get_texture(value)
-	
+
 	def _texture_scale(self, tex1=1, tex2=1):
 		tex1, tex2 = self._get_texture(tex1), self._get_texture(tex2)
 		return liar.textures.Product([tex1, tex2])
-	
+
 	def _texture_mix(self, tex1=0, tex2=1, amount=0.5):
 		tex1, tex2, amount = self._get_texture(tex1), self._get_texture(tex2), self._get_texture(amount)
 		return liar.textures.LinearInterpolator([(0, tex1), (1, tex2)], amount)
-	
+
 	def _texture_checkerboard(self, tex1=1, tex2=0, dimension=2, aamode="closedform"):
 		tex1, tex2 = self._get_texture(tex1), self._get_texture(tex2)
 		assert dimension in (2, 3)
@@ -361,19 +370,19 @@ class PbrtScene(object):
 			tex.antiAliasing = ("none", "bilinear")[aamode != "none"]
 			tex = liar.textures.TransformationUv(tex, liar.Transformation2D.scaler(.5))
 		return tex
-	
+
 	def _texture_fbm(self, octaves=8, roughness=.5):
 		return liar.textures.FBm(octaves, roughness)
-	
+
 	def _texture_imagemap(self, filename, wrap="repeat", maxanisotropy=8, trilinear=False):
-		return liar.textures.Image(filename)
-	
+		return liar.textures.Image(filename, liar.CIEXYZ)
+
 	def _texture_windy(self):
 		from liar.textures import FBm, TransformationLocal, Abs, Product
 		waveHeight = FBm(6)
 		windStrength = Abs(TransformationLocal(FBm(3), liar.Transformation3D.scaler(.1)))
 		return Product(waveHeight, windStrength)
-	
+
 	def _get_texture(self, arg):
 		# arg as a texture name
 		try:
@@ -389,18 +398,18 @@ class PbrtScene(object):
 		# arg as a path to an image file
 		try:
 			if os.path.isfile(arg):
-				tex = liar.textures.Image(arg)
+				tex = liar.textures.Image(arg, liar.CIEXYZ)
 		except TypeError:
 			pass
 		if not tex:
 			# an RGB triple
 			try:
-				x, y, z = arg
+				r, g, b = arg
 			except TypeError:
 				pass
 			else:
 				try:
-					tex = liar.textures.Constant(liar.rgb(x, y, z))
+					tex = liar.textures.Constant(_color(r, g, b))
 				except TypeError:
 					pass
 		if not tex:
@@ -413,8 +422,8 @@ class PbrtScene(object):
 			raise ValueError("%(arg)r is nor a registered texture name, nor a imagemap path, nor an RGB triple, nor a single float" % vars())
 		self.__auto_textures[arg] = tex
 		return tex
-	
-	
+
+
 	def Volume(self, name, p0=(0,0,0), p1=(1,1,1), **kwargs):
 		self.verify_world()
 		shader = getattr(self, "_volume_" + name)(**kwargs)
@@ -425,7 +434,15 @@ class PbrtScene(object):
 		self.__volume = liar.mediums.Bounded(shader, (p0, p1))
 		if not self.__cur_transform.isIdentity():
 			self.__volume = liar.mediums.Transformation(self.__volume, self.__cur_transform)
-	
+
+	def _volume_homogeneous(self, sigma_a=0, sigma_s=0, g=0, Le=0):
+		# let's start off with a simple one ...
+		sigma_e = (_avg(sigma_a) + _avg(sigma_s))
+		fog = liar.mediums.Fog(sigma_e, g)
+		fog.emission = _color(Le)
+		fog.color = _color(_mul(sigma_s, 0)) #_mul(sigma_s, 1 / sigma_e)
+		return fog
+
 	def _volume_exponential(self, sigma_a=0, sigma_s=0, g=0, Le=0, a=1, b=1, updir=(0,1,0)):
 		# let's start off with a simple one ...
 		sigma_e = (_avg(sigma_a) + _avg(sigma_s))
@@ -435,32 +452,32 @@ class PbrtScene(object):
 		fog.decay = b
 		fog.up = updir
 		return fog
-	
+
 	def LightSource(self, name, **kwargs):
 		self.verify_world()
 		light = getattr(self, "_lightsource_" + name)(**kwargs)
 		self.__objects.append(self.__with_cur_transform(light))
-	
+
 	def AreaLightSource(self, name, **kwargs):
 		self.verify_world()
 		self.__area_light = name, kwargs
-	
+
 	def _lightsource_area(self, shape, L=(1, 1, 1), nsamples=1):
 		self.verify_world()
 		light = liar.scenery.LightArea(shape)
-		light.radiance = L
+		light.radiance = _color(L)
 		light.numberOfEmissionSamples = nsamples
 		return light
-	
+
 	def _lightsource_distant(self, from_=(0, 0, 0), to=(0, 0, 1), L=(1, 1, 1)):
 		from liar.tools import geometry
 		direction = geometry.subtract(to, from_)
-		return liar.scenery.LightDirectional(direction, L)
-	
+		return liar.scenery.LightDirectional(direction, _color(L))
+
 	def _lightsource_infinite(self, L=(1, 1, 1), nsamples=1, mapname=None):
 		tex = self._get_texture(L)
 		if mapname:
-			if L == (1, 1, 1):
+			if L == (1, 1, 1) or L == 1:
 				tex = self._get_texture(mapname)
 			else:
 				tex = liar.textures.Product(tex, self._get_texture(mapname))
@@ -473,20 +490,30 @@ class PbrtScene(object):
 		light.numberOfEmissionSamples = nsamples
 		light.shader = liar.shaders.Unshaded(light.radiance)
 		return light
-	
+
 	def _lightsource_point(self, from_=(0, 0, 0), I=(1, 1, 1)):
-		return liar.scenery.LightPoint(from_, I)
-	
+		return liar.scenery.LightPoint(from_, _color(I))
+
+	def _lightsource_spot(self, I=(1,1,1), from_=(0, 0, 0), to=(0, 0, 1), coneangle=30, conedeltaangle=5):
+		light = liar.scenery.LightSpot()
+		light.position = from_
+		light.lookAt(to)
+		light.intensity = _color(I)
+		light.outerAngle = math.radians(coneangle)
+		light.innerAngle = math.radians(conedeltaangle)
+		return light
+
+
 	def SurfaceIntegrator(self, name="directlighting", **kwargs):
 		self.verify_options()
 		self.engine.tracer = getattr(self, "_surfaceintegrator_" + name)(**kwargs)
-	
+
 	def _surfaceintegrator_directlighting(self, maxdepth=5, strategy="all"):
 		tracer = liar.tracers.DirectLighting()
 		tracer.maxRayGeneration = maxdepth
 		return tracer
-	
-	def _surfaceintegrator_photonmapper(self, causticphotons=20000, indirectphotons=100000, directphotons=100000, nused=50, maxdepth=5, maxdist=.1, finalgather=True, finalgathersamples=32, directwithphotons=False):
+
+	def _surfaceintegrator_photonmap(self, causticphotons=20000, indirectphotons=100000, directphotons=100000, nused=50, maxdepth=5, maxdist=.1, finalgather=True, finalgathersamples=32, directwithphotons=False):
 		tracer = liar.tracers.PhotonMapper()
 		tracer.globalMapSize = indirectphotons
 		tracer.causticsQuality = (100. * causticphotons) / indirectphotons
@@ -500,24 +527,24 @@ class PbrtScene(object):
 		tracer.numFinalGatherRays = finalgather and finalgathersamples
 		tracer.isRayTracingDirect = not directwithphotons
 		return tracer
-	
+
 	def VolumeIntegrator(self, *args, **kwargs):
 		self.verify_options()
 		# we don't do special settings yet
-	
-	
+
+
 	def verify_options(self):
 		assert self.__state == _STATE_OPTIONS_BLOCK
 
 	def verify_world(self):
 		assert self.__state == _STATE_WORLD_BLOCK
-	
-	
+
+
 	def parse(self, path):
 		if path == '-':
 			return self.parse_stream('stdin', sys.stdin)
 		return self.parse_stream(path, open(path))
-		
+
 		dirname, fname = os.path.split(path)
 		oldcwd = os.getcwd()
 		if dirname:
@@ -526,7 +553,7 @@ class PbrtScene(object):
 			return self.parse_stream(path, open(fname))
 		finally:
 			os.chdir(oldcwd)
-	
+
 	def parse_stream(self, path, stream):
 		import keyword
 		include_next = False
@@ -576,7 +603,7 @@ class PbrtScene(object):
 		if identifier:
 			self.__print_statement(identifier, args, kwargs)
 			getattr(self, identifier)(*args, **kwargs)
-	
+
 	def __print_statement(self, identifier, args, kwargs):
 		def truncated_repr(x, n=80):
 			s = repr(x)
@@ -590,7 +617,7 @@ class PbrtScene(object):
 		pretty_args = [truncated_repr(value) for value in args]
 		pretty_kwargs = ["%s=%s" % (key, truncated_repr(value)) for key, value in sorted(kwargs.items())]
 		self.__logger.debug("%s (%s)" % (identifier, ", ".join(pretty_args + pretty_kwargs)))
-	
+
 	def render(self):
 		self.engine.render(self.cropwindow)
 
@@ -624,7 +651,7 @@ def _unwrap(arg):
 	'''
 	_unwrap( (x,) ) -> x
 	_unwrap( x ) -> x
-	
+
 	if arg is a sequence of one item, return that item, otherwise return arg.
 	'''
 	try:
@@ -661,6 +688,20 @@ def _mul(arg, factor):
 		return [x * factor for x in arg]
 	except TypeError:
 		return factor * arg
+
+
+def _color(*args):
+	if len(args) == 1:
+		try:
+			s1 = s2 = s3 = float(args[0])
+		except TypeError:
+			s1, s2, s3 = args[0]
+	else:
+		s1, s2, s3 = args
+	x = 0.412453 * s1 + 0.357580 * s2 + 0.180423 * s3
+	y = 0.212671 * s1 + 0.715160 * s2 + 0.072169 * s3
+	z = 0.019334 * s1 + 0.119193 * s2 + 0.950227 * s3
+	return liar.rgb(x, y, z, liar.CIEXYZ) # euhm, yes, we should have something different for this :-)
 
 
 try:

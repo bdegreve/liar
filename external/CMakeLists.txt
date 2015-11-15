@@ -15,7 +15,7 @@ if(JPEG_BUILD)
         list(APPEND _configure
             "${CMAKE_COMMAND}" -E copy_if_different jconfig.vc jconfig.h
         )
-        if (MSVC11)
+        if (MSVC_VERSION GREATER  1699) # >= 1700, MSVC11+
             # oh great, they dropped win32.mak 
             find_file(JPEG_WIN32_MAK "Win32.Mak"
                 HINTS "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Include"

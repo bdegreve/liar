@@ -64,11 +64,11 @@ private:
 		bool operator()(const TKeyTexture& a, const TKeyTexture& b) const { return a.first < b.first; }
 	};
 
-	const Spectral doLookUp(const Sample& sample,
-		const IntersectionContext& context) const;
+	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context) const override;
+	TScalar doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	TKeyTextures keys_;
 	TTexturePtr control_;

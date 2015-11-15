@@ -53,8 +53,8 @@ public:
 
 protected:
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	TScalar noise(const TPoint3D& point) const;
 
@@ -71,7 +71,8 @@ private:
 
 	LASS_META_ASSERT(hashSize_ % numGradients_ == 0, hash_size_must_be_a_multiple_of_num_gradient_vectors);
 
-	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context) const;
+	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context) const override;
+	TScalar doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
 
 	void init(TSeed seed = 0);
 	TScalar gradient(size_t x, size_t y, size_t z, TScalar dx, TScalar dy, TScalar dz) const;

@@ -48,14 +48,12 @@ public:
 	void setTextureB(const TTexturePtr& b);
 
 protected:
-
 	BinaryOperator(const TTexturePtr& a, const TTexturePtr& b);
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const  override;
+	void doSetState(const TPyObjectPtr& state)  override;
 
 private:
-
 	TTexturePtr a_;
 	TTexturePtr b_;
 };

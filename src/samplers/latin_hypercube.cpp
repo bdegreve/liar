@@ -287,20 +287,6 @@ void LatinHypercube::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixe
 
 
 
-size_t LatinHypercube::doRoundSize1D(size_t requestedSize) const
-{
-	return requestedSize;
-}
-
-
-
-size_t LatinHypercube::doRoundSize2D(size_t requestedSize) const
-{
-	return requestedSize;
-}
-
-
-
 const TSamplerPtr LatinHypercube::doClone() const
 {
 	return TSamplerPtr(new LatinHypercube(*this));

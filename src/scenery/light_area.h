@@ -32,6 +32,7 @@
 #include "scenery_common.h"
 #include "../kernel/attenuation.h"
 #include "../kernel/scene_light.h"
+#include "../kernel/spectrum.h"
 
 namespace liar
 {
@@ -46,12 +47,12 @@ public:
 	LightArea(const TSceneObjectPtr& iSurface);
 
 	const TSceneObjectPtr& surface() const;
-	const Spectral& radiance() const;
+	const TSpectrumPtr& radiance() const;
 	const TAttenuationPtr& attenuation() const;
 	// const unsigned numberOfEmissionSamples() const; [via SceneLight]
 	bool isDoubleSided() const;
 
-	void setRadiance(const Spectral& radiance);
+	void setRadiance(const TSpectrumPtr& radiance);
 	void setAttenuation(const TAttenuationPtr& iAttenuation);
 	void setNumberOfEmissionSamples(unsigned iNumberOfSamples);
 	void setDoubleSided(bool iIsDoubleSided);
@@ -79,7 +80,7 @@ private:
 	const Spectral doSampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 			BoundedRay& emissionRay, TScalar& pdf) const;
-	const Spectral doTotalPower() const;
+	TScalar doTotalPower() const;
 	size_t doNumberOfEmissionSamples() const;
 	bool doIsSingular() const;
 
@@ -87,7 +88,7 @@ private:
 	void doSetLightState(const TPyObjectPtr& state);
 
 	TSceneObjectPtr surface_;
-	Spectral radiance_;
+	TSpectrumPtr radiance_;
 	TAttenuationPtr attenuation_;
 	unsigned numberOfEmissionSamples_;
 	bool isSingleSided_;

@@ -36,7 +36,7 @@ PY_CLASS_CONSTRUCTOR_1(CubeMapping, const TTexturePtr&);
 // --- public --------------------------------------------------------------------------------------
 
 CubeMapping::CubeMapping(const TTexturePtr& texture):
-	UnaryOperator(texture)
+	ContextMapping(texture)
 {
 }
 
@@ -48,7 +48,7 @@ CubeMapping::CubeMapping(const TTexturePtr& texture):
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral CubeMapping::doLookUp(const Sample& sample, const IntersectionContext& context) const
+void CubeMapping::doTransformContext(const Sample&, IntersectionContext& context) const
 {
 	const TVector3D& n = context.geometricNormal();
 	size_t i, j;
@@ -67,10 +67,9 @@ const Spectral CubeMapping::doLookUp(const Sample& sample, const IntersectionCon
 		i = 1;
 		j = 2;
 	}
-	IntersectionContext temp(context);
-	temp.setUv(TPoint2D(context.point()[i], context.point()[j]));
-	temp.setDUv_dI(TVector2D(context.dPoint_dI()[i], context.dPoint_dI()[j]));
-	temp.setDUv_dJ(TVector2D(context.dPoint_dJ()[i], context.dPoint_dJ()[j]));
+	context.setUv(TPoint2D(context.point()[i], context.point()[j]));
+	context.setDUv_dI(TVector2D(context.dPoint_dI()[i], context.dPoint_dI()[j]));
+	context.setDUv_dJ(TVector2D(context.dPoint_dJ()[i], context.dPoint_dJ()[j]));
 	
 	const TVector2D dst_du(context.dPoint_dU()[i], context.dPoint_dU()[j]);
 	const TVector2D dst_dv(context.dPoint_dV()[i], context.dPoint_dV()[j]);
@@ -82,14 +81,13 @@ const Spectral CubeMapping::doLookUp(const Sample& sample, const IntersectionCon
 		const TVector2D duv_dt(inverse[1], inverse[3]);
 		const TVector3D dpoint_ds = context.dPoint_dU() * duv_ds.x + context.dPoint_dV() * duv_ds.y;
 		const TVector3D dpoint_dt = context.dPoint_dU() * duv_dt.x + context.dPoint_dV() * duv_dt.y;
-		temp.setDPoint_dU(dpoint_ds);
-		temp.setDPoint_dV(dpoint_dt);
+		context.setDPoint_dU(dpoint_ds);
+		context.setDPoint_dV(dpoint_dt);
 		const TVector3D dnormal_ds = context.dNormal_dU() * duv_ds.x + context.dNormal_dV() * duv_ds.y;
 		const TVector3D dnormal_dt = context.dNormal_dU() * duv_dt.x + context.dNormal_dV() * duv_dt.y;
-		temp.setDNormal_dU(dnormal_ds);
-		temp.setDNormal_dV(dnormal_dt);
+		context.setDNormal_dU(dnormal_ds);
+		context.setDNormal_dV(dnormal_dt);
 	}
-	return texture()->lookUp(sample, temp);
 }
 
 

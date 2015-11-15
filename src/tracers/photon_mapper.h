@@ -233,7 +233,7 @@ private:
 
 	size_t fillPhotonMaps(const TSamplerPtr& sampler, const TimePeriod& period);
 	void emitPhoton(const LightContext& light, TScalar lightPdf, const Sample& sample, TRandomSecondary::TValue secondarySeed);
-	void tracePhoton(const Sample& sample, Spectral power, const BoundedRay& ray, size_t geneneration, TUniformSecondary& uniform, bool isCaustic = false);
+	void tracePhoton(const Sample& sample, const Spectral& power, const BoundedRay& ray, size_t geneneration, TUniformSecondary& uniform, bool isCaustic = false);
 	template <typename PhotonBuffer, typename PhotonMap> void buildPhotonMap(MapType mapType, PhotonBuffer& buffer, PhotonMap& map, TScalar powerScale);
 	void buildIrradianceMap(size_t numberOfThreads);
 	void buildVolumetricPhotonMap(const TPreliminaryVolumetricPhotonMap& preliminaryVolumetricMap, size_t numberOfThreads);

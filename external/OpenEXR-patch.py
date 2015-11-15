@@ -9,15 +9,12 @@ for dirname, subdirs, fnames in os.walk(srcdir):
         if not fname.endswith('.cpp'):
             continue
         path = os.path.join(dirname, fname)
-        lines = []
-        needsWrite = False
+        lines = ['#include <algorithm>\n'] # apparently this is necessary/
         with open(path) as f:
             for line in f:
                 if line.strip() == '#define ZLIB_WINAPI':
-                    needsWrite = True
-                else:
-                    lines.append(line)
-        if needsWrite:
-            with open(path, 'w') as f:
-                f.writelines(lines)
+                    continue                    
+                lines.append(line)
+        with open(path, 'w') as f:
+            f.writelines(lines)
         

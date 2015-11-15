@@ -34,7 +34,7 @@ namespace scenery
 
 PY_DECLARE_CLASS_DOC(LightDirectional, "directional light")
 PY_CLASS_CONSTRUCTOR_0(LightDirectional)
-PY_CLASS_CONSTRUCTOR_2(LightDirectional, const TVector3D&, const XYZ&)
+PY_CLASS_CONSTRUCTOR_2(LightDirectional, const TVector3D&, const TSpectrumPtr&)
 PY_CLASS_MEMBER_RW(LightDirectional, direction, setDirection)
 PY_CLASS_MEMBER_RW(LightDirectional, radiance, setRadiance)
 PY_CLASS_MEMBER_RW(LightDirectional, portal, setPortal)
@@ -43,14 +43,14 @@ PY_CLASS_MEMBER_RW(LightDirectional, portal, setPortal)
 // --- public --------------------------------------------------------------------------------------
 
 LightDirectional::LightDirectional():
-	radiance_(XYZ(1, 1, 1))
+radiance_(Spectrum::white())
 {
 	setDirection(TVector3D(0, 0, -1));
 }
 
 
 
-LightDirectional::LightDirectional(const TVector3D& direction, const XYZ& radiance):
+LightDirectional::LightDirectional(const TVector3D& direction, const TSpectrumPtr& radiance) :
 	radiance_(radiance)
 {
 	setDirection(direction);
@@ -65,7 +65,7 @@ const TVector3D& LightDirectional::direction() const
 
 
 
-const Spectral& LightDirectional::radiance() const
+const TSpectrumPtr& LightDirectional::radiance() const
 {
 	return radiance_;
 }
@@ -86,7 +86,7 @@ void LightDirectional::setDirection(const TVector3D& direction)
 
 
 
-void LightDirectional::setRadiance(const Spectral& radiance)
+void LightDirectional::setRadiance(const TSpectrumPtr& radiance)
 {
 	radiance_ = radiance;
 }
@@ -193,12 +193,12 @@ const Spectral LightDirectional::doSampleEmission(const Sample& sample, const TP
 		shadowRay = BoundedRay(target, -direction_, tolerance, intersection.t(), prim::IsAlreadyNormalized());
 	} 
 	pdf = TNumTraits::one;
-	return radiance_;
+	return radiance_->evaluate(sample);
 }
 
 
 
-const Spectral LightDirectional::doSampleEmission(const Sample&, const TPoint2D& lightSampleA, const TPoint2D&, BoundedRay& emissionRay, TScalar& pdf) const
+const Spectral LightDirectional::doSampleEmission(const Sample& sample, const TPoint2D& lightSampleA, const TPoint2D&, BoundedRay& emissionRay, TScalar& pdf) const
 {
 	TVector3D normal;
 	const TSceneObjectPtr& port = userPortal_ ? userPortal_ : defaultPortal_;
@@ -209,7 +209,7 @@ const Spectral LightDirectional::doSampleEmission(const Sample&, const TPoint2D&
 	if (pdf > 0 && cosTheta > 0)
 	{
 		pdf /= cosTheta;
-		return radiance_;
+		return radiance_->evaluate(sample);
 	}
 	else
 	{
@@ -220,11 +220,11 @@ const Spectral LightDirectional::doSampleEmission(const Sample&, const TPoint2D&
 
 
 
-const Spectral LightDirectional::doTotalPower() const
+TScalar LightDirectional::doTotalPower() const
 {
 	const TSceneObjectPtr& port = userPortal_ ? userPortal_ : defaultPortal_;
 	LASS_ASSERT(port);
-	return port->area(direction_) * radiance_;
+	return port->area(direction_) * radiance_->absAverage();
 }
 
 

@@ -220,18 +220,9 @@ public:
 		return sum;
 	}
 
-	TValue total() const
+	TValue average() const
 	{
-		return std::accumulate(v_, v_ + numBands, TNumTraits::zero);
-	}
-	TValue absTotal() const
-	{
-		TValue sum = TNumTraits::zero;
-		for (size_t i = 0; i < N; ++i)
-		{
-			sum += num::abs(v_[i]);
-		}
-		return sum;
+		return std::accumulate(v_, v_ + numBands, TNumTraits::zero) / numBands;
 	}
 
 	bool isZero() const
@@ -263,7 +254,61 @@ private:
 	TValue v_[N];
 };
 
-// --- 3 bands ---
+// --- 1 band ---
+
+template <typename T>
+class Bands<1, T>
+{
+public:
+
+	typedef typename util::CallTraits<T>::TValue TValue;
+	typedef typename util::CallTraits<T>::TParam TParam;
+	typedef typename util::CallTraits<T>::TReference TReference;
+	typedef typename util::CallTraits<T>::TConstReference TConstReference;
+	typedef num::NumTraits<T> TNumTraits;
+
+	enum { numBands = 1 };
+
+	Bands(TParam f = TNumTraits::zero): v_(f) {}
+	void fill(TParam f) { v_ = f; }
+
+	TReference operator[](size_t i) { return v_; }
+	TParam operator[](size_t i) const { return v_; }
+
+	Bands& operator+=(const Bands& other) { v_ += other.v_; return *this; }
+	Bands& operator-=(const Bands& other) { v_ -= other.v_; return *this; }
+	Bands& operator*=(const Bands& other) { v_ *= other.v_; return *this; }
+	Bands& operator/=(const Bands& other) { v_ /= other.v_; return *this; }
+
+	Bands& operator+=(TParam f) { v_ += f; return *this; }
+	Bands& operator-=(TParam f) { v_ -= f; return *this; }
+	Bands& operator*=(TParam f) { v_ *= f; return *this; }
+	Bands& operator/=(TParam f) { v_ /= f; return *this; }
+
+	Bands& fma(const Bands& a, const Bands& b) { v_ += a.v_ * b.v_; return *this; }
+	Bands& fma(TParam a, const Bands& b) { v_ += a_ * b.v_; return *this; }
+	Bands& fma(const Bands& a, TParam b)  { v_ += a.v_ * b; return *this; }
+
+	Bands& inpabs() { v_ = num::abs(v_); return *this; }
+	Bands& inpmax(const Bands& other) { v_ = std::max(v_, other.v_); return *this; }
+	Bands& inppow(const Bands& other) { v_ = num::pow(v_, other.v_); return *this; }
+	Bands& inppow(TScalar f) { v_ = num::pow(v_, f); return *this; }
+	Bands& inpsqrt() { v_ = num::sqrt(v_); return *this; }
+	Bands& inpexp() { v_ = num::exp(v_); return *this; }
+	Bands& inpclamp(TParam min, TParam max) { v_ = num::clamp(v_, min, max); return *this; }
+	Bands& inplerp(const Bands& other, TScalar f) { v_ = num::lerp(v_, other.v_, f); }
+
+	TValue dot(const Bands& other) const { return v_ * other.v_; }
+	TValue average() const { return v_; }
+
+	bool isZero() const { return !v_; }
+	bool operator==(const Bands& other) const { return v_ == other.v_; }
+
+private:
+
+	TValue v_;
+};
+
 
 template <typename T>
 class Bands<3, T>
@@ -432,13 +477,9 @@ public:
 		return v_[0] * other.v_[0] + v_[1] * other.v_[1] + v_[2] * other.v_[2];
 	}
 
-	TValue total() const
+	TValue average() const
 	{
-		return v_[0] + v_[1] + v_[2];
-	}
-	TValue absTotal() const
-	{
-		return num::abs(v_[0]) + num::abs(v_[1]) + num::abs(v_[2]);
+		return (v_[0] + v_[1] + v_[2]) / 3;
 	}
 
 	bool isZero() const

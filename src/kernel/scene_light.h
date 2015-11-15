@@ -83,7 +83,9 @@ public:
 		return doSampleEmission(cameraSample, lightSampleA, lightSampleB, emissionRay, pdf);
 	}
 
-	const Spectral totalPower() const
+	/** Return total power output for light, but averaged over all frequencies 
+	 */ 
+	TScalar totalPower() const
 	{
 		return doTotalPower();
 	}
@@ -125,7 +127,7 @@ private:
 	virtual const Spectral doSampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 			BoundedRay& emissionRay, TScalar& pdf) const = 0;
-	virtual const Spectral doTotalPower() const = 0;
+	virtual TScalar doTotalPower() const = 0;
 	virtual size_t doNumberOfEmissionSamples() const = 0;
 	virtual bool doIsSingular() const = 0;
 	

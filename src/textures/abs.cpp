@@ -53,6 +53,11 @@ const Spectral Abs::doLookUp(const Sample& sample, const IntersectionContext& co
 }
 
 
+TScalar Abs::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	return num::abs(texture()->scalarLookUp(sample, context));
+}
+
 
 // --- free ----------------------------------------------------------------------------------------
 

@@ -36,7 +36,7 @@ PY_CLASS_MEMBER_RW(ProjectionMapping, projection, setProjection);
 // --- public --------------------------------------------------------------------------------------
 
 ProjectionMapping::ProjectionMapping(const TTexturePtr& texture, const TProjectionPtr& projection):
-	UnaryOperator(texture),
+	ContextMapping(texture),
 	projection_(projection)
 {
 }
@@ -77,17 +77,15 @@ void ProjectionMapping::doSetState(const TPyObjectPtr& state)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral ProjectionMapping::doLookUp(const Sample& sample, const IntersectionContext& context) const
+void ProjectionMapping::doTransformContext(const Sample&, IntersectionContext& context) const
 {
-	IntersectionContext temp(context);
 	const TPoint2D uv0 = (PY_ENFORCE_POINTER(projection_))->uv(context.point());
 	const TPoint2D uvI = projection_->uv(context.point() + context.dPoint_dI());
 	const TPoint2D uvJ = projection_->uv(context.point() + context.dPoint_dJ());
-	temp.setUv(uv0);
-	temp.setDUv_dI(uvI - uv0);
-	temp.setDUv_dJ(uvJ - uv0);
+	context.setUv(uv0);
+	context.setDUv_dI(uvI - uv0);
+	context.setDUv_dJ(uvJ - uv0);
 #pragma LASS_TODO("perhaps we need to transform other Uv dependent quantities as well [Brams]")
-	return texture()->lookUp(sample, temp);
 }
 
 

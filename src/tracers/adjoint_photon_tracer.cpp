@@ -75,7 +75,7 @@ const Spectral AdjointPhotonTracer::doCastRay(
 	TScalar tScatter, pdf;
 	const Spectral transmittance = mediumStack().sampleScatterOutOrTransmittance(uniform(), bound(ray, ray.nearLimit(), tIntersection), tScatter, pdf);
 	Spectral transmittedPower = power * transmittance / pdf;
-	const TScalar transmittanceProbability = std::min(transmittedPower.absTotal() / power.absTotal(), TNumTraits::one);
+	const TScalar transmittanceProbability = std::min(transmittedPower.absAverage() / power.absAverage(), TNumTraits::one);
 	if (!russianRoulette(transmittedPower, transmittanceProbability, uniform()))
 	{
 		return;
@@ -98,7 +98,7 @@ const Spectral AdjointPhotonTracer::doCastRay(
 			return;
 		}
 		Spectral scatteredPower = transmittedPower * reflectance / pdfOut;
-		const TScalar scatteredProbability = std::min(scatteredPower.absTotal() / transmittedPower.absTotal(), TNumTraits::one);
+		const TScalar scatteredProbability = std::min(scatteredPower.absAverage() / transmittedPower.absAverage(), TNumTraits::one);
 		if (!russianRoulette(scatteredPower, scatteredProbability, uniform()))
 		{
 			return;

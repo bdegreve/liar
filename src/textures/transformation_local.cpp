@@ -37,7 +37,7 @@ PY_CLASS_MEMBER_RW(TransformationLocal, transformation, setTransformation);
 // --- public --------------------------------------------------------------------------------------
 
 TransformationLocal::TransformationLocal(const TTexturePtr& texture, const TTransformation3D& transformation):
-	UnaryOperator(texture),
+	ContextMapping(texture),
 	transformation_(transformation)
 {
 }
@@ -45,7 +45,7 @@ TransformationLocal::TransformationLocal(const TTexturePtr& texture, const TTran
 
 
 TransformationLocal::TransformationLocal(const TTexturePtr& texture, const TPyTransformation3DPtr& transformation):
-	UnaryOperator(texture),
+	ContextMapping(texture),
 	transformation_(transformation->transformation())
 {
 }
@@ -72,16 +72,14 @@ void TransformationLocal::setTransformation(const TTransformation3D& transformat
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral TransformationLocal::doLookUp(const Sample& sample, const IntersectionContext& context) const
+void TransformationLocal::doTransformContext(const Sample& sample, IntersectionContext& context) const
 {
-	IntersectionContext temp(context);
-	temp.setPoint(prim::transform(context.point(), transformation_));
-	temp.setDPoint_dI(prim::transform(context.dPoint_dI(), transformation_));
-	temp.setDPoint_dJ(prim::transform(context.dPoint_dJ(), transformation_));
-	temp.setDPoint_dU(prim::transform(context.dPoint_dU(), transformation_));
-	temp.setDPoint_dV(prim::transform(context.dPoint_dV(), transformation_));
+	context.setPoint(prim::transform(context.point(), transformation_));
+	context.setDPoint_dI(prim::transform(context.dPoint_dI(), transformation_));
+	context.setDPoint_dJ(prim::transform(context.dPoint_dJ(), transformation_));
+	context.setDPoint_dU(prim::transform(context.dPoint_dU(), transformation_));
+	context.setDPoint_dV(prim::transform(context.dPoint_dV(), transformation_));
 #pragma LASS_TODO("perhaps we need to transform other Uv dependent quantities as well [Brams]")
-	return texture()->lookUp(sample, temp);
 }
 
 

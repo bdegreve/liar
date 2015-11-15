@@ -300,13 +300,6 @@ void Stratifier::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixel), 
 
 
 
-size_t Stratifier::doRoundSize1D(size_t requestedSize) const
-{
-	return requestedSize;
-}
-
-
-
 size_t Stratifier::doRoundSize2D(size_t requestedSize) const
 {
 	const TScalar realSqrt = num::sqrt(static_cast<TScalar>(requestedSize));

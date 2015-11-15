@@ -77,9 +77,6 @@ private:
 	virtual void doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, TSubSequenceId id, TSample1D* first, TSample1D* last);
 	virtual void doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, TSubSequenceId id, TSample2D* first, TSample2D* last);
 
-	virtual size_t doRoundSize1D(size_t requestedSize) const;
-	virtual size_t doRoundSize2D(size_t requestedSize) const;
-
 	virtual const TSamplerPtr doClone() const;
 
 	virtual const TPyObjectPtr doGetState() const;

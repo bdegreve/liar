@@ -36,7 +36,7 @@ PY_CLASS_MEMBER_RW(TransformationUv, transformation, setTransformation);
 // --- public --------------------------------------------------------------------------------------
 
 TransformationUv::TransformationUv(const TTexturePtr& texture, const TTransformation2D& transformation):
-	UnaryOperator(texture)
+	ContextMapping(texture)
 {
 	setTransformation(transformation);
 }
@@ -64,24 +64,26 @@ void TransformationUv::setTransformation(const TTransformation2D& transformation
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral TransformationUv::doLookUp(const Sample& sample, const IntersectionContext& context) const
+void TransformationUv::doTransformContext(const Sample& sample, IntersectionContext& context) const
 {
-	IntersectionContext temp(context);
-	temp.setUv(prim::transform(context.uv(), forward_));
-	temp.setDUv_dI(prim::transform(context.dUv_dI(), forward_));
-	temp.setDUv_dJ(prim::transform(context.dUv_dJ(), forward_));
+	context.setUv(prim::transform(context.uv(), forward_));
+	context.setDUv_dI(prim::transform(context.dUv_dI(), forward_));
+	context.setDUv_dJ(prim::transform(context.dUv_dJ(), forward_));
 
 	// we need derivatives from old (u,v) coordinates to new (s,t) coordinates.
 	const TScalar* const invMat = inverse_.matrix();
 	const TVector2D dUv_dS(invMat[0], invMat[3]);
 	const TVector2D dUv_dT(invMat[1], invMat[4]);
 
-	temp.setDPoint_dU(context.dPoint_dU() * dUv_dS.x + context.dPoint_dV() * dUv_dS.y);
-	temp.setDPoint_dV(context.dPoint_dU() * dUv_dT.x + context.dPoint_dV() * dUv_dT.y);
-	temp.setDNormal_dU(context.dNormal_dU() * dUv_dS.x + context.dNormal_dV() * dUv_dS.y);
-	temp.setDNormal_dV(context.dNormal_dU() * dUv_dT.x + context.dNormal_dV() * dUv_dT.y);
+	const TVector3D dPoint_dS = context.dPoint_dU() * dUv_dS.x + context.dPoint_dV() * dUv_dS.y;
+	const TVector3D dPoint_dT = context.dPoint_dU() * dUv_dT.x + context.dPoint_dV() * dUv_dT.y;
+	context.setDPoint_dU(dPoint_dS);
+	context.setDPoint_dV(dPoint_dT);
 
-	return texture()->lookUp(sample, temp);
+	const TVector3D dNormal_dS = context.dNormal_dU() * dUv_dS.x + context.dNormal_dV() * dUv_dS.y;
+	const TVector3D dNormal_dT = context.dNormal_dU() * dUv_dT.x + context.dNormal_dV() * dUv_dT.y;
+	context.setDNormal_dU(dNormal_dS);
+	context.setDNormal_dV(dNormal_dT);
 }
 
 

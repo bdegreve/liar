@@ -151,8 +151,8 @@ TBsdfPtr Dielectric::doBsdf(const Sample& sample, const IntersectionContext& con
 	const TScalar ior2 = std::max(average(innerRefractionIndex_->lookUp(sample, context)), TNumTraits::zero);
 	const bool isLeaving = context.solidEvent() == seLeaving;
 	const TScalar ior = isLeaving ? ior2 / ior1 : ior1 / ior2;
-	const XYZ reflectance = reflectance_->lookUp(sample, context);
-	const XYZ transmittance = transmittance_->lookUp(sample, context);
+	const Spectral reflectance = reflectance_->lookUp(sample, context);
+	const Spectral transmittance = transmittance_->lookUp(sample, context);
 
 	return TBsdfPtr(new DielectricBsdf(sample, context, caps(), ior, reflectance, transmittance));
 }
@@ -184,7 +184,7 @@ void Dielectric::init(const TTexturePtr& innerRefractionIndex, const TTexturePtr
 
 // --- bsdf ----------------------------------------------------------------------------------------
 
-Dielectric::DielectricBsdf::DielectricBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, TScalar ior, const XYZ& reflectance, const XYZ& transmittance):
+Dielectric::DielectricBsdf::DielectricBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, TScalar ior, const Spectral& reflectance, const Spectral& transmittance) :
 	Bsdf(sample, context, caps),
 	reflectance_(reflectance),
 	transmittance_(transmittance),
@@ -218,8 +218,8 @@ SampleBsdfOut Dielectric::DielectricBsdf::doSample(const TVector3D& omegaIn, con
 	const TScalar rPar = (cosI - ior_ * cosT) / (cosI + ior_ * cosT);
 	const TScalar rFresnel = (num::sqr(rOrth) + num::sqr(rPar)) / 2;
 
-	const TScalar powRefl = kernel::hasCaps(allowedCaps, capsRefl) ? reflectance_.absTotal() * rFresnel : 0;
-	const TScalar powTrans = kernel::hasCaps(allowedCaps, capsTrans) ? transmittance_.absTotal() * (1 - rFresnel) : 0;
+	const TScalar powRefl = kernel::hasCaps(allowedCaps, capsRefl) ? reflectance_.absAverage() * rFresnel : 0;
+	const TScalar powTrans = kernel::hasCaps(allowedCaps, capsTrans) ? transmittance_.absAverage() * (1 - rFresnel) : 0;
 	LASS_ASSERT(powRefl + powTrans > 0);
 	const TScalar probRefl = powRefl / (powRefl + powTrans);
 	

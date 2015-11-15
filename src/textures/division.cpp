@@ -44,12 +44,16 @@ Division::Division(const TTexturePtr& a, const TTexturePtr& b):
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral
-Division::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral Division::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	return textureA()->lookUp(sample, context) / textureB()->lookUp(sample, context);
 }
 
+
+TScalar Division::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	return textureA()->scalarLookUp(sample, context) / textureB()->scalarLookUp(sample, context);
+}
 
 
 // --- free ----------------------------------------------------------------------------------------

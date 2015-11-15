@@ -51,13 +51,12 @@ public:
 	FBm(size_t numOctaves, TScalar falloff);
 
 protected:
-
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 private:
-
-	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context) const;
+	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context) const override;
+	TScalar doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
 
 	void init(size_t numOctaves, TScalar falloff = .5);
 

@@ -158,7 +158,7 @@ inline TScalar invCdf(TScalar uniform, TScalar alpha, TScalar beta, TScalar& pdf
 
 }
 
-const Spectral ExponentialFog::doTransmittance(const BoundedRay& ray) const
+const Spectral ExponentialFog::doTransmittance(const Sample&, const BoundedRay& ray) const
 {
 	const TScalar d = ray.farLimit() - ray.nearLimit();
 	const TScalar a = alpha(ray);
@@ -169,9 +169,9 @@ const Spectral ExponentialFog::doTransmittance(const BoundedRay& ray) const
 
 
 
-const Spectral ExponentialFog::doEmission(const BoundedRay& ray) const
+const Spectral ExponentialFog::doEmission(const Sample& sample, const BoundedRay& ray) const
 {
-	if (!emission())
+	if (!emission()->evaluate(sample))
 	{
 		return Spectral();
 	}
@@ -183,18 +183,18 @@ const Spectral ExponentialFog::doEmission(const BoundedRay& ray) const
 
 	if (extinction() == 0) // instead special case for thickness < 1e-5?
 	{
-		return tau(emission(), b, d);
+		return tau(emission()->evaluate(sample), b, d);
 	}
 
 	const TScalar thickness = tau(a, b, d);
 	LASS_ASSERT(thickness >= 0);
 
 	const TScalar absorptance = -num::expm1(-thickness); // = 1 - transmittance(ray)
-	return emission() * (absorptance / extinction());
+	return emission()->evaluate(sample) * (absorptance / extinction());
 }
 
 
-const Spectral ExponentialFog::doScatterOut(const BoundedRay& ray) const
+const Spectral ExponentialFog::doScatterOut(const Sample&, const BoundedRay& ray) const
 {
 	const TScalar d = ray.farLimit() - ray.nearLimit();
 	const TScalar a = alpha(ray);
@@ -205,7 +205,7 @@ const Spectral ExponentialFog::doScatterOut(const BoundedRay& ray) const
 
 
 
-const Spectral ExponentialFog::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const Spectral ExponentialFog::doSampleScatterOut(TScalar scatterSample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	const TScalar dMax = ray.farLimit() - ray.nearLimit();
 	const TScalar a = alpha(ray);
@@ -220,14 +220,14 @@ const Spectral ExponentialFog::doSampleScatterOut(TScalar sample, const BoundedR
 	}
 
 	TScalar p;
-	const TScalar d = invCdf(sample * attMax, a, b, p);
+	const TScalar d = invCdf(scatterSample * attMax, a, b, p);
 	tScatter = std::min(ray.nearLimit() + d, ray.farLimit());
 	pdf = p / attMax;
 	return Spectral(p);
 }
 
 
-const Spectral ExponentialFog::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const Spectral ExponentialFog::doSampleScatterOutOrTransmittance(const Sample&, TScalar scatterSample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	const TScalar dMax = ray.farLimit() - ray.nearLimit();
 	const TScalar a = alpha(ray);
@@ -242,7 +242,7 @@ const Spectral ExponentialFog::doSampleScatterOutOrTransmittance(TScalar sample,
 	}
 
 	TScalar p;
-	const TScalar d = invCdf(sample * attMax, a, b, p);
+	const TScalar d = invCdf(scatterSample * attMax, a, b, p);
 	if (d > dMax)
 	{
 		// full transmission

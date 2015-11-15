@@ -32,62 +32,43 @@ namespace textures
 PY_DECLARE_CLASS_DOC(Constant, "texture with constant value")
 PY_CLASS_CONSTRUCTOR_1(Constant, TScalar);
 PY_CLASS_CONSTRUCTOR_1(Constant, const XYZ&);
-PY_CLASS_CONSTRUCTOR_1(Constant, const Spectral&);
+PY_CLASS_CONSTRUCTOR_1(Constant, const TSpectrumPtr&);
 PY_CLASS_CONVERTOR(Constant, TScalar);
 PY_CLASS_CONVERTOR(Constant, XYZ);
-PY_CLASS_CONVERTOR(Constant, Spectral);
-//PY_CLASS_CONSTRUCTOR_2(Constant, const std::vector<TScalar>&, const TSpectrumFormatPtr&);
+PY_CLASS_CONVERTOR(Constant, TSpectrumPtr);
 PY_CLASS_MEMBER_RW(Constant, value, setValue);
 
 // --- public --------------------------------------------------------------------------------------
 
-Constant::Constant(const Spectral& spectrum) :
-value_(spectrum)
-{
-}
-
-
-
-Constant::Constant(const XYZ& spectrum) :
+Constant::Constant(const TSpectrumPtr& spectrum) :
 	value_(spectrum)
 {
 }
 
 
 
+Constant::Constant(const XYZ& value) :
+	value_(Spectrum::make(value))
+{
+}
+
+
+
 Constant::Constant(TScalar value):
-	value_(value)
-{
-}
-
-
-/*
-Constant::Constant(const std::vector<TScalar>& iPowerDensities):
-	Texture(&Type),
-	value_(iPowerDensities, SpectrumFormat::defaultFormat())
+	value_(Spectrum::make(value))
 {
 }
 
 
 
-Constant::Constant(const std::vector<TScalar>& iPowerDensities, 
-				   const TSpectrumFormatPtr& iFormat):
-	Texture(&Type),
-	value_(iPowerDensities, iFormat)
-{
-}
-*/
-
-
-
-const Spectral& Constant::value() const
+const TSpectrumPtr& Constant::value() const
 {
 	return value_;
 }
 
 
 
-void Constant::setValue(const Spectral& value)
+void Constant::setValue(const TSpectrumPtr& value)
 {
 	value_ = value;
 }
@@ -112,9 +93,16 @@ void Constant::doSetState(const TPyObjectPtr& state)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral Constant::doLookUp(const Sample&, const IntersectionContext&) const
+const Spectral Constant::doLookUp(const Sample& sample, const IntersectionContext&) const
 {
-	return value_;
+	return value_->evaluate(sample);
+}
+
+
+
+TScalar Constant::doScalarLookUp(const Sample&, const IntersectionContext&) const
+{
+	return value_->absAverage();
 }
 
 

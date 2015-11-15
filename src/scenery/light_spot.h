@@ -32,6 +32,7 @@
 #include "scenery_common.h"
 #include "../kernel/attenuation.h"
 #include "../kernel/scene_light.h"
+#include "../kernel/spectrum.h"
 
 namespace liar
 {
@@ -47,14 +48,14 @@ public:
 
 	const TPoint3D& position() const;
 	const TVector3D& direction() const;
-	const Spectral& intensity() const;
+	const TSpectrumPtr& intensity() const;
 	const TAttenuationPtr& attenuation() const;
 	TScalar outerAngle() const;
 	TScalar innerAngle() const;
 
 	void setPosition(const TPoint3D& iPosition);
 	void setDirection(const TVector3D& direction);
-	void setIntensity(const Spectral& iIntensity);
+	void setIntensity(const TSpectrumPtr& iIntensity);
 	void setAttenuation(const TAttenuationPtr& iAttenuation);
 	void setOuterAngle(TScalar iRadians);
 	void setInnerAngle(TScalar iRadians);
@@ -80,7 +81,7 @@ private:
 	const Spectral doSampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 			BoundedRay& emissionRay, TScalar& pdf) const;
-	const Spectral doTotalPower() const;
+	TScalar doTotalPower() const;
 	size_t doNumberOfEmissionSamples() const;
 	bool doIsSingular() const;
 
@@ -94,7 +95,7 @@ private:
 	TVector3D direction_;
 	TVector3D tangentU_;
 	TVector3D tangentV_;
-	Spectral intensity_;
+	TSpectrumPtr intensity_;
 	TAttenuationPtr attenuation_;
 	TScalar cosOuterAngle_;
 	TScalar cosInnerAngle_;

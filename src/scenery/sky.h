@@ -45,7 +45,6 @@ class LIAR_SCENERY_DLL Sky: public SceneObject
 public:
 
 	Sky();
-	Sky(TScalar radius);
 
 private:
 
@@ -66,7 +65,7 @@ private:
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-	TScalar radius_;
+	static TScalar radius_;
 };
 
 

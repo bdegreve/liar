@@ -79,7 +79,7 @@ void Parallelogram::doLocalContext(const kernel::Sample&, const BoundedRay& ray,
 	TPoint2D uv;
 	TScalar t;
 	const prim::Result LASS_UNUSED(hit) = prim::intersect(parallelogram_, ray.unboundedRay(), uv.x, uv.y, t, ray.nearLimit());
-	LASS_ASSERT(hit == prim::rOne && ray.inRange(t));
+	LASS_ASSERT(hit == prim::rOne);// && ray.inRange(t));
 	LASS_ASSERT(t == intersection.t());
 
 	result.setPoint(ray.point(intersection.t()));

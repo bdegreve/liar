@@ -52,14 +52,14 @@ public:
 	void setBounds(const TAabb3D& bounds);
 
 private:
-	size_t doNumScatterSamples() const;
-	const Spectral doTransmittance(const BoundedRay& ray) const;
-	const Spectral doEmission(const BoundedRay& ray) const;
-	const Spectral doScatterOut(const BoundedRay& ray) const;
-	const Spectral doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
-	const Spectral doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
-	const Spectral doPhase(const TPoint3D&, const TVector3D&, const TVector3D&, TScalar& pdf) const;
-	const Spectral doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const;
+	size_t doNumScatterSamples() const override;
+	const Spectral doTransmittance(const Sample& sample, const BoundedRay& ray) const override;
+	const Spectral doEmission(const Sample& sample, const BoundedRay& ray) const override;
+	const Spectral doScatterOut(const Sample& sample, const BoundedRay& ray) const override;
+	const Spectral doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const override;
+	const Spectral doSampleScatterOutOrTransmittance(const Sample& sample, TScalar scatterSample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const override;
+	const Spectral doPhase(const Sample& sample, const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const override;
+	const Spectral doSamplePhase(const Sample& sample, const TPoint2D& phaseSample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const override;
 
 	bool bound(const BoundedRay& ray, BoundedRay& bounded) const;
 

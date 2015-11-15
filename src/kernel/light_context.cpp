@@ -104,10 +104,13 @@ const Spectral LightContext::sampleEmission(
 	const Spectral radiance = light_->sampleEmission(
 		cameraSample, lightSample, localTarget, localNormal, localRay, pdf);
 
-	// we must transform back to world space.  But we already do know the starting point, so don't rely
-	// on recalculating that one
-	shadowRay = transform(localRay, localToWorld_);
-	shadowRay.support() = target;
+	if (pdf)
+	{
+		// we must transform back to world space.  But we already do know the starting point, so don't rely
+		// on recalculating that one
+		shadowRay = transform(localRay, localToWorld_);
+		shadowRay.support() = target;
+	}
 
 	return radiance;
 }
@@ -123,15 +126,18 @@ const Spectral LightContext::sampleEmission(
 	BoundedRay localRay;
 	const Spectral radiance = light_->sampleEmission(cameraSample, lightSampleA, lightSampleB, localRay, pdf);
 
-	emissionRay = transform(localRay, localToWorld_);
+	if (pdf)
+	{
+		emissionRay = transform(localRay, localToWorld_);
+	}
 	return radiance;
 }
 
 
 
 const Spectral LightContext::emission(
-		const Sample& cameraSample, const TRay3D& ray,
-		BoundedRay& shadowRay, TScalar& pdf) const
+	const Sample& cameraSample, const TRay3D& ray,
+	BoundedRay& shadowRay, TScalar& pdf) const
 {
 	setTime(cameraSample.time());
 	TScalar scale = 1;
@@ -140,14 +146,16 @@ const Spectral LightContext::emission(
 	BoundedRay localShadowRay;
 	const Spectral radiance = light_->emission(cameraSample, localRay, localShadowRay, pdf);
 
-	shadowRay = BoundedRay(
-		ray, localShadowRay.nearLimit() / scale, localShadowRay.farLimit() / scale);
+	if (pdf)
+	{
+		shadowRay = BoundedRay(ray, localShadowRay.nearLimit() / scale, localShadowRay.farLimit() / scale);
+	}
 	return radiance;
 }
 
 
 
-const Spectral LightContext::totalPower() const
+TScalar LightContext::totalPower() const
 {
 	return light_->totalPower();
 }
@@ -237,7 +245,7 @@ void LightContexts::clear()
 {
 	contexts_.clear();
 	cdf_.clear();
-	totalPower_ = Spectral(0);
+	totalPower_ = 0;
 }
 
 
@@ -265,13 +273,12 @@ void LightContexts::setSceneBound(const TAabb3D& bound, const TimePeriod& period
 		return;
 	}
 	cdf_.resize(n);
-	totalPower_ = Spectral(0);
+	totalPower_ = 0;
 	for (size_t k = 0; k < n; ++k)
 	{
 		contexts_[k].setSceneBound(bound, period);
-		const Spectral power = contexts_[k].totalPower();
-		totalPower_ += power;
-		cdf_[k] = totalPower_.total();
+		totalPower_ += contexts_[k].totalPower();
+		cdf_[k] = totalPower_;
 	}
 	std::transform(cdf_.begin(), cdf_.end(), cdf_.begin(), std::bind2nd(std::divides<TScalar>(), cdf_.back()));
 }
@@ -330,7 +337,7 @@ size_t LightContexts::size() const
 
 
 
-const Spectral LightContexts::totalPower() const
+TScalar LightContexts::totalPower() const
 {
 	return totalPower_;
 }

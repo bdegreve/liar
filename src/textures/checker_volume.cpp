@@ -77,8 +77,7 @@ void CheckerVolume::doSetState(const TPyObjectPtr& state)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral
-CheckerVolume::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral CheckerVolume::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	const TScalar x = num::fractional(context.point().x);
 	const TScalar y = num::fractional(context.point().y);
@@ -94,6 +93,21 @@ CheckerVolume::doLookUp(const Sample& sample, const IntersectionContext& context
 }
 
 
+
+TScalar CheckerVolume::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	const TScalar x = num::fractional(context.point().x);
+	const TScalar y = num::fractional(context.point().y);
+	const TScalar z = num::fractional(context.point().z);
+	if (z < split_.z)
+	{
+		return ((x < split_.x) == (y < split_.y) ? textureA() : textureB())->scalarLookUp(sample, context);
+	}
+	else
+	{
+		return ((x < split_.x) != (y < split_.y) ? textureA() : textureB())->scalarLookUp(sample, context);
+	}
+}
 
 // --- free ----------------------------------------------------------------------------------------
 

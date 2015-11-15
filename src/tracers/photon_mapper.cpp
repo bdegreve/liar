@@ -416,9 +416,9 @@ const Spectral PhotonMapper::doShadeMedium(const kernel::Sample& sample, const k
 {
 	const bool doTraceSingleScattering = isScatteringDirect();
 
-	transparency = mediumStack().transmittance(ray);
+	transparency = mediumStack().transmittance(sample, ray);
 
-	Spectral result = mediumStack().emission(ray) + estimateVolumetric(sample, ray, doTraceSingleScattering);
+	Spectral result = mediumStack().emission(sample, ray) + estimateVolumetric(sample, ray, doTraceSingleScattering);
 	if (doTraceSingleScattering)
 	{
 		result += traceSingleScattering(sample, ray);
@@ -439,7 +439,7 @@ const Spectral PhotonMapper::doShadeSurface(
 	}
 
 	Spectral result;
-	if (context.rayGeneration() == 0)
+	if (context.rayGeneration() == 0 || !context.object().asLight())
 	{
 		// actually, we block this because currently this is our way to include area lights in the camera rays only.
 		// we should always to the shader emission thing, but get the light emission seperately.
@@ -608,7 +608,7 @@ void PhotonMapper::emitPhoton(
 
 
 void PhotonMapper::tracePhoton(
-		const Sample& sample, Spectral power, const BoundedRay& ray,
+		const Sample& sample, const Spectral& power, const BoundedRay& ray,
 		size_t generation, TUniformSecondary& uniform, bool isCaustic)
 {
 	if (!power)
@@ -621,10 +621,10 @@ void PhotonMapper::tracePhoton(
 
 	const TPoint3D hitPoint = ray.point(intersection.t());
 	TScalar tScatter, pdf;
-	const Spectral transmittance = mediumStack().sampleScatterOutOrTransmittance(uniform(), bound(ray, ray.nearLimit(), intersection.t()), tScatter, pdf);
+	const Spectral transmittance = mediumStack().sampleScatterOutOrTransmittance(sample, uniform(), bound(ray, ray.nearLimit(), intersection.t()), tScatter, pdf);
 	Spectral transmittedPower = power * transmittance / pdf;
 	// RR to keep power constant (if possible)
-	const TScalar transmittanceProbability = std::min(transmittedPower.absTotal() / power.absTotal(), TNumTraits::one);
+	const TScalar transmittanceProbability = std::min(transmittedPower.absAverage() / power.absAverage(), TNumTraits::one);
 	if (!russianRoulette(transmittedPower, transmittanceProbability, uniform()))
 	{
 		return;
@@ -652,13 +652,13 @@ void PhotonMapper::tracePhoton(
 		}
 		TVector3D dirOut;
 		TScalar pdfOut;
-		const Spectral reflectance = mediumStack().samplePhase(TPoint2D(uniform(), uniform()), scatterPoint, ray.direction(), dirOut, pdfOut);
+		const Spectral reflectance = mediumStack().samplePhase(sample, TPoint2D(uniform(), uniform()), scatterPoint, ray.direction(), dirOut, pdfOut);
 		if (pdfOut <= 0 || !reflectance)
 		{
 			return;
 		}
 		Spectral scatteredPower = transmittedPower * reflectance / pdfOut;
-		const TScalar scatteredProbability = std::min(scatteredPower.absTotal() / transmittedPower.absTotal(), TNumTraits::one);
+		const TScalar scatteredProbability = std::min(scatteredPower.absAverage() / transmittedPower.absAverage(), TNumTraits::one);
 		if (!russianRoulette(scatteredPower, scatteredProbability, uniform()))
 		{
 			return;
@@ -683,13 +683,13 @@ void PhotonMapper::tracePhoton(
 		}
 		MediumChanger mediumChanger(mediumStack(), context.interior(), context.solidEvent());
 		const BoundedRay newRay = bound(ray, intersection.t() + liar::tolerance, ray.farLimit());
-		return tracePhoton(sample, power, newRay, generation + 1, uniform, isCaustic);
+		return tracePhoton(sample, transmittedPower, newRay, generation + 1, uniform, isCaustic);
 	}
 	shader->shadeContext(sample, context);
 
 	if (shader->hasCaps(Bsdf::capsDiffuse))
 	{
-		Photon photon(hitPoint, -ray.direction(), power);
+		Photon photon(hitPoint, -ray.direction(), transmittedPower);
 		if (isCaustic)
 		{
 			if (russianRoulette(photon.power, storageProbability_[mtCaustics], uniform()))
@@ -734,8 +734,8 @@ void PhotonMapper::tracePhoton(
 	}
 
 	const TScalar cos_theta = out.omegaOut.z;
-	Spectral newPower = power * out.value * (num::abs(cos_theta) / out.pdf);
-	const TScalar attenuation = newPower.average() / power.average();
+	Spectral newPower = transmittedPower * out.value * (num::abs(cos_theta) / out.pdf);
+	const TScalar attenuation = newPower.average() / transmittedPower.average();
 	//LASS_ASSERT(attenuation < 1.1);
 	const TScalar scatterProbability = std::min(TNumTraits::one, attenuation);
 	if (!russianRoulette(newPower, scatterProbability, uniform()))
@@ -768,7 +768,7 @@ void PhotonMapper::buildPhotonMap(MapType type, PhotonBuffer& buffer, PhotonMap&
 		for (typename PhotonBuffer::iterator i = buffer.begin(); i != end; ++i)
 		{
 			i->power *= powerScale;
-			powers.push_back(i->power.absTotal());
+			powers.push_back(i->power.absAverage());
 		}
 		LASS_COUT << "  photon powers: " << temp::statistics(powers) << std::endl;
 
@@ -922,7 +922,7 @@ public:
 			PhotonMapper::Irradiance& ir = buffer_[i];
 			ir.irradiance = photonMapper_.estimateIrradianceImpl(neighbourhood_, ir.position, ir.normal, ir.squaredEstimationRadius, counts_[i]);
 			radii_[i] = num::sqrt(ir.squaredEstimationRadius);
-			irradiances_[i] = ir.irradiance.absTotal();
+			irradiances_[i] = ir.irradiance.absAverage();
 		}
 	}
 private:
@@ -1057,7 +1057,7 @@ const Spectral PhotonMapper::gatherIndirect(
 		for (TPhotonNeighbourhood::const_iterator i = photonNeighbourhood_.begin(); i != last; ++i)
 		{
 			const TVector3D omega = context.worldToBsdf(i->object()->omegaIn);
-			const TScalar p = i->object()->power.absTotal();
+			const TScalar p = i->object()->power.absAverage();
 			if (omega.z < 0)
 			{
 				continue;
@@ -1123,7 +1123,7 @@ const Spectral PhotonMapper::traceGatherRay(const Sample& sample, const BoundedR
 	{
 		return inScatter;
 	}
-	const Spectral transmittance = mediumStack().transmittance(ray, intersection.t());
+	const Spectral transmittance = mediumStack().transmittance(sample, ray, intersection.t());
 
 	IntersectionContext context(*scene(), sample, ray, intersection, rayGeneration);
 	const Shader* const shader = context.shader();
@@ -1360,7 +1360,7 @@ namespace temp
 
 
 
-const Spectral PhotonMapper::estimateVolumetric(const Sample&, const kernel::BoundedRay& ray, bool dropDirectPhotons) const
+const Spectral PhotonMapper::estimateVolumetric(const Sample& sample, const kernel::BoundedRay& ray, bool dropDirectPhotons) const
 {
 	typedef Sample::TSubSequence1D::difference_type difference_type;
 
@@ -1391,8 +1391,8 @@ const Spectral PhotonMapper::estimateVolumetric(const Sample&, const kernel::Bou
 		{
 			continue;
 		}
-		const Spectral trans = medium->scatterOut(bound(ray, tNear, t));
-		const Spectral phase = medium->phase(pos, ray.direction(), -photon.omegaIn);
+		const Spectral trans = medium->scatterOut(sample, bound(ray, tNear, t));
+		const Spectral phase = medium->phase(sample, pos, ray.direction(), -photon.omegaIn);
 		result += (k) * trans * phase * photon.power;
 	}
 

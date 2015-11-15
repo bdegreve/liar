@@ -85,11 +85,7 @@ void Sample::setWeight(TScalar weight)
 
 const Sample::TSubSequence1D Sample::subSequence1D(int id) const
 {
-	if (id < 0)
-	{
-		return TSubSequence1D(0 ,0);
-	}
-	LASS_ASSERT(sampler_);
+	LASS_ASSERT(sampler_ && id >= 0);
 	const size_t k = sampler_->subSequenceOffset1D(id);
 	const size_t n = sampler_->subSequenceSize1D(id);
 	return TSubSequence1D(&subSequences1D_[0] + k, &subSequences1D_[0] + k + n);
@@ -99,11 +95,7 @@ const Sample::TSubSequence1D Sample::subSequence1D(int id) const
 
 const Sample::TSubSequence2D Sample::subSequence2D(int id) const
 {
-	if (id < 0)
-	{
-		return TSubSequence2D(0, 0);
-	}
-	LASS_ASSERT(sampler_);
+	LASS_ASSERT(sampler_ && id >= 0);
 	const size_t k = sampler_->subSequenceOffset2D(id);
 	const size_t n = sampler_->subSequenceSize2D(id);
 	return TSubSequence2D(&subSequences2D_[0] + k, &subSequences2D_[0] + k + n);

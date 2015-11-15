@@ -30,6 +30,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_SCENERY_LIGHT_POINT_H
 
 #include "scenery_common.h"
+#include "../kernel/spectrum.h"
 #include "../kernel/attenuation.h"
 #include "../kernel/scene_light.h"
 
@@ -44,14 +45,14 @@ class LIAR_SCENERY_DLL LightPoint: public SceneLight
 public:
 
 	LightPoint();
-	LightPoint(const TPoint3D& iPosition, const Spectral& iIntensity);
+	LightPoint(const TPoint3D& iPosition, const TSpectrumPtr& iIntensity);
 
 	const TPoint3D& position() const;
-	const Spectral& intensity() const;
+	const TSpectrumPtr& intensity() const;
 	const TAttenuationPtr& attenuation() const;
 
 	void setPosition(const TPoint3D& iPosition);
-	void setIntensity(const Spectral& iIntensity);
+	void setIntensity(const TSpectrumPtr& iIntensity);
 	void setAttenuation(const TAttenuationPtr& iAttenuation);
 
 private:
@@ -73,7 +74,7 @@ private:
 	const Spectral doSampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 			BoundedRay& emissionRay, TScalar& pdf) const;
-	const Spectral doTotalPower() const;
+	TScalar doTotalPower() const;
 	size_t doNumberOfEmissionSamples() const;
 	bool doIsSingular() const;
 
@@ -81,7 +82,7 @@ private:
 	void doSetLightState(const TPyObjectPtr& state);
 
 	TPoint3D position_;
-	Spectral intensity_;
+	TSpectrumPtr intensity_;
 	TAttenuationPtr attenuation_;
 };
 

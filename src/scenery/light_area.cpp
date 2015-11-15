@@ -45,7 +45,7 @@ PY_CLASS_MEMBER_RW(LightArea, isDoubleSided, setDoubleSided)
 
 LightArea::LightArea(const TSceneObjectPtr& iSurface):
 	surface_(LASS_ENFORCE_POINTER(iSurface)),
-	radiance_(1),
+	radiance_(Spectrum::white()),
 	attenuation_(Attenuation::defaultAttenuation()),
 	numberOfEmissionSamples_(9),
 	isSingleSided_(true)
@@ -68,7 +68,7 @@ const TSceneObjectPtr& LightArea::surface() const
 
 
 
-const Spectral& LightArea::radiance() const
+const TSpectrumPtr& LightArea::radiance() const
 {
 	return radiance_;
 }
@@ -89,7 +89,7 @@ bool LightArea::isDoubleSided() const
 
 
 
-void LightArea::setRadiance(const Spectral& radiance)
+void LightArea::setRadiance(const TSpectrumPtr& radiance)
 {
 	radiance_ = radiance;
 }
@@ -198,13 +198,13 @@ const Spectral LightArea::doEmission(const Sample& sample, const TRay3D& ray, Bo
 		pdf = 0;
 		return Spectral();
 	}
-	return radiance_;
+	return radiance_->evaluate(sample);
 }
 
 
 
 const Spectral LightArea::doSampleEmission(
-		const Sample&, const TPoint2D& lightSample, const TPoint3D& target,
+	const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target,
 		BoundedRay& shadowRay, TScalar& pdf) const
 {
 	LASS_ASSERT(surface_);
@@ -218,17 +218,17 @@ const Spectral LightArea::doSampleEmission(
 	if (isSingleSided_ && dot(normalLight, toLight) > 0)
 	{
 		pdf = 0;
-		return Spectral();
+		return Spectral(0);
 	}
 
 	shadowRay = BoundedRay(target, toLight, tolerance, distance, prim::IsAlreadyNormalized());
-	return radiance_ ;
+	return radiance_->evaluate(sample);
 }
 
 
 
 const Spectral LightArea::doSampleEmission(
-		const Sample&, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D& normalTarget, 
+		const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D& normalTarget,
 		BoundedRay& shadowRay, TScalar& pdf) const
 {
 	LASS_ASSERT(surface_);
@@ -243,17 +243,17 @@ const Spectral LightArea::doSampleEmission(
 	if ((dot(normalTarget, toLight) <= 0) || (isSingleSided_ && dot(normalLight, toLight) > 0))
 	{
 		pdf = 0;
-		return Spectral();
+		return Spectral(0);
 	}
 
 	shadowRay = BoundedRay(target, toLight, tolerance, distance, prim::IsAlreadyNormalized());
-	return radiance_ ;
+	return radiance_->evaluate(sample);
 }
 
 
 
 const Spectral LightArea::doSampleEmission(
-		const Sample&, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
+		const Sample& sample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
 		BoundedRay& emissionRay, TScalar& pdf) const
 {
 	TVector3D originNormal;
@@ -281,14 +281,14 @@ const Spectral LightArea::doSampleEmission(
 
 	emissionRay = BoundedRay(origin, direction, tolerance);
 	pdf = originPdf * directionPdf;
-	return radiance_ * localDirection.z;
+	return radiance_->evaluate(sample) * localDirection.z;
 }
 
 
 
-const Spectral LightArea::doTotalPower() const
+TScalar LightArea::doTotalPower() const
 {
-	const Spectral singleSidedPower = (TNumTraits::pi * surface_->area()) * radiance_;
+	const TScalar singleSidedPower = (TNumTraits::pi * surface_->area()) * radiance_->absAverage();
 	return isSingleSided_ ? singleSidedPower : 2 * singleSidedPower;
 }
 

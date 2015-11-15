@@ -35,7 +35,7 @@ PY_CLASS_CONSTRUCTOR_1(OrCo, const TTexturePtr&);
 // --- public --------------------------------------------------------------------------------------
 
 OrCo::OrCo(const TTexturePtr& texture):
-	UnaryOperator(texture)
+	ContextMapping(texture)
 {
 }
 
@@ -47,26 +47,25 @@ OrCo::OrCo(const TTexturePtr& texture):
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral OrCo::doLookUp(const Sample& sample, const IntersectionContext& context) const
+void OrCo::doTransformContext(const Sample&, IntersectionContext& context) const
 {
 	if (context.bounds().isEmpty())
 	{
-		return texture()->lookUp(sample, context);
+		return;
 	}
+
 	const TPoint3D center = context.bounds().center().affine();
 	const TVector3D size = context.bounds().size();
 	const TVector3D scale(
 		size.x ? 2 / size.x : 1,
 		size.y ? 2 / size.y : 1,
 		size.z ? 2 / size.z : 1);
-	IntersectionContext temp(context);
-	temp.setPoint(TPoint3D((context.point() - center) * scale));
-	temp.setDPoint_dI(context.dPoint_dI() * scale);
-	temp.setDPoint_dJ(context.dPoint_dJ() * scale);
-	temp.setDPoint_dU(context.dPoint_dU() * scale);
-	temp.setDPoint_dV(context.dPoint_dV() * scale);
+	context.setPoint(TPoint3D((context.point() - center) * scale));
+	context.setDPoint_dI(context.dPoint_dI() * scale);
+	context.setDPoint_dJ(context.dPoint_dJ() * scale);
+	context.setDPoint_dU(context.dPoint_dU() * scale);
+	context.setDPoint_dV(context.dPoint_dV() * scale);
 #pragma LASS_TODO("perhaps we need to transform other Uv dependent quantities as well [Brams]")
-	return texture()->lookUp(sample, temp);
 }
 
 

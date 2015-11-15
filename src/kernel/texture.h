@@ -32,6 +32,7 @@
 #include "kernel_common.h"
 #include "intersection_context.h"
 #include "sample.h"
+#include "spectral.h"
 #include "xyz.h"
 
 namespace liar
@@ -53,6 +54,11 @@ public:
 		return doLookUp(sample, context);
 	}
 
+	TScalar scalarLookUp(const Sample& sample, const IntersectionContext& context) const
+	{
+		return doScalarLookUp(sample, context);
+	}
+
 	static const TTexturePtr& black();
 	static const TTexturePtr& white();
 
@@ -69,8 +75,8 @@ protected:
 
 private:
 
-	virtual const Spectral doLookUp(const Sample& sample,
-		const IntersectionContext& context) const = 0;
+	virtual const Spectral doLookUp(const Sample& sample, const IntersectionContext& context) const = 0;
+	virtual TScalar doScalarLookUp(const Sample& sample, const IntersectionContext& context) const = 0;
 
 	static TTexturePtr black_;
 	static TTexturePtr white_;
@@ -84,28 +90,24 @@ namespace impl
 	{
 		PY_HEADER(Texture);
 	public:
-		TextureBlack() {}
+		TextureBlack();
 	private:
-		const Spectral doLookUp(const Sample&, const IntersectionContext&) const
-		{ 
-			return Spectral(0);
-		}
-		const TPyObjectPtr doGetState() const { return python::makeTuple(); }
-		void doSetState(const TPyObjectPtr&) {}
+		const Spectral doLookUp(const Sample&, const IntersectionContext&) const override;
+		TScalar doScalarLookUp(const Sample&, const IntersectionContext&) const override;
+		const TPyObjectPtr doGetState() const override;
+		void doSetState(const TPyObjectPtr&) override;
 	};
 
 	class LIAR_KERNEL_DLL TextureWhite: public Texture
 	{
 		PY_HEADER(Texture);
 	public:
-		TextureWhite() {}
+		TextureWhite();
 	private:
-		const Spectral doLookUp(const Sample&, const IntersectionContext&) const
-		{ 
-			return Spectral(1);
-		}
-		const TPyObjectPtr doGetState() const { return python::makeTuple(); }
-		void doSetState(const TPyObjectPtr&) {}
+		const Spectral doLookUp(const Sample&, const IntersectionContext&) const override;
+		TScalar doScalarLookUp(const Sample&, const IntersectionContext&) const override;
+		const TPyObjectPtr doGetState() const override;
+		void doSetState(const TPyObjectPtr&) override;
 	};
 }
 

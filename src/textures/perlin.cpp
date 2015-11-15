@@ -94,6 +94,13 @@ const Spectral Perlin::doLookUp(const Sample&, const IntersectionContext& contex
 
 
 
+TScalar Perlin::doScalarLookUp(const Sample&, const IntersectionContext& context) const
+{
+	return noise(context.point());
+}
+
+
+
 const TPyObjectPtr Perlin::doGetState() const
 {
 	return python::makeTuple(seed_);

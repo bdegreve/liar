@@ -7,35 +7,29 @@
 # http://liar.bramz.net/
 
 from liar import *
-import geometry
+from liar.tools import cornell_box, scripting
 
 setTolerance(tolerance() * 1000)
 
-if True:
-	width = 800
-	height = 800
-	super_sampling = 4
-	global_size = 200000
-	caustics_quality = 20
-	raytrace_direct = True
-	gather_rays = 36
-else:
-	width = 400
-	height = 400
-	super_sampling = 1
-	global_size = 10000
-	caustics_quality = 5
-	raytrace_direct = True
-	gather_rays = 9
+options = scripting.renderOptions(
+    size=800,
+    super_sampling=4,
+	photon_mapping = True,
+    global_size = 200000,
+    caustics_quality=20,
+	raytrace_direct = True,
+    gather_rays = 36
+    )
 
-camera = geometry.getCamera()
-walls = geometry.getWalls()
-lights = geometry.getLights()
+camera = cornell_box.camera()
+walls = cornell_box.walls()
+lights = cornell_box.lights()
 
 glass_sphere = scenery.Sphere((1.86, 1, 1.20), 1)
 glass_sphere.shader = shaders.Dielectric()
 glass_sphere.shader.innerRefractionIndex = textures.Constant(2)
 glass_sphere.interior = mediums.Beer(rgb(0.5, 0.5, 0))
+#glass_sphere.interior = mediums.Beer(rgb(1, 1, 0))
 
 blue_sphere = scenery.Sphere((3.69, 1, 3.51), 1)
 blue_sphere.shader = shaders.AshikhminShirley()
@@ -45,24 +39,26 @@ blue_sphere.shader.specularPowerU = blue_sphere.shader.specularPowerV = textures
 
 spheres = [glass_sphere, blue_sphere]
 
-photonMapper = tracers.PhotonMapper()
-photonMapper.maxNumberOfPhotons = 10000000
-photonMapper.globalMapSize = global_size
-photonMapper.causticsQuality = caustics_quality
-photonMapper.isVisualizingPhotonMap = False
-photonMapper.isRayTracingDirect = raytrace_direct
-photonMapper.numFinalGatherRays = gather_rays
-photonMapper.ratioPrecomputedIrradiance = 0.25
+if options.photon_mapping:
+	tracer = tracers.PhotonMapper()
+	tracer.maxNumberOfPhotons = 10000000
+	tracer.globalMapSize = options.global_size
+	tracer.causticsQuality = options.caustics_quality
+	tracer.isVisualizingPhotonMap = False
+	tracer.isRayTracingDirect = options.raytrace_direct
+	tracer.numFinalGatherRays = options.gather_rays
+	tracer.ratioPrecomputedIrradiance = 0.25
+else:
+	tracer = tracers.DirectLighting()
 
-image = output.Image("photon_mapper_spheres.hdr", (width, height))
-display = output.Display("photon mapped Cornell box with sppheres", (width, height))
+image = output.Image("photon_mapper_spheres.hdr", (options.size, options.size))
+display = output.Display("photon mapped Cornell box with sppheres", (options.size, options.size))
 
 engine = RenderEngine()
-engine.tracer = photonMapper
-engine.sampler = samplers.Stratifier((width, height), super_sampling)
+engine.tracer = tracer
+engine.sampler = samplers.Stratifier((options.size, options.size), options.super_sampling)
 engine.sampler.jittered = False
 engine.scene = scenery.List(walls + spheres +  lights)
 engine.camera = camera
 engine.target = output.Splitter([image, display])
 engine.render()
-

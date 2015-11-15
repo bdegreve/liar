@@ -23,6 +23,7 @@
 
 #include "kernel_common.h"
 #include "rgb_space.h"
+#include "spectrum.h"
 #include <lass/num/impl/matrix_solve.h>
 
 #ifdef LIAR_HAVE_LCMS2_H
@@ -469,24 +470,24 @@ void RgbSpace::enforceChromaticity(const TPoint2D& c, const char* name) const
 
 // --- free ----------------------------------------------------------------------------------------
 
-XYZ rgb(const RgbSpace::RGBA& rgba)
+TSpectrumPtr rgb(const RgbSpace::RGBA& rgba)
 {
-	return RgbSpace::defaultSpace()->convert(rgba);
+	return Spectrum::make(RgbSpace::defaultSpace()->convert(rgba));
 }
 
-XYZ rgb(const RgbSpace::RGBA& rgba, const TRgbSpacePtr& rgbSpace)
+TSpectrumPtr rgb(const RgbSpace::RGBA& rgba, const TRgbSpacePtr& rgbSpace)
 {
-	return rgbSpace->convert(rgba);
+	return Spectrum::make(rgbSpace->convert(rgba));
 }
 
-XYZ rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue)
+TSpectrumPtr rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue)
 {
-	return RgbSpace::defaultSpace()->convert(prim::ColorRGBA(red, green, blue));
+	return Spectrum::make(RgbSpace::defaultSpace()->convert(prim::ColorRGBA(red, green, blue)));
 }
 
-XYZ rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue, const TRgbSpacePtr& rgbSpace)
+TSpectrumPtr rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue, const TRgbSpacePtr& rgbSpace)
 {
-	return rgbSpace->convert(prim::ColorRGBA(red, green, blue));
+	return Spectrum::make(rgbSpace->convert(prim::ColorRGBA(red, green, blue)));
 }
 
 }

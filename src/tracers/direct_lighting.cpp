@@ -167,8 +167,8 @@ void DirectLighting::doSetState(const TPyObjectPtr&)
 
 const Spectral DirectLighting::doShadeMedium(const kernel::Sample& sample, const kernel::BoundedRay& ray, Spectral& transparency) const
 {
-	transparency = mediumStack().transmittance(ray);
-	return mediumStack().emission(ray) + traceSingleScattering(sample, ray);
+	transparency = mediumStack().transmittance(sample, ray);
+	return mediumStack().emission(sample, ray) + traceSingleScattering(sample, ray);
 }
 
 
@@ -389,12 +389,12 @@ const Spectral DirectLighting::traceSingleScattering(const Sample& sample, const
 		{
 			continue;
 		}
-		const Spectral phase = medium->phase(point, ray.direction(), shadowRay.direction());
+		const Spectral phase = medium->phase(sample, point, ray.direction(), shadowRay.direction());
 		if (scene()->isIntersecting(sample, shadowRay))
 		{
 			continue;
 		}
-		const Spectral transShadow = medium->transmittance(shadowRay);
+		const Spectral transShadow = medium->transmittance(sample, shadowRay);
 		result += transRay * transShadow * phase * radiance / (n * tPdf * lightPdf * surfacePdf);
 	}
 

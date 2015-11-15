@@ -30,7 +30,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_TEXTURES_TRANSFORMATION_UV_H
 
 #include "textures_common.h"
-#include "unary_operator.h"
+#include "context_mapping.h"
 #include <lass/prim/transformation_2d.h>
 
 namespace liar
@@ -40,9 +40,9 @@ namespace textures
 
 typedef prim::Transformation2D<TScalar> TTransformation2D;
 
-class LIAR_TEXTURES_DLL TransformationUv: public UnaryOperator
+class LIAR_TEXTURES_DLL TransformationUv: public ContextMapping
 {
-	PY_HEADER(UnaryOperator)
+	PY_HEADER(ContextMapping)
 public:
 
 	TransformationUv(const TTexturePtr& texture, const TTransformation2D& transformation);
@@ -51,13 +51,11 @@ public:
 	void setTransformation(const TTransformation2D& transformation);
 
 protected:
-
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
 private:
-
-	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context) const;
+	void doTransformContext(const Sample& sample, IntersectionContext& context) const override;
 
 	TTransformation2D forward_;
 	TTransformation2D inverse_;

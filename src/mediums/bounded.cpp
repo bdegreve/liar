@@ -92,38 +92,38 @@ size_t Bounded::doNumScatterSamples() const
 
 
 
-const Spectral Bounded::doTransmittance(const BoundedRay& ray) const
+const Spectral Bounded::doTransmittance(const Sample& sample, const BoundedRay& ray) const
 {
 	BoundedRay bounded;
 	if (!child_ || !bound(ray, bounded))
 	{
 		return Spectral(1);
 	}
-	return child_->transmittance(bounded);
+	return child_->transmittance(sample, bounded);
 }
 
 
 
-const Spectral Bounded::doEmission(const BoundedRay& ray) const
+const Spectral Bounded::doEmission(const Sample& sample, const BoundedRay& ray) const
 {
 	BoundedRay bounded;
 	if (!child_ || !bound(ray, bounded))
 	{
 		return Spectral(0);
 	}
-	return child_->emission(bounded);
+	return child_->emission(sample, bounded);
 }
 
 
 
-const Spectral Bounded::doScatterOut(const BoundedRay& ray) const
+const Spectral Bounded::doScatterOut(const Sample& sample, const BoundedRay& ray) const
 {
 	BoundedRay bounded;
 	if (!child_ || !bound(ray, bounded))
 	{
 		return Spectral(0);
 	}
-	return child_->scatterOut(bounded);
+	return child_->scatterOut(sample, bounded);
 }
 
 
@@ -141,7 +141,7 @@ const Spectral Bounded::doSampleScatterOut(TScalar sample, const BoundedRay& ray
 
 
 
-const Spectral Bounded::doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const Spectral Bounded::doSampleScatterOutOrTransmittance(const Sample& sample, TScalar scatterSample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	BoundedRay bounded;
 	if (!child_ || !bound(ray, bounded))
@@ -150,23 +150,23 @@ const Spectral Bounded::doSampleScatterOutOrTransmittance(TScalar sample, const 
 		pdf = 1;
 		return Spectral(1);
 	}
-	return child_->sampleScatterOutOrTransmittance(sample, bounded, tScatter, pdf);
+	return child_->sampleScatterOutOrTransmittance(sample, scatterSample, bounded, tScatter, pdf);
 }
 
 
-const Spectral Bounded::doPhase(const TPoint3D& pos, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
+const Spectral Bounded::doPhase(const Sample& sample, const TPoint3D& pos, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
 {
 	if (!child_ || !bounds_.contains(pos))
 	{
 		pdf = 0;
 		return Spectral(0);
 	}
-	return child_->phase(pos, dirIn, dirOut, pdf);
+	return child_->phase(sample, pos, dirIn, dirOut, pdf);
 }
 
 
 
-const Spectral Bounded::doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
+const Spectral Bounded::doSamplePhase(const Sample& sample, const TPoint2D& phaseSample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
 {
 	if (!child_ || !bounds_.contains(position))
 	{
@@ -174,7 +174,7 @@ const Spectral Bounded::doSamplePhase(const TPoint2D& sample, const TPoint3D& po
 		dirOut = dirIn;
 		return Spectral(0);
 	}
-	return child_->samplePhase(sample, position, dirIn, dirOut, pdf);
+	return child_->samplePhase(sample, phaseSample, position, dirIn, dirOut, pdf);
 }
 
 

@@ -114,6 +114,14 @@ const Spectral Xyz::doLookUp(const Sample& sample, const IntersectionContext& co
 
 
 
+TScalar Xyz::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	const TPoint3D& p = context.point();
+	return p.x * a_->scalarLookUp(sample, context) + p.y * b_->scalarLookUp(sample, context) + p.z * c_->scalarLookUp(sample, context);
+}
+
+
+
 // --- free ----------------------------------------------------------------------------------------
 
 }

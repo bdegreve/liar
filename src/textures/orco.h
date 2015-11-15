@@ -30,23 +30,21 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_ORCO_H
 
 #include "textures_common.h"
-#include "unary_operator.h"
+#include "context_mapping.h"
 
 namespace liar
 {
 namespace textures
 {
 
-class LIAR_TEXTURES_DLL OrCo: public UnaryOperator
+class LIAR_TEXTURES_DLL OrCo: public ContextMapping
 {
-	PY_HEADER(UnaryOperator)
+	PY_HEADER(ContextMapping)
 public:
-
 	OrCo(const TTexturePtr& texture);
 
 private:
-
-	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context) const;
+	void doTransformContext(const Sample& sample, IntersectionContext& context) const override;
 };
 
 }

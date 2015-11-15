@@ -73,7 +73,7 @@ public:
 			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
 			BoundedRay& emissionRay, TScalar& pdf) const;
 
-	const Spectral totalPower() const;
+	TScalar totalPower() const;
 	bool isSingular() const;
 
 private:
@@ -110,11 +110,11 @@ public:
 	TIterator begin() const;
 	TIterator end() const;
 	size_t size() const;
-	const Spectral totalPower() const;
+	TScalar totalPower() const;
 private:
 	TContexts contexts_;
 	std::vector<TScalar> cdf_;
-	Spectral totalPower_;
+	TScalar totalPower_;
 };
 
 }

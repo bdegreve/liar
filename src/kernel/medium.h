@@ -71,19 +71,19 @@ public:
 		return idSurfaceSamples_;
 	}
 
-	const Spectral transmittance(const BoundedRay& ray) const
+	const Spectral transmittance(const Sample& sample, const BoundedRay& ray) const
 	{
-		return doTransmittance(ray);
+		return doTransmittance(sample, ray);
 	}
 
-	const Spectral emission(const BoundedRay& ray) const
+	const Spectral emission(const Sample& sample, const BoundedRay& ray) const
 	{
-		return doEmission(ray);
+		return doEmission(sample, ray);
 	}
 
-	const Spectral scatterOut(const BoundedRay& ray) const
+	const Spectral scatterOut(const Sample& sample, const BoundedRay& ray) const
 	{
-		return doScatterOut(ray);
+		return doScatterOut(sample, ray);
 	}
 
 	/** @param tScatter [out] position along ray where photon hits particle
@@ -97,27 +97,27 @@ public:
 	/** @param tScatter [out] position along ray where photon hits particle
 	 *  @returns attenuation due to transmition only, does not include scattering at tScatter.
 	 */
-	const Spectral sampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+	const Spectral sampleScatterOutOrTransmittance(const Sample& sample, TScalar scatterSample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 	{
-		return doSampleScatterOutOrTransmittance(sample, ray, tScatter, pdf);
+		return doSampleScatterOutOrTransmittance(sample, scatterSample, ray, tScatter, pdf);
 	}
 
 	/** @param dirIn: incoming direction @e towards @a position.
 	 *  @param dirOut: incoming direction away from @a position.
 	 */
-	const Spectral phase(const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut) const
+	const Spectral phase(const Sample& sample, const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut) const
 	{
 		TScalar pdf;
-		return doPhase(position, dirIn, dirOut, pdf);
+		return doPhase(sample, position, dirIn, dirOut, pdf);
 	}
-	const Spectral phase(const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
+	const Spectral phase(const Sample& sample, const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
 	{
-		return doPhase(position, dirIn, dirOut, pdf);
+		return doPhase(sample, position, dirIn, dirOut, pdf);
 	}
 
-	const Spectral samplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
+	const Spectral samplePhase(const Sample& sample, const TPoint2D& phaseSample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
 	{
-		return doSamplePhase(sample, position, dirIn, dirOut, pdf);
+		return doSamplePhase(sample, phaseSample, position, dirIn, dirOut, pdf);
 	}
 
 protected:
@@ -128,13 +128,13 @@ private:
 
 	virtual void doRequestSamples(const TSamplerPtr& sampler);
 	virtual size_t doNumScatterSamples() const;
-	virtual const Spectral doTransmittance(const BoundedRay& ray) const = 0;
-	virtual const Spectral doEmission(const BoundedRay& ray) const = 0;
-	virtual const Spectral doScatterOut(const BoundedRay& ray) const = 0;
+	virtual const Spectral doTransmittance(const Sample& sample, const BoundedRay& ray) const = 0;
+	virtual const Spectral doEmission(const Sample& sample, const BoundedRay& ray) const = 0;
+	virtual const Spectral doScatterOut(const Sample& sample, const BoundedRay& ray) const = 0;
 	virtual const Spectral doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const = 0;
-	virtual const Spectral doSampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const = 0;
-	virtual const Spectral doPhase(const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const = 0;
-	virtual const Spectral doSamplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const = 0;
+	virtual const Spectral doSampleScatterOutOrTransmittance(const Sample& sample, TScalar scatterSample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const = 0;
+	virtual const Spectral doPhase(const Sample& sample, const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const = 0;
+	virtual const Spectral doSamplePhase(const Sample& sample, const TPoint2D& phaseSample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const = 0;
 
 	Spectral refractionIndex_;
 	size_t priority_;
@@ -152,13 +152,13 @@ class LIAR_KERNEL_DLL MediumStack
 public:
 	MediumStack(const TMediumPtr& defaultMedium = TMediumPtr());
 	const Medium* medium() const;
-	const Spectral transmittance(const BoundedRay& ray) const;
-	const Spectral transmittance(const BoundedRay& ray, TScalar farLimit) const;
-	const Spectral transmittance(const DifferentialRay& ray, TScalar farLimit) const;
-	const Spectral emission(const BoundedRay& ray) const;
+	const Spectral transmittance(const Sample& sample, const BoundedRay& ray) const;
+	const Spectral transmittance(const Sample& sample, const BoundedRay& ray, TScalar farLimit) const;
+	const Spectral transmittance(const Sample& sample, const DifferentialRay& ray, TScalar farLimit) const;
+	const Spectral emission(const Sample& sample, const BoundedRay& ray) const;
 	const Spectral sampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
-	const Spectral sampleScatterOutOrTransmittance(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
-	const Spectral samplePhase(const TPoint2D& sample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dir, TScalar& pdf) const;
+	const Spectral sampleScatterOutOrTransmittance(const Sample& sample, TScalar scatterSample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const;
+	const Spectral samplePhase(const Sample& sample, const TPoint2D& phaseSample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dir, TScalar& pdf) const;
 
 private:
 	friend class MediumChanger;

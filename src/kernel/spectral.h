@@ -25,13 +25,18 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_KERNEL_SPECTRAL_H
 
 #include "kernel_common.h"
-#include "rgb_space.h"
 #include "bands.h"
+#include "observer.h"
 
 namespace liar
 {
 namespace kernel
 {
+
+class RgbSpace;
+typedef python::PyObjectPtr<RgbSpace>::Type TRgbSpacePtr;
+
+class Sample;
 
 class LIAR_KERNEL_DLL Spectral
 {
@@ -53,10 +58,32 @@ public:
 
 	Spectral();
 	explicit Spectral(TParam f);
-	explicit Spectral(const XYZ& xyz);
+
+	static Spectral fromXYZ(const XYZ& xyz, const Sample& sample);
+	static TScalar absAverageFromXYZ(const XYZ& xyz);
+
+#if LIAR_SPECTRAL_BANDS
+	template <typename Func> static Spectral fromFunc(Func func, const Sample&)
+	{
+		TBands v;
+		for (size_t k = 0; k < numBands; ++k)
+		{
+			v[k] = func(pimpl_->bands[k]);
+		}
+		return Spectral(v);
+	}
+#else
+	template <typename Func> static Spectral fromFunc(Func func, const Sample& sample)
+	{
+		return Spectral::fromXYZ(standardObserver().integrate(func), sample);
+	}
+#endif
 
 	const XYZ xyz() const;
 	operator XYZ() const { return xyz(); }
+
+	Spectral& operator=(TParam f) { v_.fill(f); return *this; }
+	Spectral& operator=(const Spectral& other) { v_ = other.v_; return *this; }
 
 	TParam operator[](size_t index) const { return v_[index]; }
 	TReference operator[](size_t index) { return v_[index]; }
@@ -76,9 +103,13 @@ public:
 	Spectral& fma(const Spectral& a, TParam b) { v_.fma(a.v_, b); return *this; }
 
 	TScalar dot(const Spectral& other) const { return v_.dot(other.v_); }
-	TScalar total() const { return v_.total(); }
-	TScalar absTotal() const { return v_.absTotal(); }
-	TScalar average() const { return total() / numBands; }
+	TScalar average() const { return v_.average(); }
+	TScalar absAverage() const 
+	{ 
+		TBands av(v_); 
+		av.inpabs(); 
+		return av.average(); 
+	}
 
 	bool isZero() const { return v_.isZero(); }
 	bool operator!() const { return isZero(); }
@@ -95,21 +126,27 @@ public:
 
 	bool operator==(const Spectral& other) const { return v_ == other.v_; }
 
-private:    
+private:
+
+	explicit Spectral(const TBands& v) : v_(v) {}
+
 	TBands v_;
 
 #if LIAR_SPECTRAL_BANDS
-	static XYZ observer_[numBands];
-	static TWavelength bands_[numBands + 1];
-	static Spectral yellow_;
-	static Spectral magenta_;
-	static Spectral cyan_;
-	static Spectral red_;
-	static Spectral green_;
-	static Spectral blue_;
-	static TRgbSpacePtr rgbSpace_;
-
-	static TRgbSpacePtr initData();
+	struct Impl
+	{
+		XYZ observer[numBands];
+		TWavelength bands[numBands + 1];
+		TBands yellow;
+		TBands magenta;
+		TBands cyan;
+		TBands red;
+		TBands green;
+		TBands blue;
+		TRgbSpacePtr rgbSpace;
+		Impl();
+	};
+	static Impl* pimpl_;
 #endif
 };
 
@@ -262,12 +299,8 @@ inline Spectral operator/(Spectral::TParam a, const Spectral& b)
 	return r;
 }
 
-PY_SHADOW_CLASS(LIAR_KERNEL_DLL, PySpectral, Spectral)
-
 }
 }
-
-PY_SHADOW_CASTERS(liar::kernel::PySpectral)
 
 #endif
 

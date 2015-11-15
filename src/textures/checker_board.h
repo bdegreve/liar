@@ -54,9 +54,8 @@ public:
 	static void setDefaultAntiAliasing(const std::string& mode);
 
 protected:
-
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 private:
 
@@ -69,8 +68,10 @@ private:
 
 	typedef util::Dictionary<std::string, AntiAliasing> TAntiAliasingDictionary;
 
-	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context) const;
+	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context) const override;
+	TScalar doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
 
+	TScalar weightA(const IntersectionContext& context) const;
 	TScalar integrate(const TVector2D& min, const TVector2D& max) const;
 
 	static TAntiAliasingDictionary makeAntiAliasingDictionary();

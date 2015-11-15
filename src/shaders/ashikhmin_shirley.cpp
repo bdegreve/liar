@@ -165,8 +165,8 @@ TBsdfPtr AshikhminShirley::doBsdf(const Sample& sample, const IntersectionContex
 {
 	const Spectral Rd = diffuse_->lookUp(sample, context);
 	const Spectral Rs = specular_->lookUp(sample, context);
-	const TScalar nu = std::max<TScalar>(average(specularPowerU_->lookUp(sample, context)), 0);
-	const TScalar nv = std::max<TScalar>(average(specularPowerV_->lookUp(sample, context)), 0);
+	const TScalar nu = std::max<TScalar>(specularPowerU_->scalarLookUp(sample, context), 0);
+	const TScalar nv = std::max<TScalar>(specularPowerV_->scalarLookUp(sample, context), 0);
 	return TBsdfPtr(new Bsdf(sample, context, Rd, Rs, nu, nv));
 }
 
@@ -242,8 +242,8 @@ BsdfOut AshikhminShirley::Bsdf::doEvaluate(const TVector3D& k1, const TVector3D&
 	{
 		return BsdfOut();
 	}
-	const TScalar pd = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsDiffuse) ? diffuse_.absTotal() : 0;
-	const TScalar ps = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsGlossy) ? specular_.absTotal() : 0;
+	const TScalar pd = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsDiffuse) ? diffuse_.absAverage() : 0;
+	const TScalar ps = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsGlossy) ? specular_.absAverage() : 0;
 	LASS_ASSERT(pd >= 0 && ps >= 0);
 	const TScalar ptot = pd + ps;
 
@@ -267,8 +267,8 @@ BsdfOut AshikhminShirley::Bsdf::doEvaluate(const TVector3D& k1, const TVector3D&
 SampleBsdfOut AshikhminShirley::Bsdf::doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const
 {
 	LASS_ASSERT(k1.z > 0);
-	TScalar pd = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsDiffuse) ? diffuse_.absTotal() : 0;
-	TScalar ps = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsGlossy) ? specular_.absTotal() : 0;
+	TScalar pd = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsDiffuse) ? diffuse_.absAverage() : 0;
+	TScalar ps = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsGlossy) ? specular_.absAverage() : 0;
 	const TScalar ptot = pd + ps;
 	if (ptot <= 0)
 	{

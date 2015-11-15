@@ -235,11 +235,14 @@ const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TPoint
 const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TVector3D& view, TVector3D& normal, TScalar& pdf) const
 {
 	const TPoint3D result = doSampleSurface(sample, normal, pdf);
+
+	/* is this cosTheta <= test necessary here ? */
 	const TScalar cosTheta = -dot(normal, view);
 	if (cosTheta <= 0)
 	{
 		pdf = 0;
 	}
+
 	return result;
 }
 
@@ -247,8 +250,8 @@ const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TVecto
 
 TScalar SceneObject::doAngularPdf(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TVector3D& normal) const
 {
-	LASS_ASSERT(hasSurfaceSampling() == false);
-	LASS_THROW("surface sampling is unimplemented for scene objects '" << typeid(*this).name() << "'.");
+	//LASS_ASSERT(hasSurfaceSampling() == false);
+	//LASS_THROW("surface sampling is unimplemented for scene objects '" << typeid(*this).name() << "'.");
 
 	Intersection intersection;
 	this->intersect(sample, ray, intersection);
