@@ -22,17 +22,17 @@
 # adjust dlopen flags so we can share symbols across extension modules
 # http://liar.bramz.net/2007/01/28/shared-libraries-dlopen-and-rtti/
 #
-import sys
+import sys as _sys
 try:
-	_oldflags = sys.getdlopenflags()
+	_oldflags = _sys.getdlopenflags()
 except AttributeError:
 	pass
 else:
 	try:
-		import dl
+		import dl as _dl
 	except ImportError:
-		import DLFCN as dl
-	sys.setdlopenflags(dl.RTLD_NOW | dl.RTLD_GLOBAL)
+		import DLFCN as _dl
+	_sys.setdlopenflags(_dl.RTLD_NOW | _dl.RTLD_GLOBAL)
 
 
 from liar.kernel import *
@@ -43,7 +43,21 @@ import liar.output
 import liar.samplers
 import liar.scenery
 import liar.shaders
+import liar.spectra
 import liar.textures
 import liar.tracers
 
+
+def _load_observer(resource):
+    import pkgutil
+    import csv
+    data = pkgutil.get_data('liar', resource)
+    lines = (line for line in data.splitlines() if not line.startswith('#'))
+    reader = csv.reader(lines, dialect='excel-tab')
+    columns = { col[0]: map(float, col[1:]) for col in zip(*reader) }
+    observer = liar.Observer(columns['w'], zip(columns['xbar'], columns['ybar'], columns['zbar']))
+    liar.Observer.setStandard(observer)
+        
+_load_observer('data/observer.tsv')
+        
 # EOF

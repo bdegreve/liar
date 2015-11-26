@@ -74,6 +74,7 @@ private:
 	TSample2D lensCoordinate_;
 	TTime time_;
 	TWavelength wavelength_;
+	TScalar wavelengthPdf_;
 	TScalar weight_;
 	std::vector<TSample1D> subSequences1D_;
 	std::vector<TSample2D> subSequences2D_;

@@ -100,11 +100,10 @@ const Spectral BlackBody::doEvaluate(const Sample& sample) const
 TScalar BlackBody::doAbsAverage() const
 {
 	// we should be able to do this better
-	auto ws = standardObserver().wavelengths();
+	const Observer::TWavelengths& ws = standardObserver().wavelengths();
 	TScalar acc = 0;
-	for (size_t k = 0; k < ws.size(); ++k)
+	for (TWavelength w : ws)
 	{
-		TWavelength w = ws[k];
 		const TScalar w5 = num::sqr(num::sqr(w)) * w;
 		acc += c1 / (w5 * num::expm1(c2 / (w * temperature_)));
 	}

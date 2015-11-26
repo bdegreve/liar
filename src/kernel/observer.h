@@ -32,72 +32,58 @@ namespace liar
 namespace kernel
 {
 
+class Observer;
+typedef python::PyObjectPtr<Observer>::Type TObserverPtr;
+
 class LIAR_KERNEL_DLL Observer: public python::PyObjectPlus
 {
 	PY_HEADER(python::PyObjectPlus)
 public:
-	typedef std::pair<TWavelength, TWavelength> TWavelengthRange;
+	typedef std::vector<TWavelength> TWavelengths;
+	typedef std::vector<XYZ> TXYZs;
+	typedef std::vector<TScalar> TScalars;
 
-	template <typename InputIteratorWavelength, typename InputIteratorXYZ>
-	Observer(InputIteratorWavelength firstW, InputIteratorWavelength lastW, InputIteratorXYZ firstXYZ)
-	{
-		while (firstW != lastW)
-		{
-			nodes_.push_back(Node(*firstW++, *firstXYZ++));
-		}
-		init();
-	}
+	Observer(const TWavelengths& wavelengths, const TXYZs& sensitivities);
 
-	const TWavelengthRange wavelengthRange() const;
+	const TWavelengths& wavelengths() const;
+	const TXYZs& sensitivities() const;
 
-	const XYZ tristimulus(TWavelength frequency) const;
-	const XYZ tristimulus(TWavelengthRange frequency) const;
+	TWavelength minWavelength() const;
+	TWavelength maxWavelength() const;
 
-	const XYZ chromaticity(TWavelength frequency) const;
-	const XYZ chromaticity(const TWavelengthRange& frequency) const;
+	const XYZ sensitivity(TWavelength wavelength) const;
 
-	TWavelength sample(const XYZ& power, TScalar sample, XYZ& chromaticity, TScalar& pdf) const;
+	const XYZ tristimulus(const TScalars& spectrum) const;
+	const XYZ tristimulus(const TWavelengths& wavelengths, const TScalars& spectrum) const;
 
-	template <typename Func> 
-	const XYZ integrate(Func func) const
+	template <typename Func>
+	const XYZ tristimulus(Func func) const
 	{
 		XYZ acc;
-		for (TNodes::const_iterator i = nodes_.begin(); i != nodes_.end(); ++i)
+		for (size_t k = 0, n = w_.size(); k < n; ++k)
 		{
-			acc += i->xyz * (func(i->wavelength) * i->dw_mid);
+			acc += dXYZ_[k] * func(w_[k]);
 		}
 		return acc;
 	}
 
-	const std::vector<TWavelength> wavelengths() const;
+	TWavelength sample(TScalar sample, TScalar& pdf) const;
+
+	static const TObserverPtr& standard();
+	static void setStandard(const TObserverPtr& standard);
 
 private:
-	struct Node
-	{
-		TWavelength wavelength;
-		XYZ xyz;
-		XYZ dxyz_dw;
-		XYZ cdf;
-		TScalar dw_mid;
+	TWavelengths w_;
+	TXYZs xyz_;
+	TXYZs dxyz_dw_;
+	TXYZs dXYZ_;
+	std::vector<TScalar> cdf_;
 
-		Node(TWavelength w, XYZ xyz): wavelength(w), xyz(xyz) {}
-		const XYZ interpolate(TWavelength w) const;
-		const XYZ integrate(TWavelength w) const;
-	};
-	typedef std::vector<Node> TNodes;
-
-	void init();
-
-	TNodes nodes_;
+	static TObserverPtr standard_;
 };
 
-LIAR_KERNEL_DLL const Observer& standardObserver();
 
-/*
-LIAR_KERNEL_DLL const XYZ tristimulus(TWavelength frequency);
-LIAR_KERNEL_DLL const XYZ chromaticity(TWavelength frequency);
-LIAR_KERNEL_DLL TWavelength sampleWavelength(const XYZ& power, TScalar sample, XYZ& chromaticity, TScalar& pdf);
-*/
+LIAR_KERNEL_DLL const Observer& standardObserver();
 
 }
 }

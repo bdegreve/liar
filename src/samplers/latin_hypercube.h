@@ -64,23 +64,23 @@ private:
 
 	void init(const TResolution2D& resolution = TResolution2D(320, 240), size_t numberOfSamples = 1);
 
-	virtual const TResolution2D& doResolution() const;
-	virtual size_t doSamplesPerPixel() const;
-	virtual void doSetResolution(const TResolution2D& resolution);
-	virtual void doSetSamplesPerPixel(size_t samplesPerPixel);
-	virtual void doSeed(TSeed randomSeed);
+	const TResolution2D& doResolution() const override;
+	size_t doSamplesPerPixel() const override;
+	void doSetResolution(const TResolution2D& resolution) override;
+	void doSetSamplesPerPixel(size_t samplesPerPixel) override;
+	void doSeed(TSeed randomSeed) override;
 
-	virtual void doSampleScreen(const TResolution2D& pixel, size_t subPixel, TSample2D& screenCoordinate);
-	virtual void doSampleLens(const TResolution2D& pixel, size_t subPixel, TSample2D& lensCoordinate);
-	virtual void doSampleTime(const TResolution2D& pixel, size_t subPixel, const TimePeriod& period, TTime& time);
-	virtual void doSampleWavelength(const TResolution2D& pixel, size_t subPixel, TScalar& wavelength);
-	virtual void doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, TSubSequenceId id, TSample1D* first, TSample1D* last);
-	virtual void doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, TSubSequenceId id, TSample2D* first, TSample2D* last);
+	void doSampleScreen(const TResolution2D& pixel, size_t subPixel, TSample2D& screenCoordinate) override;
+	void doSampleLens(const TResolution2D& pixel, size_t subPixel, TSample2D& lensCoordinate) override;
+	void doSampleTime(const TResolution2D& pixel, size_t subPixel, const TimePeriod& period, TTime& time) override;
+	void doSampleWavelength(const TResolution2D& pixel, size_t subPixel, TScalar& wavelength, TScalar& pdf) override;
+	void doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, TSubSequenceId id, TSample1D* first, TSample1D* last) override;
+	void doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, TSubSequenceId id, TSample2D* first, TSample2D* last) override;
 
-	virtual const TSamplerPtr doClone() const;
+	const TSamplerPtr doClone() const override;
 
-	virtual const TPyObjectPtr doGetState() const;
-	virtual void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	TSample1D sampleStratum(size_t subPixel, TStrata& strata);
 

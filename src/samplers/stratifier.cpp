@@ -190,13 +190,11 @@ void Stratifier::doSampleTime(const TResolution2D& LASS_UNUSED(pixel), size_t su
 
 
 
-void Stratifier::doSampleWavelength(const TResolution2D& LASS_UNUSED(pixel), size_t subPixel, TWavelength& wavelength)
+void Stratifier::doSampleWavelength(const TResolution2D& LASS_UNUSED(pixel), size_t subPixel, TWavelength& wavelength, TScalar& pdf)
 {
 	LASS_ASSERT(pixel.x < resolution_.x && pixel.y < resolution_.y);
-	const TScalar phi = sampleStratum(subPixel, wavelengthStrata_);
-	XYZ xyz;
-	TScalar pdf;
-	wavelength = standardObserver().sample(XYZ(1, 1, 1), phi, xyz, pdf);
+	const TScalar sample = sampleStratum(subPixel, wavelengthStrata_);
+	wavelength = standardObserver().sample(sample, pdf);
 }
 
 

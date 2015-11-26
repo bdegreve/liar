@@ -96,7 +96,6 @@ PY_MODULE_CLASS(kernel, liar::kernel::Spectrum)
 PY_MODULE_CLASS(kernel, liar::kernel::Texture)
 PY_MODULE_CLASS(kernel, liar::kernel::impl::ShadowTransformation2D)
 PY_MODULE_CLASS(kernel, liar::kernel::PyTransformation3D)
-PY_MODULE_CLASS(kernel, liar::kernel::PyXYZ)
 
 PY_MODULE_FUNCTION(kernel, license)
 PY_MODULE_FUNCTION(kernel, tolerance)
@@ -147,7 +146,6 @@ void kernelPostInject(PyObject*)
 {
 	PY_INJECT_OBJECT_IN_MODULE_EX(liar::kernel::CIEXYZ, kernel, "CIEXYZ")
 	PY_INJECT_OBJECT_IN_MODULE_EX(liar::kernel::sRGB, kernel, "sRGB")
-	PY_INJECT_OBJECT_IN_MODULE_EX(liar::kernel::standardObserver(), kernel, "standardObserver")
 
 	LASS_COUT << liar::name << " v" << liar::version << " ("
 		<< LASS_LIB_PLATFORM "_" LASS_LIB_COMPILER LASS_LIB_DEBUG << ")\n"

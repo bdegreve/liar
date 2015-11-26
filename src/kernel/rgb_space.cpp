@@ -57,7 +57,7 @@ PY_CLASS_METHOD_NAME(RgbSpace, reduce, "__reduce__")
 PY_CLASS_METHOD_NAME(RgbSpace, getState, "__getstate__")
 PY_CLASS_METHOD_NAME(RgbSpace, setState, "__setstate__")
 PY_CLASS_STATIC_METHOD_DOC(RgbSpace, defaultSpace, "defaultSpace() -> RgbSpace");
-PY_CLASS_STATIC_METHOD_DOC(RgbSpace, setDefaultSpace, "defaultSpace(RgbSpace) -> None");
+PY_CLASS_STATIC_METHOD_DOC(RgbSpace, setDefaultSpace, "setDefaultSpace(RgbSpace) -> None");
 
 //// load default RGB space.  We use the sRGB space here.
 //// you can find it here: http://www.brucelindbloom.com/index.html?WorkingSpaceInfo.html
