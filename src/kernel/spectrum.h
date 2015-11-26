@@ -50,7 +50,7 @@ public:
 
 	virtual ~Spectrum();
 
-	Spectral evaluate(const Sample& sample) const { return doEvaluate(sample); }
+	Spectral evaluate(const Sample& sample) const;
 	TScalar absAverage() const { return doAbsAverage(); }
 
 	static TSpectrumPtr make(TScalar value);
@@ -72,6 +72,11 @@ private:
 
 	virtual const TPyObjectPtr doGetState() const = 0;
 	virtual void doSetState(const TPyObjectPtr& state) = 0;
+
+#if LIAR_SPECTRAL_MODE_SMITS || LIAR_SPECTRAL_MODE_XYZ
+	mutable Spectral cached_;
+	mutable bool isCached_;
+#endif
 
 	static TSpectrumPtr white_;
 	static TSpectrumPtr black_;

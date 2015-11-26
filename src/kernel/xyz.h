@@ -174,12 +174,27 @@ inline const XYZ chromaticity(const XYZ& xyz)
 	return sum == 0 ? 0 : xyz / sum;
 }
 
-PY_SHADOW_CLASS(LIAR_KERNEL_DLL, PyXYZ, XYZ)
-
 }
 }
 
-PY_SHADOW_CASTERS(liar::kernel::PyXYZ)
+namespace lass
+{
+namespace python
+{
+template <>
+struct PyExportTraits<liar::kernel::XYZ>
+{
+	static PyObject* build(const liar::kernel::XYZ& v)
+	{
+		return fromSharedPtrToNakedCast(python::makeTuple(v.x, v.y, v.z));
+	}
+	static int get(PyObject* obj, liar::kernel::XYZ& v)
+	{
+		return python::decodeTuple(obj, v.x, v.y, v.z);
+	}
+};
+}
+}
 
 #endif
 

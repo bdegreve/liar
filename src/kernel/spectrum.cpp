@@ -52,8 +52,22 @@ PY_CLASS_MEMBER_R(TSpectrumXYZ, value)
 
 	// --- public --------------------------------------------------------------------------------------
 
-	Spectrum::~Spectrum()
+Spectrum::~Spectrum()
 {
+}
+
+
+Spectral Spectrum::evaluate(const Sample& sample) const
+{
+#if LIAR_SPECTRAL_MODE_SMITS || LIAR_SPECTRAL_MODE_XYZ
+	if (!isCached_)
+	{
+		cached_ = doEvaluate(sample);
+	}
+	return cached_;
+#else
+	doEvaluate(sample);
+#endif
 }
 
 
@@ -106,6 +120,9 @@ void Spectrum::setState(const TPyObjectPtr& state)
 // --- protected -----------------------------------------------------------------------------------
 
 Spectrum::Spectrum()
+#if LIAR_SPECTRAL_MODE_SMITS || LIAR_SPECTRAL_MODE_XYZ
+	: isCached_(false)
+#endif
 {
 }
 

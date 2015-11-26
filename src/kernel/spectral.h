@@ -40,39 +40,45 @@ class Sample;
 
 class LIAR_KERNEL_DLL Spectral
 {
-private:
+public:
 
-#if LIAR_SPECTRAL_BANDS
-	typedef Bands< LIAR_SPECTRAL_BANDS> TBands;
+#if LIAR_SPECTRAL_MODE_SMITS
+	enum { numBands = 10 };
+#elif LIAR_SPECTRAL_MODE_XYZ
+	enum { numBands = 3 };
 #else
-	typedef Bands<3> TBands;
+	error Invalid spectral mode
 #endif
 
-public:
+	typedef Bands<numBands, TScalar> TBands;
+
 	typedef TBands::TValue TValue;
 	typedef TBands::TParam TParam;
 	typedef TBands::TReference TReference;
 	typedef TBands::TConstReference TConstReference;
 
-	enum { numBands = TBands::numBands };
-
 	Spectral();
 	explicit Spectral(TParam f);
 
 	static Spectral fromXYZ(const XYZ& xyz, const Sample& sample);
+	static Spectral fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, const Sample& sample);
+#if LIAR_SPECTRAL_MODE_SMITS || LIAR_SPECTRAL_MODE_XYZ
+	static Spectral fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values);
+#endif
+
 	static TScalar absAverageFromXYZ(const XYZ& xyz);
 
-#if LIAR_SPECTRAL_BANDS
+#if LIAR_SPECTRAL_MODE_SMITS
 	template <typename Func> static Spectral fromFunc(Func func, const Sample&)
 	{
 		TBands v;
 		for (size_t k = 0; k < numBands; ++k)
 		{
-			v[k] = func(pimpl_->bands[k]);
+			v[k] = func((pimpl_->bands[k] + pimpl_->bands[k + 1]) / 2);
 		}
 		return Spectral(v);
 	}
-#else
+#elif LIAR_SPECTRAL_MODE_XYZ
 	template <typename Func> static Spectral fromFunc(Func func, const Sample& sample)
 	{
 		return Spectral::fromXYZ(standardObserver().integrate(func), sample);
@@ -132,7 +138,7 @@ private:
 
 	TBands v_;
 
-#if LIAR_SPECTRAL_BANDS
+#if LIAR_SPECTRAL_MODE_SMITS
 	struct Impl
 	{
 		XYZ observer[numBands];

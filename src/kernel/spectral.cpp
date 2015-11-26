@@ -42,7 +42,7 @@ Spectral::Spectral(TValue f):
 }
 
 
-#if LIAR_SPECTRAL_BANDS
+#if LIAR_SPECTRAL_MODE_SMITS
 
 Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample&)
 {
@@ -105,6 +105,60 @@ Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample&)
 		v.fma(rgb.r - rgb.g, pimpl_->red);
 		return Spectral(v);
 	}
+}
+
+Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, const Sample&)
+{
+	return fromSampled(wavelengths, values);
+}
+
+Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values)
+{
+	// can be done better!
+	LASS_ASSERT(wavelengths.size() == values.size());
+	const size_t n = wavelengths.size();
+	const auto &bands = pimpl_->bands;
+
+	Spectral result;
+	size_t i = 0;
+	size_t k1 = 0, k2 = 1;
+	while (k2 < n && i < numBands)
+	{
+		TWavelength w1 = wavelengths[k1];
+		if (w1 >= bands[i + 1])
+		{
+			++i;
+			continue;
+		}
+
+		TWavelength w2 = wavelengths[k2];
+		TWavelength dw = w2 - w1;
+		if (dw <= 0)
+		{
+			continue;
+		}
+
+		TScalar v1 = values[k1];
+		TScalar v2 = values[k2];
+		TScalar dv = v2 - v1;
+
+		if (w1 < bands[i])
+		{
+			v1 = v1 + dv * (bands[i] - w1) / dw;
+			w1 = bands[i];
+		}
+		if (w2 > bands[i + 1])
+		{
+			v2 = v1 + dv * (bands[i + 1] - w1) / dw;
+			w2 = bands[i + 1];
+		}
+
+		result.v_[i] += (v1 + v2) * (w2 - w1) / 2; // can't reuse dw
+
+		k1 = k2++;
+	}
+
+	return result;
 }
 
 TScalar Spectral::absAverageFromXYZ(const XYZ& xyz)
@@ -267,10 +321,21 @@ Spectral::Impl::Impl()
 Spectral::Impl* Spectral::pimpl_ = new Spectral::Impl();
 
 
-#else
+#elif LIAR_SPECTRAL_MODE_XYZ
 
 Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample&)
 {
+	return Spectral(TBands(xyz.x, xyz.y, xyz.z));
+}
+
+Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, const Sample&)
+{
+	return fromSampled(wavelengths, values);
+}
+
+Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values)
+{
+	const XYZ xyz = standardObserver().tristimulus(wavelengths, values);
 	return Spectral(TBands(xyz.x, xyz.y, xyz.z));
 }
 
