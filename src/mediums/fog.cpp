@@ -157,10 +157,10 @@ const Spectral Fog::doEmission(const Sample& sample, const BoundedRay& ray) cons
 	const TScalar thickness = extinction_ * d;
 	if (thickness < 1e-5)
 	{
-		return emission_->evaluate(sample) * d;
+		return emission_->evaluate(sample, Illuminant) * d;
 	}
 	const TScalar absorptance = -num::expm1(-thickness); // = 1 - transmittance(ray)
-	return emission_->evaluate(sample) * (absorptance / extinction_);
+	return emission_->evaluate(sample, Illuminant) * (absorptance / extinction_);
 
 }
 
@@ -225,7 +225,7 @@ const Spectral Fog::doPhase(const Sample& sample, const TPoint3D&, const TVector
 		p = 1;
 	}
 	pdf = p;
-	return color_->evaluate(sample) * p;
+	return color_->evaluate(sample, Reflectant) * p;
 }
 
 
@@ -258,7 +258,7 @@ const Spectral Fog::doSamplePhase(const Sample& sample, const TPoint2D& phaseSam
 	const TScalar sinTheta = num::sqrt(std::max<TScalar>(1 - num::sqr(cosTheta), 0));
 	dirOut = cosTheta * dirIn + (sinTheta * num::cos(phi)) * u + (sinTheta * num::sin(phi)) * v;
 
-	return color_->evaluate(sample) * pdf;
+	return color_->evaluate(sample, Reflectant) * pdf;
 }
 
 

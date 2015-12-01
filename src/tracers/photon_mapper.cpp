@@ -435,7 +435,7 @@ const Spectral PhotonMapper::doShadeSurface(
 {
 	if (isVisualizingPhotonMap_)
 	{
-		return estimateIrradiance(point, normal);
+		return Spectral::fromXYZ(estimateIrradiance(point, normal), sample, Illuminant);
 	}
 
 	Spectral result;
@@ -638,7 +638,7 @@ void PhotonMapper::tracePhoton(
 		bool mayStore = !isDirect || !isScatteringDirect_ || numFinalGatherRays_ > 0;
 		if (mayStore)
 		{
-			VolumetricPhoton photon(Photon(scatterPoint, ray.direction(), transmittedPower), isDirect);
+			VolumetricPhoton photon(Photon(scatterPoint, ray.direction(), transmittedPower, sample), isDirect);
 			if (russianRoulette(photon.power, storageProbability_[mtVolume], uniform()))
 			{
 				shared_->volumetricBuffer_.push_back(photon);
@@ -689,7 +689,7 @@ void PhotonMapper::tracePhoton(
 
 	if (shader->hasCaps(Bsdf::capsDiffuse))
 	{
-		Photon photon(hitPoint, -ray.direction(), transmittedPower);
+		Photon photon(hitPoint, -ray.direction(), transmittedPower, sample);
 		if (isCaustic)
 		{
 			if (russianRoulette(photon.power, storageProbability_[mtCaustics], uniform()))
@@ -768,7 +768,7 @@ void PhotonMapper::buildPhotonMap(MapType type, PhotonBuffer& buffer, PhotonMap&
 		for (typename PhotonBuffer::iterator i = buffer.begin(); i != end; ++i)
 		{
 			i->power *= powerScale;
-			powers.push_back(i->power.absAverage());
+			powers.push_back(i->power.absTotal());
 		}
 		LASS_COUT << "  photon powers: " << temp::statistics(powers) << std::endl;
 
@@ -922,7 +922,7 @@ public:
 			PhotonMapper::Irradiance& ir = buffer_[i];
 			ir.irradiance = photonMapper_.estimateIrradianceImpl(neighbourhood_, ir.position, ir.normal, ir.squaredEstimationRadius, counts_[i]);
 			radii_[i] = num::sqrt(ir.squaredEstimationRadius);
-			irradiances_[i] = ir.irradiance.absAverage();
+			irradiances_[i] = ir.irradiance.absTotal();
 		}
 	}
 private:
@@ -1057,7 +1057,7 @@ const Spectral PhotonMapper::gatherIndirect(
 		for (TPhotonNeighbourhood::const_iterator i = photonNeighbourhood_.begin(); i != last; ++i)
 		{
 			const TVector3D omega = context.worldToBsdf(i->object()->omegaIn);
-			const TScalar p = i->object()->power.absAverage();
+			const TScalar p = i->object()->power.absTotal();
 			if (omega.z < 0)
 			{
 				continue;
@@ -1182,7 +1182,7 @@ const Spectral PhotonMapper::gatherSecondary(
 }
 
 
-const Spectral PhotonMapper::estimateIrradiance(const TPoint3D& point, const TVector3D& normal, TScalar& sqrEstimationRadius, size_t& count) const
+const XYZ PhotonMapper::estimateIrradiance(const TPoint3D& point, const TVector3D& normal, TScalar& sqrEstimationRadius, size_t& count) const
 {
 	if (!shared_->irradianceMap_.isEmpty())
 	{
@@ -1191,7 +1191,7 @@ const Spectral PhotonMapper::estimateIrradiance(const TPoint3D& point, const TVe
 		{
 			sqrEstimationRadius = 0;
 			count = 0;
-			return Spectral();
+			return XYZ();
 		}
 		if (dot(normal, nearest->normal) > 0.9)
 		{
@@ -1206,7 +1206,7 @@ const Spectral PhotonMapper::estimateIrradiance(const TPoint3D& point, const TVe
 
 
 
-const Spectral PhotonMapper::estimateIrradianceImpl(TPhotonNeighbourhood& neighbourhood, const TPoint3D& point, const TVector3D& normal, TScalar& sqrEstimationRadius, size_t& count) const
+const XYZ PhotonMapper::estimateIrradianceImpl(TPhotonNeighbourhood& neighbourhood, const TPoint3D& point, const TVector3D& normal, TScalar& sqrEstimationRadius, size_t& count) const
 {
 	LASS_ASSERT(neighbourhood.size() > estimationSize_[mtGlobal]);
 	const TPhotonNeighbourhood::const_iterator last = shared_->globalMap_.rangeSearch(
@@ -1216,10 +1216,10 @@ const Spectral PhotonMapper::estimateIrradianceImpl(TPhotonNeighbourhood& neighb
 	if (count == 0)
 	{
 		sqrEstimationRadius = 0;
-		return Spectral();
+		return XYZ();
 	}
 
-	Spectral result;
+	XYZ result;
 	for (TPhotonNeighbourhood::const_iterator i = neighbourhood.begin(); i != last; ++i)
 	{
 		if (dot(i->object()->omegaIn, normal) > 0)
@@ -1229,13 +1229,13 @@ const Spectral PhotonMapper::estimateIrradianceImpl(TPhotonNeighbourhood& neighb
 	}
 
 	sqrEstimationRadius = neighbourhood.front().squaredDistance();
-	return sqrEstimationRadius > 0 ? result / (TNumTraits::pi * sqrEstimationRadius) : Spectral();
+	return sqrEstimationRadius > 0 ? result / (TNumTraits::pi * sqrEstimationRadius) : XYZ();
 }
 
 
 
 const Spectral PhotonMapper::estimateRadiance(
-		const Sample&, const IntersectionContext& context, const TBsdfPtr& bsdf,
+		const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& point, const TVector3D& omegaOut, TScalar& sqrEstimationRadius) const
 {
 	const Shader* const shader = context.shader();
@@ -1259,7 +1259,7 @@ const Spectral PhotonMapper::estimateRadiance(
 		{
 			sqrEstimationRadius = nearest->squaredEstimationRadius;
 			const BsdfOut out = bsdf->evaluate(omegaOut, context.worldToBsdf(nearest->normal), Bsdf::capsAll);
-			return out ? out.value * nearest->irradiance : Spectral();
+			return out ? out.value * nearest->spectralIrradiance(sample) : Spectral();
 		}
 	}
 
@@ -1281,7 +1281,7 @@ const Spectral PhotonMapper::estimateRadiance(
 		const BsdfOut out = bsdf->evaluate(omegaOut, omegaPhoton, Bsdf::capsAll & ~Bsdf::capsSpecular & ~Bsdf::capsGlossy);
 		if (out.pdf > 0 && out.value)
 		{
-			result += out.value * i->object()->power;
+			result += out.value * i->object()->spectralPower(sample);
 		}
 	}
 
@@ -1292,7 +1292,7 @@ const Spectral PhotonMapper::estimateRadiance(
 
 
 const Spectral PhotonMapper::estimateCaustics(
-		const Sample&, const IntersectionContext& context, const TBsdfPtr& bsdf,
+		const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& point, const TVector3D& omegaIn) const
 {
 	const Shader* const shader = context.shader();
@@ -1326,7 +1326,7 @@ const Spectral PhotonMapper::estimateCaustics(
 		{
 			const TScalar sqrR = photonNeighbourhood_[i].squaredDistance();
 			const TScalar w = alpha * (1 - b2 * (1 - num::exp(b1 * sqrR)));
-			result += w * out.value * photonNeighbourhood_[i].object()->power;
+			result += w * out.value * photonNeighbourhood_[i].object()->spectralPower(sample);
 		}
 	}
 
@@ -1393,7 +1393,7 @@ const Spectral PhotonMapper::estimateVolumetric(const Sample& sample, const kern
 		}
 		const Spectral trans = medium->scatterOut(sample, bound(ray, tNear, t));
 		const Spectral phase = medium->phase(sample, pos, ray.direction(), -photon.omegaIn);
-		result += (k) * trans * phase * photon.power;
+		result += (k) * trans * phase * photon.spectralPower(sample);
 	}
 
 	return result;

@@ -24,6 +24,7 @@
 #include "kernel_common.h"
 #include "output_sample.h"
 #include "sample.h"
+#include "spectral.h"
 
 namespace liar
 {
@@ -56,8 +57,8 @@ OutputSample::OutputSample(
 
 
 OutputSample::OutputSample(
-		const Sample& sample, const XYZ& radiance, TScalar depth, TScalar alpha, TScalar weight):
-	radiance_(radiance),
+		const Sample& sample, const Spectral& radiance, TScalar depth, TScalar alpha, TScalar weight):
+	radiance_(radiance.xyz(sample)),
 	screenCoordinate_(sample.screenCoordinate()),
 	depth_(depth),
 	alpha_(alpha),

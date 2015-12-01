@@ -23,10 +23,11 @@
 
 #include "spectra_common.h"
 
-#include <lass/io/proxy_man.h>
-
 // keep in alphabetical order please! [Bramz]
 //
+#include "black_body.h"
+#include "recovery_meng_simon.h"
+#include "sampled.h"
 
 using namespace liar::spectra;
 
@@ -36,6 +37,10 @@ PY_DECLARE_MODULE_DOC(spectra,
 
 // keep in alphabetical order please! [Bramz]
 //
+PY_MODULE_CLASS(spectra, BlackBody)
+PY_MODULE_CLASS(spectra, RecoveryMengSimon)
+PY_MODULE_CLASS(spectra, Sampled)
+
 
 void spectraPostInject(PyObject*)
 {

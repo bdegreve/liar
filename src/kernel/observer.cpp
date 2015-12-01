@@ -35,6 +35,10 @@ PY_DECLARE_CLASS_DOC(Observer, "Conversion of spectral data to tristimulus")
 	PY_CLASS_CONSTRUCTOR_2(Observer, const Observer::TWavelengths&, const Observer::TXYZs&)
 	PY_CLASS_MEMBER_R(Observer, wavelengths)
 	PY_CLASS_MEMBER_R(Observer, sensitivities)
+	PY_CLASS_MEMBER_R(Observer, minWavelength)
+	PY_CLASS_MEMBER_R(Observer, maxWavelength)
+	PY_CLASS_METHOD(Observer, sensitivity)
+	PY_CLASS_METHOD_QUALIFIED_1(Observer, tristimulus, const XYZ, const Observer::TScalars&)
 	PY_CLASS_STATIC_METHOD_DOC(Observer, standard, "standard() -> Observer");
 	PY_CLASS_STATIC_METHOD_DOC(Observer, setStandard, "setStandard(Observer) -> None");
 
@@ -186,6 +190,33 @@ const XYZ Observer::tristimulus(const TWavelengths& wavelengths, const TScalars&
 	}
 
 	return acc;
+}
+
+
+/** Calculate luminance (Y component of tristimulus) for spectrum where you have a sample for each wavelength in the observer
+*/
+TScalar Observer::luminance(const TScalars& spectrum) const
+{
+	if (spectrum.size() != dXYZ_.size())
+	{
+		LASS_THROW("Requires a spectrum sample for each wavelength in observer data.");
+	}
+
+	TScalar y = 0;
+	for (size_t k = 0, n = w_.size(); k < n; ++k)
+	{
+		y += dXYZ_[k].y * spectrum[k];
+	}
+	return y;
+}
+
+
+/** Calculate luminance (Y component of tristimulus) for spectrum where you have values at different sampled wavelengths
+*/
+TScalar Observer::luminance(const TWavelengths& wavelengths, const TScalars& spectrum) const
+{
+	// i'm too lazy.
+	return tristimulus(wavelengths, spectrum).y;
 }
 
 

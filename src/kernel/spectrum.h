@@ -50,8 +50,8 @@ public:
 
 	virtual ~Spectrum();
 
-	Spectral evaluate(const Sample& sample) const;
-	TScalar absAverage() const { return doAbsAverage(); }
+	Spectral evaluate(const Sample& sample, SpectralType type) const;
+	TScalar luminance() const { return doLuminance(); }
 
 	static TSpectrumPtr make(TScalar value);
 	static TSpectrumPtr make(const XYZ& value);
@@ -67,8 +67,8 @@ protected:
 	Spectrum();
 
 private:
-	virtual const Spectral doEvaluate(const Sample& sample) const = 0;
-	virtual TScalar doAbsAverage() const = 0;
+	virtual const Spectral doEvaluate(const Sample& sample, SpectralType type) const = 0;
+	virtual TScalar doLuminance() const = 0;
 
 	virtual const TPyObjectPtr doGetState() const = 0;
 	virtual void doSetState(const TPyObjectPtr& state) = 0;
@@ -93,8 +93,8 @@ public:
 	explicit SpectrumFlat(TScalar value);
 	TScalar value() const;
 private:
-	const Spectral doEvaluate(const Sample& sample) const override;
-	TScalar doAbsAverage() const override;
+	const Spectral doEvaluate(const Sample& sample, SpectralType type) const override;
+	TScalar doLuminance() const override;
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 	TScalar value_;
@@ -108,8 +108,8 @@ public:
 	explicit SpectrumXYZ(const XYZ& value);
 	const XYZ& value() const;
 private:
-	const Spectral doEvaluate(const Sample& sample) const override;
-	TScalar doAbsAverage() const override;
+	const Spectral doEvaluate(const Sample& sample, SpectralType type) const override;
+	TScalar doLuminance() const override;
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 	XYZ value_;

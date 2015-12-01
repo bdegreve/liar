@@ -84,6 +84,10 @@ public:
 	{
 		return total() / 3;
 	}
+	TScalar maximum() const
+	{
+		return std::max(x, std::max(y, z));
+	}
 	bool isZero() const
 	{
 		return x == 0 && y == 0 && z == 0;

@@ -39,6 +39,7 @@
 
 #cmakedefine LIAR_SPECTRAL_MODE_XYZ 1
 #cmakedefine LIAR_SPECTRAL_MODE_SMITS 1
+#cmakedefine LIAR_SPECTRAL_MODE_SINGLE 1
 
 #endif
 

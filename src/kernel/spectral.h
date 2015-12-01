@@ -27,6 +27,7 @@
 #include "kernel_common.h"
 #include "bands.h"
 #include "observer.h"
+#include "sample.h"
 
 namespace liar
 {
@@ -38,6 +39,14 @@ typedef python::PyObjectPtr<RgbSpace>::Type TRgbSpacePtr;
 
 class Sample;
 
+
+enum SpectralType
+{
+	Illuminant,
+	Reflectant
+};
+
+
 class LIAR_KERNEL_DLL Spectral
 {
 public:
@@ -46,6 +55,8 @@ public:
 	enum { numBands = 10 };
 #elif LIAR_SPECTRAL_MODE_XYZ
 	enum { numBands = 3 };
+#elif LIAR_SPECTRAL_MODE_SINGLE
+	enum { numBands = 1 };
 #else
 	error Invalid spectral mode
 #endif
@@ -59,34 +70,37 @@ public:
 
 	Spectral();
 	explicit Spectral(TParam f);
+	Spectral(TParam f, SpectralType type);
 
-	static Spectral fromXYZ(const XYZ& xyz, const Sample& sample);
-	static Spectral fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, const Sample& sample);
+	static Spectral fromXYZ(const XYZ& xyz, const Sample& sample, SpectralType type);
+	static Spectral fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, const Sample& sample, SpectralType type);
 #if LIAR_SPECTRAL_MODE_SMITS || LIAR_SPECTRAL_MODE_XYZ
-	static Spectral fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values);
+	static Spectral fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, SpectralType type);
 #endif
 
-	static TScalar absAverageFromXYZ(const XYZ& xyz);
-
 #if LIAR_SPECTRAL_MODE_SMITS
-	template <typename Func> static Spectral fromFunc(Func func, const Sample&)
+	template <typename Func> static Spectral fromFunc(Func func, const Sample&, SpectralType type)
 	{
 		TBands v;
 		for (size_t k = 0; k < numBands; ++k)
 		{
 			v[k] = func((pimpl_->bands[k] + pimpl_->bands[k + 1]) / 2);
 		}
-		return Spectral(v);
+		return Spectral(v, type);
 	}
 #elif LIAR_SPECTRAL_MODE_XYZ
-	template <typename Func> static Spectral fromFunc(Func func, const Sample& sample)
+	template <typename Func> static Spectral fromFunc(Func func, const Sample& sample, SpectralType type)
 	{
-		return Spectral::fromXYZ(standardObserver().integrate(func), sample);
+		return Spectral::fromXYZ(standardObserver().tristimulus(func), sample, type);
+	}
+#elif LIAR_SPECTRAL_MODE_SINGLE
+	template <typename Func> static Spectral fromFunc(Func func, const Sample& sample, SpectralType type)
+	{
+		return Spectral(func(sample.wavelength()), type);
 	}
 #endif
 
-	const XYZ xyz() const;
-	operator XYZ() const { return xyz(); }
+	const XYZ xyz(const Sample& sample) const;
 
 	Spectral& operator=(TParam f) { v_.fill(f); return *this; }
 	Spectral& operator=(const Spectral& other) { v_ = other.v_; return *this; }
@@ -134,7 +148,7 @@ public:
 
 private:
 
-	explicit Spectral(const TBands& v) : v_(v) {}
+	Spectral(const TBands& v, SpectralType type);
 
 	TBands v_;
 

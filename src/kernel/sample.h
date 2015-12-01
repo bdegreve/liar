@@ -59,6 +59,7 @@ public:
 	const TSample2D& lensCoordinate() const;
 	TTime time() const;
 	TWavelength wavelength() const;
+	TWavelength wavelength(TScalar &pdf) const;
 
 	TScalar weight() const;
 	void setWeight(TScalar weight);

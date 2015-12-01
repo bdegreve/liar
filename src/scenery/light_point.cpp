@@ -175,7 +175,7 @@ const Spectral LightPoint::doSampleEmission(const Sample& sample, const TPoint2D
 	shadowRay = BoundedRay(target, toLight, tolerance, distance, prim::IsAlreadyNormalized());
 	pdf = TNumTraits::one;
 
-	return intensity_->evaluate(sample) / attenuation_->attenuation(distance, squaredDistance);
+	return intensity_->evaluate(sample, Illuminant) / attenuation_->attenuation(distance, squaredDistance);
 }
 
 
@@ -184,14 +184,14 @@ const Spectral LightPoint::doSampleEmission(const Sample& sample, const TPoint2D
 {
 	const TVector3D direction = num::uniformSphere(lightSampleA, pdf).position();
 	emissionRay = BoundedRay(position_, direction, tolerance);
-	return intensity_->evaluate(sample);
+	return intensity_->evaluate(sample, Illuminant);
 }
 
 
 
 TScalar LightPoint::doTotalPower() const
 {
-	return (4 * TNumTraits::pi) * intensity_->absAverage();
+	return (4 * TNumTraits::pi) * intensity_->luminance();
 }
 
 

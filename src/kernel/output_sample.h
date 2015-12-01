@@ -38,6 +38,7 @@ namespace kernel
 {
 
 class Sample;
+class Spectral;
 
 class LIAR_KERNEL_DLL OutputSample
 {
@@ -45,7 +46,7 @@ public:
 
 	OutputSample();
 	OutputSample(const TPoint2D& screenCoordinate, const XYZ& radiance, TScalar depth, TScalar alpha = 1, TScalar weight = 1);
-	OutputSample(const Sample& sample, const XYZ& radiance, TScalar depth, TScalar alpha = 1, TScalar weight = 1);
+	OutputSample(const Sample& sample, const Spectral& radiance, TScalar depth, TScalar alpha = 1, TScalar weight = 1);
 	OutputSample(const OutputSample& other, const TPoint2D& screenCoordinate, TScalar weight);
 
 	const TPoint2D& screenCoordinate() const { return screenCoordinate_; }

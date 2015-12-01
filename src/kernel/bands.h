@@ -225,6 +225,11 @@ public:
 		return std::accumulate(v_, v_ + numBands, TNumTraits::zero) / numBands;
 	}
 
+	TValue maximum() const
+	{
+		return *std::max_element(v_, v_ + numBands);
+	}
+
 	bool isZero() const
 	{
 		for (size_t i = 0; i < N; ++i)
@@ -286,7 +291,7 @@ public:
 	Bands& operator/=(TParam f) { v_ /= f; return *this; }
 
 	Bands& fma(const Bands& a, const Bands& b) { v_ += a.v_ * b.v_; return *this; }
-	Bands& fma(TParam a, const Bands& b) { v_ += a_ * b.v_; return *this; }
+	Bands& fma(TParam a, const Bands& b) { v_ += a * b.v_; return *this; }
 	Bands& fma(const Bands& a, TParam b)  { v_ += a.v_ * b; return *this; }
 
 	Bands& inpabs() { v_ = num::abs(v_); return *this; }
@@ -296,10 +301,11 @@ public:
 	Bands& inpsqrt() { v_ = num::sqrt(v_); return *this; }
 	Bands& inpexp() { v_ = num::exp(v_); return *this; }
 	Bands& inpclamp(TParam min, TParam max) { v_ = num::clamp(v_, min, max); return *this; }
-	Bands& inplerp(const Bands& other, TScalar f) { v_ = num::lerp(v_, other.v_, f); }
+	Bands& inplerp(const Bands& other, TScalar f) { v_ = num::lerp(v_, other.v_, f); return *this; }
 
 	TValue dot(const Bands& other) const { return v_ * other.v_; }
 	TValue average() const { return v_; }
+	TValue maximum() const { return v_; }
 
 	bool isZero() const { return !v_; }
 	bool operator==(const Bands& other) const { return v_ == other.v_; }
@@ -480,6 +486,11 @@ public:
 	TValue average() const
 	{
 		return (v_[0] + v_[1] + v_[2]) / 3;
+	}
+
+	TValue maximum() const
+	{
+		return std::max(v_[0], std::max(v_[1], v_[2]));
 	}
 
 	bool isZero() const

@@ -193,7 +193,7 @@ const Spectral LightDirectional::doSampleEmission(const Sample& sample, const TP
 		shadowRay = BoundedRay(target, -direction_, tolerance, intersection.t(), prim::IsAlreadyNormalized());
 	} 
 	pdf = TNumTraits::one;
-	return radiance_->evaluate(sample);
+	return radiance_->evaluate(sample, Illuminant);
 }
 
 
@@ -209,7 +209,7 @@ const Spectral LightDirectional::doSampleEmission(const Sample& sample, const TP
 	if (pdf > 0 && cosTheta > 0)
 	{
 		pdf /= cosTheta;
-		return radiance_->evaluate(sample);
+		return radiance_->evaluate(sample, Illuminant);
 	}
 	else
 	{
@@ -224,7 +224,7 @@ TScalar LightDirectional::doTotalPower() const
 {
 	const TSceneObjectPtr& port = userPortal_ ? userPortal_ : defaultPortal_;
 	LASS_ASSERT(port);
-	return port->area(direction_) * radiance_->absAverage();
+	return port->area(direction_) * radiance_->luminance();
 }
 
 

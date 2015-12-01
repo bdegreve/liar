@@ -225,7 +225,7 @@ const Spectral LightSpot::doSampleEmission(const Sample& sample, const TPoint2D&
 	shadowRay = BoundedRay(target, toLight, tolerance, distance, 
 		prim::IsAlreadyNormalized());
 	pdf = TNumTraits::one;
-	return intensity_->evaluate(sample) * multiplier;
+	return intensity_->evaluate(sample, Illuminant) * multiplier;
 }
 
 
@@ -245,7 +245,7 @@ const Spectral LightSpot::doSampleEmission(const Sample& sample, const TPoint2D&
 	const TVector3D direction = tangentU_ * local.x + tangentV_ * local.y + direction_ * local.z;
 	emissionRay = BoundedRay(position_, direction, tolerance);
 	const TScalar cosTheta = local.z;
-	return intensity_->evaluate(sample) * fallOff(cosTheta);
+	return intensity_->evaluate(sample, Illuminant) * fallOff(cosTheta);
 }
 
 
@@ -253,7 +253,7 @@ const Spectral LightSpot::doSampleEmission(const Sample& sample, const TPoint2D&
 TScalar LightSpot::doTotalPower() const
 {
 	const TScalar factor = ((1 - cosInnerAngle_) + (cosInnerAngle_ - cosOuterAngle_) / 4);
-	return (2 * TNumTraits::pi * factor) * intensity_->absAverage();
+	return (2 * TNumTraits::pi * factor) * intensity_->luminance();
 }
 
 

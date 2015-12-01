@@ -197,13 +197,13 @@ void Image::setDefaultMipMapping(const std::string& mode)
 
 const Spectral Image::doLookUp(const Sample& sample, const IntersectionContext& context) const
 {
-	return Spectral::fromXYZ(lookUp(context), sample);
+	return Spectral::fromXYZ(lookUp(context), sample, Reflectant); // not true!!!!
 }
 
 
 TScalar Image::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
 {
-	return Spectral::absAverageFromXYZ(lookUp(context));
+	return lookUp(context).y;
 }
 
 

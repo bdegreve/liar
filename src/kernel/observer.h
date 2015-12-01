@@ -55,7 +55,6 @@ public:
 
 	const XYZ tristimulus(const TScalars& spectrum) const;
 	const XYZ tristimulus(const TWavelengths& wavelengths, const TScalars& spectrum) const;
-
 	template <typename Func>
 	const XYZ tristimulus(Func func) const
 	{
@@ -65,6 +64,19 @@ public:
 			acc += dXYZ_[k] * func(w_[k]);
 		}
 		return acc;
+	}
+
+	TScalar luminance(const TScalars& spectrum) const;
+	TScalar luminance(const TWavelengths& wavelengths, const TScalars& spectrum) const;
+	template <typename Func>
+	TScalar luminance(Func func) const
+	{
+		TScalar y = 0;
+		for (size_t k = 0, n = w_.size(); k < n; ++k)
+		{
+			y += dXYZ_[k].y * func(w_[k]);
+		}
+		return y;
 	}
 
 	TWavelength sample(TScalar sample, TScalar& pdf) const;

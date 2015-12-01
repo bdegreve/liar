@@ -99,11 +99,16 @@ private:
 
 	struct Photon
 	{
-		Photon(const TPoint3D& position, const TVector3D& omegaIn, const Spectral& power):
-			position(position), omegaIn(omegaIn), power(power) {}
+	public:
+		Photon(const TPoint3D& position, const TVector3D& omegaIn, const Spectral& power, const Sample& sample) :
+			position(position), omegaIn(omegaIn), power(power.xyz(sample)) {}
 		TPoint3D position;
 		TVector3D omegaIn;
-		Spectral power;
+		XYZ power;
+		const Spectral spectralPower(const Sample& sample) const 
+		{
+			return Spectral::fromXYZ(power, sample, Illuminant);
+		}
 	};
 	typedef std::vector<Photon> TPhotonBuffer;
 
@@ -113,8 +118,12 @@ private:
 			position(position), normal(normal), irradiance(), squaredEstimationRadius(0) {}
 		TPoint3D position;
 		TVector3D normal;
-		Spectral irradiance;
+		XYZ irradiance;
 		TScalar squaredEstimationRadius;
+		const Spectral spectralIrradiance(const Sample& sample) const
+		{
+			return Spectral::fromXYZ(irradiance, sample, Illuminant);
+		}
 	};
 	typedef std::vector<Irradiance> TIrradianceBuffer;
 
@@ -245,14 +254,14 @@ private:
 		const TPoint3D& target, const TVector3D& omegaOut) const;
 	const Spectral traceGatherRay(const Sample& sample, const BoundedRay& ray, bool gatherVolumetric, size_t gatherStage, size_t rayGeneration) const;
 
-	const Spectral estimateIrradiance(const TPoint3D& point, const TVector3D& normal, TScalar& sqrEstimationRadius, size_t& estimationCount) const;
-	const Spectral estimateIrradiance(const TPoint3D& point, const TVector3D& normal) const
+	const XYZ estimateIrradiance(const TPoint3D& point, const TVector3D& normal, TScalar& sqrEstimationRadius, size_t& estimationCount) const;
+	const XYZ estimateIrradiance(const TPoint3D& point, const TVector3D& normal) const
 	{
 		TScalar sqrRadius;
 		size_t count;
 		return estimateIrradiance(point, normal, sqrRadius, count);
 	}
-	const Spectral estimateIrradianceImpl(TPhotonNeighbourhood& neighbourhood, const TPoint3D& point, const TVector3D& normal, TScalar& sqrEstimationRadius, size_t& estimationCount) const;
+	const XYZ estimateIrradianceImpl(TPhotonNeighbourhood& neighbourhood, const TPoint3D& point, const TVector3D& normal, TScalar& sqrEstimationRadius, size_t& estimationCount) const;
 
 	const Spectral estimateRadiance(const Sample& sample, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& point, const TVector3D& omegaOut, TScalar& sqrEstimationRadius) const;

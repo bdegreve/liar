@@ -5,7 +5,7 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -47,7 +47,6 @@ import liar.spectra
 import liar.textures
 import liar.tracers
 
-
 def _load_observer(resource):
     import pkgutil
     import csv
@@ -55,9 +54,25 @@ def _load_observer(resource):
     lines = (line for line in data.splitlines() if not line.startswith('#'))
     reader = csv.reader(lines, dialect='excel-tab')
     columns = { col[0]: map(float, col[1:]) for col in zip(*reader) }
-    observer = liar.Observer(columns['w'], zip(columns['xbar'], columns['ybar'], columns['zbar']))
-    liar.Observer.setStandard(observer)
-        
-_load_observer('data/observer.tsv')
-        
+    wavelengths = columns['w']
+    if any(w > 1 for w in wavelengths):
+        # if so, we assume wavelengths are expressed in nanometers. Convert to meters!
+        wavelengths = [w * 1e-9 for w in columns['w']]
+    return liar.Observer(wavelengths, zip(columns['xbar'], columns['ybar'], columns['zbar']))
+
+liar.Observer.setStandard(_load_observer('data/observer.tsv'))
+
+
+def _load_recovery_meng_simon(resource):
+    import pkgutil
+    import json
+    data = json.loads(pkgutil.get_data('liar', resource))
+    wavelengths = data['wavelengths']
+    spectra = {tuple(s['xy']): s['spectrum'] for s in data['spectra']}
+    return liar.spectra.RecoveryMengSimon(wavelengths, spectra)
+
+liar.Recovery.setStandard(_load_recovery_meng_simon('data/recovery_meng_simon.json'))
+
+
+
 # EOF

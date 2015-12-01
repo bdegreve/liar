@@ -22,9 +22,10 @@
  */
 
 #include "kernel_common.h"
-#include "spectral.h"
+#include "recovery.h"
 #include "rgb_space.h"
 #include "sample.h"
+#include "spectral.h"
 
 namespace liar
 {
@@ -42,9 +43,28 @@ Spectral::Spectral(TValue f):
 }
 
 
+Spectral::Spectral(TValue f, SpectralType type) :
+	v_(type == Reflectant ? std::min(f, TNumTraits::one) : f)
+{
+}
+
+
+Spectral::Spectral(const TBands& v, SpectralType type):
+	v_(v)
+{
+	if (type == Reflectant)
+	{
+		const TScalar max = v_.maximum();
+		if (max > 1)
+		{
+			v_ /= max;
+		}
+	}
+}
+
 #if LIAR_SPECTRAL_MODE_SMITS
 
-Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample&)
+Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample&, SpectralType type)
 {
 	const prim::ColorRGBA rgb = pimpl_->rgbSpace->linearConvert(xyz);
 	
@@ -58,7 +78,7 @@ Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample&)
 				TBands v(rgb.r);
 				v.fma(rgb.g - rgb.r, pimpl_->cyan);
 				v.fma(rgb.b - rgb.g, pimpl_->blue);
-				return Spectral(v);
+				return Spectral(v, type);
 			}
 			else
 			{
@@ -66,7 +86,7 @@ Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample&)
 				TBands v(rgb.r);
 				v.fma(rgb.b - rgb.r, pimpl_->cyan);
 				v.fma(rgb.g - rgb.b, pimpl_->green);
-				return Spectral(v);
+				return Spectral(v, type);
 			}
 		}
 		else
@@ -75,7 +95,7 @@ Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample&)
 			TBands v(rgb.b);
 			v.fma(rgb.r - rgb.b, pimpl_->yellow);
 			v.fma(rgb.g - rgb.r, pimpl_->green);
-			return Spectral(v);
+			return Spectral(v, type);
 		}
 	}
 	else if (rgb.g <= rgb.b)
@@ -86,7 +106,7 @@ Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample&)
 			TBands v(rgb.g);
 			v.fma(rgb.r - rgb.g, pimpl_->magenta);
 			v.fma(rgb.b - rgb.r, pimpl_->blue);
-			return Spectral(v);
+			return Spectral(v, type);
 		}
 		else
 		{
@@ -94,7 +114,7 @@ Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample&)
 			TBands v(rgb.g);
 			v.fma(rgb.b - rgb.g, pimpl_->magenta);
 			v.fma(rgb.r - rgb.b, pimpl_->red);
-			return Spectral(v);
+			return Spectral(v, type);
 		}
 	}
 	else
@@ -103,16 +123,16 @@ Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample&)
 		TBands v(rgb.b);
 		v.fma(rgb.g - rgb.b, pimpl_->yellow);
 		v.fma(rgb.r - rgb.g, pimpl_->red);
-		return Spectral(v);
+		return Spectral(v, type);
 	}
 }
 
-Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, const Sample&)
+Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, const Sample&, SpectralType type)
 {
-	return fromSampled(wavelengths, values);
+	return fromSampled(wavelengths, values, type);
 }
 
-Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values)
+Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, SpectralType type)
 {
 	// can be done better!
 	LASS_ASSERT(wavelengths.size() == values.size());
@@ -158,15 +178,19 @@ Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, cons
 		k1 = k2++;
 	}
 
+	if (type == Reflectant)
+	{
+		const TScalar max = result.v_.maximum();
+		if (max > 1)
+		{
+			result /= max;
+		}
+	}
+
 	return result;
 }
 
-TScalar Spectral::absAverageFromXYZ(const XYZ& xyz)
-{
-	return abs(xyz).average(); // not really, but maybe close enough.
-}
-
-const XYZ Spectral::xyz() const
+const XYZ Spectral::xyz(const Sample&) const
 {
 	XYZ sum = 0;
 	for (size_t k = 0; k < numBands; ++k)
@@ -323,30 +347,67 @@ Spectral::Impl* Spectral::pimpl_ = new Spectral::Impl();
 
 #elif LIAR_SPECTRAL_MODE_XYZ
 
-Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample&)
+Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample&, SpectralType type)
 {
-	return Spectral(TBands(xyz.x, xyz.y, xyz.z));
+	return Spectral(TBands(xyz.x, xyz.y, xyz.z), type);
 }
 
-Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, const Sample&)
+Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, const Sample&, SpectralType type)
 {
-	return fromSampled(wavelengths, values);
+	return fromSampled(wavelengths, values, type);
 }
 
-Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values)
+Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, SpectralType type)
 {
 	const XYZ xyz = standardObserver().tristimulus(wavelengths, values);
-	return Spectral(TBands(xyz.x, xyz.y, xyz.z));
+	return Spectral(TBands(xyz.x, xyz.y, xyz.z), type);
 }
 
-TScalar Spectral::absAverageFromXYZ(const XYZ& xyz)
-{
-	return abs(xyz).average();
-}
-
-const XYZ Spectral::xyz() const
+const XYZ Spectral::xyz(const Sample&) const
 {
 	return XYZ(v_[0], v_[1], v_[2]);
+}
+
+#elif LIAR_SPECTRAL_MODE_SINGLE
+
+Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample& sample, SpectralType type)
+{
+	return standardRecovery().recover(xyz, sample, type);
+}
+
+Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, const Sample& sample, SpectralType type)
+{
+	LASS_ASSERT(wavelengths.size() > 1 && wavelengths.size() == values.size());
+	const size_t k = std::upper_bound(wavelengths.begin(), wavelengths.end(), sample.wavelength()) - wavelengths.begin();
+	if (k == 0 || k == wavelengths.size())
+	{
+		return Spectral(0);
+	}
+
+	LASS_ASSERT(wavelengths[k] > wavelengths[k - 1]);
+	const TScalar t = (sample.wavelength() - wavelengths[k - 1]) / (wavelengths[k] - wavelengths[k - 1]);
+	const TScalar v = num::lerp(values[k - 1], values[k], t);
+
+	if (type == Reflectant)
+	{
+		const TScalar max = *std::max_element(values.begin(), values.end());
+		if (max > 1)
+		{
+			return Spectral(v / max);
+		}
+	}
+	return Spectral(v);
+}
+
+const XYZ Spectral::xyz(const Sample& sample) const
+{
+	TScalar pdf = 0;
+	const TWavelength w = sample.wavelength(pdf);
+	if (pdf <= 0)
+	{
+		return XYZ(0);
+	}
+	return (v_[0] / pdf) * standardObserver().sensitivity(w);
 }
 
 #endif

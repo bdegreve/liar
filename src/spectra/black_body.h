@@ -51,8 +51,8 @@ public:
 
 private:
 
-	const Spectral doEvaluate(const Sample& sample) const override;
-	TScalar doAbsAverage() const override;
+	const Spectral doEvaluate(const Sample& sample, SpectralType type) const override;
+	TScalar doLuminance() const override;
 
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;

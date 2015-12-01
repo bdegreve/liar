@@ -34,6 +34,7 @@
 #include "projection.h"
 #include "sampler.h"
 #include "ray_tracer.h"
+#include "recovery.h"
 #include "render_engine.h"
 #include "render_target.h"
 #include "rgb_space.h"
@@ -82,6 +83,7 @@ PY_MODULE_CLASS(kernel, liar::kernel::Observer)
 PY_MODULE_CLASS(kernel, liar::kernel::Projection)
 	PY_MODULE_CLASS(kernel, liar::kernel::PerspectiveProjection)
 PY_MODULE_CLASS(kernel, liar::kernel::RgbSpace)
+PY_MODULE_CLASS(kernel, liar::kernel::Recovery)
 PY_MODULE_CLASS(kernel, liar::kernel::RayTracer)
 PY_MODULE_CLASS(kernel, liar::kernel::RenderEngine)
 PY_MODULE_CLASS(kernel, liar::kernel::RenderTarget)

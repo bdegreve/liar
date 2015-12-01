@@ -198,7 +198,7 @@ const Spectral LightArea::doEmission(const Sample& sample, const TRay3D& ray, Bo
 		pdf = 0;
 		return Spectral();
 	}
-	return radiance_->evaluate(sample);
+	return radiance_->evaluate(sample, Illuminant);
 }
 
 
@@ -222,7 +222,7 @@ const Spectral LightArea::doSampleEmission(
 	}
 
 	shadowRay = BoundedRay(target, toLight, tolerance, distance, prim::IsAlreadyNormalized());
-	return radiance_->evaluate(sample);
+	return radiance_->evaluate(sample, Illuminant);
 }
 
 
@@ -247,7 +247,7 @@ const Spectral LightArea::doSampleEmission(
 	}
 
 	shadowRay = BoundedRay(target, toLight, tolerance, distance, prim::IsAlreadyNormalized());
-	return radiance_->evaluate(sample);
+	return radiance_->evaluate(sample, Illuminant);
 }
 
 
@@ -281,14 +281,14 @@ const Spectral LightArea::doSampleEmission(
 
 	emissionRay = BoundedRay(origin, direction, tolerance);
 	pdf = originPdf * directionPdf;
-	return radiance_->evaluate(sample) * localDirection.z;
+	return radiance_->evaluate(sample, Illuminant) * localDirection.z;
 }
 
 
 
 TScalar LightArea::doTotalPower() const
 {
-	const TScalar singleSidedPower = (TNumTraits::pi * surface_->area()) * radiance_->absAverage();
+	const TScalar singleSidedPower = (TNumTraits::pi * surface_->area()) * radiance_->luminance();
 	return isSingleSided_ ? singleSidedPower : 2 * singleSidedPower;
 }
 

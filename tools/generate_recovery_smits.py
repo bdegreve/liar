@@ -16,9 +16,11 @@ import liar.tools.rgb_spaces
 import os
 import re
 
-def main(num_bands, min_wavelength, max_wavelength, rgbSpaceName, niter=10000, fitall=False):
-    bands = scipy.linspace(min_wavelength, max_wavelength, num_bands + 1)
-    xyz_observer = scipy.transpose(scipy.array(map(liar.standardObserver.tristimulus, zip(bands[:-1], bands[1:]))))
+def main(num_bands, min_wavelength_nm, max_wavelength_nm, rgbSpaceName, niter=10000, fitall=False):
+    observer = liar.Observer.standard()
+    bands_nm = scipy.linspace(min_wavelength_nm, max_wavelength_nm, num_bands + 1)
+    print bands_nm
+    xyz_observer = scipy.transpose(scipy.array([tristimulus_nm(observer, bands_nm[k], bands_nm[k + 1]) for k in range(num_bands)]))
 
     rgb_space = get_rgb_space(rgbSpaceName)
     rgb_observer = xyz_to_rgb(xyz_observer, rgb_space)
@@ -28,20 +30,30 @@ def main(num_bands, min_wavelength, max_wavelength, rgbSpaceName, niter=10000, f
     #write_code_fragments(bands, rgb_space, niter, fitall, xyz_observer, white, yellow, magenta, cyan, red, green, blue)
 
     if fitall:
-        steps(bands, white, 'k')
+        steps(bands_nm, white, 'k')
         pyplot.figure()
 
-    steps(bands, red, 'r')
-    steps(bands, green, 'g')
-    steps(bands, blue, 'b')
-    steps(bands, (red + green + blue), 'k:')
+    steps(bands_nm, red, 'r')
+    steps(bands_nm, green, 'g')
+    steps(bands_nm, blue, 'b')
+    steps(bands_nm, (red + green + blue), 'k:')
     pyplot.figure()
 
-    steps(bands, yellow, 'y')
-    steps(bands, magenta, 'm')
-    steps(bands, cyan, 'c')
-    steps(bands, (yellow + magenta + cyan) / 2, 'k:')
+    steps(bands_nm, yellow, 'y')
+    steps(bands_nm, magenta, 'm')
+    steps(bands_nm, cyan, 'c')
+    steps(bands_nm, (yellow + magenta + cyan) / 2, 'k:')
     pyplot.show()
+
+
+def tristimulus_nm(observer, w_min_nm, w_max_nm):
+    X, Y, Z = 0, 0, 0
+    for w_nm in range(int(w_min_nm), int(w_max_nm)):
+        x, y, z = observer.sensitivity(w_nm * 1e-9)
+        X += x * 1e-9
+        Y += y * 1e-9
+        Z += z * 1e-9
+    return X, Y, Z
 
 
 def get_rgb_space(name):
@@ -114,14 +126,14 @@ def fit(r, g, b, null_A, pinv_A, niter):
 
     #s = [max(0, min(v, 1)) for v in s]   # clamp between 0 and 1
 
-    print s
+    print ['%.4f' % f for f in s]
     return s
 
 
 def error(s, x, null_A, *args):
     y = x + scipy.dot(null_A, s)
     mx = 100 * (max(y) - 1) if max(y) > 1 else 0 # penalty for values > 1
-    mx += (-1000 * min(y)) if min(y) < 0 else 0
+    #mx += (-1000 * min(y)) if min(y) < 0 else 0
     return 10 * scipy.linalg.norm(scipy.diff(y)) + mx
 
 
@@ -227,8 +239,8 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Generate the Spectrum<->XYZ conversion constants.')
     parser.add_argument("-n", "--num-bands", type=int, default=10, metavar='<n>', help="number of bands in spectrum [default=%(default)s]")
-    parser.add_argument("-w", "--w-min", type=float, default=360e-9, metavar='<w>', help="lower wavelength bound of spectrum [default=%(default)s]")
-    parser.add_argument("-W", "--w-max", type=float, default=800e-9, metavar='<w>', help="upper wavelength bound of spectrum [default=%(default)s]")
+    parser.add_argument("-w", "--w-min", type=float, default=380, metavar='<w>', help="lower wavelength [nm] bound of spectrum [default=%(default)s]")
+    parser.add_argument("-W", "--w-max", type=float, default=720, metavar='<w>', help="upper wavelength [nm] bound of spectrum [default=%(default)s]")
     parser.add_argument("--niter", type=int, default=10000, metavar='<n>', help="number of iterations in optimization algorithm, more is better [default=%(default)s]")
     parser.add_argument("--rgb-space", type=str, default="sRGB", metavar='<name>', help="RGB space to be used, name of one of the spaces in liar.rgb_spaces [default=%(default)s]")
     parser.add_argument("--fit-all", default=False, action="store_true", help="Also fit white, red, green and blue instead of just yellow, magenta and cyan.")

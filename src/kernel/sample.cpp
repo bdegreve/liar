@@ -68,6 +68,13 @@ TWavelength Sample::wavelength() const
 }
 
 
+TWavelength Sample::wavelength(TScalar& pdf) const
+{
+	pdf = wavelengthPdf_;
+	return wavelength_;
+}
+
+
 
 TScalar Sample::weight() const
 {

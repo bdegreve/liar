@@ -60,7 +60,7 @@ endif()
 
 if (Lass_PYTHON_EXECUTABLE AND NOT CMAKE_INSTALL_PREFIX)
 	execute_process(
-		COMMAND "${Lass_PYTHON_EXECUTABLE}" -c "from distutils import sysconfig; print (sysconfig.get_python_lib(True))" 
+		COMMAND "${Lass_PYTHON_EXECUTABLE}" -c "from distutils import sysconfig; print (sysconfig.get_python_lib(True))"
 		OUTPUT_VARIABLE _python_site_packages
 		OUTPUT_STRIP_TRAILING_WHITESPACE
 	)
@@ -132,31 +132,31 @@ macro(add_liar_module_ex name)
 			endif()
 		endif()
 	endforeach()
-	add_library(${name} MODULE 
+	add_library(${name} MODULE
 		${_srcs}
 		)
-	target_link_libraries(${name} 
+	target_link_libraries(${name}
 		libkernel
 		${_libs}
 		)
 	set_target_properties(
 		${name}
-		PROPERTIES 
+		PROPERTIES
 		COMPILE_FLAGS "${liar_CFLAGS}"
 		LINK_FLAGS "${liar_LDFLAGS}"
 		)
 	if (WIN32)
 		set_target_properties(
 			${name}
-			PROPERTIES 
+			PROPERTIES
 			SUFFIX ".pyd"
 			)
 	else()
 		set_target_properties(
 			${name}
-			PROPERTIES 
+			PROPERTIES
 			PREFIX ""
-			)	
+			)
 	endif()
 	install(
 		TARGETS ${name}
@@ -178,28 +178,37 @@ macro(add_liar_module name)
 			endif()
 		endif()
 	endforeach()
-	add_liar_module_ex(${name} 
+	add_liar_module_ex(${name}
 		SRCS ${${name}_SRCS} ${_srcs}
 		LIBS ${${name}_LIBS}
 	)
 endmacro()
 
-option(ENABLE_SPECTRAL "Use spectral bands for computations, rather than XYZ triplets" ON)
-if (ENABLE_SPECTRAL)
-  set(LIAR_SPECTRAL_BANDS 10)
+SET(SPECTRAL_MODE "XYZ" CACHE STRING "Computational mode for Spectral values")
+SET_PROPERTY(CACHE SPECTRAL_MODE PROPERTY STRINGS XYZ Smits Single)
+unset(LIAR_SPECTRAL_MODE_XYZ)
+unset(LIAR_SPECTRAL_MODE_SMITS)
+unset(LIAR_SPECTRAL_MODE_SINGLE)
+if (SPECTRAL_MODE STREQUAL "XYZ")
+	set(LIAR_SPECTRAL_MODE_XYZ ON)
+elseif(SPECTRAL_MODE STREQUAL "Smits")
+	set(LIAR_SPECTRAL_MODE_SMITS ON)
+elseif(SPECTRAL_MODE STREQUAL "Single")
+	set(LIAR_SPECTRAL_MODE_SINGLE ON)
 else()
-  unset(LIAR_SPECTRAL_BANDS)
+	message(FATAL_ERROR "Invalid value for SPECTRAL_MODE: ${SPECTRAL_MODE}")
 endif()
 
 configure_file(
-    "${CMAKE_CURRENT_LIST_DIR}/src/config.h.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/config.h"
-    )
+	"${CMAKE_CURRENT_LIST_DIR}/src/config.h.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/config.h"
+	)
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 add_subdirectory(external)
 add_subdirectory(src)
 add_subdirectory(doc)
+add_subdirectory(data)
 
 set(BUILD_TESTING "ON" CACHE BOOL "build test")
 if(BUILD_TESTING)

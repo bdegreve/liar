@@ -57,16 +57,16 @@ Spectrum::~Spectrum()
 }
 
 
-Spectral Spectrum::evaluate(const Sample& sample) const
+Spectral Spectrum::evaluate(const Sample& sample, SpectralType type) const
 {
 #if LIAR_SPECTRAL_MODE_SMITS || LIAR_SPECTRAL_MODE_XYZ
-	if (!isCached_)
+	if (!isCached_) // euhm ... potentially incorrect. type could be different.
 	{
-		cached_ = doEvaluate(sample);
+		cached_ = doEvaluate(sample, type);
 	}
 	return cached_;
 #else
-	doEvaluate(sample);
+	return doEvaluate(sample, type);
 #endif
 }
 
@@ -147,14 +147,14 @@ TScalar SpectrumFlat::value() const
 	return value_;
 }
 
-const Spectral SpectrumFlat::doEvaluate(const Sample&) const
+const Spectral SpectrumFlat::doEvaluate(const Sample&, SpectralType type) const
 {
-	return Spectral(value_);
+	return Spectral(value_, type);
 }
 
-TScalar SpectrumFlat::doAbsAverage() const
+TScalar SpectrumFlat::doLuminance() const
 {
-	return num::abs(value_);
+	return value_;
 }
 
 const TPyObjectPtr SpectrumFlat::doGetState() const
@@ -178,14 +178,14 @@ const XYZ& SpectrumXYZ::value() const
 	return value_;
 }
 
-const Spectral SpectrumXYZ::doEvaluate(const Sample& sample) const
+const Spectral SpectrumXYZ::doEvaluate(const Sample& sample, SpectralType type) const
 {
-	return Spectral::fromXYZ(value_, sample);
+	return Spectral::fromXYZ(value_, sample, type);
 }
 
-TScalar SpectrumXYZ::doAbsAverage() const
+TScalar SpectrumXYZ::doLuminance() const
 {
-	return Spectral::absAverageFromXYZ(value_);
+	return value_.y;
 }
 
 const TPyObjectPtr SpectrumXYZ::doGetState() const

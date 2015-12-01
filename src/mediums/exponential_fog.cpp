@@ -171,7 +171,7 @@ const Spectral ExponentialFog::doTransmittance(const Sample&, const BoundedRay& 
 
 const Spectral ExponentialFog::doEmission(const Sample& sample, const BoundedRay& ray) const
 {
-	if (!emission()->evaluate(sample))
+	if (!emission()->evaluate(sample, Illuminant))
 	{
 		return Spectral();
 	}
@@ -183,14 +183,14 @@ const Spectral ExponentialFog::doEmission(const Sample& sample, const BoundedRay
 
 	if (extinction() == 0) // instead special case for thickness < 1e-5?
 	{
-		return tau(emission()->evaluate(sample), b, d);
+		return tau(emission()->evaluate(sample, Illuminant), b, d);
 	}
 
 	const TScalar thickness = tau(a, b, d);
 	LASS_ASSERT(thickness >= 0);
 
 	const TScalar absorptance = -num::expm1(-thickness); // = 1 - transmittance(ray)
-	return emission()->evaluate(sample) * (absorptance / extinction());
+	return emission()->evaluate(sample, Illuminant) * (absorptance / extinction());
 }
 
 

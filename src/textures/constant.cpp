@@ -95,14 +95,14 @@ void Constant::doSetState(const TPyObjectPtr& state)
 
 const Spectral Constant::doLookUp(const Sample& sample, const IntersectionContext&) const
 {
-	return value_->evaluate(sample);
+	return value_->evaluate(sample, Reflectant);
 }
 
 
 
 TScalar Constant::doScalarLookUp(const Sample&, const IntersectionContext&) const
 {
-	return value_->absAverage();
+	return value_->luminance();
 }
 
 

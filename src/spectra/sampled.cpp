@@ -84,16 +84,16 @@ TSpectrumPtr Sampled::resample(const TWavelengths& wavelengths) const
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral Sampled::doEvaluate(const Sample& sample) const
+const Spectral Sampled::doEvaluate(const Sample& sample, SpectralType type) const
 {
-	return Spectral::fromSampled(wavelengths_, values_, sample);
+	return Spectral::fromSampled(wavelengths_, values_, sample, type);
 }
 
 
 
-TScalar Sampled::doAbsAverage() const
+TScalar Sampled::doLuminance() const
 {
-	return tristimulus_.absTotal() / 3; // not really good probably.
+	return tristimulus_.y;
 }
 
 

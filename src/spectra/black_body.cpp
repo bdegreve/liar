@@ -87,17 +87,17 @@ void BlackBody::setTemperatureCelcius(TScalar temperature)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral BlackBody::doEvaluate(const Sample& sample) const
+const Spectral BlackBody::doEvaluate(const Sample& sample, SpectralType type) const
 {
 	return Spectral::fromFunc([=](TWavelength w) {
 		const TScalar w5 = num::sqr(num::sqr(w)) * w;
 		return c1 / (w5 * num::expm1(c2 / (w * temperature_)));
-	}, sample);
+	}, sample, type);
 }
 
 
 
-TScalar BlackBody::doAbsAverage() const
+TScalar BlackBody::doLuminance() const
 {
 	// we should be able to do this better
 	const Observer::TWavelengths& ws = standardObserver().wavelengths();
