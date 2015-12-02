@@ -106,10 +106,11 @@ void Xyz::doSetState(const TPyObjectPtr& state)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral Xyz::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral Xyz::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
 {
+#pragma LASS_FIXME("what about type==Reflectant?")
 	const TPoint3D& p = context.point();
-	return p.x * a_->lookUp(sample, context) + p.y * b_->lookUp(sample, context) + p.z * c_->lookUp(sample, context);
+	return p.x * a_->lookUp(sample, context, type) + p.y * b_->lookUp(sample, context, type) + p.z * c_->lookUp(sample, context, type);
 }
 
 

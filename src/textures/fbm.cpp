@@ -69,9 +69,10 @@ void FBm::doSetState(const TPyObjectPtr& state)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral FBm::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral FBm::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
 {
-	return Spectral(doScalarLookUp(sample, context));
+#pragma LASS_TODO("what about type==Reflectant?")
+	return Spectral(doScalarLookUp(sample, context), type);
 }
 
 

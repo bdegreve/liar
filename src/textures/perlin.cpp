@@ -87,9 +87,10 @@ TScalar Perlin::noise(const TPoint3D& point) const
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral Perlin::doLookUp(const Sample&, const IntersectionContext& context) const
+const Spectral Perlin::doLookUp(const Sample&, const IntersectionContext& context, SpectralType type) const
 {
-	return Spectral(noise(context.point()));
+#pragma LASS_TODO("what about type==Reflectant?")
+	return Spectral(noise(context.point()), type);
 }
 
 

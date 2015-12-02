@@ -47,9 +47,9 @@ Abs::Abs(const TTexturePtr& texture):
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral Abs::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral Abs::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
 {
-	return abs(texture()->lookUp(sample, context));
+	return abs(texture()->lookUp(sample, context, type));
 }
 
 

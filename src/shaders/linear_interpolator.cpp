@@ -129,7 +129,7 @@ const Spectral LinearInterpolator::doEmission(const Sample& sample, const Inters
 		return Spectral();
 	}
 
-	const TScalar keyValue = average(control_->lookUp(sample, context));
+	const TScalar keyValue = control_->scalarLookUp(sample, context);
 	TKeyShader sentinel(keyValue, TShaderPtr());
 	TKeyShaders::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), sentinel, LesserKey());
 
@@ -162,7 +162,7 @@ TBsdfPtr LinearInterpolator::doBsdf(const Sample& sample, const IntersectionCont
 		return TBsdfPtr();
 	}
 
-	const TScalar keyValue = average(control_->lookUp(sample, context));
+	const TScalar keyValue = control_->scalarLookUp(sample, context);
 	TKeyShader sentinel(keyValue, TShaderPtr());
 	TKeyShaders::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), sentinel, LesserKey());
 

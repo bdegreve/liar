@@ -163,8 +163,8 @@ size_t AshikhminShirley::doNumReflectionSamples() const
 
 TBsdfPtr AshikhminShirley::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-	const Spectral Rd = diffuse_->lookUp(sample, context);
-	const Spectral Rs = specular_->lookUp(sample, context);
+	const Spectral Rd = diffuse_->lookUp(sample, context, Reflectant);
+	const Spectral Rs = specular_->lookUp(sample, context, Reflectant);
 	const TScalar nu = std::max<TScalar>(specularPowerU_->scalarLookUp(sample, context), 0);
 	const TScalar nv = std::max<TScalar>(specularPowerV_->scalarLookUp(sample, context), 0);
 	return TBsdfPtr(new Bsdf(sample, context, Rd, Rs, nu, nv));

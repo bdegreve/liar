@@ -46,11 +46,11 @@ ContextMapping::ContextMapping(const TTexturePtr& texture):
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral ContextMapping::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral ContextMapping::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
 {
 	IntersectionContext temp(context);
 	doTransformContext(sample, temp);
-	return texture()->lookUp(sample, temp);
+	return texture()->lookUp(sample, temp, type);
 }
 
 

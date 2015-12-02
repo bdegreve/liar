@@ -136,10 +136,11 @@ size_t ThinDielectric::doNumTransmissionSamples() const
 
 TBsdfPtr ThinDielectric::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-	// in theory, refractive indices must be at least 1
-	const TScalar ior1 = std::max(average(outerRefractionIndex_->lookUp(sample, context)), 1e-9);
-	const TScalar ior2 = std::max(average(innerRefractionIndex_->lookUp(sample, context)), 1e-9);
-	const Spectral transparency = clamp(transparency_->lookUp(sample, context), TNumTraits::zero, TNumTraits::one);
+	// in theory, refractive indices must be at least 1, but they must be more than zero for sure.
+	// IOR as average of spectral works correctly for LIAR_SPECTRAL_MODE_SINGLE. Everything else uses ... well, and average.
+	const TScalar ior1 = std::max(average(outerRefractionIndex_->lookUp(sample, context, Illuminant)), 1e-9);
+	const TScalar ior2 = std::max(average(innerRefractionIndex_->lookUp(sample, context, Illuminant)), 1e-9);
+	const Spectral transparency = clamp(transparency_->lookUp(sample, context, Reflectant), TNumTraits::zero, TNumTraits::one);
 	const TScalar ior = ior1 / ior2; 
 	return TBsdfPtr(new Bsdf(sample, context, caps(), ior, transparency));
 }

@@ -110,20 +110,20 @@ void CheckerBoard::doSetState(const TPyObjectPtr& state)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral CheckerBoard::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral CheckerBoard::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
 {
 	const TScalar wA = weightA(context);
 	if (wA >= 1)
 	{
-		return textureA()->lookUp(sample, context);
+		return textureA()->lookUp(sample, context, type);
 	}
 	else if (wA <= 0)
 	{
-		return textureB()->lookUp(sample, context);
+		return textureB()->lookUp(sample, context, type);
 	}
 	else
 	{
-		return wA * textureA()->lookUp(sample, context) + (1 - wA) * textureB()->lookUp(sample, context);
+		return wA * textureA()->lookUp(sample, context, type) + (1 - wA) * textureB()->lookUp(sample, context, type);
 	}
 }
 

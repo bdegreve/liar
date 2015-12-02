@@ -93,9 +93,9 @@ void Constant::doSetState(const TPyObjectPtr& state)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral Constant::doLookUp(const Sample& sample, const IntersectionContext&) const
+const Spectral Constant::doLookUp(const Sample& sample, const IntersectionContext&, SpectralType type) const
 {
-	return value_->evaluate(sample, Reflectant);
+	return value_->evaluate(sample, type);
 }
 
 

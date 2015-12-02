@@ -101,6 +101,7 @@ public:
 #endif
 
 	const XYZ xyz(const Sample& sample) const;
+	TScalar luminance(const Sample& sample) const { return xyz(sample).y; }
 
 	Spectral& operator=(TParam f) { v_.fill(f); return *this; }
 	Spectral& operator=(const Spectral& other) { v_ = other.v_; return *this; }

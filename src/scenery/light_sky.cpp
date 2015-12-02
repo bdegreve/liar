@@ -266,7 +266,7 @@ const Spectral LightSky::doEmission(const Sample& sample, const TRay3D& ray, Bou
 
 	pdf = margPdfU * condPdfV * (resolution_.x * resolution_.y) / (4 * TNumTraits::pi);
 
-	return radiance_->lookUp(sample, context);
+	return radiance_->lookUp(sample, context, Illuminant);
 }
 
 
@@ -289,7 +289,7 @@ const Spectral LightSky::doSampleEmission(
 
 	Intersection intersection(this, fixedDistance_, seLeaving);
 	IntersectionContext context(*this, sample, shadowRay, intersection, 0);
-	return radiance_->lookUp(sample, context);
+	return radiance_->lookUp(sample, context, Illuminant);
 }
 
 
@@ -332,7 +332,7 @@ const Spectral LightSky::doSampleEmission(
 	BoundedRay shadowRay(begin - fixedDistance_ * dir, dir, tolerance, fixedDistance_, prim::IsAlreadyNormalized());
 	Intersection intersection(this, fixedDistance_, seLeaving);
 	IntersectionContext context(*this, sample, shadowRay, intersection, 0);
-	return radiance_->lookUp(sample, context);
+	return radiance_->lookUp(sample, context, Illuminant);
 }
 
 
@@ -485,7 +485,7 @@ const Spectral LightSky::lookUpRadiance(const Sample& sample, TScalar i, TScalar
 	Intersection intersection(this, fixedDistance_, seLeaving);
 	IntersectionContext context(*this, sample, ray, intersection, 0);
 
-	return radiance_->lookUp(sample, context);
+	return radiance_->lookUp(sample, context, Illuminant);
 }
 
 

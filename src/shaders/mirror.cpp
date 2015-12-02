@@ -82,7 +82,7 @@ size_t Mirror::doNumReflectionSamples() const
 
 TBsdfPtr Mirror::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-	return TBsdfPtr(new Bsdf(sample, context, reflectance_->lookUp(sample, context)));
+	return TBsdfPtr(new Bsdf(sample, context, reflectance_->lookUp(sample, context, Reflectant)));
 }
 
 

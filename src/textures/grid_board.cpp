@@ -77,13 +77,13 @@ void GridBoard::doSetState(const TPyObjectPtr& state)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral GridBoard::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral GridBoard::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
 {
 	const TScalar u = num::fractional(context.uv().x);
 	const TScalar v = num::fractional(context.uv().y);
 	const bool isA = u < halfThickness_.x || v < halfThickness_.x || 
 		u > (TNumTraits::one - halfThickness_.x) || v > (TNumTraits::one - halfThickness_.y);
-	return (isA ? textureA() : textureB())->lookUp(sample, context);	
+	return (isA ? textureA() : textureB())->lookUp(sample, context, type);	
 }
 
 

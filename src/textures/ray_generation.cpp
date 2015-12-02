@@ -46,9 +46,9 @@ RayGeneration::RayGeneration()
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral RayGeneration::doLookUp(const Sample&, const IntersectionContext& context) const
+const Spectral RayGeneration::doLookUp(const Sample&, const IntersectionContext& context, SpectralType type) const
 {
-	return Spectral(static_cast<TScalar>(context.rayGeneration()));
+	return Spectral(static_cast<TScalar>(context.rayGeneration()), type);
 }
 
 

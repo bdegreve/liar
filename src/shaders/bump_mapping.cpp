@@ -120,7 +120,7 @@ size_t BumpMapping::doNumTransmissionSamples() const
 
 void BumpMapping::doShadeContext(const Sample& sample, IntersectionContext& context) const
 {
-	const TScalar d = scale_ * average(displacement_->lookUp(sample, context));
+	const TScalar d = scale_ * displacement_->scalarLookUp(sample, context);
 	const TVector2D dD_dUv = dDisplacement_dUv(sample, context);
 
 	const TScalar s = num::sign(dot(cross(context.dPoint_dU(), context.dPoint_dV()), context.normal()));
@@ -189,20 +189,20 @@ const TVector2D BumpMapping::dDisplacement_dUv(
 		context.setPoint(p + .5 * context.dPoint_dI());
 		context.setNormal(n + .5 * context.dNormal_dI());
 		context.setUv(uv + .5 * context.dUv_dI());
-		dD_dIj.x = scale_ * average(displacement_->lookUp(sample, context));
+		dD_dIj.x = scale_ * displacement_->scalarLookUp(sample, context);
 		context.setPoint(p - .5 * context.dPoint_dI());
 		context.setNormal(n - .5 * context.dNormal_dI());
 		context.setUv(uv - .5 * context.dUv_dI());
-		dD_dIj.x -= scale_ * average(displacement_->lookUp(sample, context));
+		dD_dIj.x -= scale_ * displacement_->scalarLookUp(sample, context);
 
 		context.setPoint(p + .5 * context.dPoint_dJ());
 		context.setNormal(n + .5 * context.dNormal_dJ());
 		context.setUv(uv + .5 * context.dUv_dJ());
-		dD_dIj.y = scale_ * average(displacement_->lookUp(sample, context));
+		dD_dIj.y = scale_ * displacement_->scalarLookUp(sample, context);
 		context.setPoint(p - .5 * context.dPoint_dJ());
 		context.setNormal(n - .5 * context.dNormal_dJ());
 		context.setUv(uv - .5 * context.dUv_dJ());
-		dD_dIj.y -= scale_ * average(displacement_->lookUp(sample, context));
+		dD_dIj.y -= scale_ * displacement_->scalarLookUp(sample, context);
 
 		const TScalar dUv_dIj[4] =
 		{
@@ -236,20 +236,20 @@ const TVector2D BumpMapping::dDisplacement_dUv(
 	context.setPoint(p + dUv_2.x * context.dPoint_dU());
 	context.setNormal(n + dUv_2.x * context.dNormal_dU());
 	context.setUv(uv.x + dUv_2.x, uv.y);
-	dD_dUv.x = scale_ * average(displacement_->lookUp(sample, context));
+	dD_dUv.x = scale_ * displacement_->scalarLookUp(sample, context);
 	context.setPoint(p - dUv_2.x * context.dPoint_dU());
 	context.setNormal(n - dUv_2.x * context.dNormal_dU());
 	context.setUv(uv.x - dUv_2.x, uv.y);
-	dD_dUv.x -= scale_ * average(displacement_->lookUp(sample, context));
+	dD_dUv.x -= scale_ * displacement_->scalarLookUp(sample, context);
 
 	context.setPoint(p + dUv_2.y * context.dPoint_dV());
 	context.setNormal(n + dUv_2.y * context.dNormal_dV());
 	context.setUv(uv.x, uv.y + dUv_2.y);
-	dD_dUv.y = scale_ * average(displacement_->lookUp(sample, context));
+	dD_dUv.y = scale_ * displacement_->scalarLookUp(sample, context);
 	context.setPoint(p - dUv_2.y * context.dPoint_dV());
 	context.setNormal(n - dUv_2.y * context.dNormal_dV());
 	context.setUv(uv.x, uv.y - dUv_2.y);
-	dD_dUv.y -= scale_ * average(displacement_->lookUp(sample, context));
+	dD_dUv.y -= scale_ * displacement_->scalarLookUp(sample, context);
 
 	context.setPoint(p);
 	context.setNormal(n);

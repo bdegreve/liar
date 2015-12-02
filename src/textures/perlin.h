@@ -71,7 +71,7 @@ private:
 
 	LASS_META_ASSERT(hashSize_ % numGradients_ == 0, hash_size_must_be_a_multiple_of_num_gradient_vectors);
 
-	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context) const override;
+	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const override;
 	TScalar doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
 
 	void init(TSeed seed = 0);

@@ -64,7 +64,7 @@ private:
 		bool operator()(const TKeyTexture& a, const TKeyTexture& b) const { return a.first < b.first; }
 	};
 
-	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context) const override;
+	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const override;
 	TScalar doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
 
 	const TPyObjectPtr doGetState() const override;

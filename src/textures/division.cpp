@@ -44,9 +44,10 @@ Division::Division(const TTexturePtr& a, const TTexturePtr& b):
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral Division::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral Division::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
 {
-	return textureA()->lookUp(sample, context) / textureB()->lookUp(sample, context);
+#pragma LASS_FIXME("what about type==Reflectant?")
+	return textureA()->lookUp(sample, context, type) / textureB()->lookUp(sample, context, type);
 }
 
 

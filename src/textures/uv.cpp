@@ -47,11 +47,12 @@ Uv::Uv(const TTexturePtr& a, const TTexturePtr& b):
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral Uv::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral Uv::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
 {
+#pragma LASS_FIXME("what about type==Reflectant?")
 	const TScalar u = num::mod(context.uv().x, TNumTraits::one);
 	const TScalar v = num::mod(context.uv().y, TNumTraits::one);
-	return u * textureA()->lookUp(sample, context) + v * textureB()->lookUp(sample, context);	
+	return u * textureA()->lookUp(sample, context, type) + v * textureB()->lookUp(sample, context, type);
 }
 
 

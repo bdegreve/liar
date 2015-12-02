@@ -49,7 +49,7 @@ protected:
 	void doSetState(const TPyObjectPtr& state) override;
 
 private:
-	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context) const override;
+	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const override;
 	TScalar doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
 };
 

@@ -195,9 +195,9 @@ void Image::setDefaultMipMapping(const std::string& mode)
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral Image::doLookUp(const Sample& sample, const IntersectionContext& context) const
+const Spectral Image::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
 {
-	return Spectral::fromXYZ(lookUp(context), sample, Reflectant); // not true!!!!
+	return Spectral::fromXYZ(lookUp(context), sample, type);
 }
 
 

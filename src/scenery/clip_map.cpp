@@ -135,7 +135,7 @@ void ClipMap::doIntersect(const Sample& sample, const BoundedRay& ray, Intersect
 		}
 
 		IntersectionContext context(*child_, sample, boundedRay, intersection, 0);
-		if (average(clipMap_->lookUp(sample, context)) >= threshold_)
+		if (clipMap_->scalarLookUp(sample, context) >= threshold_)
 		{
 			intersection.push(this);
 			result.swap(intersection);

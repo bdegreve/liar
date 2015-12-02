@@ -46,9 +46,10 @@ Time::Time()
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral Time::doLookUp(const Sample& sample, const IntersectionContext&) const
+const Spectral Time::doLookUp(const Sample& sample, const IntersectionContext&, SpectralType type) const
 {
-	return Spectral(static_cast<TScalar>(sample.time()));
+#pragma LASS_FIXME("what about type==Reflectant?")
+	return Spectral(static_cast<TScalar>(sample.time()), type);
 }
 
 
