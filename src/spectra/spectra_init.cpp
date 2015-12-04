@@ -26,6 +26,7 @@
 // keep in alphabetical order please! [Bramz]
 //
 #include "black_body.h"
+#include "cauchy.h"
 #include "recovery_meng_simon.h"
 #include "sampled.h"
 
@@ -38,6 +39,7 @@ PY_DECLARE_MODULE_DOC(spectra,
 // keep in alphabetical order please! [Bramz]
 //
 PY_MODULE_CLASS(spectra, BlackBody)
+PY_MODULE_CLASS(spectra, Cauchy)
 PY_MODULE_CLASS(spectra, RecoveryMengSimon)
 PY_MODULE_CLASS(spectra, Sampled)
 

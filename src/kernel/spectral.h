@@ -138,6 +138,7 @@ public:
 
 	Spectral& inpabs() { v_.inpabs(); return *this; }
 	Spectral& inpmax(const Spectral& other) { v_.inpmax(other.v_); return *this; }
+	Spectral& inpmax(TParam f) { v_.inpmax(f); return *this; }
 	Spectral& inppow(const Spectral& other) { v_.inppow(other.v_); return *this; }
 	Spectral& inppow(TParam f) { v_.inppow(f); return *this; }
 	Spectral& inpsqrt() { v_.inpsqrt(); return *this; }
@@ -181,6 +182,18 @@ inline Spectral max(const Spectral& a, const Spectral& b)
 {
 	Spectral r(a);
 	return r.inpmax(b);
+}
+
+inline Spectral max(const Spectral& a, TScalar b)
+{
+	Spectral r(a);
+	return r.inpmax(b);
+}
+
+inline Spectral max(TScalar a, const Spectral& b)
+{
+	Spectral r(b);
+	return r.inpmax(a);
 }
 
 inline TScalar dot(const Spectral& a, const Spectral& b)

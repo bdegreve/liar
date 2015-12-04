@@ -67,7 +67,7 @@ def _load_recovery_meng_simon(resource):
     import pkgutil
     import json
     data = json.loads(pkgutil.get_data('liar', resource))
-    wavelengths = data['wavelengths']
+    wavelengths = [w * 1e-9 for w in data['wavelengths']]
     spectra = {tuple(s['xy']): s['spectrum'] for s in data['spectra']}
     return liar.spectra.RecoveryMengSimon(wavelengths, spectra)
 
