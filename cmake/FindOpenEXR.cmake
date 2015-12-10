@@ -1,9 +1,9 @@
 set(_hints ${OpenEXR_DIR} ${OpenEXR_DIR}/Deploy)
 
 find_path(OpenEXR_INCLUDE_DIR 
-	ImfRgbaFile.h
+	OpenEXR/ImfRgbaFile.h
 	HINTS ${_hints}
-	PATH_SUFFIXES include OpenEXR
+	PATH_SUFFIXES include
 	)
 mark_as_advanced(OpenEXR_INCLUDE_DIR)
 

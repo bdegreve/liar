@@ -26,6 +26,9 @@ if (OPENEXR_FOUND)
 		${OpenEXR_DEFINITIONS}
 		)
 	add_liar_codec(openexr ${OpenEXR_LIBRARIES})
+	if (OpenEXR_BUILD)
+		add_dependencies(openexr external_openexr)
+	endif()
 	install(
 		FILES ${OpenEXR_REDISTS}
 		DESTINATION codecs

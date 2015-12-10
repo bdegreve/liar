@@ -28,9 +28,9 @@
 #	pragma warning(disable: 4231) // ImfAttribute.h(410) : warning C4231: nonstandard extension used : 'extern' before template explicit instantiation
 #endif
 
-#include <ImfRgbaFile.h>
-#include <ImfStandardAttributes.h>
-#include <ImfIO.h>
+#include <OpenEXR/ImfRgbaFile.h>
+#include <OpenEXR/ImfStandardAttributes.h>
+#include <OpenEXR/ImfIO.h>
 #include <lass/io/binary_i_file.h>
 #include <lass/io/binary_o_file.h>
 
@@ -68,16 +68,23 @@ struct Handle
 	kernel::TRgbSpacePtr rgbSpace;
 	TResolution2D resolution;
 	TLine line;
-	util::ScopedPtr<LassIStream> istream;
-	util::ScopedPtr<LassOStream> ostream;
-	util::ScopedPtr<Imf::RgbaInputFile> input;
-	util::ScopedPtr<Imf::RgbaOutputFile> output;
+	std::unique_ptr<LassIStream> istream;
+	std::unique_ptr<LassOStream> ostream;
+	std::unique_ptr<Imf::RgbaInputFile> input;
+	std::unique_ptr<Imf::RgbaOutputFile> output;
 	int y;
 	Handle(const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace):
 		rgbSpace((rgbSpace ? rgbSpace : kernel::sRGB)->linearSpace()),
 		resolution(resolution)
 	{	
 	}
+	~Handle() 
+	{
+		input.reset();
+		output.reset();
+		istream.reset();
+		ostream.reset();
+	};
 };
 
 inline Imath::V2f point2DToV2f(const TPoint2D& p)
@@ -112,8 +119,8 @@ private:
 
 	TImageHandle doOpen(const std::wstring& path, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
 	{
-		util::ScopedPtr<LassIStream> istream(new LassIStream(path));
-		util::ScopedPtr<Imf::RgbaInputFile> input(new Imf::RgbaInputFile(*istream, 0));
+		std::unique_ptr<LassIStream> istream(new LassIStream(path));
+		std::unique_ptr<Imf::RgbaInputFile> input(new Imf::RgbaInputFile(*istream, 0));
 		const Imath::Box2i& dispWin = input->header().displayWindow();
 		const Imath::Box2i& dataWin = input->header().dataWindow();
 		const TResolution2D resolution(dispWin.max.x - dispWin.min.x + 1, dispWin.max.y - dispWin.min.y + 1);
@@ -128,7 +135,8 @@ private:
 
 	void doClose(TImageHandle handle) const
 	{
-		delete static_cast<Handle*>(handle);
+		Handle* h = static_cast<Handle*>(handle);
+		delete h;
 	}
 
 	const TResolution2D doResolution(TImageHandle handle) const

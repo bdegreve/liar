@@ -67,22 +67,19 @@ endif()
 
 option(OpenEXR_BUILD OFF)
 if(OpenEXR_BUILD)
-    set(OpenEXR_IlmBase_URL "http://download.savannah.nongnu.org/releases/openexr/ilmbase-1.0.2.tar.gz" CACHE STRING "URL to IlmBase source code")
-    set(OpenEXR_URL "http://download.savannah.nongnu.org/releases/openexr/openexr-1.7.0.tar.gz" CACHE STRING "URL to OpenEXR source code")
+    set(OpenEXR_IlmBase_URL "https://github.com/bdegreve/openexr/branches/v2.2fixes/IlmBase" CACHE STRING "URL to IlmBase source code")
+    set(OpenEXR_URL "https://github.com/bdegreve/openexr/branches/v2.2fixes/OpenEXR" CACHE STRING "URL to OpenEXR source code")
     mark_as_advanced(OpenEXR_IlmBase_URL OpenEXR_URL)
     find_package(ZLIB)
     if (ZLIB_INCLUDE_DIR AND ZLIB_LIBRARY AND Lass_PYTHON_EXECUTABLE)  
         ExternalProject_Add(
             external_ilmbase
             PREFIX ilmbase
-            URL "${OpenEXR_IlmBase_URL}"
-            PATCH_COMMAND 
-                "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/IlmBase-CMakeLists.txt" "./CMakeLists.txt"
-                && "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/IlmMacros.cmake" "."
-                && "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/IlmBaseConfig.cmake" "."
+            SVN_REPOSITORY "${OpenEXR_IlmBase_URL}"
             CMAKE_CACHE_ARGS 
                 "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}"
                 "-DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>"
+                "-DBUILD_TESTING:BOOL=OFF"
             BUILD_COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --config RelWithDebInfo
             INSTALL_COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --config RelWithDebInfo --target install
             INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/openexr"
@@ -90,16 +87,11 @@ if(OpenEXR_BUILD)
         ExternalProject_Add(
             external_openexr
             PREFIX openexr
-            URL "${OpenEXR_URL}"
-            PATCH_COMMAND 
-                "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/OpenEXR-CMakeLists.txt" "./CMakeLists.txt"
-                && "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/IlmMacros.cmake" "."
-                && "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/OpenEXRConfig.cmake" "."
-                && "${Lass_PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/OpenEXR-patch.py" "."
+            SVN_REPOSITORY "${OpenEXR_URL}"
             CMAKE_CACHE_ARGS 
                 "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}"
                 "-DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>"
-                "-DIlmBase_DIR:PATH=<INSTALL_DIR>"
+                "-DILMBASE_PACKAGE_PREFIX:PATH=<INSTALL_DIR>"
                 "-DZLIB_INCLUDE_DIR:PATH=${ZLIB_INCLUDE_DIR}"
                 "-DZLIB_LIBRARY:PATH=${ZLIB_LIBRARY}"
             BUILD_COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --config RelWithDebInfo
@@ -116,8 +108,8 @@ if(OpenEXR_BUILD)
         mark_as_advanced(OpenEXR_INCLUDE_DIR)
         foreach(_comp Half Iex IlmThread IlmImf)
             if (MSVC_IDE)
-                _set_if_empty(OpenEXR_${_comp}_LIBRARY "${_openexrdir}/lib/RelWithDebInfo/${_comp}.lib" FILEPATH)
-                _set_if_empty(OpenEXR_${_comp}_REDIST "${_openexrdir}/bin/RelWithDebInfo/${_comp}.dll" FILEPATH)
+                _set_if_empty(OpenEXR_${_comp}_LIBRARY "${_openexrdir}/lib/${_comp}-2_2.lib" FILEPATH)
+                _set_if_empty(OpenEXR_${_comp}_REDIST "${_openexrdir}/lib/${_comp}-2_2.dll" FILEPATH)
                 mark_as_advanced(OpenEXR_${_comp}_LIBRARY OpenEXR_${_comp}_REDIST)
             endif()
         endforeach()
