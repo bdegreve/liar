@@ -35,7 +35,7 @@ PY_DECLARE_CLASS_DOC(Spectrum, "Abstract base class of spectrum definitionas")
 	PY_CLASS_METHOD_NAME(Spectrum, setState, "__setstate__")
 
 	typedef impl::SpectrumFlat TSpectrumFlat;
-PY_DECLARE_CLASS_NAME(TSpectrumFlat, "SpectrumFlat");
+PY_DECLARE_CLASS_NAME(TSpectrumFlat, "Flat");
 PY_CLASS_INNER_CLASS_NAME(Spectrum, TSpectrumFlat, "Flat");
 PY_CLASS_MEMBER_R(TSpectrumFlat, value)
 
@@ -43,7 +43,7 @@ PY_CLASS_MEMBER_R(TSpectrumFlat, value)
 TSpectrumPtr Spectrum::black_(new TSpectrumFlat(0));
 
 typedef impl::SpectrumXYZ TSpectrumXYZ;
-PY_DECLARE_CLASS_NAME(TSpectrumXYZ, "SpectrumXYZ");
+PY_DECLARE_CLASS_NAME(TSpectrumXYZ, "XYZ");
 PY_CLASS_INNER_CLASS_NAME(Spectrum, TSpectrumXYZ, "XYZ");
 PY_CLASS_MEMBER_R(TSpectrumXYZ, value)
 
@@ -59,7 +59,7 @@ Spectrum::~Spectrum()
 
 Spectral Spectrum::evaluate(const Sample& sample, SpectralType type) const
 {
-#if LIAR_SPECTRAL_MODE_SMITS || LIAR_SPECTRAL_MODE_XYZ
+#if LIAR_SPECTRAL_MODE_SMITS || LIAR_SPECTRAL_MODE_RGB
 	if (!isCached_) // euhm ... potentially incorrect. type could be different.
 	{
 		cached_ = doEvaluate(sample, type);
@@ -120,7 +120,7 @@ void Spectrum::setState(const TPyObjectPtr& state)
 // --- protected -----------------------------------------------------------------------------------
 
 Spectrum::Spectrum()
-#if LIAR_SPECTRAL_MODE_SMITS || LIAR_SPECTRAL_MODE_XYZ
+#if LIAR_SPECTRAL_MODE_SMITS || LIAR_SPECTRAL_MODE_RGB
 	: isCached_(false)
 #endif
 {

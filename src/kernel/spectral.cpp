@@ -345,11 +345,12 @@ Spectral::Impl::Impl()
 Spectral::Impl* Spectral::pimpl_ = new Spectral::Impl();
 
 
-#elif LIAR_SPECTRAL_MODE_XYZ
+#elif LIAR_SPECTRAL_MODE_RGB
 
 Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample&, SpectralType type)
 {
-	return Spectral(TBands(xyz.x, xyz.y, xyz.z), type);
+	const RgbSpace::RGBA rgb = RgbSpace::defaultSpace()->linearConvert(xyz);
+	return Spectral(TBands(rgb.r, rgb.g, rgb.b), type);
 }
 
 Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, const Sample&, SpectralType type)
@@ -360,12 +361,13 @@ Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, cons
 Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, SpectralType type)
 {
 	const XYZ xyz = standardObserver().tristimulus(wavelengths, values);
-	return Spectral(TBands(xyz.x, xyz.y, xyz.z), type);
+	const RgbSpace::RGBA rgb = RgbSpace::defaultSpace()->linearConvert(xyz);
+	return Spectral(TBands(rgb.r, rgb.g, rgb.b), type);
 }
 
 const XYZ Spectral::xyz(const Sample&) const
 {
-	return XYZ(v_[0], v_[1], v_[2]);
+	return RgbSpace::defaultSpace()->linearConvert(RgbSpace::RGBA(v_[0], v_[1], v_[2]));
 }
 
 #elif LIAR_SPECTRAL_MODE_SINGLE

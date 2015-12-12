@@ -53,7 +53,7 @@ public:
 
 #if LIAR_SPECTRAL_MODE_SMITS
 	enum { numBands = 10 };
-#elif LIAR_SPECTRAL_MODE_XYZ
+#elif LIAR_SPECTRAL_MODE_RGB
 	enum { numBands = 3 };
 #elif LIAR_SPECTRAL_MODE_SINGLE
 	enum { numBands = 1 };
@@ -74,7 +74,7 @@ public:
 
 	static Spectral fromXYZ(const XYZ& xyz, const Sample& sample, SpectralType type);
 	static Spectral fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, const Sample& sample, SpectralType type);
-#if LIAR_SPECTRAL_MODE_SMITS || LIAR_SPECTRAL_MODE_XYZ
+#if LIAR_SPECTRAL_MODE_SMITS || LIAR_SPECTRAL_MODE_RGB
 	static Spectral fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, SpectralType type);
 #endif
 
@@ -88,7 +88,7 @@ public:
 		}
 		return Spectral(v, type);
 	}
-#elif LIAR_SPECTRAL_MODE_XYZ
+#elif LIAR_SPECTRAL_MODE_RGB
 	template <typename Func> static Spectral fromFunc(Func func, const Sample& sample, SpectralType type)
 	{
 		return Spectral::fromXYZ(standardObserver().tristimulus(func), sample, type);

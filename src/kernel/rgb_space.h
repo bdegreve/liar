@@ -82,6 +82,7 @@ public:
 	bool operator!=(const RgbSpace& other) const;
 
 	const TRgbSpacePtr linearSpace() const;
+	const TRgbSpacePtr withGamma(RGBA::TValue gamma) const;
 
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const;

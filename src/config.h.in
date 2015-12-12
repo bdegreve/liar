@@ -37,7 +37,7 @@
 #define LIAR_TIME double
 #define LIAR_TIME_DELTA double
 
-#cmakedefine LIAR_SPECTRAL_MODE_XYZ 1
+#cmakedefine LIAR_SPECTRAL_MODE_RGB 1
 #cmakedefine LIAR_SPECTRAL_MODE_SMITS 1
 #cmakedefine LIAR_SPECTRAL_MODE_SINGLE 1
 

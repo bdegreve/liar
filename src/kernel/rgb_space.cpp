@@ -50,7 +50,8 @@ PY_CLASS_METHOD_QUALIFIED_NAME_1(RgbSpace, convert, const XYZ, const RgbSpace::R
 PY_CLASS_METHOD_QUALIFIED_NAME_1(RgbSpace, convert, const RgbSpace::RGBA, const XYZ&, "toRGBA")
 PY_CLASS_METHOD_QUALIFIED_NAME_1(RgbSpace, linearConvert, const XYZ, const RgbSpace::RGBA&, "toXYZlinear")
 PY_CLASS_METHOD_QUALIFIED_NAME_1(RgbSpace, linearConvert, const RgbSpace::RGBA, const XYZ&, "toRGBAlinear")
-PY_CLASS_METHOD_DOC(RgbSpace, linearSpace, "return RGB space with gamma=1");
+PY_CLASS_METHOD_DOC(RgbSpace, linearSpace, "return RGB space with same chromaticities, but with gamma=1");
+PY_CLASS_METHOD_DOC(RgbSpace, withGamma, "return RGB space with same chromaticities, but with another gamma");
 PY_CLASS_METHOD_NAME(RgbSpace, operator==, python::methods::_eq_);
 PY_CLASS_METHOD_NAME(RgbSpace, operator!=, python::methods::_ne_);
 PY_CLASS_METHOD_NAME(RgbSpace, reduce, "__reduce__")
@@ -286,12 +287,20 @@ bool RgbSpace::operator!=(const RgbSpace& other) const
 
 const TRgbSpacePtr RgbSpace::linearSpace() const
 {
-	if (gamma_ == 1)
+	return withGamma(1);
+}
+
+
+
+const TRgbSpacePtr RgbSpace::withGamma(RGBA::TValue gamma) const
+{
+	if (gamma_ == gamma)
 	{
 		return TRgbSpacePtr(new RgbSpace(*this));
 	}
-	return TRgbSpacePtr(new RgbSpace(red_, green_, blue_, white_, 1));
+	return TRgbSpacePtr(new RgbSpace(red_, green_, blue_, white_, gamma));
 }
+
 
 
 const TPyObjectPtr RgbSpace::reduce() const
