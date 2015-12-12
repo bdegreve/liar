@@ -151,6 +151,10 @@ bool Translation::doContains(const Sample& sample, const TPoint3D& point) const
 const TAabb3D Translation::doBoundingBox() const
 {
 	const TAabb3D localBox = child_->boundingBox();
+	if (localBox.isEmpty())
+	{
+		return localBox;
+	}
 	return TAabb3D(localBox.min() + localToWorld_, localBox.max() + localToWorld_);
 }
 

@@ -79,9 +79,11 @@ void ProjectionMapping::doSetState(const TPyObjectPtr& state)
 
 void ProjectionMapping::doTransformContext(const Sample&, IntersectionContext& context) const
 {
-	const TPoint2D uv0 = (PY_ENFORCE_POINTER(projection_))->uv(context.point());
-	const TPoint2D uvI = projection_->uv(context.point() + context.dPoint_dI());
-	const TPoint2D uvJ = projection_->uv(context.point() + context.dPoint_dJ());
+	TRay3D ray;
+	TScalar t;
+	const TPoint2D uv0 = (PY_ENFORCE_POINTER(projection_))->uv(context.point(), ray, t);
+	const TPoint2D uvI = projection_->uv(context.point() + context.dPoint_dI(), ray, t);
+	const TPoint2D uvJ = projection_->uv(context.point() + context.dPoint_dJ(), ray, t);
 	context.setUv(uv0);
 	context.setDUv_dI(uvI - uv0);
 	context.setDUv_dJ(uvJ - uv0);

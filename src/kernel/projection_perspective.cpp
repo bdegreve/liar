@@ -22,7 +22,7 @@
  */
 
 #include "kernel_common.h"
-#include "perspective_projection.h"
+#include "projection_perspective.h"
 //#include <lass/num/distribution_transformations.h>
 
 namespace liar
@@ -30,24 +30,24 @@ namespace liar
 namespace kernel
 {
 
-PY_DECLARE_CLASS_DOC(PerspectiveProjection, "")
-PY_CLASS_CONSTRUCTOR_0(PerspectiveProjection)
-PY_CLASS_MEMBER_RW(PerspectiveProjection, position, setPosition)
-PY_CLASS_MEMBER_RW(PerspectiveProjection, sky, setSky)
-PY_CLASS_MEMBER_RW(PerspectiveProjection, direction, setDirection)
-PY_CLASS_METHOD(PerspectiveProjection, lookAt)
-PY_CLASS_MEMBER_RW(PerspectiveProjection, right, setRight)
-PY_CLASS_MEMBER_RW(PerspectiveProjection, down, setDown)
-PY_CLASS_MEMBER_RW(PerspectiveProjection, width, setWidth)
-PY_CLASS_MEMBER_RW(PerspectiveProjection, height, setHeight)
-PY_CLASS_MEMBER_RW(PerspectiveProjection, aspectRatio, setAspectRatio)
-PY_CLASS_MEMBER_RW(PerspectiveProjection, focalLength, setFocalLength)
-PY_CLASS_MEMBER_RW(PerspectiveProjection, fovAngle, setFovAngle)
+PY_DECLARE_CLASS_DOC(ProjectionPerspective, "")
+PY_CLASS_CONSTRUCTOR_0(ProjectionPerspective)
+PY_CLASS_MEMBER_RW(ProjectionPerspective, position, setPosition)
+PY_CLASS_MEMBER_RW(ProjectionPerspective, sky, setSky)
+PY_CLASS_MEMBER_RW(ProjectionPerspective, direction, setDirection)
+PY_CLASS_METHOD(ProjectionPerspective, lookAt)
+PY_CLASS_MEMBER_RW(ProjectionPerspective, right, setRight)
+PY_CLASS_MEMBER_RW(ProjectionPerspective, up, setUp)
+PY_CLASS_MEMBER_RW(ProjectionPerspective, width, setWidth)
+PY_CLASS_MEMBER_RW(ProjectionPerspective, height, setHeight)
+PY_CLASS_MEMBER_RW(ProjectionPerspective, aspectRatio, setAspectRatio)
+PY_CLASS_MEMBER_RW(ProjectionPerspective, focalLength, setFocalLength)
+PY_CLASS_MEMBER_RW(ProjectionPerspective, fovAngle, setFovAngle)
 
 
 // --- public --------------------------------------------------------------------------------------
 
-PerspectiveProjection::PerspectiveProjection():
+ProjectionPerspective::ProjectionPerspective():
 	Projection(),
 	position_(0, 0, 0),
 	sky_(0, 0, 1),
@@ -62,7 +62,7 @@ PerspectiveProjection::PerspectiveProjection():
 
 /** return position of camera
  */
-const TPoint3D& PerspectiveProjection::position() const
+const TPoint3D& ProjectionPerspective::position() const
 {
 	return position_;
 }
@@ -71,21 +71,21 @@ const TPoint3D& PerspectiveProjection::position() const
 
 /** set position of camera
  */
-void PerspectiveProjection::setPosition(const TPoint3D& position)
+void ProjectionPerspective::setPosition(const TPoint3D& position)
 {
 	position_ = position;
 }
 
 
 
-const TVector3D& PerspectiveProjection::sky() const
+const TVector3D& ProjectionPerspective::sky() const
 {
 	return sky_;
 }
 
 
 
-void PerspectiveProjection::setSky(const TVector3D& sky)
+void ProjectionPerspective::setSky(const TVector3D& sky)
 {
 	sky_ = sky;
 }
@@ -95,7 +95,7 @@ void PerspectiveProjection::setSky(const TVector3D& sky)
 /** return direction vector of camera.
  *  not always normalized
  */
-const TVector3D& PerspectiveProjection::direction() const
+const TVector3D& ProjectionPerspective::direction() const
 {
 	return direction_;
 }
@@ -104,45 +104,45 @@ const TVector3D& PerspectiveProjection::direction() const
 
 /** set @e direction of camera directly.
  */
-void PerspectiveProjection::setDirection(const TVector3D& direction) 
+void ProjectionPerspective::setDirection(const TVector3D& direction) 
 {
 	directionNormal_ = direction.normal();
 	rightNormal_ = cross(directionNormal_, sky_).normal();
-	downNormal_ = cross(directionNormal_, rightNormal_).normal();
+	upNormal_ = cross(rightNormal_, directionNormal_).normal();
 	initTransformation();
 }
 
 
 
 /** sets camera so it looks to @a target point.
- *  The PerspectiveProjection tilts around the @e sky vector towards @a target (
+ *  The ProjectionPerspective tilts around the @e sky vector towards @a target (
  *  so that @e position, @a target and the @e sky vector are coplanar), 
  *  and then pitches to line up @e direction with @a target.
  *  @e right and @e down are reset to be orthogonal to the direction and to 
  *  fit @e fovAngle and @e aspectRatio.
  */
-void PerspectiveProjection::lookAt(const TPoint3D& target)
+void ProjectionPerspective::lookAt(const TPoint3D& target)
 {
 	setDirection(target - position_);
 }
 
 
 
-const TVector3D& PerspectiveProjection::right() const
+const TVector3D& ProjectionPerspective::right() const
 {
 	return right_;
 }
 
 
 
-const TVector3D& PerspectiveProjection::down() const
+const TVector3D& ProjectionPerspective::up() const
 {
-	return down_;
+	return up_;
 }
 
 
 
-void PerspectiveProjection::setRight(const TVector3D& right)
+void ProjectionPerspective::setRight(const TVector3D& right)
 {
 	rightNormal_ = right.normal();
 	initTransformation();
@@ -150,22 +150,22 @@ void PerspectiveProjection::setRight(const TVector3D& right)
 
 
 
-void PerspectiveProjection::setDown(const TVector3D& down)
+void ProjectionPerspective::setUp(const TVector3D& up)
 {
-	downNormal_ = down.normal();
+	upNormal_ = up.normal();
 	initTransformation();
 }
 
 
 
-TScalar PerspectiveProjection::width() const
+TScalar ProjectionPerspective::width() const
 {
 	return width_;
 }
 
 
 
-TScalar PerspectiveProjection::height() const
+TScalar ProjectionPerspective::height() const
 {
 	return height_;
 }
@@ -174,14 +174,14 @@ TScalar PerspectiveProjection::height() const
 
 /** return aspect ratio
  */
-TScalar PerspectiveProjection::aspectRatio() const
+TScalar ProjectionPerspective::aspectRatio() const
 {
 	return aspectRatio_;
 }
 
 
 
-void PerspectiveProjection::setWidth(TScalar width)
+void ProjectionPerspective::setWidth(TScalar width)
 {
 	width_ = width;
 	aspectRatio_ = width_ / height_;
@@ -191,7 +191,7 @@ void PerspectiveProjection::setWidth(TScalar width)
 
 
 
-void PerspectiveProjection::setHeight(TScalar height)
+void ProjectionPerspective::setHeight(TScalar height)
 {
 	height_ = height;
 	aspectRatio_ = width_ / height_;
@@ -202,7 +202,7 @@ void PerspectiveProjection::setHeight(TScalar height)
 
 /** set aspect ratio and scale @e down
  */
-void PerspectiveProjection::setAspectRatio(TScalar ratio)
+void ProjectionPerspective::setAspectRatio(TScalar ratio)
 {
 	aspectRatio_ = ratio;
 	height_ = width_ / aspectRatio_;
@@ -211,7 +211,7 @@ void PerspectiveProjection::setAspectRatio(TScalar ratio)
 
 
 
-TScalar PerspectiveProjection::focalLength() const
+TScalar ProjectionPerspective::focalLength() const
 {
 	return focalLength_;
 }
@@ -220,14 +220,14 @@ TScalar PerspectiveProjection::focalLength() const
 
 /** return horizontal FOV in radians
  */
-TScalar PerspectiveProjection::fovAngle() const
+TScalar ProjectionPerspective::fovAngle() const
 {
 	return fovAngle_;
 }
 
 
 
-void PerspectiveProjection::setFocalLength(TScalar length)
+void ProjectionPerspective::setFocalLength(TScalar length)
 {
 	focalLength_ = length;
 	fovAngle_ = 2 * num::atan((width_ / 2) / focalLength_);
@@ -240,7 +240,7 @@ void PerspectiveProjection::setFocalLength(TScalar length)
  *  - @c right is scaled so that its orthogonal part to direction expands the FOV.
  *  - @c down is also scaled so that the aspect ratio is preserved.
  */
-void PerspectiveProjection::setFovAngle(TScalar radians)
+void ProjectionPerspective::setFovAngle(TScalar radians)
 {
 	fovAngle_ = radians;
 	focalLength_ = (width_ / 2) / num::tan(fovAngle_ / 2);
@@ -251,50 +251,60 @@ void PerspectiveProjection::setFovAngle(TScalar radians)
 
 // --- protected -----------------------------------------------------------------------------------
 
-const TRay3D PerspectiveProjection::doRay(const TUv& uv) const
+const TRay3D ProjectionPerspective::doRay(const TUv& uv, TScalar& pdf) const
 {
-	return TRay3D(position_, plane_.point(uv));
+	const TVector3D d = plane_.point(uv) - position_;
+	const TRay3D ray(position_, d);
+
+	const TScalar cosTheta = dot(ray.direction(), directionNormal_);
+	pdf = d.squaredNorm() / (width_ * height_ * cosTheta);
+
+	return ray;
 }
 
 
 
-const PerspectiveProjection::TUv PerspectiveProjection::doUv(const TPoint3D& point) const
+const Projection::TUv ProjectionPerspective::doUv(const TPoint3D& point, TRay3D& ray, TScalar& t) const
 {
-	const TRay3D ray(position_, point);
-	TScalar t;
+	if (squaredDistance(point, position_) < num::sqr(tolerance))
+	{
+		t = 0;
+		return TUv();
+	}
+	ray = TRay3D(position_, point);
 	if (prim::intersect(plane_, ray, t) != prim::rOne)
 	{
+		t = 0;
 		return TUv();
 	}
 	const TPoint3D intersection = ray.point(t);
-	const TUv uv = plane_.uv(intersection);
-	return TUv(uv.x, -uv.y);
+	return plane_.uv(intersection);
 }
 
 
 
 // --- private -------------------------------------------------------------------------------------
 
-void PerspectiveProjection::initTransformation()
+void ProjectionPerspective::initTransformation()
 {
 	direction_ = directionNormal_ * focalLength_;
 	right_ = rightNormal_ * width_;
-	down_ = downNormal_ * height_;
+	up_ = upNormal_ * height_;
 	
-	const TPoint3D support = position_ + direction_ - (down_ + right_) / 2;
-	plane_ = TProjectionPlane(support, right_, down_);
+	const TPoint3D support = position_ + direction_ - (right_ + up_) / 2;
+	plane_ = TProjectionPlane(support, right_, up_);
 }
 
 
 
-const TPyObjectPtr PerspectiveProjection::doGetState() const
+const TPyObjectPtr ProjectionPerspective::doGetState() const
 {
 	return python::makeTuple(
 		position_,
 		sky_,
 		directionNormal_,
 		rightNormal_,
-		downNormal_,
+		upNormal_,
 		width_,
 		height_,
 		focalLength_
@@ -303,14 +313,14 @@ const TPyObjectPtr PerspectiveProjection::doGetState() const
 
 
 
-void PerspectiveProjection::doSetState(const TPyObjectPtr& state)
+void ProjectionPerspective::doSetState(const TPyObjectPtr& state)
 {
 	LASS_ENFORCE(python::decodeTuple(state,
 		position_,
 		sky_,
 		directionNormal_,
 		rightNormal_,
-		downNormal_,
+		upNormal_,
 		width_,
 		height_,
 		focalLength_

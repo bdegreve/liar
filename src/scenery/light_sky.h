@@ -62,7 +62,6 @@ public:
 private:
 
 	typedef std::vector<TScalar> TMap;
-	typedef std::vector<XYZ> TXYZMap;
 
 	LASS_UTIL_VISITOR_DO_ACCEPT;
 
@@ -91,7 +90,7 @@ private:
 	void doSetLightState(const TPyObjectPtr& state);
 
 	void init(const TTexturePtr& radiance);
-	void buildPdf(TMap& pdf, /*TXYZMap& radianceMap,*/ TScalar& power, util::ProgressIndicator& progress) const;
+	void buildPdf(TMap& pdf, TScalar& power, util::ProgressIndicator& progress) const;
 	void buildCdf(const TMap& iPdf, TMap& oMarginalCdfU, TMap& oConditionalCdfV, util::ProgressIndicator& progress) const;
 	void sampleMap(const TPoint2D& sample, TScalar&, TScalar& j, TScalar& pdf) const;
 	const TVector3D direction(TScalar i, TScalar j) const;
@@ -102,7 +101,6 @@ private:
 	TSceneObjectPtr portal_;
 	TMap marginalCdfU_;
 	TMap conditionalCdfV_;
-	//TXYZMap radianceMap_;
 	unsigned numberOfSamples_;
 	TResolution2D resolution_;
 	TVector2D invResolution_;

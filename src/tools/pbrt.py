@@ -16,6 +16,8 @@ def parse(path, *args, **kwargs):
 
 class PbrtScene(object):
 	def __init__(self, verbosity=NORMAL, render_immediately=True, display=True, threads=None):
+		self.__logger = logging.getLogger("liar.tools.pbrt")
+		self.__logger.setLevel({QUIET: logging.CRITICAL, NORMAL: logging.INFO, VERBOSE: logging.DEBUG}[verbosity])
 		self.engine = liar.RenderEngine()
 		self.engine.numberOfThreads = threads or liar.RenderEngine.AUTO_NUMBER_OF_THREADS
 		self.Identity()
@@ -28,8 +30,7 @@ class PbrtScene(object):
 		self.PixelFilter()
 		self.Film()
 		self.SurfaceIntegrator()
-		self.__logger = logging.getLogger("liar.tools.pbrt")
-		self.__logger.setLevel({QUIET: logging.CRITICAL, NORMAL: logging.INFO, VERBOSE: logging.DEBUG}[verbosity])
+		self.Sampler()
 
 	def Identity(self):
 		self.__cur_transform = liar.Transformation3D.identity()
@@ -209,9 +210,7 @@ class PbrtScene(object):
 		self.__film = getattr(self, "_film_" + name)(**kwargs)
 
 	def _film_image(self, filename="pbrt.exr", writefrequency=-1, premultiplyalpha=True):
-		image = liar.output.Image(filename, self.resolution)
-		image.rgbSpace = liar.CIEXYZ
-		return image
+		return liar.output.Image(filename, self.resolution)
 
 
 	def PixelFilter(self, name="mitchell", **kwargs):
@@ -374,8 +373,8 @@ class PbrtScene(object):
 	def _texture_fbm(self, octaves=8, roughness=.5):
 		return liar.textures.FBm(octaves, roughness)
 
-	def _texture_imagemap(self, filename, wrap="repeat", maxanisotropy=8, trilinear=False):
-		return liar.textures.Image(filename, liar.CIEXYZ)
+	def _texture_imagemap(self, filename, wrap="repeat", maxanisotropy=8, trilinear=False, gamma=1):
+		return liar.textures.Image(filename, _RGB_SPACE.withGamma(gamma))
 
 	def _texture_windy(self):
 		from liar.textures import FBm, TransformationLocal, Abs, Product
@@ -398,7 +397,7 @@ class PbrtScene(object):
 		# arg as a path to an image file
 		try:
 			if os.path.isfile(arg):
-				tex = liar.textures.Image(arg, liar.CIEXYZ)
+				tex = liar.textures.Image(arg, _RGB_SPACE)
 		except TypeError:
 			pass
 		if not tex:
@@ -475,24 +474,35 @@ class PbrtScene(object):
 		return liar.scenery.LightDirectional(direction, _color(L))
 
 	def _lightsource_infinite(self, L=(1, 1, 1), nsamples=1, mapname=None):
-		tex = self._get_texture(L)
-		if mapname:
-			if L == (1, 1, 1) or L == 1:
-				tex = self._get_texture(mapname)
-			else:
-				tex = liar.textures.Product(tex, self._get_texture(mapname))
-		try:
-			tex.mipMapping = 'none'
-		except AttributeError:
-			pass
+		tex, res = self._get_light_texture(L, mapname)
 		flipAndShiftU = liar.Transformation2D([-1, 0, -.25, 0, 1, 0, 0, 0, 1])
 		light = liar.scenery.LightSky(liar.textures.TransformationUv(tex, flipAndShiftU))
+		if res:
+			light.samplingResolution = res
 		light.numberOfEmissionSamples = nsamples
 		light.shader = liar.shaders.Unshaded(light.radiance)
 		return light
 
 	def _lightsource_point(self, from_=(0, 0, 0), I=(1, 1, 1)):
 		return liar.scenery.LightPoint(from_, _color(I))
+
+	def _lightsource_projection(self, I=(1, 1, 1), fov=45, mapname=None):
+		intensity, resolution = self._get_light_texture(I, mapname)
+		light = liar.scenery.LightProjection()
+		light.intensity = intensity
+		light.projection.sky, light.projection.direction = (0, 1, 0), (0, 0, 1)
+		light.projection.right, light.projection.up = (1, 0, 0), (0, -1, 0)
+		if resolution:
+			light.samplingResolution = resolution
+			light.projection.aspectRatio = resolution[0] / resolution[1]
+		else:
+			light.projection.aspectRatio = 1
+		light.projection.fovAngle = math.radians(fov)
+		if light.projection.aspectRatio > 1:
+			# PBRT's fov is on shortest edge, but liar's fov is always on width
+			# fix by scaling focalLength
+			light.projection.focalLength /= light.projection.aspectRatio
+		return light
 
 	def _lightsource_spot(self, I=(1,1,1), from_=(0, 0, 0), to=(0, 0, 1), coneangle=30, conedeltaangle=5):
 		light = liar.scenery.LightSpot()
@@ -503,6 +513,21 @@ class PbrtScene(object):
 		light.innerAngle = math.radians(conedeltaangle)
 		return light
 
+	def _get_light_texture(self, factor, mapname):
+		if not mapname:
+			return self._get_texture(multiplier)
+		tex = self._get_texture(mapname)
+		try:
+			res = tex.resolution
+		except AttributeError:
+			res = None
+		try:
+			tex.mipMapping = 'none'
+		except AttributeError:
+			pass
+		if not (factor == (1, 1, 1) or factor == 1):
+			tex = liar.textures.Product(self._get_texture(factor), tex)
+		return tex, res
 
 	def SurfaceIntegrator(self, name="directlighting", **kwargs):
 		self.verify_options()
@@ -693,15 +718,14 @@ def _mul(arg, factor):
 def _color(*args):
 	if len(args) == 1:
 		try:
-			s1 = s2 = s3 = float(args[0])
+			return liar.Spectrum.Flat(float(args[0]))
 		except TypeError:
-			s1, s2, s3 = args[0]
+			r, g, b = args[0]
 	else:
-		s1, s2, s3 = args
-	x = 0.412453 * s1 + 0.357580 * s2 + 0.180423 * s3
-	y = 0.212671 * s1 + 0.715160 * s2 + 0.072169 * s3
-	z = 0.019334 * s1 + 0.119193 * s2 + 0.950227 * s3
-	return liar.rgb(x, y, z, liar.CIEXYZ) # euhm, yes, we should have something different for this :-)
+		r, g, b = args
+	return liar.rgb(r, g, b, _RGB_SPACE)
+
+_RGB_SPACE = liar.sRGB.linearSpace()
 
 
 try:

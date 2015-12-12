@@ -21,7 +21,7 @@
  *  http://liar.bramz.net/
  */
 
-/** @class liar::kernel::PerspectiveProjection
+/** @class liar::kernel::ProjectionPerspective
  *  @brief handles the maths of the projection
  *  @author Bram de Greve [Bramz]
  *
@@ -31,8 +31,8 @@
  *  ease copying attributes from camera to texture.
  */
 
-#ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_PERSPECTIVE_PROJECTION_H
-#define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_PERSPECTIVE_PROJECTION_H
+#ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_PROJECTION_PERSPECTIVE_H
+#define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_PROJECTION_PERSPECTIVE_H
 
 #include "kernel_common.h"
 #include "projection.h"
@@ -43,12 +43,12 @@ namespace liar
 namespace kernel
 {
 
-class LIAR_KERNEL_DLL PerspectiveProjection: public Projection
+class LIAR_KERNEL_DLL ProjectionPerspective: public Projection
 {
 	PY_HEADER(Projection)
 public:
 
-	PerspectiveProjection();
+	ProjectionPerspective();
 
 	const TPoint3D& position() const;
 	void setPosition(const TPoint3D& iPosition);
@@ -60,9 +60,9 @@ public:
 	const TVector3D& sky() const;
 	void setSky(const TVector3D& sky);
 
-	const TVector3D& down() const;
+	const TVector3D& up() const;
 	const TVector3D& right() const;
-	void setDown(const TVector3D& down);
+	void setUp(const TVector3D& down);
 	void setRight(const TVector3D& right);
 
 	TScalar width() const;
@@ -81,8 +81,8 @@ private:
 
 	typedef prim::Plane3D<TScalar, prim::Parametric, prim::Unnormalized> TProjectionPlane;
 
-	const TRay3D doRay(const TUv& uv) const;
-	const TUv doUv(const TPoint3D& point) const;
+	const TRay3D doRay(const TUv& uv, TScalar& pdf) const;
+	const TUv doUv(const TPoint3D& point, TRay3D& ray, TScalar& t) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
@@ -92,12 +92,12 @@ private:
 	TProjectionPlane plane_;
 	TPoint3D position_;
 	TVector3D right_;        /**< i unit */
-	TVector3D down_;         /**< j unit */
+	TVector3D up_;         /**< j unit */
 	TVector3D direction_;    /**< k unit */
 	TVector3D sky_;
 	TVector3D directionNormal_;
 	TVector3D rightNormal_;
-	TVector3D downNormal_;
+	TVector3D upNormal_;
 	TScalar width_;
 	TScalar height_;
 	TScalar aspectRatio_;

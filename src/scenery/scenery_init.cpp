@@ -34,6 +34,7 @@
 #include "light_area.h"
 #include "light_directional.h"
 #include "light_point.h"
+#include "light_projection.h"
 #include "light_sky.h"
 #include "light_spot.h"
 #include "list.h"
@@ -68,6 +69,7 @@ PY_MODULE_CLASS(scenery, Goursat)
 PY_MODULE_CLASS(scenery, LightArea)
 PY_MODULE_CLASS(scenery, LightDirectional)
 PY_MODULE_CLASS(scenery, LightPoint)
+PY_MODULE_CLASS(scenery, LightProjection)
 PY_MODULE_CLASS(scenery, LightSky)
 PY_MODULE_CLASS(scenery, LightSpot)
 PY_MODULE_CLASS(scenery, List)

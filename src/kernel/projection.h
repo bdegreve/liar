@@ -35,6 +35,9 @@ namespace liar
 namespace kernel
 {
 
+class Projection;
+typedef python::PyObjectPtr<Projection>::Type TProjectionPtr;
+
 class LIAR_KERNEL_DLL Projection: public python::PyObjectPlus
 {
 	PY_HEADER(python::PyObjectPlus)
@@ -44,8 +47,11 @@ public:
 
 	virtual ~Projection();
 
-	const TRay3D ray(const TUv& uv) const { return doRay(uv); }
-	const TUv uv(const TPoint3D& point) const { return doUv(point); }
+	const TRay3D ray(const TUv& uv, TScalar& pdf) const { return doRay(uv, pdf); }
+	const TRay3D ray(TScalar u, TScalar v, TScalar& pdf) const { return doRay(TUv(u, v), pdf); }
+	const TRay3D ray(TScalar u, TScalar v) const { TScalar pdf; return doRay(TUv(u, v), pdf); }
+	
+	const TUv uv(const TPoint3D& point, TRay3D& ray, TScalar& t) const { return doUv(point, ray, t); }
 
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const { return doGetState(); }
@@ -57,8 +63,8 @@ protected:
 
 private:
 
-	virtual const TRay3D doRay(const TUv& uv) const = 0;
-	virtual const TUv doUv(const TPoint3D& point) const = 0;
+	virtual const TRay3D doRay(const TUv& uv, TScalar& pdf) const = 0;
+	virtual const TUv doUv(const TPoint3D& point, TRay3D& ray, TScalar& t) const = 0;
 
 	virtual const TPyObjectPtr doGetState() const = 0;
 	virtual void doSetState(const TPyObjectPtr& state) = 0;

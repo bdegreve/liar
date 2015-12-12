@@ -50,6 +50,8 @@ public:
 	BoundedRay(const TPoint3D& support, const TPoint3D& iLookAt,
 		TScalar nearLimit = liar::TNumTraits::zero, TScalar farLimit = liar::TNumTraits::infinity);
 
+	BoundedRay operator-() const;
+
 	const TRay3D& unboundedRay() const { return unboundedRay_; }
 	TScalar nearLimit() const { return nearLimit_; }
 	TScalar farLimit() const { return farLimit_; }

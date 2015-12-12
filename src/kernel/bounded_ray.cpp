@@ -98,6 +98,17 @@ BoundedRay::BoundedRay(const TPoint3D& support, const TPoint3D& lookAt, TScalar 
 
 
 
+/** Reverse bounded ray, from far to near limit.
+ *	Support point will be put in origina farLimit.
+ */
+BoundedRay BoundedRay::operator-() const
+{
+	LASS_ENFORCE(!num::isInf(farLimit_));
+	return BoundedRay(unboundedRay_.point(farLimit_), -direction(), 0, farLimit_ - nearLimit_);
+}
+
+
+
 // --- protected -----------------------------------------------------------------------------------
 
 

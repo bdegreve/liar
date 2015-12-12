@@ -140,7 +140,7 @@ void LightSky::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod&)
 
 	util::ProgressIndicator progress("Preprocessing environment map");
 	TMap pdf;
-	buildPdf(pdf, /*radianceMap_,*/ power_, progress);
+	buildPdf(pdf, power_, progress);
 	buildCdf(pdf, marginalCdfU_, conditionalCdfV_, progress);
 }
 
@@ -381,13 +381,12 @@ void LightSky::init(const TTexturePtr& radiance)
 
 
 
-void LightSky::buildPdf(TMap& pdf, /*TXYZMap& radianceMap,*/ TScalar& power, util::ProgressIndicator& progress) const
+void LightSky::buildPdf(TMap& pdf, TScalar& power, util::ProgressIndicator& progress) const
 {
 	Sample dummy;
 
 	const size_t n = resolution_.x * resolution_.y;
 	TMap tempPdf(n);
-	//TXYZMap radMap(n);
 	TScalar averageIntensity = 0;
 	for (size_t i = 0; i < resolution_.x; ++i)
 	{
@@ -399,14 +398,12 @@ void LightSky::buildPdf(TMap& pdf, /*TXYZMap& radianceMap,*/ TScalar& power, uti
 			const TScalar radiance = lookUpRadiance(dummy, fi, fj).absAverage();
 			const TScalar projectedArea = portal_ ? portal_->area(direction(fi, fj)) : (TNumTraits::pi * num::sqr(sceneBounds_.radius()));
 			const TScalar intensity = radiance * projectedArea;
-			//radMap[i * resolution_.y + j] = radiance;
 			tempPdf[i * resolution_.y + j] = intensity;
 			averageIntensity += intensity;
 		}
 	}
 	averageIntensity /= n;
 
-	//radianceMap.swap(radMap);
 	pdf.swap(tempPdf);
 	power = averageIntensity * (4 * TNumTraits::pi);
 }

@@ -42,6 +42,7 @@
 #include "scene_object.h"
 #include "shader.h"
 #include "spectrum.h"
+#include "spherical_projection.h"
 #include "spline.h"
 #include "xyz.h"
 #include "texture.h"
@@ -82,6 +83,7 @@ PY_MODULE_CLASS(kernel, liar::kernel::Medium)
 PY_MODULE_CLASS(kernel, liar::kernel::Observer)
 PY_MODULE_CLASS(kernel, liar::kernel::Projection)
 	PY_MODULE_CLASS(kernel, liar::kernel::PerspectiveProjection)
+	PY_MODULE_CLASS(kernel, liar::kernel::SphericalProjection)
 PY_MODULE_CLASS(kernel, liar::kernel::RgbSpace)
 PY_MODULE_CLASS(kernel, liar::kernel::Recovery)
 PY_MODULE_CLASS(kernel, liar::kernel::RayTracer)

@@ -165,8 +165,6 @@ Conductor::ConductorBsdf::ConductorBsdf(const Sample& sample, const Intersection
 	eta_(eta),
 	kappa_(kappa)
 {
-	LASS_ASSERT(ior_ > 0);
-	LASS_ASSERT(kappa_ > 0);
 }
 
 
