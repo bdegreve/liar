@@ -30,8 +30,9 @@
 #include "image_codec.h"
 #include "medium.h"
 #include "observer.h"
-#include "perspective_projection.h"
 #include "projection.h"
+#include "projection_perspective.h"
+#include "projection_spherical.h"
 #include "sampler.h"
 #include "ray_tracer.h"
 #include "recovery.h"
@@ -42,7 +43,6 @@
 #include "scene_object.h"
 #include "shader.h"
 #include "spectrum.h"
-#include "spherical_projection.h"
 #include "spline.h"
 #include "xyz.h"
 #include "texture.h"
@@ -82,8 +82,8 @@ PY_MODULE_CLASS(kernel, liar::kernel::ImageCodecLass)
 PY_MODULE_CLASS(kernel, liar::kernel::Medium)
 PY_MODULE_CLASS(kernel, liar::kernel::Observer)
 PY_MODULE_CLASS(kernel, liar::kernel::Projection)
-	PY_MODULE_CLASS(kernel, liar::kernel::PerspectiveProjection)
-	PY_MODULE_CLASS(kernel, liar::kernel::SphericalProjection)
+	PY_MODULE_CLASS(kernel, liar::kernel::ProjectionPerspective)
+	PY_MODULE_CLASS(kernel, liar::kernel::ProjectionSpherical)
 PY_MODULE_CLASS(kernel, liar::kernel::RgbSpace)
 PY_MODULE_CLASS(kernel, liar::kernel::Recovery)
 PY_MODULE_CLASS(kernel, liar::kernel::RayTracer)
