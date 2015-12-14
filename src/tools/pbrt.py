@@ -3,7 +3,7 @@ import os
 import math
 import logging
 import liar
-
+import liar.tools.spd
 
 VERBOSITIES = QUIET, NORMAL, VERBOSE = range(3)
 
@@ -195,10 +195,14 @@ class PbrtScene(object):
 			name = "stratified"
 		self.engine.sampler = getattr(self, "_sampler_" + name)(**kwargs)
 
-	def _sampler_stratified(self, jitter=True, xsamples=2, ysamples=2, pixelsamples=0):
-		sampler = liar.samplers.Stratifier()
+	def _sampler_stratified(self, jitter=True, xsamples=2, ysamples=2, pixelsamples=None):
+		if pixelsamples:
+			sampler = liar.samplers.LatinHypercube()
+			sampler.samplesPerPixel = pixelsamples
+		else:
+			sampler = liar.samplers.Stratifier()
+			sampler.samplesPerPixel = xsamples * ysamples
 		sampler.jittered = jitter
-		sampler.samplesPerPixel = pixelsamples or (xsamples * ysamples)
 		return sampler
 
 
@@ -255,11 +259,9 @@ class PbrtScene(object):
 		else:
 			as_vertex_index = lambda i: (i, )
 
-		verts = split_as_tuples(P, 3)
-		normals = split_as_tuples(N or [], 3)
-		uvs = split_as_tuples(uv or [], 2)
+		uv = split_as_tuples(uv or [], 2)
 		triangles = split_as_tuples([as_vertex_index(i) for i in indices], 3)
-		return liar.scenery.TriangleMesh(verts, normals, uvs, triangles)
+		return liar.scenery.TriangleMesh(P, N or [], uv or [], triangles)
 
 	def _shape_loopsubdiv(self, nlevels=3, *args, **kwargs):
 		mesh = self._shape_trianglemesh(*args, **kwargs)
@@ -334,6 +336,7 @@ class PbrtScene(object):
 			mat = liar.shaders.LinearInterpolator([(0, transparent), (1, mat)], self._get_texture(opacity))
 		return mat
 
+
 	def Texture(self, name, type, class_, mapping="uv", uscale=1, vscale=1, udelta=0, vdelta=0, v1=(1,0,0), v2=(0,1,0), **kwargs):
 		self.verify_world()
 		tex = getattr(self, "_texture_" + class_)(**kwargs)
@@ -347,17 +350,6 @@ class PbrtScene(object):
 				tex = liar.textures.TransformationUv(tex, transform)
 		self.__textures[name] = tex
 
-	def _texture_constant(self, value):
-		return self._get_texture(value)
-
-	def _texture_scale(self, tex1=1, tex2=1):
-		tex1, tex2 = self._get_texture(tex1), self._get_texture(tex2)
-		return liar.textures.Product([tex1, tex2])
-
-	def _texture_mix(self, tex1=0, tex2=1, amount=0.5):
-		tex1, tex2, amount = self._get_texture(tex1), self._get_texture(tex2), self._get_texture(amount)
-		return liar.textures.LinearInterpolator([(0, tex1), (1, tex2)], amount)
-
 	def _texture_checkerboard(self, tex1=1, tex2=0, dimension=2, aamode="closedform"):
 		tex1, tex2 = self._get_texture(tex1), self._get_texture(tex2)
 		assert dimension in (2, 3)
@@ -370,11 +362,22 @@ class PbrtScene(object):
 			tex = liar.textures.TransformationUv(tex, liar.Transformation2D.scaler(.5))
 		return tex
 
+	def _texture_constant(self, value):
+		return self._get_texture(value)
+
 	def _texture_fbm(self, octaves=8, roughness=.5):
 		return liar.textures.FBm(octaves, roughness)
 
 	def _texture_imagemap(self, filename, wrap="repeat", maxanisotropy=8, trilinear=False, gamma=1):
 		return liar.textures.Image(filename, _RGB_SPACE.withGamma(gamma))
+
+	def _texture_mix(self, tex1=0, tex2=1, amount=0.5):
+		tex1, tex2, amount = self._get_texture(tex1), self._get_texture(tex2), self._get_texture(amount)
+		return liar.textures.LinearInterpolator([(0, tex1), (1, tex2)], amount)
+
+	def _texture_scale(self, tex1=1, tex2=1):
+		tex1, tex2 = self._get_texture(tex1), self._get_texture(tex2)
+		return liar.textures.Product([tex1, tex2])
 
 	def _texture_windy(self):
 		from liar.textures import FBm, TransformationLocal, Abs, Product
@@ -383,15 +386,18 @@ class PbrtScene(object):
 		return Product(waveHeight, windStrength)
 
 	def _get_texture(self, arg):
+		# arg is already a texture
+		if isinstance(arg, liar.Texture):
+			return arg
 		# arg as a texture name
 		try:
 			return self.__textures[arg]
-		except KeyError:
+		except (KeyError, TypeError):
 			pass
 		# arg as a cached texture
 		try:
 			return self.__auto_textures[arg]
-		except KeyError:
+		except (KeyError, TypeError):
 			pass
 		tex = None
 		# arg as a path to an image file
@@ -419,7 +425,10 @@ class PbrtScene(object):
 				pass
 		if not tex:
 			raise ValueError("%(arg)r is nor a registered texture name, nor a imagemap path, nor an RGB triple, nor a single float" % vars())
-		self.__auto_textures[arg] = tex
+		try:
+			self.__auto_textures[arg] = tex
+		except TypeError:
+			pass
 		return tex
 
 
@@ -452,10 +461,12 @@ class PbrtScene(object):
 		fog.up = updir
 		return fog
 
+
 	def LightSource(self, name, **kwargs):
 		self.verify_world()
 		light = getattr(self, "_lightsource_" + name)(**kwargs)
 		self.__objects.append(self.__with_cur_transform(light))
+
 
 	def AreaLightSource(self, name, **kwargs):
 		self.verify_world()
@@ -529,6 +540,7 @@ class PbrtScene(object):
 			tex = liar.textures.Product(self._get_texture(factor), tex)
 		return tex, res
 
+
 	def SurfaceIntegrator(self, name="directlighting", **kwargs):
 		self.verify_options()
 		self.engine.tracer = getattr(self, "_surfaceintegrator_" + name)(**kwargs)
@@ -553,7 +565,13 @@ class PbrtScene(object):
 		tracer.isRayTracingDirect = not directwithphotons
 		return tracer
 
+
 	def VolumeIntegrator(self, *args, **kwargs):
+		self.verify_options()
+		# we don't do special settings yet
+
+
+	def Renderer(self, *args, **kwargs):
 		self.verify_options()
 		# we don't do special settings yet
 
@@ -585,7 +603,7 @@ class PbrtScene(object):
 		identifier = None
 		args = []
 		kwargs = {}
-		key = None
+		arg_type, arg_name = None, None
 		tokens = _scanner(path, stream)
 		for token_type, token, line_number in tokens:
 			if token_type == _IDENTIFIER:
@@ -606,28 +624,76 @@ class PbrtScene(object):
 						identifier += '_'
 			elif token_type == _PARAMETER:
 				#assert not token in kwargs
-				key = token
-				if keyword.iskeyword(key):
-					key += '_'
+				arg_type, arg_name = token
+				if keyword.iskeyword(arg_name):
+					arg_name += '_'
 			else:
 				if token_type == _START_LIST:
-					arg = []
+					value = []
 					for token_type, token, line_number in tokens:
 						if token_type == _END_LIST:
 							break
 						assert token_type in (_NUMBER, _STRING), "syntax error in file %(path)r, line %(line_number)d: parameter lists should only contain numbers and strings" % vars()
-						arg.append(token)
-					arg = _unwrap(tuple(arg))
+						value.append(token)
 				else:
-					arg = token
-				if key:
-					kwargs[key] = arg
-					key = None
+					value = [token]
+				if arg_type:
+					value = getattr(self, '_arg_' + arg_type)(*value)
+					arg_type = None
+				value = _unwrap(tuple(value))
+				if arg_name:
+					kwargs[arg_name] = value
+					arg_name = None
 				else:
-					args.append(arg)
+					args.append(value)
 		if identifier:
 			self.__print_statement(identifier, args, kwargs)
 			getattr(self, identifier)(*args, **kwargs)
+
+
+	def _arg_integer(self, *values):
+		return map(int, values)
+
+	def _arg_float(self, *values):
+		return map(float, values)
+
+	def _arg_point(self, *values):
+		return _split_as_tuples(values, 3)
+
+	def _arg_vector(self, *values):
+		return _split_as_tuples(values, 3)
+
+	def _arg_normal(self, *values):
+		return _split_as_tuples(values, 3)
+
+	def _arg_bool(self, *values):
+		return map(bool, values)
+
+	def _arg_string(self, *values):
+		return map(str, values)
+
+	def _arg_texture(self, *values):
+		return map(self._get_texture, values)
+
+	def _arg_xyz(self, *values):
+		return map(liar.Spectrum.XYZ, _split_as_tuples(values, 3))
+
+	def _arg_rgb(self, *values):
+		return [liar.rgb(rgb, _RGB_SPACE) for rgb in _split_as_tuples(values, 3)]
+
+	_arg_color = _arg_rgb
+
+	def _arg_blackbody(self, *values):
+		assert False, values
+
+	def _arg_spectrum(self, *values):
+		if len(values) == 1:
+			filename, = values
+			assert _is_string(filename), filename
+			return liar.tools.spd.load(filename)
+		wavelengths, values = zip(*_split_as_tuples(values, 2))
+		return [liar.spectra.Sampled(wavelengths, values)]
+
 
 	def __print_statement(self, identifier, args, kwargs):
 		def truncated_repr(x, n=80):
@@ -653,15 +719,15 @@ _IDENTIFIER, _NUMBER, _STRING, _PARAMETER, _START_LIST, _END_LIST = range(6)
 def _scanner(path, stream):
 	from re import Scanner
 	scanner = Scanner([
-		(r"[a-zA-Z_]\w*", lambda scanner, token: (_IDENTIFIER, token)),
-		(r"[\-+]?(\d+\.\d*|\.\d+)([eE][\-+]?[0-9]+)?", lambda scanner, token: (_NUMBER, float(token))),
-		(r"[\-+]?\d+", lambda scanner, token: (_NUMBER, int(token))),
-		(r'\[', lambda scanner, token: (_START_LIST, token)),
-		(r'\]', lambda scanner, token: (_END_LIST, token)),
-		(r'"(integer|float|point|vector|normal|color|bool|string|texture)\s+[a-zA-Z_][a-zA-Z0-9_]*"', lambda scanner, token: (_PARAMETER, token[1:-1].split()[1])),
-		(r'"true"', lambda scanner, token: (_NUMBER, True)),
-		(r'"false"', lambda scanner, token: (_NUMBER, False)),
-		(r'".*?"', lambda scanner, token: (_STRING, token[1:-1])),
+		(r"[a-zA-Z_]\w*", lambda _, token: (_IDENTIFIER, token)),
+		(r"[\-+]?(\d+\.\d*|\.\d+)([eE][\-+]?[0-9]+)?", lambda _, token: (_NUMBER, float(token))),
+		(r"[\-+]?\d+", lambda _, token: (_NUMBER, int(token))),
+		(r'\[', lambda _, token: (_START_LIST, token)),
+		(r'\]', lambda _, token: (_END_LIST, token)),
+		(r'"(integer|float|point|vector|normal|bool|string|texture|color|rgb|xyz|blackbody|spectrum)\s+[a-zA-Z_][a-zA-Z0-9_]*"', lambda _, token: (_PARAMETER, token[1:-1].split())),
+		(r'"true"', lambda _, token: (_NUMBER, True)),
+		(r'"false"', lambda _, token: (_NUMBER, False)),
+		(r'".*?"', lambda _, token: (_STRING, token[1:-1])),
 		(r'#.*$', None), # comments
 		(r'\s+', None), # whitespace
 		])
@@ -681,9 +747,15 @@ def _unwrap(arg):
 	'''
 	try:
 		x, = arg
-	except ValueError:
+	except (TypeError, ValueError):
 		x = arg
 	return x
+
+
+def _split_as_tuples(xs, n):
+	assert len(xs) % n == 0
+	return [tuple(xs[k:k+n]) for k in range(0, len(xs), n)]
+
 
 
 def _filter_dict(mapping, predicate):
@@ -717,10 +789,13 @@ def _mul(arg, factor):
 
 def _color(*args):
 	if len(args) == 1:
+		arg = args[0]
+		if isinstance(arg, liar.Spectrum):
+			return arg
 		try:
-			return liar.Spectrum.Flat(float(args[0]))
+			return liar.Spectrum.Flat(float(arg))
 		except TypeError:
-			r, g, b = args[0]
+			r, g, b = arg
 	else:
 		r, g, b = args
 	return liar.rgb(r, g, b, _RGB_SPACE)
