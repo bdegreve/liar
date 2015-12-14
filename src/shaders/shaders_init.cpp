@@ -30,6 +30,7 @@
 #include "conductor.h"
 #include "dielectric.h"
 #include "flip.h"
+#include "lafortune.h"
 #include "lambert.h"
 #include "linear_interpolator.h"
 #include "mirror.h"
@@ -50,6 +51,7 @@ PY_MODULE_CLASS(shaders, BumpMapping)
 PY_MODULE_CLASS(shaders, Conductor)
 PY_MODULE_CLASS(shaders, Dielectric)
 PY_MODULE_CLASS(shaders, Flip)
+PY_MODULE_CLASS(shaders, Lafortune)
 PY_MODULE_CLASS(shaders, Lambert)
 PY_MODULE_CLASS(shaders, LinearInterpolator)
 PY_MODULE_CLASS(shaders, Mirror)

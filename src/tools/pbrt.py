@@ -286,13 +286,110 @@ class PbrtScene(object):
 		if bumpmap:
 			self.__material = liar.shaders.BumpMapping(self.__material, self._get_texture(bumpmap))
 
+	def _material_bluepaint(self):
+		diffuse = self._get_texture((0.3094, 0.39667, 0.70837))
+		mat = liar.shaders.Lafortune(diffuse)
+		xy = self._get_texture((0.870567, 0.857255, 0.670982))
+		z = self._get_texture((0.803624,  0.774290,  0.586674))
+		e = self._get_texture((21.820103, 18.597755, 7.472717))
+		mat.addLobe(xy, xy, z, e)
+		xy = self._get_texture((-0.451218, -0.406681, -0.477976))
+		z = self._get_texture((0.023123, 0.017625, 0.227295))
+		e = self._get_texture((2.774499, 2.581499, 3.677653))
+		mat.addLobe(xy, xy, z, e)
+		xy = self._get_texture((-1.031545, -1.029426, -1.026588))
+		z = self._get_texture((0.706734,  0.696530,  0.687715))
+		e = self._get_texture((66.899060, 63.767912, 57.489181))
+		mat.addLobe(xy, xy, z, e)
+		return mat
+
+	def _material_clay(self):
+		diffuse = self._get_texture((0.383626, 0.260749, 0.274207))
+		mat = liar.shaders.Lafortune(diffuse)
+		xy = self._get_texture((-1.089701, -1.102701, -1.107603))
+		z = self._get_texture((-1.354682, -2.714801, -1.569866))
+		e = self._get_texture((17.968505, 11.024489, 21.270282))
+		mat.addLobe(xy, xy, z, e)
+		xy = self._get_texture((-0.733381,  -0.793320, -0.848206))
+		z = self._get_texture((0.676108, 0.679314, 0.726031))
+		e = self._get_texture((8.219745, 9.055139, 11.261951))
+		mat.addLobe(xy, xy, z, e)
+		xy = self._get_texture((-1.010548, -1.012378, -1.011263))
+		z = self._get_texture((0.910783, 0.885239, 0.892451))
+		e = self._get_texture((152.912795, 141.937171, 201.046802))
+		mat.addLobe(xy, xy, z, e)
+		return mat
+
+	def _material_felt(self):
+		diffuse = self._get_texture((0.025865,  0.025865,  0.025865))
+		mat = liar.shaders.Lafortune(diffuse)
+		xy = self._get_texture((-0.304075, -0.304075, -0.304075))
+		z = self._get_texture((-0.065992, -0.065992, -0.065992))
+		e = self._get_texture((3.047892, 3.047892, 3.047892))
+		mat.addLobe(xy, xy, z, e)
+		xy = self._get_texture((-0.749561, -0.749561, -0.749561))
+		z = self._get_texture((-1.167929, -1.167929, -1.167929))
+		e = self._get_texture((6.931827, 6.931827, 6.931827))
+		mat.addLobe(xy, xy, z, e)
+		xy = self._get_texture((1.004921, 1.004921, 1.004921))
+		z = self._get_texture((-0.205529, -0.205529, -0.205529))
+		e = self._get_texture((94.117332, 94.117332, 94.117332))
+		mat.addLobe(xy, xy, z, e)
+		return mat
+
+	def _material_glass(self, Kr=1, Kt=1, index=1.5):
+		glass = liar.shaders.Dielectric(self._get_texture(index))
+		glass.reflectance = self._get_texture(Kr)
+		glass.transmittance = self._get_texture(Kt)
+		return glass
+
 	def _material_matte(self, Kd=1, sigma=0):
 		return liar.shaders.Lambert(self._get_texture(Kd))
+
+	def _material_metal(self, eta, k, roughness=.01):
+		return liar.shaders.Conductor(self._get_texture(eta), self._get_texture(k))
+
+	def _material_mirror(self, Kr=1):
+		return liar.shaders.Mirror(self._get_texture(Kr))
 
 	def _material_plastic(self, Kd=1, Ks=1, roughness=0.1):
 		#diffuse = liar.shaders.Lambert(self._get_texture(Kd))
 		#return liar.shaders.Sum([diffuse])
 		return self._material_substrate(Kd=Kd, Ks=Ks, uroughness=roughness, vroughness=roughness)
+
+	def _material_primer(self):
+		diffuse = self._get_texture((0.118230, 0.121218, 0.133209))
+		mat = liar.shaders.Lafortune(diffuse)
+		xy = self._get_texture((-0.399286, -1.033473, -1.058104))
+		z = self._get_texture((0.167504, 0.009545, -0.068002))
+		e = self._get_texture((2.466633, 7.637253,  8.117645))
+		mat.addLobe(xy, xy, z, e)
+		xy = self._get_texture((-1.041861, -1.100108, -1.087779))
+		z = self._get_texture((0.014375, -0.198147, -0.053605))
+		e = self._get_texture((7.993722, 29.446268, 41.988990))
+		mat.addLobe(xy, xy, z, e)
+		xy = self._get_texture((-1.098605, -0.379883, -0.449038))
+		z = self._get_texture((-0.145110, 0.159127, 0.173224))
+		e = self._get_texture((31.899719, 2.372852, 2.636161))
+		mat.addLobe(xy, xy, z, e)
+		return mat
+
+	def _material_skin(self):
+		diffuse = self._get_texture((0.428425, 0.301341, 0.331054))
+		mat = liar.shaders.Lafortune(diffuse)
+		xy = self._get_texture((-1.131747, -1.016939, -0.966018))
+		z = self._get_texture((-1.209182, -1.462488, -1.222419))
+		e = self._get_texture((6.421658,  3.699932,  3.524889))
+		mat.addLobe(xy, xy, z, e)
+		xy = self._get_texture((-0.546570, -0.643533, -0.638934))
+		z = self._get_texture((0.380123,  0.410559,  0.437367))
+		e = self._get_texture((3.685044,  4.266495,  4.539742))
+		mat.addLobe(xy, xy, z, e)
+		xy = self._get_texture((-0.998888, -1.020153, -1.027479))
+		z = self._get_texture((0.857998,  0.703913,  0.573625))
+		e = self._get_texture((64.208486, 63.919687, 43.809866))
+		mat.addLobe(xy, xy, z, e)
+		return mat
 
 	def _material_substrate(self, Kd=.5, Ks=.5, uroughness=.1, vroughness=.1):
 		from liar.textures import Division, Max
@@ -302,21 +399,6 @@ class PbrtScene(object):
 		shader.specularPowerU = Division(one, Max(self._get_texture(uroughness), eps))
 		shader.specularPowerV = Division(one, Max(self._get_texture(vroughness), eps))
 		return shader
-
-	def _material_mirror(self, Kr=1):
-		return liar.shaders.Mirror(self._get_texture(Kr))
-
-	def _material_glass(self, Kr=1, Kt=1, index=1.5):
-		glass = liar.shaders.Dielectric(self._get_texture(index))
-		glass.reflectance = self._get_texture(Kr)
-		glass.transmittance = self._get_texture(Kt)
-		return glass
-
-	def _material_bluepaint(self):
-		return liar.shaders.Lambert(self._get_texture((.3, .4, .7)))
-
-	def _material_clay(self):
-		return liar.shaders.Lambert(self._get_texture((.4, .3, .3)))
 
 	def _material_uber(self, Kd=1, Ks=1, Kr=0, roughness=0.1, opacity=1):
 		layers = []
