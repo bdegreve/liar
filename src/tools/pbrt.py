@@ -583,6 +583,7 @@ class PbrtScene(object):
 		intensity, resolution = self._get_light_texture(I, mapname)
 		light = liar.scenery.LightProjection()
 		light.intensity = intensity
+		light.projection = liar.ProjectionPerspective()
 		light.projection.sky, light.projection.direction = (0, 1, 0), (0, 0, 1)
 		light.projection.right, light.projection.up = (1, 0, 0), (0, -1, 0)
 		if resolution:
