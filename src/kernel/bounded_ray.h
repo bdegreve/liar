@@ -68,8 +68,8 @@ public:
 	bool inRange(TScalar t) const
 	{
 		//return num::almostInOpenRange(t, nearLimit_, farLimit_, tolerance);
-		return t > nearLimit_ * (TNumTraits::one + tolerance) &&
-			t < farLimit_ * (TNumTraits::one - tolerance);
+		return t > nearLimit_ * (TNumTraits::one - tolerance) &&
+			t < farLimit_ * (TNumTraits::one + tolerance);
 	}
 
 	bool isEmpty() const { return nearLimit_ > farLimit_; }
