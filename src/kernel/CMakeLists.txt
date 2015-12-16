@@ -5,23 +5,25 @@ macro(EVAL)
 endmacro()
 
 
-
-find_package(LCMS2)
-EVAL(LCMS2_FOUND LCMS2_INCLUDE_DIRS LCMS2_LIBRARIES LCMS2_REDISTS LCMS2_DEBUG_REDISTS)
-option(ENABLE_LCMS2 "Use LCMS2 as color conversion engine" "${LCMS2_FOUND}")
-if(ENABLE_LCMS2 AND LCMS2_FOUND)
-	add_definitions(-DLIAR_HAVE_LCMS2_H=1)
-	include_directories(${LCMS2_INCLUDE_DIRS})
-	install(
-		FILES ${LCMS2_REDISTS}
-		DESTINATION .
-		CONFIGURATIONS RELEASE MINSIZEREL RELWITHDEBINFO
-		)
-	install(
-		FILES ${LCMS2_DEBUG_REDISTS}
-		DESTINATION .
-		CONFIGURATIONS DEBUG
-		)
+option(LCMS2_ENABLE "Use LCMS2 as color conversion engine" "OFF")
+if (LCMS2_ENABLE)
+	find_package(LCMS2)
+	if (LCMS2_FOUND)
+		add_definitions(-DLIAR_HAVE_LCMS2_H=1)
+		include_directories(${LCMS2_INCLUDE_DIRS})
+		install(
+			FILES ${LCMS2_REDISTS}
+			DESTINATION .
+			CONFIGURATIONS RELEASE MINSIZEREL RELWITHDEBINFO
+			)
+		install(
+			FILES ${LCMS2_DEBUG_REDISTS}
+			DESTINATION .
+			CONFIGURATIONS DEBUG
+			)
+	else()
+		message(SEND_ERROR "LCMS2 not found. Fix or disable LCMS2.")
+	endif()
 endif()
 
 
@@ -51,6 +53,7 @@ target_link_libraries(libkernel
 	lass_python
 	${LCMS2_LIBRARIES}
 	)
+set_precompiled_header(libkernel kernel_common.h kernel_common.cpp)
 install(
 	TARGETS libkernel
 	DESTINATION .

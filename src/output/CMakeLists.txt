@@ -2,12 +2,12 @@ set (_libraries)
 set (_srcs)
 
 find_path(
-	pixeltoaster_INCLUDE_DIR 
+	pixeltoaster_INCLUDE_DIR
 	PixelToaster.h
 	DOC "path to PixelToaster.h"
 	PATHS "${CMAKE_CURRENT_SOURCE_DIR}/PixelToaster"
 	)
-mark_as_advanced(pixeltoaster_INCLUDE_DIR) 
+mark_as_advanced(pixeltoaster_INCLUDE_DIR)
 if (pixeltoaster_INCLUDE_DIR)
 	set(_ok FALSE)
 	if (WIN32)
@@ -40,13 +40,13 @@ if (pixeltoaster_INCLUDE_DIR)
 				${_apple_use_x11}
 				)
 			set(PIXELTOASTER_APPLE_USE_X11 ${pixeltoaster_APPLE_USE_X11})
-				list(APPEND output_LIBS 
+				list(APPEND output_LIBS
 					${CORE_SERVICES_LIBRARY}
 					${COCOA_LIBRARY}
 					${OPENGL_LIBRARIES}
-					)		
+					)
 			if(NOT pixeltoaster_APPLE_USE_X11)
-				list(APPEND output_SRCS 
+				list(APPEND output_SRCS
 					"PixelToaster/PixelToasterApple.mm"
 					)
 				set(_ok TRUE)
@@ -58,7 +58,7 @@ if (pixeltoaster_INCLUDE_DIR)
 				include_directories(
 					BEFORE ${X11_INCLUDE_DIR}
 					)
-				list(APPEND output_LIBS 
+				list(APPEND output_LIBS
 					${X11_LIBRARIES}
 					)
 				set(_ok TRUE)
@@ -87,17 +87,17 @@ if (pixeltoaster_INCLUDE_DIR)
 			endif()
 		endif()
 		option(
-			pixeltoaster_HAVE_DIRTYBOX 
-			"PixelToaster supports update with dirty box" 
+			pixeltoaster_HAVE_DIRTYBOX
+			"PixelToaster supports update with dirty box"
 			${pixeltoaster_HAVE_RECTANGLE})
 		mark_as_advanced(pixeltoaster_HAVE_DIRTYBOX)
 	endif()
 endif()
 
-set(LIAR_OUTPUT_HAVE_PIXELTOASTER_H 
+set(LIAR_OUTPUT_HAVE_PIXELTOASTER_H
 	${_ok}
 	)
-set(LIAR_OUTPUT_HAVE_PIXELTOASTER_DIRTYBOX 
+set(LIAR_OUTPUT_HAVE_PIXELTOASTER_DIRTYBOX
 	${pixeltoaster_HAVE_DIRTYBOX}
 	)
 configure_file(
@@ -110,3 +110,11 @@ include_directories(
 
 add_liar_module(output)
 
+# display_impl.cpp does not use the precompiled header, we must disable it.
+if(MSVC)
+		set_property(
+				SOURCE display_impl.cpp
+				APPEND_STRING
+				PROPERTY COMPILE_FLAGS " /Y-"
+		)
+endif()

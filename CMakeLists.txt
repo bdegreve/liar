@@ -68,6 +68,12 @@ if (Lass_PYTHON_EXECUTABLE AND NOT CMAKE_INSTALL_PREFIX)
 endif ()
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}")
 
+if (MSVC)
+	option(BUILD_USING_PRECOMPILED_HEADERS "Build using precompiled headers" ON)
+else()
+	set(BUILD_USING_PRECOMPILED_HEADERS OFF)
+endif()
+
 if (MSVC_IDE AND NOT MSVC_VERSION LESS 1400)
 	if (MSVC_VERSION LESS 1500)
 		set(_default_mp OFF)
@@ -112,6 +118,48 @@ endmacro()
 macro(_mark_target_as_python_module name)
 endmacro()
 
+function(set_precompiled_header target hdrfile srcpath)
+    if(NOT BUILD_USING_PRECOMPILED_HEADERS)
+        return()
+    endif()
+
+    if(MSVC_IDE)
+        set(pchpath "${CMAKE_CURRENT_BINARY_DIR}/${target}.dir/${CMAKE_CFG_INTDIR}/${hdrfile}.pch")
+    else()
+        set(pchpath "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${target}.dir/${hdrfile}.pch")
+    endif()
+    if(MSVC)
+        set_property(
+            TARGET "${target}"
+            APPEND_STRING
+            PROPERTY COMPILE_FLAGS " /Fp\"${pchpath}\" /Yu\"${hdrfile}\""
+        )
+        set_property(
+            SOURCE "${srcpath}"
+            APPEND_STRING
+            PROPERTY COMPILE_FLAGS " /Yc\"${hdrfile}\""
+        )
+        if (NOT MSVC_IDE)
+            get_target_property(sources "${target}" SOURCES)
+            list(REMOVE_ITEM sources "${srcpath}")
+            set_property(
+                SOURCE ${sources}
+                APPEND
+                PROPERTY OBJECT_DEPENDS "${pchpath}"
+            )
+        endif()
+    else()
+        #add_custom_command(
+        #    OUTPUT ${pchpath}
+        #    DEPENDS ${hdrfile}
+        #    COMMAND ...)
+        #set_source_files_properties(
+        #    ${test_SRCS}
+        #    PROPERTIES
+        #    OBJECT_DEPENDS ${_pchpath})
+    endif()
+endfunction()
+
 macro(add_liar_module_ex name)
 	set(_srcs)
 	set(_libs)
@@ -132,34 +180,34 @@ macro(add_liar_module_ex name)
 			endif()
 		endif()
 	endforeach()
-	add_library(${name} MODULE
+	add_library("${name}" MODULE
 		${_srcs}
 		)
-	target_link_libraries(${name}
+	target_link_libraries("${name}"
 		libkernel
 		${_libs}
 		)
 	set_target_properties(
-		${name}
+		"${name}"
 		PROPERTIES
 		COMPILE_FLAGS "${liar_CFLAGS}"
 		LINK_FLAGS "${liar_LDFLAGS}"
 		)
 	if (WIN32)
 		set_target_properties(
-			${name}
+			"${name}"
 			PROPERTIES
 			SUFFIX ".pyd"
 			)
 	else()
 		set_target_properties(
-			${name}
+			"${name}"
 			PROPERTIES
 			PREFIX ""
 			)
 	endif()
 	install(
-		TARGETS ${name}
+		TARGETS "${name}"
 		DESTINATION "${_destination}"
 		)
 endmacro()
@@ -178,14 +226,15 @@ macro(add_liar_module name)
 			endif()
 		endif()
 	endforeach()
-	add_liar_module_ex(${name}
+	add_liar_module_ex("${name}"
 		SRCS ${${name}_SRCS} ${_srcs}
 		LIBS ${${name}_LIBS}
 	)
+	set_precompiled_header("${name}" "${name}_common.h" "${name}_common.cpp")
 endmacro()
 
-SET(SPECTRAL_MODE "XYZ" CACHE STRING "Computational mode for Spectral values")
-SET_PROPERTY(CACHE SPECTRAL_MODE PROPERTY STRINGS RGB Smits Single)
+set(SPECTRAL_MODE "XYZ" CACHE STRING "Computational mode for Spectral values")
+set_property(CACHE SPECTRAL_MODE PROPERTY STRINGS RGB Smits Single)
 unset(LIAR_SPECTRAL_MODE_RGB)
 unset(LIAR_SPECTRAL_MODE_SMITS)
 unset(LIAR_SPECTRAL_MODE_SINGLE)
