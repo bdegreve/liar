@@ -339,6 +339,8 @@ RenderEngine::Consumer& RenderEngine::Consumer::operator=(const Consumer& other)
 
 void RenderEngine::Consumer::operator()(const Task& iTask)
 {
+	typedef OutputSample::TValue TValue;
+
 	const TResolution2D begin = iTask.begin();
 	const TResolution2D end = iTask.end();
 	const size_t samplesPerPixel = sampler_->samplesPerPixel();
@@ -363,11 +365,12 @@ void RenderEngine::Consumer::operator()(const Task& iTask)
 				sampler_->sample(i, k, timePeriod_, sample);
 				const DifferentialRay primaryRay = engine_->camera_->primaryRay(sample, pixelSize_);
 				sample.setWeight(engine_->camera_->weight(primaryRay));
-				TScalar alpha, tIntersection;
+				TScalar alpha;
+				TScalar tIntersection;
 				const Spectral radiance = rayTracer_->castRay(sample, primaryRay, tIntersection, alpha);
 				const TScalar depth = engine_->camera_->asDepth(primaryRay, tIntersection);
 
-				outputSamples[outputIndex++] = OutputSample(sample, radiance, depth, alpha);
+				outputSamples[outputIndex++] = OutputSample(sample, radiance, static_cast<TValue>(depth), static_cast<TValue>(alpha));
 				if (outputIndex == outputSize)
 				{
 					engine_->writeRender(&outputSamples[0], &outputSamples[0] + outputSize, *progress_);

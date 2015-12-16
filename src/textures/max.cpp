@@ -50,7 +50,7 @@ const Spectral Max::doLookUp(const Sample& sample, const IntersectionContext& co
 }
 
 
-TScalar Max::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+Texture::TValue Max::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	return std::max(textureA()->scalarLookUp(sample, context), textureB()->scalarLookUp(sample, context));
 }

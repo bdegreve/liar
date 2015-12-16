@@ -44,6 +44,7 @@ PY_CLASS_MEMBER_RW_DOC(Simple, refractionIndex, setRefractionIndex, "texture for
 // --- public --------------------------------------------------------------------------------------
 
 Simple::Simple():
+	Shader(Bsdf::capsAll),
 	diffuse_(Texture::black()),
 	specular_(Texture::black()),
 	specularPower_(Texture::white()),
@@ -56,6 +57,7 @@ Simple::Simple():
 
 
 Simple::Simple(const TTexturePtr& iDiffuse):
+	Shader(Bsdf::capsAll), 
 	diffuse_(iDiffuse),
 	specular_(Texture::black()),
 	specularPower_(Texture::white()),
@@ -68,6 +70,7 @@ Simple::Simple(const TTexturePtr& iDiffuse):
 
 
 Simple::Simple(const TTexturePtr& iDiffuse, const TTexturePtr& iSpecular):
+	Shader(Bsdf::capsAll), 
 	diffuse_(iDiffuse),
 	specular_(iSpecular),
 	specularPower_(Texture::white()),
@@ -169,17 +172,27 @@ void Simple::setRefractionIndex(const TTexturePtr& iRefractionIndex)
 
 // --- private -------------------------------------------------------------------------------------
 
+TBsdfPtr Simple::doBsdf(const Sample& sample, const IntersectionContext& context) const
+{
+	const Spectral diffuse = diffuse_->lookUp(sample, context, Reflectant);
+	const Spectral specular = specular_->lookUp(sample, context, Reflectant);
+	const Spectral specularPower = specularPower_->lookUp(sample, context, Illuminant);
+	const Spectral reflectance = reflectance_->lookUp(sample, context, Reflectant);
+	const Spectral transmittance = transmittance_->lookUp(sample, context, Reflectant);
+	const Spectral refractionIndex = std::max(average(refractionIndex_->lookUp(sample, context, Illuminant)), 1e-9);
+
+	return TBsdfPtr(new SimpleBsdf(sample, context, Bsdf::capsAll, diffuse, specular, specularPower, reflectance, transmittance, refractionIndex));
+}
+
+
+
 const Spectrum Simple::doShade(	
 	const Sample& iSample,
 	const DifferentialRay& iPrimaryRay,
 	const Intersection& iIntersection,
 	const IntersectionContext& iContext) const
 {
-	const Spectrum diffuse = diffuse_->lookUp(iSample, iContext) / TNumTraits::pi;
-	const Spectrum specular = specular_->lookUp(iSample, iContext);
-	const Spectrum specularPower = specularPower_->lookUp(iSample, iContext);
-	const Spectrum reflectance = reflectance_->lookUp(iSample, iContext);
-	const Spectrum transmittance = transmittance_->lookUp(iSample, iContext);
+
 
 	const TPoint3D& intersectionPoint = iContext.point();
 	const TVector3D& normal = iContext.normal();
@@ -246,8 +259,48 @@ void Simple::doSetState(const TPyObjectPtr& iState)
 
 
 
+// --- bsdf ----------------------------------------------------------------------------------------
+
+Simple::SimpleBsdf::SimpleBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const Spectral& diffuse,
+		const Spectral& specular, const Spectral& specularPower, const Spectral& reflectance, const Spectral& transmittance,
+		const Spectral& refractionIndex):
+	Bsdf(sample, context, caps),
+	diffuseOverPi_(diffuse / TNumTraits::pi),
+	specular_(specular),
+	specularPower_(specularPower),
+	reflectance_(reflectance),
+	transmittance_(transmittance),
+	refractionIndex_(refractionIndex)
+{
+}
+
+BsdfOut LambertBsdf::doEvaluate(const TVector3D&, const TVector3D& omegaOut, TBsdfCaps LASS_UNUSED(allowedCaps)) const
+{
+	LASS_ASSERT(shaders::hasCaps(allowedCaps, caps()));
+	const TScalar cosTheta = num::abs(omegaOut.z);
+	if (cosTheta <= 0)
+	{
+		return BsdfOut();
+	}
+	return BsdfOut(diffuseOverPi_, cosTheta / TNumTraits::pi);
+}
+
+SampleBsdfOut LambertBsdf::doSample(const TVector3D&, const TPoint2D& sample, TScalar, TBsdfCaps LASS_UNUSED(allowedCaps)) const
+{
+	LASS_ASSERT(shaders::hasCaps(allowedCaps, caps()));
+	SampleBsdfOut out;
+	out.omegaOut = num::cosineHemisphere(sample, out.pdf).position();
+	out.value = diffuseOverPi_;
+	out.usedCaps = caps();
+	return out;
+}
+
+
+
 
 // --- free ----------------------------------------------------------------------------------------
+
+
 
 
 

@@ -42,15 +42,16 @@ class LIAR_MEDIUMS_DLL Fog: public Medium
 {
 	PY_HEADER(Medium)
 public:
+	typedef Spectral::TValue TValue;
 
 	Fog();
-	Fog(TScalar extinction, TScalar assymetry);
+	Fog(TValue extinction, TValue assymetry);
 
-	TScalar extinction() const;
-	void setExtinction(TScalar extinction);
+	TValue extinction() const;
+	void setExtinction(TValue extinction);
 
-	TScalar assymetry() const;
-	void setAssymetry(TScalar g);
+	TValue assymetry() const;
+	void setAssymetry(TValue g);
 
 	const TSpectrumPtr& color() const;
 	void setColor(const TSpectrumPtr& color);
@@ -71,12 +72,12 @@ private:
 	const Spectral doPhase(const Sample& sample, const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const override;
 	const Spectral doSamplePhase(const Sample& sample, const TPoint2D& phaseSample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const override;
 
-	void init(TScalar extinction = 0, TScalar assymetry = 0, const TSpectrumPtr& color = Spectrum::white(), const TSpectrumPtr& emission = Spectrum::black(), size_t numSamples = 1);
+	void init(TValue extinction = 0, TValue assymetry = 0, const TSpectrumPtr& color = Spectrum::white(), const TSpectrumPtr& emission = Spectrum::black(), size_t numSamples = 1);
 
 	TSpectrumPtr color_;
 	TSpectrumPtr emission_;
-	TScalar extinction_;
-	TScalar assymetry_;
+	TValue extinction_;
+	TValue assymetry_;
 	size_t numSamples_;
 };
 

@@ -43,7 +43,8 @@ class LIAR_SHADERS_DLL LinearInterpolator: public Shader
 	PY_HEADER(Shader)
 public:
 
-	typedef std::pair<TScalar, TShaderPtr> TKeyShader;
+	typedef Spectral::TValue TValue;
+	typedef std::pair<TValue, TShaderPtr> TKeyShader;
 	typedef std::vector<TKeyShader> TKeyShaders;
 
 	LinearInterpolator();
@@ -55,7 +56,7 @@ public:
 	void setKeys(const TKeyShaders& keyShaders);
 	void setControl(const TTexturePtr& controlTexture);
 
-	void addKey(TScalar keyValue, const TShaderPtr& keyShader);
+	void addKey(TValue keyValue, const TShaderPtr& keyShader);
 
 private:
 
@@ -67,13 +68,13 @@ private:
 	class Bsdf: public kernel::Bsdf
 	{
 	public:
-		Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TBsdfPtr& a, const TBsdfPtr& b, TScalar t);
+		Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TBsdfPtr& a, const TBsdfPtr& b, TValue t);
 	private:
 		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
 		TBsdfPtr a_;
 		TBsdfPtr b_;
-		TScalar t_;
+		TValue t_;
 	};
 
 	const Spectral doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const;

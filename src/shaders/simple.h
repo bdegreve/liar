@@ -65,12 +65,26 @@ public:
 	const TTexturePtr& refractionIndex() const;
 	void setRefractionIndex(const TTexturePtr& iRefractionIndex);
 
-
-
 private:
 
-	const Spectral doShade(const Sample& sample,	const DifferentialRay& primaryRay, 
-		const Intersection& intersection, const IntersectionContext& context) const;
+	class SimpleBsdf : public Bsdf
+	{
+	public:
+		SimpleBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const Spectral& diffuse,
+			const Spectral& specular, const Spectral& specularPower, const Spectral& reflectance, const Spectral& transmittance,
+			const Spectral& refractionIndex);
+	private:
+		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
+		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
+		Spectral diffuse_;
+		Spectral specular_;
+		Spectral specularPower_;
+		Spectral reflectance_;
+		Spectral transmittance_;
+		Spectral refractionIndex_;
+	};
+
+	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);

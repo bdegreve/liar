@@ -201,7 +201,7 @@ const Spectral Image::doLookUp(const Sample& sample, const IntersectionContext& 
 }
 
 
-TScalar Image::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+Texture::TValue Image::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	return lookUp(context).y;
 }
@@ -222,7 +222,7 @@ const Image::TPixel Image::lookUp(const IntersectionContext& context) const
 	const TVector2D& dUv_dJ = context.dUv_dJ();
 
 	size_t levelU0 = 0, levelU1 = 0, levelV0 = 0, levelV1 = 0;
-	TScalar dLevelU = TNumTraits::zero, dLevelV = TNumTraits::zero;
+	TPixel::TValue dLevelU = 0, dLevelV = 0;
 	switch (mipMapping_)
 	{
 	case mmNone:
@@ -256,13 +256,13 @@ const Image::TPixel Image::lookUp(const IntersectionContext& context) const
 
 	case aaTrilinear:
 		result = 
-			bilinear(levelU0, levelV0, uv) * (TNumTraits::one - dLevelU) +
+			bilinear(levelU0, levelV0, uv) * (1 - dLevelU) +
 			bilinear(levelU1, levelV0, uv) * dLevelU;
 		if (levelV0 != levelV1)
 		{
-			result *= (TNumTraits::one - dLevelV);
+			result *= (1 - dLevelV);
 			result += dLevelV * (
-				bilinear(levelU0, levelV1, uv) * (TNumTraits::one - dLevelU) +
+				bilinear(levelU0, levelV1, uv) * (1 - dLevelU) +
 				bilinear(levelU1, levelV1, uv) * dLevelU);
 		}
 		break;
@@ -437,16 +437,16 @@ Image::MipMapLevel Image::makeMipMapOdd(
 
 	MipMapLevel level(resolution);
 
-	const TScalar scale = num::inv(static_cast<TScalar>(oldSize));
+	const TValue scale = num::inv(static_cast<TValue>(oldSize));
 	const bool compressX = compressionAxis == 'x';
 	for (size_t k = 0; k < newSize; ++k)
 	{
 		const size_t k0 = 2 * k;
 		const size_t k1 = k0 + 1;
 		const size_t k2 = k0 + 2;
-		const TScalar w0 = scale * (newSize - k);
-		const TScalar w1 = scale * newSize; 
-		const TScalar w2 = scale * (k + 1);
+		const TValue w0 = scale * (newSize - k);
+		const TValue w1 = scale * newSize;
+		const TValue w2 = scale * (k + 1);
 
 		if (compressX)
 		{
@@ -470,26 +470,26 @@ Image::MipMapLevel Image::makeMipMapOdd(
 
 
 void Image::mipMapLevel(
-		TScalar width, size_t numLevels, size_t& level0, size_t& level1, TScalar& dLevel) const
+	TScalar width, size_t numLevels, size_t& level0, size_t& level1, TPixel::TValue& dLevel) const
 {
 	const TScalar maxLevel = static_cast<TScalar>(numLevels - 1);
 	const TScalar level = maxLevel + num::log2(std::max(width, TScalar(1e-9f)));
 	if (level < TNumTraits::one)
 	{
 		level0 = level1 = 0;
-		dLevel = TNumTraits::zero;
+		dLevel = 0;
 	}
 	else if (level >= maxLevel)
 	{
 		level0 = level1 = static_cast<size_t>(maxLevel);
-		dLevel = TNumTraits::zero;
+		dLevel = 0;
 	}
 	else
 	{
 		const TScalar floorLevel = num::floor(level);
 		level0 = static_cast<size_t>(floorLevel);
 		level1 = level0 + 1;
-		dLevel = level - floorLevel;
+		dLevel = static_cast<TPixel::TValue>(level - floorLevel);
 	}
 }
 
@@ -523,8 +523,8 @@ const Image::TPixel Image::bilinear(size_t levelU, size_t levelV, const TPoint2D
 	const TScalar y = num::mod((1 - uv.y) * res.y - .5f, static_cast<TScalar>(res.y));
 	const TScalar x0 = num::floor(x);
 	const TScalar y0 = num::floor(y);
-	const TScalar dx = x - x0;
-	const TScalar dy = y - y0;
+	const TValue dx = static_cast<TValue>(x - x0);
+	const TValue dy = static_cast<TValue>(y - y0);
 
 	const size_t i0 = static_cast<size_t>(x0) % res.x;
 	const size_t j0 = static_cast<size_t>(y0) % res.y;
@@ -532,8 +532,8 @@ const Image::TPixel Image::bilinear(size_t levelU, size_t levelV, const TPoint2D
 	const size_t j1 = (j0 + 1) % res.y;
 
 	return
-		(mipMap(i0, j0) * (TNumTraits::one - dx) + mipMap(i1, j0) * dx) * (TNumTraits::one - dy) +
-		(mipMap(i0, j1) * (TNumTraits::one - dx) + mipMap(i1, j1) * dx) * dy;
+		(mipMap(i0, j0) * (1 - dx) + mipMap(i1, j0) * dx) * (1 - dy) +
+		(mipMap(i0, j1) * (1 - dx) + mipMap(i1, j1) * dx) * dy;
 }
 
 

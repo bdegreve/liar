@@ -41,24 +41,24 @@ class LIAR_SPECTRA_DLL Cauchy : public Spectrum
 	PY_HEADER(Spectrum)
 public:
 
-	Cauchy(TScalar b, TScalar c);
+	Cauchy(TParam b, TParam c);
 
-	TScalar b() const;
-	void setB(TScalar b);
+	TValue b() const;
+	void setB(TParam b);
 
-	TScalar c() const;
-	void setC(TScalar c);
+	TValue c() const;
+	void setC(TParam c);
 
 private:
 
 	const Spectral doEvaluate(const Sample& sample, SpectralType type) const override;
-	TScalar doLuminance() const override;
+	TValue doLuminance() const override;
 
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
-	TScalar b_;
-	TScalar c_;
+	TValue b_;
+	TValue c_;
 };
 
 }

@@ -90,9 +90,9 @@ const Spectral Product::doLookUp(const Sample& sample, const IntersectionContext
 
 
 
-TScalar Product::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+Texture::TValue Product::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
 {
-	TScalar result = 1;
+	TValue result = 1;
 	for (TFactors::const_iterator i = factors_.begin(); i != factors_.end(); ++i)
 	{
 		result *= (*i)->scalarLookUp(sample, context);

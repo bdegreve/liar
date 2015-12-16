@@ -174,8 +174,8 @@ bool Display::doIsCanceling() const
 
 void Display::onKeyDown(PixelToaster::DisplayInterface& display, PixelToaster::Key key)
 {
-	TScalar stopDivisions = 3.f; // third of stop
-	TScalar exposureStep = num::inv(stopDivisions);
+	const TValue stopDivisions = 3.f; // third of stop
+	TValue exposureStep = num::inv(stopDivisions);
 
 	using namespace PixelToaster;
 	switch (key)
@@ -202,7 +202,7 @@ void Display::onKeyDown(PixelToaster::DisplayInterface& display, PixelToaster::K
 	case Key::Equals:
 	case Key::Add:
 		{
-			TScalar stops = autoExposure() ? exposureCorrectionStops() : exposureStops();
+			TValue stops = autoExposure() ? exposureCorrectionStops() : exposureStops();
 			stops += exposureStep;
 			stops = num::round(stopDivisions * stops) / stopDivisions; // round to nearest stop step
 			if (autoExposure())
@@ -273,11 +273,16 @@ void Display::close()
 	displayLoop_->join();
 }
 
-
-void printThirdStops(std::ostringstream& stream, int thirdStops)
+namespace
 {
-	const int i = thirdStops / 3;
-	const int d = thirdStops % 3;
+
+	typedef Display::TValue TValue;
+
+void printThirdStops(std::ostringstream& stream, TValue thirdStops)
+{
+	const int s = static_cast<int>(thirdStops);
+	const int i = s / 3;
+	const int d = s % 3;
 	stream << std::showpos;
 	if (i || !d)
 	{
@@ -289,7 +294,7 @@ void printThirdStops(std::ostringstream& stream, int thirdStops)
 	}
 }
 
-
+}
 
 const std::string Display::makeTitle() const
 {
@@ -417,7 +422,7 @@ void Display::histogram()
     typedef prim::Vector3D<size_t> THistoSample;
     std::vector<THistoSample> histo(numBuckets);
     const size_t maxBucket = numBuckets - 1;
-    const TWeightBuffer& w = totalWeight();
+    const TValueBuffer& w = totalWeight();
     const TTonemapBuffer& tonemapped = tonemapBuffer();
     for (size_t k = 0, n = tonemapped.size(); k < n; ++k)
     {

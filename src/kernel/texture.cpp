@@ -101,7 +101,7 @@ Texture::Texture()
 
 // --- private -------------------------------------------------------------------------------------
 
-TScalar Texture::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+Texture::TValue Texture::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	return lookUp(sample, context, Illuminant).luminance(sample);
 }
@@ -123,7 +123,7 @@ const Spectral TextureBlack::doLookUp(const Sample&, const IntersectionContext&,
 	return Spectral(0);
 }
 
-TScalar TextureBlack::doScalarLookUp(const Sample&, const IntersectionContext&) const
+Texture::TValue TextureBlack::doScalarLookUp(const Sample&, const IntersectionContext&) const
 {
 	return 0;
 }
@@ -147,7 +147,7 @@ const Spectral TextureWhite::doLookUp(const Sample&, const IntersectionContext&,
 	return Spectral(1);
 }
 
-TScalar TextureWhite::doScalarLookUp(const Sample&, const IntersectionContext&) const
+Texture::TValue TextureWhite::doScalarLookUp(const Sample&, const IntersectionContext&) const
 {
 	return 1;
 }

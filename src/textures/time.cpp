@@ -49,14 +49,14 @@ Time::Time()
 const Spectral Time::doLookUp(const Sample& sample, const IntersectionContext&, SpectralType type) const
 {
 #pragma LASS_FIXME("what about type==Reflectant?")
-	return Spectral(static_cast<TScalar>(sample.time()), type);
+	return Spectral(static_cast<TValue>(sample.time()), type);
 }
 
 
 
-TScalar Time::doScalarLookUp(const Sample& sample, const IntersectionContext&) const
+Texture::TValue Time::doScalarLookUp(const Sample& sample, const IntersectionContext&) const
 {
-	return static_cast<TScalar>(sample.time());
+	return static_cast<TValue>(sample.time());
 }
 
 

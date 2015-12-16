@@ -59,12 +59,12 @@ private:
 	class Bsdf: public kernel::Bsdf
 	{
 	public:
-		Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TScalar ior, const Spectral& transparency);
+		Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const Spectral& ior, const Spectral& transparency);
 	private:
 		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
 		Spectral transparency_;
-		TScalar ior_;
+		Spectral ior_;
 	};
 
 	size_t doNumReflectionSamples() const;

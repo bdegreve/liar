@@ -29,7 +29,7 @@ namespace liar
 namespace output
 {
 
-typedef short TToken;
+typedef num::Tuint8 TToken;
 
 void writeCommand(io::BinaryOStream& stream, SocketCommand command)
 {
@@ -51,8 +51,8 @@ bool readCommand(io::BinaryIStream& stream, SocketCommand& command)
 
 void writeResolution(io::BinaryOStream& stream, const TResolution2D& resolution)
 {
-	const num::Tuint32 width = resolution.x;
-	const num::Tuint32 height = resolution.y;
+	const num::Tuint32 width = num::numCast<num::Tuint32>(resolution.x);
+	const num::Tuint32 height = num::numCast<num::Tuint32>(resolution.y);
 	stream << width << height;
 	stream.flush();
 }
@@ -72,26 +72,27 @@ bool readResolution(io::BinaryIStream& stream, TResolution2D& resolution)
 
 void writeSample(io::BinaryOStream& stream, const OutputSample& sample)
 {
+	typedef OutputSample::TValue TValue;
 	const TToken command = scSample;
-	const XYZ& radiance = sample.radiance();
 	const TPoint2D& screenCoordinate = sample.screenCoordinate();
-	const TScalar depth = sample.depth();
-	const TScalar alpha = sample.alpha();
-	const TScalar weight = sample.weight();
-	stream << command << screenCoordinate.x << screenCoordinate.y << radiance.x << radiance.y << radiance.z << depth << alpha << weight;
+	const XYZ& radiance = sample.radiance();
+	stream << command 
+		<< static_cast<num::Tfloat32>(screenCoordinate.x) << static_cast<num::Tfloat32>(screenCoordinate.y) 
+		<< static_cast<num::Tfloat32>(radiance.x) << static_cast<num::Tfloat32>(radiance.y) << static_cast<num::Tfloat32>(radiance.z)
+		<< static_cast<num::Tfloat32>(sample.depth()) << static_cast<num::Tfloat32>(sample.alpha()) << static_cast<num::Tfloat32>(sample.weight());
 }
 
 bool readSample(io::BinaryIStream& stream, OutputSample& sample)
 {
-	XYZ radiance;
-	TPoint2D screenCoordinate;
-	TScalar depth, alpha, weight;
-	stream >> screenCoordinate.x >> screenCoordinate.y >> radiance.x >> radiance.y >> radiance.z >> depth >> alpha >> weight;
+	num::Tfloat32 s, t;
+	num::Tfloat32 x, y, z;
+	num::Tfloat32 depth, alpha, weight;
+	stream >> s >> t >> x >> y >> z >> depth >> alpha >> weight;
 	if (!stream.good())
 	{
 		return false;
 	}
-	sample = OutputSample(screenCoordinate, radiance, depth, alpha, weight);
+	sample = OutputSample(TPoint2D(s, t), XYZ(x, y, z), depth, alpha, weight);
 	return true;
 }
 

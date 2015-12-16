@@ -47,6 +47,7 @@ class LIAR_KERNEL_DLL Texture: public python::PyObjectPlus
 {
 	PY_HEADER(python::PyObjectPlus)
 public:
+	typedef Spectral::TValue TValue;
 
 	virtual ~Texture();
 	const Spectral lookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
@@ -54,7 +55,7 @@ public:
 		return doLookUp(sample, context, type);
 	}
 
-	TScalar scalarLookUp(const Sample& sample, const IntersectionContext& context) const
+	TValue scalarLookUp(const Sample& sample, const IntersectionContext& context) const
 	{
 		return doScalarLookUp(sample, context);
 	}
@@ -76,7 +77,7 @@ protected:
 private:
 
 	virtual const Spectral doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const = 0;
-	virtual TScalar doScalarLookUp(const Sample& sample, const IntersectionContext& context) const = 0;
+	virtual TValue doScalarLookUp(const Sample& sample, const IntersectionContext& context) const = 0;
 
 	static TTexturePtr black_;
 	static TTexturePtr white_;
@@ -93,7 +94,7 @@ namespace impl
 		TextureBlack();
 	private:
 		const Spectral doLookUp(const Sample&, const IntersectionContext&, SpectralType) const override;
-		TScalar doScalarLookUp(const Sample&, const IntersectionContext&) const override;
+		TValue doScalarLookUp(const Sample&, const IntersectionContext&) const override;
 		const TPyObjectPtr doGetState() const override;
 		void doSetState(const TPyObjectPtr&) override;
 	};
@@ -105,7 +106,7 @@ namespace impl
 		TextureWhite();
 	private:
 		const Spectral doLookUp(const Sample&, const IntersectionContext&, SpectralType) const override;
-		TScalar doScalarLookUp(const Sample&, const IntersectionContext&) const override;
+		TValue doScalarLookUp(const Sample&, const IntersectionContext&) const override;
 		const TPyObjectPtr doGetState() const override;
 		void doSetState(const TPyObjectPtr&) override;
 	};

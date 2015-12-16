@@ -242,7 +242,7 @@ const Spectral DirectLighting::traceDirect(
 				Sample::TSubSequence2D(bsdfSamples + k, bsdfSamples + k + 1),
 				Sample::TSubSequence1D(componentSamples + k, componentSamples + k + 1),
 				point, normal, omega);
-			result += radiance / (n * pdf);
+			result += radiance / static_cast<Spectral::TValue>(n * pdf);
 		}
 	}
 
@@ -309,9 +309,10 @@ const Spectral DirectLighting::traceSpecularAndGlossy(
 				BoundedRay(beginCentral, directionCentral, liar::tolerance),
 				TRay3D(beginI, directionI),
 				TRay3D(beginJ, directionJ));
-			TScalar t, a;
+			TScalar t;
+			TScalar a;
 			const Spectral reflected = castRay(sample, reflectedRay, t, a, highQuality && (out.usedCaps & Bsdf::capsSpecular));
-			result += out.value * reflected * (a * num::abs(out.omegaOut.z) / (n * out.pdf));
+			result += out.value * reflected * static_cast<Spectral::TValue>(a * num::abs(out.omegaOut.z) / (n * out.pdf));
 		}
 	}
 	//*
@@ -340,9 +341,10 @@ const Spectral DirectLighting::traceSpecularAndGlossy(
 				BoundedRay(beginCentral, directionCentral, liar::tolerance),
 				TRay3D(beginCentral, directionCentral),
 				TRay3D(beginCentral, directionCentral));
-			TScalar t, a;
+			TScalar t;
+			TScalar a;
 			const Spectral transmitted = castRay(sample, transmittedRay, t, a, highQuality && (out.usedCaps & Bsdf::capsSpecular));
-			result += out.value * transmitted * (a * num::abs(out.omegaOut.z) / (n * out.pdf));
+			result += out.value * transmitted * static_cast<Spectral::TValue>(a * num::abs(out.omegaOut.z) / (n * out.pdf));
 		}
 	}
 	/**/
@@ -395,7 +397,7 @@ const Spectral DirectLighting::traceSingleScattering(const Sample& sample, const
 			continue;
 		}
 		const Spectral transShadow = medium->transmittance(sample, shadowRay);
-		result += transRay * transShadow * phase * radiance / (n * tPdf * lightPdf * surfacePdf);
+		result += transRay * transShadow * phase * radiance / static_cast<Spectral::TValue>(n * tPdf * lightPdf * surfacePdf);
 	}
 
 	return result;

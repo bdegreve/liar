@@ -39,9 +39,10 @@ class LIAR_KERNEL_DLL Observer: public python::PyObjectPlus
 {
 	PY_HEADER(python::PyObjectPlus)
 public:
+	typedef XYZ::TValue TValue;
 	typedef std::vector<TWavelength> TWavelengths;
 	typedef std::vector<XYZ> TXYZs;
-	typedef std::vector<TScalar> TScalars;
+	typedef std::vector<TValue> TValues;
 
 	Observer(const TWavelengths& wavelengths, const TXYZs& sensitivities);
 
@@ -53,8 +54,8 @@ public:
 
 	const XYZ sensitivity(TWavelength wavelength) const;
 
-	const XYZ tristimulus(const TScalars& spectrum) const;
-	const XYZ tristimulus(const TWavelengths& wavelengths, const TScalars& spectrum) const;
+	const XYZ tristimulus(const TValues& spectrum) const;
+	const XYZ tristimulus(const TWavelengths& wavelengths, const TValues& spectrum) const;
 	template <typename Func>
 	const XYZ tristimulus(Func func) const
 	{
@@ -66,10 +67,10 @@ public:
 		return acc;
 	}
 
-	TScalar luminance(const TScalars& spectrum) const;
-	TScalar luminance(const TWavelengths& wavelengths, const TScalars& spectrum) const;
+	TValue luminance(const TValues& spectrum) const;
+	TValue luminance(const TWavelengths& wavelengths, const TValues& spectrum) const;
 	template <typename Func>
-	TScalar luminance(Func func) const
+	TValue luminance(Func func) const
 	{
 		TScalar y = 0;
 		for (size_t k = 0, n = w_.size(); k < n; ++k)

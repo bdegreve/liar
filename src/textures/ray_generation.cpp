@@ -48,14 +48,14 @@ RayGeneration::RayGeneration()
 
 const Spectral RayGeneration::doLookUp(const Sample&, const IntersectionContext& context, SpectralType type) const
 {
-	return Spectral(static_cast<TScalar>(context.rayGeneration()), type);
+	return Spectral(static_cast<TValue>(context.rayGeneration()), type);
 }
 
 
 
-TScalar RayGeneration::doScalarLookUp(const Sample&, const IntersectionContext& context) const
+Texture::TValue RayGeneration::doScalarLookUp(const Sample&, const IntersectionContext& context) const
 {
-	return static_cast<TScalar>(context.rayGeneration());
+	return static_cast<TValue>(context.rayGeneration());
 }
 
 

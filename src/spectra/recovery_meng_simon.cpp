@@ -41,7 +41,7 @@ struct RecoveryMengSimon::Impl
 	struct PointInfo
 	{
 		TValues values;
-		TScalar max;
+		TValue max;
 	};
 
 	typedef spat::PlanarMesh<TScalar, const PointInfo*, meta::EmptyType, meta::EmptyType> TMesh;
@@ -62,7 +62,7 @@ struct RecoveryMengSimon::Impl
 
 	Impl(const TWavelengths& wavelengths, const TSamples& samples);
 
-	bool recover(const XYZ& xyz, const Impl::PointInfo* pi[3], TScalar w[3]) const;
+	bool recover(const XYZ& xyz, const Impl::PointInfo* pi[3], TValue w[3]) const;
 	
 	const TAabb2D aabb{ TPoint2D{ -0.3, -0.3 }, TPoint2D{ 1.0, 1.2 } };
 	const TWavelengths wavelengths;
@@ -89,10 +89,10 @@ RecoveryMengSimon::~RecoveryMengSimon()
 RecoveryMengSimon::TValues RecoveryMengSimon::recover(const XYZ& xyz) const
 {
 	const size_t n = pimpl_->wavelengths.size();
-	TValues r(n, TNumTraits::zero);
+	TValues r(n, 0);
 
 	const Impl::PointInfo* pi[3];
-	TScalar w[3];
+	TValue w[3];
 	if (!pimpl_->recover(xyz, pi, w))
 	{
 		return r;
@@ -103,7 +103,7 @@ RecoveryMengSimon::TValues RecoveryMengSimon::recover(const XYZ& xyz) const
 	const TValues& c = pi[2]->values;
 	for (size_t k = 0; k < n; ++k)
 	{
-		r[k] += w[0] * a[k] + w[1] * b[k] + w[2] * c[k];
+		r[k] = w[0] * a[k] + w[1] * b[k] + w[2] * c[k];
 	}
 
 	return r;
@@ -130,7 +130,7 @@ RecoveryMengSimon::TEdges RecoveryMengSimon::meshEdges() const
 Spectral RecoveryMengSimon::doRecover(const XYZ& xyz, const Sample& sample, SpectralType type) const
 {
 	const Impl::PointInfo* pi[3];
-	TScalar w[3];
+	TValue w[3];
 	if (!pimpl_->recover(xyz, pi, w))
 	{
 		return Spectral(0);
@@ -148,18 +148,17 @@ Spectral RecoveryMengSimon::doRecover(const XYZ& xyz, const Sample& sample, Spec
 	}
 
 	LASS_ASSERT(ws[k] > ws[k - 1]);
-	const TScalar t = (sample.wavelength() - ws[k - 1]) / (ws[k] - ws[k - 1]);
+	const TWavelength t = (sample.wavelength() - ws[k - 1]) / (ws[k] - ws[k - 1]);
 	
-	const TScalar v = num::lerp(
-		w[0] * a[k - 1] + w[1] * b[k - 1] + w[2] * c[k - 1],
-		w[0] * a[k]     + w[1] * b[k]     + w[2] * c[k],
-		t);
+	const TValue v0 = w[0] * a[k - 1] + w[1] * b[k - 1] + w[2] * c[k - 1];
+	const TValue v1 = w[0] * a[k]     + w[1] * b[k]     + w[2] * c[k];
+	const TValue v = num::lerp(v0, v1, static_cast<TValue>(t));
 
 	if (type == Reflectant)
 	{
 		// maximum of interpolated spectrum is not necessarely interpolated maximum
 		// but interpolated maximum should be an overestimation, so it should be still valid.
-		const TScalar max = w[0] * pi[0]->max + w[1] * pi[1]->max + w[2] * pi[2]->max;
+		const TValue max = w[0] * pi[0]->max + w[1] * pi[1]->max + w[2] * pi[2]->max;
 		LASS_ASSERT(max >= v);
 		if (max > 1)
 		{
@@ -169,7 +168,7 @@ Spectral RecoveryMengSimon::doRecover(const XYZ& xyz, const Sample& sample, Spec
 	return Spectral(v);
 #else
 	const size_t n = pimpl_->wavelengths.size();
-	TValues r(n, TNumTraits::zero);
+	TValues r(n, 0);
 	for (size_t k = 0; k < n; ++k)
 	{
 		r[k] += w[0] * a[k] + w[1] * b[k] + w[2] * c[k];
@@ -228,9 +227,9 @@ RecoveryMengSimon::Impl::Impl(const TWavelengths& ws, const TSamples& ss):
 }
 
 
-bool RecoveryMengSimon::Impl::recover(const XYZ& xyz, const Impl::PointInfo* pi[3], TScalar w[3]) const
+bool RecoveryMengSimon::Impl::recover(const XYZ& xyz, const Impl::PointInfo* pi[3], TValue w[3]) const
 {
-	const TScalar s = xyz.x + xyz.y + xyz.z;
+	const TValue s = xyz.x + xyz.y + xyz.z;
 	if (s == 0)
 	{
 		return false;
@@ -250,8 +249,8 @@ bool RecoveryMengSimon::Impl::recover(const XYZ& xyz, const Impl::PointInfo* pi[
 	const TPoint2D a = TMesh::fastOrg(e);
 	const TPoint2D b = TMesh::fastDest(e);
 	const TPoint2D c = TMesh::fastDest(e->lNext());
-
-	spat::barycenters(xy, a, b, c, w[0], w[1], w[2]);
+	TScalar u[3];
+	spat::barycenters(xy, a, b, c, u[0], u[1], u[2]);
 
 	pi[0] = TMesh::pointHandle(e);
 	pi[1] = TMesh::pointHandle(e->lNext());
@@ -259,14 +258,18 @@ bool RecoveryMengSimon::Impl::recover(const XYZ& xyz, const Impl::PointInfo* pi[
 
 	for (size_t k = 0; k < 3; ++k)
 	{
-		if (!pi[k])
+		if (pi[k])
+		{
+			w[k] = static_cast<TValue>(u[k]);
+		}
+		else
 		{
 			pi[k] = &zero;
 			w[k] = 0;
 		}
 	}
 
-	const TScalar wtot = w[0] + w[1] + w[2];
+	const TValue wtot = w[0] + w[1] + w[2];
 	if (wtot == 0)
 	{
 		return false;

@@ -452,9 +452,9 @@ void RgbSpace::init(
 	const TTransformation3D M = concatenate(M_CAT, M_XYZ);
 
 	const TScalar* mat = M.matrix();
-	r_ = XYZ(mat[0], mat[4], mat[8]);
-	g_ = XYZ(mat[1], mat[5], mat[9]);
-	b_ = XYZ(mat[2], mat[6], mat[10]);
+	r_ = XYZ(static_cast<XYZ::TValue>(mat[0]), static_cast<XYZ::TValue>(mat[4]), static_cast<XYZ::TValue>(mat[8]));
+	g_ = XYZ(static_cast<XYZ::TValue>(mat[1]), static_cast<XYZ::TValue>(mat[5]), static_cast<XYZ::TValue>(mat[9]));
+	b_ = XYZ(static_cast<XYZ::TValue>(mat[2]), static_cast<XYZ::TValue>(mat[6]), static_cast<XYZ::TValue>(mat[10]));
 
 	const TScalar* invMat = M.inverseMatrix();
 	x_ = RGBA(static_cast<RGBA::TValue>(invMat[0]), static_cast<RGBA::TValue>(invMat[4]), static_cast<RGBA::TValue>(invMat[8]));

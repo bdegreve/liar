@@ -45,7 +45,7 @@ public:
 
 	explicit Constant(const TSpectrumPtr& value);
 	explicit Constant(const XYZ& value);
-	explicit Constant(TScalar scalar);
+	explicit Constant(TValue scalar);
 
 	const TSpectrumPtr& value() const;
 	void setValue(const TSpectrumPtr& value);
@@ -58,7 +58,7 @@ protected:
 private:
 
 	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const override;
-	TScalar doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
+	TValue doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
 
 	TSpectrumPtr value_;
 };

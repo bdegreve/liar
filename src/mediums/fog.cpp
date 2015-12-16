@@ -34,7 +34,7 @@ namespace mediums
 
 PY_DECLARE_CLASS_DOC(Fog, "")
 PY_CLASS_CONSTRUCTOR_0(Fog)
-PY_CLASS_CONSTRUCTOR_2(Fog, TScalar, TScalar)
+PY_CLASS_CONSTRUCTOR_2(Fog, Fog::TValue, Fog::TValue)
 PY_CLASS_MEMBER_RW(Fog, extinction, setExtinction)
 PY_CLASS_MEMBER_RW(Fog, assymetry, setAssymetry)
 PY_CLASS_MEMBER_RW(Fog, color, setColor)
@@ -50,37 +50,37 @@ Fog::Fog()
 
 
 
-Fog::Fog(TScalar extinction, TScalar assymetry)
+Fog::Fog(TValue extinction, TValue assymetry)
 {
 	init(extinction, assymetry);
 }
 
 
 
-TScalar Fog::extinction() const
+Fog::TValue Fog::extinction() const
 {
 	return extinction_;
 }
 
 
 
-void Fog::setExtinction(TScalar extinction)
+void Fog::setExtinction(TValue extinction)
 {
-	extinction_ = std::max<TScalar>(extinction, 0);
+	extinction_ = std::max<TValue>(extinction, 0);
 }
 
 
 
-TScalar Fog::assymetry() const
+Fog::TValue Fog::assymetry() const
 {
 	return assymetry_;
 }
 
 
 
-void Fog::setAssymetry(TScalar g)
+void Fog::setAssymetry(TValue g)
 {
-	assymetry_ = num::clamp<TScalar>(g, -1, 1);
+	assymetry_ = num::clamp<TValue>(g, -1, 1);
 }
 
 
@@ -142,9 +142,9 @@ size_t Fog::doNumScatterSamples() const
 
 const Spectral Fog::doTransmittance(const Sample&, const BoundedRay& ray) const
 {
-	const TScalar d = ray.farLimit() - ray.nearLimit();
+	const TValue d = static_cast<TValue>(ray.farLimit() - ray.nearLimit());
 	LASS_ASSERT(d >= 0 && extinction_ >= 0);
-	const TScalar thickness = extinction_ * d;
+	const TValue thickness = extinction_ * d;
 	return Spectral(num::exp(-thickness));
 }
 
@@ -152,14 +152,14 @@ const Spectral Fog::doTransmittance(const Sample&, const BoundedRay& ray) const
 
 const Spectral Fog::doEmission(const Sample& sample, const BoundedRay& ray) const
 {
-	const TScalar d = ray.farLimit() - ray.nearLimit();
+	const TValue d = static_cast<TValue>(ray.farLimit() - ray.nearLimit());
 	LASS_ASSERT(d >= 0 && extinction_ >= 0);
-	const TScalar thickness = extinction_ * d;
-	if (thickness < 1e-5)
+	const TValue thickness = extinction_ * d;
+	if (thickness < 1e-5f)
 	{
 		return emission_->evaluate(sample, Illuminant) * d;
 	}
-	const TScalar absorptance = -num::expm1(-thickness); // = 1 - transmittance(ray)
+	const TValue absorptance = -num::expm1(-thickness); // = 1 - transmittance(ray)
 	return emission_->evaluate(sample, Illuminant) * (absorptance / extinction_);
 
 }
@@ -175,15 +175,15 @@ const Spectral Fog::doScatterOut(const Sample& sample, const BoundedRay& ray) co
 
 const Spectral Fog::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
-	const TScalar dMax = ray.farLimit() - ray.nearLimit();
-	const TScalar attMax = 1 - num::exp(-extinction_ * dMax);
+	const TValue dMax = static_cast<TValue>(ray.farLimit() - ray.nearLimit());
+	const TValue attMax = 1 - num::exp(-extinction_ * dMax);
 	if (attMax <= 0)
 	{
 		pdf = 0;
 		return Spectral();
 	}
-	TScalar p;
-	const TScalar d = num::uniformToExponential(sample * attMax, extinction_, p);
+	TValue p;
+	const TValue d = num::uniformToExponential(static_cast<TValue>(sample) * attMax, extinction_, p);
 	tScatter = std::min(ray.nearLimit() + d, ray.farLimit());
 	pdf = p / attMax;
 	return Spectral(p);
@@ -194,19 +194,20 @@ const Spectral Fog::doSampleScatterOutOrTransmittance(const Sample& sample, TSca
 {
 	pdf = 1;
 	const TScalar dMax = ray.farLimit() - ray.nearLimit();
-	const TScalar d = num::uniformToExponential(scatterSample, extinction_, pdf);
+	const TScalar d = num::uniformToExponential(scatterSample, static_cast<TScalar>(extinction_), pdf);
 	if (d > dMax)
 	{
 		// full transmission
 		tScatter = ray.farLimit();
 		pdf = num::exp(-extinction_ * dMax); // = 1 - cdf(tMax);
-		return Spectral(pdf);
 	}
-
-	// the photon has hit a particle. we always assume it's scattered.
-	// the callee has to russian roulette for absorption himself.
-	tScatter = ray.nearLimit() + d;
-	return Spectral(pdf);
+	else
+	{
+		// the photon has hit a particle. we always assume it's scattered.
+		// the callee has to russian roulette for absorption himself.
+		tScatter = ray.nearLimit() + d;
+	}
+	return Spectral(static_cast<TValue>(pdf));
 }
 
 
@@ -225,7 +226,7 @@ const Spectral Fog::doPhase(const Sample& sample, const TPoint3D&, const TVector
 		p = 1;
 	}
 	pdf = p;
-	return color_->evaluate(sample, Reflectant) * p;
+	return color_->evaluate(sample, Reflectant) * static_cast<TValue>(p);
 }
 
 
@@ -258,12 +259,12 @@ const Spectral Fog::doSamplePhase(const Sample& sample, const TPoint2D& phaseSam
 	const TScalar sinTheta = num::sqrt(std::max<TScalar>(1 - num::sqr(cosTheta), 0));
 	dirOut = cosTheta * dirIn + (sinTheta * num::cos(phi)) * u + (sinTheta * num::sin(phi)) * v;
 
-	return color_->evaluate(sample, Reflectant) * pdf;
+	return color_->evaluate(sample, Reflectant) * static_cast<TValue>(pdf);
 }
 
 
 
-void Fog::init(TScalar extinction, TScalar assymetry, const TSpectrumPtr& color, const TSpectrumPtr& emission, size_t numSamples)
+void Fog::init(TValue extinction, TValue assymetry, const TSpectrumPtr& color, const TSpectrumPtr& emission, size_t numSamples)
 {
 	setExtinction(extinction);
 	setEmission(emission);

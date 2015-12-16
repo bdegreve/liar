@@ -149,10 +149,10 @@ TBsdfPtr Dielectric::doBsdf(const Sample& sample, const IntersectionContext& con
 {
 	// in theory, refractive indices must be at least 1, but they must be more than zero for sure.
 	// IOR as average of spectral works correctly for LIAR_SPECTRAL_MODE_SINGLE. Everything else uses ... well, and average.
-	const TScalar ior1 = std::max(average(outerRefractionIndex_->lookUp(sample, context, Illuminant)), 1e-9);
-	const TScalar ior2 = std::max(average(innerRefractionIndex_->lookUp(sample, context, Illuminant)), 1e-9);
+	const TValue ior1 = std::max(average(outerRefractionIndex_->lookUp(sample, context, Illuminant)), 1e-9f);
+	const TValue ior2 = std::max(average(innerRefractionIndex_->lookUp(sample, context, Illuminant)), 1e-9f);
 	const bool isLeaving = context.solidEvent() == seLeaving;
-	const TScalar ior = isLeaving ? ior2 / ior1 : ior1 / ior2;
+	const TValue ior = isLeaving ? ior2 / ior1 : ior1 / ior2;
 	const Spectral reflectance = reflectance_->lookUp(sample, context, Reflectant);
 	const Spectral transmittance = transmittance_->lookUp(sample, context, Reflectant);
 
@@ -186,7 +186,7 @@ void Dielectric::init(const TTexturePtr& innerRefractionIndex, const TTexturePtr
 
 // --- bsdf ----------------------------------------------------------------------------------------
 
-Dielectric::DielectricBsdf::DielectricBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, TScalar ior, const Spectral& reflectance, const Spectral& transmittance) :
+Dielectric::DielectricBsdf::DielectricBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, TValue ior, const Spectral& reflectance, const Spectral& transmittance) :
 	Bsdf(sample, context, caps),
 	reflectance_(reflectance),
 	transmittance_(transmittance),
@@ -206,24 +206,26 @@ BsdfOut Dielectric::DielectricBsdf::doEvaluate(const TVector3D&, const TVector3D
 
 SampleBsdfOut Dielectric::DielectricBsdf::doSample(const TVector3D& omegaIn, const TPoint2D&, TScalar componentSample, TBsdfCaps allowedCaps) const
 {
+	typedef Spectral::TValue TValue;
+
 	enum
 	{
 		capsRefl = Bsdf::capsReflection | Bsdf::capsSpecular,
 		capsTrans = Bsdf::capsTransmission | Bsdf::capsSpecular
 	};
 
-	const TScalar cosI = omegaIn.z;
+	const TValue cosI = static_cast<TValue>(omegaIn.z);
 	LASS_ASSERT(cosI > 0);
-	const TScalar sinT2 = num::sqr(ior_) * (1 - num::sqr(cosI));
-	const TScalar cosT = num::sqrt(std::max<TScalar>(1 - sinT2, 0));
-	const TScalar rOrth = (ior_ * cosI - cosT) / (ior_ * cosI + cosT);
-	const TScalar rPar = (cosI - ior_ * cosT) / (cosI + ior_ * cosT);
-	const TScalar rFresnel = (num::sqr(rOrth) + num::sqr(rPar)) / 2;
+	const TValue sinT2 = num::sqr(ior_) * (1 - num::sqr(cosI));
+	const TValue cosT = num::sqrt(std::max<TValue>(1 - sinT2, 0));
+	const TValue rOrth = (ior_ * cosI - cosT) / (ior_ * cosI + cosT);
+	const TValue rPar = (cosI - ior_ * cosT) / (cosI + ior_ * cosT);
+	const TValue rFresnel = (num::sqr(rOrth) + num::sqr(rPar)) / 2;
 
-	const TScalar powRefl = kernel::hasCaps(allowedCaps, capsRefl) ? reflectance_.absAverage() * rFresnel : 0;
-	const TScalar powTrans = kernel::hasCaps(allowedCaps, capsTrans) ? transmittance_.absAverage() * (1 - rFresnel) : 0;
+	const TValue powRefl = kernel::hasCaps(allowedCaps, capsRefl) ? reflectance_.absAverage() * rFresnel : 0;
+	const TValue powTrans = kernel::hasCaps(allowedCaps, capsTrans) ? transmittance_.absAverage() * (1 - rFresnel) : 0;
 	LASS_ASSERT(powRefl + powTrans > 0);
-	const TScalar probRefl = powRefl / (powRefl + powTrans);
+	const TValue probRefl = powRefl / (powRefl + powTrans);
 	
 	if (componentSample < probRefl)
 	{
@@ -235,7 +237,8 @@ SampleBsdfOut Dielectric::DielectricBsdf::doSample(const TVector3D& omegaIn, con
 		TVector3D omegaTrans = -omegaIn;
 		omegaTrans *= ior_;
 		omegaTrans.z += (ior_ * cosI - cosT);
-		return SampleBsdfOut(omegaTrans, transmittance_ * (1 - rFresnel) / num::abs(omegaTrans.z), 1 - probRefl, capsTrans); 
+		const TValue cosO = static_cast<TValue>(omegaTrans.z);
+		return SampleBsdfOut(omegaTrans, transmittance_ * (1 - rFresnel) / num::abs(cosO), 1 - probRefl, capsTrans);
 	}
 }
 

@@ -128,7 +128,7 @@ void FilterMitchell::doWriteRender(const OutputSample* first, const OutputSample
 				const TScalar x = (p0.x + i - filterWidth_) * invRes.x;
 				const TScalar w = f[i].x * f[j].y;
 				LASS_ASSERT(output != end);
-				*output++ = OutputSample(*first, TPoint2D(x, y), w);
+				*output++ = OutputSample(*first, TPoint2D(x, y), static_cast<OutputSample::TValue>(w));
 			}
 		}
 

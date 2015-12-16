@@ -54,7 +54,7 @@ Spectral::Spectral(const TBands& v, SpectralType type):
 {
 	if (type == Reflectant)
 	{
-		const TScalar max = v_.maximum();
+		const TValue max = v_.maximum();
 		if (max > 1)
 		{
 			v_ /= max;
@@ -127,12 +127,12 @@ Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample&, SpectralType type)
 	}
 }
 
-Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, const Sample&, SpectralType type)
+Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TValue>& values, const Sample&, SpectralType type)
 {
 	return fromSampled(wavelengths, values, type);
 }
 
-Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, SpectralType type)
+Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TValue>& values, SpectralType type)
 {
 	// can be done better!
 	LASS_ASSERT(wavelengths.size() == values.size());
@@ -158,29 +158,29 @@ Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, cons
 			continue;
 		}
 
-		TScalar v1 = values[k1];
-		TScalar v2 = values[k2];
-		TScalar dv = v2 - v1;
+		TValue v1 = values[k1];
+		TValue v2 = values[k2];
+		TValue dv = v2 - v1;
 
 		if (w1 < bands[i])
 		{
-			v1 = v1 + dv * (bands[i] - w1) / dw;
+			v1 = v1 + static_cast<TValue>(dv * (bands[i] - w1) / dw);
 			w1 = bands[i];
 		}
 		if (w2 > bands[i + 1])
 		{
-			v2 = v1 + dv * (bands[i + 1] - w1) / dw;
+			v2 = v1 + static_cast<TValue>(dv * (bands[i + 1] - w1) / dw);
 			w2 = bands[i + 1];
 		}
 
-		result.v_[i] += (v1 + v2) * (w2 - w1) / 2; // can't reuse dw
+		result.v_[i] += (v1 + v2) * static_cast<TValue>(w2 - w1) / 2; // can't reuse dw
 
 		k1 = k2++;
 	}
 
 	if (type == Reflectant)
 	{
-		const TScalar max = result.v_.maximum();
+		const TValue max = result.v_.maximum();
 		if (max > 1)
 		{
 			result /= max;
@@ -242,7 +242,7 @@ Spectral::Impl::Impl()
 		8.00000e-07f,
 	};
 
-	const TScalar y[numBands] =
+	const TValue y[numBands] =
 	{
 		0.00787763f,
 		-5.55112e-17f,
@@ -256,7 +256,7 @@ Spectral::Impl::Impl()
 		0.969991f,
 	};
 
-	const TScalar m[numBands] =
+	const TValue m[numBands] =
 	{
 		0.991654f,
 		0.999989f,
@@ -270,7 +270,7 @@ Spectral::Impl::Impl()
 		0.997143f,
 	};
 
-	const TScalar c[numBands] =
+	const TValue c[numBands] =
 	{
 		0.949163f,
 		0.922302f,
@@ -284,7 +284,7 @@ Spectral::Impl::Impl()
 		0.0394559f,
 	};
 
-	const TScalar r[numBands] =
+	const TValue r[numBands] =
 	{
 		0.0508371f,
 		0.0776981f,
@@ -298,7 +298,7 @@ Spectral::Impl::Impl()
 		0.960544f,
 	};
 
-	const TScalar g[numBands] =
+	const TValue g[numBands] =
 	{
 		0.00834648f,
 		1.11093e-05f,
@@ -312,7 +312,7 @@ Spectral::Impl::Impl()
 		0.00285692f,
 	};
 
-	const TScalar b[numBands] =
+	const TValue b[numBands] =
 	{
 		0.992122f,
 		1.00000f,
@@ -353,12 +353,12 @@ Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample&, SpectralType type)
 	return Spectral(TBands(rgb.r, rgb.g, rgb.b), type);
 }
 
-Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, const Sample&, SpectralType type)
+Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TValue>& values, const Sample&, SpectralType type)
 {
 	return fromSampled(wavelengths, values, type);
 }
 
-Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, SpectralType type)
+Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TValue>& values, SpectralType type)
 {
 	const XYZ xyz = standardObserver().tristimulus(wavelengths, values);
 	const RgbSpace::RGBA rgb = RgbSpace::defaultSpace()->linearConvert(xyz);
@@ -377,7 +377,7 @@ Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample& sample, SpectralType ty
 	return standardRecovery().recover(xyz, sample, type);
 }
 
-Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, const Sample& sample, SpectralType type)
+Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TValue>& values, const Sample& sample, SpectralType type)
 {
 	LASS_ASSERT(wavelengths.size() > 1 && wavelengths.size() == values.size());
 	const size_t k = std::upper_bound(wavelengths.begin(), wavelengths.end(), sample.wavelength()) - wavelengths.begin();
@@ -387,12 +387,12 @@ Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, cons
 	}
 
 	LASS_ASSERT(wavelengths[k] > wavelengths[k - 1]);
-	const TScalar t = (sample.wavelength() - wavelengths[k - 1]) / (wavelengths[k] - wavelengths[k - 1]);
-	const TScalar v = num::lerp(values[k - 1], values[k], t);
+	const TValue t = static_cast<TValue>((sample.wavelength() - wavelengths[k - 1]) / (wavelengths[k] - wavelengths[k - 1]));
+	const TValue v = num::lerp(values[k - 1], values[k], t);
 
 	if (type == Reflectant)
 	{
-		const TScalar max = *std::max_element(values.begin(), values.end());
+		const TValue max = *std::max_element(values.begin(), values.end());
 		if (max > 1)
 		{
 			return Spectral(v / max);
@@ -409,7 +409,7 @@ const XYZ Spectral::xyz(const Sample& sample) const
 	{
 		return XYZ(0);
 	}
-	return (v_[0] / pdf) * standardObserver().sensitivity(w);
+	return static_cast<TValue>(v_[0] / pdf) * standardObserver().sensitivity(w);
 }
 
 #endif

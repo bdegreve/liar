@@ -104,7 +104,7 @@ void LinearInterpolator::setControl(const TTexturePtr& iContolTexture)
 
 /** add a key texture to the list
  */
-void LinearInterpolator::addKey(const TScalar keyValue, const TTexturePtr& keyTexture)
+void LinearInterpolator::addKey(const TValue keyValue, const TTexturePtr& keyTexture)
 {
 	TKeyTexture key(keyValue, keyTexture);
 	TKeyTextures::iterator i = std::lower_bound(keys_.begin(), keys_.end(), key, LesserKey());
@@ -127,7 +127,7 @@ const Spectral LinearInterpolator::doLookUp(const Sample& sample, const Intersec
 		return Spectral();
 	}
 
-	const TScalar keyValue = control_->scalarLookUp(sample, context);
+	const TValue keyValue = control_->scalarLookUp(sample, context);
 
 	TKeyTexture sentinel(keyValue, TTexturePtr());
 	TKeyTextures::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), sentinel, LesserKey());
@@ -144,7 +144,7 @@ const Spectral LinearInterpolator::doLookUp(const Sample& sample, const Intersec
 	TKeyTextures::const_iterator prevI = stde::prev(i);
 	LASS_ASSERT(prevI->first != i->first); // due to lower_bound
 
-	const TScalar t = (keyValue - prevI->first) / (i->first - prevI->first);
+	const TValue t = (keyValue - prevI->first) / (i->first - prevI->first);
 	
 	return lerp(
 		prevI->second->lookUp(sample, context, type),
@@ -154,14 +154,14 @@ const Spectral LinearInterpolator::doLookUp(const Sample& sample, const Intersec
 
 
 
-TScalar LinearInterpolator::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+Texture::TValue LinearInterpolator::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	if (keys_.empty())
 	{
 		return 0;
 	}
 
-	const TScalar keyValue = control_->scalarLookUp(sample, context);
+	const TValue keyValue = control_->scalarLookUp(sample, context);
 
 	TKeyTexture sentinel(keyValue, TTexturePtr());
 	TKeyTextures::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), sentinel, LesserKey());
@@ -178,7 +178,7 @@ TScalar LinearInterpolator::doScalarLookUp(const Sample& sample, const Intersect
 	TKeyTextures::const_iterator prevI = stde::prev(i);
 	LASS_ASSERT(prevI->first != i->first); // due to lower_bound
 
-	const TScalar t = (keyValue - prevI->first) / (i->first - prevI->first);
+	const TValue t = (keyValue - prevI->first) / (i->first - prevI->first);
 
 	return num::lerp(
 		prevI->second->scalarLookUp(sample, context),

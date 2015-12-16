@@ -119,7 +119,7 @@ private:
 	typedef std::vector<MipMapLevel> TMipMaps;
 
 	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const override;
-	TScalar doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
+	TValue doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
 
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
@@ -130,7 +130,7 @@ private:
 	MipMapLevel makeMipMapOdd(const MipMapLevel& parent, prim::XY compressionAxis, size_t newSize) const;
 
 	void mipMapLevel(TScalar width, size_t numLevels, 
-		size_t& level0, size_t& level1, TScalar& dLevel) const;
+		size_t& level0, size_t& level1, TPixel::TValue& dLevel) const;
 
 	const TPixel lookUp(const IntersectionContext& context) const;
 	const TPixel nearest(size_t levelU, size_t levelV, const TPoint2D& uv) const;

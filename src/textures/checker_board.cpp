@@ -112,7 +112,7 @@ void CheckerBoard::doSetState(const TPyObjectPtr& state)
 
 const Spectral CheckerBoard::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
 {
-	const TScalar wA = weightA(context);
+	const TValue wA = weightA(context);
 	if (wA >= 1)
 	{
 		return textureA()->lookUp(sample, context, type);
@@ -128,9 +128,9 @@ const Spectral CheckerBoard::doLookUp(const Sample& sample, const IntersectionCo
 }
 
 
-TScalar CheckerBoard::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+Texture::TValue CheckerBoard::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
 {
-	const TScalar wA = weightA(context);
+	const TValue wA = weightA(context);
 	if (wA >= 1)
 	{
 		return textureA()->scalarLookUp(sample, context);
@@ -146,7 +146,7 @@ TScalar CheckerBoard::doScalarLookUp(const Sample& sample, const IntersectionCon
 }
 
 
-TScalar CheckerBoard::weightA(const IntersectionContext& context) const
+Texture::TValue CheckerBoard::weightA(const IntersectionContext& context) const
 {
 #pragma LASS_FIXME("points need transform too [Bramz]")
 	const TVector2D uv = context.uv().position().transform(num::fractional);
@@ -154,22 +154,22 @@ TScalar CheckerBoard::weightA(const IntersectionContext& context) const
 	switch (antiAliasing_)
 	{
 	case aaNone:
-		return (uv.x < split_.x) == (uv.y < split_.y) ? 1 : 0;
+		return (uv.x < split_.x) == (uv.y < split_.y) ? 1.f : 0.f;
 
 	case aaBilinear:
 	{
 		const TVector2D dUv = prim::pointwiseMax(context.dUv_dI().transform(num::abs), context.dUv_dJ().transform(num::abs));
 		const TVector2D uvMin = uv - dUv / 2;
 		const TVector2D uvMax = uv + dUv / 2;
-		const TScalar area = dUv.x * dUv.y;
+		const TValue area = static_cast<TValue>(dUv.x * dUv.y);
 		if (area > 0)
 		{
-			const TScalar areaA = integrate(uvMin, uvMax);
-			return num::clamp(areaA / area, TNumTraits::zero, TNumTraits::one);
+			const TValue areaA = integrate(uvMin, uvMax);
+			return num::clamp(areaA / area, static_cast<TValue>(0), static_cast<TValue>(1));
 		}
 		else
 		{
-			return (uv.x < split_.x) == (uv.y < split_.y) ? 1 : 0;
+			return (uv.x < split_.x) == (uv.y < split_.y) ? 1.f : 0.f;
 		}
 	}
 
@@ -177,12 +177,12 @@ TScalar CheckerBoard::weightA(const IntersectionContext& context) const
 		LASS_ASSERT_UNREACHABLE;
 	}
 
-	return 1;
+	return 1.f;
 }
 
 
 
-TScalar CheckerBoard::integrate(const TVector2D& min, const TVector2D& max) const
+Texture::TValue CheckerBoard::integrate(const TVector2D& min, const TVector2D& max) const
 {
 	const TVector2D min0 = min.transform(num::floor);
 	const TVector2D max0 = max.transform(num::floor);
@@ -203,7 +203,7 @@ TScalar CheckerBoard::integrate(const TVector2D& min, const TVector2D& max) cons
 	result += dot(dMaxU, dMaxV) - dot(dMaxU, dMinV);
 	result += dot(dMinU, dMinV) - dot(dMinU, dMaxV);
 
-	return result;
+	return static_cast<TValue>(result);
 }
 
 

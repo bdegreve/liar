@@ -88,7 +88,7 @@ const Spectral GridBoard::doLookUp(const Sample& sample, const IntersectionConte
 
 
 
-TScalar GridBoard::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+Texture::TValue GridBoard::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	const TScalar u = num::fractional(context.uv().x);
 	const TScalar v = num::fractional(context.uv().y);

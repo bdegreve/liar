@@ -172,7 +172,7 @@ void Lafortune::doSetState(const TPyObjectPtr& state)
 
 Lafortune::LafortuneBsdf::LafortuneBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const Spectral& diffuse) :
 	Bsdf(sample, context, caps),
-	diffuseOverPi_(diffuse / TNumTraits::pi)
+	diffuseOverPi_(diffuse / num::NumTraits<TValue>::pi)
 {
 }
 
@@ -215,9 +215,9 @@ Spectral Lafortune::LafortuneBsdf::eval(const TVector3D& omegaIn, const TVector3
 	const TVector3D omega = omegaIn * omegaOut; // component wise.
 	for (TLobes::const_iterator i = lobes_.begin(); i != lobes_.end(); ++i)
 	{
-		Spectral comp = i->x * omega.x;
-		comp.fma(i->y, omega.y);
-		comp.fma(i->z, omega.z);
+		Spectral comp = i->x * static_cast<TValue>(omega.x);
+		comp.fma(i->y, static_cast<TValue>(omega.y));
+		comp.fma(i->z, static_cast<TValue>(omega.z));
 		comp.inpmax(0);
 		comp.inppow(i->power);
 		result += comp;

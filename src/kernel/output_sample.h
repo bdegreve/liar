@@ -43,26 +43,27 @@ class Spectral;
 class LIAR_KERNEL_DLL OutputSample
 {
 public:
+	typedef XYZ::TValue TValue;
 
 	OutputSample();
-	OutputSample(const TPoint2D& screenCoordinate, const XYZ& radiance, TScalar depth, TScalar alpha = 1, TScalar weight = 1);
-	OutputSample(const Sample& sample, const Spectral& radiance, TScalar depth, TScalar alpha = 1, TScalar weight = 1);
-	OutputSample(const OutputSample& other, const TPoint2D& screenCoordinate, TScalar weight);
+	OutputSample(const TPoint2D& screenCoordinate, const XYZ& radiance, TValue depth, TValue alpha = 1, TValue weight = 1);
+	OutputSample(const Sample& sample, const Spectral& radiance, TValue depth, TValue alpha = 1, TValue weight = 1);
+	OutputSample(const OutputSample& other, const TPoint2D& screenCoordinate, TValue weight);
 
 	const TPoint2D& screenCoordinate() const { return screenCoordinate_; }
 	const XYZ& radiance() const { return radiance_; }
 	void setRadiance(const XYZ& radiance) { radiance_ = radiance; }
-	TScalar depth() const { return depth_; }
-	TScalar alpha() const { return alpha_; }
-	TScalar weight() const { return weight_; }
+	TValue depth() const { return depth_; }
+	TValue alpha() const { return alpha_; }
+	TValue weight() const { return weight_; }
 
 private:
 
 	XYZ radiance_;
 	TPoint2D screenCoordinate_;
-	TScalar depth_;
-	TScalar alpha_;
-	TScalar weight_;
+	TValue depth_;
+	TValue alpha_;
+	TValue weight_;
 };
 
 typedef std::vector<OutputSample> TOutputSamples;

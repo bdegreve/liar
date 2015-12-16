@@ -57,19 +57,20 @@ public:
 	const TTexturePtr& transmittance() const;
 	void setTransmittance(const TTexturePtr& transmittance);
 
-	class DielectricBsdf: public Bsdf
+private:
+	typedef Spectral::TValue TValue;
+
+	class DielectricBsdf : public Bsdf
 	{
 	public:
-		DielectricBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TScalar ior, const Spectral& reflectance, const Spectral& transmittance);
+		DielectricBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TValue ior, const Spectral& reflectance, const Spectral& transmittance);
 	private:
 		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
 		Spectral reflectance_;
 		Spectral transmittance_;
-		TScalar ior_;
+		TValue ior_;
 	};
-
-private:
 
 	size_t doNumReflectionSamples() const;
 	size_t doNumTransmissionSamples() const;

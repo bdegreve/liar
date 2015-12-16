@@ -54,7 +54,7 @@ const Spectral ContextMapping::doLookUp(const Sample& sample, const Intersection
 }
 
 
-TScalar ContextMapping::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+Texture::TValue ContextMapping::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	IntersectionContext temp(context);
 	doTransformContext(sample, temp);

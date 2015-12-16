@@ -54,24 +54,26 @@ Raster::TToneMappingDictionary Raster::toneMappingDictionary_ = Raster::makeTone
 
 namespace
 {
-	inline float filmic(float x)
-	{
-		x = std::max(0.f, x - 0.004f);
-		const float y = (x * (6.2f * x + .5f)) / (x * (6.2f * x + 1.7f) + 0.06f); 
-		return num::pow(y, 2.2f); // undo gamma
-	}
-	inline float invFilmic(float y)
-	{
-		y = std::max(0.f, std::min(y, 0.99999f));
-		y = num::pow(y, 1.f / 2.2f); // apply gamma
-		// a*x*x + b*y + c == 0
-		const float a = 6.2f * y - 6.2f;
-		const float b = 1.7f * y - .5f;
-		const float c = .06f * y;
-		const float D = b * b - 4 * a * c;
-		const float x = (-b - num::sqrt(D)) / (2 * a);
-		return x + 0.004f;
-	}
+    typedef Raster::TValue TValue;
+
+    inline TValue filmic(TValue x)
+    {
+        x = std::max(0.f, x - 0.004f);
+        const TValue y = (x * (6.2f * x + .5f)) / (x * (6.2f * x + 1.7f) + 0.06f);
+        return num::pow(y, 2.2f); // undo gamma
+    }
+    inline TValue invFilmic(float y)
+    {
+        y = std::max(0.f, std::min(y, 0.99999f));
+        y = num::pow(y, 1.f / 2.2f); // apply gamma
+        // a*x*x + b*y + c == 0
+        const TValue a = 6.2f * y - 6.2f;
+        const TValue b = 1.7f * y - .5f;
+        const TValue c = .06f * y;
+        const TValue D = b * b - 4 * a * c;
+        const TValue x = (-b - num::sqrt(D)) / (2 * a);
+        return x + 0.004f;
+    }
 }
 
 
@@ -91,9 +93,9 @@ const std::string Raster::toneMapping() const
 
 
 
-TScalar Raster::exposureStops() const
+Raster::TValue Raster::exposureStops() const
 {
-    const TScalar stopDivisions = 3.f; // in how many discrete steps is one stop divided?
+    const TValue stopDivisions = 3.f; // in how many discrete steps is one stop divided?
 
     if (!autoExposure_)
     {
@@ -105,8 +107,8 @@ TScalar Raster::exposureStops() const
         {
             return exposureStops_;
         }
-        TScalar autoGain = 1;
-        const TScalar y = averageSceneLuminance();
+        TValue autoGain = 1;
+        const TValue y = averageSceneLuminance();
         if (y > 0)
         {
             switch (toneMapping_)
@@ -132,8 +134,8 @@ TScalar Raster::exposureStops() const
                 LASS_ENFORCE_UNREACHABLE;
             };
         }
-        TScalar stops = num::log2(autoGain);
-        TScalar exposureStops = num::round(stopDivisions * stops) / stopDivisions; // round to nearest discrete step.
+        const TValue stops = num::log2(autoGain);
+        const TValue exposureStops = num::round(stopDivisions * stops) / stopDivisions; // round to nearest discrete step.
         if (exposureStops != exposureStops_)
         {
             exposureStops_ = exposureStops;
@@ -146,7 +148,7 @@ TScalar Raster::exposureStops() const
 
 
 
-TScalar Raster::exposureCorrectionStops() const
+Raster::TValue Raster::exposureCorrectionStops() const
 {
     return exposureCorrectionStops_;
 }
@@ -160,7 +162,7 @@ bool Raster::autoExposure() const
 
 
 
-TScalar Raster::middleGrey() const
+Raster::TValue Raster::middleGrey() const
 {
     return middleGrey_;
 }
@@ -194,7 +196,7 @@ void Raster::setToneMapping(const std::string& toneMapping)
 
 
 
-void Raster::setExposureStops(TScalar stops)
+void Raster::setExposureStops(TValue stops)
 {
     LASS_LOCK(renderLock_)
     {
@@ -210,7 +212,7 @@ void Raster::setExposureStops(TScalar stops)
 
 
 
-void Raster::setExposureCorrectionStops(TScalar stops)
+void Raster::setExposureCorrectionStops(TValue stops)
 {
     LASS_LOCK(renderLock_)
     {
@@ -240,7 +242,7 @@ void Raster::setAutoExposure(bool enable)
 
 
 
-void Raster::setMiddleGrey(TScalar level)
+void Raster::setMiddleGrey(TValue level)
 {
     LASS_LOCK(renderLock_)
     {
@@ -306,7 +308,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
 
     LASS_LOCK(renderLock_)
     {
-        const TScalar gain = sceneGain(); // get gain first, as it can change the dirtybox
+        const TValue gain = sceneGain(); // get gain first, as it can change the dirtybox
 
         const TDirtyBox::TPoint min = renderDirtyBox_.min();
         const TDirtyBox::TPoint max = renderDirtyBox_.max();
@@ -357,8 +359,8 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
 
         case tmReinhard2002Y:
             {
-                const TScalar Lw = gain * maxSceneLuminance_;
-                const TScalar invLwSquared = num::inv(Lw * Lw);
+                const TValue Lw = gain * maxSceneLuminance_;
+                const TValue invLwSquared = num::inv(Lw * Lw);
                 for (size_t j = min.y; j <= max.y; ++j)
                 {
                     const size_t kBegin = j * resolution_.x + min.x;
@@ -366,7 +368,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
                     for (size_t k = kBegin; k < kEnd; ++k)
                     {
                         const XYZ linear = weighted(k, gain);
-                        const TScalar L = linear.y;
+                        const TValue L = linear.y;
                         const XYZ tonemapped = linear * ((1 + L * invLwSquared) / (1 + L));
                         tonemapBuffer_[k] = destSpace->convert(tonemapped, alphaBuffer_[k]);
                     }
@@ -376,8 +378,8 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
 
         case tmReinhard2002RGB:
             {
-                const TScalar Lw = gain * maxSceneLuminance_;
-                const TScalar invLwSquared = num::inv(Lw * Lw);
+                const TValue Lw = gain * maxSceneLuminance_;
+                const TValue invLwSquared = num::inv(Lw * Lw);
                 for (size_t j = min.y; j <= max.y; ++j)
                 {
                     const size_t kBegin = j * resolution_.x + min.x;
@@ -432,7 +434,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
                 for (size_t k = kBegin; k < kEnd; ++k)
                 {
                     const XYZ linear = weighted(k, gain);
-                    const XYZ tonemapped = linear * (filmic(linear.y) / std::max(linear.y, 0.004));
+                    const XYZ tonemapped = linear * (filmic(linear.y) / std::max(linear.y, static_cast<XYZ::TValue>(0.004)));
                     tonemapBuffer_[k] = destSpace->convert(tonemapped, alphaBuffer_[k]);
                 }
             }
@@ -471,7 +473,7 @@ const Raster::TTonemapBuffer& Raster::tonemapBuffer() const
 
 
 
-const Raster::TWeightBuffer& Raster::totalWeight() const
+const Raster::TValueBuffer& Raster::totalWeight() const
 {
     return totalWeight_;
 }
@@ -521,9 +523,9 @@ void Raster::doWriteRender(const OutputSample* first, const OutputSample* last)
             if (i >= 0 && static_cast<size_t>(i) < resolution_.x && j >= 0 && static_cast<size_t>(j) < resolution_.y)
             {
                 const size_t k = j * resolution_.x + i;
-                TScalar& w = totalWeight_[k];
+                TValue& w = totalWeight_[k];
                 w += first->weight();
-                const TScalar alpha = first->weight() * first->alpha();
+                const TValue alpha = first->weight() * first->alpha();
                 alphaBuffer_[k] += alpha;
                 XYZ& xyz = renderBuffer_[k];
                 xyz += first->radiance() * alpha;
@@ -543,44 +545,44 @@ void Raster::doWriteRender(const OutputSample* first, const OutputSample* last)
 
 
 
-TScalar Raster::sceneGain() const
+Raster::TValue Raster::sceneGain() const
 {
-    const TScalar stops = exposureStops() + exposureCorrectionStops();
-    return num::pow(TScalar(2), stops);
+    const TValue stops = exposureStops() + exposureCorrectionStops();
+    return num::pow(TValue(2), stops);
 }
 
 
 
-TScalar Raster::averageSceneLuminance() const
+Raster::TValue Raster::averageSceneLuminance() const
 {
-	TScalar sumLogY = 0;
-	size_t coverage = 0;
-	LASS_LOCK(renderLock_)
-	{
-		for (size_t k = 0, n = renderBuffer_.size(); k < n; ++k)
-		{
-			const TScalar w = totalWeight_[k];
-			const TScalar y = renderBuffer_[k].y;
-			if (w > 0 && y > 0)
-			{
-				sumLogY += num::log(y / w);
-				++coverage;
-			}
-		}
-	}
-	if (!coverage)
-	{
-		return 0;
-	}
-	const TScalar avgLogY = sumLogY / coverage;
-	return num::exp(avgLogY);
+    TValue sumLogY = 0;
+    size_t coverage = 0;
+    LASS_LOCK(renderLock_)
+    {
+        for (size_t k = 0, n = renderBuffer_.size(); k < n; ++k)
+        {
+            const TValue w = totalWeight_[k];
+            const TValue y = renderBuffer_[k].y;
+            if (w > 0 && y > 0)
+            {
+                sumLogY += num::log(y / w);
+                ++coverage;
+            }
+        }
+    }
+    if (!coverage)
+    {
+        return 0;
+    }
+    const TValue avgLogY = sumLogY / coverage;
+    return num::exp(avgLogY);
 }
 
 
 
-inline XYZ Raster::weighted(size_t index, TScalar gain) const
+inline XYZ Raster::weighted(size_t index, TValue gain) const
 {
-    const TScalar w = totalWeight_[index];
+    const TValue w = totalWeight_[index];
     return w > 0 ? renderBuffer_[index] * (gain / w) : XYZ(0);
 }
 

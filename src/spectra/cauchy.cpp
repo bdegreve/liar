@@ -30,37 +30,37 @@ namespace spectra
 {
 
 PY_DECLARE_CLASS_DOC(Cauchy, "Cauchy's equation")
-	PY_CLASS_CONSTRUCTOR_2(Cauchy, TScalar, TScalar)
+PY_CLASS_CONSTRUCTOR_2(Cauchy, Cauchy::TParam, Cauchy::TParam)
 
 
 // --- public --------------------------------------------------------------------------------------
 
-Cauchy::Cauchy(TScalar b, TScalar c):
+Cauchy::Cauchy(TParam b, TParam c) :
 	b_(b),
 	c_(c)
 {
 }
 
 
-TScalar Cauchy::b() const
+Cauchy::TValue Cauchy::b() const
 {
 	return b_;
 }
 
 
-void Cauchy::setB(TScalar b)
+void Cauchy::setB(TParam b)
 {
 	b_ = b;
 }
 
 
-TScalar Cauchy::c() const
+Cauchy::TValue Cauchy::c() const
 {
 	return c_;
 }
 
 
-void Cauchy::setC(TScalar c)
+void Cauchy::setC(TParam c)
 {
 	c_ = c;
 }
@@ -76,13 +76,13 @@ const Spectral Cauchy::doEvaluate(const Sample& sample, SpectralType type) const
 {
 	return Spectral::fromFunc([=](TWavelength w) {
 		const TWavelength w_nm = sample.wavelength() * 1e6; // in micrometers
-		return b_ + c_ / num::sqr(w_nm);
+		return static_cast<TValue>(b_ + c_ / num::sqr(w_nm));
 	}, sample, type);
 }
 
 
 
-TScalar Cauchy::doLuminance() const
+Cauchy::TValue Cauchy::doLuminance() const
 {
 	return b_;
 }

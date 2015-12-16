@@ -119,6 +119,10 @@ public:
 		}
 		return *this;
 	}
+	Bands& operator/=(TParam f)
+	{
+		return (*this *= num::inv(f));
+	}
 
 	Bands& fma(const Bands& a, const Bands& b)
 	{
@@ -158,6 +162,14 @@ public:
 		for (size_t i = 0; i < N; ++i)
 		{
 			v_[i] = std::max(v_[i], other.v_[i]);
+		}
+		return *this;
+	}
+	Bands& inpmax(TParam f)
+	{
+		for (size_t i = 0; i < N; ++i)
+		{
+			v_[i] = std::max(v_[i], f);
 		}
 		return *this;
 	}
@@ -201,7 +213,7 @@ public:
 		}
 		return *this;
 	}
-	Bands& inplerp(const Bands& other, TScalar f)
+	Bands& inplerp(const Bands& other, TParam f)
 	{
 		for (size_t i = 0; i < N; ++i)
 		{
@@ -223,6 +235,11 @@ public:
 	TValue average() const
 	{
 		return std::accumulate(v_, v_ + numBands, TNumTraits::zero) / numBands;
+	}
+
+	TValue minimum() const
+	{
+		return *std::min_element(v_, v_ + numBands);
 	}
 
 	TValue maximum() const
@@ -296,15 +313,17 @@ public:
 
 	Bands& inpabs() { v_ = num::abs(v_); return *this; }
 	Bands& inpmax(const Bands& other) { v_ = std::max(v_, other.v_); return *this; }
+	Bands& inpmax(TParam f) { v_ = std::max(v_, f); return *this; }
 	Bands& inppow(const Bands& other) { v_ = num::pow(v_, other.v_); return *this; }
-	Bands& inppow(TScalar f) { v_ = num::pow(v_, f); return *this; }
+	Bands& inppow(TParam f) { v_ = num::pow(v_, f); return *this; }
 	Bands& inpsqrt() { v_ = num::sqrt(v_); return *this; }
 	Bands& inpexp() { v_ = num::exp(v_); return *this; }
 	Bands& inpclamp(TParam min, TParam max) { v_ = num::clamp(v_, min, max); return *this; }
-	Bands& inplerp(const Bands& other, TScalar f) { v_ = num::lerp(v_, other.v_, f); return *this; }
+	Bands& inplerp(const Bands& other, TParam f) { v_ = num::lerp(v_, other.v_, f); return *this; }
 
 	TValue dot(const Bands& other) const { return v_ * other.v_; }
 	TValue average() const { return v_; }
+	TValue minimum() const { return v_; }
 	TValue maximum() const { return v_; }
 
 	bool isZero() const { return !v_; }
@@ -398,6 +417,13 @@ public:
 		v_[2] *= f;
 		return *this;
 	}
+	Bands& operator/=(TParam f)
+	{
+		v_[0] /= f;
+		v_[1] /= f;
+		v_[2] /= f;
+		return *this;
+	}
 
 	Bands& fma(const Bands& a, const Bands& b)
 	{
@@ -435,6 +461,13 @@ public:
 		v_[2] = std::max(v_[2], other.v_[2]);
 		return *this;
 	}
+	Bands& inpmax(TParam f)
+	{
+		v_[0] = std::max(v_[0], f);
+		v_[1] = std::max(v_[1], f);
+		v_[2] = std::max(v_[2], f);
+		return *this;
+	}
 	Bands& inppow(const Bands& other)
 	{
 		v_[0] = num::pow(v_[0], other.v_[0]);
@@ -442,7 +475,7 @@ public:
 		v_[2] = num::pow(v_[2], other.v_[2]);
 		return *this;
 	}
-	Bands& inppow(TScalar f)
+	Bands& inppow(TParam f)
 	{
 		v_[0] = num::pow(v_[0], f);
 		v_[1] = num::pow(v_[1], f);
@@ -470,7 +503,7 @@ public:
 		v_[2] = num::clamp(v_[2], min, max);
 		return *this;
 	}
-	Bands& inplerp(const Bands& other, TScalar f)
+	Bands& inplerp(const Bands& other, TParam f)
 	{
 		v_[0] = num::lerp(v_[0], other.v_[0], f);
 		v_[1] = num::lerp(v_[1], other.v_[1], f);
@@ -486,6 +519,11 @@ public:
 	TValue average() const
 	{
 		return (v_[0] + v_[1] + v_[2]) / 3;
+	}
+
+	TValue minimum() const
+	{
+		return std::min(v_[0], std::min(v_[1], v_[2]));
 	}
 
 	TValue maximum() const

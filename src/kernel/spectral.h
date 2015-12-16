@@ -61,21 +61,22 @@ public:
 	error Invalid spectral mode
 #endif
 
-	typedef Bands<numBands, TScalar> TBands;
+	typedef Bands<numBands, float> TBands;
 
 	typedef TBands::TValue TValue;
 	typedef TBands::TParam TParam;
 	typedef TBands::TReference TReference;
 	typedef TBands::TConstReference TConstReference;
+	typedef num::NumTraits<TValue> TNumTraits;
 
 	Spectral();
 	explicit Spectral(TParam f);
 	Spectral(TParam f, SpectralType type);
 
 	static Spectral fromXYZ(const XYZ& xyz, const Sample& sample, SpectralType type);
-	static Spectral fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, const Sample& sample, SpectralType type);
+	static Spectral fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TValue>& values, const Sample& sample, SpectralType type);
 #if LIAR_SPECTRAL_MODE_SMITS || LIAR_SPECTRAL_MODE_RGB
-	static Spectral fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TScalar>& values, SpectralType type);
+	static Spectral fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TValue>& values, SpectralType type);
 #endif
 
 #if LIAR_SPECTRAL_MODE_SMITS
@@ -101,7 +102,7 @@ public:
 #endif
 
 	const XYZ xyz(const Sample& sample) const;
-	TScalar luminance(const Sample& sample) const { return xyz(sample).y; }
+	TValue luminance(const Sample& sample) const { return xyz(sample).y; }
 
 	Spectral& operator=(TParam f) { v_.fill(f); return *this; }
 	Spectral& operator=(const Spectral& other) { v_ = other.v_; return *this; }
@@ -123,14 +124,16 @@ public:
 	Spectral& fma(TParam a, const Spectral& b) { v_.fma(a, b.v_); return *this; }
 	Spectral& fma(const Spectral& a, TParam b) { v_.fma(a.v_, b); return *this; }
 
-	TScalar dot(const Spectral& other) const { return v_.dot(other.v_); }
-	TScalar average() const { return v_.average(); }
-	TScalar absAverage() const 
+	TValue dot(const Spectral& other) const { return v_.dot(other.v_); }
+	TValue average() const { return v_.average(); }
+	TValue absAverage() const
 	{ 
 		TBands av(v_); 
 		av.inpabs(); 
 		return av.average(); 
 	}
+	TValue minimum() const { return v_.minimum(); }
+	TValue maximum() const { return v_.maximum(); }
 
 	bool isZero() const { return v_.isZero(); }
 	bool operator!() const { return isZero(); }
@@ -184,13 +187,13 @@ inline Spectral max(const Spectral& a, const Spectral& b)
 	return r.inpmax(b);
 }
 
-inline Spectral max(const Spectral& a, TScalar b)
+inline Spectral max(const Spectral& a, Spectral::TParam b)
 {
 	Spectral r(a);
 	return r.inpmax(b);
 }
 
-inline Spectral max(TScalar a, const Spectral& b)
+inline Spectral max(Spectral::TParam a, const Spectral& b)
 {
 	Spectral r(b);
 	return r.inpmax(a);
@@ -214,7 +217,7 @@ inline Spectral pow(const Spectral& a, const Spectral& b)
 	return r.inppow(b);
 }
 
-inline Spectral pow(const Spectral& a, TScalar b)
+inline Spectral pow(const Spectral& a, Spectral::TParam b)
 {
 	Spectral r(a);
 	return r.inppow(b);
@@ -232,19 +235,19 @@ inline Spectral exp(const Spectral& a)
 	return r.inpexp();
 }
 
-inline Spectral clamp(const Spectral& a, TScalar min, TScalar max)
+inline Spectral clamp(const Spectral& a, Spectral::TParam min, Spectral::TParam max)
 {
 	Spectral r(a);
 	return r.inpclamp(min, max);
 }
 
-inline Spectral lerp(const Spectral& a, const Spectral& b, TScalar f)
+inline Spectral lerp(const Spectral& a, const Spectral& b, Spectral::TParam f)
 {
 	Spectral r(a);
 	return r.inplerp(b, f);
 }
 
-inline TScalar average(const Spectral& a)
+inline Spectral::TValue average(const Spectral& a)
 {
 	return a.average();
 }

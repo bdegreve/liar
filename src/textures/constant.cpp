@@ -30,10 +30,10 @@ namespace textures
 {
 
 PY_DECLARE_CLASS_DOC(Constant, "texture with constant value")
-PY_CLASS_CONSTRUCTOR_1(Constant, TScalar);
+PY_CLASS_CONSTRUCTOR_1(Constant, Constant::TValue);
 PY_CLASS_CONSTRUCTOR_1(Constant, const XYZ&);
 PY_CLASS_CONSTRUCTOR_1(Constant, const TSpectrumPtr&);
-PY_CLASS_CONVERTOR(Constant, TScalar);
+PY_CLASS_CONVERTOR(Constant, Constant::TValue);
 PY_CLASS_CONVERTOR(Constant, XYZ);
 PY_CLASS_CONVERTOR(Constant, TSpectrumPtr);
 PY_CLASS_MEMBER_RW(Constant, value, setValue);
@@ -54,7 +54,7 @@ Constant::Constant(const XYZ& value) :
 
 
 
-Constant::Constant(TScalar value):
+Constant::Constant(TValue value):
 	value_(Spectrum::make(value))
 {
 }
@@ -100,7 +100,7 @@ const Spectral Constant::doLookUp(const Sample& sample, const IntersectionContex
 
 
 
-TScalar Constant::doScalarLookUp(const Sample&, const IntersectionContext&) const
+Texture::TValue Constant::doScalarLookUp(const Sample&, const IntersectionContext&) const
 {
 	return value_->luminance();
 }

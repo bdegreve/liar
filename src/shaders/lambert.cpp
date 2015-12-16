@@ -98,7 +98,7 @@ void Lambert::doSetState(const TPyObjectPtr& state)
 
 LambertBsdf::LambertBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const Spectral& diffuse) :
 	Bsdf(sample, context, caps),
-	diffuseOverPi_(diffuse / TNumTraits::pi)
+	diffuseOverPi_(diffuse / num::NumTraits<Spectral::TValue>::pi)
 {
 }
 

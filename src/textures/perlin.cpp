@@ -51,21 +51,25 @@ Perlin::Perlin(TSeed seed)
 
 // --- protected -----------------------------------------------------------------------------------
 
+namespace
+{
 
+}
 
-TScalar Perlin::noise(const TPoint3D& point) const
+Texture::TValue Perlin::noise(const TPoint3D& point) const
 {
 	typedef prim::Vector3D<size_t> TIndex;
+	typedef prim::Vector3D<TValue> TValue3D;
 
 	const TScalar modulo = hashSize_;
 	const TPoint3D p(num::mod(point.x, modulo), num::mod(point.y, modulo), num::mod(point.z, modulo));
 	const TPoint3D p0(num::floor(p.x), num::floor(p.y), num::floor(p.z));
-	const TVector3D dp = p - p0;
+	const TValue3D dp(static_cast<TValue>(p.x - p0.x), static_cast<TValue>(p.y - p0.y), static_cast<TValue>(p.z - p0.z));
 	const TIndex i(static_cast<size_t>(p0.x), static_cast<size_t>(p0.y), static_cast<size_t>(p0.z));
 	
-	const TVector3D s = dp.transform(kernel);
+	const TValue3D s = dp.transform(kernel);
 
-	const TScalar g[1 << dimension_] =
+	const TValue g[1 << dimension_] =
 	{
 		gradient(i.x     , i.y     , i.z     , dp.x     , dp.y     , dp.z    ),
 		gradient(i.x + 1 , i.y     , i.z     , dp.x - 1 , dp.y     , dp.z    ),
@@ -95,7 +99,7 @@ const Spectral Perlin::doLookUp(const Sample&, const IntersectionContext& contex
 
 
 
-TScalar Perlin::doScalarLookUp(const Sample&, const IntersectionContext& context) const
+Texture::TValue Perlin::doScalarLookUp(const Sample&, const IntersectionContext& context) const
 {
 	return noise(context.point());
 }
@@ -136,7 +140,7 @@ void Perlin::init(TSeed seed)
 
 
 
-TScalar Perlin::gradient(size_t x, size_t y, size_t z, TScalar dx, TScalar dy, TScalar dz) const
+Texture::TValue Perlin::gradient(size_t x, size_t y, size_t z, TValue dx, TValue dy, TValue dz) const
 {
 	LASS_ASSERT(x < (hashSize_ + hashPadding_) && y < (hashSize_ + hashPadding_) && z < (hashSize_ + hashPadding_));
 	const size_t hashed = hashTables_[0][x] ^ hashTables_[1][y] ^ hashTables_[2][z];
@@ -168,10 +172,10 @@ TScalar Perlin::gradient(size_t x, size_t y, size_t z, TScalar dx, TScalar dy, T
 
 
 
-TScalar Perlin::kernel(TScalar dx)
+Texture::TValue Perlin::kernel(TValue dx)
 {
-	const TScalar dx2 = dx * dx;
-	const TScalar dx3 = dx2 * dx;
+	const TValue dx2 = dx * dx;
+	const TValue dx3 = dx2 * dx;
 	return (6 * dx3 - 15 * dx2 + 10 * dx) * dx2;
 }
 

@@ -43,8 +43,8 @@ class LIAR_MEDIUMS_DLL ExponentialFog: public Fog
 public:
 
 	ExponentialFog();
-	ExponentialFog(TScalar extinction, TScalar assymetry);
-	ExponentialFog(TScalar extinction, TScalar assymetry, TScalar decay);
+	ExponentialFog(TValue extinction, TValue assymetry);
+	ExponentialFog(TValue extinction, TValue assymetry, TValue decay);
 
 	const TPoint3D& origin() const;
 	void setOrigin(const TPoint3D& origin);
@@ -52,8 +52,8 @@ public:
 	const TVector3D& up() const;
 	void setUp(const TVector3D& up);
 
-	TScalar decay() const;
-	void setDecay(TScalar decay);
+	TValue decay() const;
+	void setDecay(TValue decay);
 
 private:
 
@@ -63,13 +63,13 @@ private:
 	const Spectral doSampleScatterOut(TScalar scatterSample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const override;
 	const Spectral doSampleScatterOutOrTransmittance(const Sample& sample, TScalar scatterSample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const override;
 
-	void init(TScalar decay = 1);
-	TScalar alpha(const BoundedRay& ray) const;
-	TScalar beta(const BoundedRay& ray) const;
+	void init(TValue decay = 1);
+	TValue alpha(const BoundedRay& ray) const;
+	TValue beta(const BoundedRay& ray) const;
 
 	TPoint3D origin_;
 	TVector3D up_;
-	TScalar decay_;
+	TValue decay_;
 };
 
 }

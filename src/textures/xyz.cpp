@@ -110,15 +110,21 @@ const Spectral Xyz::doLookUp(const Sample& sample, const IntersectionContext& co
 {
 #pragma LASS_FIXME("what about type==Reflectant?")
 	const TPoint3D& p = context.point();
-	return p.x * a_->lookUp(sample, context, type) + p.y * b_->lookUp(sample, context, type) + p.z * c_->lookUp(sample, context, type);
+	const TValue x = num::fractional(static_cast<TValue>(p.x));
+	const TValue y = num::fractional(static_cast<TValue>(p.y));
+	const TValue z = num::fractional(static_cast<TValue>(p.z));
+	return x * a_->lookUp(sample, context, type) + y * b_->lookUp(sample, context, type) + z * c_->lookUp(sample, context, type);
 }
 
 
 
-TScalar Xyz::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+Texture::TValue Xyz::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	const TPoint3D& p = context.point();
-	return p.x * a_->scalarLookUp(sample, context) + p.y * b_->scalarLookUp(sample, context) + p.z * c_->scalarLookUp(sample, context);
+	const TValue x = num::fractional(static_cast<TValue>(p.x));
+	const TValue y = num::fractional(static_cast<TValue>(p.y));
+	const TValue z = num::fractional(static_cast<TValue>(p.z));	
+	return x * a_->scalarLookUp(sample, context) + y * b_->scalarLookUp(sample, context) + z * c_->scalarLookUp(sample, context);
 }
 
 

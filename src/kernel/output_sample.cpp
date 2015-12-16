@@ -45,7 +45,7 @@ OutputSample::OutputSample():
 
 
 OutputSample::OutputSample(
-		const TPoint2D& screenCoordinate, const XYZ& radiance, TScalar depth, TScalar alpha, TScalar weight):
+		const TPoint2D& screenCoordinate, const XYZ& radiance, TValue depth, TValue alpha, TValue weight) :
 	radiance_(radiance),
 	screenCoordinate_(screenCoordinate),
 	depth_(depth),
@@ -57,7 +57,7 @@ OutputSample::OutputSample(
 
 
 OutputSample::OutputSample(
-		const Sample& sample, const Spectral& radiance, TScalar depth, TScalar alpha, TScalar weight):
+		const Sample& sample, const Spectral& radiance, TValue depth, TValue alpha, TValue weight) :
 	radiance_(radiance.xyz(sample)),
 	screenCoordinate_(sample.screenCoordinate()),
 	depth_(depth),
@@ -69,7 +69,7 @@ OutputSample::OutputSample(
 
 
 OutputSample::OutputSample(
-		const OutputSample& other, const TPoint2D& screenCoordinate, TScalar weight):
+		const OutputSample& other, const TPoint2D& screenCoordinate, TValue weight) :
 	radiance_(other.radiance_),
 	screenCoordinate_(screenCoordinate),
 	depth_(other.depth_),

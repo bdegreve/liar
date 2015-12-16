@@ -225,7 +225,7 @@ const Spectral RayTracer::estimateLightContribution(
 			const Spectral trans = mediumStack().transmittance(sample, shadowRay);
 			const TScalar weight = temp::squaredHeuristic(nl * lightPdf, nb * out.pdf);
 			const TScalar cosTheta = omegaOut.z;
-			result += out.value * trans * radiance * (sign * weight * num::abs(cosTheta) / (nl * lightPdf));
+			result += out.value * trans * radiance * static_cast<Spectral::TValue>(sign * weight * num::abs(cosTheta) / (nl * lightPdf));
 		}
 	}
 
@@ -254,7 +254,7 @@ const Spectral RayTracer::estimateLightContribution(
 			const Spectral trans = mediumStack().transmittance(sample, shadowRay);
 			const TScalar weight = temp::squaredHeuristic(nb * out.pdf, nl * lightPdf);
 			const TScalar cosTheta = out.omegaOut.z;
-			result += out.value * trans * radiance * (sign * weight * num::abs(cosTheta) / (nb * out.pdf));
+			result += out.value * trans * radiance * static_cast<Spectral::TValue>(sign * weight * num::abs(cosTheta) / (nb * out.pdf));
 		}
 	}
 

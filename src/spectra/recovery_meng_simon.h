@@ -59,8 +59,9 @@ public:
 		}
 	};
 
+	typedef Spectral::TValue TValue;
+	typedef std::vector<TValue> TValues;
 	typedef std::vector<TWavelength> TWavelengths;
-	typedef std::vector<TScalar> TValues;
 	typedef std::map<TXY, TValues, LessXY> TSamples;
 	typedef std::pair<TXY, TXY> TEdge;
 	typedef std::vector<TEdge> TEdges;

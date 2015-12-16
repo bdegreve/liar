@@ -46,7 +46,7 @@ public:
 
 private:
 	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const override;
-	TScalar doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
+	TValue doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
 
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;

@@ -82,6 +82,7 @@ private:
 		LafortuneBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const Spectral& diffuse);
 		void addLobe(const Spectral& x, const Spectral& y, const Spectral& z, const Spectral& power);
 	private:
+		typedef Spectral::TValue TValue;
 		struct Lobe
 		{
 			Spectral x;

@@ -56,6 +56,18 @@ public:
 	typedef int TSubSequenceId;
 	typedef num::Tuint32 TSeed;
 
+	class Task
+	{
+	public:
+		typedef size_t TId;
+		virtual ~Task();
+		TId id() const { return id_; }
+	protected:
+		Task(TId id) : id_(id) {}
+		TId id_;
+	};
+	typedef util::SharedPtr<Task> TTaskPtr;
+
 	const TResolution2D& resolution() const { return doResolution(); }
 	size_t samplesPerPixel() const { return doSamplesPerPixel(); }
 	void setResolution(const TResolution2D& resolution) { doSetResolution(resolution); }
@@ -67,6 +79,10 @@ public:
 	size_t subSequenceSize1D(TSubSequenceId id) const { return subSequenceSize1D_[id]; }
 	size_t subSequenceSize2D(TSubSequenceId id) const { return subSequenceSize2D_[id]; }
 	void clearSubSequenceRequests();
+
+	TTaskPtr getTask() {
+		return TTaskPtr(0);
+	}
 
 	void sample(const TResolution2D& pixel, size_t subPixel, const TimePeriod& period, Sample& sample);
 	void sample(const TimePeriod& period, Sample& sample);

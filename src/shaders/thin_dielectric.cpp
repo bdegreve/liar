@@ -136,12 +136,10 @@ size_t ThinDielectric::doNumTransmissionSamples() const
 
 TBsdfPtr ThinDielectric::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-	// in theory, refractive indices must be at least 1, but they must be more than zero for sure.
-	// IOR as average of spectral works correctly for LIAR_SPECTRAL_MODE_SINGLE. Everything else uses ... well, and average.
-	const TScalar ior1 = std::max(average(outerRefractionIndex_->lookUp(sample, context, Illuminant)), 1e-9);
-	const TScalar ior2 = std::max(average(innerRefractionIndex_->lookUp(sample, context, Illuminant)), 1e-9);
-	const Spectral transparency = clamp(transparency_->lookUp(sample, context, Reflectant), TNumTraits::zero, TNumTraits::one);
-	const TScalar ior = ior1 / ior2; 
+	const Spectral ior1 = max(outerRefractionIndex_->lookUp(sample, context, Illuminant), 1e-9f);
+	const Spectral ior2 = max(innerRefractionIndex_->lookUp(sample, context, Illuminant), 1e-9f);
+	const Spectral transparency = max(transparency_->lookUp(sample, context, Reflectant), 0);
+	const Spectral ior = ior1 / ior2;
 	return TBsdfPtr(new Bsdf(sample, context, caps(), ior, transparency));
 }
 
@@ -163,12 +161,11 @@ void ThinDielectric::doSetState(const TPyObjectPtr& state)
 
 // --- bsdf ----------------------------------------------------------------------------------------
 
-ThinDielectric::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, TScalar ior, const Spectral& transparency) :
+ThinDielectric::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const Spectral& ior, const Spectral& transparency) :
 	kernel::Bsdf(sample, context, caps),
 	transparency_(transparency),
 	ior_(ior)
 {
-	LASS_ASSERT(ior_ > 0);
 }
 
 
@@ -184,40 +181,36 @@ SampleBsdfOut ThinDielectric::Bsdf::doSample(const TVector3D& omegaIn, const TPo
 {
 	// http://users.skynet.be/bdegreve/writings/reflection_transmission.pdf
 
+	typedef Spectral::TValue TValue;
+
 	enum
 	{
 		capsRefl = Bsdf::capsReflection | Bsdf::capsSpecular,
 		capsTrans = Bsdf::capsTransmission | Bsdf::capsSpecular
 	};
 
-	const TScalar cosI = omegaIn.z;
+	const TValue cosI = static_cast<TValue>(omegaIn.z);
 	LASS_ASSERT(cosI > 0);
-	const TScalar sinT2 = num::sqr(ior_) * (1 - num::sqr(cosI));
+	Spectral sinT2 = sqr(ior_) * (1 - num::sqr(cosI));
 
-	Spectral R(TNumTraits::one);
-	Spectral T(TNumTraits::zero);
-	if (sinT2 < 1)
-	{
-		const TScalar cosT = num::sqrt(1 - sinT2);
-		LASS_ASSERT(cosT > 0);
-		const TScalar rOrth = (ior_ * cosI - cosT) / (ior_ * cosI + cosT);
-		const TScalar rPar = (cosI - ior_ * cosT) / (cosI + ior_ * cosT);
-		const TScalar r = (num::sqr(rOrth) + num::sqr(rPar)) / 2;
-		LASS_ASSERT(r < 1);
-		const Spectral t = pow(transparency_, num::inv(cosT));
-		
-		R = r * (1 + sqr((1 - r) * t) / (1 - sqr(r * t)));
-		R = clamp(R, TNumTraits::zero, TNumTraits::one);
-		T = num::sqr(1 - r) * t / (1 - sqr(r * t));
-		T = clamp(T, TNumTraits::zero, TNumTraits::one);
-	}
-	const TScalar r = average(R);
-	const TScalar t = average(T);
+	sinT2.inpclamp(0, 1);
+	const Spectral cosT = sqrt(1 - sinT2);
+	LASS_ASSERT(cosT > 0);
+	const Spectral rOrth = (ior_ * cosI - cosT) / (ior_ * cosI + cosT);
+	const Spectral rPar = (cosI - ior_ * cosT) / (cosI + ior_ * cosT);
+	const Spectral r = (sqr(rOrth) + sqr(rPar)) / 2;
+	LASS_ASSERT(r < 1);
+	const Spectral t = pow(transparency_, 1 / cosT);
+
+	Spectral R = r * (1 + sqr((1 - r) * t) / (1 - sqr(r * t)));
+	R.inpclamp(0, 1);
+	Spectral T = num::sqr(1 - r) * t / (1 - sqr(r * t));
+	T.inpclamp(0, 1);
 
 	const bool doReflection = kernel::hasCaps(allowedCaps, capsRefl);
 	const bool doTransmission = kernel::hasCaps(allowedCaps, capsTrans);
-	const TScalar sr = doReflection ? (doTransmission ? r : 1) : 0;
-	const TScalar st = doTransmission ? (doReflection ? t : 1) : 0;
+	const TValue sr = doReflection ? (doTransmission ? average(R) : 1) : 0;
+	const TValue st = doTransmission ? (doReflection ? average(T) : 1) : 0;
 	
 	LASS_ASSERT(sr >= 0 && st >= 0);
 	if (sr <= 0 && st <= 0)
@@ -225,7 +218,7 @@ SampleBsdfOut ThinDielectric::Bsdf::doSample(const TVector3D& omegaIn, const TPo
 		return SampleBsdfOut();
 	}
 
-	const TScalar pr = sr / (sr + st);
+	const TValue pr = sr / (sr + st);
 	if (componentSample < pr)
 	{
 		const TVector3D omegaOut = TVector3D(-omegaIn.x, -omegaIn.y, omegaIn.z);

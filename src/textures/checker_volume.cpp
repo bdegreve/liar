@@ -94,7 +94,7 @@ const Spectral CheckerVolume::doLookUp(const Sample& sample, const IntersectionC
 
 
 
-TScalar CheckerVolume::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+Texture::TValue CheckerVolume::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	const TScalar x = num::fractional(context.point().x);
 	const TScalar y = num::fractional(context.point().y);

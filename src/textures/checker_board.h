@@ -69,10 +69,10 @@ private:
 	typedef util::Dictionary<std::string, AntiAliasing> TAntiAliasingDictionary;
 
 	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const override;
-	TScalar doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
+	TValue doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
 
-	TScalar weightA(const IntersectionContext& context) const;
-	TScalar integrate(const TVector2D& min, const TVector2D& max) const;
+	TValue weightA(const IntersectionContext& context) const;
+	TValue integrate(const TVector2D& min, const TVector2D& max) const;
 
 	static TAntiAliasingDictionary makeAntiAliasingDictionary();
 

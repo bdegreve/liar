@@ -104,7 +104,7 @@ void LinearInterpolator::setControl(const TTexturePtr& contolTexture)
 
 /** add a key texture to the list
  */
-void LinearInterpolator::addKey(const TScalar keyValue, const TShaderPtr& keyShader)
+void LinearInterpolator::addKey(const TValue keyValue, const TShaderPtr& keyShader)
 {
 	TKeyShader key(keyValue, keyShader);
 	TKeyShaders::iterator i = std::lower_bound(keys_.begin(), keys_.end(), key, LesserKey());
@@ -129,7 +129,7 @@ const Spectral LinearInterpolator::doEmission(const Sample& sample, const Inters
 		return Spectral();
 	}
 
-	const TScalar keyValue = control_->scalarLookUp(sample, context);
+	const TValue keyValue = control_->scalarLookUp(sample, context);
 	TKeyShader sentinel(keyValue, TShaderPtr());
 	TKeyShaders::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), sentinel, LesserKey());
 
@@ -145,7 +145,7 @@ const Spectral LinearInterpolator::doEmission(const Sample& sample, const Inters
 	const TKeyShaders::const_iterator prevI = stde::prev(i);
 	LASS_ASSERT(prevI->first != i->first); // due to lower_bound
 
-	const TScalar t = (keyValue - prevI->first) / (i->first - prevI->first);
+	const TValue t = (keyValue - prevI->first) / (i->first - prevI->first);
 
 	return lerp(
 		prevI->second->emission(sample, context, omegaOut),
@@ -162,7 +162,7 @@ TBsdfPtr LinearInterpolator::doBsdf(const Sample& sample, const IntersectionCont
 		return TBsdfPtr();
 	}
 
-	const TScalar keyValue = control_->scalarLookUp(sample, context);
+	const TValue keyValue = control_->scalarLookUp(sample, context);
 	TKeyShader sentinel(keyValue, TShaderPtr());
 	TKeyShaders::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), sentinel, LesserKey());
 
@@ -180,7 +180,7 @@ TBsdfPtr LinearInterpolator::doBsdf(const Sample& sample, const IntersectionCont
 
 	const TBsdfPtr a = prevI->second->bsdf(sample, context);
 	const TBsdfPtr b = i->second->bsdf(sample, context);
-	const TScalar t = (keyValue - prevI->first) / (i->first - prevI->first);
+	const TValue t = (keyValue - prevI->first) / (i->first - prevI->first);
 
 	return TBsdfPtr(new Bsdf(sample, context, caps(), a, b, t));
 }
@@ -239,7 +239,7 @@ void LinearInterpolator::doSetState(const TPyObjectPtr& state)
 
 LinearInterpolator::Bsdf::Bsdf(
 		const Sample& sample, const IntersectionContext& context, TBsdfCaps caps,
-		const TBsdfPtr& a, const TBsdfPtr& b, TScalar t):
+		const TBsdfPtr& a, const TBsdfPtr& b, TValue t) :
 	kernel::Bsdf(sample, context, caps),
 	a_(a),
 	b_(b),

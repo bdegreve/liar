@@ -43,20 +43,21 @@ class LIAR_OUTPUT_DLL Raster: public RenderTarget
 {
     PY_HEADER(RenderTarget)
 public:
+    typedef OutputSample::TValue TValue;
 
     const TRgbSpacePtr& rgbSpace() const;
     const std::string toneMapping() const;
-    TScalar exposureStops() const;
-    TScalar exposureCorrectionStops() const;
+    TValue exposureStops() const;
+    TValue exposureCorrectionStops() const;
     bool autoExposure() const;
-    TScalar middleGrey() const;
+    TValue middleGrey() const;
 
     void setRgbSpace(const TRgbSpacePtr& rgbSpace);
     void setToneMapping(const std::string& mode);
-    void setExposureStops(TScalar fStops);
-    void setExposureCorrectionStops(TScalar stops);
+    void setExposureStops(TValue fStops);
+    void setExposureCorrectionStops(TValue stops);
     void setAutoExposure(bool enable = true);
-    void setMiddleGrey(TScalar grey);
+    void setMiddleGrey(TValue grey);
 
     void nextToneMapping();
 
@@ -65,7 +66,7 @@ protected:
     Raster(const TResolution2D& resolution);
 
     typedef std::vector<XYZ> TRenderBuffer;
-    typedef std::vector<TScalar> TWeightBuffer;
+    typedef std::vector<OutputSample::TValue> TValueBuffer;
     typedef std::vector<prim::ColorRGBA> TTonemapBuffer;
     typedef prim::Aabb2D<size_t> TDirtyBox;
 
@@ -73,7 +74,7 @@ protected:
     TDirtyBox tonemap(const TRgbSpacePtr& destSpace);
 
     const TTonemapBuffer& tonemapBuffer() const;
-    const TWeightBuffer& totalWeight() const;
+    const TValueBuffer& totalWeight() const;
     const TDirtyBox& dirtyBox() const;
     void clearDirtyBox();
 
@@ -100,26 +101,26 @@ private:
 
     void doWriteRender(const OutputSample* first, const OutputSample* last);
  
-    TScalar sceneGain() const;
-    TScalar averageSceneLuminance() const;
-    XYZ weighted(size_t index, TScalar gain = 1.f) const;
+    TValue sceneGain() const;
+    TValue averageSceneLuminance() const;
+    XYZ weighted(size_t index, TValue gain = 1) const;
 
     static TToneMappingDictionary makeToneMappingDictionary();
 
     TRenderBuffer renderBuffer_;
     TTonemapBuffer tonemapBuffer_;
-    TWeightBuffer totalWeight_;
-    TWeightBuffer alphaBuffer_;
+    TValueBuffer totalWeight_;
+    TValueBuffer alphaBuffer_;
     mutable TDirtyBox renderDirtyBox_;
     TDirtyBox allTimeDirtyBox_;
     mutable util::CriticalSection renderLock_;
     TResolution2D resolution_;
     TRgbSpacePtr rgbSpace_;
     ToneMapping toneMapping_;
-    mutable TScalar exposureStops_;
-    TScalar exposureCorrectionStops_;
-    TScalar middleGrey_;
-    TScalar maxSceneLuminance_;
+    mutable TValue exposureStops_;
+    TValue exposureCorrectionStops_;
+    TValue middleGrey_;
+    TValue maxSceneLuminance_;
     bool autoExposure_;
     mutable bool isDirtyAutoExposure_;
     

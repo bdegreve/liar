@@ -175,7 +175,8 @@ const Spectral LightPoint::doSampleEmission(const Sample& sample, const TPoint2D
 	shadowRay = BoundedRay(target, toLight, tolerance, distance, prim::IsAlreadyNormalized());
 	pdf = TNumTraits::one;
 
-	return intensity_->evaluate(sample, Illuminant) / attenuation_->attenuation(distance, squaredDistance);
+	return intensity_->evaluate(sample, Illuminant) / 
+		static_cast<Spectral::TValue>(attenuation_->attenuation(distance, squaredDistance));
 }
 
 

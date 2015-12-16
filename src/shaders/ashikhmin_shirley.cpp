@@ -163,10 +163,11 @@ size_t AshikhminShirley::doNumReflectionSamples() const
 
 TBsdfPtr AshikhminShirley::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
+	typedef Spectral::TValue TValue;
 	const Spectral Rd = diffuse_->lookUp(sample, context, Reflectant);
 	const Spectral Rs = specular_->lookUp(sample, context, Reflectant);
-	const TScalar nu = std::max<TScalar>(specularPowerU_->scalarLookUp(sample, context), 0);
-	const TScalar nv = std::max<TScalar>(specularPowerV_->scalarLookUp(sample, context), 0);
+	const TValue nu = std::max<TValue>(specularPowerU_->scalarLookUp(sample, context), 0);
+	const TValue nv = std::max<TValue>(specularPowerV_->scalarLookUp(sample, context), 0);
 	return TBsdfPtr(new Bsdf(sample, context, Rd, Rs, nu, nv));
 }
 
@@ -224,7 +225,7 @@ void AshikhminShirley::doSetState(const TPyObjectPtr& iState)
 
 
 
-AshikhminShirley::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& diffuse, const Spectral& specular, TScalar powerU, TScalar powerV):
+AshikhminShirley::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& diffuse, const Spectral& specular, TScalar powerU, TScalar powerV) :
 	kernel::Bsdf(sample, context, Bsdf::capsReflection | Bsdf::capsDiffuse | Bsdf::capsGlossy),
 	diffuse_(diffuse),
 	specular_(specular),
@@ -306,7 +307,7 @@ const Spectral AshikhminShirley::Bsdf::rhoD(const TVector3D& k1, const TVector3D
 {
 	const TScalar a = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k1.z / 2));
 	const TScalar b = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k2.z / 2));
-	return diffuse_ * (1 - specular_) * (a * b * 28.f / (23.f * TNumTraits::pi));
+	return diffuse_ * (1 - specular_) * static_cast<Spectral::TValue>(a * b * 28.f / (23.f * TNumTraits::pi));
 }
 
 
@@ -317,10 +318,10 @@ const Spectral AshikhminShirley::Bsdf::rhoS(const TVector3D& k1, const TVector3D
 	const TScalar n = powerU_ * num::sqr(h.x) + powerV_ * num::sqr(h.y);
 	const TScalar nn = h.z == 1 ? 0 : n / (1 - num::sqr(h.z));
 	const TScalar hk = dot(h, k1);
-	const Spectral F = specular_ + (1 - specular_) * temp::pow5(1 - hk);
+	const Spectral F = specular_ + (1 - specular_) * static_cast<Spectral::TValue>(temp::pow5(1 - hk));
 	const TScalar pdfH = 4 * c * num::pow(h.z, n);
 	pdf = pdfH / (4 * hk);
-	return F * (c * num::pow(h.z, nn) / (hk * std::max(k1.z, k2.z)));
+	return F * static_cast<Spectral::TValue>((c * num::pow(h.z, nn) / (hk * std::max(k1.z, k2.z))));
 }
 
 

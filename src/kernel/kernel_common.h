@@ -135,7 +135,7 @@ bool russianRoulette(T& subject, TScalar pdf, TScalar sample)
 	{
 		return false;
 	}
-	subject /= std::min(pdf, TNumTraits::one);
+	subject /= static_cast<Spectral::TValue>(std::min(pdf, TNumTraits::one));
 	return true;
 }
 

@@ -48,7 +48,7 @@ public:
 	typedef TRandom::TValue TSeed;
 
 	FBm(size_t numOctaves);
-	FBm(size_t numOctaves, TScalar falloff);
+	FBm(size_t numOctaves, TValue falloff);
 
 protected:
 	const TPyObjectPtr doGetState() const override;
@@ -56,12 +56,12 @@ protected:
 
 private:
 	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const override;
-	TScalar doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
+	TValue doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
 
-	void init(size_t numOctaves, TScalar falloff = .5);
+	void init(size_t numOctaves, TValue falloff = .5);
 
 	size_t numOctaves_;
-	TScalar falloff_;
+	TValue falloff_;
 };
 
 }

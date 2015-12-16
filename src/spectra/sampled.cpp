@@ -30,12 +30,12 @@ namespace spectra
 {
 
 PY_DECLARE_CLASS_DOC(Sampled, "sampled spectrum")
-PY_CLASS_CONSTRUCTOR_2(Sampled, const Sampled::TWavelengths&, const Sampled::TScalars&)
+PY_CLASS_CONSTRUCTOR_2(Sampled, const Sampled::TWavelengths&, const Sampled::TValues&)
 
 
 // --- public --------------------------------------------------------------------------------------
 
-Sampled::Sampled(const TWavelengths& wavelengths, const TScalars& values):
+Sampled::Sampled(const TWavelengths& wavelengths, const TValues& values):
 	wavelengths_(wavelengths),
 	values_(values)
 {
@@ -46,7 +46,7 @@ Sampled::Sampled(const TWavelengths& wavelengths, const TScalars& values):
 TSpectrumPtr Sampled::resample(const TWavelengths& wavelengths) const
 {
 	const size_t n = wavelengths.size();
-	TScalars values(n, 0);
+	TValues values(n, 0);
 
 	if (wavelengths_.size() == 1)
 	{
@@ -69,7 +69,7 @@ TSpectrumPtr Sampled::resample(const TWavelengths& wavelengths) const
 		const TWavelength w = wavelengths[i];
 		if (w < w2)
 		{
-			const TScalar t = (w - w1) / (w2 - w1);
+			const TValue t = static_cast<TValue>((w - w1) / (w2 - w1));
 			values[i] = num::lerp(values_[k - 1], values_[k], t);
 		}
 	}
@@ -91,7 +91,7 @@ const Spectral Sampled::doEvaluate(const Sample& sample, SpectralType type) cons
 
 
 
-TScalar Sampled::doLuminance() const
+Sampled::TValue Sampled::doLuminance() const
 {
 	return tristimulus_.y;
 }

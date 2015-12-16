@@ -74,7 +74,7 @@ const Spectral Beer::doTransmittance(const Sample& sample, const BoundedRay& ray
 {
 	const TScalar t = ray.farLimit() - ray.nearLimit();
 	LASS_ASSERT(t >= 0);
-	return pow(transparency_->evaluate(sample, Reflectant), t);
+	return pow(transparency_->evaluate(sample, Reflectant), static_cast<Spectral::TValue>(t));
 }
 
 

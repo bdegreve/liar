@@ -71,7 +71,7 @@ Spectral Spectrum::evaluate(const Sample& sample, SpectralType type) const
 }
 
 
-TSpectrumPtr Spectrum::make(TScalar value)
+TSpectrumPtr Spectrum::make(TParam value)
 {
 	return TSpectrumPtr(new impl::SpectrumFlat(value));
 }
@@ -137,12 +137,12 @@ Spectrum::Spectrum()
 namespace impl
 {
 
-SpectrumFlat::SpectrumFlat(TScalar value) :
+SpectrumFlat::SpectrumFlat(TParam value) :
 	value_(value)
 {
 }
 
-TScalar SpectrumFlat::value() const
+SpectrumFlat::TValue SpectrumFlat::value() const
 {
 	return value_;
 }
@@ -152,7 +152,7 @@ const Spectral SpectrumFlat::doEvaluate(const Sample&, SpectralType type) const
 	return Spectral(value_, type);
 }
 
-TScalar SpectrumFlat::doLuminance() const
+SpectrumFlat::TValue SpectrumFlat::doLuminance() const
 {
 	return value_;
 }
@@ -183,7 +183,7 @@ const Spectral SpectrumXYZ::doEvaluate(const Sample& sample, SpectralType type) 
 	return Spectral::fromXYZ(value_, sample, type);
 }
 
-TScalar SpectrumXYZ::doLuminance() const
+SpectrumXYZ::TValue SpectrumXYZ::doLuminance() const
 {
 	return value_.y;
 }

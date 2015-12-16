@@ -41,23 +41,23 @@ class LIAR_SPECTRA_DLL BlackBody: public Spectrum
 	PY_HEADER(Spectrum)
 public:
 
-	BlackBody(TScalar temperature);
+	BlackBody(TValue temperature);
 
-	TScalar temperature() const;
-	void setTemperature(TScalar temperature);
+	TValue temperature() const;
+	void setTemperature(TValue temperature);
 
-	TScalar temperatureCelcius() const;
-	void setTemperatureCelcius(TScalar temperature);
+	TValue temperatureCelcius() const;
+	void setTemperatureCelcius(TValue temperature);
 
 private:
 
 	const Spectral doEvaluate(const Sample& sample, SpectralType type) const override;
-	TScalar doLuminance() const override;
+	TValue doLuminance() const override;
 
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
-	TScalar temperature_;
+	TValue temperature_;
 };
 
 }

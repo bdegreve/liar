@@ -42,7 +42,7 @@ class LIAR_TEXTURES_DLL LinearInterpolator: public Texture
 	PY_HEADER(Texture)
 public:
 
-	typedef std::pair<TScalar, TTexturePtr> TKeyTexture;
+	typedef std::pair<TValue, TTexturePtr> TKeyTexture;
 	typedef std::vector<TKeyTexture> TKeyTextures;
 
 	LinearInterpolator();
@@ -55,7 +55,7 @@ public:
 	void setKeys(const TKeyTextures& keyTextures);
 	void setControl(const TTexturePtr& controlTexture);
 
-	void addKey(TScalar keyValue, const TTexturePtr& keyTexture);
+	void addKey(TValue keyValue, const TTexturePtr& keyTexture);
 
 private:
 
@@ -65,7 +65,7 @@ private:
 	};
 
 	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const override;
-	TScalar doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
+	TValue doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
 
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;

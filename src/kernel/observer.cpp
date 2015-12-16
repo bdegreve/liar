@@ -38,7 +38,7 @@ PY_DECLARE_CLASS_DOC(Observer, "Conversion of spectral data to tristimulus")
 	PY_CLASS_MEMBER_R(Observer, minWavelength)
 	PY_CLASS_MEMBER_R(Observer, maxWavelength)
 	PY_CLASS_METHOD(Observer, sensitivity)
-	PY_CLASS_METHOD_QUALIFIED_1(Observer, tristimulus, const XYZ, const Observer::TScalars&)
+	PY_CLASS_METHOD_QUALIFIED_1(Observer, tristimulus, const XYZ, const Observer::TValues&)
 	PY_CLASS_STATIC_METHOD_DOC(Observer, standard, "standard() -> Observer");
 	PY_CLASS_STATIC_METHOD_DOC(Observer, setStandard, "setStandard(Observer) -> None");
 
@@ -75,8 +75,8 @@ Observer::Observer(const TWavelengths& wavelengths, const TXYZs& sensitivities):
 		const TWavelength w_next = w_[k + 1];
 		const XYZ& xyz_next = xyz_[k + 1];
 
-		dxyz_dw_.push_back((xyz_next - xyz) / (w_next - w));
-		dXYZ_.push_back(xyz * ((w_next - w_prev) / 2));
+		dxyz_dw_.push_back((xyz_next - xyz) / static_cast<TValue>(w_next - w));
+		dXYZ_.push_back(xyz * static_cast<TValue>((w_next - w_prev) / 2));
 
 		w_prev = w;
 		cdf_.push_back(cdf_.back() + xyz.absTotal());
@@ -87,19 +87,19 @@ Observer::Observer(const TWavelengths& wavelengths, const TXYZs& sensitivities):
 		const XYZ& xyz = xyz_.back();
 
 		dxyz_dw_.push_back(XYZ(0, 0, 0));
-		dXYZ_.push_back(xyz * ((w - w_prev) / 2));
+		dXYZ_.push_back(xyz * static_cast<TValue>((w - w_prev) / 2));
 		cdf_.push_back(cdf_.back() + xyz.absTotal());
 	}
 
 	// rescale so that tristimulus of `1' spectrum gives Y == 1, and that cdf_.back() == 1.
-	TScalar Y = 0;
+	TValue Y = 0;
 	for (size_t k = 0; k < n; ++k)
 	{
 		Y += dXYZ_[k].y;
 	}
 	LASS_ENFORCE(Y > 0);
 	
-	const TScalar invY = num::inv(Y);
+	const TValue invY = num::inv(Y);
 	const TScalar invCdf = num::inv(cdf_.back());
 
 	for (size_t k = 0; k < n; ++k)
@@ -152,13 +152,13 @@ const XYZ Observer::sensitivity(TWavelength wavelength) const
 	const TWavelength dw = wavelength - w_[k];
 	LASS_ASSERT(dw >= 0);
 
-	return xyz_[k] + dxyz_dw_[k] * dw;
+	return xyz_[k] + dxyz_dw_[k] * static_cast<TValue>(dw);
 }
 
 
 /** Calculate tristimulus for spectrum where you have a sample for each wavelength in the observer 
  */
-const XYZ Observer::tristimulus(const TScalars& spectrum) const
+const XYZ Observer::tristimulus(const TValues& spectrum) const
 {
 	if (spectrum.size() != dXYZ_.size())
 	{
@@ -176,7 +176,7 @@ const XYZ Observer::tristimulus(const TScalars& spectrum) const
 
 /** Calculate tristimulus for spectrum where you have values at different sampled wavelengths
  */
-const XYZ Observer::tristimulus(const TWavelengths& wavelengths, const TScalars& spectrum) const
+const XYZ Observer::tristimulus(const TWavelengths& wavelengths, const TValues& spectrum) const
 {
 	LASS_ASSERT(wavelengths.size() == spectrum.size());
 
@@ -186,7 +186,7 @@ const XYZ Observer::tristimulus(const TWavelengths& wavelengths, const TScalars&
 	{
 		// Triangular integration. Not the most efficient way, but it works.
 		const TWavelength dw = wavelengths[std::min(k + 1, n - 1)] - wavelengths[std::max(k - 1, 0)];
-		acc += sensitivity(wavelengths[k]) * (dw / 2);
+		acc += sensitivity(wavelengths[k]) * static_cast<TValue>(dw / 2) * spectrum[k];
 	}
 
 	return acc;
@@ -195,14 +195,14 @@ const XYZ Observer::tristimulus(const TWavelengths& wavelengths, const TScalars&
 
 /** Calculate luminance (Y component of tristimulus) for spectrum where you have a sample for each wavelength in the observer
 */
-TScalar Observer::luminance(const TScalars& spectrum) const
+Observer::TValue Observer::luminance(const TValues& spectrum) const
 {
 	if (spectrum.size() != dXYZ_.size())
 	{
 		LASS_THROW("Requires a spectrum sample for each wavelength in observer data.");
 	}
 
-	TScalar y = 0;
+	TValue y = 0;
 	for (size_t k = 0, n = w_.size(); k < n; ++k)
 	{
 		y += dXYZ_[k].y * spectrum[k];
@@ -213,7 +213,7 @@ TScalar Observer::luminance(const TScalars& spectrum) const
 
 /** Calculate luminance (Y component of tristimulus) for spectrum where you have values at different sampled wavelengths
 */
-TScalar Observer::luminance(const TWavelengths& wavelengths, const TScalars& spectrum) const
+Observer::TValue Observer::luminance(const TWavelengths& wavelengths, const TValues& spectrum) const
 {
 	// i'm too lazy.
 	return tristimulus(wavelengths, spectrum).y;
@@ -247,7 +247,7 @@ TWavelength Observer::sample(TScalar sample, TScalar& pdf) const
 
 	const TScalar dcdf = cdf2 - cdf1;
 	LASS_ASSERT(dcdf > 0);
-	const TScalar x = (sample - cdf1) / dcdf;
+	const TWavelength x = (sample - cdf1) / dcdf;
 	const TWavelength dw = w2 - w1;
 	LASS_ASSERT(dw > 0);
 	pdf = dcdf / dw;

@@ -281,7 +281,7 @@ const Spectral LightArea::doSampleEmission(
 
 	emissionRay = BoundedRay(origin, direction, tolerance);
 	pdf = originPdf * directionPdf;
-	return radiance_->evaluate(sample, Illuminant) * localDirection.z;
+	return radiance_->evaluate(sample, Illuminant) * static_cast<Spectral::TValue>(localDirection.z);
 }
 
 

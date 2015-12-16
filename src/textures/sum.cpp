@@ -95,13 +95,13 @@ const Spectral Sum::doLookUp(const Sample& sample, const IntersectionContext& co
 
 
 
-TScalar Sum::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+Texture::TValue Sum::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	if (terms_.empty())
 	{
 		return 0;
 	}
-	TScalar result = 0;
+	TValue result = 0;
 	for (TTerms::const_iterator i = terms_.begin(); i != terms_.end(); ++i)
 	{
 		result += (*i)->scalarLookUp(sample, context);

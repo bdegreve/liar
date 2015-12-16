@@ -61,14 +61,9 @@ private:
     void doBeginRender();
     void doEndRender();
  
-    TScalar maxSceneLuminance(const TRenderBuffer &scene, const TWeightBuffer &weight) const;
-
-    TWeightBuffer alphaBuffer_;
     std::wstring path_;
     std::string options_;
     util::CriticalSection saveLock_;
-    mutable bool isDirtyAutoExposure_;
-    bool isSaved_;
 };
 
 

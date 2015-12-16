@@ -48,12 +48,15 @@ class LIAR_KERNEL_DLL Spectrum: public python::PyObjectPlus
 	PY_HEADER(python::PyObjectPlus)
 public:
 
+	typedef Spectral::TValue TValue;
+	typedef Spectral::TParam TParam;
+
 	virtual ~Spectrum();
 
 	Spectral evaluate(const Sample& sample, SpectralType type) const;
-	TScalar luminance() const { return doLuminance(); }
+	TValue luminance() const { return doLuminance(); }
 
-	static TSpectrumPtr make(TScalar value);
+	static TSpectrumPtr make(TParam value);
 	static TSpectrumPtr make(const XYZ& value);
 	static const TSpectrumPtr& white();
 	static const TSpectrumPtr& black();
@@ -68,7 +71,7 @@ protected:
 
 private:
 	virtual const Spectral doEvaluate(const Sample& sample, SpectralType type) const = 0;
-	virtual TScalar doLuminance() const = 0;
+	virtual TValue doLuminance() const = 0;
 
 	virtual const TPyObjectPtr doGetState() const = 0;
 	virtual void doSetState(const TPyObjectPtr& state) = 0;
@@ -90,14 +93,14 @@ class LIAR_KERNEL_DLL SpectrumFlat : public Spectrum
 {
 	PY_HEADER(Spectrum)
 public:
-	explicit SpectrumFlat(TScalar value);
-	TScalar value() const;
+	explicit SpectrumFlat(Spectral::TParam value);
+	Spectral::TValue value() const;
 private:
 	const Spectral doEvaluate(const Sample& sample, SpectralType type) const override;
-	TScalar doLuminance() const override;
+	TValue doLuminance() const override;
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
-	TScalar value_;
+	TValue value_;
 };
 
 
@@ -109,7 +112,7 @@ public:
 	const XYZ& value() const;
 private:
 	const Spectral doEvaluate(const Sample& sample, SpectralType type) const override;
-	TScalar doLuminance() const override;
+	TValue doLuminance() const override;
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 	XYZ value_;

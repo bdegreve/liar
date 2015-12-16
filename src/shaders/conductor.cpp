@@ -126,8 +126,8 @@ TBsdfPtr Conductor::doBsdf(const Sample& sample, const IntersectionContext& cont
 {
 	// in theory, refractive indices must be at least 1, but they must be more than zero for sure.
 	// IOR as average of spectral works correctly for LIAR_SPECTRAL_MODE_SINGLE. Everything else uses ... well, and average.
-	const Spectral eta = max(refractionIndex_->lookUp(sample, context, Illuminant), 1e-9);
-	const Spectral kappa = max(absorptionCoefficient_->lookUp(sample, context, Illuminant), 1e-9);
+	const Spectral eta = max(refractionIndex_->lookUp(sample, context, Illuminant), 1e-9f);
+	const Spectral kappa = max(absorptionCoefficient_->lookUp(sample, context, Illuminant), 1e-9f);
 	const Spectral reflectance = reflectance_->lookUp(sample, context, Reflectant);
 
 	return TBsdfPtr(new ConductorBsdf(sample, context, caps(), eta, kappa, reflectance));
@@ -178,14 +178,16 @@ BsdfOut Conductor::ConductorBsdf::doEvaluate(const TVector3D&, const TVector3D&,
 
 SampleBsdfOut Conductor::ConductorBsdf::doSample(const TVector3D& omegaIn, const TPoint2D&, TScalar componentSample, TBsdfCaps allowedCaps) const
 {
+	typedef Spectral::TValue TValue;
+
 	enum
 	{
 		capsRefl = Bsdf::capsReflection | Bsdf::capsSpecular,
 	};
 
-	const TScalar cosI = omegaIn.z;
+	const TValue cosI = static_cast<TValue>(omegaIn.z);
 	LASS_ASSERT(cosI > 0);
-	const TScalar cosI2 = num::sqr(cosI);
+	const TValue cosI2 = num::sqr(cosI);
 	const Spectral a = sqr(eta_) + sqr(kappa_);
 	const Spectral b = (2 * cosI) * eta_;
 

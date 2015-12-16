@@ -42,22 +42,22 @@ class LIAR_SPECTRA_DLL Sampled: public Spectrum
 public:
 
 	typedef std::vector<TWavelength> TWavelengths;
-	typedef std::vector<TScalar> TScalars;
+	typedef std::vector<TValue> TValues;
 
-	Sampled(const TWavelengths& wavelengths, const TScalars& values);
+	Sampled(const TWavelengths& wavelengths, const TValues& values);
 
 	TSpectrumPtr resample(const TWavelengths& wavelengths) const;
 
 private:
 
 	const Spectral doEvaluate(const Sample& sample, SpectralType type) const override;
-	TScalar doLuminance() const override;
+	TValue doLuminance() const override;
 
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
 	TWavelengths wavelengths_;
-	TScalars values_;
+	TValues values_;
 	XYZ tristimulus_;
 };
 

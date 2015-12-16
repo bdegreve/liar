@@ -34,15 +34,17 @@ namespace kernel
 class XYZ
 {
 public:
-	typedef TScalar TValue;
+	typedef float TValue;
+	typedef float TParam;
+	typedef num::NumTraits<TValue> TNumTraits;
 
-	TScalar x;
-	TScalar y;
-	TScalar z;
+	TValue x;
+	TValue y;
+	TValue z;
 
 	XYZ(): x(0), y(0), z(0) {}
-	XYZ(TScalar f): x(f), y(f), z(f) {}
-	XYZ(TScalar x, TScalar y, TScalar z): x(x), y(y), z(z) {}
+	XYZ(TParam f) : x(f), y(f), z(f) {}
+	XYZ(TParam x, TParam y, TParam z) : x(x), y(y), z(z) {}
 
 	XYZ& operator+=(const XYZ& other)
 	{
@@ -72,19 +74,19 @@ public:
 		z /= other.z;
 		return *this;
 	}
-	TScalar total() const
+	TValue total() const
 	{
 		return x + y + z;
 	}
-	TScalar absTotal() const
+	TValue absTotal() const
 	{
 		return num::abs(x) + num::abs(y) + num::abs(z);
 	}
-	TScalar average() const
+	TValue average() const
 	{
 		return total() / 3;
 	}
-	TScalar maximum() const
+	TValue maximum() const
 	{
 		return std::max(x, std::max(y, z));
 	}
@@ -151,7 +153,7 @@ inline XYZ sqr(const XYZ& a)
 {
 	return XYZ(a.x * a.x, a.y * a.y, a.z * a.z);
 }
-inline XYZ pow(const XYZ& a, TScalar b)
+inline XYZ pow(const XYZ& a, XYZ::TParam b)
 {
 	return XYZ(num::pow(a.x, b), num::pow(a.y, b), num::pow(a.z, b));
 }
@@ -159,11 +161,11 @@ inline XYZ exp(const XYZ& a)
 {
 	return XYZ(num::exp(a.x), num::exp(a.y), num::exp(a.z));
 }
-inline XYZ clamp(const XYZ& a, TScalar min, TScalar max)
+inline XYZ clamp(const XYZ& a, XYZ::TParam min, XYZ::TParam max)
 {
 	return XYZ(num::clamp(a.x, min, max), num::clamp(a.y, min, max), num::clamp(a.z, min, max));
 }
-inline XYZ lerp(const XYZ& a, const XYZ& b, TScalar f)
+inline XYZ lerp(const XYZ& a, const XYZ& b, XYZ::TParam f)
 {
 	return XYZ(num::lerp(a.x, b.x, f), num::lerp(a.y, b.y, f), num::lerp(a.z, b.z, f));
 }
@@ -174,7 +176,7 @@ inline bool operator==(const XYZ& a, const XYZ& b)
 
 inline const XYZ chromaticity(const XYZ& xyz)
 {
-	const TScalar sum = xyz.x + xyz.y + xyz.z;
+	const XYZ::TValue sum = xyz.x + xyz.y + xyz.z;
 	return sum == 0 ? 0 : xyz / sum;
 }
 

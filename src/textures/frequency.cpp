@@ -65,10 +65,10 @@ const Spectral Frequency::doLookUp(const Sample& sample, const IntersectionConte
 }
 
 
-TScalar Frequency::doScalarLookUp(const Sample& sample, const IntersectionContext&) const
+Texture::TValue Frequency::doScalarLookUp(const Sample& sample, const IntersectionContext&) const
 {
 	const TWavelength c0 = 299792458; // speed of light in vacuum
-	return static_cast<TScalar>(c0 / sample.wavelength());
+	return static_cast<TValue>(c0 / sample.wavelength());
 }
 
 

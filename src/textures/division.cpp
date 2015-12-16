@@ -51,7 +51,7 @@ const Spectral Division::doLookUp(const Sample& sample, const IntersectionContex
 }
 
 
-TScalar Division::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+Texture::TValue Division::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
 {
 	return textureA()->scalarLookUp(sample, context) / textureB()->scalarLookUp(sample, context);
 }

@@ -30,54 +30,58 @@ namespace spectra
 {
 
 PY_DECLARE_CLASS_DOC(BlackBody, "Black body radiation")
-	PY_CLASS_CONSTRUCTOR_1(BlackBody, TScalar)
+	PY_CLASS_CONSTRUCTOR_1(BlackBody, BlackBody::TValue)
+	PY_CLASS_MEMBER_RW(BlackBody, temperature, setTemperature)
+	PY_CLASS_MEMBER_RW(BlackBody, temperatureCelcius, setTemperatureCelcius)
 
 
 namespace
 {
+	typedef BlackBody::TValue TValue;
+	
 	// https://en.wikipedia.org/wiki/Planck's_law#First_and_second_radiation_constants
-	const TScalar h = 6.626070040e-34; // planck constant
-	const TScalar c = 299792458; // speed of light
-	const TScalar kb = 1.3806488e-23; // boltzmann constant
+	const TValue h = 6.626070040e-34f; // planck constant
+	const TValue c = 299792458.0f; // speed of light
+	const TValue kb = 1.3806488e-23f; // boltzmann constant
 
-	const TScalar c1 = 2 * h * num::sqr(c);
-	const TScalar c2 = h * c / kb;
+	const TValue c1 = 2 * h * num::sqr(c);
+	const TValue c2 = h * c / kb;
 }
 
 
 // --- public --------------------------------------------------------------------------------------
 
-BlackBody::BlackBody(TScalar temperature):
+BlackBody::BlackBody(TValue temperature) :
 	temperature_(temperature)
 {
 }
 
 
 
-TScalar BlackBody::temperature() const
+TValue BlackBody::temperature() const
 {
 	return temperature_;
 }
 
 
 
-void BlackBody::setTemperature(TScalar temperature)
+void BlackBody::setTemperature(TValue temperature)
 {
 	temperature_ = temperature;
 }
 
 
 
-TScalar BlackBody::temperatureCelcius() const
+TValue BlackBody::temperatureCelcius() const
 {
-	return temperature_ - 273.15;
+	return temperature_ - 273.15f;
 }
 
 
 
-void BlackBody::setTemperatureCelcius(TScalar temperature)
+void BlackBody::setTemperatureCelcius(TValue temperature)
 {
-	temperature_ = temperature + 273.15;
+	temperature_ = temperature + 273.15f;
 }
 
 
@@ -90,22 +94,22 @@ void BlackBody::setTemperatureCelcius(TScalar temperature)
 const Spectral BlackBody::doEvaluate(const Sample& sample, SpectralType type) const
 {
 	return Spectral::fromFunc([=](TWavelength w) {
-		const TScalar w5 = num::sqr(num::sqr(w)) * w;
-		return c1 / (w5 * num::expm1(c2 / (w * temperature_)));
+		const TWavelength w5 = num::sqr(num::sqr(w)) * w;
+		return static_cast<TValue>(c1 / (w5 * num::expm1(c2 / (w * temperature_))));
 	}, sample, type);
 }
 
 
 
-TScalar BlackBody::doLuminance() const
+BlackBody::TValue BlackBody::doLuminance() const
 {
 	// we should be able to do this better
 	const Observer::TWavelengths& ws = standardObserver().wavelengths();
-	TScalar acc = 0;
+	TValue acc = 0;
 	for (TWavelength w : ws)
 	{
-		const TScalar w5 = num::sqr(num::sqr(w)) * w;
-		acc += c1 / (w5 * num::expm1(c2 / (w * temperature_)));
+		const TWavelength w5 = num::sqr(num::sqr(w)) * w;
+		acc += static_cast<TValue>(c1 / (w5 * num::expm1(c2 / (w * temperature_))));
 	}
 	return acc / ws.size();
 }
