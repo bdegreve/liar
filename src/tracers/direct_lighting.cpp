@@ -68,8 +68,9 @@ void DirectLighting::setNumSecondaryLightSamples(size_t numSamples)
 
 // --- private -------------------------------------------------------------------------------------
 
-void DirectLighting::doRequestSamples(const kernel::TSamplerPtr&)
+void DirectLighting::doRequestSamples(const kernel::TSamplerPtr& sampler)
 {
+	requestLightAndSceneSamples(sampler);
 }
 
 

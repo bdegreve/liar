@@ -95,6 +95,8 @@ protected:
 			const Sample::TSubSequence2D& lightSamples,  const Sample::TSubSequence2D& bsdfSamples, const Sample::TSubSequence1D& componentSamples, 
 			const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn) const;
 
+	void requestLightAndSceneSamples(const TSamplerPtr& sampler);
+
 private:
 
 	virtual void doRequestSamples(const TSamplerPtr& sampler) = 0;

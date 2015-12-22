@@ -55,11 +55,13 @@ IntersectionContext::IntersectionContext(const SceneObject& object, const Sample
 {
 	init(object, ray.centralRay(), intersection, rayGeneration);
 
-	DifferentialRay localRay = transform(ray, worldToLocal());
-	setScreenSpaceDifferentialsI(localRay.differentialI(), dPoint_dI_, dNormal_dI_, dUv_dI_);
-	setScreenSpaceDifferentialsI(localRay.differentialJ(), dPoint_dJ_, dNormal_dJ_, dUv_dJ_);
-	hasScreenSpaceDifferentials_ = true;
-
+	if (ray.hasDifferentials())
+	{
+		DifferentialRay localRay = transform(ray, worldToLocal());
+		setScreenSpaceDifferentialsI(localRay.differentialI(), dPoint_dI_, dNormal_dI_, dUv_dI_);
+		setScreenSpaceDifferentialsI(localRay.differentialJ(), dPoint_dJ_, dNormal_dJ_, dUv_dJ_);
+		hasScreenSpaceDifferentials_ = true;
+	}
 	if (shader_)
 	{
 		shader_->shadeContext(sample_, *this);

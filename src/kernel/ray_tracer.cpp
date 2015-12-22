@@ -108,12 +108,9 @@ void RayTracer::setMaxRayGeneration(int iMaxRayGeneration)
 
 void RayTracer::requestSamples(const TSamplerPtr& sampler)
 {
-	if (scene_ && sampler)
+	if (sampler)
 	{
 		sampler->clearSubSequenceRequests();
-		lights_.requestSamples(sampler);
-		forAllObjects(scene_, impl::requestMemberSamples<Shader>(sampler, &SceneObject::shader));
-		forAllObjects(scene_, impl::requestMemberSamples<Medium>(sampler, &SceneObject::interior));
 		doRequestSamples(sampler);
 	}
 }
@@ -261,6 +258,16 @@ const Spectral RayTracer::estimateLightContribution(
 	return result;
 }
 
+
+/** Helper function for some RayTracer implementations to request 
+ *  samples for lights and shaders. This is mostly for the DirectLighting one.
+ */
+void RayTracer::requestLightAndSceneSamples(const TSamplerPtr& sampler)
+{
+	lights_.requestSamples(sampler);
+	forAllObjects(scene(), impl::requestMemberSamples<Shader>(sampler, &SceneObject::shader));
+	forAllObjects(scene(), impl::requestMemberSamples<Medium>(sampler, &SceneObject::interior));
+}
 
 // --- private -------------------------------------------------------------------------------------
 

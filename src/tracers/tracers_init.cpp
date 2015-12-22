@@ -25,6 +25,7 @@
 
 // keep in alphabetical order please! [Bramz]
 //
+#include "adjoint_photon_tracer.h"
 #include "direct_lighting.h"
 #include "photon_mapper.h"
 
@@ -36,6 +37,7 @@ PY_DECLARE_MODULE_DOC(tracers, "LiAR ray- and path tracers")
 
 // keep in alphabetical order please! [Bramz]
 //
+PY_MODULE_CLASS(tracers, AdjointPhotonTracer)
 PY_MODULE_CLASS(tracers, DirectLighting)
 PY_MODULE_CLASS(tracers, PhotonMapper)
 

@@ -46,10 +46,12 @@ public:
 
 	DifferentialRay();
 	DifferentialRay(const BoundedRay& centralRay, const TRay3D& differentialI, const TRay3D& differentialJ);
+	explicit DifferentialRay(const BoundedRay& centralRay);
 
 	const BoundedRay& centralRay() const { return centralRay_; }
 	const TRay3D& differentialI() const { return differentialI_; }
 	const TRay3D& differentialJ() const { return differentialJ_; }
+	bool hasDifferentials() const { return hasDifferentials_; }
 
 	const TPoint3D& support() const { return centralRay_.support(); }		/**< return support point of central ray */
 	const TVector3D& direction() const { return centralRay_.direction(); }	/**< return diretion of central ray */
@@ -68,6 +70,7 @@ private:
 	BoundedRay centralRay_;
 	TRay3D differentialI_;
 	TRay3D differentialJ_;
+	bool hasDifferentials_;
 };
 
 LIAR_KERNEL_DLL DifferentialRay transform(const DifferentialRay& ray, const TTransformation3D& transformation);

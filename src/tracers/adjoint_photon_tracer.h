@@ -45,13 +45,28 @@ public:
 
 private:
 
+	typedef num::RandomXorShift128Plus TRandom;
+
 	void doRequestSamples(const TSamplerPtr& sampler);
 	void doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads);
 	const Spectral doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const;
 	const TRayTracerPtr doClone() const;
 
+	const Spectral tracePhoton(const Sample& sample, const Spectral& power, const DifferentialRay& ray, TScalar& tIntersection, TScalar& alpha, size_t generation) const;
+
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
+
+	typedef Sampler::TSubSequenceId TSampleId;
+	typedef std::vector<TSampleId> TSampleIds;
+
+	TSampleIds strategySample_;
+	TSampleIds bsdfSample_;
+	TSampleIds lightChoiceSample_;
+	TSampleIds lightSample_;
+
+
+	mutable TRandom random_;
 };
 
 }
