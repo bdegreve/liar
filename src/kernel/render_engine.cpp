@@ -190,19 +190,8 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 			<< "' goes outside valid boundary '" << bucketBound_ << "'.");
 	}
 	
-	const TResolution2D resolution = sampler_->resolution();
-	const TVector2D pixelSize = TVector2D(resolution).reciprocal();
-	const size_t samplesPerPixel = sampler_->samplesPerPixel();
+	const TVector2D pixelSize = TVector2D(renderTarget_->resolution()).reciprocal();
 	const TimePeriod timePeriod = iFrameTime + camera_->shutterDelta();
-
-	const TResolution2D min(
-		num::round(bucket.min().x * resolution.x), 
-		num::round(bucket.min().y * resolution.y));
-	const TResolution2D max(
-		num::round(bucket.max().x * resolution.x), 
-		num::round(bucket.max().y * resolution.y));
-	const size_t numberOfPixels = (max.x - min.x) * (max.y - min.y);
-	const size_t numberOfSamples = numberOfPixels * samplesPerPixel;
 
 	if (isDirty_)
 	{
@@ -213,39 +202,31 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 		isDirty_ = false;
 	}
 
-	Progress progress("rendering bucket " + util::stringCast<std::string>(bucket), 
-		numberOfSamples);
+	// we need an unbounded progress indicator ...
+	const size_t numerOfSamplers = sampler_->resolution().x * sampler_->resolution().y * sampler_->samplesPerPixel();
+	Progress progress("rendering bucket " + util::stringCast<std::string>(bucket), numerOfSamplers);
 
 	Consumer consumer(*this, rayTracer_, sampler_, progress, pixelSize, timePeriod);
-	if (numberOfThreads_ == 1)
-	{
-		Task task(min, max);
-		consumer(task);
-	}
-	else
-	{
-		typedef util::ThreadPool<Task, Consumer> TThreadPool;
-		TThreadPool pool(numberOfThreads_, TThreadPool::unlimitedNumberOfTasks, consumer);
 
-		const TResolution2D::TValue step = 64;
-		TResolution2D i;
-		for (i.y = min.y; i.y < max.y; i.y += step)
+	typedef Sampler::TTaskPtr TTaskPtr;
+	typedef util::ThreadPool<TTaskPtr, Consumer> TThreadPool;
+
+	TThreadPool pool(numberOfThreads_, std::max<size_t>(2 * numberOfThreads_, 16), consumer);
+
+	TTaskPtr task = sampler_->getTask();
+	while (task)
+	{
+		pool.addTask(task);
+		task = sampler_->getTask();
+
+		if (isCanceling())
 		{
-			for (i.x = min.x; i.x < max.x; i.x += step)
-			{
-				if (isCanceling())
-				{
-					pool.clearQueue();
-					return;
-				}
-
-				TResolution2D end(std::min(i.x + step, max.x), std::min(i.y + step, max.y));
-				pool.addTask(Task(i, end));
-			}
+			pool.clearQueue();
+			return;
 		}
-
-		// ~TThreadPool will wait for completion ...
 	}
+
+	// ~TThreadPool will wait for completion ...
 }
 
 
@@ -298,15 +279,15 @@ bool RenderEngine::isCanceling() const
 
 // --- Consumer ------------------------------------------------------------------------------------
 
-RenderEngine::Consumer::Consumer(RenderEngine& iEngine, const TRayTracerPtr& iRayTracer,
-		const TSamplerPtr& sampler, Progress& ioProgress,
-		const TVector2D& iPixelSize, const TimePeriod& iTimePeriod):
-	engine_(&iEngine),
-	rayTracer_(LASS_ENFORCE_POINTER(iRayTracer)),
+RenderEngine::Consumer::Consumer(
+		RenderEngine& engine, const TRayTracerPtr& rayTracer, const TSamplerPtr& sampler, 
+		Progress& progress, const TVector2D& pixelSize, const TimePeriod& timePeriod):
+	engine_(&engine),
+	rayTracer_(LASS_ENFORCE_POINTER(rayTracer)),
 	sampler_(LASS_ENFORCE_POINTER(sampler)),
-	progress_(&ioProgress),
-	pixelSize_(iPixelSize),
-	timePeriod_(iTimePeriod)
+	progress_(&progress),
+	pixelSize_(pixelSize),
+	timePeriod_(timePeriod)
 {
 }
 
@@ -337,46 +318,34 @@ RenderEngine::Consumer& RenderEngine::Consumer::operator=(const Consumer& other)
 
 
 
-void RenderEngine::Consumer::operator()(const Task& iTask)
+void RenderEngine::Consumer::operator()(const Sampler::TTaskPtr& task)
 {
 	typedef OutputSample::TValue TValue;
-
-	const TResolution2D begin = iTask.begin();
-	const TResolution2D end = iTask.end();
-	const size_t samplesPerPixel = sampler_->samplesPerPixel();
 
 	const size_t outputSize = 1024;
 	TOutputSamples outputSamples(outputSize);
 	size_t outputIndex = 0;
 
 	Sample sample;
-	TResolution2D i;
-	for (i.y = begin.y; i.y < end.y; ++i.y)
+	while (task->drawSample(*sampler_, timePeriod_, sample))
 	{
-		for (i.x = begin.x; i.x < end.x; ++i.x)
+		if (engine_->isCanceling())
 		{
-			for (size_t k = 0; k < samplesPerPixel; ++k)
-			{
-				if (engine_->isCanceling())
-				{
-					return;
-				}
+			return;
+		}
 
-				sampler_->sample(i, k, timePeriod_, sample);
-				const DifferentialRay primaryRay = engine_->camera_->primaryRay(sample, pixelSize_);
-				sample.setWeight(engine_->camera_->weight(primaryRay));
-				TScalar alpha;
-				TScalar tIntersection;
-				const Spectral radiance = rayTracer_->castRay(sample, primaryRay, tIntersection, alpha);
-				const TScalar depth = engine_->camera_->asDepth(primaryRay, tIntersection);
+		const DifferentialRay primaryRay = engine_->camera_->primaryRay(sample, pixelSize_);
+		sample.setWeight(engine_->camera_->weight(primaryRay));
+		TScalar alpha;
+		TScalar tIntersection;
+		const Spectral radiance = rayTracer_->castRay(sample, primaryRay, tIntersection, alpha);
+		const TScalar depth = engine_->camera_->asDepth(primaryRay, tIntersection);
 
-				outputSamples[outputIndex++] = OutputSample(sample, radiance, static_cast<TValue>(depth), static_cast<TValue>(alpha));
-				if (outputIndex == outputSize)
-				{
-					engine_->writeRender(&outputSamples[0], &outputSamples[0] + outputSize, *progress_);
-					outputIndex = 0;
-				}
-			}
+		outputSamples[outputIndex++] = OutputSample(sample, radiance, static_cast<TValue>(depth), static_cast<TValue>(alpha));
+		if (outputIndex == outputSize)
+		{
+			engine_->writeRender(&outputSamples[0], &outputSamples[0] + outputSize, *progress_);
+			outputIndex = 0;
 		}
 	}
 

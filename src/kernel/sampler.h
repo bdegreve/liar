@@ -59,12 +59,14 @@ public:
 	class Task
 	{
 	public:
-		typedef size_t TId;
 		virtual ~Task();
-		TId id() const { return id_; }
+		size_t id() const;
+		bool drawSample(Sampler& sampler, const TimePeriod& period, Sample& sample);
 	protected:
-		Task(TId id) : id_(id) {}
-		TId id_;
+		Task(size_t id);
+	private:
+		virtual bool doDrawSample(Sampler& sampler, const TimePeriod& period, Sample& sample) = 0;
+		size_t id_;
 	};
 	typedef util::SharedPtr<Task> TTaskPtr;
 
@@ -80,9 +82,7 @@ public:
 	size_t subSequenceSize2D(TSubSequenceId id) const { return subSequenceSize2D_[id]; }
 	void clearSubSequenceRequests();
 
-	TTaskPtr getTask() {
-		return TTaskPtr(0);
-	}
+	TTaskPtr getTask();
 
 	void sample(const TResolution2D& pixel, size_t subPixel, const TimePeriod& period, Sample& sample);
 	void sample(const TimePeriod& period, Sample& sample);
@@ -107,6 +107,8 @@ private:
 	friend class Sample;
 
 	typedef std::vector<size_t> TSubSequenceSizes;
+
+	virtual TTaskPtr doGetTask() = 0;
 
 	virtual const TResolution2D& doResolution() const = 0;
 	virtual size_t doSamplesPerPixel() const = 0;
@@ -139,6 +141,31 @@ private:
 	TSubSequenceSizes subSequenceOffset2D_;
 	size_t totalSubSequenceSize1D_;
 	size_t totalSubSequenceSize2D_;
+};
+
+
+class LIAR_KERNEL_DLL SamplerTileBased: public Sampler
+{
+	PY_HEADER(Sampler)
+protected:
+	SamplerTileBased();
+private:
+	class TaskTileBased : public Task
+	{
+	public:
+		TaskTileBased(size_t id, const TResolution2D& begin, const TResolution2D& end, size_t samplesPerPixel);
+	private:
+		bool doDrawSample(Sampler& sampler, const TimePeriod& period, Sample& sample) override;
+		TResolution2D begin_;
+		TResolution2D end_;
+		TResolution2D pixel_;
+		size_t samplesPerPixel_;
+		size_t subPixel_;
+	};
+
+	TTaskPtr doGetTask() override;
+
+	size_t nextId_;
 };
 
 typedef python::PyObjectPtr<Sampler>::Type TSamplerPtr;

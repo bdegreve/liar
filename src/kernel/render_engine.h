@@ -90,27 +90,14 @@ private:
 		size_t totalNumSamples_;
 	};
 
-	class Task
-	{
-	public:
-		Task() {}
-		Task(const TResolution2D& begin, const TResolution2D& end): begin_(begin), end_(end) {}
-		const TResolution2D& begin() const { return begin_; }
-		const TResolution2D& end() const { return end_; }
-	private:
-		TResolution2D begin_;
-		TResolution2D end_;
-	};
-
 	class Consumer
 	{
 	public:
-		Consumer(RenderEngine& iEngine, const TRayTracerPtr& iRayTracer,
-				const TSamplerPtr& sampler, Progress& ioProgress,
-				const TVector2D& iPixelSize, const TimePeriod& iTimePeriod);
+		Consumer(RenderEngine& engine, const TRayTracerPtr& rayTracer, const TSamplerPtr& sampler, 
+			Progress& progress, const TVector2D& pixelSize, const TimePeriod& timePeriod);
 		Consumer(const Consumer& other);
 		Consumer& operator=(const Consumer& other);
-		void operator()(const Task& iTask);
+		void operator()(const Sampler::TTaskPtr& task);
 	private:
 		RenderEngine* engine_;
 		TRayTracerPtr rayTracer_;

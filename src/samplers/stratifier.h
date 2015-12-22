@@ -38,9 +38,9 @@ namespace liar
 namespace samplers
 {
 
-class LIAR_SAMPLERS_DLL Stratifier: public Sampler
+class LIAR_SAMPLERS_DLL Stratifier : public SamplerTileBased
 {
-	PY_HEADER(Sampler)
+	PY_HEADER(SamplerTileBased)
 public:
 
 	Stratifier();

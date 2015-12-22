@@ -38,9 +38,9 @@ namespace liar
 namespace samplers
 {
 
-class LIAR_SAMPLERS_DLL LatinHypercube: public Sampler
+class LIAR_SAMPLERS_DLL LatinHypercube : public SamplerTileBased
 {
-	PY_HEADER(Sampler)
+	PY_HEADER(SamplerTileBased)
 public:
 
 	LatinHypercube();

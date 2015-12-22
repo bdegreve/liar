@@ -50,6 +50,13 @@ TSamplerPtr& Sampler::defaultSampler()
 
 
 
+Sampler::TTaskPtr Sampler::getTask()
+{
+	return doGetTask();
+}
+
+
+
 int Sampler::requestSubSequence1D(size_t requestedSize)
 {
 	if (requestedSize == 0)
@@ -221,6 +228,94 @@ size_t Sampler::doRoundSize2D(size_t requestedSize) const
 // --- free ----------------------------------------------------------------------------------------
 
 
+Sampler::Task::~Task()
+{
+}
+
+
+Sampler::Task::Task(size_t id):
+	id_(id)
+{
+}
+
+
+size_t Sampler::Task::id() const
+{
+	return id_;
+}
+
+
+bool Sampler::Task::drawSample(Sampler& sampler, const TimePeriod& period, Sample& sample)
+{
+	return doDrawSample(sampler, period, sample);
+}
+
+
+
+
+// --- SamplerTileBased ----------------------------------------------------------------------------
+
+PY_DECLARE_CLASS_DOC(SamplerTileBased, "Abstract base class of samplers that render a number of samples per pixel")
+
+SamplerTileBased::SamplerTileBased() :
+	Sampler(),
+	nextId_(0)
+{
+}
+
+
+SamplerTileBased::TTaskPtr SamplerTileBased::doGetTask()
+{
+	const size_t tileSize = 64;
+	const size_t id = nextId_++;
+	TResolution2D res = resolution();
+	const size_t n_x = (res.x + tileSize - 1) / tileSize;
+	const size_t n_y = (res.y + tileSize - 1) / tileSize;
+	if (id >= n_x * n_y)
+	{
+		return TTaskPtr(0);
+	}
+	const size_t i = id % n_x;
+	const size_t j = id / n_x;
+	
+	const TResolution2D begin(i * tileSize, j * tileSize);
+	const TResolution2D end(std::min(begin.x + tileSize, res.x), std::min(begin.y + tileSize, res.y));
+
+	return TTaskPtr(new TaskTileBased(id, begin, end, this->samplesPerPixel()));
+}
+
+
+SamplerTileBased::TaskTileBased::TaskTileBased(size_t id, const TResolution2D& begin, const TResolution2D& end, size_t samplesPerPixel):
+	Task(id),
+	begin_(begin),
+	end_(end),
+	pixel_(begin),
+	samplesPerPixel_(samplesPerPixel),
+	subPixel_(0)
+{
+}
+
+
+bool SamplerTileBased::TaskTileBased::doDrawSample(Sampler& sampler, const TimePeriod& period, Sample& sample)
+{
+	if (subPixel_ == samplesPerPixel_)
+	{
+		subPixel_ = 0;
+		++pixel_.x;
+		if (pixel_.x == end_.x)
+		{
+			pixel_.x = begin_.x;
+			++pixel_.y;
+			if (pixel_.y == end_.y)
+			{
+				return false;
+			}
+		}
+	}
+	sampler.sample(pixel_, subPixel_, period, sample);
+	++subPixel_;
+	return true;
+}
 
 }
 

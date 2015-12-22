@@ -84,13 +84,10 @@ void Splitter::add(const TChildren& children)
 
 const TResolution2D Splitter::doResolution() const
 {
-	TResolution2D maxResolution(0, 0);
+	TResolution2D maxResolution(1, 1);
 	for (TChildren::const_iterator i = children_.begin(); i != children_.end(); ++i)
 	{
-		for (int k = 0; k < TResolution2D::dimension; ++k)
-		{
-			maxResolution[k] = std::max(maxResolution[k], (*i)->resolution()[k]);
-		}
+		maxResolution = pointwiseMax(maxResolution, (*i)->resolution());
 	}
 	return maxResolution;
 }
