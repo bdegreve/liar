@@ -17,15 +17,12 @@
 #
 # http://liar.bramz.net/
 
-def load(path):
-    with open(path) as f:
-        return _parse(f)
 
-def _parse(f):
+def load(fp):
     from liar.spectra import Sampled
     valid_line = lambda line: line and not line.startswith('#') and not line.startswith(';')
 
-    lines = filter(valid_line, (line.strip() for line in f))
+    lines = filter(valid_line, (line.strip() for line in fp))
     records = (map(float, line.split()) for line in lines)
     columns = zip(*records)
     wavelengths = columns[0]
@@ -33,3 +30,29 @@ def _parse(f):
         # assume wavelengths in nanometers, convert to meters
         wavelengths = [w * 1e-9 for w in wavelengths]
     return [Sampled(wavelengths, values) for values in columns[1:]]
+
+
+def loads(s):
+    from cStringIO import StringIO
+    fp = StringIO(s)
+    return load(fp)
+
+
+def dump(obj, fp):
+    from liar.spectra import Sampled
+    if isinstance(obj, Sampled):
+        obj = [obj]
+    if len(obj) == 0:
+        raise ValueError("Must have a list of at least one spectrum")
+    if not all(hasattr(o, 'wavelengths') and hasattr(o, 'values') for o in obj):
+        raise ValueError("All spectra must have 'wavelengths' and 'values' attributes (like Sampled)")
+    wavelengths = tuple(obj[0].wavelengths)
+    for o in obj[1:]:
+        if wavelengths != tuple(o.wavelengths):
+            raise ValueError("All spectra must be sampled on the same wavelengths. Resample before dumping.")
+    if all(w < 1 for w in wavelengths):
+        # assume wavelengths in meters, convert to nanometers
+        wavelengths = [w * 1e9 for w in wavelengths]
+    allValues = [tuple(o.values) for o in obj]
+    for row in zip(wavelengths, *allValues):
+        fp.write(' '.join(map(str, row)) + '\n')
