@@ -195,11 +195,11 @@ SampleBsdfOut ThinDielectric::Bsdf::doSample(const TVector3D& omegaIn, const TPo
 
 	sinT2.inpclamp(0, 1);
 	const Spectral cosT = sqrt(1 - sinT2);
-	LASS_ASSERT(cosT > 0);
+	//LASS_ASSERT(cosT > 0);
 	const Spectral rOrth = (ior_ * cosI - cosT) / (ior_ * cosI + cosT);
 	const Spectral rPar = (cosI - ior_ * cosT) / (cosI + ior_ * cosT);
 	const Spectral r = (sqr(rOrth) + sqr(rPar)) / 2;
-	LASS_ASSERT(r < 1);
+	//LASS_ASSERT(r < 1);
 	const Spectral t = pow(transparency_, 1 / cosT);
 
 	Spectral R = r * (1 + sqr((1 - r) * t) / (1 - sqr(r * t)));

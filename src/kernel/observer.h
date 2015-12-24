@@ -92,6 +92,12 @@ private:
 	TXYZs dXYZ_;
 	std::vector<TScalar> cdf_;
 
+#if LIAR_SPECTRAL_MODE_BANDED
+	friend class Spectral;
+	const XYZ tristimulus(const Spectral& spectrum) const;
+	XYZ xyzBands_[LIAR_SPECTRAL_MODE_BANDED];
+#endif
+
 	static TObserverPtr standard_;
 };
 

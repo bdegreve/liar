@@ -73,7 +73,7 @@ private:
 	void doSampleScreen(const TResolution2D& pixel, size_t subPixel, TSample2D& screenCoordinate) override;
 	void doSampleLens(const TResolution2D& pixel, size_t subPixel, TSample2D& lensCoordinate) override;
 	void doSampleTime(const TResolution2D& pixel, size_t subPixel, const TimePeriod& period, TTime& time) override;
-	void doSampleWavelength(const TResolution2D& pixel, size_t subPixel, TScalar& wavelength, TScalar& pdf) override;
+	void doSampleWavelength(const TResolution2D& pixel, size_t subPixel, TWavelength& wavelength, TScalar& pdf) override;
 	void doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, TSubSequenceId id, TSample1D* first, TSample1D* last) override;
 	void doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, TSubSequenceId id, TSample2D* first, TSample2D* last) override;
 

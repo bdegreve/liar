@@ -22,9 +22,15 @@
  */
 
 #include "kernel_common.h"
+
 #include "observer.h"
+#if LIAR_SPECTRAL_MODE_BANDED
+#	include "spectral.h"
+#endif
+
 #include <lass/stde/extended_iterator.h>
 #include <lass/stde/access_iterator.h>
+
 
 namespace liar
 {
@@ -110,6 +116,11 @@ Observer::Observer(const TWavelengths& wavelengths, const TXYZs& sensitivities):
 		cdf_[k] *= invCdf;
 	}
 	cdf_.back() = 1;
+
+#if LIAR_SPECTRAL_MODE_BANDED
+	std::fill(xyzBands_, xyzBands_ + Spectral::numBands, XYZ(0));
+	Spectral::bandedIntegration(xyzBands_, w_, xyz_);
+#endif
 }
 
 
@@ -178,16 +189,17 @@ const XYZ Observer::tristimulus(const TValues& spectrum) const
  */
 const XYZ Observer::tristimulus(const TWavelengths& wavelengths, const TValues& spectrum) const
 {
-	LASS_ASSERT(wavelengths.size() == spectrum.size());
+	const size_t n = wavelengths.size();
+	LASS_ASSERT(n == spectrum.size());
+	LASS_ASSERT(n > 1);
 
-	XYZ acc;
-	const int n = static_cast<int>(wavelengths.size());
-	for (int k = 0; k < n; ++k)
+	// Triangular integration.
+	XYZ acc = sensitivity(wavelengths[0]) * spectrum[0] * static_cast<TValue>((wavelengths[1] - wavelengths[0]) / 2);
+	for (size_t k = 1; k < n - 1; ++k)
 	{
-		// Triangular integration. Not the most efficient way, but it works.
-		const TWavelength dw = wavelengths[std::min(k + 1, n - 1)] - wavelengths[std::max(k - 1, 0)];
-		acc += sensitivity(wavelengths[k]) * static_cast<TValue>(dw / 2) * spectrum[k];
+		acc += sensitivity(wavelengths[k]) * spectrum[k] * static_cast<TValue>((wavelengths[k + 1] - wavelengths[k - 1]) / 2);
 	}
+	acc += sensitivity(wavelengths[n - 1]) * spectrum[n - 1] * static_cast<TValue>((wavelengths[n - 1] - wavelengths[n - 2]) / 2);
 
 	return acc;
 }
@@ -224,7 +236,7 @@ Observer::TValue Observer::luminance(const TWavelengths& wavelengths, const TVal
 TWavelength Observer::sample(TScalar sample, TScalar& pdf) const
 {
 	LASS_ASSERT(sample >= 0 && sample < 1);
-	const TWavelengths::const_iterator i = std::upper_bound(cdf_.begin(), cdf_.end(), sample);
+	const auto i = std::upper_bound(cdf_.begin(), cdf_.end(), sample);
 
 	if (i == cdf_.begin())
 	{
@@ -247,7 +259,7 @@ TWavelength Observer::sample(TScalar sample, TScalar& pdf) const
 
 	const TScalar dcdf = cdf2 - cdf1;
 	LASS_ASSERT(dcdf > 0);
-	const TWavelength x = (sample - cdf1) / dcdf;
+	const TWavelength x = static_cast<TWavelength>((sample - cdf1) / dcdf);
 	const TWavelength dw = w2 - w1;
 	LASS_ASSERT(dw > 0);
 	pdf = dcdf / dw;
@@ -268,6 +280,20 @@ void Observer::setStandard(const TObserverPtr& standard)
 
 // --- private ----------------------------------------------------------------
 
+#if LIAR_SPECTRAL_MODE_BANDED
+
+const XYZ Observer::tristimulus(const Spectral& spectrum) const
+{
+	XYZ sum = 0;
+	for (size_t k = 0; k < Spectral::numBands; ++k)
+	{
+		sum += xyzBands_[k] * spectrum[k];
+	}
+	return sum;
+
+}
+
+#endif
 
 
 // --- free --------------------------------------------------------------------

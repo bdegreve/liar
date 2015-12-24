@@ -29,6 +29,12 @@
 #include "observer.h"
 #include "sample.h"
 
+#if LIAR_SPECTRAL_MODE_SINGLE
+#	define LIAR_SPECTRAL_SAMPLE_INDEPENDENT 0
+#else
+#	define LIAR_SPECTRAL_SAMPLE_INDEPENDENT 1
+#endif
+
 namespace liar
 {
 namespace kernel
@@ -42,8 +48,9 @@ class Sample;
 
 enum SpectralType
 {
-	Illuminant,
-	Reflectant
+	Illuminant = 0,
+	Reflectant,
+	numSpectralTypes
 };
 
 
@@ -51,9 +58,9 @@ class LIAR_KERNEL_DLL Spectral
 {
 public:
 
-#if LIAR_SPECTRAL_MODE_SMITS
-	enum { numBands = 10 };
-#elif LIAR_SPECTRAL_MODE_RGB
+#if LIAR_SPECTRAL_MODE_BANDED
+	enum { numBands = LIAR_SPECTRAL_MODE_BANDED };
+#elif LIAR_SPECTRAL_MODE_RGB || LIAR_SPECTRAL_MODE_XYZ
 	enum { numBands = 3 };
 #elif LIAR_SPECTRAL_MODE_SINGLE
 	enum { numBands = 1 };
@@ -61,35 +68,36 @@ public:
 	error Invalid spectral mode
 #endif
 
-	typedef Bands<numBands, float> TBands;
+	typedef Bands<numBands, LIAR_VALUE> TBands;
 
 	typedef TBands::TValue TValue;
 	typedef TBands::TParam TParam;
 	typedef TBands::TReference TReference;
 	typedef TBands::TConstReference TConstReference;
 	typedef num::NumTraits<TValue> TNumTraits;
+	typedef std::vector<TWavelength> TWavelengths;
 
 	Spectral();
 	explicit Spectral(TParam f);
 	Spectral(TParam f, SpectralType type);
 
 	static Spectral fromXYZ(const XYZ& xyz, const Sample& sample, SpectralType type);
-	static Spectral fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TValue>& values, const Sample& sample, SpectralType type);
-#if LIAR_SPECTRAL_MODE_SMITS || LIAR_SPECTRAL_MODE_RGB
-	static Spectral fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TValue>& values, SpectralType type);
+	static Spectral fromSampled(const TWavelengths& wavelengths, const std::vector<TValue>& values, const Sample& sample, SpectralType type);
+#if LIAR_SPECTRAL_SAMPLE_INDEPENDENT
+	static Spectral fromSampled(const TWavelengths& wavelengths, const std::vector<TValue>& values, SpectralType type);
 #endif
 
-#if LIAR_SPECTRAL_MODE_SMITS
+#if LIAR_SPECTRAL_MODE_BANDED
 	template <typename Func> static Spectral fromFunc(Func func, const Sample&, SpectralType type)
 	{
 		TBands v;
 		for (size_t k = 0; k < numBands; ++k)
 		{
-			v[k] = func((pimpl_->bands[k] + pimpl_->bands[k + 1]) / 2);
+			v[k] = func((bands_[k] + bands_[k + 1]) / 2);
 		}
 		return Spectral(v, type);
 	}
-#elif LIAR_SPECTRAL_MODE_RGB
+#elif LIAR_SPECTRAL_MODE_RGB || LIAR_SPECTRAL_MODE_XYZ
 	template <typename Func> static Spectral fromFunc(Func func, const Sample& sample, SpectralType type)
 	{
 		return Spectral::fromXYZ(standardObserver().tristimulus(func), sample, type);
@@ -157,21 +165,38 @@ private:
 
 	TBands v_;
 
-#if LIAR_SPECTRAL_MODE_SMITS
-	struct Impl
+#if LIAR_SPECTRAL_MODE_BANDED
+	friend class Observer;
+	static bool initialize();
+	static TWavelength bands_[numBands + 1];
+	static bool isInitialized_;
+
+	template <typename ValueType>
+	static void bandedIntegration(ValueType* result, const TWavelengths& w, const std::vector<ValueType>& v)
 	{
-		XYZ observer[numBands];
-		TWavelength bands[numBands + 1];
-		TBands yellow;
-		TBands magenta;
-		TBands cyan;
-		TBands red;
-		TBands green;
-		TBands blue;
-		TRgbSpacePtr rgbSpace;
-		Impl();
-	};
-	static Impl* pimpl_;
+		const size_t n = w.size();
+		LASS_ASSERT(v.size() == n);
+		size_t i = 0, k1 = 0, k2 = 1;
+		while (i < numBands && k2 < n)
+		{
+			if (w[k1] >= bands_[i + 1])
+			{
+				++i;
+				continue;
+			}
+			const TWavelength dw = w[k2] - w[k1];
+			if (w[k2] > bands_[i] && dw > 0)
+			{
+				const TWavelength t1 = w[k1] < bands_[i]     ? (bands_[i]     - w[k1]) / dw : 0;
+				const TWavelength t2 = w[k2] > bands_[i + 1] ? (bands_[i + 1] - w[k1]) / dw : 1;
+				const TWavelength c = dw * (t2 - t1) / 2;
+				const TValue a = static_cast<TValue>(c * (2 - t1 - t2));
+				const TValue b = static_cast<TValue>(c * (t1 + t2));
+				result[i] += v[k1] * a + v[k1] * b;
+			}
+			k1 = k2++;
+		}
+	}
 #endif
 };
 

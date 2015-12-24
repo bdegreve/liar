@@ -69,17 +69,14 @@ public:
 protected:
 	Spectrum();
 
+	void preEvaluate();
+
 private:
 	virtual const Spectral doEvaluate(const Sample& sample, SpectralType type) const = 0;
 	virtual TValue doLuminance() const = 0;
 
 	virtual const TPyObjectPtr doGetState() const = 0;
 	virtual void doSetState(const TPyObjectPtr& state) = 0;
-
-#if LIAR_SPECTRAL_MODE_SMITS || LIAR_SPECTRAL_MODE_RGB
-	mutable Spectral cached_;
-	mutable bool isCached_;
-#endif
 
 	static TSpectrumPtr white_;
 	static TSpectrumPtr black_;

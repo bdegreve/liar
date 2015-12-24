@@ -59,15 +59,7 @@ Spectrum::~Spectrum()
 
 Spectral Spectrum::evaluate(const Sample& sample, SpectralType type) const
 {
-#if LIAR_SPECTRAL_MODE_SMITS || LIAR_SPECTRAL_MODE_RGB
-	if (!isCached_) // euhm ... potentially incorrect. type could be different.
-	{
-		cached_ = doEvaluate(sample, type);
-	}
-	return cached_;
-#else
 	return doEvaluate(sample, type);
-#endif
 }
 
 
@@ -120,9 +112,6 @@ void Spectrum::setState(const TPyObjectPtr& state)
 // --- protected -----------------------------------------------------------------------------------
 
 Spectrum::Spectrum()
-#if LIAR_SPECTRAL_MODE_SMITS || LIAR_SPECTRAL_MODE_RGB
-	: isCached_(false)
-#endif
 {
 }
 
