@@ -295,9 +295,9 @@ void LightContexts::requestSamples(const TSamplerPtr& sampler)
 
 
 
-const LightContext& LightContexts::operator[](size_t i) const
+const LightContext* LightContexts::operator[](size_t i) const
 {
-	return contexts_[i];
+	return &contexts_[i];
 }
 
 
@@ -312,6 +312,18 @@ const LightContext* LightContexts::sample(TScalar x, TScalar& pdf) const
 	const size_t k = std::min(static_cast<size_t>(i - cdf_.begin()), cdf_.size() - 1);
 	pdf = *i - (k > 0 ? cdf_[k - 1] : TNumTraits::zero);
 	return &contexts_[k];
+}
+
+
+
+TScalar LightContexts::pdf(const LightContext* light) const
+{
+	LASS_ASSERT(!contexts_.empty());
+	const std::ptrdiff_t k = light - &contexts_[0];
+	LASS_ASSERT(k >= 0 && static_cast<size_t>(k) < contexts_.size());
+	LASS_ASSERT(&contexts_[k] == light);
+
+	return k > 0 ? (cdf_[k] - cdf_[k - 1]) : cdf_[k];
 }
 
 

@@ -52,7 +52,9 @@ private:
 	const Spectral doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const;
 	const TRayTracerPtr doClone() const;
 
-	const Spectral tracePhoton(const Sample& sample, const Spectral& power, const DifferentialRay& ray, TScalar& tIntersection, TScalar& alpha, size_t generation) const;
+	const Spectral tracePhoton(const Sample& sample, const DifferentialRay& ray, TScalar& tIntersection, TScalar& alpha, size_t generation) const;
+	const Spectral shadeSurface(const Sample& sample, const DifferentialRay& primaryRay, const Intersection& intersection, size_t generation) const;
+	SampleBsdfOut scatterSurface(const Sample& sample, const TBsdfPtr& bsdf, const TPoint3D& target, const TVector3D& omegaIn, size_t generation) const;
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
@@ -62,6 +64,7 @@ private:
 
 	TSampleIds strategySample_;
 	TSampleIds bsdfSample_;
+	TSampleIds bsdfComponentSample_;
 	TSampleIds lightChoiceSample_;
 	TSampleIds lightSample_;
 

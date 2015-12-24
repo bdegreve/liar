@@ -48,6 +48,7 @@ void AdjointPhotonTracer::doRequestSamples(const kernel::TSamplerPtr& sampler)
 {
 	strategySample_.clear();
 	bsdfSample_.clear();
+	bsdfComponentSample_.clear();
 	lightChoiceSample_.clear();
 	lightSample_.clear();
 
@@ -55,6 +56,7 @@ void AdjointPhotonTracer::doRequestSamples(const kernel::TSamplerPtr& sampler)
 	{
 		strategySample_.push_back(sampler->requestSubSequence1D(1));
 		bsdfSample_.push_back(sampler->requestSubSequence2D(1));
+		bsdfComponentSample_.push_back(sampler->requestSubSequence1D(1));
 		lightChoiceSample_.push_back(sampler->requestSubSequence1D(1));
 		lightSample_.push_back(sampler->requestSubSequence2D(1));
 	}
@@ -72,19 +74,19 @@ const Spectral AdjointPhotonTracer::doCastRay(
 	const kernel::Sample& sample, const kernel::DifferentialRay& primaryRay,
 	TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const
 {
-	Spectral power(1);
-	return tracePhoton(sample, power, primaryRay, tIntersection, alpha, generation);
+	return tracePhoton(sample, primaryRay, tIntersection, alpha, generation);
 }
 
-const Spectral AdjointPhotonTracer::tracePhoton(const Sample& sample, const Spectral& power, const DifferentialRay& ray, TScalar& tIntersection, TScalar& alpha, size_t generation) const
+const Spectral AdjointPhotonTracer::tracePhoton(const Sample& sample, const DifferentialRay& ray, TScalar& tIntersection, TScalar& alpha, size_t generation) const
 {
+	Spectral power(1);
+
 	if (generation >= maxRayGeneration())
 	{
 		return Spectral(0);
 	}
 
 	num::DistributionUniform<TScalar, TRandom> uniform(random_);
-	TScalar weight = 1;
 
 	Intersection intersection;
 	scene()->intersect(sample, ray, intersection);
@@ -97,17 +99,10 @@ const Spectral AdjointPhotonTracer::tracePhoton(const Sample& sample, const Spec
 	tIntersection = intersection.t();
 	alpha = 1;
 
-	const TPoint3D hitPoint = ray.point(intersection.t());
 	TScalar tScatter, pdf;
 	const BoundedRay mediumRay = bound(ray.centralRay(), ray.nearLimit(), tIntersection);
 	const Spectral transmittance = mediumStack().sampleScatterOutOrTransmittance(sample, uniform(), mediumRay, tScatter, pdf);
-	Spectral transmittedPower = power * transmittance / static_cast<Spectral::TValue>(pdf);
-	// RR to keep power constant (if possible)
-	/*const TScalar transmittanceProbability = std::min<TScalar>(transmittedPower.absAverage() / power.absAverage(), TNumTraits::one);
-	if (!russianRoulette(transmittedPower, transmittanceProbability, uniform()))
-	{
-		return Spectral(0);
-	}*/
+	power *= transmittance / static_cast<Spectral::TValue>(pdf);
 
 	if (tScatter < tIntersection)
 	{
@@ -119,113 +114,134 @@ const Spectral AdjointPhotonTracer::tracePhoton(const Sample& sample, const Spec
 		{
 			return Spectral(0);
 		}
-		Spectral scatteredPower = transmittedPower * reflectance / static_cast<Spectral::TValue>(pdfOut);
-		const TScalar scatteredProbability = std::min<TScalar>(scatteredPower.absAverage() / transmittedPower.absAverage(), TNumTraits::one);
-		if (!russianRoulette(scatteredPower, scatteredProbability, uniform()))
-		{
-			return Spectral(0);
-		}
+		power *= reflectance / static_cast<Spectral::TValue>(pdfOut);
 		const BoundedRay scatteredRay(scatterPoint, ray.direction());
 		TScalar t, a;
-		return tracePhoton(sample, scatteredPower, DifferentialRay(scatteredRay), t, a, generation + 1);
+		return power * tracePhoton(sample, DifferentialRay(scatteredRay), t, a, generation + 1);
 	}
 
-	Spectral result;
-	IntersectionContext context(*scene(), sample, ray, intersection, generation);
-	const SceneLight* light = context.rayGeneration() > 0 ? context.object().asLight() : 0;
+	return power * shadeSurface(sample, ray, intersection, generation);
+}
 
+const Spectral AdjointPhotonTracer::shadeSurface(const Sample& sample, const DifferentialRay& ray, const Intersection& intersection, size_t generation) const
+{
+	Spectral result;
+
+	IntersectionContext context(*scene(), sample, ray, intersection, generation);
+	const SceneLight* light = generation > 0 ? context.object().asLight() : 0;
 	if (light)
 	{
 		BoundedRay LASS_UNUSED(shadowRay);
 		TScalar LASS_UNUSED(lightPdf); // ??
 		const Spectral emission = light->emission(sample, ray.centralRay().unboundedRay(), shadowRay, lightPdf);
-		result += transmittedPower * emission;
+		result += emission;
 	}
 
+	
 	if (const Shader* const shader = context.shader())
 	{
 		shader->shadeContext(sample, context);
-
 		const TVector3D omegaIn = context.worldToBsdf(-ray.direction());
 		LASS_ASSERT(omegaIn.z > 0);
 
 		if (!light)
 		{
-			result += transmittedPower * context.shader()->emission(sample, context, omegaIn);
+			result += shader->emission(sample, context, omegaIn);
 		}
-
 		const TBsdfPtr bsdf = shader->bsdf(sample, context);
 		if (bsdf)
 		{
-			const TScalar strategyPdf = 0.5;
-			if (*sample.subSequence1D(strategySample_[generation]) < strategyPdf)
+			const TPoint3D target = ray.point(intersection.t());
+			SampleBsdfOut out = scatterSurface(sample, bsdf, target, omegaIn, generation);
+			if (out)
 			{
-				const TPoint2D sampleBsdf = *sample.subSequence2D(bsdfSample_[generation]);
-				const TScalar sampleComponent = uniform();
-				const SampleBsdfOut out = bsdf->sample(omegaIn, sampleBsdf, sampleComponent, Bsdf::capsAll);
-				if (out)
-				{
-					const TScalar cosTheta = out.omegaOut.z;
-					Spectral newPower = transmittedPower * out.value * static_cast<Spectral::TValue>(num::abs(cosTheta) / (out.pdf * strategyPdf));
-					const TScalar attenuation = newPower.average() / transmittedPower.average();
-					//LASS_ASSERT(attenuation < 1.1);
-					const TScalar scatterProbability = std::min(TNumTraits::one, attenuation);
-					if (russianRoulette(newPower, scatterProbability, uniform()))
-					{
-						const BoundedRay newRay(hitPoint, context.bsdfToWorld(out.omegaOut));
-						MediumChanger mediumChanger(mediumStack(), context.interior(), out.omegaOut.z < 0 ? context.solidEvent() : seNoEvent);
-						TScalar t, a;
-						result += tracePhoton(sample, newPower, DifferentialRay(newRay), t, a, generation + 1);
-					}
-				}
-			}
-			else
-			{
-				TScalar lightPdf;
-				const LightContext* light = lights().sample(*sample.subSequence1D(lightChoiceSample_[generation]), lightPdf);
-				if (light && lightPdf > 0)
-				{
-					const TPoint2D lightSample = *sample.subSequence2D(lightSample_[generation]);
-					BoundedRay shadowRay;
-					TScalar pdf;
-					light->sampleEmission(sample, lightSample, hitPoint, context.worldNormal(), shadowRay, pdf);
-					if (pdf > 0)
-					{
-						pdf *= lightPdf * (1 - strategyPdf);
-						const TVector3D omegaOut = bsdf->worldToBsdf(shadowRay.direction());
-						const BsdfOut out = bsdf->evaluate(omegaIn, omegaOut, Bsdf::capsAll);
-						if (out)
-						{
-							const TScalar cosTheta = omegaOut.z;
-							Spectral newPower = transmittedPower * out.value * static_cast<Spectral::TValue>(num::abs(cosTheta) / pdf);
-							const TScalar attenuation = newPower.average() / transmittedPower.average();
-							//LASS_ASSERT(attenuation < 1.1);
-							const TScalar scatterProbability = std::min(TNumTraits::one, attenuation);
-							if (russianRoulette(newPower, scatterProbability, uniform()))
-							{
-								const BoundedRay newRay(hitPoint, shadowRay.direction());
-								MediumChanger mediumChanger(mediumStack(), context.interior(), omegaOut.z < 0 ? context.solidEvent() : seNoEvent);
-								TScalar t, a;
-								result += tracePhoton(sample, newPower, DifferentialRay(newRay), t, a, generation + 1);
-							}
-						}
-					}
-				}
+				const TScalar cosTheta = out.omegaOut.z;
+				const TPoint3D start = target + (cosTheta > 0 ? 10 : -10) * liar::tolerance * context.worldNormal();
+				const BoundedRay newRay(start, context.bsdfToWorld(out.omegaOut), liar::tolerance);
+				TScalar t, a;
+				out.value *= tracePhoton(sample, DifferentialRay(newRay), t, a, generation + 1);
+
+				result.fma(out.value, static_cast<Spectral::TValue>(num::abs(cosTheta) / out.pdf));
 			}
 		}
 	}
 	else
 	{
 		// entering or leaving something ...
-
 		MediumChanger mediumChanger(mediumStack(), context.interior(), context.solidEvent());
 		const DifferentialRay newRay = bound(ray, intersection.t() + tolerance, ray.farLimit());
 		TScalar t, a;
-		result += tracePhoton(sample, transmittedPower, newRay, t, a, generation + 1);
+		result += tracePhoton(sample, newRay, t, a, generation + 1);
 	}
-	
+
 	return result;
 }
+
+
+
+SampleBsdfOut AdjointPhotonTracer::scatterSurface(const Sample& sample, const TBsdfPtr& bsdf, const TPoint3D& target, const TVector3D& omegaIn, size_t generation) const
+{
+	const TScalar strategyPdf = bsdf->hasCaps(Bsdf::capsDiffuse) ? 0.5f : 1.0f;
+	if (*sample.subSequence1D(strategySample_[generation]) < strategyPdf)
+	{
+		// sample BSDF.
+		const TPoint2D sampleBsdf = *sample.subSequence2D(bsdfSample_[generation]);
+		const TScalar sampleComponent = *sample.subSequence1D(bsdfComponentSample_[generation]);
+		SampleBsdfOut out = bsdf->sample(omegaIn, sampleBsdf, sampleComponent, Bsdf::capsAll);
+		if (!out)
+		{
+			return out;
+		}
+		out.pdf *= strategyPdf;
+
+		// linear search through the lights. So this will only work great if there aren't too many.
+		TRay3D ray(target, bsdf->bsdfToWorld(out.omegaOut));
+		for (const LightContext& light : lights())
+		{
+			TScalar pdfLight;
+			BoundedRay shadowRay;
+			light.emission(sample, ray, shadowRay, pdfLight);
+			if (pdfLight > 0)
+			{
+				out.pdf += (1 - strategyPdf) * lights().pdf(&light) * pdfLight;
+			}
+		}
+
+		return out;
+	}
+	else
+	{
+		TScalar lightPdf;
+		const LightContext* light = lights().sample(*sample.subSequence1D(lightChoiceSample_[generation]), lightPdf);
+		if (!light || !lightPdf)
+		{
+			return SampleBsdfOut();
+		}
+
+		const TPoint2D lightSample = *sample.subSequence2D(lightSample_[generation]);
+		BoundedRay shadowRay;
+		TScalar pdf;
+		light->sampleEmission(sample, lightSample, target, shadowRay, pdf);
+		if (!pdf)
+		{
+			return SampleBsdfOut();
+		}
+		pdf *= lightPdf * (1 - strategyPdf);
+
+		const TVector3D omegaOut = bsdf->worldToBsdf(shadowRay.direction());
+		const BsdfOut out = bsdf->evaluate(omegaIn, omegaOut, Bsdf::capsAll);
+		if (!out)
+		{
+			return SampleBsdfOut();
+		}
+		pdf += out.pdf * strategyPdf;
+
+		return SampleBsdfOut(omegaOut, out.value, pdf, Bsdf::capsAll);
+	}
+}
+
+
+
 
 
 

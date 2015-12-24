@@ -105,8 +105,9 @@ public:
 	void setSceneBound(const TAabb3D& bound, const TimePeriod& period);
 	void requestSamples(const TSamplerPtr& sampler);
 
-	const LightContext& operator[](size_t i) const;
+	const LightContext* operator[](size_t i) const;
 	const LightContext* sample(TScalar x, TScalar& pdf) const;
+	TScalar pdf(const LightContext* light) const;
 	TIterator begin() const;
 	TIterator end() const;
 	size_t size() const;

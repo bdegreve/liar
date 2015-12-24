@@ -106,13 +106,8 @@ const Spectral DirectLighting::doCastRay(
 {
 	Intersection intersection;
 	scene()->intersect(sample, primaryRay, intersection);
-	if (!intersection)
-	{
-		tIntersection = TNumTraits::infinity;
-		alpha = 0;
-	}
-	tIntersection = intersection.t();
-	alpha = 1;
+	tIntersection = intersection ? intersection.t() : TNumTraits::infinity;
+	alpha = intersection ? 1 : 0;
 
 	const BoundedRay mediumRay = bound(primaryRay.centralRay(), primaryRay.centralRay().nearLimit(), tIntersection);
 	LASS_ENFORCE(!mediumRay.isEmpty());
