@@ -29,9 +29,14 @@ namespace liar
 namespace spectra
 {
 
-PY_DECLARE_CLASS_DOC(Sampled, "sampled spectrum")
+PY_DECLARE_CLASS_DOC(Sampled, 
+	"Sampled spectrum\n"
+	"\n"
+	"Sampled(wavelengths, values)")
 PY_CLASS_CONSTRUCTOR_2(Sampled, const Sampled::TWavelengths&, const Sampled::TValues&)
-
+PY_CLASS_MEMBER_R(Sampled, wavelengths)
+PY_CLASS_MEMBER_R(Sampled, values)
+PY_CLASS_METHOD(Sampled, resample)
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -40,6 +45,18 @@ Sampled::Sampled(const TWavelengths& wavelengths, const TValues& values):
 	values_(values)
 {
 	tristimulus_ = standardObserver().tristimulus(wavelengths, values);
+}
+
+
+const Sampled::TWavelengths& Sampled::wavelengths() const
+{
+	return wavelengths_;
+}
+
+
+const Sampled::TValues& Sampled::values() const
+{
+	return values_;
 }
 
 

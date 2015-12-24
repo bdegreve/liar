@@ -46,6 +46,9 @@ public:
 
 	Sampled(const TWavelengths& wavelengths, const TValues& values);
 
+	const TWavelengths& wavelengths() const;
+	const TValues& values() const;
+
 	TSpectrumPtr resample(const TWavelengths& wavelengths) const;
 
 private:
