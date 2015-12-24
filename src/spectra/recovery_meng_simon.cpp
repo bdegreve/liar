@@ -44,17 +44,17 @@ struct RecoveryMengSimon::Impl
 		TValue max;
 	};
 
-	typedef spat::PlanarMesh<TScalar, const PointInfo*, meta::EmptyType, meta::EmptyType> TMesh;
+	typedef spat::PlanarMesh<TValue, const PointInfo*, meta::EmptyType, meta::EmptyType> TMesh;
 	typedef std::vector<PointInfo> TPointInfos;
-	typedef prim::Aabb2D<TScalar> TAabb2D;
+	typedef prim::Aabb2D<TValue> TAabb2D;
 
 	struct EdgeCollector
 	{
 		mutable RecoveryMengSimon::TEdges edges;
 		bool call(TMesh::TEdge* e) const
 		{
-			const TPoint2D tail = TMesh::fastOrg(e);
-			const TPoint2D head = TMesh::fastDest(e);
+			const XY tail = TMesh::fastOrg(e);
+			const XY head = TMesh::fastDest(e);
 			edges.push_back(std::make_pair(tail, head));
 			return true;
 		}
@@ -64,7 +64,7 @@ struct RecoveryMengSimon::Impl
 
 	bool recover(const XYZ& xyz, const Impl::PointInfo* pi[3], TValue w[3]) const;
 	
-	const TAabb2D aabb{ TPoint2D{ -0.3, -0.3 }, TPoint2D{ 1.0, 1.2 } };
+	const TAabb2D aabb{ XY{ -0.3f, -0.3f }, XY{ 1.0f, 1.2f } };
 	const TWavelengths wavelengths;
 	const TSamples samples;
 	TMesh mesh;
@@ -202,7 +202,7 @@ RecoveryMengSimon::Impl::Impl(const TWavelengths& ws, const TSamples& ss):
 	size_t k = 0;
 	for (const auto& s : samples)
 	{
-		const TPoint2D xy = s.first;
+		const XY xy = s.first;
 		const TValues& values = s.second;
 		if (!aabb.contains(xy))
 		{
@@ -234,7 +234,7 @@ bool RecoveryMengSimon::Impl::recover(const XYZ& xyz, const Impl::PointInfo* pi[
 	{
 		return false;
 	}
-	const TMesh::TPoint2D xy(xyz.x / s, xyz.y / s);
+	const XY xy(xyz.x / s, xyz.y / s);
 	if (!aabb.contains(xy))
 	{
 		return false;
@@ -246,11 +246,10 @@ bool RecoveryMengSimon::Impl::recover(const XYZ& xyz, const Impl::PointInfo* pi[
 		e = e->sym();
 	}
 
-	const TPoint2D a = TMesh::fastOrg(e);
-	const TPoint2D b = TMesh::fastDest(e);
-	const TPoint2D c = TMesh::fastDest(e->lNext());
-	TScalar u[3];
-	spat::barycenters(xy, a, b, c, u[0], u[1], u[2]);
+	const XY a = TMesh::fastOrg(e);
+	const XY b = TMesh::fastDest(e);
+	const XY c = TMesh::fastDest(e->lNext());
+	spat::barycenters(xy, a, b, c, w[0], w[1], w[2]);
 
 	pi[0] = TMesh::pointHandle(e);
 	pi[1] = TMesh::pointHandle(e->lNext());
@@ -258,11 +257,7 @@ bool RecoveryMengSimon::Impl::recover(const XYZ& xyz, const Impl::PointInfo* pi[
 
 	for (size_t k = 0; k < 3; ++k)
 	{
-		if (pi[k])
-		{
-			w[k] = static_cast<TValue>(u[k]);
-		}
-		else
+		if (!pi[k])
 		{
 			pi[k] = &zero;
 			w[k] = 0;

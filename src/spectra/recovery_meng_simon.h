@@ -49,11 +49,12 @@ class LIAR_SPECTRA_DLL RecoveryMengSimon : public Recovery
 	PY_HEADER(Recovery)
 public:
 
-	typedef TPoint2D TXY;
+	typedef XYZ::TValue TValue;
+	typedef prim::Point2D<TValue> XY;
 
 	struct LessXY
 	{
-		bool operator()(TXY a, TXY b) const
+		bool operator()(XY a, XY b) const
 		{
 			return a.x < b.x || (a.x == b.x && a.y < b.y);
 		}
@@ -62,8 +63,8 @@ public:
 	typedef Spectral::TValue TValue;
 	typedef std::vector<TValue> TValues;
 	typedef std::vector<TWavelength> TWavelengths;
-	typedef std::map<TXY, TValues, LessXY> TSamples;
-	typedef std::pair<TXY, TXY> TEdge;
+	typedef std::map<XY, TValues, LessXY> TSamples;
+	typedef std::pair<XY, XY> TEdge;
 	typedef std::vector<TEdge> TEdges;
 
 	RecoveryMengSimon(const TWavelengths& wavelengths, const TSamples& samples);
