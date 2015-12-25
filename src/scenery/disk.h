@@ -63,20 +63,20 @@ private:
 
 	LASS_UTIL_VISITOR_DO_ACCEPT
 
-	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
-	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
-	void doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const;
-	bool doContains(const Sample& sample, const TPoint3D& point) const;
-	const TAabb3D doBoundingBox() const;
-	TScalar doArea() const;
-	TScalar doArea(const TVector3D& normal) const;
+	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const override;
+	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const override;
+	void doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const override;
+	bool doContains(const Sample& sample, const TPoint3D& point) const override;
+	const TAabb3D doBoundingBox() const override;
+	TScalar doArea() const override;
+	TScalar doArea(const TVector3D& normal) const override;
 
-	bool doHasSurfaceSampling() const;
-	const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const;
-	TScalar doAngularPdf(const TRay3D& ray, BoundedRay& shadowRay, TVector3D& normal) const;
+	bool doHasSurfaceSampling() const override;
+	const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const override;
+	//TScalar doAngularPdf(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TVector3D& normal) const override;
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	TDisk3D disk_;
 };

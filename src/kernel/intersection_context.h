@@ -52,7 +52,7 @@ namespace experimental
 		ResetOnCopy(const T& x): value_(x) {}
 		ResetOnCopy(const ResetOnCopy&): value_() {}
 		ResetOnCopy& operator=(const T& x) { value_ = x; return *this; }
-		ResetOnCopy& operator=(const ResetOnCopy& other) { value_ = T(); return *this; }
+		ResetOnCopy& operator=(const ResetOnCopy& /*other*/) { value_ = T(); return *this; }
 		T& operator*() { return value_; }
 		bool operator!() const { return !value_; }
 	private:

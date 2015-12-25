@@ -307,7 +307,7 @@ const TimePeriod OrthographicCamera::doShutterDelta() const
 
 
 
-TScalar OrthographicCamera::doWeight(const TRay3D& ray) const
+TScalar OrthographicCamera::doWeight(const TRay3D&) const
 {
 	return 1;
 }

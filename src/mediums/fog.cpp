@@ -190,7 +190,7 @@ const Spectral Fog::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TS
 }
 
 
-const Spectral Fog::doSampleScatterOutOrTransmittance(const Sample& sample, TScalar scatterSample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
+const Spectral Fog::doSampleScatterOutOrTransmittance(const Sample&, TScalar scatterSample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	pdf = 1;
 	const TScalar dMax = ray.farLimit() - ray.nearLimit();

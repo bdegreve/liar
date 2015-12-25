@@ -311,7 +311,7 @@ const TPoint3D Sphere::doSampleSurface(const TPoint2D& sample, const TVector3D& 
 */
 
 
-TScalar Sphere::doAngularPdf(const TRay3D& ray, BoundedRay& shadowRay, TVector3D& normal) const
+TScalar Sphere::doAngularPdf(const Sample&, const TRay3D& ray, BoundedRay& shadowRay, TVector3D& normal) const
 {
 	TScalar t = 0;
 	const prim::Result r = prim::intersect(sphere_, ray, t, tolerance);

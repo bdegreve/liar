@@ -72,7 +72,7 @@ void TransformationLocal::setTransformation(const TTransformation3D& transformat
 
 // --- private -------------------------------------------------------------------------------------
 
-void TransformationLocal::doTransformContext(const Sample& sample, IntersectionContext& context) const
+void TransformationLocal::doTransformContext(const Sample&, IntersectionContext& context) const
 {
 	context.setPoint(prim::transform(context.point(), transformation_));
 	context.setDPoint_dI(prim::transform(context.dPoint_dI(), transformation_));

@@ -164,9 +164,9 @@ void Csg::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection&
 			{
 			case 0:
 				{
-					BoundedRay ray(ray.unboundedRay(), resultA.t(), ray.farLimit());
-					childA_->intersect(sample, ray, resultB);
-					childB_->intersect(sample, ray, resultB);
+					BoundedRay ray2(ray.unboundedRay(), resultA.t(), ray.farLimit());
+					childA_->intersect(sample, ray2, resultB);
+					childB_->intersect(sample, ray2, resultB);
 				}
 				break;
 			case 1:
@@ -193,8 +193,8 @@ void Csg::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection&
 			}
 			else
 			{
-				BoundedRay ray(ray.unboundedRay(), resultA.t(), ray.farLimit());
-				childA_->intersect(sample, ray, resultA);
+				BoundedRay ray2(ray.unboundedRay(), resultA.t(), ray.farLimit());
+				childA_->intersect(sample, ray2, resultA);
 			}
 		}
 		else // if (resultB.t() < resultA.t())
@@ -211,8 +211,8 @@ void Csg::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection&
 			}
 			else
 			{
-				BoundedRay ray(ray.unboundedRay(), resultB.t(), ray.farLimit());
-				childB_->intersect(sample, ray, resultB);
+				BoundedRay ray2(ray.unboundedRay(), resultB.t(), ray.farLimit());
+				childB_->intersect(sample, ray2, resultB);
 			}
 		}
 	}

@@ -294,8 +294,8 @@ public:
 	Bands(TParam f = TNumTraits::zero): v_(f) {}
 	void fill(TParam f) { v_ = f; }
 
-	TReference operator[](size_t i) { return v_; }
-	TParam operator[](size_t i) const { return v_; }
+	TReference operator[](size_t) { return v_; }
+	TParam operator[](size_t) const { return v_; }
 
 	Bands& operator+=(const Bands& other) { v_ += other.v_; return *this; }
 	Bands& operator-=(const Bands& other) { v_ -= other.v_; return *this; }

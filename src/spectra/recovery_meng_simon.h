@@ -60,7 +60,6 @@ public:
 		}
 	};
 
-	typedef Spectral::TValue TValue;
 	typedef std::vector<TValue> TValues;
 	typedef std::vector<TWavelength> TWavelengths;
 	typedef std::map<XY, TValues, LessXY> TSamples;

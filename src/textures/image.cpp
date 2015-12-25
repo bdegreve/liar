@@ -201,7 +201,7 @@ const Spectral Image::doLookUp(const Sample& sample, const IntersectionContext& 
 }
 
 
-Texture::TValue Image::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+Texture::TValue Image::doScalarLookUp(const Sample&, const IntersectionContext& context) const
 {
 	return lookUp(context).y;
 }

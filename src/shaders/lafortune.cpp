@@ -202,7 +202,6 @@ SampleBsdfOut Lafortune::LafortuneBsdf::doSample(const TVector3D& omegaIn, const
 	LASS_ASSERT(shaders::hasCaps(allowedCaps, caps()));
 	SampleBsdfOut out;
 	out.omegaOut = num::cosineHemisphere(sample, out.pdf).position();
-	const TVector3D omega = omegaIn * out.omegaOut; // component wise.
 	out.value = eval(omegaIn, out.omegaOut);
 	out.usedCaps = caps();
 	return out;

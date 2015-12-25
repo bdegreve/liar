@@ -57,7 +57,7 @@ public:
 	const XYZ tristimulus(const TValues& spectrum) const;
 	const XYZ tristimulus(const TWavelengths& wavelengths, const TValues& spectrum) const;
 	template <typename Func>
-	const XYZ tristimulus(Func func) const
+	const XYZ tristimulusFunc(Func func) const
 	{
 		XYZ acc;
 		for (size_t k = 0, n = w_.size(); k < n; ++k)
@@ -70,9 +70,9 @@ public:
 	TValue luminance(const TValues& spectrum) const;
 	TValue luminance(const TWavelengths& wavelengths, const TValues& spectrum) const;
 	template <typename Func>
-	TValue luminance(Func func) const
+	TValue luminanceFunc(Func func) const
 	{
-		TScalar y = 0;
+		TValue y = 0;
 		for (size_t k = 0, n = w_.size(); k < n; ++k)
 		{
 			y += dXYZ_[k].y * func(w_[k]);

@@ -64,7 +64,7 @@ void TransformationUv::setTransformation(const TTransformation2D& transformation
 
 // --- private -------------------------------------------------------------------------------------
 
-void TransformationUv::doTransformContext(const Sample& sample, IntersectionContext& context) const
+void TransformationUv::doTransformContext(const Sample&, IntersectionContext& context) const
 {
 	context.setUv(prim::transform(context.uv(), forward_));
 	context.setDUv_dI(prim::transform(context.dUv_dI(), forward_));

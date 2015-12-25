@@ -157,7 +157,7 @@ const XYZ Observer::sensitivity(TWavelength wavelength) const
 		return XYZ(0);
 	}
 
-	const ptrdiff_t k = (i - w_.begin()) - 1;
+	const std::ptrdiff_t k = (i - w_.begin()) - 1;
 	LASS_ASSERT(k >= 0 && static_cast<size_t>(k) < w_.size());
 
 	const TWavelength dw = wavelength - w_[k];
@@ -253,7 +253,7 @@ TWavelength Observer::sample(TScalar sample, TScalar& pdf) const
 	
 	const TScalar cdf1 = *stde::prev(i);
 	const TScalar cdf2 = *i;
-	const ptrdiff_t k = i - cdf_.begin();
+	const std::ptrdiff_t k = i - cdf_.begin();
 	const TWavelength w1 = w_[k - 1];
 	const TWavelength w2 = w_[k];
 
