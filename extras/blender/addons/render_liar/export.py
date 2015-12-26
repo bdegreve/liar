@@ -5,7 +5,7 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -51,19 +51,23 @@ def str_index(i):
 
 
 def matrix_to_list(matrix):
-    return [[matrix[i][j] for i in range(4)] for j in range(4)]
+    return tuple(tuple(row) for row in matrix.row)
 
 
 def is_identity_matrix(matrix):
     for i in range(4):
         for j in range(4):
-            if i == j:
-                if matrix[i][j] != 1:
-                    return False
-            else:
-                if matrix[i][j]:
-                    return False
+            if matrix[i][j] !=(1 if i == j else 0):
+                return False
     return True
+
+
+def is_translation_matrix(matrix):
+    for i in range(4):
+        for j in range(3):
+            if matrix[i][j] !=(1 if i == j else 0):
+                return False
+    return matrix[3][3] == 1
 
 
 def make_dir(dirname):
@@ -97,26 +101,26 @@ def compress_mesh(vertices, uvs, normals, face_groups):
 
 def encode_mesh_to_obj(vertices, normals, uvs, face_groups):
     vertices, uvs, normals, face_groups = compress_mesh(vertices, normals, uvs, face_groups)
-    
+
     lines = ["# --- vertices ---"]
     for vert in vertices:
         lines += ["v %s" % ' '.join(map(str_float, vert))]
-    
+
     lines += ["", "# --- uvs ---"]
     for uv in uvs:
         lines += ["vt %s" % ' '.join(map(str_float, uv))]
-    
+
     lines += ["", "# --- normals ---"]
     for normal in normals:
         lines += ["vn %s" % ' '.join(map(str_float, normal))]
-    
+
     lines += ["", "# --- face groups ---"]
     for face_group in face_groups:
         lines += ["g"]
         for face in face_group:
             verts = ['/'.join(map(str_index, vert)).rstrip('/') for vert in face]
             lines += ["f %s" % ' '.join(verts)]
-            
+
     return '\n'.join(lines)
 
 
@@ -144,8 +148,8 @@ class LiarExporter(object):
             self.is_compressing_archive = False
         else:
             self.is_compressing_archive = True
-    
-    def write_to_archive(self, filename, content): 
+
+    def write_to_archive(self, filename, content):
         if self.is_compressing_archive:
             try:
                 self.zip_file
@@ -160,18 +164,18 @@ class LiarExporter(object):
             make_dir(self.archive_path)
             f = file(os.path.join(self.archive_path, filename), 'w')
             f.write(content)
-            f.close()           
-    
+            f.close()
+
     def write_none(self, obj):
         pass
-    
+
     def write_image(self, texture):
         assert(texture.type == 'IMAGE')
         name = texture.image.name
         if name in self.images:
             return
         self.images[name] = True
-        
+
         filename = texture.image.filepath
         if texture.use_mipmap or texture.use_mipmap_gauss:
             anti_aliasing = 'AA_TRILINEAR'
@@ -181,7 +185,7 @@ class LiarExporter(object):
             mip_mapping = 'MM_NONE'
         if not texture.use_interpolation:
             anti_aliasing = 'AA_NONE'
-        
+
         self.script_file.write('''
 # --- image IM:%(name)s ---
 image = liar.textures.Image(fix_path(%(filename)r))
@@ -190,38 +194,40 @@ image.mipMapping = liar.textures.Image.%(mip_mapping)s
 images['IM:%(name)s'] = image
 ''' % vars())
         return name
-    
+
     def write_texture(self, texture):
         name = texture.name
         if name in self.textures:
-            return
+            return "textures['TE:%(name)s']" % vars()
         self.textures[name] = True
-        
+
         if texture.type == 'IMAGE':
             image_name = self.write_image(texture)
             self.script_file.write('''
 # --- texture TE:%(name)s ---
 textures['TE:%(name)s'] = images['IM:%(image_name)s']
 ''' % vars())
+        elif texture.type == 'NONE':
+            return None
         else:
             print("WARNING: Cannot handle %s textures!" % texture.type)
-            self.script_file.write('''
-# --- texture TE:%(name)s ---
-textures['TE:%(name)s'] = liar.Texture.black()
-''' % vars())
+            return None
+
         return "textures['TE:%(name)s']" % vars()
-    
+
     def write_material(self, material):
         name = material.name
         if name in self.materials:
             return
         self.materials[name] = True
-        
-        channels = ""
+
+        channels = {}
         for index, slot in enumerate(material.texture_slots):
             if not slot or not slot.use:
                 continue
             channel = self.write_texture(slot.texture)
+            if not channel:
+                continue
             if slot.texture_coords == 'UV':
                 ox, oy = slot.offset[:2]
                 sx, sy = slot.scale[:2]
@@ -243,8 +249,10 @@ textures['TE:%(name)s'] = liar.Texture.black()
                     channel = "liar.textures.TransformationLocal(%(channel)s, [(%(sx)r, 0, 0, %(ox)r), (0, %(sy)r, 0, %(oy)r), (0, 0, %(sz)r, %(oz)r), (0, 0, 0, 1)])" % vars()
                 if slot.texture_coords == 'ORCO':
                     channel = "liar.textures.OrCo(%s)" % channel
-            channels += "\n\t%(index)d: %(channel)s," % vars()
-        
+            channels[index] = channel
+
+        str_channels = "{\n%s}" % ''.join('%d: %s\n' for (index, channel) in sorted(channels.items())) if channels else "{}"
+
         if material.alpha == 0:
             ior = material.specular_ior
             self.script_file.write(r'''
@@ -254,16 +262,16 @@ material.innerRefractionIndex = liar.textures.Constant(%(ior)r)
 materials['MA:%(name)s'] = material
 ''' % vars())
             return
-        
+
         diffuse = const_texture(material.diffuse_color, material.diffuse_intensity)
         specular = const_texture(material.specular_color, material.specular_intensity)
         specular_power = "liar.textures.Constant(%r)" % material.specular_hardness
         bumpmap = None
-        
+
         for index, slot in enumerate(material.texture_slots):
-            if not slot or not slot.use:
+            if not slot or not slot.use or not index in channels:
                 continue
-            channel = "texture_channels[%d]" % index
+            channel = "channels[%d]" % index
             if slot.use_map_color_diffuse:
                 diffuse = channel
             if slot.use_map_color_spec:
@@ -272,13 +280,12 @@ materials['MA:%(name)s'] = material
                 specular_power = channel
             if slot.use_map_normal:
                 bumpmap = channel
-        
+
         if specular:
             self.script_file.write(r'''
 # --- material MA:%(name)s ---
 material = liar.shaders.AshikhminShirley()
-texture_channels = {%(channels)s
-    }
+channels = %(str_channels)s
 material.diffuse = %(diffuse)s
 material.specular = %(specular)s
 material.specularPowerU = material.specularPowerV = %(specular_power)s
@@ -287,41 +294,41 @@ material.specularPowerU = material.specularPowerV = %(specular_power)s
             self.script_file.write(r'''
 # --- material MA:%(name)s ---
 material = liar.shaders.Lambert()
-texture_channels = {%(channels)s
-    }
+channels = %(str_channels)s
 material.diffuse = %(diffuse)s
 ''' % vars())
         if bumpmap:
             self.script_file.write("material = liar.shaders.BumpMapping(material, %(bumpmap)s)\n" % vars())
         self.script_file.write("materials['MA:%(name)s'] = material\n" % vars())
-    
+
     def write_mesh(self, obj):
         mesh = obj.data
         name = mesh.name
         if name in self.meshes:
             return
         self.meshes[name] = True
-        
+
         if not mesh.materials:
             print('WARNING: no material assigned to mesh, skipping mesh')
             return
-        
+
         #for k, v in mesh.properties.iteritems():
         #    print("property %s: %s" % (k, v))
-        
+
         # extract vertices, normals and uvs
         vertices = [tuple(v.co) for v in mesh.vertices]
         normals = [tuple(v.normal) for v in mesh.vertices]
         uvs = []
-        
+
         # extract faces per material
+        mesh.update(calc_tessface=True)
         face_groups = [[]] * len(mesh.materials)
         for face in mesh.tessfaces:
             size = len(face.vertices)
             assert(size == 3 or size == 4)
-            
+
             faceVerts = face.vertices
-            
+
             #if False: mesh.sticky:
             #    faceUvs = faceVerts
             #elif mesh.faceUV:
@@ -339,30 +346,30 @@ material.diffuse = %(diffuse)s
             else:
                 normals.append(tuple(face.normal))
                 faceNormals = size * [len(normals) - 1]
-            
+
             indices = tuple(zip(faceVerts, faceUvs, faceNormals))
             face_groups[face.material_index].append(indices)
-                
+
         # determine used face groups
         used_groups = [i for i, group in enumerate(face_groups) if group]
         if not used_groups:
             print('WARNING: mesh has no faces, skipping mesh')
             return
-                
+
         # write used materials
         for i in used_groups:
             self.write_material(mesh.materials[i])
-        
+
         # write groups to zip
         file_name = mesh.name + ".obj"
         content = encode_mesh_to_obj(vertices, uvs, normals, [face_groups[i] for i in used_groups])
         self.write_to_archive(file_name, "# --- %(name)s ---\n\n%(content)s" % vars())
-        
+
         if mesh.use_auto_smooth:
             auto_smooth_angle = ", auto_smooth_angle=%r" % mesh.auto_smooth_angle
         else:
             auto_smooth_angle = ""
-        
+
         self.script_file.write('''
 # --- mesh ME:%(name)s ---
 face_groups = load_face_groups_from_archive(%(file_name)r%(auto_smooth_angle)s)
@@ -373,14 +380,14 @@ face_groups = load_face_groups_from_archive(%(file_name)r%(auto_smooth_angle)s)
             self.script_file.write("face_groups[%(i)d].shader = %(mat)s\n" % vars())
         self.script_file.write("meshes['ME:%s'] = group_scenery(face_groups)\n" % name)
         return "meshes['ME:%s']" % name
-    
+
     def write_lamp(self, obj):
         lamp = obj.data
         name = lamp.name
         if name in self.lamps:
             return
         self.lamps[name] = True
-        
+
         def attenuation(lamp):
             if lamp.falloff_type == 'CONSTANT':
                 return 0, 0
@@ -393,7 +400,7 @@ face_groups = load_face_groups_from_archive(%(file_name)r%(auto_smooth_angle)s)
             else:
                 return 0, 1
         intensity = tuple(lamp.energy * x for x in lamp.color)
-        
+
         if lamp.type == 'POINT':
             attLin, attSqr = attenuation(lamp)
             self.script_file.write(r'''
@@ -459,16 +466,20 @@ lamps['LA:%(name)s'] = light
         camera = obj.data
         name = camera.name
         type = {'PERSP':'PerspectiveCamera', 'ORTHO':'OrthographicCamera'}[camera.type]
-        position = tuple(obj.location)
         matrix = obj.matrix_world
-        direction = tuple(-matrix[2])[:3]
-        right = matrix[0][:3]
-        down = tuple(-matrix[1])[:3]
+        right = tuple(matrix.col[0].xyz)
+        down = tuple(-matrix.col[1].xyz)
+        direction = tuple(-matrix.col[2].xyz)
+        position = tuple(matrix.col[3].xyz)
         fov = camera.angle
         focus_dist = camera.dof_distance
-        f_stop = 4 # when will this be available from the Python API?
+        try:
+            f_stop = camera.gpu_dof.fstop if camera.gpu_dof.fstop < 128 else None
+        except AttributeError:
+            f_stop = None
         self.script_file.write(r'''
 # --- camera CA:%(name)s ---
+fNumber = %(f_stop)r
 camera = liar.cameras.%(type)s()
 camera.position = %(position)s
 camera.direction = %(direction)s
@@ -476,10 +487,11 @@ camera.right = %(right)s
 camera.down = %(down)s
 camera.fovAngle = %(fov)r
 camera.focusDistance = %(focus_dist)s
-camera.fNumber = %(f_stop)s
+if fNumber:
+    camera.fNumber = fNumber
 cameras['CA:%(name)s'] = camera
 ''' % vars())
- 
+
     def write_render(self, render):
         file_formats = {
             'HDR': ".hdr",
@@ -599,7 +611,7 @@ def group_scenery(scenery_objects):
     else:
         return liar.scenery.AabpTree(scenery_objects)
 ''' % vars())
-    
+
     def write_world(self, world, render):
         if not world:
             return
@@ -629,18 +641,18 @@ world.numberOfEmissionSamples = 64
 world.shader = %(shader)s
 objects['WO:%(name)s'] = world
 ''' % vars())
-    
+
     def write_body(self, scene):
-            
+
         for i, obj in enumerate(scene.objects):
             if not _matching_layers(scene.layers, obj.layers):
                 continue
             self.__write_object(obj)
             self.draw_progress(float(i+1) / len(scene.objects))
-            
+
         self.write_world(scene.world, scene.render)
         self.write_render(scene.render)
-        
+
     def __write_object(self, obj):
         object_writers = {
             'MESH': LiarExporter.write_mesh,
@@ -650,9 +662,9 @@ objects['WO:%(name)s'] = world
         if obj.name in self.objects:
             return
         self.objects[obj.name] = True
-        
+
         print("- object '{obj.name}' of type '{obj.type}'".format(obj=obj))
-        if not obj.type in object_writers:              
+        if not obj.type in object_writers:
             print("WARNING: Did not recognize object type '{obj.type}'".format(obj=obj))
             return
 
@@ -660,19 +672,26 @@ objects['WO:%(name)s'] = world
         if not data:
             return
 
-        obj_matrix = matrix_to_list(obj.matrix_world)
-        if not is_identity_matrix(obj_matrix):
+        print(type(obj.matrix_world[0]))
+        if is_identity_matrix(obj.matrix_world):
             self.script_file.write(r'''
 # --- object OB:{obj.name} ---
 objects['OB:{obj.name}'] = {data}
 '''.format(**vars()))
-        else:
+        elif is_translation_matrix(obj.matrix_world):
+            translation = tuple(obj.matrix_world.col[3].xyz)
             self.script_file.write(r'''
 # --- object OB:{obj.name} ---
-matrix = {obj_matrix}
+objects['OB:{obj.name}'] = liar.scenery.Translation({data}, {translation})
+'''.format(**vars()))
+        else:
+            matrix = matrix_to_list(obj.matrix_world)
+            self.script_file.write(r'''
+# --- object OB:{obj.name} ---
+matrix = {matrix}
 objects['OB:{obj.name}'] = liar.scenery.Transformation({data}, matrix)
 '''.format(**vars()))
-    
+
     def write_footer(self, scene):
         active_camera = scene.camera.data.name
         render = scene.render
@@ -730,17 +749,17 @@ if __name__ == "__main__":
         #if os.path.exists(self.script_path):
         #    if not Blender.Draw.PupMenu("Overwrite File?%t|Yes%x1|No%x0"):
         #        return
-            
+
         print("Exporting to LiAR '%s' ..." % self.script_path)
         self.draw_progress(0)
-        
+
         self.script_file = open(self.script_path, 'w')
         try:
-        
+
             self.write_header()
             self.write_body(scene)
             self.write_footer(scene)
-            
+
         finally:
             self.script_file.close()
             try:

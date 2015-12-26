@@ -1,4 +1,4 @@
-from render_liar import LIAR
+from render_liar import LIAR, auto_register
 import bpy
 from bpy import props
 import sys
@@ -10,6 +10,7 @@ enum_aperture_types = (
     )
 
 
+@auto_register
 class LiarCameraSettings(bpy.types.PropertyGroup):
     @classmethod
     def register(cls):
@@ -30,7 +31,7 @@ class LiarCameraSettings(bpy.types.PropertyGroup):
         cls.aperture_fstop = props.FloatProperty(
                 name="Aperture F/stop",
                 description="F/stop ratio (lower numbers give more defocus, higher numbers give a sharper image)",
-                min=0.0, soft_min=0.1, soft_max=64.0,
+                min=0.0, soft_min=0.1, soft_max=128.0,
                 default=5.6,
                 step=10,
                 precision=1,
@@ -48,12 +49,3 @@ class LiarCameraSettings(bpy.types.PropertyGroup):
     @classmethod
     def unregister(cls):
         del bpy.types.Camera.liar
-
-
-
-def register():
-    bpy.utils.register_class(LiarCameraSettings)
-    
-    
-def unregister():
-    bpy.utils.unregister_class(LiarCameraSettings)

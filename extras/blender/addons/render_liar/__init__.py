@@ -5,7 +5,7 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -36,7 +36,7 @@ import sys
 
 #import sys
 #sys.path.append(r"C:\local\winpdb-1.4.8")
-#import rpdb2; 
+#import rpdb2;
 #rpdb2.start_embedded_debugger("liar")
 
 
@@ -51,14 +51,14 @@ class LiarPreferences(bpy.types.AddonPreferences):
         layout.prop(self, "python_binary")
 
 
-class LiarRender(bpy.types.RenderEngine):   
+class LiarRender(bpy.types.RenderEngine):
     bl_idname = LIAR
     bl_label = 'LiAR Render'
-    bl_use_shading_nodes = True 
+    bl_use_shading_nodes = True
     bl_use_preview = False
     bl_use_exclude_layers = True
     bl_use_save_buffers = True
-    
+
     def render(self, scene):
         scale = scene.render.resolution_percentage / 100.0
         self.size_x = int(scene.render.resolution_x * scale)
@@ -72,11 +72,11 @@ class LiarRender(bpy.types.RenderEngine):
 
     def _render_scene(self, scene):
         from render_liar import render, export
-        
+
         from imp import reload
         reload(render)
         reload(export)
-        
+
         render.render_scene(self, scene)
 
         pixel_count = self.size_x * self.size_y
@@ -93,21 +93,36 @@ class LiarRender(bpy.types.RenderEngine):
         self.end_result(result)
 
 
+def auto_register(cls):
+    _auto_registry.append(cls)
+    return cls
+
+_auto_registry = []
+
+
+def compat_engine(cls):
+    _compat_list.append(cls)
+    return cls
+
+_compat_list = []
+
+
 def register():
-    from render_liar import ui, properties
-    
-    from imp import reload
-    reload(ui)
-    reload(properties)
-        
-    properties.register()
-    ui.register()
+    import render_liar.properties.camera
+    import render_liar.operators.export
+    import render_liar.ui.camera
+    import render_liar.ui.render
+
+    for cls in _auto_registry:
+        bpy.utils.register_class(cls)
+    for cls in _compat_list:
+        cls.COMPAT_ENGINES.add(LIAR)
     bpy.utils.register_module(__name__)
 
 
 def unregister():
-    from render_liar import ui, properties
-    ui.unregister()
-    properties.unregister()
+    for cls in reversed(_compat_list):
+        cls.COMPAT_ENGINES.remove(LIAR)
+    for cls in reversed(_auto_registry):
+        bpy.utils.unregister_class(cls)
     bpy.utils.unregister_module(__name__)
-
