@@ -109,6 +109,10 @@ PhotonMapper::PhotonMapper():
 	numSecondaryGatherRays_(0),
 	ratioPrecomputedIrradiance_(0.25f),
 	volumetricGatherQuality_(0.25f),
+	idFinalGatherSamples_(-1),
+	idFinalGatherComponentSamples_(-1),
+	idFinalVolumetricGatherSamples_(-1),
+	idLightSelector_(-1),
 	isVisualizingPhotonMap_(false),
 	isRayTracingDirect_(true),
 	isScatteringDirect_(true),
@@ -123,6 +127,8 @@ PhotonMapper::PhotonMapper():
 	}
 	setNumSecondaryGatherRays(1);
 	updateStorageProbabilities();
+
+	photonSampler_ = Sampler::defaultProgressiveSampler()->clone().dynamicCast<SamplerProgressive>();
 }
 
 
@@ -328,6 +334,20 @@ void PhotonMapper::setScatteringDirect(bool enabled)
 }
 
 
+
+const TSamplerProgressivePtr& PhotonMapper::photonSampler() const
+{
+	return photonSampler_;
+}
+
+
+
+void PhotonMapper::setPhotonSampler(const TSamplerProgressivePtr& photonSampler)
+{
+	photonSampler_ = photonSampler;
+}
+
+
 // --- protected -----------------------------------------------------------------------------------
 
 // --- private -------------------------------------------------------------------------------------
@@ -339,6 +359,8 @@ void PhotonMapper::doRequestSamples(const kernel::TSamplerPtr& sampler)
 	idFinalGatherSamples_ = numFinalGatherRays_ > 0 ? sampler->requestSubSequence2D(numFinalGatherRays_) : -1;
 	idFinalGatherComponentSamples_ = numFinalGatherRays_ > 0 ? sampler->requestSubSequence1D(numFinalGatherRays_) : -1;
 	idFinalVolumetricGatherSamples_ = numFinalGatherRays_ > 0 ? sampler->requestSubSequence1D(numFinalGatherRays_) : -1;
+
+	idLightSelector_ = photonSampler_->requestSubSequence1D(1);
 }
 
 
@@ -355,7 +377,9 @@ void PhotonMapper::doPreProcess(const kernel::TSamplerPtr& sampler, const TimePe
 		return;
 	}
 
-	const size_t photonsShot = fillPhotonMaps(sampler, period);
+	photonSampler_->seed(0);
+
+	const size_t photonsShot = fillPhotonMaps(photonSampler_, period);
 	const TScalar powerScale = num::inv(static_cast<TScalar>(photonsShot));
 	buildPhotonMap(mtGlobal, shared_->globalBuffer_, shared_->globalMap_, powerScale);
 	buildIrradianceMap(numberOfThreads);
@@ -383,7 +407,8 @@ const TPyObjectPtr PhotonMapper::doGetState() const
 	return python::makeTuple(DirectLighting::doGetState(),
 		maxNumberOfPhotons_, globalMapSize_, causticsQuality_,
 		numFinalGatherRays_, ratioPrecomputedIrradiance_, isVisualizingPhotonMap_,
-		isRayTracingDirect_, isScatteringDirect_, radius, tolerance, size);
+		isRayTracingDirect_, isScatteringDirect_, radius, tolerance, size,
+		photonSampler_);
 }
 
 
@@ -397,7 +422,8 @@ void PhotonMapper::doSetState(const TPyObjectPtr& state)
 
 	python::decodeTuple(state, directLighting, maxNumberOfPhotons_, globalMapSize_, causticsQuality_,
 		numFinalGatherRays_, ratioPrecomputedIrradiance_, isVisualizingPhotonMap_,
-		isRayTracingDirect_, isScatteringDirect_, radius, tolerance, size);
+		isRayTracingDirect_, isScatteringDirect_, radius, tolerance, size,
+		photonSampler_);
 
 	DirectLighting::doSetState(directLighting);
 
@@ -544,13 +570,16 @@ namespace experimental
 }
 
 
-size_t PhotonMapper::fillPhotonMaps(const TSamplerPtr& sampler, const TimePeriod& period)
+size_t PhotonMapper::fillPhotonMaps(const TSamplerProgressivePtr& sampler, const TimePeriod& period)
 {
 	TRandomPrimary random;
 	TUniformPrimary uniform(random);
 	TPhotonBuffer& globalBuffer = shared_->globalBuffer_;
 
 	util::ProgressIndicator progress("filling photon map with " + util::stringCast<std::string>(globalMapSize_) + " photons");
+
+	Sampler::TTaskPtr task = sampler->getTask();
+	Sample sample;
 
 	size_t photonsShot = 0;
 	while (globalBuffer.size() < globalMapSize_)
@@ -565,12 +594,23 @@ size_t PhotonMapper::fillPhotonMaps(const TSamplerPtr& sampler, const TimePeriod
 			break;
 		}
 
+		if (!task->drawSample(*sampler, period, sample))
+		{
+			task = sampler->getTask();
+			if (!task)
+			{
+				break;
+			}
+			if (!task->drawSample(*sampler, period, sample))
+			{
+				break;
+			}
+		}
+
 		TScalar pdf;
-		const LightContext* const light = lights().sample(uniform(), pdf);
+		const LightContext* const light = lights().sample(*sample.subSequence1D(idLightSelector_), pdf);
 		if (light && pdf > 0)
 		{
-			Sample sample;
-			sampler->sample(period, sample);
 			const TRandomSecondary::TValue secondarySeed = random();
 			emitPhoton(*light, pdf, sample, secondarySeed);
 		}
@@ -592,8 +632,11 @@ void PhotonMapper::emitPhoton(
 {
 	TRandomSecondary random(secondarySeed);
 	TUniformSecondary uniform(random);
-	TPoint2D lightSampleA(uniform(), uniform());
-	TPoint2D lightSampleB(uniform(), uniform());
+
+	// let's cheat and use camera samples ;-)
+	// (only works because we're using a progressive sampler here)
+	const TPoint2D& lightSampleA = sample.screenSample();
+	const TPoint2D& lightSampleB = sample.lensSample();
 
 	BoundedRay ray;
 	TScalar pdf;

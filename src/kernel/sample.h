@@ -55,11 +55,18 @@ public:
 
 	Sample();
 
-	const TSample2D& screenCoordinate() const;
-	const TSample2D& lensCoordinate() const;
+	const TSample2D& screenSample() const;
+	void setScreenSample(const TSample2D& sample);
+
+	const TSample2D& lensSample() const;
+	void setLensSample(const TSample2D& sample);
+
 	TTime time() const;
+	void setTime(TTime time);
+
 	TWavelength wavelength() const;
 	TWavelength wavelength(TScalar &pdf) const;
+	void setWavelengthSample(TSample1D sample);
 
 	TScalar weight() const;
 	void setWeight(TScalar weight);
@@ -67,12 +74,16 @@ public:
 	const TSubSequence1D subSequence1D(int id) const;
 	const TSubSequence2D subSequence2D(int id) const;
 
+	void setSubSample1D(int id, size_t offset, TSample1D sample);
+	void setSubSample2D(int id, size_t offset, TSample2D sample);
+
 private:
 
 	friend class Sampler;
+	friend class SamplerTileBased; // until we cleared up the mess.
 
-	TSample2D screenCoordinate_;
-	TSample2D lensCoordinate_;
+	TSample2D screenSample_;
+	TSample2D lensSample_;
 	TTime time_;
 	TWavelength wavelength_;
 	TScalar wavelengthPdf_;

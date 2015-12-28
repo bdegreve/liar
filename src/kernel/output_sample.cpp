@@ -59,7 +59,7 @@ OutputSample::OutputSample(
 OutputSample::OutputSample(
 		const Sample& sample, const Spectral& radiance, TValue depth, TValue alpha, TValue weight) :
 	radiance_(radiance.xyz(sample)),
-	screenCoordinate_(sample.screenCoordinate()),
+	screenCoordinate_(sample.screenSample()),
 	depth_(depth),
 	alpha_(alpha),
 	weight_(weight)

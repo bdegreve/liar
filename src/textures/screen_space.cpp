@@ -49,7 +49,7 @@ ScreenSpace::ScreenSpace(const TTexturePtr& texture):
 
 void ScreenSpace::doTransformContext(const Sample& sample, IntersectionContext& context) const
 {
-	context.setUv(sample.screenCoordinate());
+	context.setUv(sample.screenSample());
 	context.setDUv_dI(TVector2D(1, 0));
 	context.setDUv_dJ(TVector2D(0, 1));
 	context.setDPoint_dU(context.dPoint_dI());

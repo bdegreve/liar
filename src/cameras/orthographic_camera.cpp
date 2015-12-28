@@ -288,7 +288,7 @@ void OrthographicCamera::setShutterTime(TTimeDelta shutterTime)
 
 const BoundedRay OrthographicCamera::doGenerateRay(const Sample& sample, const TVector2D& screenSpaceDelta) const
 {
-	const TPoint2D& screen = sample.screenCoordinate() + screenSpaceDelta;
+	const TPoint2D& screen = sample.screenSample() + screenSpaceDelta;
 
 	TPoint3D raySupport = position_ + (screen.x - .5f) * right_ + (screen.y - .5f) * down_;
 	TVector3D rayDirection = directionNormal_;

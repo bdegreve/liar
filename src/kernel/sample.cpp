@@ -24,6 +24,7 @@
 #include "kernel_common.h"
 #include "sample.h"
 #include "sampler.h"
+#include "observer.h"
 
 namespace liar
 {
@@ -33,8 +34,8 @@ namespace kernel
 // --- public --------------------------------------------------------------------------------------
 
 Sample::Sample():
-	screenCoordinate_(TSample2D(0, 0)),
-	lensCoordinate_(TSample2D(0, 0)),
+	screenSample_(TSample2D(0, 0)),
+	lensSample_(TSample2D(0, 0)),
 	time_(0.f),
 	weight_(1),
 	sampler_(0)
@@ -42,23 +43,39 @@ Sample::Sample():
 }
 
 
-
-const Sample::TSample2D& Sample::screenCoordinate() const
+const Sample::TSample2D& Sample::screenSample() const
 {
-	return screenCoordinate_;
+	return screenSample_;
 }
 
 
-
-const Sample::TSample2D& Sample::lensCoordinate() const
+void Sample::setScreenSample(const TSample2D& sample)
 {
-	return lensCoordinate_;
+	screenSample_ = sample;
+}
+
+
+const Sample::TSample2D& Sample::lensSample() const
+{
+	return lensSample_;
+}
+
+
+void Sample::setLensSample(const TSample2D& sample)
+{
+	lensSample_ = sample;
 }
 
 
 TTime Sample::time() const
 {
 	return time_;
+}
+
+
+void Sample::setTime(TTime time)
+{
+	time_ = time;
 }
 
 
@@ -74,6 +91,11 @@ TWavelength Sample::wavelength(TScalar& pdf) const
 	return wavelength_;
 }
 
+
+void Sample::setWavelengthSample(TSample1D sample)
+{
+	wavelength_ = standardObserver().sample(sample, wavelengthPdf_);
+}
 
 
 TScalar Sample::weight() const
@@ -99,13 +121,28 @@ const Sample::TSubSequence1D Sample::subSequence1D(int id) const
 }
 
 
-
 const Sample::TSubSequence2D Sample::subSequence2D(int id) const
 {
 	LASS_ASSERT(sampler_ && id >= 0);
 	const size_t k = sampler_->subSequenceOffset2D(id);
 	const size_t n = sampler_->subSequenceSize2D(id);
 	return TSubSequence2D(&subSequences2D_[0] + k, &subSequences2D_[0] + k + n);
+}
+
+
+void Sample::setSubSample1D(int id, size_t offset, TSample1D sample)
+{
+	LASS_ASSERT(sampler_ && id >= 0 && offset < sampler_->subSequenceSize1D(id));
+	const size_t k = sampler_->subSequenceOffset1D(id);
+	subSequences1D_[k + offset] = sample;
+}
+
+
+void Sample::setSubSample2D(int id, size_t offset, TSample2D sample)
+{
+	LASS_ASSERT(sampler_ && id >= 0 && offset < sampler_->subSequenceSize2D(id));
+	const size_t k = sampler_->subSequenceOffset2D(id);
+	subSequences2D_[k + offset] = sample;
 }
 
 

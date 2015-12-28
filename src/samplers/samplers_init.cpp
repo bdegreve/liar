@@ -22,6 +22,7 @@
  */
 
 #include "samplers_common.h"
+#include "halton.h"
 #include "stratifier.h"
 #include "latin_hypercube.h"
 #include "../kernel/sampler.h"
@@ -34,16 +35,24 @@ void setDefaultSampler(const liar::kernel::TSamplerPtr& defaultSampler)
 	liar::kernel::Sampler::defaultSampler() = defaultSampler;
 }
 
+void setDefaultProgressiveSampler(const liar::kernel::TSamplerProgressivePtr& defaultSampler)
+{
+	liar::kernel::Sampler::defaultProgressiveSampler() = defaultSampler;
+}
+
 PY_DECLARE_MODULE_DOC(samplers, "LiAR sample generators")
 
+PY_MODULE_CLASS(samplers, Halton)
 PY_MODULE_CLASS(samplers, Stratifier)
 PY_MODULE_CLASS(samplers, LatinHypercube)
 
 PY_MODULE_FUNCTION(samplers, setDefaultSampler)
+PY_MODULE_FUNCTION(samplers, setDefaultProgressiveSampler)
 
 void samplersPostInject(PyObject*)
 {
 	setDefaultSampler(liar::kernel::TSamplerPtr(new LatinHypercube));
+	setDefaultProgressiveSampler(liar::kernel::TSamplerProgressivePtr(new Halton));
 	LASS_COUT << "liar.samplers imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n";
 }
 

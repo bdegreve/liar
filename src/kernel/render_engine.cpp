@@ -203,9 +203,14 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 	}
 
 	// we need an unbounded progress indicator ...
-	const size_t numerOfSamplers = sampler_->resolution().x * sampler_->resolution().y * sampler_->samplesPerPixel();
-	Progress progress("rendering bucket " + util::stringCast<std::string>(bucket), numerOfSamplers);
+	size_t numberOfSamples = 100000000000;
+	if (SamplerTileBased* sampler = dynamic_cast<SamplerTileBased*>(sampler_.get()))
+	{
+		numberOfSamples = sampler->resolution().x * sampler->resolution().y * sampler->samplesPerPixel();
+	}
+	Progress progress("rendering bucket " + util::stringCast<std::string>(bucket), numberOfSamples);
 
+	sampler_->setBucket(bucket); // bit unorthodox, since we modify sampler here.
 	Consumer consumer(*this, rayTracer_, sampler_, progress, pixelSize, timePeriod);
 
 	typedef Sampler::TTaskPtr TTaskPtr;

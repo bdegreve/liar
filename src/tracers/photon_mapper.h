@@ -93,6 +93,9 @@ public:
 	bool isScatteringDirect() const;
 	void setScatteringDirect(bool enabled = true);
 
+	const TSamplerProgressivePtr& photonSampler() const;
+	void setPhotonSampler(const TSamplerProgressivePtr& photonSampler);
+
 private:
 
 	typedef std::vector<Medium*> TMediumStack;
@@ -240,7 +243,7 @@ private:
 	bool hasFinalGather() const { return isRayTracingDirect_ && (numFinalGatherRays_ > 0); }
 	bool hasSecondaryGather() const { return hasFinalGather() && (numSecondaryGatherRays_ > 0); }
 
-	size_t fillPhotonMaps(const TSamplerPtr& sampler, const TimePeriod& period);
+	size_t fillPhotonMaps(const TSamplerProgressivePtr& sampler, const TimePeriod& period);
 	void emitPhoton(const LightContext& light, TScalar lightPdf, const Sample& sample, TRandomSecondary::TValue secondarySeed);
 	void tracePhoton(const Sample& sample, const Spectral& power, const BoundedRay& ray, size_t geneneration, TUniformSecondary& uniform, bool isCaustic = false);
 	template <typename PhotonBuffer, typename PhotonMap> void buildPhotonMap(MapType mapType, PhotonBuffer& buffer, PhotonMap& map, TScalar powerScale);
@@ -318,6 +321,9 @@ private:
 	bool isVisualizingPhotonMap_;
 	bool isRayTracingDirect_;
 	bool isScatteringDirect_;
+
+	TSamplerProgressivePtr photonSampler_;
+	int idLightSelector_;
 
 	// buffers
 	mutable TPhotonNeighbourhood photonNeighbourhood_;

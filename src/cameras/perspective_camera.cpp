@@ -405,7 +405,7 @@ void PerspectiveCamera::setShutterTime(TTimeDelta shutterTime)
 
 const BoundedRay PerspectiveCamera::doGenerateRay(const Sample& sample, const TVector2D& screenSpaceDelta) const
 {
-	const TPoint2D& screen = sample.screenCoordinate() + screenSpaceDelta;
+	const TPoint2D& screen = sample.screenSample() + screenSpaceDelta;
 
 	TPoint3D raySupport = position_;
 	TVector3D rayDirection = direction_ + (screen.x - .5f) * right_ + (screen.y - .5f) * down_;
@@ -416,7 +416,7 @@ const BoundedRay PerspectiveCamera::doGenerateRay(const Sample& sample, const TV
 	{
 #pragma LASS_TODO("do something with a focal plane versus focal cyilinder")
 		TScalar pdf;
-		const TPoint2D& lens = num::uniformDisk(sample.lensCoordinate(), pdf);
+		const TPoint2D& lens = num::uniformDisk(sample.lensSample(), pdf);
 		const TPoint3D lensPoint = position_ +
 			lensRadius_ * lens.x * rightNormal_ +
 			lensRadius_ * lens.y * downNormal_;
