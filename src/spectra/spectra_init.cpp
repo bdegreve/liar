@@ -28,6 +28,7 @@
 #include "black_body.h"
 #include "cauchy.h"
 #include "recovery_meng_simon.h"
+#include "recovery_smits.h"
 #include "sampled.h"
 
 using namespace liar::spectra;
@@ -41,6 +42,7 @@ PY_DECLARE_MODULE_DOC(spectra,
 PY_MODULE_CLASS(spectra, BlackBody)
 PY_MODULE_CLASS(spectra, Cauchy)
 PY_MODULE_CLASS(spectra, RecoveryMengSimon)
+PY_MODULE_CLASS(spectra, RecoverySmits)
 PY_MODULE_CLASS(spectra, Sampled)
 
 
