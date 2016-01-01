@@ -278,19 +278,27 @@ namespace
 
 	typedef Display::TValue TValue;
 
-void printThirdStops(std::ostringstream& stream, TValue thirdStops)
+void printThirdStops(std::ostringstream& stream, TValue stops)
 {
-	const int s = static_cast<int>(thirdStops);
-	const int i = s / 3;
-	const int d = s % 3;
-	stream << std::showpos;
-	if (i || !d)
+	const char sign = stops >= 0 ? '+' : '-';
+	const int thirds = static_cast<int>(num::round(num::abs(3 * stops)));
+	const int i = thirds / 3;
+	const int d = thirds % 3;
+	if (i)
 	{
-		stream << " " << i << std::noshowpos;
+		stream << " " << sign << i;
+		if (d)
+		{
+			stream << " " << d << "/3";
+		}
 	}
-	if (d)
+	else if (d)
 	{
-		stream << " " << (i ? num::abs(d) : d) << "/3";
+		stream << " " << sign << d << "/3";
+	}
+	else
+	{
+		stream << " +0";
 	}
 }
 
