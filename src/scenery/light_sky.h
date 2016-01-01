@@ -61,7 +61,8 @@ public:
 
 private:
 
-	typedef std::vector<TScalar> TMap;
+	typedef Spectral::TValue TValue;
+	typedef std::vector<TValue> TMap;
 
 	LASS_UTIL_VISITOR_DO_ACCEPT;
 
@@ -95,6 +96,7 @@ private:
 	void sampleMap(const TPoint2D& sample, TScalar&, TScalar& j, TScalar& pdf) const;
 	const TVector3D direction(TScalar i, TScalar j) const;
 	const Spectral lookUpRadiance(const Sample& sample, TScalar i, TScalar j) const;
+	TValue lookUpLuminance(const Sample& sample, TScalar i, TScalar j) const;
 
 	TScalar power_;
 	TTexturePtr radiance_;

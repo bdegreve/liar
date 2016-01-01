@@ -135,8 +135,8 @@ void LightSky::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod&)
 	sceneBounds_ = boundingSphere(scene->boundingBox());
 
 	// intersections with sky are always this distance removed from any point.
-	fixedDistance_ = 1e3 * sceneBounds_.radius();
-	
+	const TScalar radius = sceneBounds_.radius();
+	fixedDistance_ = radius > 0 ? 1e3 * radius : 1e3;
 
 	util::ProgressIndicator progress("Preprocessing environment map");
 	TMap pdf;
@@ -174,36 +174,42 @@ void LightSky::doLocalContext(const Sample&, const BoundedRay& ray, const Inters
 	result.setPoint(sceneBounds_.center() + fixedDistance_ * ray.direction());
 
 	//         [sin theta * cos phi]
-	// R = r * [sin theta * sin phi]
+	// P = r * [sin theta * sin phi] = r * dir
 	//         [cos theta          ]
 	//
-	const TVector3D normal = -ray.direction();
+	const TVector3D& dir = ray.direction();
+
+	//            [-sin theta * cos phi]
+	// N = -dir = [-sin theta * sin phi]
+	//            [-cos theta          ]
+	//
+	const TVector3D normal = -dir;
 	result.setNormal(normal);
 	result.setGeometricNormal(normal);
 
 	// phi = 2pi * u
-	// theta = pi * v
+	// theta = -pi * v
 	//
-	LASS_ASSERT(normal.z >= -TNumTraits::one && normal.z <= TNumTraits::one);
-	const TScalar phi = num::atan2(normal.x, normal.y);
-	const TScalar cosTheta = normal.z;
+	LASS_ASSERT(dir.z >= -TNumTraits::one && dir.z <= TNumTraits::one);
+	const TScalar phi = num::atan2(dir.y, dir.x);
+	const TScalar cosTheta = dir.z;
 	const TScalar theta = num::acos(cosTheta);
-	result.setUv(phi / (2 * TNumTraits::pi), theta / TNumTraits::pi);
+	result.setUv(phi / (2 * TNumTraits::pi), -theta / TNumTraits::pi);
 
-	//               [sin theta * -sin phi]               [cos theta * cos phi]
-	// dN_du = 2pi * [sin theta * cos phi ]  dN_dv = pi * [cos theta * sin phi]
-	//               [0                   ]               [-sin theta         ]
+	//                 [sin theta * -sin phi]                  [cos theta * cos phi]
+	// dDir_du = 2pi * [sin theta * cos phi ]  dDir_dv = -pi * [cos theta * sin phi]
+	//                 [0                   ]                  [-sin theta         ]
 	//
 	const TScalar sinTheta = num::sin(theta);
 	const TScalar cosPhi = num::cos(phi);
 	const TScalar sinPhi = num::sin(phi);
-	const TVector3D dNormal_dU = 2 * TNumTraits::pi * TVector3D(-sinTheta * sinPhi, sinTheta * cosPhi, 0);
-	const TVector3D dNormal_dV = TNumTraits::pi * TVector3D(cosTheta * cosPhi, cosTheta * sinPhi, -sinTheta);
-	result.setDNormal_dU(dNormal_dU);
-	result.setDNormal_dV(dNormal_dV);
+	const TVector3D dDir_dU = 2 * TNumTraits::pi * TVector3D(-sinTheta * sinPhi, sinTheta * cosPhi, 0);
+	const TVector3D dDir_dV = -TNumTraits::pi * TVector3D(cosTheta * cosPhi, cosTheta * sinPhi, -sinTheta);
+	result.setDNormal_dU(-dDir_dU);
+	result.setDNormal_dV(-dDir_dU);
 	
-	result.setDPoint_dU(fixedDistance_ * -dNormal_dU);
-	result.setDPoint_dV(fixedDistance_ * -dNormal_dV);
+	result.setDPoint_dU(fixedDistance_ * -dDir_dU);
+	result.setDPoint_dV(fixedDistance_ * -dDir_dV);
 }
 
 
@@ -258,11 +264,11 @@ const Spectral LightSky::doEmission(const Sample& sample, const TRay3D& ray, Bou
 	const TScalar u0 = ii > 0 ? marginalCdfU_[ii - 1] : TNumTraits::zero;
 	const TScalar margPdfU = marginalCdfU_[ii] - u0;
 
-	const TScalar* condCdfV = &conditionalCdfV_[ii * resolution_.y];
+	const TValue* condCdfV = &conditionalCdfV_[ii * resolution_.y];
 	const size_t jj = num::clamp<size_t>(static_cast<size_t>(num::floor(j)), 0, resolution_.y - 1);
 	LASS_ASSERT(jj < resolution_.y);
-	const TScalar v0 = jj > 0 ? condCdfV[jj - 1] : TNumTraits::zero;
-	const TScalar condPdfV = condCdfV[jj] - v0;
+	const TValue v0 = jj > 0 ? condCdfV[jj - 1] : 0;
+	const TValue condPdfV = condCdfV[jj] - v0;
 
 	pdf = margPdfU * condPdfV * (resolution_.x * resolution_.y) / (4 * TNumTraits::pi);
 
@@ -322,7 +328,7 @@ const Spectral LightSky::doSampleEmission(
 		TVector3D tangentU, tangentV;
 		lass::prim::impl::Plane3DImplDetail::generateDirections(dir, tangentU, tangentV);
 		const TPoint2D uv = num::uniformDisk(lightSampleB, pdfB);
-		begin = sceneBounds_.center() + sceneBounds_.radius() * (tangentU * uv.x + tangentV * uv.y - dir);
+		begin = sceneBounds_.center() + sceneBounds_.radius() * (tangentU * uv.x + tangentV * uv.y + dir);
 		pdfB /= num::sqr(sceneBounds_.radius());
 	}
 
@@ -395,9 +401,9 @@ void LightSky::buildPdf(TMap& pdf, TScalar& power, util::ProgressIndicator& prog
 		for (size_t j = 0; j < resolution_.y; ++j)
 		{
 			const TScalar fj = static_cast<TScalar>(j) + .5f;
-			const TScalar radiance = lookUpRadiance(dummy, fi, fj).absAverage();
-			const TScalar projectedArea = portal_ ? portal_->area(direction(fi, fj)) : (TNumTraits::pi * num::sqr(sceneBounds_.radius()));
-			const TScalar intensity = radiance * projectedArea;
+			const TValue radiance = lookUpLuminance(dummy, fi, fj);;
+			const TScalar projectedArea = portal_ ? portal_->area(direction(fi, fj)) : (TNumTraits::pi * num::sqr(fixedDistance_));
+			const TValue intensity = static_cast<TValue>(radiance * projectedArea);
 			tempPdf[i * resolution_.y + j] = intensity;
 			averageIntensity += intensity;
 		}
@@ -419,8 +425,8 @@ void LightSky::buildCdf(const TMap& pdf, TMap& oMarginalCdfU, TMap& oConditional
 	for (size_t i = 0; i < resolution_.x; ++i)
 	{
 		progress(.8 + .2 * static_cast<TScalar>(i) / resolution_.x);
-		const TScalar* pdfLine = &pdf[i * resolution_.y];
-		TScalar* condCdfV = &conditionalCdfV[i * resolution_.y];
+		const TValue* pdfLine = &pdf[i * resolution_.y];
+		TValue* condCdfV = &conditionalCdfV[i * resolution_.y];
 		std::partial_sum(pdfLine, pdfLine + resolution_.y, condCdfV);
 		
 		marginalPdfU[i]	= condCdfV[resolution_.y - 1];
@@ -448,11 +454,11 @@ void LightSky::sampleMap(const TPoint2D& sample, TScalar& i, TScalar& j, TScalar
 	const TScalar margPdfU = marginalCdfU_[ii] - u0;
 	i = static_cast<TScalar>(ii) + (sample.x - u0) / margPdfU;
 
-	const TScalar* condCdfV = &conditionalCdfV_[ii * resolution_.y];
+	const TValue* condCdfV = &conditionalCdfV_[ii * resolution_.y];
 	const size_t jj = std::min(resolution_.y - 1, static_cast<size_t>(
 		std::lower_bound(condCdfV, condCdfV + resolution_.y, sample.y) - condCdfV));
-	const TScalar v0 = jj > 0 ? condCdfV[jj - 1] : TNumTraits::zero;
-	const TScalar condPdfV = condCdfV[jj] - v0;
+	const TValue v0 = jj > 0 ? condCdfV[jj - 1] : 0;
+	const TValue condPdfV = condCdfV[jj] - v0;
 	j = static_cast<TScalar>(jj) + (sample.y - v0) / condPdfV;
 
 	pdf = margPdfU * condPdfV * (resolution_.x * resolution_.y) / (4 * TNumTraits::pi);
@@ -483,6 +489,21 @@ const Spectral LightSky::lookUpRadiance(const Sample& sample, TScalar i, TScalar
 	IntersectionContext context(*this, sample, ray, intersection, 0);
 
 	return radiance_->lookUp(sample, context, Illuminant);
+}
+
+
+
+LightSky::TValue LightSky::lookUpLuminance(const Sample& sample, TScalar i, TScalar j) const
+{
+	const BoundedRay centralRay(sceneBounds_.center(), direction(i, j));
+	const TRay3D differentialI(sceneBounds_.center(), direction(i + 1, j));
+	const TRay3D differentialJ(sceneBounds_.center(), direction(i, j + 1));
+	const DifferentialRay ray(centralRay, differentialI, differentialJ);
+
+	Intersection intersection(this, fixedDistance_, seLeaving);
+	IntersectionContext context(*this, sample, ray, intersection, 0);
+
+	return radiance_->scalarLookUp(sample, context);
 }
 
 
