@@ -215,13 +215,13 @@ const Spectral LightArea::doSampleEmission(
 	const TScalar distance = toLight.norm();
 	toLight /= distance;
 
+	shadowRay = BoundedRay(target, toLight, tolerance, distance, prim::IsAlreadyNormalized());
+
 	if (isSingleSided_ && dot(normalLight, toLight) > 0)
 	{
 		pdf = 0;
 		return Spectral(0);
 	}
-
-	shadowRay = BoundedRay(target, toLight, tolerance, distance, prim::IsAlreadyNormalized());
 	return radiance_->evaluate(sample, Illuminant);
 }
 
@@ -240,13 +240,13 @@ const Spectral LightArea::doSampleEmission(
 	const TScalar distance = toLight.norm();
 	toLight /= distance;
 
+	shadowRay = BoundedRay(target, toLight, tolerance, distance, prim::IsAlreadyNormalized());
+
 	if ((dot(normalTarget, toLight) <= 0) || (isSingleSided_ && dot(normalLight, toLight) > 0))
 	{
 		pdf = 0;
 		return Spectral(0);
 	}
-
-	shadowRay = BoundedRay(target, toLight, tolerance, distance, prim::IsAlreadyNormalized());
 	return radiance_->evaluate(sample, Illuminant);
 }
 
