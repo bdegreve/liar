@@ -138,7 +138,8 @@ void TriangleMesh::doIntersect(const Sample&, const BoundedRay& ray, Intersectio
 	const prim::Result hit = mesh_.intersect(ray.unboundedRay(), triangle, t, ray.nearLimit());
 	if (hit == prim::rOne && ray.inRange(t))
 	{
-		result = Intersection(this, t, seNoEvent, triangle - mesh_.triangles().begin());
+		const size_t k = static_cast<size_t>(std::distance(mesh_.triangles().begin(), triangle)); 
+		result = Intersection(this, t, seNoEvent, k);
 	}
 	else
 	{

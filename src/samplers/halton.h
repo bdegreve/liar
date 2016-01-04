@@ -43,7 +43,7 @@ class ScrambledRadicalInverse
 public:
 	typedef std::vector<size_t> TScrambler;
 
-	ScrambledRadicalInverse(size_t base = 2) : base_(2), state_(0) {}
+	ScrambledRadicalInverse(size_t base = 2) : base_(base), state_(0) {}
 
 	void setBase(size_t base) { base_ = base; }
 	void seed(size_t state) { state_ = state; }
@@ -65,8 +65,8 @@ public:
 		return result;
 	}
 private:
-	size_t state_;
 	size_t base_;
+	size_t state_;
 };
 
 
@@ -120,8 +120,8 @@ private:
 	static TScramblers scramblers_;
 	static bool isInitialized_;
 
-	size_t nextId_;
 	size_t samplesPerTask_;
+	size_t nextId_;
 };
 
 

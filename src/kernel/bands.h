@@ -326,7 +326,7 @@ public:
 	TValue minimum() const { return v_; }
 	TValue maximum() const { return v_; }
 
-	bool isZero() const { return !v_; }
+	bool isZero() const { return v_ == 0; }
 	bool operator==(const Bands& other) const { return v_ == other.v_; }
 
 private:

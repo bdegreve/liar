@@ -99,9 +99,9 @@ void RayTracer::setScene(const TSceneObjectPtr& scene)
 
 
 
-void RayTracer::setMaxRayGeneration(int iMaxRayGeneration)
+void RayTracer::setMaxRayGeneration(size_t maxRayGeneration)
 {
-	maxRayGeneration_ = std::max<int>(iMaxRayGeneration, 0);
+	maxRayGeneration_ = maxRayGeneration;
 }
 
 

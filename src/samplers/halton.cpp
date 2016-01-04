@@ -200,25 +200,27 @@ bool Halton::TaskHalton::doDrawSample(Sampler& sampler, const TimePeriod& period
 	sample.setWavelengthSample(wavelength_());
 
 	size_t primeIndex = 0;
-	for (int i = 0, n = static_cast<int>(halton.numSubSequences1D()); i < n; ++i)
+	for (size_t i = 0, n = halton.numSubSequences1D(); i < n; ++i)
 	{
+		const TSubSequenceId id = static_cast<TSubSequenceId>(i);
 		auto& rng = subs1D_[i];
 		const auto& scrambler = halton.scramblers_.at(primeIndex++);
-		for (size_t k = 0, m = halton.subSequenceSize1D(i); k < m; ++k)
+		for (size_t k = 0, m = halton.subSequenceSize1D(id); k < m; ++k)
 		{
-			sample.setSubSample1D(i, k, rng(scrambler));
+			sample.setSubSample1D(id, k, rng(scrambler));
 		}
 	}
 
-	for (int i = 0, n = static_cast<int>(halton.numSubSequences2D()); i < n; ++i)
+	for (size_t i = 0, n = halton.numSubSequences2D(); i < n; ++i)
 	{
+		const TSubSequenceId id = static_cast<TSubSequenceId>(i);
 		auto& rngX = subs2DX_[i];
 		auto& rngY = subs2DY_[i];
 		const auto& scramblerX = halton.scramblers_.at(primeIndex++);
 		const auto& scramblerY = halton.scramblers_.at(primeIndex++);
-		for (size_t k = 0, m = halton.subSequenceSize2D(i); k < m; ++k)
+		for (size_t k = 0, m = halton.subSequenceSize2D(id); k < m; ++k)
 		{
-			sample.setSubSample2D(i, k, TSample2D(rngX(scramblerX), rngY(scramblerY)));
+			sample.setSubSample2D(id, k, TSample2D(rngX(scramblerX), rngY(scramblerY)));
 		}
 	}
 
@@ -240,14 +242,14 @@ void Halton::TaskHalton::seed(const Halton& halton)
 	subs1D_.resize(n1D);
 	for (size_t i = 0; i < n1D; ++i)
 	{
-		const size_t m = halton.subSequenceSize1D(static_cast<int>(i));
+		const size_t m = halton.subSequenceSize1D(static_cast<TSubSequenceId>(i));
 		subs1D_[i].seed(s * m);
 	}
 
 	const size_t n2D = halton.numSubSequences2D();
-	for (size_t i = 0, n = halton.numSubSequences2D(); i < n; ++i)
+	for (size_t i = 0, n = n2D; i < n; ++i)
 	{
-		const size_t m = halton.subSequenceSize2D(static_cast<int>(i));
+		const size_t m = halton.subSequenceSize2D(static_cast<TSubSequenceId>(i));
 		subs2DX_[i].seed(s * m);
 		subs2DY_[i].seed(s * m);
 	}

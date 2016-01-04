@@ -57,9 +57,9 @@ void OrCo::doTransformContext(const Sample&, IntersectionContext& context) const
 	const TPoint3D center = context.bounds().center().affine();
 	const TVector3D size = context.bounds().size();
 	const TVector3D scale(
-		size.x ? 2 / size.x : 1,
-		size.y ? 2 / size.y : 1,
-		size.z ? 2 / size.z : 1);
+		size.x > 0 ? 2 / size.x : 1,
+		size.y > 0 ? 2 / size.y : 1,
+		size.z > 0 ? 2 / size.z : 1);
 	context.setPoint(TPoint3D((context.point() - center) * scale));
 	context.setDPoint_dI(context.dPoint_dI() * scale);
 	context.setDPoint_dJ(context.dPoint_dJ() * scale);

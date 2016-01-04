@@ -151,14 +151,13 @@ TWavelength Observer::maxWavelength() const
 const XYZ Observer::sensitivity(TWavelength wavelength) const
 {
 	const TWavelengths::const_iterator i = std::upper_bound(w_.begin(), w_.end(), wavelength);
-
 	if (i == w_.begin() || i == w_.end())
 	{
 		return XYZ(0);
 	}
-
-	const std::ptrdiff_t k = (i - w_.begin()) - 1;
-	LASS_ASSERT(k >= 0 && static_cast<size_t>(k) < w_.size());
+	
+	const size_t k = static_cast<size_t>(std::distance(w_.begin(), i) - 1);
+	LASS_ASSERT(k < w_.size() - 1);
 
 	const TWavelength dw = wavelength - w_[k];
 	LASS_ASSERT(dw >= 0);
@@ -253,15 +252,17 @@ TWavelength Observer::sample(TScalar sample, TScalar& pdf) const
 	
 	const TScalar cdf1 = *stde::prev(i);
 	const TScalar cdf2 = *i;
-	const std::ptrdiff_t k = i - cdf_.begin();
-	const TWavelength w1 = w_[k - 1];
-	const TWavelength w2 = w_[k];
-
 	const TScalar dcdf = cdf2 - cdf1;
 	LASS_ASSERT(dcdf > 0);
 	const TWavelength x = static_cast<TWavelength>((sample - cdf1) / dcdf);
+	
+	const size_t k = static_cast<size_t>(std::distance(cdf_.begin(), i));
+	LASS_ASSERT(k > 0 && k < cdf_.size());
+	const TWavelength w1 = w_[k - 1];
+	const TWavelength w2 = w_[k];
 	const TWavelength dw = w2 - w1;
 	LASS_ASSERT(dw > 0);
+
 	pdf = dcdf / dw;
 	return num::lerp(w1, w2, x);
 }

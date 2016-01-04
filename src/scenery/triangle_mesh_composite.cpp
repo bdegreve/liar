@@ -164,7 +164,7 @@ void TriangleMeshComposite::doIntersect(const Sample&, const BoundedRay& ray, In
 	const prim::Result hit = mesh_.intersect(ray.unboundedRay(), triangle, t, ray.nearLimit());
 	if (hit == prim::rOne && ray.inRange(t))
 	{
-		const size_t k = triangle - mesh_.triangles().begin();
+		const size_t k = static_cast<size_t>(std::distance(mesh_.triangles().begin(), triangle));
 		TriangleMesh* const child = backLinks_[k].first;
 		const size_t k2 = k - backLinks_[k].second;
 		result = Intersection(child, t, seNoEvent, k2);

@@ -518,22 +518,25 @@ void Raster::doWriteRender(const OutputSample* first, const OutputSample* last)
         while (first != last)
         {
             const TPoint2D& position = first->screenCoordinate();
-            const int i = static_cast<int>(num::floor(position.x * resolution_.x));
-            const int j = static_cast<int>(num::floor(position.y * resolution_.y));
-            if (i >= 0 && static_cast<size_t>(i) < resolution_.x && j >= 0 && static_cast<size_t>(j) < resolution_.y)
+            if (position.x >= 0 && position.y >= 0)
             {
-                const size_t k = j * resolution_.x + i;
-                TValue& w = totalWeight_[k];
-                w += first->weight();
-                const TValue alpha = first->weight() * first->alpha();
-                alphaBuffer_[k] += alpha;
-                XYZ& xyz = renderBuffer_[k];
-                xyz += first->radiance() * alpha;
-
-                renderDirtyBox_ += TDirtyBox::TPoint(i, j);
-                if (w > 0 && xyz.y > 0)
+                const size_t i = static_cast<size_t>(num::floor(position.x * resolution_.x));
+                const size_t j = static_cast<size_t>(num::floor(position.y * resolution_.y));
+                if (i < resolution_.x && j < resolution_.y)
                 {
-                    maxSceneLuminance_ = std::max(xyz.y / w, maxSceneLuminance_);
+                    const size_t k = j * resolution_.x + i;
+                    TValue& w = totalWeight_[k];
+                    w += first->weight();
+                    const TValue alpha = first->weight() * first->alpha();
+                    alphaBuffer_[k] += alpha;
+                    XYZ& xyz = renderBuffer_[k];
+                    xyz += first->radiance() * alpha;
+    
+                    renderDirtyBox_ += TDirtyBox::TPoint(i, j);
+                    if (w > 0 && xyz.y > 0)
+                    {
+                        maxSceneLuminance_ = std::max(xyz.y / w, maxSceneLuminance_);
+                    }
                 }
             }
             ++first;

@@ -43,8 +43,8 @@ class LassIStream: public Imf::IStream
 {
 public:
 	LassIStream(const std::wstring& path): Imf::IStream(util::wcharToUtf8(path).c_str()), file_(path) {}
-	bool read(char c[/*n*/], int n) { file_.read(c, n); return true; }
-	Imf::Int64 tellg() { return file_.tellg(); }
+	bool read(char c[/*n*/], int n) { file_.read(c, num::numCast<size_t>(n)); return true; }
+	Imf::Int64 tellg() { return num::numCast<Imf::Int64>( file_.tellg() ); }
 	void seekg(Imf::Int64 pos) { file_.seekg( num::numCast<long>(pos) ); }
 	void clear() {}
 private:
@@ -55,8 +55,8 @@ class LassOStream: public Imf::OStream
 {
 public:
 	LassOStream(const std::wstring& path): Imf::OStream(util::wcharToUtf8(path).c_str()), file_(path) {}
-	void write(const char c[], int n) { file_.write(c, n); }
-	Imf::Int64 tellp() { return file_.tellp(); }
+	void write(const char c[], int n) { file_.write(c, num::numCast<size_t>(n)); }
+	Imf::Int64 tellp() { return num::numCast<Imf::Int64>( file_.tellp() ); }
 	void seekp(Imf::Int64 pos) { file_.seekp( num::numCast<long>(pos) ); }
 private:
 	lass::io::BinaryOFile file_;
@@ -126,7 +126,7 @@ private:
 		const TResolution2D resolution(dispWin.max.x - dispWin.min.x + 1, dispWin.max.y - dispWin.min.y + 1);
 		const kernel::TRgbSpacePtr space = determineRgbSpaceForOpenFile(input->header(), rgbSpace);
 		std::auto_ptr<Handle> pimpl(new Handle(resolution, space));
-		pimpl->line.resize(dataWin.max.x - dataWin.min.x + 1);
+		pimpl->line.resize(num::numCast<size_t>(dataWin.max.x - dataWin.min.x + 1));
 		pimpl->istream.swap(istream);
 		pimpl->input.swap(input);
 		pimpl->y = dispWin.min.y;
@@ -161,13 +161,15 @@ private:
 		if (pimpl->y >= dataWin.min.y && pimpl->y <= dataWin.max.y)
 		{
 			Handle::TLine& line = pimpl->line;
-			pimpl->input->setFrameBuffer(&line[0] - pimpl->y * line.size() - dataWin.min.x, 1, line.size());
+			pimpl->input->setFrameBuffer(
+				&line[0] - pimpl->y * static_cast<int>(line.size()) - dataWin.min.x, 
+				1, line.size());
 			pimpl->input->readPixels(pimpl->y);
 			for (int x = dispWin.min.x; x <= dispWin.max.x; ++x)
 			{
 				if (x >= dataWin.min.x && x <= dataWin.max.x)
 				{
-					const Imf::Rgba& pixel = line[x - dataWin.min.x];
+					const Imf::Rgba& pixel = line[static_cast<size_t>(x - dataWin.min.x)];
 					*out++ = prim::ColorRGBA(pixel.r, pixel.g, pixel.b, pixel.a);
 				}
 				else
@@ -194,7 +196,7 @@ private:
 			const prim::ColorRGBA& pixel = *in++;
 			line[x] = Imf::Rgba(pixel.r, pixel.g, pixel.b, pixel.a);
 		}
-		output.setFrameBuffer(&line[0] - output.currentScanLine() * line.size(), 1, line.size());
+		output.setFrameBuffer(&line[0] - output.currentScanLine() * static_cast<int>(line.size()), 1, line.size());
 		output.writePixels(1);
 	}
 

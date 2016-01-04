@@ -176,7 +176,7 @@ BsdfOut Conductor::ConductorBsdf::doEvaluate(const TVector3D&, const TVector3D&,
 
 
 
-SampleBsdfOut Conductor::ConductorBsdf::doSample(const TVector3D& omegaIn, const TPoint2D&, TScalar componentSample, TBsdfCaps allowedCaps) const
+SampleBsdfOut Conductor::ConductorBsdf::doSample(const TVector3D& omegaIn, const TPoint2D&, TScalar, TBsdfCaps) const
 {
 	typedef Spectral::TValue TValue;
 

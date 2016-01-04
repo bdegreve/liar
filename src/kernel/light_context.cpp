@@ -104,7 +104,7 @@ const Spectral LightContext::sampleEmission(
 	const Spectral radiance = light_->sampleEmission(
 		cameraSample, lightSample, localTarget, localNormal, localRay, pdf);
 
-	if (pdf)
+	if (pdf > 0)
 	{
 		// we must transform back to world space.  But we already do know the starting point, so don't rely
 		// on recalculating that one
@@ -126,7 +126,7 @@ const Spectral LightContext::sampleEmission(
 	BoundedRay localRay;
 	const Spectral radiance = light_->sampleEmission(cameraSample, lightSampleA, lightSampleB, localRay, pdf);
 
-	if (pdf)
+	if (pdf > 0)
 	{
 		emissionRay = transform(localRay, localToWorld_);
 	}
@@ -146,7 +146,7 @@ const Spectral LightContext::emission(
 	BoundedRay localShadowRay;
 	const Spectral radiance = light_->emission(cameraSample, localRay, localShadowRay, pdf);
 
-	if (pdf)
+	if (pdf > 0)
 	{
 		shadowRay = BoundedRay(ray, localShadowRay.nearLimit() / scale, localShadowRay.farLimit() / scale);
 	}
@@ -319,8 +319,8 @@ const LightContext* LightContexts::sample(TScalar x, TScalar& pdf) const
 TScalar LightContexts::pdf(const LightContext* light) const
 {
 	LASS_ASSERT(!contexts_.empty());
-	const std::ptrdiff_t k = light - &contexts_[0];
-	LASS_ASSERT(k >= 0 && static_cast<size_t>(k) < contexts_.size());
+	const size_t k = static_cast<size_t>(light - &contexts_[0]);
+	LASS_ASSERT(k < contexts_.size());
 	LASS_ASSERT(&contexts_[k] == light);
 
 	return k > 0 ? (cdf_[k] - cdf_[k - 1]) : cdf_[k];

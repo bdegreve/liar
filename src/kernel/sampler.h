@@ -81,8 +81,8 @@ public:
 	TSubSequenceId requestSubSequence2D(size_t requestedSize);
 	size_t numSubSequences1D() const;
 	size_t numSubSequences2D() const;
-	size_t subSequenceSize1D(TSubSequenceId id) const { return subSequenceSize1D_[id]; }
-	size_t subSequenceSize2D(TSubSequenceId id) const { return subSequenceSize2D_[id]; }
+	size_t subSequenceSize1D(TSubSequenceId id) const { return subSequenceSize1D_[static_cast<size_t>(id)]; }
+	size_t subSequenceSize2D(TSubSequenceId id) const { return subSequenceSize2D_[static_cast<size_t>(id)]; }
 	void clearSubSequenceRequests();
 
 	void seed(TSeed randomSeed) { doSeed(randomSeed); }
@@ -122,8 +122,8 @@ private:
 	virtual const TPyObjectPtr doGetState() const = 0;
 	virtual void doSetState(const TPyObjectPtr& state) = 0;
 
-	size_t subSequenceOffset1D(TSubSequenceId id) const { return subSequenceOffset1D_[id]; }
-	size_t subSequenceOffset2D(TSubSequenceId id) const { return subSequenceOffset2D_[id]; }
+	size_t subSequenceOffset1D(TSubSequenceId id) const { return subSequenceOffset1D_[static_cast<size_t>(id)]; }
+	size_t subSequenceOffset2D(TSubSequenceId id) const { return subSequenceOffset2D_[static_cast<size_t>(id)]; }
 
 	static TSamplerPtr defaultSampler_;
 	static TSamplerProgressivePtr defaultProgressiveSampler_;

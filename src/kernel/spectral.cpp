@@ -179,11 +179,14 @@ Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample& sample, SpectralType ty
 Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TValue>& values, const Sample& sample, SpectralType type)
 {
 	LASS_ASSERT(wavelengths.size() > 1 && wavelengths.size() == values.size());
-	const size_t k = std::upper_bound(wavelengths.begin(), wavelengths.end(), sample.wavelength()) - wavelengths.begin();
-	if (k == 0 || k == wavelengths.size())
+	const auto i = std::upper_bound(wavelengths.begin(), wavelengths.end(), sample.wavelength());
+	if (i == wavelengths.begin() || i == wavelengths.end())
 	{
 		return Spectral(0);
 	}
+	
+	const size_t k = static_cast<size_t>(std::distance(wavelengths.begin(), i));
+	LASS_ASSERT(k > 0 && k < wavelengths.size());
 
 	LASS_ASSERT(wavelengths[k] > wavelengths[k - 1]);
 	const TValue t = static_cast<TValue>((sample.wavelength() - wavelengths[k - 1]) / (wavelengths[k] - wavelengths[k - 1]));

@@ -23,6 +23,10 @@
 
 #include "output_config.h"
 
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 #if LIAR_OUTPUT_HAVE_PIXELTOASTER_H
 #	if !defined(NDEBUG)
 #		define D3D_DEBUG_INFO

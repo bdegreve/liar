@@ -60,7 +60,7 @@ public:
 	size_t maxRayGeneration() const;
 
 	void setScene(const TSceneObjectPtr& scene);
-	void setMaxRayGeneration(const int rayGeneration);
+	void setMaxRayGeneration(size_t rayGeneration);
 
 	void requestSamples(const TSamplerPtr& sampler);
 	void preProcess(const TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads = 0);
@@ -70,11 +70,11 @@ public:
 	const Spectral castRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, bool highQuality = true) const
 	{ 
 		RayGenerationIncrementor incrementor(*this);
-		if (rayGeneration_ < maxRayGeneration_)
+		if (static_cast<size_t>(rayGeneration_) > maxRayGeneration_)
 		{
-			return doCastRay(sample, primaryRay, tIntersection, alpha, rayGeneration_, highQuality);
+			return Spectral();
 		}
-		return Spectral();
+		return doCastRay(sample, primaryRay, tIntersection, alpha, static_cast<size_t>(rayGeneration_), highQuality);
 	}
 
 	const TRayTracerPtr clone() const;
@@ -114,9 +114,11 @@ private:
 			rayTracer_(rayTracer) 
 		{ 
 			++rayTracer_.rayGeneration_; 
+			LASS_ASSERT(rayTracer_.rayGeneration_ >= 0);
 		}
 		~RayGenerationIncrementor() 
 		{
+			LASS_ASSERT(rayTracer_.rayGeneration_ >= 0);
 			--rayTracer_.rayGeneration_;
 		}
 	private:
@@ -128,7 +130,7 @@ private:
 	TSceneObjectPtr scene_;
 	LightContexts lights_;
 	size_t maxRayGeneration_;
-	mutable size_t rayGeneration_;
+	mutable int rayGeneration_;
 	mutable MediumStack mediumStack_;
 };
 

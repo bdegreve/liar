@@ -106,7 +106,7 @@ void LightProjection::setSamplingResolution(const TResolution2D& resolution)
 
 // --- private -------------------------------------------------------------------------------------
 
-void LightProjection::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod&)
+void LightProjection::doPreProcess(const TSceneObjectPtr&, const TimePeriod&)
 {
 	util::ProgressIndicator progress("Preprocessing projection map");
 	TMap pdf;
@@ -130,7 +130,7 @@ bool LightProjection::doIsIntersecting(const Sample&, const BoundedRay&) const
 
 
 
-void LightProjection::doLocalContext(const Sample&, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const
+void LightProjection::doLocalContext(const Sample&, const BoundedRay& ray, const Intersection&, IntersectionContext& result) const
 {
 	TRay3D r;
 	TScalar t;

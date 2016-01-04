@@ -200,7 +200,7 @@ struct ReadHandle: Handle
 		jpeg_start_decompress(&cinfo);
 		LASS_ENFORCE(cinfo.output_components == 3);
 		resolution = TResolution2D(cinfo.output_width, cinfo.output_height);
-		line.resize(cinfo.output_width * cinfo.output_components);
+		line.resize(cinfo.output_width * static_cast<JDIMENSION>(cinfo.output_components));
 	}
 	~ReadHandle()
 	{
@@ -236,7 +236,7 @@ struct WriteHandle: Handle
 			jpeg_set_quality(&cinfo, num::clamp(quality[0], 0, 100), TRUE);
 		}
 		jpeg_start_compress(&cinfo, TRUE);
-		line.resize(cinfo.image_width * cinfo.input_components);
+		line.resize(cinfo.image_width * static_cast<JDIMENSION>(cinfo.input_components));
 	}
 	~WriteHandle()
 	{

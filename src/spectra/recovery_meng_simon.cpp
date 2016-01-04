@@ -141,11 +141,13 @@ Spectral RecoveryMengSimon::doRecover(const XYZ& xyz, const Sample& sample, Spec
 
 #if LIAR_SPECTRAL_MODE_SINGLE
 	const TWavelengths& ws = pimpl_->wavelengths;
-	const size_t k = std::upper_bound(ws.begin(), ws.end(), sample.wavelength()) - ws.begin();
-	if (k == 0 || k == ws.size())
+	const auto i = std::upper_bound(ws.begin(), ws.end(), sample.wavelength());
+	if (i == ws.begin() || i == ws.end())
 	{
 		return Spectral(0);
 	}
+	const size_t k = static_cast<size_t>(std::distance(ws.begin(), i));
+	LASS_ASSERT(k > 0 && k < ws.size());
 
 	LASS_ASSERT(ws[k] > ws[k - 1]);
 	const TWavelength t = (sample.wavelength() - ws[k - 1]) / (ws[k] - ws[k - 1]);
