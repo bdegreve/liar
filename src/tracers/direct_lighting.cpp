@@ -251,6 +251,8 @@ const Spectral DirectLighting::traceSpecularAndGlossy(
 		const Sample& sample, const kernel::DifferentialRay& primaryRay, const IntersectionContext& context, const TBsdfPtr& bsdf,
 		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, bool highQuality) const
 {
+	typedef Sample::TSubSequence2D::difference_type difference_type;
+
 	const Shader* const shader = context.shader();
 	LASS_ASSERT(shader);
 
@@ -286,8 +288,8 @@ const Spectral DirectLighting::traceSpecularAndGlossy(
 		const Sample::TSubSequence1D compSample = sample.subSequence1D(shader->idReflectionComponentSamples());
 		LASS_ASSERT(bsdfSample.size() > 0 && compSample.size() == bsdfSample.size());
 
-		const size_t n = highQuality ? bsdfSample.size() : 1;
-		for (size_t i = 0; i < n; ++i)
+		const difference_type n = highQuality ? bsdfSample.size() : 1;
+		for (difference_type i = 0; i < n; ++i)
 		{
 			const SampleBsdfOut out = bsdf->sample(omega, bsdfSample[i], compSample[i], Bsdf::capsReflection | Bsdf::capsSpecular | Bsdf::capsGlossy);
 			if (!out)
@@ -321,8 +323,8 @@ const Spectral DirectLighting::traceSpecularAndGlossy(
 		const Sample::TSubSequence1D compSample = sample.subSequence1D(shader->idTransmissionComponentSamples());
 		LASS_ASSERT(bsdfSample.size() > 0 && compSample.size() == bsdfSample.size());
 
-		const size_t n = highQuality ? bsdfSample.size() : 1;
-		for (size_t i = 0; i < n; ++i)
+		const difference_type n = highQuality ? bsdfSample.size() : 1;
+		for (difference_type i = 0; i < n; ++i)
 		{
 			const SampleBsdfOut out = bsdf->sample(omega, bsdfSample[i], compSample[i], Bsdf::capsTransmission | Bsdf::capsSpecular | Bsdf::capsGlossy);
 			if (!out)

@@ -72,7 +72,7 @@ void AdjointPhotonTracer::doPreProcess(const kernel::TSamplerPtr&, const TimePer
 
 const Spectral AdjointPhotonTracer::doCastRay(
 	const kernel::Sample& sample, const kernel::DifferentialRay& primaryRay,
-	TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const
+	TScalar& tIntersection, TScalar& alpha, size_t generation, bool /*highQuality*/) const
 {
 	return tracePhoton(sample, primaryRay, tIntersection, alpha, generation);
 }
@@ -213,7 +213,7 @@ SampleBsdfOut AdjointPhotonTracer::scatterSurface(const Sample& sample, const TB
 	{
 		TScalar lightPdf;
 		const LightContext* light = lights().sample(*sample.subSequence1D(lightChoiceSample_[generation]), lightPdf);
-		if (!light || !lightPdf)
+		if (!light || lightPdf <= 0)
 		{
 			return SampleBsdfOut();
 		}
@@ -222,7 +222,7 @@ SampleBsdfOut AdjointPhotonTracer::scatterSurface(const Sample& sample, const TB
 		BoundedRay shadowRay;
 		TScalar pdf;
 		light->sampleEmission(sample, lightSample, target, shadowRay, pdf);
-		if (!pdf)
+		if (pdf <= 0)
 		{
 			return SampleBsdfOut();
 		}

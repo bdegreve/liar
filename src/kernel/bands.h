@@ -251,7 +251,7 @@ public:
 	{
 		for (size_t i = 0; i < N; ++i)
 		{
-			if (v_[i])
+			if (v_[i] != 0)
 			{
 				return false;
 			}
@@ -533,7 +533,7 @@ public:
 
 	bool isZero() const
 	{
-		return !(v_[0] || v_[1] || v_[2]);
+		return v_[0] == 0 && v_[1] == 0 && v_[2] == 0;
 	}
 
 	bool operator==(const Bands& other) const

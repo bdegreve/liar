@@ -100,7 +100,7 @@ public:
 #elif LIAR_SPECTRAL_MODE_RGB || LIAR_SPECTRAL_MODE_XYZ
 	template <typename Func> static Spectral fromFunc(Func func, const Sample& sample, SpectralType type)
 	{
-		return Spectral::fromXYZ(standardObserver().tristimulus(func), sample, type);
+		return Spectral::fromXYZ(standardObserver().tristimulusFunc(func), sample, type);
 	}
 #elif LIAR_SPECTRAL_MODE_SINGLE
 	template <typename Func> static Spectral fromFunc(Func func, const Sample& sample, SpectralType type)

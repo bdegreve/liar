@@ -112,10 +112,10 @@ PhotonMapper::PhotonMapper():
 	idFinalGatherSamples_(-1),
 	idFinalGatherComponentSamples_(-1),
 	idFinalVolumetricGatherSamples_(-1),
-	idLightSelector_(-1),
 	isVisualizingPhotonMap_(false),
 	isRayTracingDirect_(true),
 	isScatteringDirect_(true),
+	idLightSelector_(-1),
 	photonNeighbourhood_(1)
 {
 	for (int i = 0; i < numMapTypes; ++i)
@@ -845,7 +845,7 @@ namespace experimental
 class ConcurrentProgressIndicator: util::NonCopyable
 {
 public:
-	ConcurrentProgressIndicator(size_t max, const std::string& description, int consoleWidth = 80):
+	ConcurrentProgressIndicator(size_t max, const std::string& description, size_t consoleWidth = 80):
 		progress_(description, consoleWidth),
 		max_(max),
 		current_(0),
@@ -1349,9 +1349,9 @@ const Spectral PhotonMapper::estimateCaustics(
 	}
 
 	LASS_ASSERT(photonNeighbourhood_.size() > estimationSize_[mtCaustics]);
-	const TPhotonNeighbourhood::const_iterator last = shared_->causticsMap_.rangeSearch(
+	const auto last = shared_->causticsMap_.rangeSearch(
 		point, estimationRadius_[mtCaustics], estimationSize_[mtCaustics], photonNeighbourhood_.begin());
-	const TPhotonNeighbourhood::difference_type n = last - photonNeighbourhood_.begin();
+	const auto n = std::distance(photonNeighbourhood_.begin(), last);
 	LASS_ASSERT(n >= 0);
 	if (n < 2)
 	{
@@ -1365,15 +1365,15 @@ const Spectral PhotonMapper::estimateCaustics(
 	const TValue b2 = num::inv(1 - num::exp(-beta));
 
 	Spectral result;
-	for (int i = 0; i < n; ++i)
+	for (auto i = photonNeighbourhood_.begin(); i != last; ++i)
 	{
-		const TVector3D omegaPhoton = context.worldToBsdf(photonNeighbourhood_[i].object()->omegaIn);
+		const TVector3D omegaPhoton = context.worldToBsdf(i->object()->omegaIn);
 		const BsdfOut out = bsdf->evaluate(omegaIn, omegaPhoton, Bsdf::capsAllDiffuse);
 		if (out)
 		{
-			const TValue sqrR = static_cast<TValue>(photonNeighbourhood_[i].squaredDistance());
+			const TValue sqrR = static_cast<TValue>(i->squaredDistance());
 			const TValue w = alpha * (1 - b2 * (1 - num::exp(b1 * sqrR)));
-			result += w * out.value * photonNeighbourhood_[i].object()->spectralPower(sample);
+			result += w * out.value * i->object()->spectralPower(sample);
 		}
 	}
 
