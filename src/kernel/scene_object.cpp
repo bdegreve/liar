@@ -200,6 +200,8 @@ const TPoint3D SceneObject::doSampleSurface(const TPoint2D& /* sample */, TVecto
  *  know the target (for a shadow ray).  If they have, they can override this function,
  *  if not, the more general one will be called by default.
  *
+ *  probability will be converted to an angular one.
+ *
  */
 const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const
 {
@@ -210,7 +212,6 @@ const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TPoint
 	toLight /= num::sqrt(squaredDistance);
 
 	const TScalar cosTheta = dot(normal, toLight);
-
 	pdf *= squaredDistance / num::abs(cosTheta);
 	return result;
 }
@@ -254,7 +255,7 @@ TScalar SceneObject::doAngularPdf(const Sample& sample, const TRay3D& ray, Bound
 	//LASS_THROW("surface sampling is unimplemented for scene objects '" << typeid(*this).name() << "'.");
 
 	Intersection intersection;
-	this->intersect(sample, ray, intersection);
+	this->intersect(sample, BoundedRay(ray, tolerance), intersection);
 	if (!intersection)
 	{
 		return 0;
