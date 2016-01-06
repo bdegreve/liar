@@ -127,7 +127,6 @@ bool Sphere::doIsIntersecting(const Sample&, const BoundedRay& ray) const
 }
 
 
-
 void Sphere::doLocalContext(const Sample&, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const
 {
 	const TScalar t = intersection.t();
@@ -135,9 +134,9 @@ void Sphere::doLocalContext(const Sample&, const BoundedRay& ray, const Intersec
 	result.setT(t);
 	result.setPoint(point);
 
-	//         [sin theta * cos phi]
-	// R = r * [sin theta * sin phi]
-	//         [cos theta          ]
+	//                 [sin theta * cos phi]
+	// R = r * N = r * [sin theta * sin phi]
+	//                 [cos theta          ]
 	//
 	const TVector3D R = point - sphere_.center();
 	const TVector3D normal = R.normal();
@@ -146,28 +145,25 @@ void Sphere::doLocalContext(const Sample&, const BoundedRay& ray, const Intersec
 	// phi = 2pi * u
 	// theta = pi * v
 	//
-	LASS_ASSERT(normal.z >= -TNumTraits::one && normal.z <= TNumTraits::one);
-    const TScalar phi = num::atan2(normal.x, normal.y);
-    const TScalar theta = num::acos(normal.z);
+	const TScalar phi = sphericalPhi(normal);
+	const TScalar theta = sphericalTheta(normal);
 	result.setUv(phi / (2 * TNumTraits::pi), theta / TNumTraits::pi);
 
-	//                   [sin theta * -sin phi]                   [cos theta * cos phi]
-	// dR_du = r * 2pi * [sin theta * cos phi ]  dR_dv = r * pi * [cos theta * sin phi]
-	//                   [0                   ]                   [-sin theta         ]
+	//               [sin theta * -sin phi]                 [ cos theta * cos phi]
+	// dN/du = 2pi * [sin theta *  cos phi]    dN/dv = pi * [ cos theta * sin phi]
+	//               [0                   ]                 [-sin theta          ]
 	//
 	const TScalar sinTheta = num::sin(theta);
+	const TVector3D dNormal_dU = 2 * TNumTraits::pi * TVector3D(-normal.y, normal.x, 0);
 	const TScalar cosTheta_sinTheta = normal.z / sinTheta;
-	const TVector3D dPoint_dU = 2 * TNumTraits::pi * TVector3D(-R.y, R.x, 0);
-	const TVector3D dPoint_dV = sphere_.radius() * TNumTraits::pi * TVector3D(
-		cosTheta_sinTheta * normal.x, cosTheta_sinTheta * normal.y, -sinTheta);
-	result.setDPoint_dU(dPoint_dU);
-	result.setDPoint_dV(dPoint_dV);
+	const TVector3D dNormal_dV = TNumTraits::pi * TVector3D(cosTheta_sinTheta * normal.x, cosTheta_sinTheta * normal.y, -sinTheta);
+	result.setDNormal_dU(dNormal_dU);
+	result.setDNormal_dV(dNormal_dV);
 
+	// dR/du = r * dN/du    dR/dv = r * dN/dv
 	//
-	// dN/du = d((P-C)/r)/du = (dP/du)/r
-	//
-	result.setDNormal_dU(dPoint_dU * invRadius_);
-	result.setDNormal_dV(dPoint_dV * invRadius_);
+	result.setDPoint_dU(sphere_.radius() * dNormal_dU);
+	result.setDPoint_dV(sphere_.radius() * dNormal_dV);
 }
 
 

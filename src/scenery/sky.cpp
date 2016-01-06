@@ -77,36 +77,44 @@ void Sky::doLocalContext(const Sample&, const BoundedRay& ray, const Intersectio
 	result.setT(radius_);
 	result.setPoint(TPoint3D(radius_ * ray.direction()));
 
-	//         [sin theta * cos phi]
-	// R = r * [sin theta * sin phi]
-	//         [cos theta          ]
+	//                 [sin theta * cos phi]
+	// R = r * D = r * [sin theta * sin phi]
+	//                 [cos theta          ]
 	//
+	const TVector3D& dir = ray.direction();
+
+	//          [-sin theta * cos phi]
+	// N = -D = [-sin theta * sin phi]
+	//          [-cos theta          ]
 	const TVector3D normal = -ray.direction();
 	result.setNormal(normal);
 	result.setGeometricNormal(normal);
 
 	// phi = 2pi * u
-	// theta = pi * v
+	// theta = -pi * v
 	//
-	LASS_ASSERT(normal.z >= -TNumTraits::one && normal.z <= TNumTraits::one);
-	const TScalar phi = num::atan2(normal.x, normal.y);
-	const TScalar theta = num::acos(normal.z);
-	result.setUv(phi / (2 * TNumTraits::pi), theta / TNumTraits::pi);
+	const TScalar phi = sphericalPhi(dir);
+	const TScalar theta = sphericalTheta(dir);
+	result.setUv(phi / (2 * TNumTraits::pi), -theta / TNumTraits::pi);
 
-	//               [sin theta * -sin phi]               [cos theta * cos phi]
-	// dN_du = 2pi * [sin theta * cos phi ]  dN_dv = pi * [cos theta * sin phi]
-	//               [0                   ]               [-sin theta         ]
+	//               [sin theta * -sin phi]                  [ cos theta * cos phi]
+	// dD_du = 2pi * [sin theta *  cos phi]    dD_dv = -pi * [ cos theta * sin phi]
+	//               [0                   ]                  [-sin theta          ]
 	//
 	const TScalar sinTheta = num::sin(theta);
-	const TScalar cosTheta_sinTheta = normal.z / sinTheta;
-	const TVector3D dNormal_dU = 2 * TNumTraits::pi * TVector3D(-normal.y, normal.x, 0);
-	const TVector3D dNormal_dV = TNumTraits::pi * TVector3D(
-		cosTheta_sinTheta * normal.x, cosTheta_sinTheta * normal.y, -sinTheta);
-	result.setDNormal_dU(dNormal_dU);
-	result.setDNormal_dV(dNormal_dV);
+	const TScalar cosTheta_sinTheta = dir.z / sinTheta;
+	const TVector3D dDir_dU = 2 * TNumTraits::pi * TVector3D(-dir.y, dir.x, 0);
+	const TVector3D dDir_dV = -TNumTraits::pi * TVector3D(cosTheta_sinTheta * dir.x, cosTheta_sinTheta * dir.y, -sinTheta);
+
+	// dN/du = -dD/du    dN/dv = -dD/dv
+	//
+	result.setDNormal_dU(-dDir_dU);
+	result.setDNormal_dV(-dDir_dV);
 	
-	result.setDPoint_dU(-radius_ * dNormal_dU);
-	result.setDPoint_dV(-radius_ * dNormal_dU);
+	// dR/du = r * dD/du    dR/dv = r * dD/dv
+	//
+	result.setDPoint_dU(radius_ * dDir_dU);
+	result.setDPoint_dV(radius_ * dDir_dV);
 }
 
 

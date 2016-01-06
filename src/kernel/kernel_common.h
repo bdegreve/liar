@@ -188,6 +188,26 @@ void latinHypercube2D(RandomAccessRange& range, Generator& generator)
 	latinHypercube2D(range.begin(), range.end(), generator);
 }
 
+TScalar sphericalPhi(const TVector3D& v)
+{
+	if (v.x == 0 && v.y == 0)
+	{
+		return 0;
+	}
+	const TScalar phi = num::atan2(v.y, v.x);
+	if (phi < 0)
+	{
+		return phi + 2 * TNumTraits::pi;
+	}
+	return phi;
+}
+
+TScalar sphericalTheta(const TVector3D& v)
+{
+	LASS_ASSERT(v.z >= -1 && v.z <= 1);
+	return num::acos(v.z);
+}
+
 }
 
 }
