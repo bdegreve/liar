@@ -413,43 +413,54 @@ void RgbSpace::init(
 	// http://www.babelcolor.com/download/A%20comparison%20of%20four%20multimedia%20RGB%20spaces.pdf
 	// http://www.polybytes.com/misc/Meet_CIECAM02.pdf
 
+	// first, make matrix M_XYZ that will transform from linear (R,G,B) to (X,Y,Z) 
+
 	const TScalar zero = 0;
-	const TScalar z_r = std::max(1 - red.x - red.y, zero);
-	const TScalar z_g = std::max(1 - green.x - green.y, zero);
-	const TScalar z_b = std::max(1 - blue.x - blue.y, zero);
+	const TScalar z_r = 1 - red.x - red.y;
+	const TScalar z_g = 1 - green.x - green.y;
+	const TScalar z_b = 1 - blue.x - blue.y;
 
 	TScalar chromaticities[16] =
 	{
 		red.x, green.x, blue.x, 0,
 		red.y, green.y, blue.y, 0,
-		z_r, z_g, z_b, 0,
-		0, 0, 0, 1
+		z_r,   z_g,     z_b,    0,
+		0,     0,       0,      1
 	};
 	const TTransformation3D M_xyz(chromaticities, chromaticities + 16);
 
-	const TVector3D w(
+	const TVector3D W(
 		white.x / white.y,
 		1,
 		(1 - white.x - white.y) / white.y
 	);
-	const TVector3D s = transform(w, M_xyz.inverse());
-	const TTransformation3D M_XYZ = concatenate(TTransformation3D::scaler(s), M_xyz);
+
+	const TVector3D S = transform(W, M_xyz.inverse());
+	const TTransformation3D M_S = TTransformation3D::scaler(S);
+	const TTransformation3D M_XYZ = concatenate(M_S, M_xyz); // = M_xyz * M_S. M_S is applied first
+
+	// then, make matrix that does chromatic adaptation from whitepoint W to whitepoint E
+
+	//const TVector3D E(1, 1, 1);
 
 	TScalar bradford[16] =
 	{
 		 0.8951f,  0.2664f, -0.1614f, 0,
 		-0.7502f,  1.7135f,  0.0367f, 0,
 		 0.0389f, -0.0685f,  1.0296f, 0,
-		 0, 0, 0, 1
+		0, 0, 0, 1
 	};
 	const TTransformation3D M_BFD(bradford, bradford + 16);
-	const TVector3D cw = transform(w, M_BFD);
 
-	const TTransformation3D M_CAT = concatenate(
-		M_BFD.inverse(),
-		concatenate(TTransformation3D::scaler(cw.reciprocal()), M_BFD));
+	const TVector3D C_s = transform(W, M_BFD);
+	const TVector3D C_d(1, 1, 1); // = transform(E, M_BFD);
+	const TTransformation3D M_c = TTransformation3D::scaler(C_d / C_s);
 
-	const TTransformation3D M = concatenate(M_CAT, M_XYZ);
+	// M_CAT = M_BFD^-1 * M_c * M_BFD, thus M_BFD is applied first, then M_c and finally M_BFD^-1
+	const TTransformation3D M_CAT = concatenate(concatenate(M_BFD, M_c), M_BFD.inverse());
+
+	// M converts colors from RGB (with whitepoint W) to XYZ (CIE E)
+	const TTransformation3D M = concatenate(M_XYZ, M_CAT);
 
 	const TScalar* mat = M.matrix();
 	r_ = XYZ(static_cast<XYZ::TValue>(mat[0]), static_cast<XYZ::TValue>(mat[4]), static_cast<XYZ::TValue>(mat[8]));
