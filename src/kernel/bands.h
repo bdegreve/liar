@@ -37,7 +37,7 @@ namespace kernel
 {
 
 template <size_t N, typename T = TScalar>
-class Bands
+class LASS_SIMD_ALIGNED Bands
 {
 public:
 
@@ -336,7 +336,7 @@ private:
 
 
 template <typename T>
-class Bands<3, T>
+class LASS_ALIGNED(,16) Bands<3, T>
 {
 public:
 

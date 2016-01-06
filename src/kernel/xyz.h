@@ -31,11 +31,11 @@ namespace liar
 namespace kernel
 {
 
-class XYZ
+class LASS_SIMD_ALIGN XYZ
 {
 public:
-	typedef float TValue;
-	typedef float TParam;
+	typedef LIAR_VALUE TValue;
+	typedef LIAR_VALUE TParam;
 	typedef num::NumTraits<TValue> TNumTraits;
 
 	TValue x;
