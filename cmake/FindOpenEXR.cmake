@@ -110,8 +110,22 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenEXR DEFAULT_MSG OpenEXR_INCLUDE_DIR ${_req
 
 if(OPENEXR_FOUND)
 	set(OpenEXR_INCLUDE_DIRS "${OpenEXR_INCLUDE_DIR}" "${ZLIB_INCLUDE_DIR}")
+
+	# Earlier 1.x versions had problems with #include <OpenEXR/ImfRgbaFile.h> because in ImfRgbaFile.h
+	# they use angled includes for their own headers, like #include <ImfHeader.h>.  That doesn't work
+	# because if the include dir only goes up to OpenEXR, ImfHeader.h can never be found on the include paths.
+	# Try to detect this, and if so, we'll have to add "${OpenEXR_INCLUDE_DIR}/OpenEXR" as well
+	include(CheckIncludeFileCXX)
+	set(CMAKE_REQUIRED_INCLUDES ${OpenEXR_INCLUDE_DIRS})
+	CHECK_INCLUDE_FILE_CXX("OpenEXR/ImfRgbaFile.h" OpenEXR_CAN_INCLUDE_NORMALLY)
+	if(NOT OpenEXR_CAN_INCLUDE_NORMALLY)
+		list(APPEND OpenEXR_INCLUDE_DIRS "${OpenEXR_INCLUDE_DIR}/OpenEXR") 
+		set(CMAKE_REQUIRED_INCLUDES ${OpenEXR_INCLUDE_DIRS})
+		CHECK_INCLUDE_FILE_CXX("OpenEXR/ImfRgbaFile.h" OpenEXR_CAN_INCLUDE_WORKAROUND)
+	endif()
+	
 	set(OpenEXR_LIBRARIES "${_libraries}" "${ZLIB_LIBRARIES}")
-	set(OpenEXR_DEFINITIONS "${_definitions}")
-	set(OpenEXR_REDISTS "${_redist}")
-	set(OpenEXR_DEBUG_REDISTS "${_debug_redist}")
+	set(OpenEXR_DEFINITIONS ${_definitions})
+	set(OpenEXR_REDISTS ${_redist})
+	set(OpenEXR_DEBUG_REDISTS ${_debug_redist})
 endif()

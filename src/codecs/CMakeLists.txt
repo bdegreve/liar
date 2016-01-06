@@ -19,13 +19,17 @@ endif()
 # openexr 1.6.1: http://www.openexr.com/
 find_package(OpenEXR COMPONENTS Half Iex IlmImf IlmThread)
 if (OPENEXR_FOUND)
-	include_directories(
-		${OpenEXR_INCLUDE_DIR}
-		)
-	add_definitions(
-		${OpenEXR_DEFINITIONS}
-		)
 	add_liar_codec(openexr ${OpenEXR_LIBRARIES})
+	set_property(
+		TARGET openexr
+		APPEND PROPERTY INCLUDE_DIRECTORIES
+		${OpenEXR_INCLUDE_DIRS}
+	)
+	set_property(
+		TARGET openexr
+		APPEND_STRING PROPERTY COMPILE_OPTIONS
+		${OpenEXR_DEFINITIONS}
+	)
 	if (OpenEXR_BUILD)
 		add_dependencies(openexr external_openexr)
 	endif()
