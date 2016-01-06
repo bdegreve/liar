@@ -29,7 +29,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_SAMPLERS_HALTON_H
 
 #include "samplers_common.h"
-#include "../kernel/sampler.h"
+#include "../kernel/sampler_progressive.h"
 #include <lass/num/random.h>
 #include <lass/num/distribution.h>
 
@@ -72,7 +72,7 @@ private:
 
 class LIAR_SAMPLERS_DLL Halton : public SamplerProgressive
 {
-	PY_HEADER(SamplerTileBased)
+	PY_HEADER(SamplerProgressive)
 public:
 
 	Halton();

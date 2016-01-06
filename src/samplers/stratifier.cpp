@@ -215,7 +215,7 @@ void Stratifier::doSampleSubSequence1D(const TResolution2D&, size_t subPixel, TS
 	if (subPixel == 0)
 	{
 		subSequences1d_[i].resize(size);
-		const TScalar scale = 1 / size;
+		const TScalar scale = TNumTraits::one / size;
 
 		// generate interleaved samples: stratum1,subpixel1, stratum1,subpixel2, ... stratum2,subpixel1,stratum2,subpixel2
 		TSubSequence1D::iterator p = subSequences1d_[i].begin();	

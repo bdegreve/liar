@@ -45,11 +45,8 @@ namespace kernel
 
 class Sample;
 class Sampler;
-class SamplerProgressive;
 
 typedef python::PyObjectPtr<Sampler>::Type TSamplerPtr;
-typedef python::PyObjectPtr<SamplerProgressive>::Type TSamplerProgressivePtr;
-
 
 class LIAR_KERNEL_DLL Sampler: public python::PyObjectPlus
 {
@@ -90,7 +87,6 @@ public:
 	TTaskPtr getTask();
 
 	static TSamplerPtr& defaultSampler();
-	static TSamplerProgressivePtr& defaultProgressiveSampler();
 
 	const TSamplerPtr clone() const;
 
@@ -108,7 +104,7 @@ protected:
 private:
 
 	friend class Sample;
-	friend class SamplerTileBased; // until we cleared up the mess.
+	friend class SamplerTiled; // until we cleared up the mess.
 
 	typedef std::vector<size_t> TSubSequenceSizes;
 
@@ -126,7 +122,6 @@ private:
 	size_t subSequenceOffset2D(TSubSequenceId id) const { return subSequenceOffset2D_[static_cast<size_t>(id)]; }
 
 	static TSamplerPtr defaultSampler_;
-	static TSamplerProgressivePtr defaultProgressiveSampler_;
 
 	TSubSequenceSizes subSequenceSize1D_;
 	TSubSequenceSizes subSequenceSize2D_;
@@ -137,63 +132,6 @@ private:
 	TBucket bucket_;
 };
 
-
-class LIAR_KERNEL_DLL SamplerTileBased: public Sampler
-{
-	PY_HEADER(Sampler)
-public:
-
-	const TResolution2D& resolution() const { return doResolution(); }
-	void setResolution(const TResolution2D& resolution) { doSetResolution(resolution); }
-
-	size_t samplesPerPixel() const { return doSamplesPerPixel(); }
-	void setSamplesPerPixel(size_t samplesPerPixel) { doSetSamplesPerPixel(samplesPerPixel); }
-
-protected:
-	SamplerTileBased();
-private:
-	class TaskTileBased : public Task
-	{
-	public:
-		TaskTileBased(size_t id, const TResolution2D& begin, const TResolution2D& end, size_t samplesPerPixel);
-	private:
-		bool doDrawSample(Sampler& sampler, const TimePeriod& period, Sample& sample) override;
-		TResolution2D begin_;
-		TResolution2D end_;
-		TResolution2D pixel_;
-		size_t samplesPerPixel_;
-		size_t subPixel_;
-	};
-
-	TTaskPtr doGetTask() override;
-
-	void sample(const TResolution2D& pixel, size_t subPixel, const TimePeriod& period, Sample& sample);
-
-	virtual const TResolution2D& doResolution() const = 0;
-	virtual size_t doSamplesPerPixel() const = 0;
-	virtual void doSetResolution(const TResolution2D& resolution) = 0;
-	virtual void doSetSamplesPerPixel(size_t samplesPerPixel) = 0;
-
-	virtual void doSampleScreen(const TResolution2D& pixel, size_t subPixel, TSample2D& screenCoordinate) = 0;
-	virtual void doSampleLens(const TResolution2D& pixel, size_t subPixel, TSample2D& lensCoordinate) = 0;
-	virtual void doSampleTime(const TResolution2D& pixel, size_t subPixel, const TimePeriod& period, TTime& time) = 0;
-	virtual void doSampleWavelength(const TResolution2D& pixel, size_t subPixel, TWavelength& wavelength, TScalar& pdf) = 0;
-	virtual void doSampleSubSequence1D(const TResolution2D& pixel, size_t subPixel, TSubSequenceId id, TSample1D* first, TSample1D* last) = 0;
-	virtual void doSampleSubSequence2D(const TResolution2D& pixel, size_t subPixel, TSubSequenceId id, TSample2D* first, TSample2D* last) = 0;
-
-	size_t nextId_;
-};
-
-
-class LIAR_KERNEL_DLL SamplerProgressive : public Sampler
-{
-	PY_HEADER(Sampler)
-protected:
-	SamplerProgressive();
-};
-
-typedef python::PyObjectPtr<Sampler>::Type TSamplerPtr;
-typedef python::PyObjectPtr<SamplerProgressive>::Type TSamplerProgressivePtr;
 
 }
 

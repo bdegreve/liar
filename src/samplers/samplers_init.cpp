@@ -26,6 +26,7 @@
 #include "stratifier.h"
 #include "latin_hypercube.h"
 #include "../kernel/sampler.h"
+#include "../kernel/sampler_progressive.h"
 #include <lass/io/proxy_man.h>
 
 using namespace liar::samplers;
@@ -37,7 +38,7 @@ void setDefaultSampler(const liar::kernel::TSamplerPtr& defaultSampler)
 
 void setDefaultProgressiveSampler(const liar::kernel::TSamplerProgressivePtr& defaultSampler)
 {
-	liar::kernel::Sampler::defaultProgressiveSampler() = defaultSampler;
+	liar::kernel::SamplerProgressive::defaultProgressiveSampler() = defaultSampler;
 }
 
 PY_DECLARE_MODULE_DOC(samplers, "LiAR sample generators")

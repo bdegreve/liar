@@ -31,6 +31,7 @@
 
 #include "tracers_common.h"
 #include "direct_lighting.h"
+#include "../kernel/sampler_progressive.h"
 #include <lass/prim/sphere_3d.h>
 #include <lass/spat/kd_tree.h>
 #include <lass/spat/aabp_tree.h>

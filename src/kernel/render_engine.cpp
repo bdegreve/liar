@@ -23,6 +23,7 @@
 
 #include "kernel_common.h"
 #include "render_engine.h"
+#include "sampler_tiled.h"
 #include <lass/io/keyboard.h>
 #include <lass/util/progress_indicator.h>
 
@@ -204,7 +205,7 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 
 	// we need an unbounded progress indicator ...
 	size_t numberOfSamples = 100000000000;
-	if (SamplerTileBased* sampler = dynamic_cast<SamplerTileBased*>(sampler_.get()))
+	if (SamplerTiled* sampler = dynamic_cast<SamplerTiled*>(sampler_.get()))
 	{
 		numberOfSamples = sampler->resolution().x * sampler->resolution().y * sampler->samplesPerPixel();
 	}

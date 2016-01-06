@@ -128,7 +128,7 @@ PhotonMapper::PhotonMapper():
 	setNumSecondaryGatherRays(1);
 	updateStorageProbabilities();
 
-	photonSampler_ = Sampler::defaultProgressiveSampler()->clone().dynamicCast<SamplerProgressive>();
+	photonSampler_ = SamplerProgressive::defaultProgressiveSampler()->clone().dynamicCast<SamplerProgressive>();
 }
 
 

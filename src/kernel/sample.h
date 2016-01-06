@@ -80,7 +80,7 @@ public:
 private:
 
 	friend class Sampler;
-	friend class SamplerTileBased; // until we cleared up the mess.
+	friend class SamplerTiled; // until we cleared up the mess.
 
 	TSample2D screenSample_;
 	TSample2D lensSample_;

@@ -29,7 +29,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_SAMPLERS_LATIN_HYPERCUBE_H
 
 #include "samplers_common.h"
-#include "../kernel/sampler.h"
+#include "../kernel/sampler_tiled.h"
 #include <lass/num/random.h>
 #include <lass/num/distribution.h>
 
@@ -38,9 +38,9 @@ namespace liar
 namespace samplers
 {
 
-class LIAR_SAMPLERS_DLL LatinHypercube : public SamplerTileBased
+class LIAR_SAMPLERS_DLL LatinHypercube : public SamplerTiled
 {
-	PY_HEADER(SamplerTileBased)
+	PY_HEADER(SamplerTiled)
 public:
 
 	LatinHypercube();

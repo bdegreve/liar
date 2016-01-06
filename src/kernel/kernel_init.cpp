@@ -33,12 +33,14 @@
 #include "projection.h"
 #include "projection_perspective.h"
 #include "projection_spherical.h"
-#include "sampler.h"
 #include "ray_tracer.h"
 #include "recovery.h"
 #include "render_engine.h"
 #include "render_target.h"
 #include "rgb_space.h"
+#include "sampler.h"
+#include "sampler_progressive.h"
+#include "sampler_tiled.h"
 #include "scene_light.h"
 #include "scene_object.h"
 #include "shader.h"
@@ -90,7 +92,8 @@ PY_MODULE_CLASS(kernel, liar::kernel::RayTracer)
 PY_MODULE_CLASS(kernel, liar::kernel::RenderEngine)
 PY_MODULE_CLASS(kernel, liar::kernel::RenderTarget)
 PY_MODULE_CLASS(kernel, liar::kernel::Sampler)
-	PY_MODULE_CLASS(kernel, liar::kernel::SamplerTileBased)
+	PY_MODULE_CLASS(kernel, liar::kernel::SamplerProgressive)
+	PY_MODULE_CLASS(kernel, liar::kernel::SamplerTiled)
 PY_MODULE_CLASS(kernel, liar::kernel::ScalarSpline)
 	PY_MODULE_CLASS(kernel, liar::kernel::LinearScalarSpline)
 	PY_MODULE_CLASS(kernel, liar::kernel::CubicScalarSpline)
