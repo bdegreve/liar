@@ -45,6 +45,7 @@ PY_DECLARE_CLASS_DOC(Observer, "Conversion of spectral data to tristimulus")
 	PY_CLASS_MEMBER_R(Observer, maxWavelength)
 	PY_CLASS_METHOD(Observer, sensitivity)
 	PY_CLASS_METHOD_QUALIFIED_1(Observer, tristimulus, const XYZ, const Observer::TValues&)
+	PY_CLASS_METHOD_QUALIFIED_2(Observer, tristimulus, const XYZ, const Observer::TWavelengths&, const Observer::TValues&)
 	PY_CLASS_STATIC_METHOD_DOC(Observer, standard, "standard() -> Observer");
 	PY_CLASS_STATIC_METHOD_DOC(Observer, setStandard, "setStandard(Observer) -> None");
 
