@@ -160,7 +160,10 @@ function(set_precompiled_header target hdrfile srcpath)
     endif()
 endfunction()
 
-macro(add_liar_module_ex name)
+function(add_liar_module_ex name)
+	cmake_policy(PUSH)
+	cmake_policy(SET CMP0054 NEW)
+	
 	set(_srcs)
 	set(_libs)
 	set(_destination ".")
@@ -210,9 +213,10 @@ macro(add_liar_module_ex name)
 		TARGETS "${name}"
 		DESTINATION "${_destination}"
 		)
-endmacro()
+	cmake_policy(POP)
+endfunction()
 
-macro(add_liar_module name)
+function(add_liar_module name)
 	file(GLOB _srcs *.h *.inl *.cpp)
 	set(_option)
 	foreach(_arg ${ARGN})
@@ -231,7 +235,7 @@ macro(add_liar_module name)
 		LIBS ${${name}_LIBS}
 	)
 	set_precompiled_header("${name}" "${name}_common.h" "${name}_common.cpp")
-endmacro()
+endfunction()
 
 set(SPECTRAL_MODE "RGB" CACHE STRING "Computational mode for Spectral values")
 set(SPECTRAL_NUM_BANDS 10 CACHE STRING "Number of bands")
