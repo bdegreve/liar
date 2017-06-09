@@ -10,10 +10,13 @@ find_path(
 mark_as_advanced(pixeltoaster_INCLUDE_DIR)
 if (pixeltoaster_INCLUDE_DIR)
 	set(_ok FALSE)
+	set(_programfiles86 "ProgramFiles(x86)")
 	if (WIN32)
 		find_path(D3D9_INCLUDE_DIR
 			d3d9.h
 			HINTS ENV DXSDK_DIR ENV Include
+			PATHS "$ENV{${_programfiles86}}/Windows Kits/10/Include/${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}/shared"
+			PATHS "$ENV{${_programfiles86}}/Windows Kits/8.1/Include/shared"
 			PATH_SUFFIXES Include
 			DOC "path to d3d9.h"
 			)
@@ -69,12 +72,11 @@ if (pixeltoaster_INCLUDE_DIR)
 		include_directories(
 			${pixeltoaster_INCLUDE_DIR}
 			)
-		if ("pixeltoaster_HAVE_RECTANGLE" MATCHES "^pixeltoaster_HAVE_RECTANGLE$")
+		if (NOT DEFINED pixeltoaster_HAVE_RECTANGLE)
 			message(STATUS "Looking for PixelToaster::Rectangle")
 			configure_file(
 				"${CMAKE_CURRENT_SOURCE_DIR}/cmake/check_pixeltoaster_rectangle.cpp.in"
-				"${CMAKE_CURRENT_BINARY_DIR}/cmake/check_pixeltoaster_rectangle.cpp"
-				NOW)
+				"${CMAKE_CURRENT_BINARY_DIR}/cmake/check_pixeltoaster_rectangle.cpp")
 			try_compile(
 				pixeltoaster_HAVE_RECTANGLE
 				"${CMAKE_CURRENT_BINARY_DIR}"
