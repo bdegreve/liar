@@ -87,12 +87,12 @@ int test_conversion()
 		XYZ(1, 1, 0),
 		XYZ(1, 0, 1),
 		XYZ(0, 1, 1),
-		XYZ(.2, .5, .8),
-		XYZ(.2, .8, .5),
-		XYZ(.8, .2, .5),
-		XYZ(.5, .2, .8),
-		XYZ(.5, .8, .2),
-		XYZ(.8, .5, .2),
+		XYZ(.2f, .5f, .8f),
+		XYZ(.2f, .8f, .5f),
+		XYZ(.8f, .2f, .5f),
+		XYZ(.5f, .2f, .8f),
+		XYZ(.5f, .8f, .2f),
+		XYZ(.8f, .5f, .2f),
 		conversionSpace->convert(RGBA(0, 0, 0)),
 		conversionSpace->convert(RGBA(1, 1, 1)),
 		conversionSpace->convert(RGBA(1, 0, 0)),
@@ -101,12 +101,12 @@ int test_conversion()
 		conversionSpace->convert(RGBA(1, 1, 0)),
 		conversionSpace->convert(RGBA(1, 0, 1)),
 		conversionSpace->convert(RGBA(0, 1, 1)),
-		conversionSpace->convert(RGBA(.2, .5, .8)),
-		conversionSpace->convert(RGBA(.2, .8, .5)),
-		conversionSpace->convert(RGBA(.8, .2, .5)),
-		conversionSpace->convert(RGBA(.5, .2, .8)),
-		conversionSpace->convert(RGBA(.5, .8, .2)),
-		conversionSpace->convert(RGBA(.8, .5, .2)),
+		conversionSpace->convert(RGBA(.2f, .5f, .8f)),
+		conversionSpace->convert(RGBA(.2f, .8f, .8f)),
+		conversionSpace->convert(RGBA(.8f, .2f, .5f)),
+		conversionSpace->convert(RGBA(.5f, .2f, .8f)),
+		conversionSpace->convert(RGBA(.5f, .8f, .2f)),
+		conversionSpace->convert(RGBA(.8f, .5f, .2f)),
 		sRGB->convert(RGBA(0, 0, 0)),
 		sRGB->convert(RGBA(1, 1, 1)),
 		sRGB->convert(RGBA(1, 0, 0)),
@@ -115,12 +115,12 @@ int test_conversion()
 		sRGB->convert(RGBA(1, 1, 0)),
 		sRGB->convert(RGBA(1, 0, 1)),
 		sRGB->convert(RGBA(0, 1, 1)),
-		sRGB->convert(RGBA(.2, .5, .8)),
-		sRGB->convert(RGBA(.2, .8, .5)),
-		sRGB->convert(RGBA(.8, .2, .5)),
-		sRGB->convert(RGBA(.5, .2, .8)),
-		sRGB->convert(RGBA(.5, .8, .2)),
-		sRGB->convert(RGBA(.8, .5, .2)),
+		sRGB->convert(RGBA(.2f, .5f, .8f)),
+		sRGB->convert(RGBA(.2f, .8f, .5f)),
+		sRGB->convert(RGBA(.8f, .2f, .5f)),
+		sRGB->convert(RGBA(.5f, .2f, .8f)),
+		sRGB->convert(RGBA(.5f, .8f, .2f)),
+		sRGB->convert(RGBA(.8f, .5f, .2f)),
 	};
 	const size_t numTests = sizeof(tests) / sizeof(XYZ);
 
@@ -142,6 +142,8 @@ int test_interface()
 {
 	Tester t;
 
+	typedef Spectral::TValue TValue;
+
 	t.check("Spectral::numBands",
 #ifdef LIAR_SPECTRAL_BANDS
 		Spectral::numBands == LIAR_SPECTRAL_BANDS
@@ -159,7 +161,7 @@ int test_interface()
 	Spectral a, b, c, d, e, f, g, h, k, m, n, o;
 	for (size_t i = 0; i < Spectral::numBands; ++i)
 	{
-		const TScalar x = static_cast<TScalar>(i + 1);
+		const TValue x = static_cast<TValue>(i + 1);
 		a[i] = x;
 		b[i] = -x;
 		c[i] = 2 * x;
@@ -170,8 +172,8 @@ int test_interface()
 		h[i] = 1 + x;
 		k[i] = 2 / x;
 		m[i] = num::exp(x);
-		n[i] = num::clamp<TScalar>(x, 1.5f, 4.5f);
-		o[i] = num::lerp<TScalar>(1, x * x, .3f);
+		n[i] = num::clamp(x, TValue(1.5f), TValue(4.5f));
+		o[i] = num::lerp(TValue(1), x * x, TValue(.3f));
 	}
 
 	t.checkClose("operator+ (spectrum, spectrum)", a + b, zero);
@@ -209,8 +211,8 @@ int test_interface()
 	t.checkClose("pow", pow(b, 2), d);
 	t.checkClose("sqrt", sqrt(d), a);
 	t.checkClose("exp", exp(a), m);
-	t.checkClose("clamp", clamp(a, 1.5f, 4.5f), n);
-	t.checkClose("lerp", lerp(one, d, 0.3f), o);
+	t.checkClose("clamp", clamp(a, TValue(1.5f), TValue(4.5f)), n);
+	t.checkClose("lerp", lerp(one, d, TValue(0.3f)), o);
 
 
 	return t.numErrors;
