@@ -62,6 +62,7 @@ RenderEngine::RenderEngine():
 
 
 RenderEngine::~RenderEngine()
+{
 try
 {
 	if (renderTarget_)
@@ -69,8 +70,9 @@ try
 		renderTarget_->endRender();
 	}
 }
-catch(...)
+	catch (...)
 {
+}
 }
 
 
