@@ -298,7 +298,7 @@ void LightProjection::buildCdf(const TMap& pdf, TMap& oMarginalCdfU, TMap& oCond
 	{
 		progress(.5 + .5 * static_cast<TScalar>(i) / resolution_.x);
 		const TScalar* pdfLine = &pdf[i * resolution_.y];
-		TScalar* condCdfV = &conditionalCdfV[i * resolution_.y];
+		TMap::iterator condCdfV = conditionalCdfV.begin() + i * resolution_.y;
 		std::partial_sum(pdfLine, pdfLine + resolution_.y, condCdfV);
 
 		marginalPdfU[i] = condCdfV[resolution_.y - 1];
@@ -326,7 +326,7 @@ void LightProjection::sampleMap(const TPoint2D& sample, TScalar& u, TScalar& v, 
 	const TScalar margPdfU = marginalCdfU_[i] - x0;
 	u = invResolution_.x * (static_cast<TScalar>(i) + (sample.x - x0) / margPdfU);
 
-	const TScalar* condCdfV = &conditionalCdfV_[i * resolution_.y];
+	TMap::const_iterator condCdfV = conditionalCdfV_.begin() + i * resolution_.y;
 	const size_t j = std::min(resolution_.y - 1, static_cast<size_t>(
 		std::lower_bound(condCdfV, condCdfV + resolution_.y, sample.y) - condCdfV));
 	const TScalar y0 = j > 0 ? condCdfV[j - 1] : TNumTraits::zero;

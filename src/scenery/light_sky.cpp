@@ -425,8 +425,9 @@ void LightSky::buildCdf(const TMap& pdf, TMap& oMarginalCdfU, TMap& oConditional
 	for (size_t i = 0; i < resolution_.x; ++i)
 	{
 		progress(.8 + .2 * static_cast<TScalar>(i) / resolution_.x);
-		const TValue* pdfLine = &pdf[i * resolution_.y];
-		TValue* condCdfV = &conditionalCdfV[i * resolution_.y];
+		const size_t offset = i * resolution_.y;
+		TMap::const_iterator pdfLine = pdf.begin() + offset;
+		TMap::iterator condCdfV = conditionalCdfV.begin() + offset;
 		std::partial_sum(pdfLine, pdfLine + resolution_.y, condCdfV);
 		
 		marginalPdfU[i]	= condCdfV[resolution_.y - 1];
@@ -454,7 +455,7 @@ void LightSky::sampleMap(const TPoint2D& sample, TScalar& i, TScalar& j, TScalar
 	const TScalar margPdfU = marginalCdfU_[ii] - u0;
 	i = static_cast<TScalar>(ii) + (sample.x - u0) / margPdfU;
 
-	const TValue* condCdfV = &conditionalCdfV_[ii * resolution_.y];
+	TMap::const_iterator condCdfV = conditionalCdfV_.begin() + ii * resolution_.y;
 	const size_t jj = std::min(resolution_.y - 1, static_cast<size_t>(
 		std::lower_bound(condCdfV, condCdfV + resolution_.y, sample.y) - condCdfV));
 	const TValue v0 = jj > 0 ? condCdfV[jj - 1] : 0;
