@@ -206,7 +206,7 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 	}
 
 	// we need an unbounded progress indicator ...
-	size_t numberOfSamples = 100000000000;
+	size_t numberOfSamples = num::NumTraits<size_t>::max;
 	if (SamplerTiled* sampler = dynamic_cast<SamplerTiled*>(sampler_.get()))
 	{
 		numberOfSamples = sampler->resolution().x * sampler->resolution().y * sampler->samplesPerPixel();
