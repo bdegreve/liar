@@ -336,7 +336,7 @@ private:
 
 
 template <typename T>
-class LASS_ALIGNED(,16) Bands<3, T>
+class LASS_SIMD_ALIGN Bands<3, T>
 {
 public:
 
