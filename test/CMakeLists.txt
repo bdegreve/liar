@@ -18,7 +18,7 @@ foreach(fname ${test_files})
 		NAME ${test} 
 		COMMAND 
 			"${Lass_PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/testenv.py"
-			"--with-library=$<TARGET_FILE:lass>"
+			"--with-library=$<TARGET_FILE:Lass::lass>"
 			"$<TARGET_FILE:test_driver>" "${test}"
 		)
 	list(APPEND tests ${test})

@@ -50,7 +50,7 @@ if(APPLE)
 		)
 endif()
 target_link_libraries(libkernel
-	lass_python
+	Lass::lass_python
 	${LCMS2_LIBRARIES}
 	)
 set_precompiled_header(libkernel kernel_common.h kernel_common.cpp)
