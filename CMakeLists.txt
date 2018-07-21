@@ -156,35 +156,29 @@ function(set_precompiled_header target hdrfile srcpath)
     endif()
 endfunction()
 
+
+include(CMakeParseArguments)
+
 function(add_liar_module_ex name)
-	cmake_policy(PUSH)
-	cmake_policy(SET CMP0054 NEW)
+	message(STATUS "add_liar_module ${name}")
 	
-	set(_srcs)
-	set(_libs)
-	set(_destination ".")
-	set(_list "_srcs")
-	foreach(_arg ${ARGN})
-		if("${_arg}" STREQUAL "SRCS")
-			set(_list "_srcs")
-		elseif("${_arg}" STREQUAL "LIBS")
-			set(_list "_libs")
-		elseif("${_arg}" STREQUAL "DESTINATION")
-			set(_list "_destination")
-		else()
-			if ("${_list}" STREQUAL "_destination")
-				set(${_list} "${_arg}")
-			else()
-				list(APPEND ${_list} "${_arg}")
-			endif()
+	set(_prefix)
+	set(_options)
+	set(_one_value_keywords "DESTINATION")
+	set(_multi_value_keywords "SRCS" "LIBS")
+	cmake_parse_arguments(
+		"${_prefix}" "${_options}" "${_one_value_keywords}" "${_multi_value_keywords}"
+		"SRCS" ${ARGN})
+	if(NOT _DESTINATION)
+		set(_DESTINATION ".")
 		endif()
-	endforeach()
+
 	add_library("${name}" MODULE
-		${_srcs}
+		${_SRCS}
 		)
 	target_link_libraries("${name}"
 		libkernel
-		${_libs}
+		${_LIBS}
 		)
 	set_target_properties(
 		"${name}"
@@ -207,9 +201,8 @@ function(add_liar_module_ex name)
 	endif()
 	install(
 		TARGETS "${name}"
-		DESTINATION "${_destination}"
+		DESTINATION "${_DESTINATION}"
 		)
-	cmake_policy(POP)
 endfunction()
 
 function(add_liar_module name)
