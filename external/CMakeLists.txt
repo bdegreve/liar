@@ -71,7 +71,7 @@ if(OpenEXR_BUILD)
     set(OpenEXR_URL "https://github.com/bdegreve/openexr/branches/v2.2fixes/OpenEXR" CACHE STRING "URL to OpenEXR source code")
     mark_as_advanced(OpenEXR_IlmBase_URL OpenEXR_URL)
     find_package(ZLIB)
-    if (ZLIB_INCLUDE_DIR AND ZLIB_LIBRARY AND Lass_PYTHON_EXECUTABLE)  
+    if (ZLIB_INCLUDE_DIR AND ZLIB_LIBRARY AND Python_FOUND)
         ExternalProject_Add(
             external_ilmbase
             PREFIX ilmbase

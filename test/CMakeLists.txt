@@ -17,7 +17,7 @@ foreach(fname ${test_files})
 	add_test(
 		NAME ${test} 
 		COMMAND 
-			"${Lass_PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/testenv.py"
+			Python::Interpreter "${CMAKE_CURRENT_SOURCE_DIR}/testenv.py"
 			"--with-library=$<TARGET_FILE:Lass::lass>"
 			"$<TARGET_FILE:test_driver>" "${test}"
 		)

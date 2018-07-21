@@ -19,6 +19,7 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif ()
 
 find_package(Lass 1.9 REQUIRED)
+
 if (CMAKE_CONFIGURATION_TYPES)
 	set(_configs ${CMAKE_CONFIGURATION_TYPES})
 else()
@@ -37,7 +38,7 @@ foreach(_config ${_configs})
 		CONFIGURATIONS ${_config}
 		)
 endforeach()
-if (Lass_PYTHON_DEBUG_LIBRARY)
+if (Python_LIBRARY_DEBUG)
 	set(CMAKE_DEBUG_POSTFIX _d)
 endif()
 
@@ -57,9 +58,9 @@ if (CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_DEBUG)
 		)
 endif()
 
-if (Lass_PYTHON_EXECUTABLE AND NOT CMAKE_INSTALL_PREFIX)
+if (Python_EXECUTABLE AND NOT CMAKE_INSTALL_PREFIX)
 	execute_process(
-		COMMAND "${Lass_PYTHON_EXECUTABLE}" -c "from distutils import sysconfig; print (sysconfig.get_python_lib(True))"
+		COMMAND "${Python_EXECUTABLE}" -c "from distutils import sysconfig; print (sysconfig.get_python_lib(True))"
 		OUTPUT_VARIABLE _python_site_packages
 		OUTPUT_STRIP_TRAILING_WHITESPACE
 	)
@@ -161,7 +162,7 @@ include(CMakeParseArguments)
 
 function(add_liar_module_ex name)
 	message(STATUS "add_liar_module ${name}")
-	
+
 	set(_prefix)
 	set(_options)
 	set(_one_value_keywords "DESTINATION")
@@ -171,7 +172,7 @@ function(add_liar_module_ex name)
 		"SRCS" ${ARGN})
 	if(NOT _DESTINATION)
 		set(_DESTINATION ".")
-		endif()
+	endif()
 
 	add_library("${name}" MODULE
 		${_SRCS}
