@@ -383,7 +383,7 @@ RenderEngine::Progress::~Progress()
 RenderEngine::Progress& RenderEngine::Progress::operator+=(size_t numNewSamplesWritten)
 {
 	numSamplesWritten_ += numNewSamplesWritten;
-	indicator_(static_cast<double>(numSamplesWritten_) / totalNumSamples_);
+	indicator_(static_cast<double>(numSamplesWritten_) / static_cast<double>(totalNumSamples_));
 	return *this;
 }
 

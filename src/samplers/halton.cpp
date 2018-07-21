@@ -178,7 +178,6 @@ Halton::TaskHalton::TaskHalton(size_t id, const Halton& sampler):
 
 bool Halton::TaskHalton::doDrawSample(Sampler& sampler, const TimePeriod& period, Sample& sample)
 {
-	typedef Sample::TSample1D TSample1D;
 	typedef Sample::TSample2D TSample2D;
 
 	const Halton& halton = static_cast<Halton&>(sampler);

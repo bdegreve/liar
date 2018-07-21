@@ -156,7 +156,7 @@ void stratifier1D(RandomAccessIterator first, RandomAccessIterator last, Generat
 	const TScalar scale = num::inv(static_cast<TScalar>(n));
 	for (std::ptrdiff_t k = 0; k < n; ++k)
 	{
-		first[k] = scale * (k + uniform());
+		first[k] = scale * (static_cast<TScalar>(k) + uniform());
 	};
 	std::random_shuffle(first, last, generator);
 }
@@ -175,8 +175,8 @@ void latinHypercube2D(RandomAccessIterator first, RandomAccessIterator last, Gen
 	const TPoint2D::TValue scale = num::inv(static_cast<TPoint2D::TValue>(n));
 	for (std::ptrdiff_t k = 0; k < n; ++k)
 	{
-		first[k].x = scale * (k + uniform());
-		first[k].y = scale * (k + uniform());
+		first[k].x = scale * (static_cast<TScalar>(k) + uniform());
+		first[k].y = scale * (static_cast<TScalar>(k) + uniform());
 	};
 	std::random_shuffle(stde::member_iterator(first, &TPoint2D::x), stde::member_iterator(last, &TPoint2D::x), generator);
 	std::random_shuffle(stde::member_iterator(first, &TPoint2D::y), stde::member_iterator(last, &TPoint2D::y), generator);

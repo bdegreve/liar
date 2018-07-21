@@ -95,7 +95,7 @@ Texture::TValue FBm::doScalarLookUp(const Sample&, const IntersectionContext& co
 		weight *= falloff_;
 	}
 
-	const TValue fracOctaves = realNumOctaves - numOctaves;
+	const TValue fracOctaves = realNumOctaves - static_cast<TValue>(numOctaves);
 	if (fracOctaves > 0)
 	{
 		result += fracOctaves * weight * noise(TPoint3D(p * frequency));

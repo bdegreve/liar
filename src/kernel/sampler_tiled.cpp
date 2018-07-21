@@ -55,9 +55,11 @@ SamplerTiled::SamplerTiled() :
 SamplerTiled::TTaskPtr SamplerTiled::doGetTask()
 {
 	const TResolution2D res = resolution();
+	const TScalar r_x = static_cast<TScalar>(res.x);
+	const TScalar r_y = static_cast<TScalar>(res.y);
 
-	const TResolution2D begin(num::floor(bucket().min().x * res.x), num::floor(bucket().min().y * res.y));
-	const TResolution2D end(num::floor(bucket().max().x * res.x), num::floor(bucket().max().y * res.y));
+	const TResolution2D begin(num::floor(bucket().min().x * r_x), num::floor(bucket().min().y * r_y));
+	const TResolution2D end(num::floor(bucket().max().x * r_x), num::floor(bucket().max().y * r_y));
 
 	const size_t tileSize = 16;
 	const size_t n_x = (end.x - begin.x + tileSize - 1) / tileSize;

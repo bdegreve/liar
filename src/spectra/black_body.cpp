@@ -111,7 +111,7 @@ BlackBody::TValue BlackBody::doLuminance() const
 		const TWavelength w5 = num::sqr(num::sqr(w)) * w;
 		acc += static_cast<TValue>(c1 / (w5 * num::expm1(c2 / (w * temperature_))));
 	}
-	return acc / ws.size();
+	return acc / static_cast<TValue>(ws.size());
 }
 
 

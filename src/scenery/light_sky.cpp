@@ -255,12 +255,15 @@ const Spectral LightSky::doEmission(const Sample& sample, const TRay3D& ray, Bou
 	Intersection intersection(this, fixedDistance_, seLeaving);
 	IntersectionContext context(*this, sample, shadowRay, intersection, 0);
 
-	const TVector3D dir = ray.direction();
-	const TScalar i = context.uv().x * resolution_.x;
-	LASS_ASSERT(num::almostEqual(i, num::atan2(dir.y, dir.x) * resolution_.x / (2 * TNumTraits::pi), 1e-5));
-	const TScalar j = (dir.z + 1) * resolution_.y / 2; // cylindrical coordinate.
+	const TScalar nx = static_cast<TScalar>(resolution_.x);
+	const TScalar ny = static_cast<TScalar>(resolution_.y);
 
-	const size_t ii = static_cast<size_t>(num::floor(i > 0 ? i : i + resolution_.x)) % resolution_.x;
+	const TVector3D dir = ray.direction();
+	const TScalar i = context.uv().x * nx;
+	LASS_ASSERT(num::almostEqual(i, num::atan2(dir.y, dir.x) * nx / (2 * TNumTraits::pi), 1e-5));
+	const TScalar j = (dir.z + 1) * ny / 2; // cylindrical coordinate.
+
+	const size_t ii = static_cast<size_t>(num::floor(i > 0 ? i : i + nx)) % resolution_.x;
 	const TScalar u0 = ii > 0 ? marginalCdfU_[ii - 1] : TNumTraits::zero;
 	const TScalar margPdfU = marginalCdfU_[ii] - u0;
 
@@ -270,7 +273,7 @@ const Spectral LightSky::doEmission(const Sample& sample, const TRay3D& ray, Bou
 	const TValue v0 = jj > 0 ? condCdfV[jj - 1] : 0;
 	const TValue condPdfV = condCdfV[jj] - v0;
 
-	pdf = margPdfU * condPdfV * (resolution_.x * resolution_.y) / (4 * TNumTraits::pi);
+	pdf = margPdfU * condPdfV * nx * ny / (4 * TNumTraits::pi);
 
 	return radiance_->lookUp(sample, context, Illuminant);
 }
@@ -397,7 +400,7 @@ void LightSky::buildPdf(TMap& pdf, TScalar& power, util::ProgressIndicator& prog
 	for (size_t i = 0; i < resolution_.x; ++i)
 	{
 		const TScalar fi = static_cast<TScalar>(i) + .5f;
-		progress(.8 * static_cast<TScalar>(i) / resolution_.x);
+		progress(.8 * static_cast<double>(i) / static_cast<double>(resolution_.x));
 		for (size_t j = 0; j < resolution_.y; ++j)
 		{
 			const TScalar fj = static_cast<TScalar>(j) + .5f;
@@ -408,7 +411,7 @@ void LightSky::buildPdf(TMap& pdf, TScalar& power, util::ProgressIndicator& prog
 			averageIntensity += intensity;
 		}
 	}
-	averageIntensity /= n;
+	averageIntensity /= static_cast<TScalar>(n);
 
 	pdf.swap(tempPdf);
 	power = averageIntensity * (4 * TNumTraits::pi);
@@ -424,7 +427,7 @@ void LightSky::buildCdf(const TMap& pdf, TMap& oMarginalCdfU, TMap& oConditional
 	
 	for (size_t i = 0; i < resolution_.x; ++i)
 	{
-		progress(.8 + .2 * static_cast<TScalar>(i) / resolution_.x);
+		progress(.8 + .2 * static_cast<double>(i) / static_cast<double>(resolution_.x));
 		const size_t offset = i * resolution_.y;
 		TMap::const_iterator pdfLine = pdf.begin() + offset;
 		TMap::iterator condCdfV = conditionalCdfV.begin() + offset;
@@ -462,7 +465,7 @@ void LightSky::sampleMap(const TPoint2D& sample, TScalar& i, TScalar& j, TScalar
 	const TValue condPdfV = condCdfV[jj] - v0;
 	j = static_cast<TScalar>(jj) + (sample.y - v0) / condPdfV;
 
-	pdf = margPdfU * condPdfV * (resolution_.x * resolution_.y) / (4 * TNumTraits::pi);
+	pdf = margPdfU * condPdfV * static_cast<TScalar>(resolution_.x * resolution_.y) / (4 * TNumTraits::pi);
 }
 
 

@@ -232,13 +232,14 @@ const Spectral DirectLighting::traceDirect(
 			{
 				continue;
 			}
-			const Spectral radiance = RayTracer::estimateLightContribution(
+			Spectral radiance = RayTracer::estimateLightContribution(
 				sample, bsdf, *light,
 				Sample::TSubSequence2D(lightSamples + k, lightSamples + k + 1),
 				Sample::TSubSequence2D(bsdfSamples + k, bsdfSamples + k + 1),
 				Sample::TSubSequence1D(componentSamples + k, componentSamples + k + 1),
 				point, normal, omega);
-			result += radiance / static_cast<Spectral::TValue>(n * pdf);
+			radiance /= static_cast<Spectral::TValue>(n) * static_cast<Spectral::TValue>(pdf);
+			result += radiance;
 		}
 	}
 
@@ -310,7 +311,7 @@ const Spectral DirectLighting::traceSpecularAndGlossy(
 			TScalar t;
 			TScalar a;
 			const Spectral reflected = castRay(sample, reflectedRay, t, a, highQuality && (out.usedCaps & Bsdf::capsSpecular));
-			result += out.value * reflected * static_cast<Spectral::TValue>(a * num::abs(out.omegaOut.z) / (n * out.pdf));
+			result += out.value * reflected * static_cast<Spectral::TValue>(a * num::abs(out.omegaOut.z) / (static_cast<TScalar>(n) * out.pdf));
 		}
 	}
 	//*
@@ -342,7 +343,7 @@ const Spectral DirectLighting::traceSpecularAndGlossy(
 			TScalar t;
 			TScalar a;
 			const Spectral transmitted = castRay(sample, transmittedRay, t, a, highQuality && (out.usedCaps & Bsdf::capsSpecular));
-			result += out.value * transmitted * static_cast<Spectral::TValue>(a * num::abs(out.omegaOut.z) / (n * out.pdf));
+			result += out.value * transmitted * static_cast<Spectral::TValue>(a * num::abs(out.omegaOut.z) / (static_cast<TScalar>(n) * out.pdf));
 		}
 	}
 	/**/
@@ -395,7 +396,7 @@ const Spectral DirectLighting::traceSingleScattering(const Sample& sample, const
 			continue;
 		}
 		const Spectral transShadow = medium->transmittance(sample, shadowRay);
-		result += transRay * transShadow * phase * radiance / static_cast<Spectral::TValue>(n * tPdf * lightPdf * surfacePdf);
+		result += transRay * transShadow * phase * radiance / static_cast<Spectral::TValue>(static_cast<TScalar>(n) * tPdf * lightPdf * surfacePdf);
 	}
 
 	return result;

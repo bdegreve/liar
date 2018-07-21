@@ -59,7 +59,7 @@ public:
 		{
 			const size_t r = i % base_;
 			i /= base_;
-			result += scrambler[r] * weight;
+			result += static_cast<TScalar>(scrambler[r]) * weight;
 			weight *= invBase;
 		}
 		return result;

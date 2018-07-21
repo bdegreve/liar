@@ -72,7 +72,6 @@ bool readResolution(io::BinaryIStream& stream, TResolution2D& resolution)
 
 void writeSample(io::BinaryOStream& stream, const OutputSample& sample)
 {
-	typedef OutputSample::TValue TValue;
 	const TToken command = scSample;
 	const TPoint2D& screenCoordinate = sample.screenCoordinate();
 	const XYZ& radiance = sample.radiance();

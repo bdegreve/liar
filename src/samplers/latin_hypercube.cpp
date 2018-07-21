@@ -123,7 +123,7 @@ void LatinHypercube::doSetResolution(const TResolution2D& resolution)
 void LatinHypercube::doSetSamplesPerPixel(size_t samplesPerPixel)
 {
 	samplesPerPixel_ = samplesPerPixel; 
-	stratumSize_ = TNumTraits::one / samplesPerPixel_;
+	stratumSize_ = num::inv(static_cast<TScalar>(samplesPerPixel_));
 	timeStrata_.resize(samplesPerPixel_);
 	wavelengthStrata_.resize(samplesPerPixel_);
 	screenStrataX_.resize(samplesPerPixel_);
@@ -206,7 +206,7 @@ void LatinHypercube::doSampleSubSequence1D(const TResolution2D&, size_t subPixel
 	if (subPixel == 0)
 	{
 		subSequences1d_[i].resize(size);
-		const TScalar scale = TNumTraits::one / size;
+		const TScalar scale = num::inv(static_cast<TScalar>(size));
 
 		// generate interleaved samples: stratum1,subpixel1, stratum1,subpixel2, ... stratum2,subpixel1,stratum2,subpixel2
 		TSubSequence1D::iterator p = subSequences1d_[i].begin();
@@ -216,7 +216,7 @@ void LatinHypercube::doSampleSubSequence1D(const TResolution2D&, size_t subPixel
 			TSubSequence1D::iterator start = p;
 			for (size_t dk = 0; dk < nSubPixels; ++dk)
 			{
-				*p++ = ((k * nSubPixels + dk) + jitterGenerator_()) * scale;
+				*p++ = (static_cast<TScalar>(k * nSubPixels + dk) + jitterGenerator_()) * scale;
 			}
 			std::random_shuffle(start, p, numberGenerator_);
 		}
@@ -224,7 +224,7 @@ void LatinHypercube::doSampleSubSequence1D(const TResolution2D&, size_t subPixel
 
 	// pick a subpixel worth of samples
 	//
-	LASS_ASSERT(last - first == subSeqSize);
+	LASS_ASSERT(last - first == static_cast<std::ptrdiff_t>(subSeqSize));
 	const TSubSequence1D& subSequence = subSequences1d_[i];
 	for (size_t k = 0; k < subSeqSize; ++k)
 	{
@@ -251,7 +251,7 @@ void LatinHypercube::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixe
 	if (subPixel == 0)
 	{
 		subSequences2d_[i].resize(size);
-		const TScalar scale = TNumTraits::one / size;
+		const TScalar scale = num::inv(static_cast<TScalar>(size));
 
 		// generate interleaved samples: stratum1,subpixel1, stratum1,subpixel2, ... stratum2,subpixel1,stratum2,subpixel2
 		TSubSequence2D::iterator p = subSequences2d_[i].begin();
@@ -261,8 +261,8 @@ void LatinHypercube::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixe
 			TSubSequence2D::iterator start = p;
 			for (size_t dk = 0; dk < nSubPixels; ++dk)
 			{
-				p->x = ((k * nSubPixels + dk) + jitterGenerator_()) * scale;
-				p->y = ((k * nSubPixels + dk) + jitterGenerator_()) * scale;
+				p->x = (static_cast<TScalar>(k * nSubPixels + dk) + jitterGenerator_()) * scale;
+				p->y = (static_cast<TScalar>(k * nSubPixels + dk) + jitterGenerator_()) * scale;
 				++p;
 			}
 			
@@ -274,7 +274,7 @@ void LatinHypercube::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixe
 
 	// pick a subpixel worth of samples
 	//
-	LASS_ASSERT(last - first == subSeqSize);
+	LASS_ASSERT(last - first == static_cast<std::ptrdiff_t>(subSeqSize));
 	const TSubSequence2D& subSequence = subSequences2d_[i];
 	for (size_t k = 0; k < subSeqSize; ++k)
 	{

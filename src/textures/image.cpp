@@ -328,9 +328,9 @@ void Image::makeMipMaps(MipMapping mode) const
 		numLevelsV = 1;
 		for (size_t i = 1; i < numLevelsU; ++i)
 		{
-			const TScalar scale = TNumTraits::one / (1 << i);
-			const size_t width = static_cast<size_t>(num::floor(scale * resolution_.x));
-			const size_t height = static_cast<size_t>(num::floor(scale * resolution_.y));
+			const TScalar scale = num::inv(static_cast<TScalar>(1 << i));
+			const size_t width = static_cast<size_t>(num::floor(scale * static_cast<TScalar>(resolution_.x)));
+			const size_t height = static_cast<size_t>(num::floor(scale * static_cast<TScalar>(resolution_.y)));
 			MipMapLevel temp = makeMipMap(mipMaps.back(), 'x', width);
 			mipMaps.push_back(makeMipMap(temp, 'y', height));
 		}
@@ -444,9 +444,9 @@ Image::MipMapLevel Image::makeMipMapOdd(
 		const size_t k0 = 2 * k;
 		const size_t k1 = k0 + 1;
 		const size_t k2 = k0 + 2;
-		const TValue w0 = scale * (newSize - k);
-		const TValue w1 = scale * newSize;
-		const TValue w2 = scale * (k + 1);
+		const TValue w0 = scale * static_cast<TValue>(newSize - k);
+		const TValue w1 = scale * static_cast<TValue>(newSize);
+		const TValue w2 = scale * static_cast<TValue>(k + 1);
 
 		if (compressX)
 		{
@@ -502,8 +502,8 @@ const Image::TPixel Image::nearest(size_t levelU, size_t levelV, const TPoint2D&
 	const MipMapLevel& mipMap = mipMaps_[levelV * numLevelsU_ + levelU];
 	
 	const TResolution2D& res = mipMap.resolution();
-	const TScalar x = num::fractional(uv.x) * res.x;
-	const TScalar y = num::fractional(1.f - uv.y) * res.y;
+	const TScalar x = num::fractional(uv.x) * static_cast<TScalar>(res.x);
+	const TScalar y = num::fractional(1.f - uv.y) * static_cast<TScalar>(res.y);
 	const size_t x0 = static_cast<size_t>(num::floor(x));
 	const size_t y0 = static_cast<size_t>(num::floor(y));
 	
@@ -519,8 +519,10 @@ const Image::TPixel Image::bilinear(size_t levelU, size_t levelV, const TPoint2D
 	const MipMapLevel& mipMap = mipMaps_[levelV * numLevelsU_ + levelU];
 
 	const TResolution2D& res = mipMap.resolution();
-	const TScalar x = num::mod(uv.x * res.x - .5f, static_cast<TScalar>(res.x));
-	const TScalar y = num::mod((1 - uv.y) * res.y - .5f, static_cast<TScalar>(res.y));
+	const TScalar nx = static_cast<TScalar>(res.x);
+	const TScalar ny = static_cast<TScalar>(res.y);
+	const TScalar x = num::mod(uv.x * nx - .5f, nx);
+	const TScalar y = num::mod((1 - uv.y) * ny - .5f, ny);
 	const TScalar x0 = num::floor(x);
 	const TScalar y0 = num::floor(y);
 	const TValue dx = static_cast<TValue>(x - x0);

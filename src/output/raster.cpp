@@ -520,8 +520,8 @@ void Raster::doWriteRender(const OutputSample* first, const OutputSample* last)
             const TPoint2D& position = first->screenCoordinate();
             if (position.x >= 0 && position.y >= 0)
             {
-                const size_t i = static_cast<size_t>(num::floor(position.x * resolution_.x));
-                const size_t j = static_cast<size_t>(num::floor(position.y * resolution_.y));
+                const size_t i = static_cast<size_t>(num::floor(position.x * static_cast<TScalar>(resolution_.x)));
+                const size_t j = static_cast<size_t>(num::floor(position.y * static_cast<TScalar>(resolution_.y)));
                 if (i < resolution_.x && j < resolution_.y)
                 {
                     const size_t k = j * resolution_.x + i;
@@ -577,7 +577,7 @@ Raster::TValue Raster::averageSceneLuminance() const
     {
         return 0;
     }
-    const TValue avgLogY = sumLogY / coverage;
+    const TValue avgLogY = sumLogY / static_cast<TValue>(coverage);
     return num::exp(avgLogY);
 }
 

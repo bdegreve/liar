@@ -67,7 +67,7 @@ const Spectral Frequency::doLookUp(const Sample& sample, const IntersectionConte
 
 Texture::TValue Frequency::doScalarLookUp(const Sample& sample, const IntersectionContext&) const
 {
-	const TWavelength c0 = 299792458; // speed of light in vacuum
+	const TWavelength c0 = static_cast<TWavelength>(299792458); // speed of light in vacuum
 	return static_cast<TValue>(c0 / sample.wavelength());
 }
 

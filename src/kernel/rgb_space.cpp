@@ -415,7 +415,6 @@ void RgbSpace::init(
 
 	// first, make matrix M_XYZ that will transform from linear (R,G,B) to (X,Y,Z) 
 
-	const TScalar zero = 0;
 	const TScalar z_r = 1 - red.x - red.y;
 	const TScalar z_g = 1 - green.x - green.y;
 	const TScalar z_b = 1 - blue.x - blue.y;

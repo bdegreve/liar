@@ -129,7 +129,7 @@ void Stratifier::doSetSamplesPerPixel(size_t samplesPerPixel)
 	}
 
 	strataPerPixel_ = strataPerAxis * strataPerAxis;
-	stratum1DSize_ = TNumTraits::one / strataPerPixel_;
+	stratum1DSize_ = num::inv(static_cast<TScalar>(strataPerPixel_));
 	stratum2DSize_ = TVector2D(TNumTraits::one, TNumTraits::one) / static_cast<TScalar>(strataPerAxis);
 	timeStrata_.resize(strataPerPixel_);
 	wavelengthStrata_.resize(strataPerPixel_);
@@ -215,7 +215,7 @@ void Stratifier::doSampleSubSequence1D(const TResolution2D&, size_t subPixel, TS
 	if (subPixel == 0)
 	{
 		subSequences1d_[i].resize(size);
-		const TScalar scale = TNumTraits::one / size;
+		const TScalar scale = num::inv(static_cast<TScalar>(size));
 
 		// generate interleaved samples: stratum1,subpixel1, stratum1,subpixel2, ... stratum2,subpixel1,stratum2,subpixel2
 		TSubSequence1D::iterator p = subSequences1d_[i].begin();	
@@ -225,7 +225,7 @@ void Stratifier::doSampleSubSequence1D(const TResolution2D&, size_t subPixel, TS
 			TSubSequence1D::iterator start = p;
 			for (size_t dk = 0; dk < nSubPixels; ++dk)
 			{
-				*p++ = ((k * nSubPixels + dk) + jitterGenerator_()) * scale;
+				*p++ = (static_cast<TScalar>(k * nSubPixels + dk) + jitterGenerator_()) * scale;
 			}
 			std::random_shuffle(start, p, numberGenerator_);
 		}
@@ -233,7 +233,7 @@ void Stratifier::doSampleSubSequence1D(const TResolution2D&, size_t subPixel, TS
 
 	// pick a subpixel worth of samples
 	//
-	LASS_ASSERT(last - first == subSeqSize);
+	LASS_ASSERT(last - first == static_cast<std::ptrdiff_t>(subSeqSize));
 	const TSubSequence1D& subSequence = subSequences1d_[i];	
 	for (size_t k = 0; k < subSeqSize; ++k)
 	{
@@ -263,7 +263,7 @@ void Stratifier::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixel), 
 		LASS_ASSERT(sqrtNSubPixels * sqrtNSubPixels == nSubPixels);
 		const size_t sqrtSubSeqSize = static_cast<size_t>(num::sqrt(static_cast<double>(subSeqSize)));
 		LASS_ASSERT(sqrtSubSeqSize * sqrtSubSeqSize == subSeqSize);
-		const TScalar scale = TNumTraits::one / (sqrtNSubPixels * sqrtSubSeqSize);
+		const TScalar scale = num::inv(static_cast<TScalar>(sqrtNSubPixels * sqrtSubSeqSize));
 
 		// generate interleaved samples: stratum1,subpixel1, stratum1,subpixel2, ... stratum2,subpixel1,stratum2,subpixel2
 		TSubSequence2D::iterator p = subSequences2d_[i].begin();	
@@ -277,8 +277,8 @@ void Stratifier::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixel), 
 				{
 					for (size_t dv = 0; dv < sqrtNSubPixels; ++dv)
 					{
-						p->x = ((u * sqrtNSubPixels + du) + jitterGenerator_()) * scale;
-						p->y = ((v * sqrtNSubPixels + dv) + jitterGenerator_()) * scale;
+						p->x = (static_cast<TScalar>(u * sqrtNSubPixels + du) + jitterGenerator_()) * scale;
+						p->y = (static_cast<TScalar>(v * sqrtNSubPixels + dv) + jitterGenerator_()) * scale;
 						++p;
 					}
 				}
@@ -289,7 +289,7 @@ void Stratifier::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixel), 
 
 	// pick a subpixel worth of samples
 	//
-	LASS_ASSERT(last - first == subSeqSize);
+	LASS_ASSERT(last - first == static_cast<std::ptrdiff_t>(subSeqSize));
 	const TSubSequence2D& subSequence = subSequences2d_[i];		
 	for (size_t k = 0; k < subSeqSize; ++k)
 	{
@@ -305,8 +305,10 @@ size_t Stratifier::doRoundSize2D(size_t requestedSize) const
 	const TScalar realSqrt = num::sqrt(static_cast<TScalar>(requestedSize));
 	const size_t lowSqrt = static_cast<size_t>(num::floor(realSqrt));
 	const size_t highSqrt = lowSqrt + 1;
-
-	return (realSqrt - lowSqrt) < (highSqrt - requestedSize) ? num::sqr(lowSqrt) : num::sqr(highSqrt);
+	const size_t lowSize = num::sqr(lowSqrt);
+	const size_t highSize = num::sqr(highSqrt);
+	LASS_ASSERT(requestedSize >= lowSqrt && requestedSize <= highSize);
+	return (requestedSize - lowSqrt) < (highSize - requestedSize) ? lowSize : highSize;
 }
 
 

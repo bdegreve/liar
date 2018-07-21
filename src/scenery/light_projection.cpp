@@ -207,7 +207,7 @@ const Spectral LightProjection::doSampleEmission(const Sample& sample, const TPo
 	const TRay3D ray = projection_->ray(u, v, pdfB);
 	emissionRay = BoundedRay(ray, tolerance);
 
-	pdf = (pdfA * resolution_.x * resolution_.y) * pdfB;
+	pdf = (pdfA * static_cast<TScalar>(resolution_.x * resolution_.y)) * pdfB;
 
 	Intersection intersection(this, 1, seNoEvent);
 	IntersectionContext context(*this, sample, ray, intersection, 0);
@@ -278,7 +278,7 @@ void LightProjection::buildPdf(TMap& pdfMap, TScalar& power, util::ProgressIndic
 			const TScalar intensity = intensity_->scalarLookUp(dummy, context);
 
 			tempPdf[i * resolution_.y + j] = intensity;
-			totalPower += intensity / (pdf * n);
+			totalPower += intensity / (pdf * static_cast<TScalar>(n));
 		}
 	}
 
@@ -296,7 +296,7 @@ void LightProjection::buildCdf(const TMap& pdf, TMap& oMarginalCdfU, TMap& oCond
 
 	for (size_t i = 0; i < resolution_.x; ++i)
 	{
-		progress(.5 + .5 * static_cast<TScalar>(i) / resolution_.x);
+		progress(.5 + .5 * static_cast<double>(i) / static_cast<double>(resolution_.x));
 		const TScalar* pdfLine = &pdf[i * resolution_.y];
 		TMap::iterator condCdfV = conditionalCdfV.begin() + i * resolution_.y;
 		std::partial_sum(pdfLine, pdfLine + resolution_.y, condCdfV);

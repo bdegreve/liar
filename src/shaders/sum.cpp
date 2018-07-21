@@ -153,7 +153,7 @@ BsdfOut Sum::SumBsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omeg
 	}
 	if (usedComponents)
 	{
-		out.pdf /= usedComponents;
+		out.pdf /= static_cast<TScalar>(usedComponents);
 	}
 	return out;
 }
@@ -188,8 +188,8 @@ SampleBsdfOut Sum::SumBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& s
 		return SampleBsdfOut();
 	}
 
-	const size_t n = activeComponents_.size();
-	const size_t k = std::min(static_cast<size_t>(num::floor(n * componentSample)), n - 1);
+	const TScalar n = static_cast<TScalar>(activeComponents_.size());
+	const size_t k = std::min(static_cast<size_t>(num::floor(n * componentSample)), activeComponents_.size() - 1);
 
 	SampleBsdfOut out = activeComponents_[k]->sample(omegaIn, sample, componentSample, allowedCaps);
 	out.pdf /= n;

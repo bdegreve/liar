@@ -615,7 +615,7 @@ size_t PhotonMapper::fillPhotonMaps(const TSamplerProgressivePtr& sampler, const
 			emitPhoton(*light, pdf, sample, secondarySeed);
 		}
 
-		progress(std::min(1., static_cast<double>(globalBuffer.size()) / globalMapSize_));
+		progress(std::min(1., static_cast<double>(globalBuffer.size()) / static_cast<double>(globalMapSize_)));
 
 		++photonsShot;
 	}
@@ -822,7 +822,7 @@ void PhotonMapper::buildPhotonMap(MapType type, PhotonBuffer& buffer, PhotonMap&
 				estimationTolerance_[type] = 0.05f;
 			}
 			const TScalar medianPower = powers[powers.size() / 2];
-			const TScalar estimationArea = estimationSize_[type] * medianPower / estimationTolerance_[type];
+			const TScalar estimationArea = static_cast<TScalar>(estimationSize_[type]) * medianPower / estimationTolerance_[type];
 			if (type == mtVolume)
 			{
 				estimationRadius_[type] = num::pow(estimationArea * 3.f / 16.f, TNumTraits::one / 3) / TNumTraits::pi;
@@ -873,7 +873,7 @@ private:
 			size_t newCurrent = current_;
 			if (newCurrent > oldCurrent)
 			{
-				progress_(newCurrent / static_cast<TScalar>(max_));
+				progress_(static_cast<double>(newCurrent) / static_cast<double>(max_));
 				oldCurrent = newCurrent;
 			}
 			util::Thread::sleep(100);
@@ -1117,7 +1117,8 @@ const Spectral PhotonMapper::gatherIndirect(
 		pTotal = 1;
 		/**/
 		LASS_ENFORCE(pTotal > 0);
-		std::transform(grid_.begin(), grid_.end(), grid_.begin(), std::bind2nd(std::plus<TScalar>(), alpha * pTotal / num::sqr(gridSize)));
+		std::transform(grid_.begin(), grid_.end(), grid_.begin(), 
+			std::bind2nd(std::plus<TScalar>(), alpha * pTotal / static_cast<TScalar>(num::sqr(gridSize))));
 		gatherDistribution_.reset(grid_.begin(), grid_.end(), gridSize, gridSize);
 	}
 
@@ -1149,7 +1150,7 @@ const Spectral PhotonMapper::gatherIndirect(
 		const bool gatherVolumetric = (volumetricGatherQuality_ > 0) && (*firstVolumetricSample <= volumetricGatherQuality_);
 		const Spectral radiance = traceGatherRay(sample, ray, gatherVolumetric, gatherStage, context.rayGeneration() + 1);
 
-		result += radiance * out.value * static_cast<Spectral::TValue>(num::abs(out.omegaOut.z) / (n * out.pdf));
+		result += radiance * out.value * static_cast<Spectral::TValue>(num::abs(out.omegaOut.z) / (static_cast<TScalar>(n) * out.pdf));
 	}
 	return result;
 }
@@ -1409,8 +1410,6 @@ namespace temp
 
 const Spectral PhotonMapper::estimateVolumetric(const Sample& sample, const kernel::BoundedRay& ray, bool dropDirectPhotons) const
 {
-	typedef Sample::TSubSequence1D::difference_type difference_type;
-
 	const Medium* medium = mediumStack().medium();
 	if (shared_->volumetricMap_.isEmpty() || !medium || ray.isEmpty())
 	{
