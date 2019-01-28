@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(liar)
+project(liar VERSION 0.2.0)
 list(APPEND CMAKE_MODULE_PATH "${liar_SOURCE_DIR}/cmake")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${liar_BINARY_DIR}/bin")
