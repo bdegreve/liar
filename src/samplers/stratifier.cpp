@@ -209,7 +209,7 @@ void Stratifier::doSampleSubSequence1D(const TResolution2D&, size_t subPixel, TS
 	if (i >= subSequences1d_.size())
 	{
 		LASS_ENFORCE(subPixel == 0);
-		subSequences1d_.resize(i);
+		subSequences1d_.resize(i + 1);
 	}		
 
 	if (subPixel == 0)
