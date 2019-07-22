@@ -1,3 +1,1 @@
-add_liar_module(scenery 
-	IGNORE "aabb_tree.cpp$"
-	)
+add_liar_module(scenery)
