@@ -186,6 +186,7 @@ function(add_liar_module_ex name)
 		PROPERTIES
 		COMPILE_FLAGS "${liar_CFLAGS}"
 		LINK_FLAGS "${liar_LDFLAGS}"
+		DEBUG_POSTFIX "${Lass_PYTHON_DEBUG_POSTFIX}"
 		)
 	if (WIN32)
 		set_target_properties(
