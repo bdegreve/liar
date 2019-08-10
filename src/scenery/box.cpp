@@ -140,7 +140,7 @@ bool Box::doIsIntersecting(const Sample&, const BoundedRay& ray) const
 namespace impl
 {
 
-bool intersectSlab(TScalar min, TScalar max, TScalar support, TScalar direction, prim::XYZ axis, TScalar& tNear, TScalar& tFar, prim::XYZ& axisFar, prim::XYZ& axisNear)
+bool intersectSlab(TScalar min, TScalar max, TScalar support, TScalar direction, prim::XYZ axis, TScalar& tNear, TScalar& tFar, prim::XYZ& axisNear, prim::XYZ& axisFar)
 {
 	if (direction == 0)
 	{
@@ -190,9 +190,9 @@ bool intersect(const TAabb3D& box, const BoundedRay& ray, TScalar& t, prim::XYZ&
 	TScalar tFar = TNumTraits::infinity;
 	prim::XYZ axisNear, axisFar;
 
-	if (!intersectSlab(min[0], max[0], support[0], direction[0], 0, tNear, tFar, axisNear, axisFar)) return false;
-	if (!intersectSlab(min[1], max[1], support[1], direction[1], 1, tNear, tFar, axisNear, axisFar)) return false;
-	if (!intersectSlab(min[2], max[2], support[2], direction[2], 2, tNear, tFar, axisNear, axisFar)) return false;
+	if (!intersectSlab(min.x, max.x, support.x, direction.x, 0, tNear, tFar, axisNear, axisFar)) return false;
+	if (!intersectSlab(min.y, max.y, support.y, direction.y, 1, tNear, tFar, axisNear, axisFar)) return false;
+	if (!intersectSlab(min.z, max.z, support.z, direction.z, 2, tNear, tFar, axisNear, axisFar)) return false;
 
 	if (tNear > ray.nearLimit())
 	{
