@@ -46,6 +46,7 @@
 #include "projection_mapping.h"
 #include "ray_generation.h"
 #include "screen_space.h"
+#include "sky_blend.h"
 #include "sum.h"
 #include "time.h"
 #include "transformation_uv.h"
