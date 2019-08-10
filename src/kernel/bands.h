@@ -221,6 +221,14 @@ public:
 		}
 		return *this;
 	}
+    Bands& inpsin()
+    {
+        for (size_t i = 0; i < N; ++i)
+        {
+            v_[i] = num::sin(v_[i]);
+        }
+        return *this;
+    }
 
 	TValue dot(const Bands& other) const
 	{
@@ -320,6 +328,7 @@ public:
 	Bands& inpexp() { v_ = num::exp(v_); return *this; }
 	Bands& inpclamp(TParam min, TParam max) { v_ = num::clamp(v_, min, max); return *this; }
 	Bands& inplerp(const Bands& other, TParam f) { v_ = num::lerp(v_, other.v_, f); return *this; }
+    Bands& inpsin() { v_ = num::sin(v_); return *this; }
 
 	TValue dot(const Bands& other) const { return v_ * other.v_; }
 	TValue average() const { return v_; }
@@ -510,6 +519,13 @@ public:
 		v_[2] = num::lerp(v_[2], other.v_[2], f);
 		return *this;
 	}
+    Bands& inpsin()
+    {
+        v_[0] = num::sin(v_[0]);
+        v_[1] = num::sin(v_[1]);
+        v_[2] = num::sin(v_[2]);
+        return *this;
+    }
 
 	TValue dot(const Bands& other) const
 	{

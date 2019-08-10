@@ -156,6 +156,7 @@ public:
 	Spectral& inpexp() { v_.inpexp(); return *this; }
 	Spectral& inpclamp(TParam min, TParam max) { v_.inpclamp(min, max); return *this; }
 	Spectral& inplerp(const Spectral& other, TParam f) { v_.inplerp(other.v_, f); return *this; }
+    Spectral& inpsin() { v_.inpsin(); return *this; }
 
 	bool operator==(const Spectral& other) const { return v_ == other.v_; }
 
@@ -270,6 +271,12 @@ inline Spectral lerp(const Spectral& a, const Spectral& b, Spectral::TParam f)
 {
 	Spectral r(a);
 	return r.inplerp(b, f);
+}
+
+inline Spectral sin(const Spectral& a)
+{
+    Spectral r(a);
+    return r.inpsin();
 }
 
 inline Spectral::TValue average(const Spectral& a)
