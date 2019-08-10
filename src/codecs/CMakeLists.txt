@@ -17,9 +17,9 @@ if (JPEG_FOUND)
 endif()
 
 # openexr 1.6.1: http://www.openexr.com/
-find_package(OpenEXR COMPONENTS Half Iex IlmImf IlmThread)
+find_package(OpenEXR)
 if (OPENEXR_FOUND)
-	add_liar_codec(openexr ${OpenEXR_LIBRARIES})
+	add_liar_codec(openexr OpenEXR::IlmImf)
 	set_property(
 		TARGET openexr
 		APPEND PROPERTY INCLUDE_DIRECTORIES
