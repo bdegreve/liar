@@ -18,13 +18,19 @@
 # http://liar.bramz.net/
 
 
+try:
+    from io import StringIO
+except ImportError:
+    from cStringIO import StringIO
+
+
 def load(fp):
     from liar.spectra import Sampled
     valid_line = lambda line: line and not line.startswith('#') and not line.startswith(';')
 
     lines = filter(valid_line, (line.strip() for line in fp))
     records = (map(float, line.split()) for line in lines)
-    columns = zip(*records)
+    columns = tuple(zip(*records))
     wavelengths = columns[0]
     if any(w > 1 for w in wavelengths):
         # assume wavelengths in nanometers, convert to meters
@@ -33,7 +39,6 @@ def load(fp):
 
 
 def loads(s):
-    from cStringIO import StringIO
     fp = StringIO(s)
     return load(fp)
 
