@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -21,10 +21,10 @@
  *  http://liar.bramz.net/
  */
 
-/** @class liar::shaders::Mirror
- *  @brief very simple shader with perfect specular reflection,
- *  @author Bram de Greve [Bramz]
- */
+ /** @class liar::shaders::Mirror
+  *  @brief very simple shader with perfect specular reflection,
+  *  @author Bram de Greve [Bramz]
+  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_SHADERS_MIRROR_H
 #define LIAR_GUARDIAN_OF_INCLUSION_SHADERS_MIRROR_H
@@ -38,7 +38,7 @@ namespace liar
 namespace shaders
 {
 
-class LIAR_SHADERS_DLL Mirror: public Shader
+class LIAR_SHADERS_DLL Mirror : public Shader
 {
 	PY_HEADER(Shader)
 public:
@@ -49,26 +49,31 @@ public:
 	const TTexturePtr& reflectance() const;
 	void setReflectance(const TTexturePtr& reflectance);
 
-	class Bsdf: public kernel::Bsdf
+	const TTexturePtr& fuzz() const;
+	void setFuzz(const TTexturePtr& reflectance);
+
+	class Bsdf : public kernel::Bsdf
 	{
 	public:
-		Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& reflectance);
+		Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& reflectance, TScalar fuzz, TBsdfCaps caps);
 	private:
-		BsdfOut doEvaluate(const TVector3D& k1, const TVector3D& k2, TBsdfCaps allowedCaps) const;
-		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
+		BsdfOut doEvaluate(const TVector3D& k1, const TVector3D& k2, TBsdfCaps allowedCaps) const override;
+		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const override;
 		Spectral reflectance_;
+		TScalar fuzz_;
 	};
 
 private:
 
-	size_t doNumReflectionSamples() const;
+	size_t doNumReflectionSamples() const override;
 
-	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
+	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const override;
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	TTexturePtr reflectance_;
+	TTexturePtr fuzz_;
 };
 
 }
