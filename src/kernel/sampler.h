@@ -78,8 +78,8 @@ public:
 	TSubSequenceId requestSubSequence2D(size_t requestedSize);
 	size_t numSubSequences1D() const;
 	size_t numSubSequences2D() const;
-	size_t subSequenceSize1D(TSubSequenceId id) const { return subSequenceSize1D_[static_cast<size_t>(id)]; }
-	size_t subSequenceSize2D(TSubSequenceId id) const { return subSequenceSize2D_[static_cast<size_t>(id)]; }
+	size_t subSequenceSize1D(TSubSequenceId id) const { return id >= 0 ? subSequenceSize1D_[static_cast<size_t>(id)] : 0; }
+	size_t subSequenceSize2D(TSubSequenceId id) const { return id >= 0 ? subSequenceSize2D_[static_cast<size_t>(id)] : 0; }
 	void clearSubSequenceRequests();
 
 	void seed(TSeed randomSeed) { doSeed(randomSeed); }
