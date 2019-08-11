@@ -259,8 +259,8 @@ const Spectral LightSky::doEmission(const Sample& sample, const TRay3D& ray, Bou
 	const TScalar ny = static_cast<TScalar>(resolution_.y);
 
 	const TVector3D dir = ray.direction();
+	LASS_ASSERT(num::almostEqual(context.uv().x, num::fractional(num::atan2(dir.y, dir.x) / (2 * TNumTraits::pi)), 1e-5));
 	const TScalar i = context.uv().x * nx;
-	LASS_ASSERT(num::almostEqual(i, num::atan2(dir.y, dir.x) * nx / (2 * TNumTraits::pi), 1e-5));
 	const TScalar j = (dir.z + 1) * ny / 2; // cylindrical coordinate.
 
 	const size_t ii = static_cast<size_t>(num::floor(i > 0 ? i : i + nx)) % resolution_.x;
