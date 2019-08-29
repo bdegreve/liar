@@ -1,5 +1,5 @@
 file(GLOB pyfiles "*.py")
 install(
 	FILES ${pyfiles}
-	DESTINATION tools
+	DESTINATION liar/tools
 	)

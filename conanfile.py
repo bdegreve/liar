@@ -50,3 +50,6 @@ class LiarConan(ConanFile):
     def package(self):
         cmake = self._configure()
         cmake.install()
+
+    def package_info(self):
+        self.env_info.PYTHONPATH.append(self.package_folder)

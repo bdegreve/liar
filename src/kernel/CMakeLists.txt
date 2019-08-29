@@ -13,12 +13,12 @@ if (LCMS2_ENABLE)
 		include_directories(${LCMS2_INCLUDE_DIRS})
 		install(
 			FILES ${LCMS2_REDISTS}
-			DESTINATION .
+			DESTINATION liar
 			CONFIGURATIONS RELEASE MINSIZEREL RELWITHDEBINFO
 			)
 		install(
 			FILES ${LCMS2_DEBUG_REDISTS}
-			DESTINATION .
+			DESTINATION liar
 			CONFIGURATIONS DEBUG
 			)
 	else()
@@ -56,7 +56,7 @@ target_link_libraries(libkernel
 set_precompiled_header(libkernel kernel_common.h kernel_common.cpp)
 install(
 	TARGETS libkernel
-	DESTINATION .
+	DESTINATION liar
 	)
 
 add_liar_module_ex(kernel kernel_init.cpp)

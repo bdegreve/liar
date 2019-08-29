@@ -3,7 +3,7 @@ macro(add_liar_codec name)
 		${name}
 		SRCS "${name}.cpp"
 		LIBS ${ARGN}
-		DESTINATION codecs
+		DESTINATION liar/codecs
 		)
 endmacro()
 
@@ -35,12 +35,12 @@ if (OPENEXR_FOUND)
 	endif()
 	install(
 		FILES ${OpenEXR_REDISTS}
-		DESTINATION codecs
+		DESTINATION liar/codecs
 		CONFIGURATIONS RELEASE MINSIZEREL RELWITHDEBINFO
 		)
 	install(
 		FILES ${OpenEXR_DEBUG_REDISTS}
-		DESTINATION codecs
+		DESTINATION liar/codecs
 		CONFIGURATIONS DEBUG 
 		)
 ENDIF()
@@ -59,5 +59,5 @@ endif()
 file(GLOB pyfiles "*.py")
 install(
 	FILES ${pyfiles}
-	DESTINATION codecs
+	DESTINATION liar/codecs
 	)

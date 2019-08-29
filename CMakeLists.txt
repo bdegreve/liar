@@ -38,7 +38,7 @@ foreach(_config ${_configs})
 	endif()
 	install(
 		FILES "${_location}" "${_location_python}"
-		DESTINATION .
+		DESTINATION liar
 		CONFIGURATIONS ${_config}
 		)
 endforeach()
@@ -52,13 +52,13 @@ include(InstallRequiredSystemLibraries)
 if (CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
 	install(
 		PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
-		DESTINATION .
+		DESTINATION liar
 		)
 endif()
 if (CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_DEBUG)
 	install(
 		PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_DEBUG}
-		DESTINATION .
+		DESTINATION liar
 		)
 endif()
 
@@ -68,7 +68,7 @@ if (Python_EXECUTABLE AND NOT CMAKE_INSTALL_PREFIX)
 		OUTPUT_VARIABLE _python_site_packages
 		OUTPUT_STRIP_TRAILING_WHITESPACE
 	)
-	set (CMAKE_INSTALL_PREFIX "${_python_site_packages}/liar" CACHE PATH "liar install prefix" FORCE)
+	set (CMAKE_INSTALL_PREFIX "${_python_site_packages}" CACHE PATH "liar install prefix" FORCE)
 endif ()
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}")
 
@@ -175,7 +175,7 @@ function(add_liar_module_ex name)
 		"${_prefix}" "${_options}" "${_one_value_keywords}" "${_multi_value_keywords}"
 		"SRCS" ${ARGN})
 	if(NOT _DESTINATION)
-		set(_DESTINATION ".")
+		set(_DESTINATION "liar")
 	endif()
 
 	add_library("${name}" MODULE

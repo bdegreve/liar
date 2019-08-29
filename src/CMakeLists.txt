@@ -23,5 +23,5 @@ add_subdirectory(tracers)
 file(GLOB pyfiles "*.py")
 install(
 	FILES ${pyfiles}
-	DESTINATION .
+	DESTINATION liar
 	)
