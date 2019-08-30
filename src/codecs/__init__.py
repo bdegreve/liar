@@ -5,7 +5,7 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -17,19 +17,20 @@
 #
 # http://liar.bramz.net/
 
-import os.path
+import importlib
+import pkgutil
+import logging
 
-for filename in os.listdir(os.path.dirname(__file__)):
-	module, ext = os.path.splitext(filename)
-	if not ext in ('.py', '.so', '.pyd'):
-		continue
-	if module == '__init__' or module.startswith('lib'):
-		continue
-	if module.endswith('_d'):
-		module = module[:-2]
-	try:
-		__import__(module, globals(), locals(), [])
-	except ImportError:
-		print('Failed to import "liar.codecs.%s"' % module)
+_logger = logging.getLogger(__name__)
+
+for _, name, ispkg in pkgutil.iter_modules(__path__):
+    full_name = "{}.{}".format(__package__, name)
+    if ispkg:
+        _logger.warn("%s not loaded.", full_name)
+        continue
+    try:
+        importlib.import_module(full_name)
+    except ImportError as err:
+        _logger.error("Failed to load %s", full_name, exc_info=1)
 
 # EOF
