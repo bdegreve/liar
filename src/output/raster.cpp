@@ -406,8 +406,10 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
                 for (size_t k = kBegin; k < kEnd; ++k)
                 {
                     const XYZ linear = weighted(k, gain);
-                    const XYZ tonemapped = linear * (-num::expm1(-linear.y) / linear.y);
-                    tonemapBuffer_[k] = destSpace->convert(tonemapped, alphaBuffer_[k]);
+                    const XYZ::TValue scale = linear.y < 1e-8
+                        ? 1 - linear.y / 2
+                        : (-num::expm1(-linear.y) / linear.y);
+                    tonemapBuffer_[k] = destSpace->convert(linear * scale, alphaBuffer_[k]);
                 }
             }
             break;
