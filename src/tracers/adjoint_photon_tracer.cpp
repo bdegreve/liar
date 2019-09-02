@@ -115,7 +115,7 @@ const Spectral AdjointPhotonTracer::tracePhoton(const Sample& sample, const Diff
 			return Spectral(0);
 		}
 		power *= reflectance / static_cast<Spectral::TValue>(pdfOut);
-		const BoundedRay scatteredRay(scatterPoint, ray.direction());
+		const BoundedRay scatteredRay(scatterPoint, dirOut);
 		TScalar t, a;
 		return power * tracePhoton(sample, DifferentialRay(scatteredRay), t, a, generation + 1);
 	}
