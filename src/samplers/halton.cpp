@@ -193,7 +193,11 @@ bool Halton::TaskHalton::doDrawSample(Sampler& sampler, const TimePeriod& period
 	}
 	--samplesLeft_;
 
-	sample.setScreenSample(TSample2D(filmX_(), filmY_()));
+	const TBucket::TPoint filmOffset = sampler.bucket().min();
+	const TBucket::TVector filmDelta = sampler.bucket().size();
+	sample.setScreenSample(TSample2D(
+		filmOffset.x + filmX_() * filmDelta.x, 
+		filmOffset.y + filmY_() * filmDelta.y));
 	sample.setLensSample(TSample2D(lensX_(), lensY_()));
 	sample.setTime(period.interpolate(time_()));
 	sample.setWavelengthSample(wavelength_());
