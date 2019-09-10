@@ -51,6 +51,8 @@ void AdjointPhotonTracer::doRequestSamples(const kernel::TSamplerPtr& sampler)
 	bsdfComponentSample_.clear();
 	lightChoiceSample_.clear();
 	lightSample_.clear();
+	scatterSample_.clear();
+	scatterPhaseSample_.clear();
 
 	for (size_t k = 0; k < maxRayGeneration(); ++k)
 	{
@@ -59,6 +61,8 @@ void AdjointPhotonTracer::doRequestSamples(const kernel::TSamplerPtr& sampler)
 		bsdfComponentSample_.push_back(sampler->requestSubSequence1D(1));
 		lightChoiceSample_.push_back(sampler->requestSubSequence1D(1));
 		lightSample_.push_back(sampler->requestSubSequence2D(1));
+		scatterSample_.push_back(sampler->requestSubSequence1D(1));
+		scatterPhaseSample_.push_back(sampler->requestSubSequence2D(1));
 	}
 }
 
@@ -101,7 +105,8 @@ const Spectral AdjointPhotonTracer::tracePhoton(const Sample& sample, const Diff
 
 	TScalar tScatter, pdf;
 	const BoundedRay mediumRay = bound(ray.centralRay(), ray.nearLimit(), tIntersection);
-	const Spectral transmittance = mediumStack().sampleScatterOutOrTransmittance(sample, uniform(), mediumRay, tScatter, pdf);
+	const Spectral transmittance = mediumStack().sampleScatterOutOrTransmittance(
+		sample, *sample.subSequence1D(scatterSample_[generation]), mediumRay, tScatter, pdf);
 	power *= transmittance / static_cast<Spectral::TValue>(pdf);
 
 	if (tScatter < tIntersection)
@@ -109,7 +114,8 @@ const Spectral AdjointPhotonTracer::tracePhoton(const Sample& sample, const Diff
 		const TPoint3D scatterPoint = ray.point(tScatter);
 		TVector3D dirOut;
 		TScalar pdfOut;
-		const Spectral reflectance = mediumStack().samplePhase(sample, TPoint2D(uniform(), uniform()), scatterPoint, ray.direction(), dirOut, pdfOut);
+		const Spectral reflectance = mediumStack().samplePhase(
+			sample, *sample.subSequence2D(scatterPhaseSample_[generation]), scatterPoint, ray.direction(), dirOut, pdfOut);
 		if (pdfOut <= 0 || !reflectance)
 		{
 			return Spectral(0);

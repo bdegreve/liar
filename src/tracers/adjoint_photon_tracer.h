@@ -67,7 +67,8 @@ private:
 	TSampleIds bsdfComponentSample_;
 	TSampleIds lightChoiceSample_;
 	TSampleIds lightSample_;
-
+	TSampleIds scatterSample_;
+	TSampleIds scatterPhaseSample_;
 
 	mutable TRandom random_;
 };
