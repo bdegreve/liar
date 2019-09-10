@@ -156,6 +156,9 @@ const Spectral AdjointPhotonTracer::shadeSurface(const Sample& sample, const Dif
 			if (out)
 			{
 				const TScalar cosTheta = out.omegaOut.z;
+				MediumChanger mediumChanger(mediumStack(), context.interior(),
+					cosTheta > 0 ? seNoEvent : context.solidEvent());
+
 				const TPoint3D start = target + (cosTheta > 0 ? 10 : -10) * liar::tolerance * context.worldNormal();
 				const BoundedRay newRay(start, context.bsdfToWorld(out.omegaOut), liar::tolerance);
 				TScalar t, a;
