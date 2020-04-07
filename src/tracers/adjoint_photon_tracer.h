@@ -56,6 +56,14 @@ private:
 	const Spectral shadeSurface(const Sample& sample, const DifferentialRay& primaryRay, const Intersection& intersection, size_t generation) const;
 	SampleBsdfOut scatterSurface(const Sample& sample, const TBsdfPtr& bsdf, const TPoint3D& target, const TVector3D& omegaIn, size_t generation) const;
 
+	Sample::TSample1D strategySample(const Sample& sample, size_t generation) const;
+	Sample::TSample2D bsdfSample(const Sample& sample, size_t generation) const;
+	Sample::TSample1D bsdfComponentSample(const Sample& sample, size_t generation) const;
+	Sample::TSample1D lightChoiceSample(const Sample& sample, size_t generation) const;
+	Sample::TSample2D lightSample(const Sample& sample, size_t generation) const;
+	Sample::TSample1D scatterSample(const Sample& sample, size_t generation) const;
+	Sample::TSample2D scatterPhaseSample(const Sample& sample, size_t generation) const;
+
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 

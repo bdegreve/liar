@@ -87,10 +87,18 @@ const Spectral AdjointPhotonTracer::tracePhoton(const Sample& sample, const Diff
 
 	if (generation >= maxRayGeneration())
 	{
-		return Spectral(0);
+		// play russian roulette to see if we continue.
+		const TScalar survivalPdf = 0.5;
+		num::DistributionUniform<TScalar, TRandom> uniform(random_);
+		if (uniform() < survivalPdf)
+		{
+			power /= survivalPdf;
+		}
+		else
+		{
+			return Spectral(0);
+		}	
 	}
-
-	num::DistributionUniform<TScalar, TRandom> uniform(random_);
 
 	Intersection intersection;
 	scene()->intersect(sample, ray, intersection);
@@ -106,7 +114,7 @@ const Spectral AdjointPhotonTracer::tracePhoton(const Sample& sample, const Diff
 	TScalar tScatter, pdf;
 	const BoundedRay mediumRay = bound(ray.centralRay(), ray.nearLimit(), tIntersection);
 	const Spectral transmittance = mediumStack().sampleScatterOutOrTransmittance(
-		sample, *sample.subSequence1D(scatterSample_[generation]), mediumRay, tScatter, pdf);
+		sample, scatterSample(sample, generation), mediumRay, tScatter, pdf);
 	power *= transmittance / static_cast<Spectral::TValue>(pdf);
 
 	if (tScatter < tIntersection)
@@ -115,7 +123,7 @@ const Spectral AdjointPhotonTracer::tracePhoton(const Sample& sample, const Diff
 		TVector3D dirOut;
 		TScalar pdfOut;
 		const Spectral reflectance = mediumStack().samplePhase(
-			sample, *sample.subSequence2D(scatterPhaseSample_[generation]), scatterPoint, ray.direction(), dirOut, pdfOut);
+			sample, scatterPhaseSample(sample, generation), scatterPoint, ray.direction(), dirOut, pdfOut);
 		if (pdfOut <= 0 || !reflectance)
 		{
 			return Spectral(0);
@@ -191,12 +199,11 @@ const Spectral AdjointPhotonTracer::shadeSurface(const Sample& sample, const Dif
 SampleBsdfOut AdjointPhotonTracer::scatterSurface(const Sample& sample, const TBsdfPtr& bsdf, const TPoint3D& target, const TVector3D& omegaIn, size_t generation) const
 {
 	const TScalar strategyPdf = bsdf->hasCaps(Bsdf::capsDiffuse) ? 0.5f : 1.0f;
-	if (*sample.subSequence1D(strategySample_[generation]) < strategyPdf)
+	if (strategySample(sample, generation) < strategyPdf)
 	{
 		// sample BSDF.
-		const TPoint2D sampleBsdf = *sample.subSequence2D(bsdfSample_[generation]);
-		const TScalar sampleComponent = *sample.subSequence1D(bsdfComponentSample_[generation]);
-		SampleBsdfOut out = bsdf->sample(omegaIn, sampleBsdf, sampleComponent, Bsdf::capsAll);
+		SampleBsdfOut out = bsdf->sample(
+			omegaIn, bsdfSample(sample, generation), bsdfComponentSample(sample, generation), Bsdf::capsAll);
 		if (!out)
 		{
 			return out;
@@ -221,16 +228,15 @@ SampleBsdfOut AdjointPhotonTracer::scatterSurface(const Sample& sample, const TB
 	else
 	{
 		TScalar lightPdf;
-		const LightContext* light = lights().sample(*sample.subSequence1D(lightChoiceSample_[generation]), lightPdf);
+		const LightContext* light = lights().sample(lightChoiceSample(sample, generation), lightPdf);
 		if (!light || lightPdf <= 0)
 		{
 			return SampleBsdfOut();
 		}
 
-		const TPoint2D lightSample = *sample.subSequence2D(lightSample_[generation]);
 		BoundedRay shadowRay;
 		TScalar pdf;
-		light->sampleEmission(sample, lightSample, target, shadowRay, pdf);
+		light->sampleEmission(sample, lightSample(sample, generation), target, shadowRay, pdf);
 		if (pdf <= 0)
 		{
 			return SampleBsdfOut();
@@ -250,8 +256,81 @@ SampleBsdfOut AdjointPhotonTracer::scatterSurface(const Sample& sample, const TB
 }
 
 
+Sample::TSample1D AdjointPhotonTracer::strategySample(const Sample& sample, size_t generation) const
+{
+	if (generation < maxRayGeneration())
+	{
+		return *sample.subSequence1D(strategySample_[generation]);
+	}
+	num::DistributionUniform<TScalar, TRandom> uniform(random_);
+	return uniform();
+}
 
 
+Sample::TSample2D AdjointPhotonTracer::bsdfSample(const Sample& sample, size_t generation) const
+{
+	if (generation < maxRayGeneration())
+	{
+		return *sample.subSequence2D(bsdfSample_[generation]);
+	}
+	num::DistributionUniform<TScalar, TRandom> uniform(random_);
+	return Sample::TSample2D(uniform(), uniform());
+}
+
+
+Sample::TSample1D AdjointPhotonTracer::bsdfComponentSample(const Sample& sample, size_t generation) const
+{
+	if (generation < maxRayGeneration())
+	{
+		return *sample.subSequence1D(bsdfComponentSample_[generation]);
+	}
+	num::DistributionUniform<TScalar, TRandom> uniform(random_);
+	return uniform();
+}
+
+
+Sample::TSample1D AdjointPhotonTracer::lightChoiceSample(const Sample& sample, size_t generation) const
+{
+	if (generation < maxRayGeneration())
+	{
+		return *sample.subSequence1D(lightChoiceSample_[generation]);
+	}
+	num::DistributionUniform<TScalar, TRandom> uniform(random_);
+	return uniform();
+}
+
+
+Sample::TSample2D AdjointPhotonTracer::lightSample(const Sample& sample, size_t generation) const
+{
+	if (generation < maxRayGeneration())
+	{
+		return *sample.subSequence2D(lightSample_[generation]);
+	}
+	num::DistributionUniform<TScalar, TRandom> uniform(random_);
+	return Sample::TSample2D(uniform(), uniform());
+}
+
+
+Sample::TSample1D AdjointPhotonTracer::scatterSample(const Sample& sample, size_t generation) const
+{
+	if (generation < maxRayGeneration())
+	{
+		return *sample.subSequence1D(scatterSample_[generation]);
+	}
+	num::DistributionUniform<TScalar, TRandom> uniform(random_);
+	return uniform();
+}
+
+
+Sample::TSample2D AdjointPhotonTracer::scatterPhaseSample(const Sample& sample, size_t generation) const
+{
+	if (generation < maxRayGeneration())
+	{
+		return *sample.subSequence2D(scatterPhaseSample_[generation]);
+	}
+	num::DistributionUniform<TScalar, TRandom> uniform(random_);
+	return Sample::TSample2D(uniform(), uniform());
+}
 
 
 const TRayTracerPtr AdjointPhotonTracer::doClone() const
