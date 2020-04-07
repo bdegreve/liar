@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,6 +52,12 @@ Texture::~Texture()
 {
 }
 
+
+
+bool Texture::isChromatic() const
+{
+	return doIsChromatic();
+}
 
 
 const TTexturePtr& Texture::black()
@@ -128,6 +134,11 @@ Texture::TValue TextureBlack::doScalarLookUp(const Sample&, const IntersectionCo
 	return 0;
 }
 
+bool TextureBlack::doIsChromatic() const
+{
+	return false;
+}
+
 const TPyObjectPtr TextureBlack::doGetState() const
 {
 	return python::makeTuple();
@@ -150,6 +161,11 @@ const Spectral TextureWhite::doLookUp(const Sample&, const IntersectionContext&,
 Texture::TValue TextureWhite::doScalarLookUp(const Sample&, const IntersectionContext&) const
 {
 	return 1;
+}
+
+bool TextureWhite::doIsChromatic() const
+{
+	return false;
 }
 
 const TPyObjectPtr TextureWhite::doGetState() const

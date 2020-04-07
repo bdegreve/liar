@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -63,6 +63,18 @@ Spectral Spectrum::evaluate(const Sample& sample, SpectralType type) const
 }
 
 
+Spectrum::TValue Spectrum::luminance() const
+{
+	return doLuminance();
+}
+
+
+bool Spectrum::isFlat() const
+{
+	return doIsFlat();
+}
+
+
 TSpectrumPtr Spectrum::make(TParam value)
 {
 	return TSpectrumPtr(new impl::SpectrumFlat(value));
@@ -94,6 +106,11 @@ const TPyObjectPtr Spectrum::reduce() const
 		python::makeTuple(), this->getState());
 }
 
+
+bool Spectrum::doIsFlat() const
+{
+	return false;
+}
 
 
 const TPyObjectPtr Spectrum::getState() const
@@ -144,6 +161,11 @@ const Spectral SpectrumFlat::doEvaluate(const Sample&, SpectralType type) const
 SpectrumFlat::TValue SpectrumFlat::doLuminance() const
 {
 	return value_;
+}
+
+bool SpectrumFlat::doIsFlat() const
+{
+	return true;
 }
 
 const TPyObjectPtr SpectrumFlat::doGetState() const

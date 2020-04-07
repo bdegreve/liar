@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -74,6 +74,11 @@ SampleBsdfOut Bsdf::sample(const TVector3D& omegaIn, const TPoint2D& sample, TSc
 }
 
 
+bool Bsdf::isDispersive() const
+{
+	return doIsDispersive();
+}
+
 
 const TVector3D Bsdf::bsdfToWorld(const TVector3D& v) const
 {
@@ -95,6 +100,10 @@ const TVector3D Bsdf::worldToBsdf(const TVector3D& v) const
 
 // --- private -------------------------------------------------------------------------------------
 
+bool Bsdf::doIsDispersive() const
+{
+	return false;
+}
 
 
 // --- free ----------------------------------------------------------------------------------------

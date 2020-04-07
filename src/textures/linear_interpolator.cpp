@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,7 +42,8 @@ PY_CLASS_METHOD(LinearInterpolator, addKey)
 
 LinearInterpolator::LinearInterpolator():
 	keys_(),
-	control_(Texture::black())
+	control_(Texture::black()),
+	isChromatic_(false)
 {
 }
 
@@ -50,7 +51,8 @@ LinearInterpolator::LinearInterpolator():
 
 LinearInterpolator::LinearInterpolator(const TTexturePtr& controlTexture):
 	keys_(),
-	control_(controlTexture)
+	control_(controlTexture),
+	isChromatic_(false)
 {
 }
 
@@ -58,7 +60,8 @@ LinearInterpolator::LinearInterpolator(const TTexturePtr& controlTexture):
 
 LinearInterpolator::LinearInterpolator(const TKeyTextures& keyTextures, const TTexturePtr& controlTexture):
 	keys_(),
-	control_(controlTexture)
+	control_(controlTexture),
+	isChromatic_(false)
 {
 	setKeys(keyTextures);
 }
@@ -89,6 +92,12 @@ void LinearInterpolator::setKeys(const TKeyTextures& keyTextures)
 {
 	keys_ = keyTextures;
 	std::sort(keys_.begin(), keys_.end(), LesserKey());
+
+	isChromatic_ = false;
+	for (TKeyTextures::const_iterator i = keys_.begin(); i != keys_.end(); ++i)
+	{
+		isChromatic_ |= i->second->isChromatic();
+	}
 }
 
 
@@ -109,6 +118,7 @@ void LinearInterpolator::addKey(const TValue keyValue, const TTexturePtr& keyTex
 	TKeyTexture key(keyValue, keyTexture);
 	TKeyTextures::iterator i = std::lower_bound(keys_.begin(), keys_.end(), key, LesserKey());
 	keys_.insert(i, key);
+	isChromatic_ |= keyTexture->isChromatic();
 }
 
 
@@ -184,6 +194,13 @@ Texture::TValue LinearInterpolator::doScalarLookUp(const Sample& sample, const I
 		prevI->second->scalarLookUp(sample, context),
 		i->second->scalarLookUp(sample, context),
 		t);
+}
+
+
+
+bool LinearInterpolator::doIsChromatic() const
+{
+	return isChromatic_;
 }
 
 

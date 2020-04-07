@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -69,6 +69,13 @@ Texture::TValue Frequency::doScalarLookUp(const Sample& sample, const Intersecti
 {
 	const TWavelength c0 = static_cast<TWavelength>(299792458); // speed of light in vacuum
 	return static_cast<TValue>(c0 / sample.wavelength());
+}
+
+
+bool Frequency::doIsChromatic() const
+{
+    // although the value of doLookup obviously depends on the sample's wavelength, it _is_ a flat spectrum.
+    return false;
 }
 
 

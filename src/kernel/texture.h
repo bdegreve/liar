@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -50,6 +50,7 @@ public:
 	typedef Spectral::TValue TValue;
 
 	virtual ~Texture();
+
 	const Spectral lookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
 	{ 
 		return doLookUp(sample, context, type);
@@ -59,6 +60,8 @@ public:
 	{
 		return doScalarLookUp(sample, context);
 	}
+
+	bool isChromatic() const;
 
 	static const TTexturePtr& black();
 	static const TTexturePtr& white();
@@ -78,6 +81,7 @@ private:
 
 	virtual const Spectral doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const = 0;
 	virtual TValue doScalarLookUp(const Sample& sample, const IntersectionContext& context) const = 0;
+	virtual bool doIsChromatic() const = 0;
 
 	static TTexturePtr black_;
 	static TTexturePtr white_;
@@ -95,6 +99,7 @@ namespace impl
 	private:
 		const Spectral doLookUp(const Sample&, const IntersectionContext&, SpectralType) const override;
 		TValue doScalarLookUp(const Sample&, const IntersectionContext&) const override;
+		bool doIsChromatic() const override;
 		const TPyObjectPtr doGetState() const override;
 		void doSetState(const TPyObjectPtr&) override;
 	};
@@ -107,6 +112,7 @@ namespace impl
 	private:
 		const Spectral doLookUp(const Sample&, const IntersectionContext&, SpectralType) const override;
 		TValue doScalarLookUp(const Sample&, const IntersectionContext&) const override;
+		bool doIsChromatic() const override;
 		const TPyObjectPtr doGetState() const override;
 		void doSetState(const TPyObjectPtr&) override;
 	};

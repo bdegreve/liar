@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,20 +37,23 @@ PY_CLASS_MEMBER_RW(Product, factors, setFactors);
 
 // --- public --------------------------------------------------------------------------------------
 
-Product::Product()
+Product::Product():
+	isChromatic_(false)
 {
 }
 
 
 
 Product::Product(const TFactors& factors):
-	factors_(factors)
+	isChromatic_(false)
 {
+	setFactors(factors);
 }
 
 
 
-Product::Product(const TTexturePtr& a, const TTexturePtr& b)
+Product::Product(const TTexturePtr& a, const TTexturePtr& b):
+	isChromatic_(a->isChromatic() || b->isChromatic())
 {
 	factors_.push_back(a);
 	factors_.push_back(b);
@@ -68,6 +71,12 @@ const Product::TFactors& Product::factors() const
 void Product::setFactors(const TFactors& factors)
 {
 	factors_ = factors;
+
+	isChromatic_ = false;
+	for (TFactors::const_iterator i = factors_.begin(); i != factors_.end(); ++i)
+	{
+		isChromatic_ |= (*i)->isChromatic();
+	}
 }
 
 
@@ -98,6 +107,13 @@ Texture::TValue Product::doScalarLookUp(const Sample& sample, const Intersection
 		result *= (*i)->scalarLookUp(sample, context);
 	}
 	return result;
+}
+
+
+
+bool Product::doIsChromatic() const
+{
+	return isChromatic_;
 }
 
 
