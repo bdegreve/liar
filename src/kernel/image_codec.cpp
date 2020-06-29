@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ PY_CLASS_CONSTRUCTOR_0(ImageCodecLass)
 LASS_EXECUTE_BEFORE_MAIN_EX(ImageCodecLass,
 	TImageCodecMap& map = imageCodecs();
 	map[L"tga"] = map[L"targa"] = TImageCodecPtr(new ImageCodecLass);
-	map[L"lass"] = map[L"hdr"] = map[L"pic"] = map[L"rgbe"] = TImageCodecPtr(new ImageCodecLass(false));
+	map[L"lass"] = map[L"hdr"] = map[L"pic"] = map[L"rgbe"] = map[L"pfm"] = TImageCodecPtr(new ImageCodecLass(false));
 	map[L"igi"] = TImageCodecPtr(new ImageCodecLass(false, CIEXYZ));
 )
 
