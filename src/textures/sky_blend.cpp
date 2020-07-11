@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ const Spectral SkyBlend::doLookUp(const Sample& sample, const IntersectionContex
     }
     else
     {
-        return wA * textureA()->lookUp(sample, context, type) + (1 - wA) * textureB()->lookUp(sample, context, type);
+        return Spectral(wA * textureA()->lookUp(sample, context, Illuminant) + (1 - wA) * textureB()->lookUp(sample, context, Illuminant), type);
     }
 }
 

@@ -156,10 +156,10 @@ const Spectral LinearInterpolator::doLookUp(const Sample& sample, const Intersec
 
 	const TValue t = (keyValue - prevI->first) / (i->first - prevI->first);
 	
-	return lerp(
-		prevI->second->lookUp(sample, context, type),
-		i->second->lookUp(sample, context, type),
-		t);
+	return Spectral(lerp(
+		prevI->second->lookUp(sample, context, Illuminant),
+		i->second->lookUp(sample, context, Illuminant),
+		t), type);
 }
 
 

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -47,9 +47,9 @@ Sin::Sin(const TTexturePtr& texture):
 
 // --- private -------------------------------------------------------------------------------------
 
-const Spectral Sin::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
+const Spectral Sin::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType /*type*/) const
 {
-    return abs(texture()->lookUp(sample, context, type));
+    return sin(texture()->lookUp(sample, context, Illuminant));
 }
 
 

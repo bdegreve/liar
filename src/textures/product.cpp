@@ -92,9 +92,9 @@ const Spectral Product::doLookUp(const Sample& sample, const IntersectionContext
 	Spectral result(1);
 	for (TFactors::const_iterator i = factors_.begin(); i != factors_.end(); ++i)
 	{
-		result *= (*i)->lookUp(sample, context, type);
+		result *= (*i)->lookUp(sample, context, Illuminant);
 	}
-	return result;
+	return Spectral(result, type);
 }
 
 

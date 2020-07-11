@@ -93,7 +93,6 @@ Texture::TValue Perlin::noise(const TPoint3D& point) const
 
 const Spectral Perlin::doLookUp(const Sample&, const IntersectionContext& context, SpectralType type) const
 {
-#pragma LASS_TODO("what about type==Reflectant?")
 	return Spectral(noise(context.point()), type);
 }
 

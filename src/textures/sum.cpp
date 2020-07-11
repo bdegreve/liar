@@ -89,7 +89,6 @@ void Sum::setTerms(const TTerms& terms)
 
 const Spectral Sum::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
 {
-#pragma LASS_FIXME("what about type==Reflectant?")
 	if (terms_.empty())
 	{
 		return Spectral();
@@ -97,9 +96,9 @@ const Spectral Sum::doLookUp(const Sample& sample, const IntersectionContext& co
 	Spectral result(0);
 	for (TTerms::const_iterator i = terms_.begin(); i != terms_.end(); ++i)
 	{
-		result += (*i)->lookUp(sample, context, type);
+		result += (*i)->lookUp(sample, context, Illuminant);
 	}
-	return result;
+	return Spectral(result, type);
 }
 
 

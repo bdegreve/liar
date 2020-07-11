@@ -60,7 +60,6 @@ void Frequency::doSetState(const TPyObjectPtr&)
 
 const Spectral Frequency::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
 {
-#pragma LASS_FIXME("what about type==Reflectant?")
 	return Spectral(doScalarLookUp(sample, context), type);
 }
 

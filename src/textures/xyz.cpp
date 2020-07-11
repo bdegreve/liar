@@ -115,12 +115,11 @@ bool Xyz::doIsChromatic() const
 
 const Spectral Xyz::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
 {
-#pragma LASS_FIXME("what about type==Reflectant?")
 	const TPoint3D& p = context.point();
 	const TValue x = num::fractional(static_cast<TValue>(p.x));
 	const TValue y = num::fractional(static_cast<TValue>(p.y));
 	const TValue z = num::fractional(static_cast<TValue>(p.z));
-	return x * a_->lookUp(sample, context, type) + y * b_->lookUp(sample, context, type) + z * c_->lookUp(sample, context, type);
+	return Spectral(x * a_->lookUp(sample, context, Illuminant) + y * b_->lookUp(sample, context, Illuminant) + z * c_->lookUp(sample, context, Illuminant), type);
 }
 
 

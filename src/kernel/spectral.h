@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -80,6 +80,7 @@ public:
 	Spectral();
 	explicit Spectral(TParam f);
 	Spectral(TParam f, SpectralType type);
+	Spectral(const Spectral& other, SpectralType type);
 
 	static Spectral fromXYZ(const XYZ& xyz, const Sample& sample, SpectralType type);
 	static Spectral fromSampled(const TWavelengths& wavelengths, const std::vector<TValue>& values, const Sample& sample, SpectralType type);
