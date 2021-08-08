@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,6 @@
 #include <lass/io/socket.h>
 #include <lass/io/binary_o_socket.h>
 #include <lass/io/binary_i_socket.h>
-#include <lass/util/scoped_ptr.h>
 #include <lass/util/thread.h>
 
 namespace liar
@@ -66,7 +65,7 @@ private:
 	mutable io::BinaryOSocket ostream_;
 	mutable io::BinaryISocket istream_;
 
-	util::ScopedPtr<util::Thread> isCancelingLoop_;
+	std::unique_ptr<util::Thread> isCancelingLoop_;
 	volatile bool isQuiting_;
 	volatile bool isCanceling_;
 };

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -879,7 +879,7 @@ private:
 			util::Thread::sleep(100);
 		}
 	}
-	util::ScopedPtr<util::Thread> loopThread_;
+	std::unique_ptr<util::Thread> loopThread_;
 	util::ProgressIndicator progress_;
 	size_t max_;
 	volatile size_t current_;
@@ -906,7 +906,7 @@ public:
 		return temp;
 	}
 	size_t operator*() const { return begin_; }
-	operator num::SafeBool() const { return num::safeBool(begin_ < end_); }
+	explicit operator bool() const { return begin_ < end_; }
 private:
 	size_t begin_;
 	size_t end_;
