@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -146,7 +146,7 @@ public:
 
 	bool isZero() const { return v_.isZero(); }
 	bool operator!() const { return isZero(); }
-	operator num::SafeBool() const { return isZero() ? num::safeFalse : num::safeTrue; }
+	explicit operator bool() const { return !isZero(); }
 
 	Spectral& inpabs() { v_.inpabs(); return *this; }
 	Spectral& inpmax(const Spectral& other) { v_.inpmax(other.v_); return *this; }

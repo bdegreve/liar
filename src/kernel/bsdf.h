@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ struct BsdfOut
 	TScalar pdf;
 	BsdfOut(const Spectral& value = Spectral(), TScalar pdf = 0): value(value), pdf(pdf) {}
 	bool operator!() const { return !(pdf > 0 && value); }
-	operator num::SafeBool() const { return !*this ? num::safeFalse : num::safeTrue; }
+	explicit operator bool() const { return pdf > 0 && value; }
 	BsdfOut& operator+=(const BsdfOut& other) 
 	{
 		value += other.value;
@@ -88,7 +88,7 @@ struct SampleBsdfOut
 	SampleBsdfOut(const TVector3D& omegaOut, const BsdfOut& bsdf, TBsdfCaps usedCaps):
 		omegaOut(omegaOut), value(bsdf.value), pdf(bsdf.pdf), usedCaps(usedCaps) {}
 	bool operator!() const { return !(pdf > 0 && value); }
-	operator num::SafeBool() const { return !*this ? num::safeFalse : num::safeTrue; }
+	explicit operator bool() const { return pdf > 0 && value; }
 };
 
 typedef util::AllocatorBinned< util::AllocatorConcurrentFreeList<> > TBsdfAllocator;

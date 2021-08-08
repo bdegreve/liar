@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -73,7 +73,7 @@ public:
 
 	bool isEmpty() const;
 	bool operator!() const { return isEmpty(); }
-	operator num::SafeBool() const { return isEmpty() ? num::safeFalse : num::safeTrue; }
+	explicit operator bool() const { return !isEmpty(); }
 
 	void swap(Intersection& other);
 
