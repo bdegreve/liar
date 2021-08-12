@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -68,12 +68,12 @@ private:
 	class Bsdf: public kernel::Bsdf
 	{
 	public:
-		Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TBsdfPtr& a, const TBsdfPtr& b, TValue t);
+		Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const IntersectionContext& contextA, const IntersectionContext& contextB, TValue t);
 	private:
 		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
-		TBsdfPtr a_;
-		TBsdfPtr b_;
+		IntersectionContext a_;
+		IntersectionContext b_;
 		TValue t_;
 	};
 

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -129,30 +129,43 @@ const Spectral LinearInterpolator::doEmission(const Sample& sample, const Inters
 		return Spectral();
 	}
 
-	const TValue keyValue = control_->scalarLookUp(sample, context);
-	TKeyShader sentinel(keyValue, TShaderPtr());
-	TKeyShaders::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), sentinel, LesserKey());
+	const TValue controlValue = control_->scalarLookUp(sample, context);
+	TKeyShaders::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), controlValue,
+		[](const TKeyShader& key, TValue x) { return key.first < x; });
 
 	if (i == keys_.begin())
 	{
+		LASS_ASSERT(controlValue <= keys_.front().first);
 		return keys_.front().second->emission(sample, context, omegaOut);
 	}
 	if (i == keys_.end())
 	{
+		LASS_ASSERT(controlValue >= keys_.back().first);
 		return keys_.back().second->emission(sample, context, omegaOut);
 	}
 
 	const TKeyShaders::const_iterator prevI = stde::prev(i);
 	LASS_ASSERT(prevI->first != i->first); // due to lower_bound
 
-	const TValue t = (keyValue - prevI->first) / (i->first - prevI->first);
+	const TValue t = (controlValue - prevI->first) / (i->first - prevI->first);
+
+	const TVector3D omegaLocal = prim::transform(omegaOut, context.bsdfToLocal());
+
+	const TShaderPtr& shaderA = prevI->second;
+	IntersectionContext contextA = context;
+	shaderA->shadeContext(sample, contextA);
+	const TVector3D omegaA = prim::transform(omegaLocal, contextA.localToBsdf());
+
+	const TShaderPtr& shaderB = i->second;
+	IntersectionContext contextB = context;
+	shaderB->shadeContext(sample, contextB);
+	const TVector3D omegaB = prim::transform(omegaLocal, contextB.localToBsdf());
 
 	return lerp(
-		prevI->second->emission(sample, context, omegaOut),
-		i->second->emission(sample, context, omegaOut),
+		shaderA->emission(sample, contextA, omegaA),
+		shaderB->emission(sample, contextB, omegaB),
 		t);
 }
-
 
 
 TBsdfPtr LinearInterpolator::doBsdf(const Sample& sample, const IntersectionContext& context) const
@@ -162,27 +175,37 @@ TBsdfPtr LinearInterpolator::doBsdf(const Sample& sample, const IntersectionCont
 		return TBsdfPtr();
 	}
 
-	const TValue keyValue = control_->scalarLookUp(sample, context);
-	TKeyShader sentinel(keyValue, TShaderPtr());
-	TKeyShaders::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), sentinel, LesserKey());
+	const TValue controlValue = control_->scalarLookUp(sample, context);	
+	TKeyShaders::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), controlValue,
+		[](const TKeyShader& key, TValue x) { return key.first < x; });
 
 	if (i == keys_.begin())
 	{
+		LASS_ASSERT(controlValue <= keys_.front().first);
 		return keys_.front().second->bsdf(sample, context);
 	}
 	if (i == keys_.end())
 	{
+		LASS_ASSERT(controlValue >= keys_.back().first);
 		return keys_.back().second->bsdf(sample, context);
 	}
 
 	const TKeyShaders::const_iterator prevI = stde::prev(i);
 	LASS_ASSERT(prevI->first != i->first); // due to lower_bound
 
-	const TBsdfPtr a = prevI->second->bsdf(sample, context);
-	const TBsdfPtr b = i->second->bsdf(sample, context);
-	const TValue t = (keyValue - prevI->first) / (i->first - prevI->first);
+	const TValue t = (controlValue - prevI->first) / (i->first - prevI->first);
 
-	return TBsdfPtr(new Bsdf(sample, context, caps(), a, b, t));
+	const TShaderPtr& shaderA = prevI->second;
+	IntersectionContext contextA = context;
+	contextA.setShader(shaderA);
+	shaderA->shadeContext(sample, contextA);
+
+	const TShaderPtr& shaderB = i->second;
+	IntersectionContext contextB = context;
+	contextB.setShader(shaderB);
+	shaderB->shadeContext(sample, contextB);
+
+	return TBsdfPtr(new Bsdf(sample, context, caps(), contextA, contextB, t));
 }
 
 
@@ -239,7 +262,7 @@ void LinearInterpolator::doSetState(const TPyObjectPtr& state)
 
 LinearInterpolator::Bsdf::Bsdf(
 		const Sample& sample, const IntersectionContext& context, TBsdfCaps caps,
-		const TBsdfPtr& a, const TBsdfPtr& b, TValue t) :
+		const IntersectionContext& a, const IntersectionContext& b, TValue t) :
 	kernel::Bsdf(sample, context, caps),
 	a_(a),
 	b_(b),
@@ -252,23 +275,33 @@ LinearInterpolator::Bsdf::Bsdf(
 
 BsdfOut LinearInterpolator::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
 {
-	TScalar pa = a_->compatibleCaps(allowedCaps) ? (1 - t_) : 0;
-	TScalar pb = b_->compatibleCaps(allowedCaps) ? t_ : 0;
+	// LinearInterpolator does not shade context, but a_ and b_ might.
+	// so you need to transform omegaIn and omegaOut back to world and then to bsdf again
+
+	// FIXME: get rid of the cosTheta correction
+	// * static_cast<TValue>(num::abs(wOut.z / omegaOut.z));
+
+	TScalar pa = a_.bsdf()->compatibleCaps(allowedCaps) ? (1 - t_) : 0;
+	TScalar pb = b_.bsdf()->compatibleCaps(allowedCaps) ? t_ : 0;
 	LASS_ASSERT(pa >= 0 && pb >= 0);
 	const TScalar ptot = pa + pb;
 
 	BsdfOut out;
 	if (pa > 0)
 	{
-		out = a_->evaluate(omegaIn, omegaOut, allowedCaps);
-		out.value *= (1 - t_);
+		const TVector3D wIn = a_.worldToBsdf(context().bsdfToWorld(omegaIn));
+		const TVector3D wOut = a_.worldToBsdf(context().bsdfToWorld(omegaOut));
+		out = a_.bsdf()->evaluate(wIn, wOut, allowedCaps);
+		out.value *= (1 - t_) * static_cast<TValue>(num::abs(wOut.z / omegaOut.z));
 		out.pdf *= pa / ptot;
 	}
 	if (pb > 0)
 	{
-		const BsdfOut outB = b_->evaluate(omegaIn, omegaOut, allowedCaps);
-		out.value += outB.value * t_;
-		out.pdf += outB.pdf * pa / ptot;
+		const TVector3D wIn = b_.worldToBsdf(context().bsdfToWorld(omegaIn));
+		const TVector3D wOut = b_.worldToBsdf(context().bsdfToWorld(omegaOut));
+		const BsdfOut outB = b_.bsdf()->evaluate(wIn, wOut, allowedCaps);
+		out.value.fma(outB.value, t_ * static_cast<TValue>(num::abs(wOut.z / omegaOut.z)));
+		out.pdf += outB.pdf * pb / ptot;
 	}
 	return out;
 }
@@ -277,8 +310,11 @@ BsdfOut LinearInterpolator::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVe
 
 SampleBsdfOut LinearInterpolator::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const
 {
-	TScalar pa = a_->compatibleCaps(allowedCaps) ? (1 - t_) : 0;
-	TScalar pb = b_->compatibleCaps(allowedCaps) ? t_ : 0;
+	// LinearInterpolator does not shade context, but a_ and b_ might.
+	// so you need to transform omegaIn and omegaOut back to world and then to bsdf again
+
+	TScalar pa = a_.bsdf()->compatibleCaps(allowedCaps) ? (1 - t_) : 0;
+	TScalar pb = b_.bsdf()->compatibleCaps(allowedCaps) ? t_ : 0;
 	LASS_ASSERT(pa >= 0 && pb >= 0);
 	const TScalar ptot = pa + pb;
 	if (ptot <= 0)
@@ -291,15 +327,31 @@ SampleBsdfOut LinearInterpolator::Bsdf::doSample(const TVector3D& omegaIn, const
 	SampleBsdfOut out;
 	if (componentSample < pa)
 	{
-		out = a_->sample(omegaIn, sample, componentSample, allowedCaps);
-		out.value *= (1 - t_);
+		const TScalar cs = componentSample / pa;
+		const TVector3D wIn = a_.worldToBsdf(context().bsdfToWorld(omegaIn));
+		out = a_.bsdf()->sample(wIn, sample, cs, allowedCaps);\
+		const TVector3D wOut = out.omegaOut;
+		out.omegaOut = context().worldToBsdf(a_.bsdfToWorld(out.omegaOut));
+		if (out.omegaOut.z == 0)
+		{
+			return SampleBsdfOut();
+		}
+		out.value *= (1 - t_) * static_cast<TValue>(num::abs(wOut.z / out.omegaOut.z));
 		out.pdf *= pa;
 	}
 	else
 	{
 		LASS_ASSERT(pb > 0);
-		out = a_->sample(omegaIn, sample, componentSample, allowedCaps);
-		out.value *= t_;
+		const TScalar cs = (componentSample - pa) / pb;
+		const TVector3D wIn = b_.worldToBsdf(context().bsdfToWorld(omegaIn));
+		out = b_.bsdf()->sample(wIn, sample, cs, allowedCaps);
+		const TVector3D wOut = out.omegaOut;
+		out.omegaOut = context().worldToBsdf(b_.bsdfToWorld(wOut));
+		if (out.omegaOut.z == 0)
+		{
+			return SampleBsdfOut();
+		}
+		out.value *= t_ * static_cast<TValue>(num::abs(wOut.z / out.omegaOut.z));
 		out.pdf *= pb;
 	}
 	return out;
