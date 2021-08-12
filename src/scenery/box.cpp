@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -222,7 +222,7 @@ void Box::doLocalContext(const Sample&, const BoundedRay& ray, const Intersectio
 	prim::XYZ axis;
 	const bool LASS_UNUSED(hit) = impl::intersect(bounds_, ray, t, axis);
 	LASS_ASSERT(hit && ray.inRange(t) && static_cast<int>(axis) >= 0);
-	LASS_ASSERT(t == intersection.t());
+	LASS_ASSERT(num::almostEqual(t, intersection.t(), 1e-10));
 	const TPoint3D point = ray.point(intersection.t());
 
 	LASS_ASSERT(center[axis] != point[axis]);
