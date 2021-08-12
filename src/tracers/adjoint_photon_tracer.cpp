@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -154,7 +154,6 @@ const Spectral AdjointPhotonTracer::shadeSurface(const Sample& sample, const Dif
 	
 	if (const Shader* const shader = context.shader())
 	{
-		shader->shadeContext(sample, context);
 		const TVector3D omegaIn = context.worldToBsdf(-ray.direction());
 		LASS_ASSERT(omegaIn.z > 0);
 
@@ -173,7 +172,7 @@ const Spectral AdjointPhotonTracer::shadeSurface(const Sample& sample, const Dif
 				MediumChanger mediumChanger(mediumStack(), context.interior(),
 					cosTheta > 0 ? seNoEvent : context.solidEvent());
 
-				const TPoint3D start = target + (cosTheta > 0 ? 10 : -10) * liar::tolerance * context.worldNormal();
+				const TPoint3D start = target + (cosTheta > 0 ? 10 : -10) * liar::tolerance * context.worldGeometricNormal();
 				const BoundedRay newRay(start, context.bsdfToWorld(out.omegaOut), liar::tolerance);
 				TScalar t, a;
 				out.value *= tracePhoton(sample, DifferentialRay(newRay), t, a, generation + 1);
