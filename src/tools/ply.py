@@ -20,6 +20,7 @@
 import enum
 import io
 import struct
+from collections import namedtuple
 from dataclasses import dataclass, field
 from typing import List, Optional
 
@@ -39,6 +40,7 @@ class Element:
     name: str
     number: int
     properties: List[Property] = field(default_factory=list)
+    data_type: type = None
 
 
 class Format(enum.Enum):
@@ -65,39 +67,19 @@ def load(path: str) -> liar.scenery.TriangleMesh:
         fp.seek(header.dataOffset)
         data = loadData(fp, header)
 
-    element_dict = {element.name: element for element in header.elements}
-
-    # see about vertices ...
-    assert "vertex" in element_dict
-    vertex_element = element_dict["vertex"]
-    vertex_props = {
-        prop.name: pos for pos, prop in enumerate(vertex_element.properties)
-    }
-    assert "x" in vertex_props and "y" in vertex_props and "z" in vertex_props
-    vertex_x = vertex_props["x"]
-    vertex_y = vertex_props["y"]
-    vertex_z = vertex_props["z"]
-
-    # see about faces
-    assert "face" in element_dict
-    face_element = element_dict["face"]
-    face_props = {prop.name: pos for pos, prop in enumerate(face_element.properties)}
-    assert "vertex_indices" in face_props
-    face_vertices = face_props["vertex_indices"]
-
     vertices = []
     for v in data["vertex"]:
-        vertices.append((v[vertex_x], v[vertex_y], v[vertex_z]))
+        vertices.append((v.x, v.y, v.z))
 
     triangles = []
     for face in data["face"]:
-        indices = face[face_vertices]
+        indices = face.vertex_indices
         assert len(indices) >= 3
         for i in range(1, len(indices) - 1):
             triangles.append(((indices[0],), (indices[i],), (indices[i + 1],)))
 
-    aabb_min = tuple([min([v[k] for v in vertices]) for k in range(3)])
-    aabb_max = tuple([max([v[k] for v in vertices]) for k in range(3)])
+    aabb_min = tuple(min(v[k] for v in vertices) for k in range(3))
+    aabb_max = tuple(max(v[k] for v in vertices) for k in range(3))
     print(
         f"{len(vertices)} vertices, {len(triangles)} triangles, aabb [{aabb_min}, {aabb_max}]"
     )
@@ -139,11 +121,14 @@ def load_header(fp):
             if prop_type == "list":
                 assert num_fields == 4
                 prop = Property(
-                    prop_type, name=fields[3], num_type=fields[1], list_type=fields[2]
+                    type_=prop_type,
+                    name=fields[3],
+                    num_type=fields[1],
+                    list_type=fields[2],
                 )
             else:
                 assert num_fields == 2
-                prop = Property(prop_type, name=fields[1])
+                prop = Property(type_=prop_type, name=fields[1])
             current_element.properties.append(prop)
 
         elif command == "comment":
@@ -151,6 +136,11 @@ def load_header(fp):
 
         else:
             raise ValueError(f"Unsupported command {command}")
+
+    for element in elements:
+        element.data_type = namedtuple(
+            element.name, [prop.name for prop in element.properties]
+        )
 
     dataOffset = fp.tell()
     return Header(format, elements, dataOffset)
@@ -208,7 +198,7 @@ def load_data_ascii(fp, header: Header):
                     f += 1
             assert f == num_fields
 
-            element_data.append(line_data)
+            element_data.append(element.data_type(*line_data))
 
         ply_data[element.name] = element_data
 
@@ -256,7 +246,7 @@ def load_data_binary(fp, header: Header):
                     (value,) = read(fp, prop.type_)
                     line_data.append(value)
 
-            element_data.append(line_data)
+            element_data.append(element.data_type(*line_data))
 
         ply_data[element.name] = element_data
 
