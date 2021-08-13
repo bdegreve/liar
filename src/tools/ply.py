@@ -18,15 +18,26 @@
 # http://liar.bramz.net/
 
 import liar.scenery
+from dataclasses import dataclass, field
+from typing import List, Optional
+
+
+@dataclass
+class Property:
+    type_: str
+    name: str
+    numType: Optional[str] = None
+    listType: Optional[str] = None
+
+
+@dataclass
+class Element:
+    name: str
+    number: int
+    properties: List[Property] = field(default_factory=list)
 
 
 def load(path):
-    class Element:
-        def __init__(self, iName, iNumber):
-            self.name = iName
-            self.number = iNumber
-            self.properties = []
-
     fieldConvertors = {
         "int8": int,
         "uint8": int,
@@ -79,23 +90,13 @@ def load(path):
                 propType = fields[0]
                 if propType == "list":
                     assert numFields == 4
-                    numType = fields[1]
-                    listType = fields[2]
-                    propName = fields[3]
-                    currentElement.properties.append(
-                        {
-                            "type": propType,
-                            "name": propName,
-                            "numType": numType,
-                            "listType": listType,
-                        }
+                    prop = Property(
+                        propType, name=fields[3], numType=fields[1], listType=fields[2]
                     )
                 else:
                     assert numFields == 2
-                    propName = fields[1]
-                    currentElement.properties.append(
-                        {"type": propType, "name": propName}
-                    )
+                    prop = Property(propType, name=fields[1])
+                currentElement.properties.append(prop)
 
             elif command == "comment":
                 pass
@@ -116,25 +117,21 @@ def load(path):
                 numFields = len(fields)
                 f = 0
                 for prop in element.properties:
-                    assert len(prop) > 0
-                    propType = prop["type"]
-                    if propType == "list":
-                        assert len(prop) == 4
-                        numType = prop["numType"]
-                        listType = prop["listType"]
+                    if prop.type_ == "list":
                         assert f < numFields
-                        listLength = fieldConvertors[numType](fields[f])
+                        listLength = fieldConvertors[prop.numType](fields[f])
                         f += 1
                         listData = []
                         for k in range(listLength):
                             assert f < numFields
-                            listData.append(fieldConvertors[listType](fields[f]))
+                            listData.append(fieldConvertors[prop.listType](fields[f]))
                             f += 1
                         lineData.append(listData)
                     else:
-                        assert len(prop) == 2
+                        assert prop.numType is None
+                        assert prop.listType is None
                         assert f < numFields
-                        lineData.append(fieldConvertors[propType](fields[f]))
+                        lineData.append(fieldConvertors[prop.type_](fields[f]))
                         f += 1
                 assert f == numFields
 
@@ -150,19 +147,14 @@ def load(path):
         elements = loadHeader(fp)
         data = loadData(fp, elements)
 
-    elementDict = dict([(element.name, element) for element in elements])
+    elementDict = {element.name: element for element in elements}
 
     # see about vertices ...
     assert "vertex" in elementDict
     vertexElement = elementDict["vertex"]
-    vertexPropDict = dict(
-        [
-            (prop["name"], pos)
-            for prop, pos in zip(
-                vertexElement.properties, range(len(vertexElement.properties))
-            )
-        ]
-    )
+    vertexPropDict = {
+        prop.name: pos for pos, prop in enumerate(vertexElement.properties)
+    }
     assert "x" in vertexPropDict and "y" in vertexPropDict and "z" in vertexPropDict
     vertexX = vertexPropDict["x"]
     vertexY = vertexPropDict["y"]
@@ -171,14 +163,7 @@ def load(path):
     # see about faces
     assert "face" in elementDict
     faceElement = elementDict["face"]
-    facePropDict = dict(
-        [
-            (prop["name"], pos)
-            for prop, pos in zip(
-                faceElement.properties, range(len(faceElement.properties))
-            )
-        ]
-    )
+    facePropDict = {prop.name: pos for pos, prop in enumerate(faceElement.properties)}
     assert "vertex_indices" in facePropDict
     faceVertices = facePropDict["vertex_indices"]
 
