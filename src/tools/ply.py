@@ -20,7 +20,7 @@
 import liar.scenery
 
 
-def load(iFilename):
+def load(path):
     class Element:
         def __init__(self, iName, iNumber):
             self.name = iName
@@ -46,17 +46,17 @@ def load(iFilename):
         "double": float,
     }
 
-    def loadHeader(iFile):
-        if iFile.readline() != "ply\n":
-            raise "%s is not a PLY file" % iFilename
-        if iFile.readline() != "format ascii 1.0\n":
-            raise "PLY file %s is not of a compatible format"
+    def loadHeader(fp):
+        if fp.readline() != "ply\n":
+            raise ValueError(f"{path} is not a PLY file")
+        if fp.readline() != "format ascii 1.0\n":
+            raise ValueError(f"PLY file {path} is not of a compatible format")
 
         elements = []
         currentElement = None
 
         while True:
-            line = iFile.readline()
+            line = fp.readline()
             assert len(line) > 0
 
             splittedLine = line.split()
@@ -103,12 +103,12 @@ def load(iFilename):
             else:
                 assert False  # you should never be here
 
-    def loadData(iFile, iElements):
+    def loadData(fp, elements):
         plyData = {}
-        for element in iElements:
+        for element in elements:
             elementData = []
-            for e in xrange(element.number):
-                line = iFile.readline()
+            for e in range(element.number):
+                line = fp.readline()
                 assert len(line) > 0
 
                 lineData = []
@@ -126,7 +126,7 @@ def load(iFilename):
                         listLength = fieldConvertors[numType](fields[f])
                         f += 1
                         listData = []
-                        for k in xrange(listLength):
+                        for k in range(listLength):
                             assert f < numFields
                             listData.append(fieldConvertors[listType](fields[f]))
                             f += 1
@@ -144,10 +144,11 @@ def load(iFilename):
 
         return plyData
 
-    print "loading PLY file %s ..." % iFilename
+    print(f"loading PLY file {path} ...")
 
-    ply = file(iFilename)
-    elements = loadHeader(ply)
+    with open(path) as fp:
+        elements = loadHeader(fp)
+        data = loadData(fp, elements)
 
     elementDict = dict([(element.name, element) for element in elements])
 
@@ -181,8 +182,6 @@ def load(iFilename):
     assert "vertex_indices" in facePropDict
     faceVertices = facePropDict["vertex_indices"]
 
-    data = loadData(ply, elements)
-
     vertices = []
     for v in data["vertex"]:
         vertices.append((v[vertexX], v[vertexY], v[vertexZ]))
@@ -196,11 +195,8 @@ def load(iFilename):
 
     aabb_min = tuple([min([v[k] for v in vertices]) for k in range(3)])
     aabb_max = tuple([max([v[k] for v in vertices]) for k in range(3)])
-    print "%s vertices, %s triangles, aabb [%s, %s]" % (
-        len(vertices),
-        len(triangles),
-        aabb_min,
-        aabb_max,
+    print(
+        f"{len(vertices)} vertices, {len(triangles)} triangles, aabb [{aabb_min}, {aabb_max}]"
     )
 
     return liar.scenery.TriangleMesh(vertices, [], [], triangles)
