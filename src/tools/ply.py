@@ -20,9 +20,9 @@
 import enum
 import io
 import struct
-from collections import namedtuple
+from collections import OrderedDict, namedtuple
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, OrderedDict
 
 import liar.scenery
 
@@ -39,7 +39,7 @@ class Property:
 class Element:
     name: str
     number: int
-    properties: List[Property] = field(default_factory=list)
+    properties: OrderedDict[str, Property] = field(default_factory=list)
     data_type: type = None
 
 
@@ -67,16 +67,39 @@ def load(path: str) -> liar.scenery.TriangleMesh:
         fp.seek(header.dataOffset)
         data = loadData(fp, header)
 
-    vertices = []
-    for v in data["vertex"]:
-        vertices.append((v.x, v.y, v.z))
+    vertices = [(v.x, v.y, v.z) for v in data["vertex"]]
+    try:
+        normals = [(v.nx, v.ny, v.nz) for v in data["vertex"]]
+    except AttributeError:
+        normals = []
+    try:
+        uvs = [(v.u, v.v) for v in data["vertex"]]
+    except AttributeError:
+        uvs = []
+
+    if normals:
+        if uvs:
+            make_triange = lambda i0, i1, i2: ((i0, i0, i0), (i1, i1, i1), (i2, i2, i2))
+        else:
+            make_triange = lambda i0, i1, i2: ((i0, i0), (i1, i1), (i2, i2))
+    else:
+        if uvs:
+            make_triange = lambda i0, i1, i2: (
+                (i0, None, i0),
+                (i1, None, i1),
+                (i2, None, i2),
+            )
+        else:
+            make_triange = lambda i0, i1, i2: ((i0,), (i1,), (i2,))
 
     triangles = []
     for face in data["face"]:
         indices = face.vertex_indices
         assert len(indices) >= 3
-        for i in range(1, len(indices) - 1):
-            triangles.append(((indices[0],), (indices[i],), (indices[i + 1],)))
+        triangles.extend(
+            make_triange(indices[0], indices[i], indices[i + 1])
+            for i in range(1, len(indices) - 1)
+        )
 
     aabb_min = tuple(min(v[k] for v in vertices) for k in range(3))
     aabb_max = tuple(max(v[k] for v in vertices) for k in range(3))
@@ -84,7 +107,7 @@ def load(path: str) -> liar.scenery.TriangleMesh:
         f"{len(vertices)} vertices, {len(triangles)} triangles, aabb [{aabb_min}, {aabb_max}]"
     )
 
-    return liar.scenery.TriangleMesh(vertices, [], [], triangles)
+    return liar.scenery.TriangleMesh(vertices, normals, uvs, triangles)
 
 
 def load_header(fp):
@@ -142,8 +165,11 @@ def load_header(fp):
             element.name, [prop.name for prop in element.properties]
         )
 
-    dataOffset = fp.tell()
-    return Header(format, elements, dataOffset)
+    return Header(
+        format=format,
+        elements=OrderedDict((element.name, element) for element in elements),
+        dataOffset=fp.tell(),
+    )
 
 
 def load_data_ascii(fp, header: Header):
@@ -169,7 +195,7 @@ def load_data_ascii(fp, header: Header):
     }
 
     ply_data = {}
-    for element in header.elements:
+    for element in header.elements.values():
         element_data = []
         for _index in range(element.number):
             line = fp.readline()
@@ -233,7 +259,7 @@ def load_data_binary(fp, header: Header):
         return struct.unpack(format, buffer)
 
     ply_data = {}
-    for element in header.elements:
+    for element in header.elements.values():
         element_data = []
         for _index in range(element.number):
             line_data = []
