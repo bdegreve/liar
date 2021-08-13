@@ -26,8 +26,8 @@ from typing import List, Optional
 class Property:
     type_: str
     name: str
-    numType: Optional[str] = None
-    listType: Optional[str] = None
+    num_type: Optional[str] = None
+    list_type: Optional[str] = None
 
 
 @dataclass
@@ -38,7 +38,7 @@ class Element:
 
 
 def load(path):
-    fieldConvertors = {
+    field_convertors = {
         "int8": int,
         "uint8": int,
         "int16": int,
@@ -57,46 +57,46 @@ def load(path):
         "double": float,
     }
 
-    def loadHeader(fp):
+    def load_header(fp):
         if fp.readline() != "ply\n":
             raise ValueError(f"{path} is not a PLY file")
         if fp.readline() != "format ascii 1.0\n":
             raise ValueError(f"PLY file {path} is not of a compatible format")
 
         elements = []
-        currentElement = None
+        current_element = None
 
         while True:
             line = fp.readline()
             assert len(line) > 0
 
-            splittedLine = line.split()
-            command, fields = splittedLine[0], splittedLine[1:]
-            numFields = len(fields)
+            splitted_line = line.split()
+            command, fields = splitted_line[0], splitted_line[1:]
+            num_fields = len(fields)
 
             if command == "end_header":
-                assert numFields == 0
+                assert num_fields == 0
                 return elements
 
             if command == "element":
-                assert numFields == 2
+                assert num_fields == 2
                 name = fields[0]
                 number = int(fields[1])
-                currentElement = Element(name, number)
-                elements.append(currentElement)
+                current_element = Element(name, number)
+                elements.append(current_element)
 
             elif command == "property":
-                assert numFields > 0
-                propType = fields[0]
-                if propType == "list":
-                    assert numFields == 4
+                assert num_fields > 0
+                prop_type = fields[0]
+                if prop_type == "list":
+                    assert num_fields == 4
                     prop = Property(
-                        propType, name=fields[3], numType=fields[1], listType=fields[2]
+                        prop_type, name=fields[3], num_type=fields[1], list_type=fields[2]
                     )
                 else:
-                    assert numFields == 2
-                    prop = Property(propType, name=fields[1])
-                currentElement.properties.append(prop)
+                    assert num_fields == 2
+                    prop = Property(prop_type, name=fields[1])
+                current_element.properties.append(prop)
 
             elif command == "comment":
                 pass
@@ -104,76 +104,76 @@ def load(path):
             else:
                 assert False  # you should never be here
 
-    def loadData(fp, elements):
-        plyData = {}
+    def load_data(fp, elements):
+        ply_data = {}
         for element in elements:
-            elementData = []
+            element_data = []
             for e in range(element.number):
                 line = fp.readline()
                 assert len(line) > 0
 
-                lineData = []
+                line_data = []
                 fields = line.split()
-                numFields = len(fields)
+                num_fields = len(fields)
                 f = 0
                 for prop in element.properties:
                     if prop.type_ == "list":
-                        assert f < numFields
-                        listLength = fieldConvertors[prop.numType](fields[f])
+                        assert f < num_fields
+                        list_length = field_convertors[prop.num_type](fields[f])
                         f += 1
-                        listData = []
-                        for k in range(listLength):
-                            assert f < numFields
-                            listData.append(fieldConvertors[prop.listType](fields[f]))
+                        list_data = []
+                        for k in range(list_length):
+                            assert f < num_fields
+                            list_data.append(field_convertors[prop.list_type](fields[f]))
                             f += 1
-                        lineData.append(listData)
+                        line_data.append(list_data)
                     else:
-                        assert prop.numType is None
-                        assert prop.listType is None
-                        assert f < numFields
-                        lineData.append(fieldConvertors[prop.type_](fields[f]))
+                        assert prop.num_type is None
+                        assert prop.list_type is None
+                        assert f < num_fields
+                        line_data.append(field_convertors[prop.type_](fields[f]))
                         f += 1
-                assert f == numFields
+                assert f == num_fields
 
-                elementData.append(lineData)
+                element_data.append(line_data)
 
-            plyData[element.name] = elementData
+            ply_data[element.name] = element_data
 
-        return plyData
+        return ply_data
 
     print(f"loading PLY file {path} ...")
 
     with open(path) as fp:
-        elements = loadHeader(fp)
-        data = loadData(fp, elements)
+        elements = load_header(fp)
+        data = load_data(fp, elements)
 
-    elementDict = {element.name: element for element in elements}
+    element_dict = {element.name: element for element in elements}
 
     # see about vertices ...
-    assert "vertex" in elementDict
-    vertexElement = elementDict["vertex"]
-    vertexPropDict = {
-        prop.name: pos for pos, prop in enumerate(vertexElement.properties)
+    assert "vertex" in element_dict
+    vertex_element = element_dict["vertex"]
+    vertex_props = {
+        prop.name: pos for pos, prop in enumerate(vertex_element.properties)
     }
-    assert "x" in vertexPropDict and "y" in vertexPropDict and "z" in vertexPropDict
-    vertexX = vertexPropDict["x"]
-    vertexY = vertexPropDict["y"]
-    vertexZ = vertexPropDict["z"]
+    assert "x" in vertex_props and "y" in vertex_props and "z" in vertex_props
+    vertex_x = vertex_props["x"]
+    vertex_y = vertex_props["y"]
+    vertex_z = vertex_props["z"]
 
     # see about faces
-    assert "face" in elementDict
-    faceElement = elementDict["face"]
-    facePropDict = {prop.name: pos for pos, prop in enumerate(faceElement.properties)}
-    assert "vertex_indices" in facePropDict
-    faceVertices = facePropDict["vertex_indices"]
+    assert "face" in element_dict
+    face_element = element_dict["face"]
+    face_props = {prop.name: pos for pos, prop in enumerate(face_element.properties)}
+    assert "vertex_indices" in face_props
+    face_vertices = face_props["vertex_indices"]
 
     vertices = []
     for v in data["vertex"]:
-        vertices.append((v[vertexX], v[vertexY], v[vertexZ]))
+        vertices.append((v[vertex_x], v[vertex_y], v[vertex_z]))
 
     triangles = []
     for face in data["face"]:
-        indices = face[faceVertices]
+        indices = face[face_vertices]
         assert len(indices) >= 3
         for i in range(1, len(indices) - 1):
             triangles.append(((indices[0],), (indices[i],), (indices[i + 1],)))
