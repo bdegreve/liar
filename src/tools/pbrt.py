@@ -1,3 +1,22 @@
+# LiAR isn't a raytracer
+# Copyright (C) 2010-2021  Bram de Greve (bramz@users.sourceforge.net)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# http://liar.bramz.net/
+
 import sys
 import os
 import math
@@ -346,8 +365,12 @@ class PbrtScene(object):
 	def _material_matte(self, Kd=1, sigma=0):
 		return liar.shaders.Lambert(self._get_texture(Kd))
 
-	def _material_metal(self, eta, k, roughness=.01):
-		return liar.shaders.Conductor(self._get_texture(eta), self._get_texture(k))
+	def _material_metal(self, eta, k, roughness=.01, uroughness=None, vroughness=None, remaproughness: bool=False):
+		assert remaproughness == False
+		material = liar.shaders.CookTorrance(self._get_texture(eta), self._get_texture(k))
+		material.roughnessU = self._get_texture(uroughness if uroughness else roughness)
+		material.roughnessV = self._get_texture(vroughness if vroughness else roughness)
+		return material
 
 	def _material_mirror(self, Kr=1):
 		return liar.shaders.Mirror(self._get_texture(Kr))

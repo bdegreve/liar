@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 //
 #include "ashikhmin_shirley.h"
 #include "bump_mapping.h"
+#include "cook_torrance.h"
 #include "conductor.h"
 #include "dielectric.h"
 #include "flip.h"
@@ -48,6 +49,7 @@ PY_DECLARE_MODULE_DOC(shaders, "surface shaders for LiAR")
 //
 PY_MODULE_CLASS(shaders, AshikhminShirley)
 PY_MODULE_CLASS(shaders, BumpMapping)
+PY_MODULE_CLASS(shaders, CookTorrance)
 PY_MODULE_CLASS(shaders, Conductor)
 PY_MODULE_CLASS(shaders, Dielectric)
 PY_MODULE_CLASS(shaders, Flip)
