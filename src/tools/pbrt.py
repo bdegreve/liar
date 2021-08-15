@@ -45,6 +45,7 @@ class PbrtScene(object):
 		self.__verbosity = verbosity
 		self.__render_immediately = render_immediately
 		self.__display = display
+		self.__named_materials = {}
 		self.Camera()
 		self.PixelFilter()
 		self.Film()
@@ -294,16 +295,31 @@ class PbrtScene(object):
 		# we ignore this
 
 
-	def Material(self, name="matte", bumpmap=None, **kwargs):
+
+	def Material(self, name="matte", **kwargs):
+		self.verify_world()
+		self.__material = self._Material(name, **kwargs)
+
+	def MakeNamedMaterial(self, name, **kwargs):
+		self.verify_world() # ?
+		type_ = kwargs.pop("type")
+		self.__named_materials[name] = self._Material(type_, **kwargs)
+
+	def NamedMaterial(self, name):
+		self.verify_world() # ?
+		self.__material = self.__named_materials[name]
+
+	def _Material(self, name="matte", bumpmap=None, **kwargs):
 		self.verify_world()
 		try:
-			self.__material = getattr(self, "_material_" + name)(**kwargs)
+			material = getattr(self, "_material_" + name)(**kwargs)
 		except AttributeError:
 			self.__logger.warning("unknown material %(name)r, defaulting to matte." % vars())
 			kwargs = _filter_dict(kwargs, lambda key: key in ('Kd', 'sigma'))
-			self.__material = self._material_matte(**kwargs)
+			material = self._material_matte(**kwargs)
 		if bumpmap:
-			self.__material = liar.shaders.BumpMapping(self.__material, self._get_texture(bumpmap))
+			material = liar.shaders.BumpMapping(material, self._get_texture(bumpmap))
+		return material
 
 	def _material_bluepaint(self):
 		diffuse = self._get_texture((0.3094, 0.39667, 0.70837))
