@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,19 +36,28 @@ PY_CLASS_CONSTRUCTOR_0(AshikhminShirley)
 PY_CLASS_CONSTRUCTOR_2(AshikhminShirley, const TTexturePtr&, const TTexturePtr&)
 PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, diffuse, setDiffuse, "texture for diffuse component")
 PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specular, setSpecular, "texture for specular component")
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, roughnessU, setRoughnessU, "texture for roughness of specular component in U direction")
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, roughnessV, setRoughnessV, "texture for roughness of specular component in V direction")
 PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specularPowerU, setSpecularPowerU, "texture for rollof power of specular component in U direction")
 PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specularPowerV, setSpecularPowerV, "texture for rollof power of specular component in V direction")
 PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, numberOfSamples, setNumberOfSamples, "set number of samples for Monte Carlo simulations")
 
+using PowerFromRoughness = AshikhminShirley::PowerFromRoughness;
+PY_DECLARE_CLASS_NAME(PowerFromRoughness, "PowerFromRoughness");
+PY_CLASS_INNER_CLASS_NAME(AshikhminShirley, PowerFromRoughness, "PowerFromRoughness");
+PY_CLASS_CONSTRUCTOR_1(PowerFromRoughness, const TTexturePtr&)
+PY_CLASS_MEMBER_RW(PowerFromRoughness, roughness, setRoughness)
+
+using RoughnessFromPower = AshikhminShirley::RoughnessFromPower;
+PY_DECLARE_CLASS_NAME(RoughnessFromPower, "RoughnessFromPower");
+PY_CLASS_INNER_CLASS_NAME(AshikhminShirley, RoughnessFromPower, "RoughnessFromPower");
+PY_CLASS_CONSTRUCTOR_1(RoughnessFromPower, const TTexturePtr&)
+PY_CLASS_MEMBER_RW(RoughnessFromPower, power, setPower)
+
 // --- public --------------------------------------------------------------------------------------
 
 AshikhminShirley::AshikhminShirley():
-	Shader(Bsdf::capsReflection | Bsdf::capsDiffuse | Bsdf::capsGlossy),
-	diffuse_(Texture::white()),
-	specular_(Texture::white()),
-	specularPowerU_(Texture::white()),
-	specularPowerV_(Texture::white()),
-	numberOfSamples_(9)
+	AshikhminShirley(Texture::white(), Texture::white())
 {
 }
 
@@ -58,10 +67,10 @@ AshikhminShirley::AshikhminShirley(const TTexturePtr& iDiffuse, const TTexturePt
 	Shader(Bsdf::capsReflection | Bsdf::capsDiffuse | Bsdf::capsGlossy),
 	diffuse_(iDiffuse),
 	specular_(iSpecular),
-	specularPowerU_(Texture::white()),
-	specularPowerV_(Texture::white()),
 	numberOfSamples_(9)
 {
+	setRoughnessU(Texture::black());
+	setRoughnessV(Texture::black());
 }
 
 
@@ -94,6 +103,50 @@ void AshikhminShirley::setSpecular(const TTexturePtr& specular)
 
 
 
+const TTexturePtr& AshikhminShirley::roughnessU() const
+{
+	return roughnessU_;
+}
+
+
+
+void AshikhminShirley::setRoughnessU(const TTexturePtr& roughnessU)
+{
+	roughnessU_ = roughnessU;
+	if (RoughnessFromPower* p = dynamic_cast<RoughnessFromPower*>(roughnessU.get()))
+	{
+		specularPowerU_ = p->power();
+	}
+	else
+	{
+		specularPowerU_.reset(new PowerFromRoughness(roughnessU));
+	}
+}
+
+
+
+const TTexturePtr& AshikhminShirley::roughnessV() const
+{
+	return roughnessV_;
+}
+
+
+
+void AshikhminShirley::setRoughnessV(const TTexturePtr& roughnessV)
+{
+	roughnessV_ = roughnessV;
+	if (auto r = dynamic_cast<RoughnessFromPower*>(roughnessV.get()))
+	{
+		specularPowerV_ = r->power();
+	}
+	else
+	{
+		specularPowerV_.reset(new PowerFromRoughness(roughnessV));
+	}
+}
+
+
+
 const TTexturePtr& AshikhminShirley::specularPowerU() const
 {
 	return specularPowerU_;
@@ -104,6 +157,14 @@ const TTexturePtr& AshikhminShirley::specularPowerU() const
 void AshikhminShirley::setSpecularPowerU(const TTexturePtr& specularPower)
 {
 	specularPowerU_ = specularPower;
+	if (auto p = dynamic_cast<PowerFromRoughness*>(specularPower.get()))
+	{
+		roughnessU_ = p->roughness();
+	}
+	else
+	{
+		roughnessU_.reset(new RoughnessFromPower(specularPower));
+	}
 }
 
 
@@ -118,6 +179,14 @@ const TTexturePtr& AshikhminShirley::specularPowerV() const
 void AshikhminShirley::setSpecularPowerV(const TTexturePtr& specularPower)
 {
 	specularPowerV_ = specularPower;
+	if (auto p = dynamic_cast<PowerFromRoughness*>(specularPower.get()))
+	{
+		roughnessV_ = p->roughness();
+	}
+	else
+	{
+		roughnessV_.reset(new RoughnessFromPower(specularPower));
+	}
 }
 
 
@@ -360,6 +429,130 @@ const TVector3D AshikhminShirley::Bsdf::sampleH(const TPoint2D& sample) const
 	const TScalar cosTheta = std::pow(1 - sample.y, num::inv(n + 1));
 	const TScalar sinTheta = num::sqrt(std::max(TNumTraits::zero, 1 - num::sqr(cosTheta)));
 	return TVector3D(cosPhi * sinTheta, sinPhi * sinTheta, cosTheta);
+}
+
+
+
+// --- PowerFromRoughness ----------------------------------------------------------------------------
+
+AshikhminShirley::PowerFromRoughness::PowerFromRoughness(const TTexturePtr& roughness):
+	roughness_(roughness)
+{
+}
+
+
+
+const TTexturePtr& AshikhminShirley::PowerFromRoughness::roughness() const
+{
+	return roughness_;
+}
+
+
+
+void AshikhminShirley::PowerFromRoughness::setRoughness(const TTexturePtr& roughness)
+{
+	roughness_ = roughness;
+}
+
+
+
+const TPyObjectPtr AshikhminShirley::PowerFromRoughness::doGetState() const
+{
+	return python::makeTuple(roughness_);
+}
+
+
+
+void AshikhminShirley::PowerFromRoughness::doSetState(const TPyObjectPtr& state)
+{
+	python::decodeTuple(state, roughness_);
+}
+
+
+
+const Spectral AshikhminShirley::PowerFromRoughness::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
+{
+	const Spectral r = max(roughness_->lookUp(sample, context, Illuminant), 1e-3f);
+	const Spectral a = sqr(r);
+	return Spectral(max(2 / sqr(a) - 2, 0.f), type);
+}
+
+
+
+Spectral::TValue AshikhminShirley::PowerFromRoughness::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	const TValue r = std::max<TValue>(roughness_->scalarLookUp(sample, context), 1e-3f);
+	const TValue a = num::sqr(r);
+	return std::max<TValue>(2 / num::sqr(a) - 2, 0);
+}
+
+
+
+bool AshikhminShirley::PowerFromRoughness::doIsChromatic() const
+{
+	return roughness_->isChromatic();
+}
+
+
+
+// --- RoughnessFromPower ----------------------------------------------------------------------------
+
+AshikhminShirley::RoughnessFromPower::RoughnessFromPower(const TTexturePtr& power):
+	power_(power)
+{
+}
+
+
+
+const TTexturePtr& AshikhminShirley::RoughnessFromPower::power() const
+{
+	return power_;
+}
+
+
+
+void AshikhminShirley::RoughnessFromPower::setPower(const TTexturePtr& power)
+{
+	power_ = power;
+}
+
+
+
+const TPyObjectPtr AshikhminShirley::RoughnessFromPower::doGetState() const
+{
+	return python::makeTuple(power_);
+}
+
+
+
+void AshikhminShirley::RoughnessFromPower::doSetState(const TPyObjectPtr& state)
+{
+	python::decodeTuple(state, power_);
+}
+
+
+
+const Spectral AshikhminShirley::RoughnessFromPower::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
+{
+	const Spectral e = max(power_->lookUp(sample, context, Illuminant), 0.f);
+	const Spectral a = sqrt(2 / (e + 2));
+	return Spectral(sqrt(a), type);
+}
+
+
+
+Spectral::TValue AshikhminShirley::RoughnessFromPower::doScalarLookUp(const Sample& sample, const IntersectionContext& context) const
+{
+	const TValue e = std::max<TValue>(power_->scalarLookUp(sample, context), 0.f);
+	const TValue a = num::sqrt(2 / (e + 2));
+	return num::sqrt(a);
+}
+
+
+
+bool AshikhminShirley::RoughnessFromPower::doIsChromatic() const
+{
+	return power_->isChromatic();
 }
 
 

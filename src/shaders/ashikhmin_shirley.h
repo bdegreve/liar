@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -57,6 +57,12 @@ public:
 	const TTexturePtr& specular() const;
 	void setSpecular(const TTexturePtr& specular);
 
+	const TTexturePtr& roughnessU() const;
+	void setRoughnessU(const TTexturePtr& roughness);
+
+	const TTexturePtr& roughnessV() const;
+	void setRoughnessV(const TTexturePtr& roughness);
+
 	const TTexturePtr& specularPowerU() const;
 	void setSpecularPowerU(const TTexturePtr& specularPower);
 
@@ -82,6 +88,40 @@ public:
 		TScalar powerV_;
 	};
 
+	class PowerFromRoughness: public Texture
+	{
+		PY_HEADER(Texture)
+	public:
+		PowerFromRoughness(const TTexturePtr& roughness);
+		const TTexturePtr& roughness() const;
+		void setRoughness(const TTexturePtr& roughness);
+	protected:
+		const TPyObjectPtr doGetState() const override;
+		void doSetState(const TPyObjectPtr& state) override;
+	private:
+		const Spectral doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const override;
+		TValue doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
+		bool doIsChromatic() const override;
+		TTexturePtr roughness_;
+	};
+
+	class RoughnessFromPower: public Texture
+	{
+		PY_HEADER(Texture)
+	public:
+		RoughnessFromPower(const TTexturePtr& power);
+		const TTexturePtr& power() const;
+		void setPower(const TTexturePtr& power);
+	protected:
+		const TPyObjectPtr doGetState() const override;
+		void doSetState(const TPyObjectPtr& state) override;
+	private:
+		const Spectral doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const override;
+		TValue doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
+		bool doIsChromatic() const override;
+		TTexturePtr power_;
+	};
+
 private:
 
 	size_t doNumReflectionSamples() const;
@@ -95,6 +135,8 @@ private:
 
 	TTexturePtr diffuse_;
 	TTexturePtr specular_;
+	TTexturePtr roughnessU_;
+	TTexturePtr roughnessV_;
 	TTexturePtr specularPowerU_;
 	TTexturePtr specularPowerV_;
 	size_t numberOfSamples_;

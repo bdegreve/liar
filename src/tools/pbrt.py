@@ -392,11 +392,19 @@ class PbrtScene(object):
 	def _material_matte(self, Kd=1, sigma=0):
 		return liar.shaders.Lambert(self._get_texture(Kd))
 
-	def _material_metal(self, eta, k, roughness=.01, uroughness=None, vroughness=None, remaproughness: bool=False):
-		assert remaproughness == False
+	def _material_metal(self, eta, k, roughness=.01, uroughness=None, vroughness=None, remaproughness=True):
+		if uroughness is None:
+			uroughness = roughness
+		if vroughness is None:
+			vroughness = roughness
+		if remaproughness:
+			assert isinstance(uroughness, float) and isinstance(vroughness, float), \
+				"Currently remaproughness is only supported for fixed roughness values"
+			uroughness = _remap_roughness(uroughness)
+			vroughness = _remap_roughness(vroughness)
 		material = liar.shaders.CookTorrance(self._get_texture(eta), self._get_texture(k))
-		material.roughnessU = self._get_texture(uroughness if uroughness else roughness)
-		material.roughnessV = self._get_texture(vroughness if vroughness else roughness)
+		material.roughnessU = self._get_texture(uroughness)
+		material.roughnessV = self._get_texture(vroughness)
 		return material
 
 	def _material_mirror(self, Kr=1):
@@ -442,12 +450,9 @@ class PbrtScene(object):
 		return mat
 
 	def _material_substrate(self, Kd=.5, Ks=.5, uroughness=.1, vroughness=.1):
-		from liar.textures import Division, Max
 		shader = liar.shaders.AshikhminShirley(self._get_texture(Kd), self._get_texture(Ks))
-		one = self._get_texture(1)
-		eps = self._get_texture(1e-6)
-		shader.specularPowerU = Division(one, Max(self._get_texture(uroughness), eps))
-		shader.specularPowerV = Division(one, Max(self._get_texture(vroughness), eps))
+		shader.roughnessU = self._get_texture(uroughness)
+		shader.roughnessV = self._get_texture(vroughness)
 		return shader
 
 	def _material_uber(self, Kd=1, Ks=1, Kr=0, roughness=0.1, opacity=1):
@@ -950,6 +955,12 @@ def _color(*args):
 	else:
 		r, g, b = args
 	return liar.rgb(r, g, b, _RGB_SPACE)
+
+def _remap_roughness(roughness: float) -> float:
+    roughness = max(roughness, 1e-3)
+    x = math.log(roughness)
+    return 1.62142 + 0.819955 * x + 0.1734 * x ** 2 + 0.0171201 * x ** 3 + 0.000640711 * x **4
+
 
 _RGB_SPACE = liar.sRGB.linearSpace()
 
