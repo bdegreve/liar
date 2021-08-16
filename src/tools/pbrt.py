@@ -23,6 +23,7 @@ import math
 import logging
 import liar
 import liar.tools.spd
+from liar.tools import ply
 
 VERBOSITIES = QUIET, NORMAL, VERBOSE = range(3)
 
@@ -288,6 +289,9 @@ class PbrtScene(object):
 		mesh.loopSubdivision(nlevels)
 		mesh.smoothNormals()
 		return mesh
+
+	def _shape_plymesh(self, filename):
+		return ply.load(filename)
 
 
 	def Accelerator(self, *args, **kwargs):
