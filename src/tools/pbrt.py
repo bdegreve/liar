@@ -17,15 +17,23 @@
 #
 # http://liar.bramz.net/
 
-import sys
-import os
-import math
+
+import enum
 import logging
+import math
+import os
+import sys
+import warnings
+
 import liar
 import liar.tools.spd
 from liar.tools import ply
 
-VERBOSITIES = QUIET, NORMAL, VERBOSE = range(3)
+
+class Verbosity(enum.Enum):
+	QUIET = logging.CRITICAL
+	NORMAL = logging.INFO
+	VERBOSE = logging.DEBUG
 
 
 def parse(path, *args, **kwargs):
@@ -35,15 +43,14 @@ def parse(path, *args, **kwargs):
 
 
 class PbrtScene(object):
-	def __init__(self, verbosity=NORMAL, render_immediately=True, display=True, threads=None):
+	def __init__(self, verbosity=Verbosity.NORMAL, render_immediately=True, display=True, threads=None):
 		self.__logger = logging.getLogger("liar.tools.pbrt")
-		self.__logger.setLevel({QUIET: logging.CRITICAL, NORMAL: logging.INFO, VERBOSE: logging.DEBUG}[verbosity])
+		self.__logger.setLevel(verbosity.value)
 		self.engine = liar.RenderEngine()
 		self.engine.numberOfThreads = threads or liar.RenderEngine.AUTO_NUMBER_OF_THREADS
 		self.Identity()
-		self.__state = _STATE_OPTIONS_BLOCK
+		self.__state = State.OPTIONS_BLOCK
 		self.__named_coordinate_systems = {}
-		self.__verbosity = verbosity
 		self.__render_immediately = render_immediately
 		self.__display = display
 		self.__named_materials = {}
@@ -102,7 +109,7 @@ class PbrtScene(object):
 		self.verify_options()
 		self.Identity()
 		self.CoordinateSystem("world")
-		self.__state = _STATE_WORLD_BLOCK
+		self.__state = State.WORLD_BLOCK
 		self.__area_light = None
 		self.__volume = None
 		self.__pushed_transforms = []
@@ -597,12 +604,19 @@ class PbrtScene(object):
 		self.verify_world()
 		self.__area_light = name, kwargs
 
-	def _lightsource_area(self, shape, L=(1, 1, 1), nsamples=1):
+	def _lightsource_diffuse(self, shape, L=(1, 1, 1), nsamples=1):
 		self.verify_world()
 		light = liar.scenery.LightArea(shape)
 		light.radiance = _color(L)
 		light.numberOfEmissionSamples = nsamples
 		return light
+
+	def _lightsource_area(self, shape, L=(1, 1, 1), nsamples=1):
+		warnings.warn(
+			'AreaLightSource "area" is deprecated, use "diffuse" instead',
+			DeprecationWarning
+		)
+		return self._lightsource_diffuse(shape, L, nsamples)
 
 	def _lightsource_distant(self, from_=(0, 0, 0), to=(0, 0, 1), L=(1, 1, 1)):
 		from liar.tools import geometry
@@ -680,8 +694,7 @@ class PbrtScene(object):
 		tracer = liar.tracers.PhotonMapper()
 		tracer.globalMapSize = indirectphotons
 		tracer.causticsQuality = (100. * causticphotons) / indirectphotons
-		if self.__verbosity:
-			print ("  causticsQuality=%r" % tracer.causticsQuality)
+		self.__logger.info("causticsQuality=%r" % tracer.causticsQuality)
 		if finalgather or directwithphotons:
 			tracer.globalMapSize += directphotons
 		for k in ("global", "caustic", "volume"):
@@ -703,10 +716,10 @@ class PbrtScene(object):
 
 
 	def verify_options(self):
-		assert self.__state == _STATE_OPTIONS_BLOCK
+		assert self.__state == State.OPTIONS_BLOCK
 
 	def verify_world(self):
-		assert self.__state == _STATE_WORLD_BLOCK
+		assert self.__state == State.WORLD_BLOCK
 
 
 	def parse(self, path):
@@ -732,7 +745,7 @@ class PbrtScene(object):
 		arg_type, arg_name = None, None
 		tokens = _scanner(path, stream)
 		for token_type, token, line_number in tokens:
-			if token_type == _IDENTIFIER:
+			if token_type == Token.IDENTIFIER:
 				if identifier:
 					self.__print_statement(identifier, args, kwargs)
 					getattr(self, identifier)(*args, **kwargs)
@@ -741,25 +754,25 @@ class PbrtScene(object):
 					kwargs = {}
 				if token == "Include":
 					token_type, token, line_number = next(tokens)
-					assert token_type == _STRING, "syntax error in file %(path)r, line %(line_number)d: Include must be followed by a string" % vars()
+					assert token_type == Token.STRING, "syntax error in file %(path)r, line %(line_number)d: Include must be followed by a string" % vars()
 					self.__logger.debug("Include %r" % token)
 					self.parse(token)
 				else:
 					identifier = token
 					if keyword.iskeyword(identifier):
 						identifier += '_'
-			elif token_type == _PARAMETER:
+			elif token_type == Token.PARAMETER:
 				#assert not token in kwargs
 				arg_type, arg_name = token
 				if keyword.iskeyword(arg_name):
 					arg_name += '_'
 			else:
-				if token_type == _START_LIST:
+				if token_type == Token.START_LIST:
 					value = []
 					for token_type, token, line_number in tokens:
-						if token_type == _END_LIST:
+						if token_type == Token.END_LIST:
 							break
-						assert token_type in (_NUMBER, _STRING), "syntax error in file %(path)r, line %(line_number)d: parameter lists should only contain numbers and strings" % vars()
+						assert token_type in (Token.NUMBER, Token.STRING), "syntax error in file %(path)r, line %(line_number)d: parameter lists should only contain numbers and strings" % vars()
 						value.append(token)
 				else:
 					value = [token]
@@ -816,7 +829,8 @@ class PbrtScene(object):
 		if len(values) == 1:
 			filename, = values
 			assert _is_string(filename), filename
-			return liar.tools.spd.load(filename)
+			with open(filename) as fp:
+				return liar.tools.spd.load(fp)
 		wavelengths, values = zip(*_split_as_tuples(values, 2))
 		return [liar.spectra.Sampled(wavelengths, values)]
 
@@ -839,21 +853,32 @@ class PbrtScene(object):
 		self.engine.render(self.cropwindow)
 
 
-_STATE_UNINITIALIZED, _STATE_OPTIONS_BLOCK, _STATE_WORLD_BLOCK = range(3)
-_IDENTIFIER, _NUMBER, _STRING, _PARAMETER, _START_LIST, _END_LIST = range(6)
+class State(enum.Enum):
+	OPTIONS_BLOCK = 1
+	WORLD_BLOCK = 2
+
+
+class Token(enum.Enum):
+	IDENTIFIER = 1
+	NUMBER = 2
+	STRING = 3
+	PARAMETER = 4
+	START_LIST = 5
+	END_LIST = 6
+
 
 def _scanner(path, stream):
 	from re import Scanner
 	scanner = Scanner([
-		(r"[a-zA-Z_]\w*", lambda _, token: (_IDENTIFIER, token)),
-		(r"[\-+]?(\d+\.\d*|\.\d+)([eE][\-+]?[0-9]+)?", lambda _, token: (_NUMBER, float(token))),
-		(r"[\-+]?\d+", lambda _, token: (_NUMBER, int(token))),
-		(r'\[', lambda _, token: (_START_LIST, token)),
-		(r'\]', lambda _, token: (_END_LIST, token)),
-		(r'"(integer|float|point|vector|normal|bool|string|texture|color|rgb|xyz|blackbody|spectrum)\s+[a-zA-Z_][a-zA-Z0-9_]*"', lambda _, token: (_PARAMETER, token[1:-1].split())),
-		(r'"true"', lambda _, token: (_NUMBER, True)),
-		(r'"false"', lambda _, token: (_NUMBER, False)),
-		(r'".*?"', lambda _, token: (_STRING, token[1:-1])),
+		(r"[a-zA-Z_]\w*", lambda _, token: (Token.IDENTIFIER, token)),
+		(r"[\-+]?(\d+\.\d*|\.\d+)([eE][\-+]?[0-9]+)?", lambda _, token: (Token.NUMBER, float(token))),
+		(r"[\-+]?\d+", lambda _, token: (Token.NUMBER, int(token))),
+		(r'\[', lambda _, token: (Token.START_LIST, token)),
+		(r'\]', lambda _, token: (Token.END_LIST, token)),
+		(r'"(integer|float|point|vector|normal|bool|string|texture|color|rgb|xyz|blackbody|spectrum)\s+[a-zA-Z_][a-zA-Z0-9_]*"', lambda _, token: (Token.PARAMETER, token[1:-1].split())),
+		(r'"true"', lambda _, token: (Token.NUMBER, True)),
+		(r'"false"', lambda _, token: (Token.NUMBER, False)),
+		(r'".*?"', lambda _, token: (Token.STRING, token[1:-1])),
 		(r'#.*$', None), # comments
 		(r'\s+', None), # whitespace
 		])
@@ -942,8 +967,8 @@ if __name__ == "__main__":
 	logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 	from optparse import OptionParser
 	parser = OptionParser()
-	parser.add_option("-q", "--quiet", action="store_const", const=QUIET, dest="verbosity", default=NORMAL)
-	parser.add_option("-v", "--verbose", action="store_const", const=VERBOSE, dest="verbosity")
+	parser.add_option("-q", "--quiet", action="store_const", const=Verbosity.QUIET, dest="verbosity", default=Verbosity.NORMAL)
+	parser.add_option("-v", "--verbose", action="store_const", const=Verbosity.VERBOSE, dest="verbosity")
 	parser.add_option("-d", "--display", action="store_true", dest="display", default=False, help="show progress in preview display [default=%default]")
 	parser.add_option("-t", "--threads", action="store", type="int", help="number of threads for rendering")
 	options, args = parser.parse_args()
