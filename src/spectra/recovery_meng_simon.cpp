@@ -41,7 +41,7 @@ struct RecoveryMengSimon::Impl
 	struct PointInfo
 	{
 		TValues values;
-		TValue max;
+		TValue max = 0;
 	};
 
 	typedef spat::PlanarMesh<TValue, const PointInfo*, meta::EmptyType, meta::EmptyType> TMesh;

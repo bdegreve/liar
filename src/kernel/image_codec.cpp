@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -166,9 +166,8 @@ namespace impl
 		io::Image image;
 		TRgbSpacePtr rgbSpace;
 		std::wstring path;
-		size_t y;
-		bool saveOnClose;
-		LassImage(): y(0) {}
+		size_t y = 0;
+		bool saveOnClose = false;
 	};
 }
 

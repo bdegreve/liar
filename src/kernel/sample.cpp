@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,6 +37,8 @@ Sample::Sample():
 	screenSample_(TSample2D(0, 0)),
 	lensSample_(TSample2D(0, 0)),
 	time_(0.f),
+	wavelength_(0),
+	wavelengthPdf_(0),
 	weight_(1),
 	sampler_(0)
 {

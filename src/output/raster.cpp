@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -277,7 +277,9 @@ Raster::Raster(const TResolution2D& resolution):
     exposureStops_(0.f),
     exposureCorrectionStops_(0.f),
     middleGrey_(.184f),
-    autoExposure_(true)
+    maxSceneLuminance_(0),
+    autoExposure_(true),
+    isDirtyAutoExposure_(false)
 {
 }
 

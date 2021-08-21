@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ struct Handle
 	std::unique_ptr<LassOStream> ostream;
 	std::unique_ptr<Imf::RgbaInputFile> input;
 	std::unique_ptr<Imf::RgbaOutputFile> output;
-	int y;
+	int y = 0;
 	Handle(const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace):
 		rgbSpace((rgbSpace ? rgbSpace : kernel::sRGB)->linearSpace()),
 		resolution(resolution)
