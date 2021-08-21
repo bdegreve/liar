@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -225,7 +225,7 @@ const Spectral LightSpot::doSampleEmission(const Sample& sample, const TPoint2D&
 	shadowRay = BoundedRay(target, toLight, tolerance, distance, 
 		prim::IsAlreadyNormalized());
 	pdf = TNumTraits::one;
-	return intensity_->evaluate(sample, Illuminant) * static_cast<Spectral::TValue>(multiplier);
+	return intensity_->evaluate(sample, SpectralType::Illuminant) * static_cast<Spectral::TValue>(multiplier);
 }
 
 
@@ -245,7 +245,7 @@ const Spectral LightSpot::doSampleEmission(const Sample& sample, const TPoint2D&
 	const TVector3D direction = tangentU_ * local.x + tangentV_ * local.y + direction_ * local.z;
 	emissionRay = BoundedRay(position_, direction, tolerance);
 	const TScalar cosTheta = local.z;
-	return intensity_->evaluate(sample, Illuminant) * static_cast<Spectral::TValue>(fallOff(cosTheta));
+	return intensity_->evaluate(sample, SpectralType::Illuminant) * static_cast<Spectral::TValue>(fallOff(cosTheta));
 }
 
 

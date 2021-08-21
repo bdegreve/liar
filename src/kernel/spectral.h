@@ -46,11 +46,10 @@ typedef python::PyObjectPtr<RgbSpace>::Type TRgbSpacePtr;
 class Sample;
 
 
-enum SpectralType
+enum class SpectralType
 {
 	Illuminant = 0,
 	Reflectant,
-	numSpectralTypes
 };
 
 

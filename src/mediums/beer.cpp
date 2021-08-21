@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ const Spectral Beer::doTransmittance(const Sample& sample, const BoundedRay& ray
 {
 	const TScalar t = ray.farLimit() - ray.nearLimit();
 	LASS_ASSERT(t >= 0);
-	return pow(transparency_->evaluate(sample, Reflectant), static_cast<Spectral::TValue>(t));
+	return pow(transparency_->evaluate(sample, SpectralType::Reflectant), static_cast<Spectral::TValue>(t));
 }
 
 

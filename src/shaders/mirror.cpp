@@ -101,7 +101,7 @@ TBsdfPtr Mirror::doBsdf(const Sample& sample, const IntersectionContext& context
 	return TBsdfPtr(new Bsdf(
 		sample,
 		context,
-		reflectance_->lookUp(sample, context, Reflectant),
+		reflectance_->lookUp(sample, context, SpectralType::Reflectant),
 		fuzz_ ? fuzz_->scalarLookUp(sample, context) : 0,
 		BsdfCaps::reflection | (fuzz_ ? BsdfCaps::specular : BsdfCaps::specular)));
 }

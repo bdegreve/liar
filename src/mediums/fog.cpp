@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -157,10 +157,10 @@ const Spectral Fog::doEmission(const Sample& sample, const BoundedRay& ray) cons
 	const TValue thickness = extinction_ * d;
 	if (thickness < 1e-5f)
 	{
-		return emission_->evaluate(sample, Illuminant) * d;
+		return emission_->evaluate(sample, SpectralType::Illuminant) * d;
 	}
 	const TValue absorptance = -num::expm1(-thickness); // = 1 - transmittance(ray)
-	return emission_->evaluate(sample, Illuminant) * (absorptance / extinction_);
+	return emission_->evaluate(sample, SpectralType::Illuminant) * (absorptance / extinction_);
 
 }
 
@@ -226,7 +226,7 @@ const Spectral Fog::doPhase(const Sample& sample, const TPoint3D&, const TVector
 		p = 1;
 	}
 	pdf = p;
-	return color_->evaluate(sample, Reflectant) * static_cast<TValue>(p);
+	return color_->evaluate(sample, SpectralType::Reflectant) * static_cast<TValue>(p);
 }
 
 
@@ -259,7 +259,7 @@ const Spectral Fog::doSamplePhase(const Sample& sample, const TPoint2D& phaseSam
 	const TScalar sinTheta = num::sqrt(std::max<TScalar>(1 - num::sqr(cosTheta), 0));
 	dirOut = cosTheta * dirIn + (sinTheta * num::cos(phi)) * u + (sinTheta * num::sin(phi)) * v;
 
-	return color_->evaluate(sample, Reflectant) * static_cast<TValue>(pdf);
+	return color_->evaluate(sample, SpectralType::Reflectant) * static_cast<TValue>(pdf);
 }
 
 

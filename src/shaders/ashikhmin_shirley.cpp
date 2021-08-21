@@ -233,8 +233,8 @@ size_t AshikhminShirley::doNumReflectionSamples() const
 TBsdfPtr AshikhminShirley::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
 	typedef Spectral::TValue TValue;
-	const Spectral Rd = diffuse_->lookUp(sample, context, Reflectant);
-	const Spectral Rs = specular_->lookUp(sample, context, Reflectant);
+	const Spectral Rd = diffuse_->lookUp(sample, context, SpectralType::Reflectant);
+	const Spectral Rs = specular_->lookUp(sample, context, SpectralType::Reflectant);
 	const TValue nu = std::max<TValue>(specularPowerU_->scalarLookUp(sample, context), 0);
 	const TValue nv = std::max<TValue>(specularPowerV_->scalarLookUp(sample, context), 0);
 	return TBsdfPtr(new Bsdf(sample, context, Rd, Rs, nu, nv));
@@ -472,7 +472,7 @@ void AshikhminShirley::PowerFromRoughness::doSetState(const TPyObjectPtr& state)
 
 const Spectral AshikhminShirley::PowerFromRoughness::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
 {
-	const Spectral r = max(roughness_->lookUp(sample, context, Illuminant), 1e-3f);
+	const Spectral r = max(roughness_->lookUp(sample, context, SpectralType::Illuminant), 1e-3f);
 	const Spectral a = sqr(r);
 	return Spectral(max(2 / sqr(a) - 2, 0.f), type);
 }
@@ -534,7 +534,7 @@ void AshikhminShirley::RoughnessFromPower::doSetState(const TPyObjectPtr& state)
 
 const Spectral AshikhminShirley::RoughnessFromPower::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
 {
-	const Spectral e = max(power_->lookUp(sample, context, Illuminant), 0.f);
+	const Spectral e = max(power_->lookUp(sample, context, SpectralType::Illuminant), 0.f);
 	const Spectral a = sqrt(2 / (e + 2));
 	return Spectral(sqrt(a), type);
 }

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -173,7 +173,7 @@ const Spectral ExponentialFog::doTransmittance(const Sample&, const BoundedRay& 
 
 const Spectral ExponentialFog::doEmission(const Sample& sample, const BoundedRay& ray) const
 {
-	if (!emission()->evaluate(sample, Illuminant))
+	if (!emission()->evaluate(sample, SpectralType::Illuminant))
 	{
 		return Spectral();
 	}
@@ -185,14 +185,14 @@ const Spectral ExponentialFog::doEmission(const Sample& sample, const BoundedRay
 
 	if (extinction() == 0) // instead special case for thickness < 1e-5?
 	{
-		return tau(emission()->evaluate(sample, Illuminant), b, d);
+		return tau(emission()->evaluate(sample, SpectralType::Illuminant), b, d);
 	}
 
 	const TValue thickness = tau(a, b, d);
 	LASS_ASSERT(thickness >= 0);
 
 	const TValue absorptance = -num::expm1(-thickness); // = 1 - transmittance(ray)
-	return emission()->evaluate(sample, Illuminant) * (absorptance / extinction());
+	return emission()->evaluate(sample, SpectralType::Illuminant) * (absorptance / extinction());
 }
 
 

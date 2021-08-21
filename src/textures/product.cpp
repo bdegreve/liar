@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ const Spectral Product::doLookUp(const Sample& sample, const IntersectionContext
 	Spectral result(1);
 	for (TFactors::const_iterator i = factors_.begin(); i != factors_.end(); ++i)
 	{
-		result *= (*i)->lookUp(sample, context, Illuminant);
+		result *= (*i)->lookUp(sample, context, SpectralType::Illuminant);
 	}
 	return Spectral(result, type);
 }

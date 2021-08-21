@@ -126,9 +126,9 @@ TBsdfPtr Conductor::doBsdf(const Sample& sample, const IntersectionContext& cont
 {
 	// in theory, refractive indices must be at least 1, but they must be more than zero for sure.
 	// IOR as average of spectral works correctly for LIAR_SPECTRAL_MODE_SINGLE. Everything else uses ... well, and average.
-	const Spectral eta = max(refractionIndex_->lookUp(sample, context, Illuminant), 1e-9f);
-	const Spectral kappa = max(absorptionCoefficient_->lookUp(sample, context, Illuminant), 1e-9f);
-	const Spectral reflectance = reflectance_->lookUp(sample, context, Reflectant);
+	const Spectral eta = max(refractionIndex_->lookUp(sample, context, SpectralType::Illuminant), 1e-9f);
+	const Spectral kappa = max(absorptionCoefficient_->lookUp(sample, context, SpectralType::Illuminant), 1e-9f);
+	const Spectral reflectance = reflectance_->lookUp(sample, context, SpectralType::Reflectant);
 
 	return TBsdfPtr(new ConductorBsdf(sample, context, caps(), eta, kappa, reflectance));
 }

@@ -140,15 +140,15 @@ void Lafortune::addLobe(TTexturePtr x, TTexturePtr y, TTexturePtr z, TTexturePtr
 
 TBsdfPtr Lafortune::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-	const Spectral diffuse = diffuse_->lookUp(sample, context, Reflectant);
+	const Spectral diffuse = diffuse_->lookUp(sample, context, SpectralType::Reflectant);
 	TBsdfPtr::Rebind<LafortuneBsdf>::Type bsdf(new LafortuneBsdf(sample, context, caps(), diffuse));
 	for (const TLobePtr& lobe : lobes_)
 	{
 		bsdf->addLobe(
-			lobe->x->lookUp(sample, context, Illuminant),
-			lobe->y->lookUp(sample, context, Illuminant),
-			lobe->z->lookUp(sample, context, Illuminant),
-			lobe->power->lookUp(sample, context, Illuminant));
+			lobe->x->lookUp(sample, context, SpectralType::Illuminant),
+			lobe->y->lookUp(sample, context, SpectralType::Illuminant),
+			lobe->z->lookUp(sample, context, SpectralType::Illuminant),
+			lobe->power->lookUp(sample, context, SpectralType::Illuminant));
 	}
 	return bsdf;
 }

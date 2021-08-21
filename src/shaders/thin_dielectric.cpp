@@ -136,9 +136,9 @@ size_t ThinDielectric::doNumTransmissionSamples() const
 
 TBsdfPtr ThinDielectric::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-	const Spectral ior1 = max(outerRefractionIndex_->lookUp(sample, context, Illuminant), 1e-9f);
-	const Spectral ior2 = max(innerRefractionIndex_->lookUp(sample, context, Illuminant), 1e-9f);
-	const Spectral transparency = max(transparency_->lookUp(sample, context, Reflectant), 0);
+	const Spectral ior1 = max(outerRefractionIndex_->lookUp(sample, context, SpectralType::Illuminant), 1e-9f);
+	const Spectral ior2 = max(innerRefractionIndex_->lookUp(sample, context, SpectralType::Illuminant), 1e-9f);
+	const Spectral transparency = max(transparency_->lookUp(sample, context, SpectralType::Reflectant), 0);
 	const Spectral ior = ior1 / ior2;
 	return TBsdfPtr(new Bsdf(sample, context, caps(), ior, transparency));
 }

@@ -49,7 +49,7 @@ Sqr::Sqr(const TTexturePtr& texture):
 
 const Spectral Sqr::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
 {
-	return Spectral(sqr(texture()->lookUp(sample, context, Illuminant)), type);
+	return Spectral(sqr(texture()->lookUp(sample, context, SpectralType::Illuminant)), type);
 }
 
 

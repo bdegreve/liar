@@ -172,9 +172,9 @@ TBsdfPtr CookTorrance::doBsdf(const Sample& sample, const IntersectionContext& c
 	typedef Spectral::TValue TValue;
 	// in theory, refractive indices must be at least 1, but they must be more than zero for sure.
 	// IOR as average of spectral works correctly for LIAR_SPECTRAL_MODE_SINGLE. Everything else uses ... well, and average.
-	const Spectral eta = max(refractionIndex_->lookUp(sample, context, Illuminant), 1e-9f);
-	const Spectral kappa = max(absorptionCoefficient_->lookUp(sample, context, Illuminant), 1e-9f);
-	const Spectral reflectance = reflectance_->lookUp(sample, context, Reflectant);
+	const Spectral eta = max(refractionIndex_->lookUp(sample, context, SpectralType::Illuminant), 1e-9f);
+	const Spectral kappa = max(absorptionCoefficient_->lookUp(sample, context, SpectralType::Illuminant), 1e-9f);
+	const Spectral reflectance = reflectance_->lookUp(sample, context, SpectralType::Reflectant);
     const TValue mu = std::max<TValue>(roughnessU_->scalarLookUp(sample, context), 1e-3f);
 	const TValue mv = std::max<TValue>(roughnessV_->scalarLookUp(sample, context), 1e-3f);
 	return TBsdfPtr(new Bsdf(sample, context, eta, kappa, reflectance, mu, mv));

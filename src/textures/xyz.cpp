@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -119,7 +119,7 @@ const Spectral Xyz::doLookUp(const Sample& sample, const IntersectionContext& co
 	const TValue x = num::fractional(static_cast<TValue>(p.x));
 	const TValue y = num::fractional(static_cast<TValue>(p.y));
 	const TValue z = num::fractional(static_cast<TValue>(p.z));
-	return Spectral(x * a_->lookUp(sample, context, Illuminant) + y * b_->lookUp(sample, context, Illuminant) + z * c_->lookUp(sample, context, Illuminant), type);
+	return Spectral(x * a_->lookUp(sample, context, SpectralType::Illuminant) + y * b_->lookUp(sample, context, SpectralType::Illuminant) + z * c_->lookUp(sample, context, SpectralType::Illuminant), type);
 }
 
 

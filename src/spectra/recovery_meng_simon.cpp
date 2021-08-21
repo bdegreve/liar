@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -156,7 +156,7 @@ Spectral RecoveryMengSimon::doRecover(const XYZ& xyz, const Sample& sample, Spec
 	const TValue v1 = w[0] * a[k]     + w[1] * b[k]     + w[2] * c[k];
 	const TValue v = num::lerp(v0, v1, static_cast<TValue>(t));
 
-	if (type == Reflectant)
+	if (type == SpectralType::Reflectant)
 	{
 		// maximum of interpolated spectrum is not necessarely interpolated maximum
 		// but interpolated maximum should be an overestimation, so it should be still valid.

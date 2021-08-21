@@ -149,12 +149,12 @@ TBsdfPtr Dielectric::doBsdf(const Sample& sample, const IntersectionContext& con
 {
 	// in theory, refractive indices must be at least 1, but they must be more than zero for sure.
 	// IOR as average of spectral works correctly for LIAR_SPECTRAL_MODE_SINGLE. Everything else uses ... well, and average.
-	const TValue ior1 = std::max(average(outerRefractionIndex_->lookUp(sample, context, Illuminant)), 1e-9f);
-	const TValue ior2 = std::max(average(innerRefractionIndex_->lookUp(sample, context, Illuminant)), 1e-9f);
+	const TValue ior1 = std::max(average(outerRefractionIndex_->lookUp(sample, context, SpectralType::Illuminant)), 1e-9f);
+	const TValue ior2 = std::max(average(innerRefractionIndex_->lookUp(sample, context, SpectralType::Illuminant)), 1e-9f);
 	const bool isLeaving = context.solidEvent() == seLeaving;
 	const TValue ior = isLeaving ? ior2 / ior1 : ior1 / ior2;
-	const Spectral reflectance = reflectance_->lookUp(sample, context, Reflectant);
-	const Spectral transmittance = transmittance_->lookUp(sample, context, Reflectant);
+	const Spectral reflectance = reflectance_->lookUp(sample, context, SpectralType::Reflectant);
+	const Spectral transmittance = transmittance_->lookUp(sample, context, SpectralType::Reflectant);
 
 	return TBsdfPtr(new DielectricBsdf(sample, context, caps(), ior, reflectance, transmittance));
 }

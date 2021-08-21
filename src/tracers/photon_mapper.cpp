@@ -461,7 +461,7 @@ const Spectral PhotonMapper::doShadeSurface(
 {
 	if (isVisualizingPhotonMap_)
 	{
-		return Spectral::fromXYZ(estimateIrradiance(point, normal), sample, Illuminant);
+		return Spectral::fromXYZ(estimateIrradiance(point, normal), sample, SpectralType::Illuminant);
 	}
 
 	Spectral result;

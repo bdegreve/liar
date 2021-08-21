@@ -49,7 +49,7 @@ Sqrt::Sqrt(const TTexturePtr& texture):
 
 const Spectral Sqrt::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
 {
-	Spectral s = texture()->lookUp(sample, context, Illuminant);
+	Spectral s = texture()->lookUp(sample, context, SpectralType::Illuminant);
 	s.inpmax(0);
 	s.inpsqrt();
 	return Spectral(s, type);

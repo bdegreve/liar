@@ -174,12 +174,12 @@ void Simple::setRefractionIndex(const TTexturePtr& iRefractionIndex)
 
 TBsdfPtr Simple::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-	const Spectral diffuse = diffuse_->lookUp(sample, context, Reflectant);
-	const Spectral specular = specular_->lookUp(sample, context, Reflectant);
-	const Spectral specularPower = specularPower_->lookUp(sample, context, Illuminant);
-	const Spectral reflectance = reflectance_->lookUp(sample, context, Reflectant);
-	const Spectral transmittance = transmittance_->lookUp(sample, context, Reflectant);
-	const Spectral refractionIndex = std::max(average(refractionIndex_->lookUp(sample, context, Illuminant)), 1e-9);
+	const Spectral diffuse = diffuse_->lookUp(sample, context, SpectralType::Reflectant);
+	const Spectral specular = specular_->lookUp(sample, context, SpectralType::Reflectant);
+	const Spectral specularPower = specularPower_->lookUp(sample, context, SpectralType::Illuminant);
+	const Spectral reflectance = reflectance_->lookUp(sample, context, SpectralType::Reflectant);
+	const Spectral transmittance = transmittance_->lookUp(sample, context, SpectralType::Reflectant);
+	const Spectral refractionIndex = std::max(average(refractionIndex_->lookUp(sample, context, SpectralType::Illuminant)), 1e-9);
 
 	return TBsdfPtr(new SimpleBsdf(sample, context, BsdfCaps::all, diffuse, specular, specularPower, reflectance, transmittance, refractionIndex));
 }

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -198,7 +198,7 @@ const Spectral LightArea::doEmission(const Sample& sample, const TRay3D& ray, Bo
 		pdf = 0;
 		return Spectral();
 	}
-	return radiance_->evaluate(sample, Illuminant);
+	return radiance_->evaluate(sample, SpectralType::Illuminant);
 }
 
 
@@ -222,7 +222,7 @@ const Spectral LightArea::doSampleEmission(
 		pdf = 0;
 		return Spectral(0);
 	}
-	return radiance_->evaluate(sample, Illuminant);
+	return radiance_->evaluate(sample, SpectralType::Illuminant);
 }
 
 
@@ -247,7 +247,7 @@ const Spectral LightArea::doSampleEmission(
 		pdf = 0;
 		return Spectral(0);
 	}
-	return radiance_->evaluate(sample, Illuminant);
+	return radiance_->evaluate(sample, SpectralType::Illuminant);
 }
 
 
@@ -281,7 +281,7 @@ const Spectral LightArea::doSampleEmission(
 
 	emissionRay = BoundedRay(origin, direction, tolerance);
 	pdf = originPdf * directionPdf;
-	return radiance_->evaluate(sample, Illuminant) * static_cast<Spectral::TValue>(localDirection.z);
+	return radiance_->evaluate(sample, SpectralType::Illuminant) * static_cast<Spectral::TValue>(localDirection.z);
 }
 
 

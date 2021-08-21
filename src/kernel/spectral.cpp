@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ Spectral::Spectral(TValue f):
 
 
 Spectral::Spectral(TValue f, SpectralType type) :
-	v_(type == Reflectant ? std::min(f, TNumTraits::one) : f)
+	v_(type == SpectralType::Reflectant ? std::min(f, TNumTraits::one) : f)
 {
 }
 
@@ -58,7 +58,7 @@ Spectral::Spectral(const Spectral &other, SpectralType type):
 Spectral::Spectral(const TBands& v, SpectralType type):
 	v_(v)
 {
-	if (type == Reflectant)
+	if (type == SpectralType::Reflectant)
 	{
 		const TValue max = v_.maximum();
 		if (max > 1)
@@ -93,7 +93,7 @@ Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, cons
 	bandedIntegration(&result.v_[0], wavelengths, values);
 	result /= bandwidth;
 
-	if (type == Reflectant)
+	if (type == SpectralType::Reflectant)
 	{
 		const TValue max = result.v_.maximum();
 		if (max > 1)
@@ -198,7 +198,7 @@ Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, cons
 	const TValue t = static_cast<TValue>((sample.wavelength() - wavelengths[k - 1]) / (wavelengths[k] - wavelengths[k - 1]));
 	const TValue v = num::lerp(values[k - 1], values[k], t);
 
-	if (type == Reflectant)
+	if (type == SpectralType::Reflectant)
 	{
 		const TValue max = *std::max_element(values.begin(), values.end());
 		if (max > 1)
