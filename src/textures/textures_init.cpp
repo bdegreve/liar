@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,6 +48,8 @@
 #include "screen_space.h"
 #include "sin.h"
 #include "sky_blend.h"
+#include "sqr.h"
+#include "sqrt.h"
 #include "sum.h"
 #include "time.h"
 #include "transformation_uv.h"
@@ -89,6 +91,8 @@ PY_MODULE_CLASS(textures, ProjectionMapping)
 PY_MODULE_CLASS(textures, RayGeneration)
 PY_MODULE_CLASS(textures, Sin)
 PY_MODULE_CLASS(textures, SkyBlend)
+PY_MODULE_CLASS(textures, Sqr)
+PY_MODULE_CLASS(textures, Sqrt)
 PY_MODULE_CLASS(textures, Sum)
 PY_MODULE_CLASS(textures, ScreenSpace)
 PY_MODULE_CLASS(textures, Time)
