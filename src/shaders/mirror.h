@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -55,10 +55,10 @@ public:
 	class Bsdf : public kernel::Bsdf
 	{
 	public:
-		Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& reflectance, TScalar fuzz, TBsdfCaps caps);
+		Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& reflectance, TScalar fuzz, BsdfCaps caps);
 	private:
-		BsdfOut doEvaluate(const TVector3D& k1, const TVector3D& k2, TBsdfCaps allowedCaps) const override;
-		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const override;
+		BsdfOut doEvaluate(const TVector3D& k1, const TVector3D& k2, BsdfCaps allowedCaps) const override;
+		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const override;
 		Spectral reflectance_;
 		TScalar fuzz_;
 	};

@@ -64,7 +64,7 @@ AshikhminShirley::AshikhminShirley():
 
 
 AshikhminShirley::AshikhminShirley(const TTexturePtr& iDiffuse, const TTexturePtr& iSpecular):
-	Shader(Bsdf::capsReflection | Bsdf::capsDiffuse | Bsdf::capsGlossy),
+	Shader(BsdfCaps::reflection | BsdfCaps::diffuse | BsdfCaps::glossy),
 	diffuse_(iDiffuse),
 	specular_(iSpecular),
 	numberOfSamples_(9)
@@ -295,7 +295,7 @@ void AshikhminShirley::doSetState(const TPyObjectPtr& iState)
 
 
 AshikhminShirley::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& diffuse, const Spectral& specular, TScalar powerU, TScalar powerV) :
-	kernel::Bsdf(sample, context, Bsdf::capsReflection | Bsdf::capsDiffuse | Bsdf::capsGlossy),
+	kernel::Bsdf(sample, context, BsdfCaps::reflection | BsdfCaps::diffuse | BsdfCaps::glossy),
 	diffuse_(diffuse),
 	specular_(specular),
 	powerU_(powerU),
@@ -305,15 +305,15 @@ AshikhminShirley::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& co
 
 
 
-BsdfOut AshikhminShirley::Bsdf::doEvaluate(const TVector3D& k1, const TVector3D& k2, TBsdfCaps allowedCaps) const
+BsdfOut AshikhminShirley::Bsdf::doEvaluate(const TVector3D& k1, const TVector3D& k2, BsdfCaps allowedCaps) const
 {
 	LASS_ASSERT(k1.z > 0);
 	if (k2.z <= 0)
 	{
 		return BsdfOut();
 	}
-	const TScalar pd = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsDiffuse) ? diffuse_.absAverage() : 0;
-	const TScalar ps = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsGlossy) ? specular_.absAverage() : 0;
+	const TScalar pd = kernel::hasCaps(allowedCaps, BsdfCaps::reflection | BsdfCaps::diffuse) ? diffuse_.absAverage() : 0;
+	const TScalar ps = kernel::hasCaps(allowedCaps, BsdfCaps::reflection | BsdfCaps::glossy) ? specular_.absAverage() : 0;
 	LASS_ASSERT(pd >= 0 && ps >= 0);
 	const TScalar ptot = pd + ps;
 
@@ -334,11 +334,11 @@ BsdfOut AshikhminShirley::Bsdf::doEvaluate(const TVector3D& k1, const TVector3D&
 
 
 
-SampleBsdfOut AshikhminShirley::Bsdf::doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const
+SampleBsdfOut AshikhminShirley::Bsdf::doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const
 {
 	LASS_ASSERT(k1.z > 0);
-	TScalar pd = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsDiffuse) ? diffuse_.absAverage() : 0;
-	TScalar ps = kernel::hasCaps(allowedCaps, Bsdf::capsReflection | Bsdf::capsGlossy) ? specular_.absAverage() : 0;
+	TScalar pd = kernel::hasCaps(allowedCaps, BsdfCaps::reflection | BsdfCaps::diffuse) ? diffuse_.absAverage() : 0;
+	TScalar ps = kernel::hasCaps(allowedCaps, BsdfCaps::reflection | BsdfCaps::glossy) ? specular_.absAverage() : 0;
 	const TScalar ptot = pd + ps;
 	if (ptot <= 0)
 	{
@@ -353,7 +353,7 @@ SampleBsdfOut AshikhminShirley::Bsdf::doSample(const TVector3D& k1, const TPoint
 		out.omegaOut = num::cosineHemisphere(sample, out.pdf).position();
 		out.pdf *= pd;
 		out.value = rhoD(k1, out.omegaOut);
-		out.usedCaps = Bsdf::capsReflection | Bsdf::capsDiffuse;
+		out.usedCaps = BsdfCaps::reflection | BsdfCaps::diffuse;
 	}
 	else
 	{
@@ -365,7 +365,7 @@ SampleBsdfOut AshikhminShirley::Bsdf::doSample(const TVector3D& k1, const TPoint
 			out.value = rhoS(k1, out.omegaOut, h, out.pdf);
 			out.pdf *= ps;
 		}
-		out.usedCaps = Bsdf::capsReflection | Bsdf::capsGlossy;
+		out.usedCaps = BsdfCaps::reflection | BsdfCaps::glossy;
 	}
 	return out;
 }

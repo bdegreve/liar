@@ -40,7 +40,7 @@ PY_CLASS_METHOD(LinearInterpolator, addKey)
 // --- public --------------------------------------------------------------------------------------
 
 LinearInterpolator::LinearInterpolator():
-	Shader(Bsdf::capsNone),
+	Shader(BsdfCaps::none),
 	keys_(),
 	control_(Texture::black())
 {
@@ -49,7 +49,7 @@ LinearInterpolator::LinearInterpolator():
 
 
 LinearInterpolator::LinearInterpolator(const TKeyShaders& keyShaders, const TTexturePtr& controlTexture):
-	Shader(Bsdf::capsNone),
+	Shader(BsdfCaps::none),
 	keys_(),
 	control_(controlTexture)
 {
@@ -83,7 +83,7 @@ void LinearInterpolator::setKeys(const TKeyShaders& keyShaders)
 	keys_ = keyShaders;
 	std::sort(keys_.begin(), keys_.end(), LesserKey());
 
-	TBsdfCaps caps = 0;
+	BsdfCaps caps = BsdfCaps::none;
 	for (TKeyShaders::const_iterator i = keys_.begin(); i != keys_.end(); ++i)
 	{
 		caps |= i->second->caps();
@@ -261,7 +261,7 @@ void LinearInterpolator::doSetState(const TPyObjectPtr& state)
 // --- bsdf ----------------------------------------------------------------------------------------
 
 LinearInterpolator::Bsdf::Bsdf(
-		const Sample& sample, const IntersectionContext& context, TBsdfCaps caps,
+		const Sample& sample, const IntersectionContext& context, BsdfCaps caps,
 		const IntersectionContext& a, const IntersectionContext& b, TValue t) :
 	kernel::Bsdf(sample, context, caps),
 	a_(a),
@@ -273,7 +273,7 @@ LinearInterpolator::Bsdf::Bsdf(
 
 
 
-BsdfOut LinearInterpolator::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
+BsdfOut LinearInterpolator::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps allowedCaps) const
 {
 	// LinearInterpolator does not shade context, but a_ and b_ might.
 	// so you need to transform omegaIn and omegaOut back to world and then to bsdf again
@@ -308,7 +308,7 @@ BsdfOut LinearInterpolator::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVe
 
 
 
-SampleBsdfOut LinearInterpolator::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const
+SampleBsdfOut LinearInterpolator::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const
 {
 	// LinearInterpolator does not shade context, but a_ and b_ might.
 	// so you need to transform omegaIn and omegaOut back to world and then to bsdf again

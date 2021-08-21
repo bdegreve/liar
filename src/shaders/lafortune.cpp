@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -74,10 +74,10 @@ void Lafortune::Lobe::setState(const TPyObjectPtr& state)
 
 // --- public --------------------------------------------------------------------------------------
 
-// TODO: fix sampling method to do capsGlossy too.
+// TODO: fix sampling method to do BsdfCaps::glossy too.
 
 Lafortune::Lafortune():
-	Shader(Bsdf::capsReflection | Bsdf::capsDiffuse),
+	Shader(BsdfCaps::reflection | BsdfCaps::diffuse),
 	diffuse_(Texture::white())
 {
 }
@@ -85,7 +85,7 @@ Lafortune::Lafortune():
 
 
 Lafortune::Lafortune(const TTexturePtr& diffuse):
-	Shader(Bsdf::capsReflection | Bsdf::capsDiffuse),
+	Shader(BsdfCaps::reflection | BsdfCaps::diffuse),
 	diffuse_(diffuse)
 {
 }
@@ -170,7 +170,7 @@ void Lafortune::doSetState(const TPyObjectPtr& state)
 
 // --- bsdf ----------------------------------------------------------------------------------------
 
-Lafortune::LafortuneBsdf::LafortuneBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const Spectral& diffuse) :
+Lafortune::LafortuneBsdf::LafortuneBsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps caps, const Spectral& diffuse) :
 	Bsdf(sample, context, caps),
 	diffuseOverPi_(diffuse / num::NumTraits<TValue>::pi)
 {
@@ -185,7 +185,7 @@ void Lafortune::LafortuneBsdf::addLobe(const Spectral& x, const Spectral& y, con
 
 // TODO: use a sampling method better than lambertian.
 
-BsdfOut Lafortune::LafortuneBsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps LASS_UNUSED(allowedCaps)) const
+BsdfOut Lafortune::LafortuneBsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps LASS_UNUSED(allowedCaps)) const
 {
 	LASS_ASSERT(shaders::hasCaps(allowedCaps, caps()));
 	const TScalar cosTheta = num::abs(omegaOut.z);
@@ -197,7 +197,7 @@ BsdfOut Lafortune::LafortuneBsdf::doEvaluate(const TVector3D& omegaIn, const TVe
 }
 
 
-SampleBsdfOut Lafortune::LafortuneBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar, TBsdfCaps LASS_UNUSED(allowedCaps)) const
+SampleBsdfOut Lafortune::LafortuneBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar, BsdfCaps LASS_UNUSED(allowedCaps)) const
 {
 	LASS_ASSERT(shaders::hasCaps(allowedCaps, caps()));
 	SampleBsdfOut out;

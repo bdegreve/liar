@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ namespace kernel
 
 // --- public --------------------------------------------------------------------------------------
 
-Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps):
+Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps caps):
 	omegaGeometricNormal_(prim::normalTransform(context.geometricNormal(), context.localToBsdf())),
 	sample_(sample),
 	context_(context),
@@ -49,11 +49,11 @@ Bsdf::~Bsdf()
 
 
 
-BsdfOut Bsdf::evaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
+BsdfOut Bsdf::evaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps allowedCaps) const
 {
 	// for reflection, omegaIn and omegaOut must lay in the same hemisphere determined by geometric normal
 	const bool reflective = (dot(omegaIn, omegaGeometricNormal_) > 0) == (dot(omegaOut, omegaGeometricNormal_) > 0);
-	util::clearMasked<TBsdfCaps>(allowedCaps, reflective ? capsTransmission : capsReflection);
+	util::clearMasked<BsdfCaps>(allowedCaps, reflective ? BsdfCaps::transmission : BsdfCaps::reflection);
 
 	if (!compatibleCaps(allowedCaps))
 	{
@@ -64,7 +64,7 @@ BsdfOut Bsdf::evaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsd
 
 
 
-SampleBsdfOut Bsdf::sample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const
+SampleBsdfOut Bsdf::sample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const
 {
 	if (!compatibleCaps(allowedCaps))
 	{

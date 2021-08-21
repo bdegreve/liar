@@ -197,12 +197,12 @@ const Spectral AdjointPhotonTracer::shadeSurface(const Sample& sample, const Dif
 
 SampleBsdfOut AdjointPhotonTracer::scatterSurface(const Sample& sample, const TBsdfPtr& bsdf, const TPoint3D& target, const TVector3D& omegaIn, size_t generation) const
 {
-	const TScalar strategyPdf = bsdf->hasCaps(Bsdf::capsDiffuse) ? 0.5f : 1.0f;
+	const TScalar strategyPdf = bsdf->hasCaps(BsdfCaps::diffuse) ? 0.5f : 1.0f;
 	if (strategySample(sample, generation) < strategyPdf)
 	{
 		// sample BSDF.
 		SampleBsdfOut out = bsdf->sample(
-			omegaIn, bsdfSample(sample, generation), bsdfComponentSample(sample, generation), Bsdf::capsAll);
+			omegaIn, bsdfSample(sample, generation), bsdfComponentSample(sample, generation), BsdfCaps::all);
 		if (!out)
 		{
 			return out;
@@ -243,14 +243,14 @@ SampleBsdfOut AdjointPhotonTracer::scatterSurface(const Sample& sample, const TB
 		pdf *= lightPdf * (1 - strategyPdf);
 
 		const TVector3D omegaOut = bsdf->worldToBsdf(shadowRay.direction());
-		const BsdfOut out = bsdf->evaluate(omegaIn, omegaOut, Bsdf::capsAll);
+		const BsdfOut out = bsdf->evaluate(omegaIn, omegaOut, BsdfCaps::all);
 		if (!out)
 		{
 			return SampleBsdfOut();
 		}
 		pdf += out.pdf * strategyPdf;
 
-		return SampleBsdfOut(omegaOut, out.value, pdf, Bsdf::capsAll);
+		return SampleBsdfOut(omegaOut, out.value, pdf, BsdfCaps::all);
 	}
 }
 

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -57,9 +57,9 @@ public:
 
 	virtual ~Shader();
 
-	TBsdfCaps caps() const { return caps_; }
-	bool hasCaps(TBsdfCaps wantedCaps) const { return kernel::hasCaps(caps_, wantedCaps); }
-	bool compatibleCaps(TBsdfCaps allowedCaps) const { return kernel::compatibleCaps(caps_, allowedCaps); }
+	BsdfCaps caps() const { return caps_; }
+	bool hasCaps(BsdfCaps wantedCaps) const { return kernel::hasCaps(caps_, wantedCaps); }
+	bool compatibleCaps(BsdfCaps allowedCaps) const { return kernel::compatibleCaps(caps_, allowedCaps); }
 
 	void shadeContext(const Sample& sample, IntersectionContext& context) const
 	{
@@ -95,9 +95,9 @@ public:
 
 protected:
 
-	Shader(TBsdfCaps capabilityFlags);
+	Shader(BsdfCaps capabilityFlags);
 
-	void setCaps(TBsdfCaps capabilityFlags);
+	void setCaps(BsdfCaps capabilityFlags);
 
 private:
 
@@ -113,7 +113,7 @@ private:
 	virtual const TPyObjectPtr doGetState() const = 0;
 	virtual void doSetState(const TPyObjectPtr& state) = 0;
 
-	TBsdfCaps caps_;
+	BsdfCaps caps_;
 	int idReflectionSamples_;
 	int idReflectionComponentSamples_;
 	int idTransmissionSamples_;

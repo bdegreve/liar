@@ -68,10 +68,10 @@ private:
 	class Bsdf: public kernel::Bsdf
 	{
 	public:
-		Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const IntersectionContext& contextA, const IntersectionContext& contextB, TValue t);
+		Bsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps caps, const IntersectionContext& contextA, const IntersectionContext& contextB, TValue t);
 	private:
-		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
-		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
+		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps allowedCaps) const;
+		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const;
 		IntersectionContext a_;
 		IntersectionContext b_;
 		TValue t_;

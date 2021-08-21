@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -257,7 +257,7 @@ const Spectral DirectLighting::traceSpecularAndGlossy(
 	const Shader* const shader = context.shader();
 	LASS_ASSERT(shader);
 
-	if (!(shader->hasCaps(Bsdf::capsSpecular) || shader->hasCaps(Bsdf::capsGlossy)))
+	if (!(shader->hasCaps(BsdfCaps::specular) || shader->hasCaps(BsdfCaps::glossy)))
 	{
 		return Spectral(0);
 	}
@@ -268,7 +268,7 @@ const Spectral DirectLighting::traceSpecularAndGlossy(
 	const TVector3D dPoint_dJ = prim::transform(context.dPoint_dJ(), context.localToWorld());
 
 	Spectral result;
-	if (bsdf->hasCaps(Bsdf::capsReflection) && shader->idReflectionSamples() != -1)
+	if (bsdf->hasCaps(BsdfCaps::reflection) && shader->idReflectionSamples() != -1)
 	{
 		const TPoint3D beginCentral = point + 10 * liar::tolerance * normal;
 		const TPoint3D beginI = beginCentral + dPoint_dI;
@@ -292,7 +292,7 @@ const Spectral DirectLighting::traceSpecularAndGlossy(
 		const difference_type n = highQuality ? bsdfSample.size() : 1;
 		for (difference_type i = 0; i < n; ++i)
 		{
-			const SampleBsdfOut out = bsdf->sample(omega, bsdfSample[i], compSample[i], Bsdf::capsReflection | Bsdf::capsSpecular | Bsdf::capsGlossy);
+			const SampleBsdfOut out = bsdf->sample(omega, bsdfSample[i], compSample[i], BsdfCaps::reflection | BsdfCaps::specular | BsdfCaps::glossy);
 			if (!out)
 			{
 				continue;
@@ -310,12 +310,12 @@ const Spectral DirectLighting::traceSpecularAndGlossy(
 				TRay3D(beginJ, directionJ));
 			TScalar t;
 			TScalar a;
-			const Spectral reflected = castRay(sample, reflectedRay, t, a, highQuality && (out.usedCaps & Bsdf::capsSpecular));
+			const Spectral reflected = castRay(sample, reflectedRay, t, a, highQuality && hasCaps(out.usedCaps, BsdfCaps::specular));
 			result += out.value * reflected * static_cast<Spectral::TValue>(a * num::abs(out.omegaOut.z) / (static_cast<TScalar>(n) * out.pdf));
 		}
 	}
 	//*
-	if (shader->hasCaps(Bsdf::capsTransmission) && shader->idTransmissionSamples() != -1)
+	if (shader->hasCaps(BsdfCaps::transmission) && shader->idTransmissionSamples() != -1)
 	{
 		const MediumChanger mediumChanger(mediumStack(), context.interior(), context.solidEvent());
 		const TPoint3D beginCentral = point - 10 * liar::tolerance * normal;
@@ -327,7 +327,7 @@ const Spectral DirectLighting::traceSpecularAndGlossy(
 		const difference_type n = highQuality ? bsdfSample.size() : 1;
 		for (difference_type i = 0; i < n; ++i)
 		{
-			const SampleBsdfOut out = bsdf->sample(omega, bsdfSample[i], compSample[i], Bsdf::capsTransmission | Bsdf::capsSpecular | Bsdf::capsGlossy);
+			const SampleBsdfOut out = bsdf->sample(omega, bsdfSample[i], compSample[i], BsdfCaps::transmission | BsdfCaps::specular | BsdfCaps::glossy);
 			if (!out)
 			{
 				continue;
@@ -342,7 +342,7 @@ const Spectral DirectLighting::traceSpecularAndGlossy(
 				TRay3D(beginCentral, directionCentral));
 			TScalar t;
 			TScalar a;
-			const Spectral transmitted = castRay(sample, transmittedRay, t, a, highQuality && (out.usedCaps & Bsdf::capsSpecular));
+			const Spectral transmitted = castRay(sample, transmittedRay, t, a, highQuality && hasCaps(out.usedCaps, BsdfCaps::specular));
 			result += out.value * transmitted * static_cast<Spectral::TValue>(a * num::abs(out.omegaOut.z) / (static_cast<TScalar>(n) * out.pdf));
 		}
 	}

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ PY_CLASS_MEMBER_RW_DOC(Mirror, fuzz, setFuzz, "fuzziness factor for reflection d
 // --- public --------------------------------------------------------------------------------------
 
 Mirror::Mirror():
-	Shader(Bsdf::capsReflection | Bsdf::capsSpecular),
+	Shader(BsdfCaps::reflection | BsdfCaps::specular),
 	reflectance_(Texture::white()),
 	fuzz_(nullptr)
 {
@@ -48,7 +48,7 @@ Mirror::Mirror():
 
 
 Mirror::Mirror(const TTexturePtr& reflectance):
-	Shader(Bsdf::capsReflection | Bsdf::capsSpecular),
+	Shader(BsdfCaps::reflection | BsdfCaps::specular),
 	reflectance_(reflectance),
 	fuzz_(nullptr)
 {
@@ -103,7 +103,7 @@ TBsdfPtr Mirror::doBsdf(const Sample& sample, const IntersectionContext& context
 		context,
 		reflectance_->lookUp(sample, context, Reflectant),
 		fuzz_ ? fuzz_->scalarLookUp(sample, context) : 0,
-		Bsdf::capsReflection | (fuzz_ ? Bsdf::capsSpecular : Bsdf::capsSpecular)));
+		BsdfCaps::reflection | (fuzz_ ? BsdfCaps::specular : BsdfCaps::specular)));
 }
 
 
@@ -123,7 +123,7 @@ void Mirror::doSetState(const TPyObjectPtr& state)
 
 // --- Bsdf ----------------------------------------------------------------------------------------
 
-Mirror::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& reflectance, TScalar fuzz, TBsdfCaps caps):
+Mirror::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& reflectance, TScalar fuzz, BsdfCaps caps):
 	kernel::Bsdf(sample, context, caps),
 	reflectance_(reflectance),
 	fuzz_(fuzz)
@@ -132,14 +132,14 @@ Mirror::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, con
 
 
 
-BsdfOut Mirror::Bsdf::doEvaluate(const TVector3D&, const TVector3D&, TBsdfCaps) const
+BsdfOut Mirror::Bsdf::doEvaluate(const TVector3D&, const TVector3D&, BsdfCaps) const
 {
 	return BsdfOut();
 }
 
 
 
-SampleBsdfOut Mirror::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar, TBsdfCaps LASS_UNUSED(allowedCaps)) const
+SampleBsdfOut Mirror::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar, BsdfCaps LASS_UNUSED(allowedCaps)) const
 {
 	LASS_ASSERT(omegaIn.z > 0);
 	LASS_ASSERT(kernel::hasCaps(allowedCaps, caps()));

@@ -58,7 +58,7 @@ CookTorrance::CookTorrance(const TTexturePtr& refractionIndex):
 
 
 CookTorrance::CookTorrance(const TTexturePtr& refractionIndex, const TTexturePtr& absorptionCoefficient):
-	Shader(Bsdf::capsReflection | Bsdf::capsGlossy),
+	Shader(BsdfCaps::reflection | BsdfCaps::glossy),
 	refractionIndex_(refractionIndex),
 	absorptionCoefficient_(absorptionCoefficient),
 	reflectance_(Texture::white()),
@@ -197,7 +197,7 @@ void CookTorrance::doSetState(const TPyObjectPtr& iState)
 
 
 CookTorrance::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& eta, const Spectral& kappa, const Spectral& reflectance, TValue mU, TValue mV):
-	kernel::Bsdf(sample, context, Bsdf::capsReflection | Bsdf::capsGlossy),
+	kernel::Bsdf(sample, context, BsdfCaps::reflection | BsdfCaps::glossy),
 	eta_(eta),
 	kappa_(kappa),
 	reflectance_(reflectance),
@@ -296,7 +296,7 @@ inline Spectral fresnelConductor(const Spectral& eta, const Spectral& kappa, con
 
 
 
-BsdfOut CookTorrance::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps LASS_UNUSED(allowedCaps)) const
+BsdfOut CookTorrance::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps LASS_UNUSED(allowedCaps)) const
 {
 	LASS_ASSERT(shaders::hasCaps(allowedCaps, caps())); 
 
@@ -317,7 +317,7 @@ BsdfOut CookTorrance::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D
 
 
 
-SampleBsdfOut CookTorrance::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar /*componentSample*/, TBsdfCaps allowedCaps) const
+SampleBsdfOut CookTorrance::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar /*componentSample*/, BsdfCaps allowedCaps) const
 {
 	LASS_ASSERT(omegaIn.z > 0);
 	const TVector3D h = sampleD_beckmann(sample, mU_, mV_);
@@ -326,7 +326,7 @@ SampleBsdfOut CookTorrance::Bsdf::doSample(const TVector3D& omegaIn, const TPoin
 	{
 		return SampleBsdfOut();
 	}	
-	return SampleBsdfOut(omegaOut, doEvaluate(omegaIn, omegaOut, allowedCaps), Bsdf::capsReflection | Bsdf::capsGlossy);
+	return SampleBsdfOut(omegaOut, doEvaluate(omegaIn, omegaOut, allowedCaps), BsdfCaps::reflection | BsdfCaps::glossy);
 }
 
 

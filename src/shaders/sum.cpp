@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,10 +35,10 @@ PY_CLASS_CONSTRUCTOR_1(Sum, const Sum::TChildren&)
 // --- public --------------------------------------------------------------------------------------
 
 Sum::Sum(const TChildren& children):
-	Shader(Bsdf::capsNone),
+	Shader(BsdfCaps::none),
 	children_(children)
 {
-	TBsdfCaps caps = 0;
+	BsdfCaps caps = BsdfCaps::none;
 	for (TChildren::const_iterator i = children.begin(); i != children.end(); ++i)
 	{
 		caps |= (*i)->caps();
@@ -127,13 +127,13 @@ void Sum::doSetState(const TPyObjectPtr& state)
 
 // --- bsdf ----------------------------------------------------------------------------------------
 
-Sum::SumBsdf::SumBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps):
+Sum::SumBsdf::SumBsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps caps):
 	Bsdf(sample, context, caps),
-	activeCaps_(0)
+	activeCaps_(BsdfCaps::none)
 {
 }
 
-BsdfOut Sum::SumBsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
+BsdfOut Sum::SumBsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps allowedCaps) const
 {
 	size_t usedComponents = 0;
 	BsdfOut out;
@@ -160,7 +160,7 @@ BsdfOut Sum::SumBsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omeg
 
 
 
-SampleBsdfOut Sum::SumBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const
+SampleBsdfOut Sum::SumBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const
 {
 	// this implementation is not thread safe, but that's OK, as a BSDF is not supposed to be shared between multiple threads.
 

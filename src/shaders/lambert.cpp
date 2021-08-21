@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ PY_CLASS_MEMBER_RW_DOC(Lambert, diffuse, setDiffuse, "texture for diffuse compon
 // --- public --------------------------------------------------------------------------------------
 
 Lambert::Lambert():
-	Shader(Bsdf::capsReflection | Bsdf::capsDiffuse),
+	Shader(BsdfCaps::reflection | BsdfCaps::diffuse),
 	diffuse_(Texture::white())
 {
 }
@@ -46,7 +46,7 @@ Lambert::Lambert():
 
 
 Lambert::Lambert(const TTexturePtr& diffuse):
-	Shader(Bsdf::capsReflection | Bsdf::capsDiffuse),
+	Shader(BsdfCaps::reflection | BsdfCaps::diffuse),
 	diffuse_(diffuse)
 {
 }
@@ -96,13 +96,13 @@ void Lambert::doSetState(const TPyObjectPtr& state)
 
 // --- bsdf ----------------------------------------------------------------------------------------
 
-LambertBsdf::LambertBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const Spectral& diffuse) :
+LambertBsdf::LambertBsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps caps, const Spectral& diffuse) :
 	Bsdf(sample, context, caps),
 	diffuseOverPi_(diffuse / num::NumTraits<Spectral::TValue>::pi)
 {
 }
 
-BsdfOut LambertBsdf::doEvaluate(const TVector3D&, const TVector3D& omegaOut, TBsdfCaps LASS_UNUSED(allowedCaps)) const
+BsdfOut LambertBsdf::doEvaluate(const TVector3D&, const TVector3D& omegaOut, BsdfCaps LASS_UNUSED(allowedCaps)) const
 {
 	LASS_ASSERT(shaders::hasCaps(allowedCaps, caps()));
 	const TScalar cosTheta = num::abs(omegaOut.z);
@@ -113,7 +113,7 @@ BsdfOut LambertBsdf::doEvaluate(const TVector3D&, const TVector3D& omegaOut, TBs
 	return BsdfOut(diffuseOverPi_, cosTheta / TNumTraits::pi);
 }
 
-SampleBsdfOut LambertBsdf::doSample(const TVector3D&, const TPoint2D& sample, TScalar, TBsdfCaps LASS_UNUSED(allowedCaps)) const
+SampleBsdfOut LambertBsdf::doSample(const TVector3D&, const TPoint2D& sample, TScalar, BsdfCaps LASS_UNUSED(allowedCaps)) const
 {
 	LASS_ASSERT(shaders::hasCaps(allowedCaps, caps()));
 	SampleBsdfOut out;

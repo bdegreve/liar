@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ PY_CLASS_MEMBER_RW_DOC(ThinDielectric, transparency, setTransparency,
 // --- public --------------------------------------------------------------------------------------
 
 ThinDielectric::ThinDielectric():
-	Shader(Bsdf::capsReflection | Bsdf::capsTransmission | Bsdf::capsSpecular),
+	Shader(BsdfCaps::reflection | BsdfCaps::transmission | BsdfCaps::specular),
 	innerRefractionIndex_(Texture::white()),
 	outerRefractionIndex_(Texture::white()),
 	transparency_(Texture::white())
@@ -53,7 +53,7 @@ ThinDielectric::ThinDielectric():
 
 
 ThinDielectric::ThinDielectric(const TTexturePtr& innerRefractionIndex):
-	Shader(Bsdf::capsReflection | Bsdf::capsTransmission | Bsdf::capsSpecular),
+	Shader(BsdfCaps::reflection | BsdfCaps::transmission | BsdfCaps::specular),
 	innerRefractionIndex_(innerRefractionIndex),
 	outerRefractionIndex_(Texture::white()),
 	transparency_(Texture::white())
@@ -63,7 +63,7 @@ ThinDielectric::ThinDielectric(const TTexturePtr& innerRefractionIndex):
 
 
 ThinDielectric::ThinDielectric(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex):
-	Shader(Bsdf::capsReflection | Bsdf::capsTransmission | Bsdf::capsSpecular),
+	Shader(BsdfCaps::reflection | BsdfCaps::transmission | BsdfCaps::specular),
 	innerRefractionIndex_(innerRefractionIndex),
 	outerRefractionIndex_(outerRefractionIndex),
 	transparency_(Texture::white())
@@ -161,7 +161,7 @@ void ThinDielectric::doSetState(const TPyObjectPtr& state)
 
 // --- bsdf ----------------------------------------------------------------------------------------
 
-ThinDielectric::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const Spectral& ior, const Spectral& transparency) :
+ThinDielectric::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps caps, const Spectral& ior, const Spectral& transparency) :
 	kernel::Bsdf(sample, context, caps),
 	transparency_(transparency),
 	ior_(ior)
@@ -170,24 +170,21 @@ ThinDielectric::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& cont
 
 
 
-BsdfOut ThinDielectric::Bsdf::doEvaluate(const TVector3D&, const TVector3D&, TBsdfCaps) const
+BsdfOut ThinDielectric::Bsdf::doEvaluate(const TVector3D&, const TVector3D&, BsdfCaps) const
 {
 	return BsdfOut();
 }
 
 
 
-SampleBsdfOut ThinDielectric::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D&, TScalar componentSample, TBsdfCaps allowedCaps) const
+SampleBsdfOut ThinDielectric::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D&, TScalar componentSample, BsdfCaps allowedCaps) const
 {
 	// http://users.skynet.be/bdegreve/writings/reflection_transmission.pdf
 
 	typedef Spectral::TValue TValue;
 
-	enum
-	{
-		capsRefl = Bsdf::capsReflection | Bsdf::capsSpecular,
-		capsTrans = Bsdf::capsTransmission | Bsdf::capsSpecular
-	};
+	constexpr BsdfCaps capsRefl = BsdfCaps::reflection | BsdfCaps::specular;
+	constexpr BsdfCaps capsTrans = BsdfCaps::transmission | BsdfCaps::specular;
 
 	const TValue cosI = static_cast<TValue>(omegaIn.z);
 	LASS_ASSERT(cosI > 0);

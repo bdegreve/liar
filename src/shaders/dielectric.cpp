@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ PY_CLASS_MEMBER_RW_DOC(Dielectric, transmittance, setTransmittance,
 // --- public --------------------------------------------------------------------------------------
 
 Dielectric::Dielectric():
-	Shader(Bsdf::capsReflection | Bsdf::capsTransmission | Bsdf::capsSpecular)
+	Shader(BsdfCaps::reflection | BsdfCaps::transmission | BsdfCaps::specular)
 {
 	init();
 }
@@ -54,7 +54,7 @@ Dielectric::Dielectric():
 
 
 Dielectric::Dielectric(const TTexturePtr& innerRefractionIndex):
-	Shader(Bsdf::capsReflection | Bsdf::capsTransmission | Bsdf::capsSpecular)
+	Shader(BsdfCaps::reflection | BsdfCaps::transmission | BsdfCaps::specular)
 {
 	init(innerRefractionIndex);
 }
@@ -62,7 +62,7 @@ Dielectric::Dielectric(const TTexturePtr& innerRefractionIndex):
 
 
 Dielectric::Dielectric(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex):
-	Shader(Bsdf::capsReflection | Bsdf::capsTransmission | Bsdf::capsSpecular)
+	Shader(BsdfCaps::reflection | BsdfCaps::transmission | BsdfCaps::specular)
 {
 	init(innerRefractionIndex, outerRefractionIndex);
 }
@@ -186,7 +186,7 @@ void Dielectric::init(const TTexturePtr& innerRefractionIndex, const TTexturePtr
 
 // --- bsdf ----------------------------------------------------------------------------------------
 
-Dielectric::DielectricBsdf::DielectricBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, TValue ior, const Spectral& reflectance, const Spectral& transmittance) :
+Dielectric::DielectricBsdf::DielectricBsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps caps, TValue ior, const Spectral& reflectance, const Spectral& transmittance) :
 	Bsdf(sample, context, caps),
 	reflectance_(reflectance),
 	transmittance_(transmittance),
@@ -197,22 +197,19 @@ Dielectric::DielectricBsdf::DielectricBsdf(const Sample& sample, const Intersect
 
 
 
-BsdfOut Dielectric::DielectricBsdf::doEvaluate(const TVector3D&, const TVector3D&, TBsdfCaps) const
+BsdfOut Dielectric::DielectricBsdf::doEvaluate(const TVector3D&, const TVector3D&, BsdfCaps) const
 {
 	return BsdfOut();
 }
 
 
 
-SampleBsdfOut Dielectric::DielectricBsdf::doSample(const TVector3D& omegaIn, const TPoint2D&, TScalar componentSample, TBsdfCaps allowedCaps) const
+SampleBsdfOut Dielectric::DielectricBsdf::doSample(const TVector3D& omegaIn, const TPoint2D&, TScalar componentSample, BsdfCaps allowedCaps) const
 {
 	typedef Spectral::TValue TValue;
 
-	enum
-	{
-		capsRefl = Bsdf::capsReflection | Bsdf::capsSpecular,
-		capsTrans = Bsdf::capsTransmission | Bsdf::capsSpecular
-	};
+	constexpr BsdfCaps capsRefl = BsdfCaps::reflection | BsdfCaps::specular;
+	constexpr BsdfCaps capsTrans = BsdfCaps::transmission | BsdfCaps::specular;
 
 	const TValue cosI = static_cast<TValue>(omegaIn.z);
 	LASS_ASSERT(cosI > 0);

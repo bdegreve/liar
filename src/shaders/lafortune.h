@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -79,7 +79,7 @@ private:
 	class LafortuneBsdf : public Bsdf
 	{
 	public:
-		LafortuneBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const Spectral& diffuse);
+		LafortuneBsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps caps, const Spectral& diffuse);
 		void addLobe(const Spectral& x, const Spectral& y, const Spectral& z, const Spectral& power);
 	private:
 		typedef Spectral::TValue TValue;
@@ -92,8 +92,8 @@ private:
 			Lobe(const Spectral& x, const Spectral& y, const Spectral& z, const Spectral& power) : x(x), y(y), z(z), power(power) {}
 		};
 		typedef stde::static_vector<Lobe, capacity> TLobes;
-		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
-		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
+		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps allowedCaps) const;
+		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const;
 		Spectral eval(const TVector3D& omegaIn, const TVector3D& omegaOut) const;
 		Spectral diffuseOverPi_;
 		TLobes lobes_;

@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ PY_DECLARE_CLASS_DOC(Conductor, "Conductive Fresnel material (like metal)")
 // --- public --------------------------------------------------------------------------------------
 
 Conductor::Conductor() :
-	Shader(Bsdf::capsReflection | Bsdf::capsSpecular)
+	Shader(BsdfCaps::reflection | BsdfCaps::specular)
 {
 	init();
 }
@@ -52,7 +52,7 @@ Conductor::Conductor() :
 
 
 Conductor::Conductor(const TTexturePtr& refractionIndex) :
-	Shader(Bsdf::capsReflection | Bsdf::capsSpecular)
+	Shader(BsdfCaps::reflection | BsdfCaps::specular)
 {
 	init(refractionIndex);
 }
@@ -60,7 +60,7 @@ Conductor::Conductor(const TTexturePtr& refractionIndex) :
 
 
 Conductor::Conductor(const TTexturePtr& refractionIndex, const TTexturePtr& absorptionCoefficient) :
-	Shader(Bsdf::capsReflection | Bsdf::capsSpecular)
+	Shader(BsdfCaps::reflection | BsdfCaps::specular)
 {
 	init(refractionIndex, absorptionCoefficient);
 }
@@ -159,7 +159,7 @@ void Conductor::init(const TTexturePtr& refractionIndex, const TTexturePtr& abso
 
 // --- bsdf ----------------------------------------------------------------------------------------
 
-Conductor::ConductorBsdf::ConductorBsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const Spectral& eta, const Spectral& kappa, const Spectral& reflectance) :
+Conductor::ConductorBsdf::ConductorBsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps caps, const Spectral& eta, const Spectral& kappa, const Spectral& reflectance) :
 	Bsdf(sample, context, caps),
 	reflectance_(reflectance),
 	eta_(eta),
@@ -169,21 +169,16 @@ Conductor::ConductorBsdf::ConductorBsdf(const Sample& sample, const Intersection
 
 
 
-BsdfOut Conductor::ConductorBsdf::doEvaluate(const TVector3D&, const TVector3D&, TBsdfCaps) const
+BsdfOut Conductor::ConductorBsdf::doEvaluate(const TVector3D&, const TVector3D&, BsdfCaps) const
 {
 	return BsdfOut();
 }
 
 
 
-SampleBsdfOut Conductor::ConductorBsdf::doSample(const TVector3D& omegaIn, const TPoint2D&, TScalar, TBsdfCaps) const
+SampleBsdfOut Conductor::ConductorBsdf::doSample(const TVector3D& omegaIn, const TPoint2D&, TScalar, BsdfCaps) const
 {
 	typedef Spectral::TValue TValue;
-
-	enum
-	{
-		capsRefl = Bsdf::capsReflection | Bsdf::capsSpecular,
-	};
 
 	const TValue cosI = static_cast<TValue>(omegaIn.z);
 	LASS_ASSERT(cosI > 0);
@@ -199,7 +194,7 @@ SampleBsdfOut Conductor::ConductorBsdf::doSample(const TVector3D& omegaIn, const
 	const Spectral rFresnel = (rOrth2 + rPar2) / 2;
 
 	const TVector3D omegaRefl(-omegaIn.x, -omegaIn.y, omegaIn.z);
-	return SampleBsdfOut(omegaRefl, reflectance_ * rFresnel / cosI, 1, capsRefl);
+	return SampleBsdfOut(omegaRefl, reflectance_ * rFresnel / cosI, 1, BsdfCaps::reflection | BsdfCaps::specular);
 }
 
 

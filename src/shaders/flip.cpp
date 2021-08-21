@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -130,7 +130,7 @@ void Flip::doSetState(const TPyObjectPtr& state)
 // --- bsdf ----------------------------------------------------------------------------------------
 
 Flip::Bsdf::Bsdf(
-		const Sample& sample, const IntersectionContext& context, TBsdfCaps caps, const TBsdfPtr& child):
+		const Sample& sample, const IntersectionContext& context, BsdfCaps caps, const TBsdfPtr& child):
 	kernel::Bsdf(sample, context, caps), // caps are already flipped.
 	child_(child)
 {
@@ -138,12 +138,12 @@ Flip::Bsdf::Bsdf(
 
 
 
-TBsdfCaps Flip::Bsdf::flip(TBsdfCaps caps)
+BsdfCaps Flip::Bsdf::flip(BsdfCaps caps)
 {
-	TBsdfCaps out = caps;
-	util::clearMasked<TBsdfCaps>(out, capsReflection | capsTransmission);
-	util::setMaskedIf<TBsdfCaps>(out, capsReflection, util::checkMaskedAll<TBsdfCaps>(caps, capsTransmission));
-	util::setMaskedIf<TBsdfCaps>(out, capsTransmission, util::checkMaskedAll<TBsdfCaps>(caps, capsReflection));
+	BsdfCaps out = caps;
+	util::clearMasked<BsdfCaps>(out, BsdfCaps::reflection | BsdfCaps::transmission);
+	util::setMaskedIf<BsdfCaps>(out, BsdfCaps::reflection, util::checkMaskedAll<BsdfCaps>(caps, BsdfCaps::transmission));
+	util::setMaskedIf<BsdfCaps>(out, BsdfCaps::transmission, util::checkMaskedAll<BsdfCaps>(caps, BsdfCaps::reflection));
 	return out;
 }
 
@@ -156,14 +156,14 @@ TVector3D Flip::Bsdf::flip(const TVector3D& omega)
 
 
 
-BsdfOut Flip::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const
+BsdfOut Flip::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps allowedCaps) const
 {
 	return child_->evaluate(omegaIn, flip(omegaOut), flip(allowedCaps));
 }
 
 
 
-SampleBsdfOut Flip::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const
+SampleBsdfOut Flip::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const
 {
 	SampleBsdfOut out = child_->sample(omegaIn, sample, componentSample, flip(allowedCaps));
 	out.omegaOut = flip(out.omegaOut);

@@ -43,15 +43,44 @@ class Shader;
 class Sample;
 class IntersectionContext;
 
-typedef size_t TBsdfCaps;
+enum class BsdfCaps
+{
+	none = 0x00,
+
+	emission = 0x01,
+	reflection = 0x02,
+	transmission = 0x04,
+
+	diffuse = 0x10,
+	specular = 0x20,
+	glossy = 0x40,
+
+	all = 0xff,
+
+	nonDiffuse = glossy | specular,
+
+	allReflection = reflection | diffuse | nonDiffuse,
+	allTransmission = transmission | diffuse | nonDiffuse,
+
+	allDiffuse = reflection | transmission | diffuse,
+	allSpecular = reflection | transmission | specular,
+	allGlossy = reflection | transmission | glossy,
+	allNonDiffuse = reflection | transmission | nonDiffuse,
+};
+
+inline constexpr BsdfCaps operator& (BsdfCaps a, BsdfCaps b) { return static_cast<BsdfCaps>(static_cast<std::underlying_type_t<BsdfCaps>>(a) & static_cast<std::underlying_type_t<BsdfCaps>>(b)); }
+inline constexpr BsdfCaps operator| (BsdfCaps a, BsdfCaps b) { return static_cast<BsdfCaps>(static_cast<std::underlying_type_t<BsdfCaps>>(a) | static_cast<std::underlying_type_t<BsdfCaps>>(b)); }
+inline constexpr BsdfCaps operator~ (BsdfCaps a) { return static_cast<BsdfCaps>(~static_cast<std::underlying_type_t<BsdfCaps>>(a)) & BsdfCaps::all; }
+inline constexpr BsdfCaps& operator&= (BsdfCaps& a, BsdfCaps b) { a = a & b; return a; }
+inline constexpr BsdfCaps& operator|= (BsdfCaps& a, BsdfCaps b) { a = a | b; return a; }
 
 struct BsdfIn
 {
 	BsdfIn(): omegaOut(), allowedCaps() {}
-	BsdfIn(const TVector3D& omegaOut, TBsdfCaps allowedCaps): 
+	BsdfIn(const TVector3D& omegaOut, BsdfCaps allowedCaps): 
 		omegaOut(omegaOut), allowedCaps(allowedCaps) {}
 	TVector3D omegaOut;
-	TBsdfCaps allowedCaps;
+	BsdfCaps allowedCaps;
 };
 
 struct BsdfOut
@@ -72,9 +101,9 @@ struct BsdfOut
 struct SampleBsdfIn
 {
 	SampleBsdfIn(): sample(), allowedCaps() {}
-	SampleBsdfIn(const TPoint2D& sample, TBsdfCaps allowedCaps): sample(sample), allowedCaps(allowedCaps) {}
+	SampleBsdfIn(const TPoint2D& sample, BsdfCaps allowedCaps): sample(sample), allowedCaps(allowedCaps) {}
 	TPoint2D sample;
-	TBsdfCaps allowedCaps;
+	BsdfCaps allowedCaps;
 };
 
 struct SampleBsdfOut
@@ -82,10 +111,10 @@ struct SampleBsdfOut
 	TVector3D omegaOut;
 	Spectral value;
 	TScalar pdf;
-	TBsdfCaps usedCaps;
-	SampleBsdfOut(const TVector3D& omegaOut = TVector3D(), const Spectral& value = Spectral(), TScalar pdf = 0, TBsdfCaps usedCaps = 0):
+	BsdfCaps usedCaps;
+	SampleBsdfOut(const TVector3D& omegaOut = TVector3D(), const Spectral& value = Spectral(), TScalar pdf = 0, BsdfCaps usedCaps = BsdfCaps::none):
 		omegaOut(omegaOut), value(value), pdf(pdf), usedCaps(usedCaps) {}
-	SampleBsdfOut(const TVector3D& omegaOut, const BsdfOut& bsdf, TBsdfCaps usedCaps):
+	SampleBsdfOut(const TVector3D& omegaOut, const BsdfOut& bsdf, BsdfCaps usedCaps):
 		omegaOut(omegaOut), value(bsdf.value), pdf(bsdf.pdf), usedCaps(usedCaps) {}
 	bool operator!() const { return !(pdf > 0 && value); }
 	explicit operator bool() const { return pdf > 0 && value; }
@@ -93,14 +122,14 @@ struct SampleBsdfOut
 
 typedef util::AllocatorBinned< util::AllocatorConcurrentFreeList<> > TBsdfAllocator;
 
-inline bool hasCaps(TBsdfCaps capsUnderTest, TBsdfCaps wantedCaps)
+inline constexpr bool hasCaps(BsdfCaps capsUnderTest, BsdfCaps wantedCaps)
 {
 	return (capsUnderTest & wantedCaps) == wantedCaps;
 }
 
-inline bool compatibleCaps(TBsdfCaps capsUnderTest, TBsdfCaps allowedCaps)
+inline constexpr bool compatibleCaps(BsdfCaps capsUnderTest, BsdfCaps allowedCaps)
 {
-	const TBsdfCaps overlapping = capsUnderTest & allowedCaps;
+	const std::underlying_type_t<BsdfCaps> overlapping = static_cast<std::underlying_type_t<BsdfCaps>>(capsUnderTest & allowedCaps);
 	return (overlapping & 0xf) > 0 && (overlapping & 0xf0) > 0;
 }
 
@@ -110,57 +139,32 @@ class LIAR_KERNEL_DLL Bsdf: public util::AllocatorClassAdaptor<TBsdfAllocator>
 {
 public:
 
-	enum CapsFlags
-	{
-		capsNone = 0x00,
-
-		capsEmission = 0x01,
-		capsReflection = 0x02,
-		capsTransmission = 0x04,
-
-		capsDiffuse = 0x10,
-		capsSpecular = 0x20,
-		capsGlossy = 0x40,
-
-		capsAll = 0xff,
-
-		capsNonDiffuse = capsGlossy | capsSpecular,
-
-		capsAllReflection = capsReflection | capsDiffuse | capsNonDiffuse,
-		capsAllTransmission = capsTransmission | capsDiffuse | capsNonDiffuse,
-
-		capsAllDiffuse = capsReflection | capsTransmission | capsDiffuse,
-		capsAllSpecular = capsReflection | capsTransmission | capsSpecular,
-		capsAllGlossy = capsReflection | capsTransmission | capsGlossy,
-		capsAllNonDiffuse = capsReflection | capsTransmission | capsNonDiffuse,
-	};
-
-	Bsdf(const Sample& sample, const IntersectionContext& context, TBsdfCaps caps);
+	Bsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps caps);
 	virtual ~Bsdf();
 
 	const IntersectionContext& context() const { return context_; }
 
-	TBsdfCaps caps() const { return caps_; }
-	bool hasCaps(TBsdfCaps wantedCaps) const { return kernel::hasCaps(caps_, wantedCaps); }
-	bool compatibleCaps(TBsdfCaps allowedCaps) const { return kernel::compatibleCaps(caps_, allowedCaps); }
+	BsdfCaps caps() const { return caps_; }
+	bool hasCaps(BsdfCaps wantedCaps) const { return kernel::hasCaps(caps_, wantedCaps); }
+	bool compatibleCaps(BsdfCaps allowedCaps) const { return kernel::compatibleCaps(caps_, allowedCaps); }
 	bool isDispersive() const;
 
-	BsdfOut evaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const;
-	SampleBsdfOut sample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const;
+	BsdfOut evaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps allowedCaps) const;
+	SampleBsdfOut sample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const;
 
 	const TVector3D bsdfToWorld(const TVector3D& v) const;
 	const TVector3D worldToBsdf(const TVector3D& v) const;
 
 private:
 
-	virtual BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, TBsdfCaps allowedCaps) const = 0;
-	virtual SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, TBsdfCaps allowedCaps) const = 0;
+	virtual BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps allowedCaps) const = 0;
+	virtual SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const = 0;
 	virtual bool doIsDispersive() const;
 
 	TVector3D omegaGeometricNormal_;
 	const Sample& sample_;
 	const IntersectionContext& context_; // no ownership!
-	TBsdfCaps caps_;
+	BsdfCaps caps_;
 
 public:
 	size_t refCount_; // oops, public???

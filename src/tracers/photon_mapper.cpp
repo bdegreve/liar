@@ -487,7 +487,7 @@ const Spectral PhotonMapper::doShadeSurface(
 	}
 
 	//*
-	if (bsdf->hasCaps(Bsdf::capsDiffuse))
+	if (bsdf->hasCaps(BsdfCaps::diffuse))
 	{
 		if (highQuality && hasFinalGather())
 		{
@@ -730,7 +730,7 @@ void PhotonMapper::tracePhoton(
 	}
 	shader->shadeContext(sample, context);
 
-	if (shader->hasCaps(Bsdf::capsDiffuse))
+	if (shader->hasCaps(BsdfCaps::diffuse))
 	{
 		Photon photon(hitPoint, -ray.direction(), transmittedPower, sample);
 		if (isCaustic)
@@ -770,7 +770,7 @@ void PhotonMapper::tracePhoton(
 
 	const TPoint2D sampleBsdf(uniform(), uniform());
 	const TScalar sampleComponent = uniform();
-	const SampleBsdfOut out = bsdf->sample(omegaIn, sampleBsdf, sampleComponent, Bsdf::capsAll);
+	const SampleBsdfOut out = bsdf->sample(omegaIn, sampleBsdf, sampleComponent, BsdfCaps::all);
 	if (!out)
 	{
 		return;
@@ -786,7 +786,7 @@ void PhotonMapper::tracePhoton(
 		return;
 	}
 	const BoundedRay newRay(hitPoint, context.bsdfToWorld(out.omegaOut));
-	const bool isSpecular = (out.usedCaps & (Bsdf::capsSpecular | Bsdf::capsGlossy)) > 0;
+	const bool isSpecular = hasCaps(out.usedCaps, BsdfCaps::specular | BsdfCaps::glossy);
 	const bool newIsCaustic = isSpecular && (isCaustic || generation == 0);
 	MediumChanger mediumChanger(mediumStack(), context.interior(),
 		out.omegaOut.z < 0 ? context.solidEvent() : seNoEvent);
@@ -1135,11 +1135,11 @@ const Spectral PhotonMapper::gatherIndirect(
 			TScalar pdfHalfSphere;
 			out.omegaOut = num::uniformHemisphere(s, pdfHalfSphere).position();
 			out.pdf *= pdfHalfSphere;
-			out.value = bsdf->evaluate(omegaIn, out.omegaOut, Bsdf::capsReflection | Bsdf::capsDiffuse).value;
+			out.value = bsdf->evaluate(omegaIn, out.omegaOut, BsdfCaps::reflection | BsdfCaps::diffuse).value;
 		}
 		else
 		{
-			out = bsdf->sample(omegaIn, *firstSample, *firstComponentSample, Bsdf::capsReflection | Bsdf::capsDiffuse);
+			out = bsdf->sample(omegaIn, *firstSample, *firstComponentSample, BsdfCaps::reflection | BsdfCaps::diffuse);
 		}
 		if (!out)
 		{
@@ -1285,7 +1285,7 @@ const Spectral PhotonMapper::estimateRadiance(
 		const TPoint3D& point, const TVector3D& omegaOut, TScalar& sqrEstimationRadius) const
 {
 	const Shader* const shader = context.shader();
-	if (!bsdf || !shader || !shader->hasCaps(Bsdf::capsDiffuse))
+	if (!bsdf || !shader || !shader->hasCaps(BsdfCaps::diffuse))
 	{
 		return Spectral();
 	}
@@ -1304,7 +1304,7 @@ const Spectral PhotonMapper::estimateRadiance(
 		//if (dot(normal, nearest->normal) > 0.9)
 		{
 			sqrEstimationRadius = nearest->squaredEstimationRadius;
-			const BsdfOut out = bsdf->evaluate(omegaOut, context.worldToBsdf(nearest->normal), Bsdf::capsAll);
+			const BsdfOut out = bsdf->evaluate(omegaOut, context.worldToBsdf(nearest->normal), BsdfCaps::all);
 			return out ? out.value * nearest->spectralIrradiance(sample) : Spectral();
 		}
 	}
@@ -1324,7 +1324,7 @@ const Spectral PhotonMapper::estimateRadiance(
 	for (TPhotonNeighbourhood::const_iterator i = photonNeighbourhood_.begin(); i != last; ++i)
 	{
 		const TVector3D omegaPhoton = context.worldToBsdf(i->object()->omegaIn);
-		const BsdfOut out = bsdf->evaluate(omegaOut, omegaPhoton, Bsdf::capsAll & ~Bsdf::capsSpecular & ~Bsdf::capsGlossy);
+		const BsdfOut out = bsdf->evaluate(omegaOut, omegaPhoton, BsdfCaps::all & ~BsdfCaps::specular & ~BsdfCaps::glossy);
 		if (out.pdf > 0 && out.value)
 		{
 			result += out.value * i->object()->spectralPower(sample);
@@ -1344,7 +1344,7 @@ const Spectral PhotonMapper::estimateCaustics(
 	typedef Spectral::TValue TValue;
 
 	const Shader* const shader = context.shader();
-	if (!shader || !shader->hasCaps(Bsdf::capsDiffuse))
+	if (!shader || !shader->hasCaps(BsdfCaps::diffuse))
 	{
 		return Spectral();
 	}
@@ -1369,7 +1369,7 @@ const Spectral PhotonMapper::estimateCaustics(
 	for (auto i = photonNeighbourhood_.begin(); i != last; ++i)
 	{
 		const TVector3D omegaPhoton = context.worldToBsdf(i->object()->omegaIn);
-		const BsdfOut out = bsdf->evaluate(omegaIn, omegaPhoton, Bsdf::capsAllDiffuse);
+		const BsdfOut out = bsdf->evaluate(omegaIn, omegaPhoton, BsdfCaps::allDiffuse);
 		if (out)
 		{
 			const TValue sqrR = static_cast<TValue>(i->squaredDistance());
