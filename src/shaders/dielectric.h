@@ -63,7 +63,7 @@ private:
 	class DielectricBsdf : public Bsdf
 	{
 	public:
-		DielectricBsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps caps, const TValue ior, const Spectral& reflectance, const Spectral& transmittance);
+		DielectricBsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps caps, const TValue ior, const Spectral& reflectance, const Spectral& transmittance, bool isDispersive);
 	private:
 		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const;

@@ -155,8 +155,9 @@ TBsdfPtr Dielectric::doBsdf(const Sample& sample, const IntersectionContext& con
 	const TValue ior = isLeaving ? ior2 / ior1 : ior1 / ior2;
 	const Spectral reflectance = reflectance_->lookUp(sample, context, SpectralType::Reflectant);
 	const Spectral transmittance = transmittance_->lookUp(sample, context, SpectralType::Reflectant);
+	const bool isDispersive = outerRefractionIndex_->isChromatic() || innerRefractionIndex_->isChromatic();
 
-	return TBsdfPtr(new DielectricBsdf(sample, context, caps(), ior, reflectance, transmittance));
+	return TBsdfPtr(new DielectricBsdf(sample, context, caps(), ior, reflectance, transmittance, isDispersive));
 }
 
 
@@ -186,11 +187,12 @@ void Dielectric::init(const TTexturePtr& innerRefractionIndex, const TTexturePtr
 
 // --- bsdf ----------------------------------------------------------------------------------------
 
-Dielectric::DielectricBsdf::DielectricBsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps caps, TValue ior, const Spectral& reflectance, const Spectral& transmittance) :
+Dielectric::DielectricBsdf::DielectricBsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps caps, TValue ior, const Spectral& reflectance, const Spectral& transmittance, bool isDispersive):
 	Bsdf(sample, context, caps),
 	reflectance_(reflectance),
 	transmittance_(transmittance),
-	ior_(ior)
+	ior_(ior),
+	isDispersive_(isDispersive)
 {
 	LASS_ASSERT(ior_ > 0);
 }
