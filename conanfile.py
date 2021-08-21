@@ -25,15 +25,16 @@ class LiarConan(ConanFile):
     author = "Bram de Greve <bram.degreve@bramz.net>"
     topics = "C++", "Python"
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake_paths"
+    generators = "cmake"
     exports_sources = ("*", "!build*", "!env*", "!venv*")
     requires = [
-        "Lass/1.11.0-32+g752b84d8@cocamware/testing",
+        "Lass/1.11.0-35+gfdcf23e4@cocamware/testing",
     ]
     options = {
         "fPIC": [True, False],
         "have_openexr": [True, False],
         "have_libjpeg": [True, False],
+        "have_png": [True, False],
         "have_lcms2": [True, False],
         "spectral_mode": ["RGB", "XYZ", "Banded", "Single"],
     }
@@ -41,10 +42,12 @@ class LiarConan(ConanFile):
         "fPIC": True,
         "have_openexr": True,
         "have_libjpeg": True,
+        "have_png": True,
         "have_lcms2": False,
         "lass:shared": True,
         "openexr:shared": False,
         "libjpeg:shared": False,
+        "lodepng:shared": False,
         "lcms:shared": False,
         "spectral_mode": "RGB",
     }
@@ -54,6 +57,8 @@ class LiarConan(ConanFile):
             self.requires("openexr/2.3.0@conan/stable")
         if self.options.have_libjpeg:
             self.requires("libjpeg/9c@bincrafters/stable")
+        if self.options.have_png:
+            self.requires("lodepng/cci.20200615")
         if self.options.have_lcms2:
             self.requires("lcms/2.9@bincrafters/stable")
 

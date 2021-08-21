@@ -45,6 +45,10 @@ if (OPENEXR_FOUND)
 		)
 ENDIF()
 
+if (TARGET CONAN_PKG::lodepng)
+	add_liar_codec(lodepng CONAN_PKG::lodepng)
+endif()
+
 # libtiff: http://www.remotesensing.org/libtiff/
 find_package(TIFF)
 if (TIFF_FOUND)
