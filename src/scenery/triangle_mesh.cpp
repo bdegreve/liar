@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 
 #include "scenery_common.h"
 #include "triangle_mesh.h"
+#include <lass/num/inverse_transform_sampling.h>
 
 namespace liar
 {
@@ -54,8 +55,19 @@ PY_CLASS_METHOD(TriangleMesh, triangles)
 // --- public --------------------------------------------------------------------------------------
 
 TriangleMesh::TriangleMesh(const TVertices& vertices, const TNormals& normals, const TUvs& uvs, const TIndexTriangles& triangles):
-	mesh_(vertices, normals, uvs, triangles)
+	mesh_(vertices, normals, uvs, triangles),
+	area_(TNumTraits::zero)
 {
+	std::vector<TScalar> cdf;
+	cdf_.reserve(mesh_.triangles().size());
+	for (const auto& triangle : mesh_.triangles())
+	{
+		cdf_.push_back(triangle.area());
+	}
+	std::partial_sum(cdf_.begin(), cdf_.end(), cdf_.begin());
+	area_ = cdf_.back();
+	std::transform(cdf_.begin(), cdf_.end(), cdf_.begin(), [area=area_](TScalar x) { return x / area;  });
+	cdf_.back() = TNumTraits::one;
 }
 
 
@@ -138,8 +150,14 @@ void TriangleMesh::doIntersect(const Sample&, const BoundedRay& ray, Intersectio
 	const prim::Result hit = mesh_.intersect(ray.unboundedRay(), triangle, t, ray.nearLimit());
 	if (hit == prim::rOne && ray.inRange(t))
 	{
-		const size_t k = static_cast<size_t>(std::distance(mesh_.triangles().begin(), triangle)); 
-		result = Intersection(this, t, seNoEvent, k);
+		const TScalar d = dot(ray.direction(), triangle->geometricNormal());
+		const SolidEvent se = (d < TNumTraits::zero)
+			? seEntering
+			: (d > TNumTraits::zero)
+			? seLeaving
+			: seNoEvent;
+		const size_t k = static_cast<size_t>(std::distance(mesh_.triangles().begin(), triangle));
+		result = Intersection(this, t, se, k);
 	}
 	else
 	{
@@ -201,7 +219,7 @@ const TAabb3D TriangleMesh::doBoundingBox() const
 
 TScalar TriangleMesh::doArea() const
 {
-	return mesh_.area();
+	return area_;
 }
 
 
@@ -219,6 +237,47 @@ const TPyObjectPtr TriangleMesh::doGetState() const
 	TIndexTriangles triangles;
 	mesh_.indexTriangles(std::back_inserter(triangles));
 	return python::makeTuple(mesh_.vertices(), mesh_.normals(), mesh_.uvs(), triangles);
+}
+
+
+
+bool TriangleMesh::doHasSurfaceSampling() const
+{
+	return true;
+}
+
+
+
+const TPoint3D TriangleMesh::doSampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const
+{
+	const auto& triangles = mesh_.triangles();
+
+	// find triangle using sample.x, and get its pdf.
+	const size_t ii = std::min(triangles.size() - 1, static_cast<size_t>(
+		std::lower_bound(cdf_.begin(), cdf_.end(), sample.x) - cdf_.begin()));
+	const TScalar i0 = ii > 0 ? cdf_[ii - 1] : TNumTraits::zero;
+	const TScalar trianglePdf = cdf_[ii] - i0;
+
+	// remap the fraction of sample.x for this triangle back to [0, 1]
+	const TScalar di = (sample.x - i0) / trianglePdf;
+
+	const auto& triangle = triangles[ii];
+	const TPoint3D& p = *triangle.vertices[0];
+	const TVector3D a = *triangle.vertices[1] - p;
+	const TVector3D b = *triangle.vertices[2] - p;
+	const TVector3D n = cross(a, b);
+
+	// uniformly sample single point on triangle. pdf = 1 / triangle area
+	const TScalar s = num::sqrt(di);
+	const TScalar u = TNumTraits::one - s;
+	const TScalar v = s * sample.y;
+
+	const TScalar nn = n.norm();
+	const TScalar triangleArea = nn / 2;
+	normal = n / nn;
+	pdf = trianglePdf / triangleArea;
+
+	return p + u * a + v * b;
 }
 
 
