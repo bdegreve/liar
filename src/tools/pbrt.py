@@ -18,12 +18,17 @@
 # http://liar.bramz.net/
 
 
+import dataclasses
 import enum
+import keyword
 import logging
 import math
 import os
+import re
 import sys
 import warnings
+from dataclasses import dataclass
+from typing import Any, Dict, List
 
 import liar
 import liar.tools.spd
@@ -861,79 +866,67 @@ class PbrtScene(object):
     def verify_world(self):
         assert self.__state == State.WORLD_BLOCK
 
-    def parse(self, path):
+    def parse(self, path: str):
         if path == "-":
             return self.parse_stream("stdin", sys.stdin)
-        return self.parse_stream(path, open(path))
+        with open(path) as fp:
+            return self.parse_stream(path, fp)
 
-        dirname, fname = os.path.split(path)
-        oldcwd = os.getcwd()
-        if dirname:
-            pass
-        try:
-            return self.parse_stream(path, open(fname))
-        finally:
-            os.chdir(oldcwd)
-
-    def parse_stream(self, path, stream):
-        import keyword
-
-        include_next = False
-        identifier = None
-        args = []
-        kwargs = {}
+    def parse_stream(self, path: str, stream):
+        statement = None
         arg_type, arg_name = None, None
         tokens = _scanner(path, stream)
-        for token_type, token, line_number in tokens:
-            if token_type == Token.IDENTIFIER:
-                if identifier:
-                    self.__print_statement(identifier, args, kwargs)
-                    getattr(self, identifier)(*args, **kwargs)
-                    identifier = None
-                    args = []
-                    kwargs = {}
-                if token == "Include":
-                    token_type, token, line_number = next(tokens)
-                    assert token_type == Token.STRING, (
-                        "syntax error in file %(path)r, line %(line_number)d: Include must be followed by a string"
+        for token in tokens:
+            if token.type_ == TokenType.IDENTIFIER:
+                if statement:
+                    self._execute_statement(statement)
+                    statement = None
+                if token.value == "Include":
+                    token = next(tokens)
+                    assert token.type_ == TokenType.STRING, (
+                        "syntax error in file %(path)r, line %(token.line_number)d: Include must be followed by a string"
                         % vars()
                     )
-                    self.__logger.debug("Include %r" % token)
-                    self.parse(token)
+                    self.__logger.debug("Include %r" % token.value)
+                    self.parse(token.value)
                 else:
-                    identifier = token
-                    if keyword.iskeyword(identifier):
-                        identifier += "_"
-            elif token_type == Token.PARAMETER:
-                # assert not token in kwargs
-                arg_type, arg_name = token
+                    statement = Statement(token.line_number, token.value)
+            elif token.type_ == TokenType.PARAMETER:
+                # assert not token.value in kwargs
+                arg_type, arg_name = token.value
                 if keyword.iskeyword(arg_name):
                     arg_name += "_"
             else:
-                if token_type == Token.START_LIST:
+                if token.type_ == TokenType.START_LIST:
                     value = []
-                    for token_type, token, line_number in tokens:
-                        if token_type == Token.END_LIST:
+                    for token in tokens:
+                        if token.type_ == TokenType.END_LIST:
                             break
-                        assert token_type in (Token.NUMBER, Token.STRING), (
-                            "syntax error in file %(path)r, line %(line_number)d: parameter lists should only contain numbers and strings"
+                        assert token.type_ in (TokenType.NUMBER, TokenType.STRING), (
+                            "syntax error in file %(path)r, line %(token.line_number)d: parameter lists should only contain numbers and strings"
                             % vars()
                         )
-                        value.append(token)
+                        value.append(token.value)
                 else:
-                    value = [token]
+                    value = [token.value]
                 if arg_type:
                     value = getattr(self, "_arg_" + arg_type)(*value)
                     arg_type = None
                 value = _unwrap(tuple(value))
                 if arg_name:
-                    kwargs[arg_name] = value
+                    statement.kwargs[arg_name] = value
                     arg_name = None
                 else:
-                    args.append(value)
-        if identifier:
-            self.__print_statement(identifier, args, kwargs)
-            getattr(self, identifier)(*args, **kwargs)
+                    statement.args.append(value)
+        if statement:
+            self._execute_statement(statement)
+
+    def _execute_statement(self, statement: "Statement") -> None:
+        type_ = statement.keyword
+        if keyword.iskeyword(type_):
+            type_ += "_"
+        self.__print_statement(statement)
+        getattr(self, type_)(*statement.args, **statement.kwargs)
 
     def _arg_integer(self, *values):
         return map(int, values)
@@ -979,7 +972,7 @@ class PbrtScene(object):
         wavelengths, values = zip(*_split_as_tuples(values, 2))
         return [liar.spectra.Sampled(wavelengths, values)]
 
-    def __print_statement(self, identifier, args, kwargs):
+    def __print_statement(self, statement: "Statement") -> None:
         def truncated_repr(x, n=80):
             s = repr(x)
             if len(s) <= n:
@@ -989,16 +982,12 @@ class PbrtScene(object):
                 trunc += s[-1]
             return s[: n - len(trunc)] + trunc
 
-        import pprint
-
-        pretty_args = [truncated_repr(value) for value in args]
-        pretty_kwargs = [
-            "%s=%s" % (key, truncated_repr(value))
-            for key, value in sorted(kwargs.items())
+        args = [truncated_repr(value) for value in statement.args]
+        args += [
+            f"{key}={truncated_repr(value)}" for key, value in statement.kwargs.items()
         ]
-        self.__logger.debug(
-            "%s (%s)" % (identifier, ", ".join(pretty_args + pretty_kwargs))
-        )
+        fmt = f"%s: %s ({', '.join(('%s',) * len(args))})"
+        self.__logger.debug(fmt, statement.line_number, statement.keyword, *args)
 
     def render(self):
         self.engine.render(self.cropwindow)
@@ -1009,7 +998,7 @@ class State(enum.Enum):
     WORLD_BLOCK = 2
 
 
-class Token(enum.Enum):
+class TokenType(enum.Enum):
     IDENTIFIER = 1
     NUMBER = 2
     STRING = 3
@@ -1018,26 +1007,39 @@ class Token(enum.Enum):
     END_LIST = 6
 
 
-def _scanner(path, stream):
-    from re import Scanner
+@dataclass
+class Token:
+    type_: TokenType
+    value: Any
+    line_number: int
 
-    scanner = Scanner(
+
+@dataclass
+class Statement:
+    line_number: int
+    keyword: str
+    args: List[Any] = dataclasses.field(default_factory=list)
+    kwargs: Dict[str, Any] = dataclasses.field(default_factory=dict)
+
+
+def _scanner(path, stream):
+    scanner = re.Scanner(
         [
-            (r"[a-zA-Z_]\w*", lambda _, token: (Token.IDENTIFIER, token)),
+            (r"[a-zA-Z_]\w*", lambda _, token: (TokenType.IDENTIFIER, token)),
             (
                 r"[\-+]?(\d+\.\d*|\.\d+)([eE][\-+]?[0-9]+)?",
-                lambda _, token: (Token.NUMBER, float(token)),
+                lambda _, token: (TokenType.NUMBER, float(token)),
             ),
-            (r"[\-+]?\d+", lambda _, token: (Token.NUMBER, int(token))),
-            (r"\[", lambda _, token: (Token.START_LIST, token)),
-            (r"\]", lambda _, token: (Token.END_LIST, token)),
+            (r"[\-+]?\d+", lambda _, token: (TokenType.NUMBER, int(token))),
+            (r"\[", lambda _, token: (TokenType.START_LIST, token)),
+            (r"\]", lambda _, token: (TokenType.END_LIST, token)),
             (
                 r'"(integer|float|point|vector|normal|bool|string|texture|color|rgb|xyz|blackbody|spectrum)\s+[a-zA-Z_][a-zA-Z0-9_]*"',
-                lambda _, token: (Token.PARAMETER, token[1:-1].split()),
+                lambda _, token: (TokenType.PARAMETER, token[1:-1].split()),
             ),
-            (r'"true"', lambda _, token: (Token.NUMBER, True)),
-            (r'"false"', lambda _, token: (Token.NUMBER, False)),
-            (r'".*?"', lambda _, token: (Token.STRING, token[1:-1])),
+            (r'"true"', lambda _, token: (TokenType.NUMBER, True)),
+            (r'"false"', lambda _, token: (TokenType.NUMBER, False)),
+            (r'".*?"', lambda _, token: (TokenType.STRING, token[1:-1])),
             (r"#.*$", None),  # comments
             (r"\s+", None),  # whitespace
         ]
@@ -1048,7 +1050,7 @@ def _scanner(path, stream):
             "syntax error in file %(path)r, line %(line_number)d: %(rest)r" % vars()
         )
         for token_type, token in tokens:
-            yield token_type, token, line_number
+            yield Token(token_type, token, line_number)
 
 
 def _unwrap(arg):
