@@ -321,6 +321,10 @@ class PbrtScene(object):
     def _pixelfilter_mitchell(self, xwidth=2, ywidth=2, B=1.0 / 3, C=None):
         return liar.output.FilterMitchell(None, B)
 
+    def _pixelfilter_triangle(self, xwidth=2, ywidth=2):
+        width = math.sqrt(xwidth * ywidth)
+        return liar.output.FilterTriangle(None, width)
+
     def Shape(self, name, **kwargs):
         self.verify_world()
         shape = getattr(self, "_shape_" + name)(**kwargs)

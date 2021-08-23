@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 //
 #include "depth_channel.h"
 #include "filter_mitchell.h"
+#include "filter_triangle.h"
 #include "raster.h"
 #	include "display.h"
 #	include "image.h"
@@ -48,6 +49,7 @@ PY_DECLARE_MODULE_DOC(output,
 //
 PY_MODULE_CLASS(output, DepthChannel)
 PY_MODULE_CLASS(output, FilterMitchell)
+PY_MODULE_CLASS(output, FilterTriangle)
 PY_MODULE_CLASS(output, Raster)
 #if LIAR_OUTPUT_HAVE_PIXELTOASTER_H
 	PY_MODULE_CLASS(output, Display)
