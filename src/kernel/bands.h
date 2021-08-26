@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -205,6 +205,14 @@ public:
 		}
 		return *this;
 	}
+	Bands& inplog()
+	{
+		for (size_t i = 0; i < N; ++i)
+		{
+			v_[i] = num::log(v_[i]);
+		}
+		return *this;
+	}
 	Bands& inpclamp(TParam min, TParam max)
 	{
 		for (size_t i = 0; i < N; ++i)
@@ -326,6 +334,7 @@ public:
 	Bands& inppow(TParam f) { v_ = num::pow(v_, f); return *this; }
 	Bands& inpsqrt() { v_ = num::sqrt(v_); return *this; }
 	Bands& inpexp() { v_ = num::exp(v_); return *this; }
+	Bands& inplog() { v_ = num::log(v_); return *this; }
 	Bands& inpclamp(TParam min, TParam max) { v_ = num::clamp(v_, min, max); return *this; }
 	Bands& inplerp(const Bands& other, TParam f) { v_ = num::lerp(v_, other.v_, f); return *this; }
     Bands& inpsin() { v_ = num::sin(v_); return *this; }
@@ -503,6 +512,13 @@ public:
 		v_[0] = num::exp(v_[0]);
 		v_[1] = num::exp(v_[1]);
 		v_[2] = num::exp(v_[2]);
+		return *this;
+	}
+	Bands& inplog()
+	{
+		v_[0] = num::log(v_[0]);
+		v_[1] = num::log(v_[1]);
+		v_[2] = num::log(v_[2]);
 		return *this;
 	}
 	Bands& inpclamp(TParam min, TParam max)

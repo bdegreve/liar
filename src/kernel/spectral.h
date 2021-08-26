@@ -154,6 +154,7 @@ public:
 	Spectral& inppow(TParam f) { v_.inppow(f); return *this; }
 	Spectral& inpsqrt() { v_.inpsqrt(); return *this; }
 	Spectral& inpexp() { v_.inpexp(); return *this; }
+	Spectral& inplog() { v_.inplog(); return *this; }
 	Spectral& inpclamp(TParam min, TParam max) { v_.inpclamp(min, max); return *this; }
 	Spectral& inplerp(const Spectral& other, TParam f) { v_.inplerp(other.v_, f); return *this; }
     Spectral& inpsin() { v_.inpsin(); return *this; }
@@ -259,6 +260,12 @@ inline Spectral exp(const Spectral& a)
 {
 	Spectral r(a);
 	return r.inpexp();
+}
+
+inline Spectral log(const Spectral& a)
+{
+	Spectral r(a);
+	return r.inplog();
 }
 
 inline Spectral clamp(const Spectral& a, Spectral::TParam min, Spectral::TParam max)
