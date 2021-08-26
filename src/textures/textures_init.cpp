@@ -44,6 +44,7 @@
 #include "max.h"
 #include "orco.h"
 #include "perlin.h"
+#include "polynomial.h"
 #include "product.h"
 #include "projection_mapping.h"
 #include "ray_generation.h"
@@ -90,6 +91,7 @@ PY_MODULE_CLASS(textures, LinearInterpolator)
 PY_MODULE_CLASS(textures, Log)
 PY_MODULE_CLASS(textures, Max)
 PY_MODULE_CLASS(textures, OrCo)
+PY_MODULE_CLASS(textures, Polynomial)
 PY_MODULE_CLASS(textures, Product)
 PY_MODULE_CLASS(textures, ProjectionMapping)
 PY_MODULE_CLASS(textures, RayGeneration)
