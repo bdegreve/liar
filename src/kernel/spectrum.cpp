@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -30,16 +30,18 @@ namespace kernel
 {
 
 PY_DECLARE_CLASS_DOC(Spectrum, "Abstract base class of spectrum definitionas")
+	PY_CLASS_MEMBER_R(Spectrum, luminance)
+	PY_CLASS_MEMBER_R(Spectrum, isFlat)
 	PY_CLASS_METHOD_NAME(Spectrum, reduce, "__reduce__")
 	PY_CLASS_METHOD_NAME(Spectrum, getState, "__getstate__")
 	PY_CLASS_METHOD_NAME(Spectrum, setState, "__setstate__")
 
-	typedef impl::SpectrumFlat TSpectrumFlat;
+typedef impl::SpectrumFlat TSpectrumFlat;
 PY_DECLARE_CLASS_NAME(TSpectrumFlat, "Flat");
 PY_CLASS_INNER_CLASS_NAME(Spectrum, TSpectrumFlat, "Flat");
 PY_CLASS_MEMBER_R(TSpectrumFlat, value)
 
-	TSpectrumPtr Spectrum::white_(new TSpectrumFlat(1));
+TSpectrumPtr Spectrum::white_(new TSpectrumFlat(1));
 TSpectrumPtr Spectrum::black_(new TSpectrumFlat(0));
 
 typedef impl::SpectrumXYZ TSpectrumXYZ;
