@@ -98,8 +98,8 @@ private:
 	bool showHistogram_;
 	bool wasShowingHistogram_;
 	bool autoUpdate_;
-	volatile bool isCanceling_;
-	volatile bool isClosing_;
+	std::atomic<bool> isCanceling_;
+	std::atomic<bool> isClosing_;
 	TPoint2D beginDrag_;
 };
 

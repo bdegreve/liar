@@ -66,8 +66,8 @@ private:
 	mutable io::BinaryISocket istream_;
 
 	std::unique_ptr<util::Thread> isCancelingLoop_;
-	volatile bool isQuiting_;
-	volatile bool isCanceling_;
+	std::atomic<bool> isQuiting_;
+	std::atomic<bool> isCanceling_;
 };
 
 }

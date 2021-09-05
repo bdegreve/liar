@@ -862,7 +862,7 @@ public:
 	}
 	void operator++()
 	{
-		util::atomicIncrement(current_);
+		++current_;
 	}
 private:
 	void progressLoop()
@@ -870,7 +870,7 @@ private:
 		size_t oldCurrent = 0;
 		while (!isDone_)
 		{
-			size_t newCurrent = current_;
+			const size_t newCurrent = current_;
 			if (newCurrent > oldCurrent)
 			{
 				progress_(static_cast<double>(newCurrent) / static_cast<double>(max_));
@@ -882,8 +882,8 @@ private:
 	std::unique_ptr<util::Thread> loopThread_;
 	util::ProgressIndicator progress_;
 	size_t max_;
-	volatile size_t current_;
-	volatile bool isDone_;
+	std::atomic<size_t> current_;
+	std::atomic<bool> isDone_;
 };
 
 
