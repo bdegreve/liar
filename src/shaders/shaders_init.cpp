@@ -40,6 +40,7 @@
 #include "sum.h"
 #include "thin_dielectric.h"
 #include "unshaded.h"
+#include "walter.h"
 
 using namespace liar::shaders;
 
@@ -62,6 +63,7 @@ PY_MODULE_CLASS(shaders, Mirror)
 PY_MODULE_CLASS(shaders, Sum)
 PY_MODULE_CLASS(shaders, ThinDielectric)
 PY_MODULE_CLASS(shaders, Unshaded)
+PY_MODULE_CLASS(shaders, Walter)
 
 void shadersPostInject(PyObject*)
 {

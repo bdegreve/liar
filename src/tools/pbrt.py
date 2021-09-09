@@ -455,8 +455,26 @@ class PbrtScene(object):
         mat.addLobe(xy, xy, z, e)
         return mat
 
-    def _material_glass(self, Kr=1, Kt=1, index=1.5):
-        glass = liar.shaders.Dielectric(self._get_texture(index))
+    def _material_glass(
+        self,
+        Kr=1,
+        Kt=1,
+        eta=1.5,
+        index=None,
+        uroughness=0,
+        vroughness=0,
+        remaproughness=True,
+    ):
+        if index is not None:
+            eta = index
+        if uroughness or vroughness:
+            uroughness = _remap_roughness(uroughness, remaproughness=remaproughness)
+            vroughness = _remap_roughness(vroughness, remaproughness=remaproughness)
+            glass = liar.shaders.Walter(self._get_texture(eta))
+            glass.roughnessU = self._get_texture(uroughness)
+            glass.roughnessV = self._get_texture(vroughness)
+        else:
+            glass = liar.shaders.Dielectric(self._get_texture(eta))
         glass.reflectance = self._get_texture(Kr)
         glass.transmittance = self._get_texture(Kt)
         return glass
