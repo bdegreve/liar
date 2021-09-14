@@ -148,7 +148,11 @@ class PbrtScene(object):
 
     def WorldEnd(self):
         engine, camera = self.engine, self.engine.camera
-        width, height = engine.sampler.resolution = self.resolution
+        (width, height) = self.resolution
+        try:
+            engine.sampler.resolution = (width, height)
+        except AttributeError:
+            pass
         camera.aspectRatio = self.__frameaspectratio or (float(width) / height)
         if camera.aspectRatio > 1:
             camera.fovAngle = 2 * math.atan(
@@ -273,11 +277,8 @@ class PbrtScene(object):
         camera.falloffPower = _falloff
         return camera
 
-    def Sampler(self, name="bestcandidate", **kwargs):
+    def Sampler(self, name="halton", **kwargs):
         self.verify_options()
-        if name != "stratified":
-            self.__logger.warning("at this point, we only support stratified samplers.")
-            name = "stratified"
         self.engine.sampler = getattr(self, "_sampler_" + name)(**kwargs)
 
     def _sampler_stratified(
@@ -291,6 +292,9 @@ class PbrtScene(object):
             sampler.samplesPerPixel = xsamples * ysamples
         sampler.jittered = jitter
         return sampler
+
+    def _sampler_halton(self):
+        return liar.samplers.Halton()
 
     def Film(
         self,
