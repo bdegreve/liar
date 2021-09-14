@@ -399,11 +399,9 @@ class PbrtScene(object):
         try:
             material = getattr(self, "_material_" + name)(**kwargs)
         except AttributeError:
-            self.__logger.warning(
-                "unknown material %(name)r, defaulting to matte." % vars()
-            )
+            self.__logger.warning("unknown material %r", name)
             kwargs = _filter_dict(kwargs, lambda key: key in ("Kd", "sigma"))
-            material = self._material_matte(**kwargs)
+            material = self._material_matte(Kd=_color(1, 0, 1))
         if bumpmap:
             material = liar.shaders.BumpMapping(material, self._get_texture(bumpmap))
         return material
