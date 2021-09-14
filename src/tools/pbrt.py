@@ -513,6 +513,19 @@ class PbrtScene(object):
     def _material_mirror(self, Kr=1):
         return liar.shaders.Mirror(self._get_texture(Kr))
 
+    def _material_mix(self, *, amount=0.5, namedmaterial1: str, namedmaterial2: str):
+        """
+        According to PBRT v3 specs: A value of one corresponds to just "namedmaterial1",
+        a value of zero corresponds to just "namedmaterial2"
+        """
+        return liar.shaders.LinearInterpolator(
+            [
+                (0, self.__named_materials[namedmaterial2]),
+                (1, self.__named_materials[namedmaterial1]),
+            ],
+            self._get_texture(amount),
+        )
+
     def _material_plastic(self, Kd=1, Ks=1, roughness=0.1, remaproughness=True):
         return self._material_substrate(
             Kd=Kd,
