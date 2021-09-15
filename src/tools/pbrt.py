@@ -213,6 +213,7 @@ class PbrtScene(object):
 
     def ObjectEnd(self):
         self.AttributeEnd()
+        assert self.__cur_instance is not None
         self.__cur_instance = None
 
     def ObjectInstance(self, name):
@@ -223,9 +224,10 @@ class PbrtScene(object):
     def __add_shape(self, shape):
         self.verify_world()
         shape = self.__with_cur_transform(shape)
-        if not self.__cur_instance is None:
+        if self.__cur_instance is not None:
             self.__cur_instance.append(shape)
-        self.__objects.append(shape)
+        else:
+            self.__objects.append(shape)
 
     def __with_cur_transform(self, shape):
         # todo: merge __cur_transform with shape's transform.
