@@ -796,10 +796,7 @@ class PbrtScene(object):
 
     def _lightsource_infinite(self, L=(1, 1, 1), nsamples=1, mapname=None):
         tex, res = self._get_light_texture(L, mapname)
-        flipAndShiftU = liar.Transformation2D([-1, 0, -0.25, 0, 1, 0, 0, 0, 1])
-        light = liar.scenery.LightSky(
-            liar.textures.TransformationUv(tex, flipAndShiftU)
-        )
+        light = liar.scenery.LightSky(tex)
         if res:
             light.samplingResolution = res
         light.numberOfEmissionSamples = nsamples
