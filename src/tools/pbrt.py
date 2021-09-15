@@ -384,8 +384,13 @@ class PbrtScene(object):
         mesh.smoothNormals()
         return mesh
 
-    def _shape_plymesh(self, filename):
-        return ply.load(filename)
+    def _shape_plymesh(self, filename, alpha=None, shadowalpha=None):
+        mesh = ply.load(filename)
+        if alpha:
+            mesh = liar.scenery.ClipMap(mesh, self._get_texture(alpha), 0.001)
+        if shadowalpha:
+            assert shadowalpha is alpha
+        return mesh
 
     def Accelerator(self, *args, **kwargs):
         self.verify_options()
