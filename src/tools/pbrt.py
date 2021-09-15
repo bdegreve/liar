@@ -315,7 +315,7 @@ class PbrtScene(object):
     ):
         return liar.output.Image(filename, self.resolution)
 
-    def PixelFilter(self, name="mitchell", **kwargs):
+    def PixelFilter(self, name="box", **kwargs):
         self.verify_options()
         self.__pixelFilter = getattr(self, "_pixelfilter_" + name)(**kwargs)
 
