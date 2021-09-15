@@ -169,9 +169,14 @@ class PbrtScene(object):
                     "no display output possible, unsupported by LiAR installation"
                 )
             else:
-                w = min(width, 800)
-                h = int(w / camera.aspectRatio)
-                display = Display("PBRT powered by LiAR!", (w, h))
+                w, h = width, height
+                if w > 1600:
+                    w = 1600
+                    h = w / camera.aspectRatio
+                if h > 900:
+                    h = 900
+                    w = h * camera.aspectRatio
+                display = Display("PBRT powered by LiAR!", (int(w), int(h)))
                 engine.target = liar.output.Splitter([engine.target, display])
         if self.__pixelFilter:
             self.__pixelFilter.target, engine.target = engine.target, self.__pixelFilter
