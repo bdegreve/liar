@@ -214,6 +214,21 @@ class PbrtScene(object):
     def ObjectEnd(self):
         self.AttributeEnd()
         assert self.__cur_instance is not None
+
+        meshes = [
+            shape
+            for shape in self.__cur_instance
+            if isinstance(shape, liar.scenery.TriangleMesh)
+        ]
+        if len(meshes) > 1:
+            composite = liar.scenery.TriangleMeshComposite(meshes)
+            self.__cur_instance[:] = [
+                shape
+                for shape in self.__cur_instance
+                if not isinstance(shape, liar.scenery.TriangleMesh)
+            ]
+            self.__cur_instance.append(composite)
+
         self.__cur_instance = None
 
     def ObjectInstance(self, name):
