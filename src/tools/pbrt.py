@@ -600,6 +600,53 @@ class PbrtScene(object):
         shader.roughnessV = self._get_texture(vroughness)
         return shader
 
+    def _material_translucent(
+        self,
+        Kd=0.25,
+        Ks=0.25,
+        reflect=0.5,
+        transmit=0.5,
+        roughness=0.1,
+        remaproughness=True,
+    ):
+        layers = []
+        if Kd:
+            if _luminance(reflect) > 0.001:
+                layers.append(
+                    liar.shaders.Lambert(
+                        liar.textures.Product(
+                            [self._get_texture(Kd), self._get_texture(reflect),]
+                        )
+                    )
+                )
+            if _luminance(transmit) > 0.001:
+                layers.append(
+                    liar.shaders.Flip(
+                        liar.shaders.Lambert(
+                            liar.textures.Product(
+                                [self._get_texture(Kd), self._get_texture(transmit),]
+                            )
+                        )
+                    )
+                )
+        if Ks:
+            roughness = _remap_roughness(roughness, remaproughness=remaproughness)
+            layer = liar.shaders.Walter(self._get_texture(1.5))
+            layer.reflectance = liar.textures.Product(
+                [self._get_texture(Ks), self._get_texture(reflect),]
+            )
+            layer.transmittance = liar.textures.Product(
+                [self._get_texture(Ks), self._get_texture(transmit),]
+            )
+            layer.roughnessU = layer.roughnessV = self._get_texture(roughness)
+            layers.append(layer)
+
+        if len(layers) == 1:
+            return layers[0]
+        else:
+            return liar.shaders.Sum(layers)
+
+
     def _material_uber(self, Kd=1, Ks=1, Kr=0, roughness=0.1, opacity=1):
         layers = []
         if Kd or Ks:
