@@ -188,17 +188,25 @@ SampleBsdfOut Sum::SumBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& s
 		return SampleBsdfOut();
 	}
 
-	const TScalar n = static_cast<TScalar>(activeComponents_.size());
-	const size_t k = std::min(static_cast<size_t>(num::floor(n * componentSample)), activeComponents_.size() - 1);
+	const size_t n = activeComponents_.size();
+	const size_t k = std::min(
+		static_cast<size_t>(num::floor(static_cast<TScalar>(n) * componentSample)), 
+		activeComponents_.size() - 1);
 
 	SampleBsdfOut out = activeComponents_[k]->sample(omegaIn, sample, componentSample, allowedCaps);
-	out.pdf /= n;
-	if (componentSample > 1)
+
+	for (size_t i = 0; i < n; ++i)
 	{
-		//const BsdfOut bsdfOut = this->bsdf(omegaIn, out.omegaOut, out.usedCaps);
-		//out.value = bsdfOut.value;
-		//out.pdf = bsdfOut.pdf ???  no it isn't.
+		if (i != k)
+		{
+			const BsdfOut o = activeComponents_[i]->evaluate(omegaIn, out.omegaOut, out.usedCaps);
+			out.value += o.value;
+			out.pdf += o.pdf;
+		}
 	}
+
+	out.pdf /= static_cast<TScalar>(n);
+
 	return out;
 }
 
