@@ -638,20 +638,45 @@ class PbrtScene(object):
         else:
             return liar.shaders.Sum(layers)
 
+    def _material_uber(
+        self,
+        *,
+        Kd=0.25,
+        Ks=0.25,
+        Kr=0,
+        Kt=0,
+        roughness=0.1,
+        uroughness=None,
+        vroughness=None,
+        opacity=1,
+        eta=None,
+        index=None,
+        remaproughness: bool = True,
+    ):
+        if uroughness is None:
+            uroughness = roughness
+        if vroughness is None:
+            vroughness = roughness
+        if eta is None:
+            eta = index or 1.5
+        else:
+            assert index is None, "uber: eta and index cannot both be set."
 
-    def _material_uber(self, Kd=1, Ks=1, Kr=0, roughness=0.1, opacity=1):
         layers = []
-        if Kd or Ks:
-            if Ks:
-                layers.append(
-                    self._material_substrate(
-                        Kd=Kd, Ks=Ks, uroughness=roughness, vroughness=roughness
-                    )
+        if Ks:
+            layers.append(
+                self._material_substrate(
+                    Kd=Kd,
+                    Ks=Ks,
+                    uroughness=uroughness,
+                    vroughness=vroughness,
+                    remaproughness=remaproughness,
                 )
-            else:
-                layers.append(self._material_matte(Kd=Kd))
-        if Kr:
-            layers.append(self._material_mirror(Kr=Kr))
+            )
+        elif Kd:
+            layers.append(self._material_matte(Kd=Kd))
+        if Kr or Kt:
+            layers.append(self._material_glass(Kr=Kr, Kt=Kt, eta=eta))
         if len(layers) == 1:
             mat = layers[0]
         else:
