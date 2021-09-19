@@ -512,12 +512,8 @@ class PbrtScene(object):
             uroughness = roughness
         if vroughness is None:
             vroughness = roughness
-        if remaproughness:
-            assert isinstance(uroughness, float) and isinstance(
-                vroughness, float
-            ), "Currently remaproughness is only supported for fixed roughness values"
-            uroughness = _remap_roughness(uroughness)
-            vroughness = _remap_roughness(vroughness)
+        uroughness = _remap_roughness(uroughness, remaproughness=remaproughness)
+        vroughness = _remap_roughness(vroughness, remaproughness=remaproughness)
         material = liar.shaders.CookTorrance(
             self._get_texture(eta), self._get_texture(k)
         )
@@ -587,15 +583,11 @@ class PbrtScene(object):
     def _material_substrate(
         self, Kd=0.5, Ks=0.5, uroughness=0.1, vroughness=0.1, remaproughness=True
     ):
+        uroughness = _remap_roughness(uroughness, remaproughness=remaproughness)
+        vroughness = _remap_roughness(vroughness, remaproughness=remaproughness)
         shader = liar.shaders.AshikhminShirley(
             self._get_texture(Kd), self._get_texture(Ks)
         )
-        if remaproughness:
-            assert isinstance(uroughness, float) and isinstance(
-                vroughness, float
-            ), "Currently remaproughness is only supported for fixed roughness values"
-            uroughness = _remap_roughness(uroughness)
-            vroughness = _remap_roughness(vroughness)
         shader.roughnessU = self._get_texture(uroughness)
         shader.roughnessV = self._get_texture(vroughness)
         return shader
@@ -1215,16 +1207,31 @@ def _color(*args):
     return liar.rgb(r, g, b, _RGB_SPACE)
 
 
-def _remap_roughness(roughness: float) -> float:
-    roughness = max(roughness, 1e-3)
-    x = math.log(roughness)
-    return (
-        1.62142
-        + 0.819955 * x
-        + 0.1734 * x ** 2
-        + 0.0171201 * x ** 3
-        + 0.000640711 * x ** 4
-    )
+def _remap_roughness(roughness, *, remaproughness: bool):
+    if isinstance(roughness, liar.Texture):
+        return roughness
+        if remaproughness:
+            # roughness = liar.textures.Max(roughness, liar.textures.Constant(1e-3))
+            # x = liar.textures.Log(roughness)
+            # roughness = liar.textures.Polynomial(x,
+            #    [1.62142, 0.819955, 0.1734, 0.0171201, 0.000640711])
+            pass
+        return liar.textures.Sqrt(roughness)
+
+    r = roughness
+    if remaproughness:
+        roughness = max(roughness, 1e-3)
+        x = math.log(roughness)
+        roughness = (
+            1.62142
+            + 0.819955 * x
+            + 0.1734 * x ** 2
+            + 0.0171201 * x ** 3
+            + 0.000640711 * x ** 4
+        )
+    roughness = math.sqrt(max(roughness, 0))
+    print(f"_remap_roughness({r}, {remaproughness}) -> {roughness}")
+    return roughness
 
 
 def _luminance(x) -> float:
