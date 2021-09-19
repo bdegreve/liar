@@ -664,7 +664,7 @@ class PbrtScene(object):
             mat = layers[0]
         else:
             mat = liar.shaders.Sum(layers)
-        if opacity != 1:
+        if _luminance(opacity) < 0.999:
             transparent = liar.shaders.Flip(liar.shaders.Mirror(self._get_texture(1)))
             mat = liar.shaders.LinearInterpolator(
                 [(0, transparent), (1, mat)], self._get_texture(opacity)
@@ -1225,6 +1225,13 @@ def _remap_roughness(roughness: float) -> float:
         + 0.0171201 * x ** 3
         + 0.000640711 * x ** 4
     )
+
+
+def _luminance(x) -> float:
+    try:
+        return x.luminance
+    except AttributeError:
+        return float(x)
 
 
 _RGB_SPACE = liar.sRGB.linearSpace()
