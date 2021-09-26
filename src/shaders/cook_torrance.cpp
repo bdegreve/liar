@@ -226,15 +226,14 @@ inline TScalar D_beckmann(const TVector3D& h, TScalar alphaU, TScalar alphaV)
 	// original isotropic Beckmann distribution
 	// D = 1 / (m^2 cos^4 theta) * exp -{ (tan^2 theta) / m^2 }
 	//
+	// anisotropic roughness: 1/m^2 -> cos^2 phi / m_x^2 + sin^2 phi / m_y^2
+	// and cos^2 phi = h_x^2 / sin^2 theta
+
 	const TScalar cosTheta2 = num::sqr(h.z);
 	if (cosTheta2 == TNumTraits::zero)
 		return TNumTraits::zero;
-	const TScalar sinTheta2 = std::max(TNumTraits::one - cosTheta2, TNumTraits::zero);
-	const TScalar sinTheta = num::sqrt(sinTheta2);
-	const TScalar cosPhi2 = sinTheta > 0 ? num::sqr(h.x / sinTheta) : TScalar(0.5f);
-	const TScalar sinPhi2 = sinTheta > 0 ? num::sqr(h.y / sinTheta) : TScalar(0.5f);
-	const TScalar tanTheta2 = sinTheta2 / cosTheta2;
-	return num::exp(-tanTheta2 * (cosPhi2 / num::sqr(mU) + sinPhi2 / num::sqr(mV))) / (TNumTraits::pi * mU * mV * cosTheta2 * cosTheta2);
+	return num::exp(-(num::sqr(h.x / alphaU) + num::sqr(h.y / alphaV)) / cosTheta2) 
+		/ (TNumTraits::pi * alphaU * alphaV * num::sqr(cosTheta2));
 }
 
 
