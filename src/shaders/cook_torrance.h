@@ -72,15 +72,15 @@ public:
 	{
 	public:
 		typedef Spectral::TValue TValue;
-		Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& eta, const Spectral& kappa, const Spectral& reflectance, TValue mU, TValue mV);
+		Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& eta, const Spectral& kappa, const Spectral& reflectance, TValue alphaU, TValue alphaV);
 	private:
 		BsdfOut doEvaluate(const TVector3D& k1, const TVector3D& k2, BsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const;
 		Spectral eta_;
 		Spectral kappa_;
 		Spectral reflectance_;
-		TValue mU_;
-		TValue mV_;
+		TValue alphaU_;
+		TValue alphaV_;
 	};
 
 private:

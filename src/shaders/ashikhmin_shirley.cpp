@@ -34,13 +34,13 @@ namespace shaders
 PY_DECLARE_CLASS_DOC(AshikhminShirley, "Anisotropic Phong BRDF by Ashikhmin & Shirley (2001)")
 PY_CLASS_CONSTRUCTOR_0(AshikhminShirley)
 PY_CLASS_CONSTRUCTOR_2(AshikhminShirley, const TTexturePtr&, const TTexturePtr&)
-PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, diffuse, setDiffuse, "texture for diffuse component")
-PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specular, setSpecular, "texture for specular component")
-PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, roughnessU, setRoughnessU, "texture for roughness of specular component in U direction")
-PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, roughnessV, setRoughnessV, "texture for roughness of specular component in V direction")
-PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specularPowerU, setSpecularPowerU, "texture for rollof power of specular component in U direction")
-PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specularPowerV, setSpecularPowerV, "texture for rollof power of specular component in V direction")
-PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, numberOfSamples, setNumberOfSamples, "set number of samples for Monte Carlo simulations")
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, diffuse, setDiffuse, "diffuse reflectance")
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specular, setSpecular, "specular reflectance")
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, roughnessU, setRoughnessU, "linear roughness [0-1] of specular component in U direction: alphaU = roughnessU ** 2")
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, roughnessV, setRoughnessV, "linear roughness [0-1] of specular component in V direction: alphaV = roughnessV ** 2")
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specularPowerU, setSpecularPowerU, "rollof power [0-inf] of specular component in U direction: powerU = max(2 / alphaU ** 2 - 2, 0)")
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specularPowerV, setSpecularPowerV, "rollof power [0-inf] of specular component in V direction: powerV = max(2 / alphaV ** 2 - 2, 0)")
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, numberOfSamples, setNumberOfSamples, "number of samples for Monte Carlo simulations")
 
 using PowerFromRoughness = AshikhminShirley::PowerFromRoughness;
 PY_DECLARE_CLASS_NAME(PowerFromRoughness, "PowerFromRoughness");

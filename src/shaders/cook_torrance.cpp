@@ -31,15 +31,19 @@ namespace liar
 namespace shaders
 {
 
-PY_DECLARE_CLASS_DOC(CookTorrance, "Anisotropic Phong BRDF by Ashikhmin & Shirley (2001)")
+PY_DECLARE_CLASS_DOC(CookTorrance, 
+	"Anisotropic Microfacet Conductor BRDF by Cook & Torrance (1981)\n"
+	"\n"
+	"with Beckmann distribution and V-cavity shadow-masking\n"
+	"Roughness uses the linearized Disney definition, with alpha = sqr(roughness)")
 PY_CLASS_CONSTRUCTOR_0(CookTorrance)
 PY_CLASS_CONSTRUCTOR_2(CookTorrance, const TTexturePtr&, const TTexturePtr&)
-PY_CLASS_MEMBER_RW_DOC(CookTorrance, refractionIndex, setRefractionIndex, "texture for refraction index")
-PY_CLASS_MEMBER_RW_DOC(CookTorrance, absorptionCoefficient, setAbsorptionCoefficient, "texture for absorption coefficient")
-PY_CLASS_MEMBER_RW_DOC(CookTorrance, reflectance, setReflectance, "texture for additional reflectance multiplier")
-PY_CLASS_MEMBER_RW_DOC(CookTorrance, roughnessU, setRoughnessU, "texture for the rms microfacet slope in U direction")
-PY_CLASS_MEMBER_RW_DOC(CookTorrance, roughnessV, setRoughnessV, "texture for the rms microfacet slope in V direction")
-PY_CLASS_MEMBER_RW_DOC(CookTorrance, numberOfSamples, setNumberOfSamples, "set number of samples for Monte Carlo simulations")
+PY_CLASS_MEMBER_RW_DOC(CookTorrance, refractionIndex, setRefractionIndex, "refraction index")
+PY_CLASS_MEMBER_RW_DOC(CookTorrance, absorptionCoefficient, setAbsorptionCoefficient, "absorption coefficient")
+PY_CLASS_MEMBER_RW_DOC(CookTorrance, reflectance, setReflectance, "additional reflectance multiplier")
+PY_CLASS_MEMBER_RW_DOC(CookTorrance, roughnessU, setRoughnessU, "linear roughness [0-1] in U direction: alphaU = roughnesU ** 2")
+PY_CLASS_MEMBER_RW_DOC(CookTorrance, roughnessV, setRoughnessV, "linear roughness [0-1] in V direction: alphaV = roughnesV ** 2")
+PY_CLASS_MEMBER_RW_DOC(CookTorrance, numberOfSamples, setNumberOfSamples, "number of samples for Monte Carlo simulations")
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -175,9 +179,9 @@ TBsdfPtr CookTorrance::doBsdf(const Sample& sample, const IntersectionContext& c
 	const Spectral eta = max(refractionIndex_->lookUp(sample, context, SpectralType::Illuminant), 1e-9f);
 	const Spectral kappa = max(absorptionCoefficient_->lookUp(sample, context, SpectralType::Illuminant), 1e-9f);
 	const Spectral reflectance = reflectance_->lookUp(sample, context, SpectralType::Reflectant);
-    const TValue mu = std::max<TValue>(roughnessU_->scalarLookUp(sample, context), 1e-3f);
-	const TValue mv = std::max<TValue>(roughnessV_->scalarLookUp(sample, context), 1e-3f);
-	return TBsdfPtr(new Bsdf(sample, context, eta, kappa, reflectance, mu, mv));
+	const TValue alphaU = num::sqr(std::max<TValue>(roughnessU_->scalarLookUp(sample, context), 1e-3f));
+	const TValue alphaV = num::sqr(std::max<TValue>(roughnessV_->scalarLookUp(sample, context), 1e-3f));
+	return TBsdfPtr(new Bsdf(sample, context, eta, kappa, reflectance, alphaU, alphaV));
 }
 
 
@@ -196,13 +200,13 @@ void CookTorrance::doSetState(const TPyObjectPtr& iState)
 
 
 
-CookTorrance::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& eta, const Spectral& kappa, const Spectral& reflectance, TValue mU, TValue mV):
+CookTorrance::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& eta, const Spectral& kappa, const Spectral& reflectance, TValue alphaU, TValue alphaV):
 	kernel::Bsdf(sample, context, BsdfCaps::reflection | BsdfCaps::glossy),
 	eta_(eta),
 	kappa_(kappa),
 	reflectance_(reflectance),
-	mU_(mU),
-	mV_(mV)
+	alphaU_(alphaU),
+	alphaV_(alphaV)
 {
 }
 
@@ -217,7 +221,7 @@ namespace
 // BECKMANN P., SPIZZICHINO A.: The Scattering of Electromagnetic Waves from Rough Surfaces.
 // Pergamon Press, New York, 1963. Reprinted in 1987 by Artech House Publishers, Norwood, Massachusetts
 
-inline TScalar D_beckmann(const TVector3D& h, TScalar mU, TScalar mV)
+inline TScalar D_beckmann(const TVector3D& h, TScalar alphaU, TScalar alphaV)
 {
 	// original isotropic Beckmann distribution
 	// D = 1 / (m^2 cos^4 theta) * exp -{ (tan^2 theta) / m^2 }
@@ -234,7 +238,7 @@ inline TScalar D_beckmann(const TVector3D& h, TScalar mU, TScalar mV)
 }
 
 
-inline TVector3D sampleD_beckmann(const TPoint2D& sample, TScalar mU, TScalar mV)
+inline TVector3D sampleD_beckmann(const TPoint2D& sample, TScalar alphaU, TScalar alphaV)
 {
 	LASS_ASSERT(sample.x < TNumTraits::one);
 	const TScalar s = num::log(TNumTraits::one - sample.x);
@@ -243,21 +247,21 @@ inline TVector3D sampleD_beckmann(const TPoint2D& sample, TScalar mU, TScalar mV
 	TScalar cosPhi;
 	TScalar sinPhi;
 	TScalar tanTheta2;
-	if (mU == mV)
+	if (alphaU == alphaV)
 	{
 		const TScalar phi = 2 * TNumTraits::pi * sample.y;
 		cosPhi = num::cos(phi);
 		sinPhi = num::sin(phi);
-		tanTheta2 = -s * num::sqr(mU);
+		tanTheta2 = -s * num::sqr(alphaU);
 	}
 	else
 	{
-		TScalar phi = std::atan(mV / mU * num::tan(2 * TNumTraits::pi * sample.y + TNumTraits::pi / 2));
+		TScalar phi = std::atan(alphaV / alphaU * num::tan(2 * TNumTraits::pi * sample.y + TNumTraits::pi / 2));
 		if (sample.y > 0.5f) 
 			phi += TNumTraits::pi;
 		cosPhi = num::cos(phi);
 		sinPhi = num::sin(phi);
-		tanTheta2 = -s / (num::sqr(cosPhi / mU) + num::sqr(sinPhi / mV));
+		tanTheta2 = -s / (num::sqr(cosPhi / alphaU) + num::sqr(sinPhi / alphaV));
 	}
 
 	const TScalar cosTheta2 = num::inv(1 + tanTheta2);
@@ -306,7 +310,7 @@ BsdfOut CookTorrance::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D
 		return BsdfOut();
 	}
 	const TVector3D h = (omegaIn + omegaOut).normal();
-	const TScalar d = D_beckmann(h, mU_, mV_); // == pdfD
+	const TScalar d = D_beckmann(h, alphaU_, alphaV_); // == pdfD
 	const TScalar g = G(omegaIn, omegaOut, h);
 	const TScalar pdf = d / (4 * dot(omegaIn, h));
 	BsdfOut out(reflectance_, pdf);
@@ -320,7 +324,7 @@ BsdfOut CookTorrance::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D
 SampleBsdfOut CookTorrance::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar /*componentSample*/, BsdfCaps allowedCaps) const
 {
 	LASS_ASSERT(omegaIn.z > 0);
-	const TVector3D h = sampleD_beckmann(sample, mU_, mV_);
+	const TVector3D h = sampleD_beckmann(sample, alphaU_, alphaV_);
 	const TVector3D omegaOut = h.reflect(omegaIn);
 	if (omegaOut.z <= 0)
 	{

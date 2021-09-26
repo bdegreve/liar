@@ -22,7 +22,7 @@
  */
 
 /** @class liar::shaders::Walter
- *  @brief Anistropic Microfacet Dielectric BSDF by Walter et al. (2007) with Beckman distribution
+ *  @brief Anistropic Microfacet Dielectric BSDF by Walter et al. (2007)
  *
  *  @par reference:
  *      @arg B. Walter, S. R. Marschner, H. Li, K. E. Torrance, 
@@ -30,11 +30,11 @@
  *      Proceedings of the 18th Eurographics conference on Rendering Techniques
  *      (EGSR'07). Eurographics Association, Goslar, DEU, 195–206 (2007)
  * 
- *      @arg <i>An Overview of BRDF Models</i>, Rosana Montesand Carlos Ureña, Technical Report LSI-2012-001
- *      Dept. Lenguajes y Sistemas Informáticos University of Granada, Granada, Spain
- *
- *      @arg BECKMANN P., SPIZZICHINO A., <i>The Scattering of Electromagnetic Waves from Rough Surfaces</i>.
- *      Pergamon Press, New York, 1963. Reprinted in 1987 by Artech House Publishers, Norwood, Massachusetts
+ *      @arg B. Burley, <i>Physically-Based Shading at Disney</i> (2012)
+ * 
+ *      @arg E. Heitz, <i>Understanding the Masking-Shadowing Function in
+ *      Microfacet-Based BRDFs</i>, Journal of Computer Graphics Techniques
+ *      <b>3</b> (2), 48--107 (2014)
  *
  *  @author Bram de Greve [Bramz]
  */
@@ -81,7 +81,7 @@ public:
 	{
 	public:
 		typedef Spectral::TValue TValue;
-		Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& reflectance, const Spectral& transmittance, TValue etaI, TValue etaT, TValue mU, TValue mV);
+		Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& reflectance, const Spectral& transmittance, TValue etaI, TValue etaT, TValue alphaU, TValue alphaV);
 	private:
 		BsdfOut doEvaluate(const TVector3D& k1, const TVector3D& k2, BsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const;
@@ -90,8 +90,8 @@ public:
 		Spectral transmittance_;
 		TValue etaI_;
 		TValue etaT_;
-		TValue mU_;
-		TValue mV_;
+		TValue alphaU_;
+		TValue alphaV_;
 	};
 
 private:
