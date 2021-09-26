@@ -241,69 +241,52 @@ namespace
 
 using TValue = Spectral::TValue;
 
-// An Overview of BRDF Models, Rosana Montesand Carlos Ureña, Technical Report LSI-2012-001
-// Dept. Lenguajes y Sistemas Informáticos University of Granada, Granada, Spain
-
-// BECKMANN P., SPIZZICHINO A.: The Scattering of Electromagnetic Waves from Rough Surfaces.
-// Pergamon Press, New York, 1963. Reprinted in 1987 by Artech House Publishers, Norwood, Massachusetts
-
-inline TValue D_beckmann(const TVector3D& h, TValue mU, TValue mV)
+// Appendix B.2, B. Burley, Physically-Based Shading at Disney, 2012
+//
+inline TValue D_ggx(const TVector3D& h, TValue mU, TValue mV)
 {
-	// original isotropic Beckmann distribution
-	// D = 1 / (m^2 cos^4 theta) * exp -{ (tan^2 theta) / m^2 }
-	//
-	const TValue cosTheta2 = num::sqr(static_cast<TValue>(h.z));
-	if (cosTheta2 == 0)
+	constexpr TValue pi = num::NumTraits<TValue>::pi;
+	const TValue hx = static_cast<TValue>(h.x);
+	const TValue hy = static_cast<TValue>(h.y);
+	const TValue hz = static_cast<TValue>(h.z);
+	LASS_ASSERT(hz > 0);
+
+	return num::inv(pi * mU * mV * num::sqr(num::sqr(hx / mU) + num::sqr(hy / mV) + num::sqr(hz)));
+}
+
+
+inline TVector3D sampleD_ggx(const TPoint2D& sample, TScalar mU, TScalar mV)
+{
+	LASS_ASSERT(sample.y < TNumTraits::one);
+	const TScalar phi = 2 * TNumTraits::pi * sample.x;
+	const TScalar s = num::sqrt(sample.y / (TNumTraits::one - sample.y));	
+	return TVector3D(s * mU * num::cos(phi), s * mV * num::sin(phi), 1).normal();
+}
+
+
+// E. Heitz, Understanding the Masking-Shadowing Function in Microfacet-Based BRDFs, 2014, p86.
+inline TValue G1_ggx(const TVector3D& omega, const TVector3D& h, TScalar mU, TScalar mV)
+{
+	if (dot(omega, h) * omega.z <= 0) // same effect as X+(v.m / v.n): 1 if both have same sign, 0 otherwise
+	{
 		return 0;
-	const TValue sinTheta2 = std::max<TValue>(1 - cosTheta2, 0);
-	const TValue sinTheta = num::sqrt(sinTheta2);
-	const TValue cosPhi2 = sinTheta > 0 ? num::sqr(static_cast<TValue>(h.x) / sinTheta) : TValue(0.5f);
-	const TValue sinPhi2 = sinTheta > 0 ? num::sqr(static_cast<TValue>(h.y) / sinTheta) : TValue(0.5f);
-	const TValue tanTheta2 = sinTheta2 / cosTheta2;
-	return num::exp(-tanTheta2 * (cosPhi2 / num::sqr(mU) + sinPhi2 / num::sqr(mV))) / (num::NumTraits<TValue>::pi * mU * mV * cosTheta2 * cosTheta2);
-}
-
-
-inline TVector3D sampleD_beckmann(const TPoint2D& sample, TScalar mU, TScalar mV)
-{
-	LASS_ASSERT(sample.x < TNumTraits::one);
-	const TScalar s = num::log(TNumTraits::one - sample.x);
-	LASS_ASSERT(!num::isInf(s));
-
-	TScalar cosPhi;
-	TScalar sinPhi;
-	TScalar tanTheta2;
-	if (mU == mV)
-	{
-		const TScalar phi = 2 * TNumTraits::pi * sample.y;
-		cosPhi = num::cos(phi);
-		sinPhi = num::sin(phi);
-		tanTheta2 = -s * num::sqr(mU);
-	}
-	else
-	{
-		TScalar phi = std::atan(mV / mU * num::tan(2 * TNumTraits::pi * sample.y + TNumTraits::pi / 2));
-		if (sample.y > 0.5f) 
-			phi += TNumTraits::pi;
-		cosPhi = num::cos(phi);
-		sinPhi = num::sin(phi);
-		tanTheta2 = -s / (num::sqr(cosPhi / mU) + num::sqr(sinPhi / mV));
 	}
 
-	const TScalar cosTheta2 = num::inv(1 + tanTheta2);
-	const TScalar cosTheta = num::sqrt(cosTheta2);
-	const TScalar sinTheta = num::sqrt(std::max(1 - cosTheta2, TNumTraits::zero));
+	//return num::inv(NdotV + num::sqrt(num::sqr(VdotX * mU) + num::sqr(VdotY * mV) + num::sqr(NdotV)));
 
-	return TVector3D(cosPhi * sinTheta, sinPhi * sinTheta, cosTheta);
+	const TValue ox = static_cast<TValue>(omega.x);
+	const TValue oy = static_cast<TValue>(omega.y);
+	const TValue oz = static_cast<TValue>(omega.z);
+	return 2 / (1 + num::sqrt(1 + (num::sqr(ox * mU) + num::sqr(oy * mV)) / num::sqr(oz)));
 }
 
 
-inline TValue G(const TVector3D& omegaIn, const TVector3D& omegaOut, const TVector3D& h)
+
+inline TValue G2_ggx(const TVector3D& omegaIn, const TVector3D& omegaOut, const TVector3D& h, TScalar mU, TScalar mV)
 {
-	const TValue g1 = std::max<TValue>(0, 2 * h.z * omegaIn.z / dot(omegaIn, h));
-	const TValue g2 = std::max<TValue>(0, 2 * h.z * omegaOut.z / dot(omegaOut, h));
-	return std::min<TValue>(1, std::min(g1, g2));
+	return G1_ggx(omegaIn, h, mU, mV) * G1_ggx(omegaOut, h, mU, mV);
 }
+
 
 
 inline TValue fresnelDielectric(TValue ior, const TVector3D& omegaIn, const TVector3D& h)
@@ -331,12 +314,13 @@ BsdfOut Walter::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omeg
 	if (omegaOut.z > 0)
 	{
 		const TVector3D h = (omegaIn + omegaOut).normal();
+		LASS_ASSERT(h.z > 0);
 
 		const TValue rFresnel = fresnelDielectric(etaI_ / etaT_, omegaIn, h);
 		const TValue pdfRefl = pdfReflection(rFresnel, allowedCaps);
 
-		const TValue d = D_beckmann(h, mU_, mV_); // == pdfD
-		const TValue g = G(omegaIn, omegaOut, h);
+		const TValue d = D_ggx(h, mU_, mV_); // == pdfD
+		const TValue g = G2_ggx(omegaIn, omegaOut, h, mU_, mV_);
 		const TScalar pdf = d / (4 * dot(omegaIn, h));
 
 		BsdfOut out(reflectance_, pdf * pdfRefl);
@@ -352,8 +336,8 @@ BsdfOut Walter::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omeg
 		const TValue rFresnel = fresnelDielectric(etaI_ / etaT_, omegaIn, h);
 		const TValue pdfRefl = pdfReflection(rFresnel, allowedCaps);
 
-		const TValue d = D_beckmann(h, mU_, mV_); // == pdfD
-		const TValue g = G(omegaIn, omegaOut, h);
+		const TValue d = D_ggx(h, mU_, mV_); // == pdfD
+		const TValue g = G2_ggx(omegaIn, omegaOut, h, mU_, mV_);
 		const TValue dh_dwo = num::sqr(etaT_) * cosThetaT / num::sqr(etaI_ * cosThetaI + etaT_ * cosThetaT);
 		const TScalar pdf = d * dh_dwo;
 
@@ -372,8 +356,8 @@ BsdfOut Walter::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omeg
 SampleBsdfOut Walter::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const
 {
 	LASS_ASSERT(omegaIn.z > 0);
-	const TVector3D h = sampleD_beckmann(sample, mU_, mV_);
-	const TValue d = D_beckmann(h, mU_, mV_); // == pdfD
+	const TVector3D h = sampleD_ggx(sample, mU_, mV_);
+	const TValue d = D_ggx(h, mU_, mV_); // == pdfD
 	LASS_ASSERT(h.z > 0);
 
 	const TValue rFresnel = fresnelDielectric(etaI_ / etaT_, omegaIn, h);
@@ -386,7 +370,7 @@ SampleBsdfOut Walter::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& s
 		{
 			return SampleBsdfOut();
 		}
-		const TValue g = G(omegaIn, omegaOut, h);
+		const TValue g = G2_ggx(omegaIn, omegaOut, h, mU_, mV_);
 		const TScalar pdf = d / (4 * dot(omegaIn, h));
 		SampleBsdfOut out(omegaOut, reflectance_, pdf * pdfRefl, BsdfCaps::reflection | BsdfCaps::glossy);
 		out.value *= rFresnel * d * g / static_cast<TValue>(4 * omegaIn.z * omegaOut.z);
@@ -404,7 +388,7 @@ SampleBsdfOut Walter::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& s
 		{
 			return SampleBsdfOut();
 		}
-		const TValue g = G(omegaIn, omegaOut, h);
+		const TValue g = G2_ggx(omegaIn, omegaOut, h, mU_, mV_);
 		const TValue dh_dwo = num::sqr(etaT_) * cosThetaT / num::sqr(etaI_ * cosThetaI + etaT_ * cosThetaT);
 		const TScalar pdf = d * dh_dwo;
 		SampleBsdfOut out(omegaOut, transmittance_, pdf * (1 - pdfRefl), BsdfCaps::transmission | BsdfCaps::glossy);
