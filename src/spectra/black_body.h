@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -49,6 +49,9 @@ public:
 	TValue temperatureCelcius() const;
 	void setTemperatureCelcius(TValue temperature);
 
+	TValue scale() const;
+	void setScale(TValue scale);
+
 private:
 
 	const Spectral doEvaluate(const Sample& sample, SpectralType type) const override;
@@ -58,6 +61,7 @@ private:
 	void doSetState(const TPyObjectPtr& state) override;
 
 	TValue temperature_;
+	TValue scale_;
 };
 
 }

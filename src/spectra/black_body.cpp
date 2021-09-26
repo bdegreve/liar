@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ PY_DECLARE_CLASS_DOC(BlackBody, "Black body radiation")
 	PY_CLASS_CONSTRUCTOR_1(BlackBody, BlackBody::TValue)
 	PY_CLASS_MEMBER_RW(BlackBody, temperature, setTemperature)
 	PY_CLASS_MEMBER_RW(BlackBody, temperatureCelcius, setTemperatureCelcius)
+	PY_CLASS_MEMBER_RW(BlackBody, scale, setScale)
 
 
 namespace
@@ -52,7 +53,8 @@ namespace
 // --- public --------------------------------------------------------------------------------------
 
 BlackBody::BlackBody(TValue temperature) :
-	temperature_(temperature)
+	temperature_(temperature),
+	scale_(1)
 {
 }
 
@@ -85,6 +87,20 @@ void BlackBody::setTemperatureCelcius(TValue temperature)
 }
 
 
+
+TValue BlackBody::scale() const
+{
+	return scale_;
+}
+
+
+
+void BlackBody::setScale(TValue scale)
+{
+	scale_ = scale;
+}
+
+
 // --- protected -----------------------------------------------------------------------------------
 
 
@@ -95,7 +111,7 @@ const Spectral BlackBody::doEvaluate(const Sample& sample, SpectralType type) co
 {
 	return Spectral::fromFunc([=](TWavelength w) {
 		const TWavelength w5 = num::sqr(num::sqr(w)) * w;
-		return static_cast<TValue>(c1 / (w5 * num::expm1(c2 / (w * temperature_))));
+		return scale_ * static_cast<TValue>(c1 / (w5 * num::expm1(c2 / (w * temperature_))));
 	}, sample, type);
 }
 
@@ -111,20 +127,20 @@ BlackBody::TValue BlackBody::doLuminance() const
 		const TWavelength w5 = num::sqr(num::sqr(w)) * w;
 		acc += static_cast<TValue>(c1 / (w5 * num::expm1(c2 / (w * temperature_))));
 	}
-	return acc / static_cast<TValue>(ws.size());
+	return scale_ * acc / static_cast<TValue>(ws.size());
 }
 
 
 const TPyObjectPtr BlackBody::doGetState() const
 {
-	return python::makeTuple(temperature_);
+	return python::makeTuple(temperature_, scale_);
 }
 
 
 
 void BlackBody::doSetState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(state, temperature_);
+	python::decodeTuple(state, temperature_, scale_);
 }
 
 
