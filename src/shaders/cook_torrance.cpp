@@ -311,7 +311,7 @@ BsdfOut CookTorrance::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D
 	const TVector3D h = (omegaIn + omegaOut).normal();
 	const TScalar d = D_beckmann(h, alphaU_, alphaV_); // == pdfD
 	const TScalar g = G(omegaIn, omegaOut, h);
-	const TScalar pdf = d / (4 * dot(omegaIn, h));
+	const TScalar pdf = d * h.z / (4 * dot(omegaIn, h));
 	BsdfOut out(reflectance_, pdf);
 	out.value *= static_cast<Spectral::TValue>(d * g / (4 * omegaIn.z * omegaOut.z));
 	out.value *= fresnelConductor(eta_, kappa_, omegaIn, h);

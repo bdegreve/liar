@@ -322,15 +322,17 @@ BsdfOut Walter::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omeg
 
 		const TValue d = D_ggx(h, alphaU_, alphaV_); // == pdfD
 		const TValue g = G2_ggx(omegaIn, omegaOut, h, alphaU_, alphaV_);
-		const TScalar pdf = d / (4 * dot(omegaIn, h));
+		const TValue pdfH = d * static_cast<TValue>(h.z);
+		const TValue dh_dwo = static_cast<TValue>(num::inv(4 * dot(omegaIn, h)));
 
-		BsdfOut out(reflectance_, pdf * pdfRefl);
+		BsdfOut out(reflectance_, pdfRefl * pdfH * dh_dwo);
 		out.value *= rFresnel * d * g / static_cast<TValue>(4 * omegaIn.z * omegaOut.z);
 		return out;
 	}
 	else if (omegaOut.z < 0)
 	{
 		const TVector3D h = (-etaI_ * omegaIn - etaT_ * omegaOut).normal();
+		LASS_ASSERT(h.z > 0);
 		const TValue cosThetaI = static_cast<TValue>(num::abs(dot(omegaIn, h)));
 		const TValue cosThetaT = static_cast<TValue>(num::abs(dot(omegaOut, h)));
 
@@ -339,11 +341,11 @@ BsdfOut Walter::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omeg
 
 		const TValue d = D_ggx(h, alphaU_, alphaV_); // == pdfD
 		const TValue g = G2_ggx(omegaIn, omegaOut, h, alphaU_, alphaV_);
+		const TValue pdfH = d * static_cast<TValue>(h.z);
 		const TValue dh_dwo = num::sqr(etaT_) * cosThetaT / num::sqr(etaI_ * cosThetaI + etaT_ * cosThetaT);
-		const TScalar pdf = d * dh_dwo;
 
-		BsdfOut out(transmittance_, pdf * (1 - pdfRefl));
-		out.value *= (cosThetaI * (1 - rFresnel) * g * d * dh_dwo) / static_cast<TValue>(num::abs(omegaIn.z * omegaOut.z));
+		BsdfOut out(transmittance_, (1 - pdfRefl) * pdfH * dh_dwo);
+		out.value *= ((1 - rFresnel) * d * g * (cosThetaI * dh_dwo)) / static_cast<TValue>(num::abs(omegaIn.z * omegaOut.z));
 
 		// if (adjoint)
 		//	out.value *= num::sqr(etaI_) / num::sqr(etaT_)
@@ -358,8 +360,9 @@ SampleBsdfOut Walter::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& s
 {
 	LASS_ASSERT(omegaIn.z > 0);
 	const TVector3D h = sampleD_ggx(sample, alphaU_, alphaV_);
-	const TValue d = D_ggx(h, alphaU_, alphaV_); // == pdfD
 	LASS_ASSERT(h.z > 0);
+	const TValue d = D_ggx(h, alphaU_, alphaV_);
+	const TValue pdfH = d * static_cast<TValue>(h.z);
 
 	const TValue rFresnel = fresnelDielectric(etaI_ / etaT_, omegaIn, h);
 	const TValue pdfRefl = pdfReflection(rFresnel, allowedCaps);
@@ -372,8 +375,9 @@ SampleBsdfOut Walter::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& s
 			return SampleBsdfOut();
 		}
 		const TValue g = G2_ggx(omegaIn, omegaOut, h, alphaU_, alphaV_);
-		const TScalar pdf = d / (4 * dot(omegaIn, h));
-		SampleBsdfOut out(omegaOut, reflectance_, pdf * pdfRefl, BsdfCaps::reflection | BsdfCaps::glossy);
+		const TValue dh_dwo = static_cast<TValue>(num::inv(4 * dot(omegaOut, h)));
+		
+		SampleBsdfOut out(omegaOut, reflectance_, pdfRefl * pdfH * dh_dwo, BsdfCaps::reflection | BsdfCaps::glossy);
 		out.value *= rFresnel * d * g / static_cast<TValue>(4 * omegaIn.z * omegaOut.z);
 		return out;
 	}
@@ -390,10 +394,10 @@ SampleBsdfOut Walter::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& s
 			return SampleBsdfOut();
 		}
 		const TValue g = G2_ggx(omegaIn, omegaOut, h, alphaU_, alphaV_);
+		const TValue pdfH = d * static_cast<TValue>(h.z);
 		const TValue dh_dwo = num::sqr(etaT_) * cosThetaT / num::sqr(etaI_ * cosThetaI + etaT_ * cosThetaT);
-		const TScalar pdf = d * dh_dwo;
-		SampleBsdfOut out(omegaOut, transmittance_, pdf * (1 - pdfRefl), BsdfCaps::transmission | BsdfCaps::glossy);
-		out.value *= (cosThetaI * (1 - rFresnel) * g * d * dh_dwo) / static_cast<TValue>(num::abs(omegaIn.z * omegaOut.z));
+		SampleBsdfOut out(omegaOut, transmittance_, (1 - pdfRefl) * pdfH * dh_dwo, BsdfCaps::transmission | BsdfCaps::glossy);
+		out.value *= ((1 - rFresnel) * d * g * (cosThetaI * dh_dwo)) / static_cast<TValue>(num::abs(omegaIn.z * omegaOut.z));
 		return out;
 	}
 }
