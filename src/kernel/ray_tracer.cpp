@@ -236,7 +236,7 @@ const Spectral RayTracer::estimateLightContribution(
 			{
 				continue;
 			}
-			const TRay3D ray(start, bsdf->bsdfToWorld(out.omegaOut).normal());
+			const TRay3D ray(start, bsdf->bsdfToWorld(out.omegaOut));
 			BoundedRay shadowRay;
 			TScalar lightPdf;
 			const Spectral radiance = light.emission(sample, ray, shadowRay, lightPdf);
