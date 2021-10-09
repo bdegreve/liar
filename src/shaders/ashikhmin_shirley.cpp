@@ -307,8 +307,7 @@ AshikhminShirley::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& co
 
 BsdfOut AshikhminShirley::Bsdf::doEvaluate(const TVector3D& k1, const TVector3D& k2, BsdfCaps allowedCaps) const
 {
-	LASS_ASSERT(k1.z > 0);
-	if (k2.z <= 0)
+	if (k1.z <= 0 || k2.z <= 0)
 	{
 		return BsdfOut();
 	}
@@ -336,7 +335,10 @@ BsdfOut AshikhminShirley::Bsdf::doEvaluate(const TVector3D& k1, const TVector3D&
 
 SampleBsdfOut AshikhminShirley::Bsdf::doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const
 {
-	LASS_ASSERT(k1.z > 0);
+	if (k1.z < 0)
+	{
+		return SampleBsdfOut();
+	}
 	TScalar pd = kernel::hasCaps(allowedCaps, BsdfCaps::reflection | BsdfCaps::diffuse) ? diffuse_.absAverage() : 0;
 	TScalar ps = kernel::hasCaps(allowedCaps, BsdfCaps::reflection | BsdfCaps::glossy) ? specular_.absAverage() : 0;
 	const TScalar ptot = pd + ps;
@@ -357,7 +359,7 @@ SampleBsdfOut AshikhminShirley::Bsdf::doSample(const TVector3D& k1, const TPoint
 	}
 	else
 	{
-		LASS_ASSERT(ps > 0);
+		LIAR_ASSERT(ps > 0, "ps=" << ps);
 		const TVector3D h = sampleH(sample);
 		out.omegaOut = h.reflect(k1);
 		if (out.omegaOut.z > 0)
@@ -386,10 +388,13 @@ const Spectral AshikhminShirley::Bsdf::rhoS(const TVector3D& k1, const TVector3D
 	const TScalar c = num::sqrt((powerU_ + 1) * (powerV_ + 1)) / (8 * TNumTraits::pi);
 	const TScalar n = powerU_ * num::sqr(h.x) + powerV_ * num::sqr(h.y);
 	const TScalar nn = h.z == 1 ? 0 : n / (1 - num::sqr(h.z));
+	LIAR_ASSERT_POSITIVE_FINITE(nn);
 	const TScalar hk = dot(h, k1);
-	const Spectral F = specular_ + (1 - specular_) * static_cast<Spectral::TValue>(temp::pow5(1 - hk));
+	LIAR_ASSERT(hk > 0 && hk <= 1, "hk=" << hk << " h=" << h << " k1=" << k1);
+	const Spectral F = specular_ + (1 - specular_) * temp::pow5(std::max(static_cast<Spectral::TValue>(1 - hk), 0.f));
 	const TScalar pdfH = 4 * c * num::pow(h.z, n);
 	pdf = pdfH / (4 * hk);
+	LIAR_ASSERT_POSITIVE_FINITE(pdf);
 	return F * static_cast<Spectral::TValue>((c * num::pow(h.z, nn) / (hk * std::max(k1.z, k2.z))));
 }
 
