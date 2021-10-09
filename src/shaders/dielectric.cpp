@@ -214,16 +214,23 @@ SampleBsdfOut Dielectric::DielectricBsdf::doSample(const TVector3D& omegaIn, con
 	constexpr BsdfCaps capsTrans = BsdfCaps::transmission | BsdfCaps::specular;
 
 	const TValue cosI = static_cast<TValue>(omegaIn.z);
-	LASS_ASSERT(cosI > 0);
+	if (cosI <= 0)
+	{
+		return SampleBsdfOut();
+	}
 	const TValue sinT2 = num::sqr(ior_) * (1 - num::sqr(cosI));
 	const TValue cosT = num::sqrt(std::max<TValue>(1 - sinT2, 0));
 	const TValue rOrth = (ior_ * cosI - cosT) / (ior_ * cosI + cosT);
 	const TValue rPar = (cosI - ior_ * cosT) / (cosI + ior_ * cosT);
 	const TValue rFresnel = (num::sqr(rOrth) + num::sqr(rPar)) / 2;
+	LIAR_ASSERT_POSITIVE_FINITE(rFresnel);
 
 	const TValue powRefl = kernel::hasCaps(allowedCaps, capsRefl) ? reflectance_.absAverage() * rFresnel : 0;
 	const TValue powTrans = kernel::hasCaps(allowedCaps, capsTrans) ? transmittance_.absAverage() * (1 - rFresnel) : 0;
-	LASS_ASSERT(powRefl + powTrans > 0);
+	if (powRefl + powTrans == 0)
+	{
+		return SampleBsdfOut();
+	}
 	const TValue probRefl = powRefl / (powRefl + powTrans);
 	
 	if (componentSample < probRefl)
@@ -233,11 +240,9 @@ SampleBsdfOut Dielectric::DielectricBsdf::doSample(const TVector3D& omegaIn, con
 	}
 	else
 	{
-		TVector3D omegaTrans = -omegaIn;
-		omegaTrans *= ior_;
-		omegaTrans.z += (ior_ * cosI - cosT);
-		const TValue cosO = static_cast<TValue>(omegaTrans.z);
-		return SampleBsdfOut(omegaTrans, transmittance_ * (1 - rFresnel) / num::abs(cosO), 1 - probRefl, capsTrans);
+		LIAR_ASSERT(cosT > 0, "cosT=" << cosT << ", rFresnel=" << rFresnel << ", probRefl=" << probRefl << ", componentSample=" << componentSample);
+		const TVector3D omegaTrans(-ior_ * omegaIn.x, -ior_ * omegaIn.y, -cosT);
+		return SampleBsdfOut(omegaTrans, transmittance_ * (1 - rFresnel) / cosT, 1 - probRefl, capsTrans);
 	}
 }
 
