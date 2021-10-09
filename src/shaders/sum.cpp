@@ -194,18 +194,20 @@ SampleBsdfOut Sum::SumBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& s
 		activeComponents_.size() - 1);
 
 	SampleBsdfOut out = activeComponents_[k]->sample(omegaIn, sample, componentSample, allowedCaps);
-
-	for (size_t i = 0; i < n; ++i)
+	if (out)
 	{
-		if (i != k)
+		// evaluate the other components as well.
+		for (size_t i = 0; i < n; ++i)
 		{
-			const BsdfOut o = activeComponents_[i]->evaluate(omegaIn, out.omegaOut, out.usedCaps);
-			out.value += o.value;
-			out.pdf += o.pdf;
+			if (i != k)
+			{
+				const BsdfOut o = activeComponents_[i]->evaluate(omegaIn, out.omegaOut, out.usedCaps);
+				out.value += o.value;
+				out.pdf += o.pdf;
+			}
 		}
+		out.pdf /= static_cast<TScalar>(n);
 	}
-
-	out.pdf /= static_cast<TScalar>(n);
 
 	return out;
 }
