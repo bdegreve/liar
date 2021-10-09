@@ -49,6 +49,11 @@ if(APPLE)
 		INSTALL_NAME_DIR "@rpath"
 		)
 endif()
+target_compile_definitions(libkernel
+	PUBLIC
+		"$<$<CONFIG:Debug>:LIAR_DEBUG>"
+		"$<$<CONFIG:RelWithDebInfo>:LIAR_DEBUG>"
+)
 target_link_libraries(libkernel
 	Lass::lass_python
 	${LCMS2_LIBRARIES}

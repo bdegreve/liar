@@ -94,6 +94,10 @@ public:
 	{
 		return x == 0 && y == 0 && z == 0;
 	}
+	bool isNaN() const
+	{
+		return num::isNaN(total());
+	}
 	bool operator!() const
 	{
 		return isZero();

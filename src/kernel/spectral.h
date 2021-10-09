@@ -202,6 +202,10 @@ private:
 #endif
 };
 
+LIAR_KERNEL_DLL std::ostream& operator<<(std::ostream& s, const Spectral& a);
+LIAR_KERNEL_DLL bool isFinite(const Spectral& x);
+LIAR_KERNEL_DLL bool isPositiveAndFinite(const Spectral& x);
+
 inline Spectral abs(const Spectral& a)
 {
 	Spectral r(a);

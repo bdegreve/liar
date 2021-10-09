@@ -222,6 +222,26 @@ const XYZ Spectral::xyz(const Sample& sample) const
 
 #endif
 
+std::ostream& operator<<(std::ostream& s, const Spectral& a)
+{
+	for (size_t k = 0; k < Spectral::numBands; ++k)
+	{
+		s << (k == 0 ? "[" : ", ") << a[k];
+	}	
+	s << "]";
+	return s;
+}
+
+LIAR_KERNEL_DLL bool isFinite(const Spectral& x)
+{
+	return isFinite(x.average());
+}
+
+LIAR_KERNEL_DLL bool isPositiveAndFinite(const Spectral& x)
+{
+	return x.minimum() >= 0 && isFinite(x);
+}
+
 }
 }
 

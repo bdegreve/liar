@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -70,6 +70,24 @@
 #define LIAR_VERSION_FULL LASS_STRINGIFY(LIAR_VERSION_MAJOR) "."\
 	LASS_STRINGIFY(LIAR_VERSION_MINOR) "." LASS_STRINGIFY(LIAR_VERSION_REVISION)
 
+#ifdef LIAR_DEBUG
+#	define LIAR_ASSERT( predicate, message ) \
+		do\
+		{\
+			if (!(predicate))\
+			{\
+				LASS_CERR << "\n" << LASS_PRETTY_FUNCTION << ": ASSERT FAILURE: " << LASS_STRINGIFY(predicate) << ": " << message << "\n";\
+				LASS_BREAK_HERE;\
+			}\
+		}\
+		while (false)
+#else
+#	define LIAR_ASSERT( predicate, message )
+#endif
+#define LIAR_ASSERT_FINITE( x ) LIAR_ASSERT( isFinite(x), (x) )
+#define LIAR_ASSERT_POSITIVE_FINITE( x ) LIAR_ASSERT( isPositiveAndFinite(x), (x) )
+#define LIAR_ASSERT_NORMALIZED( x ) LIAR_ASSERT( isNormalized(x), (x) )
+
 namespace liar
 {
 
@@ -105,7 +123,7 @@ const std::string website = LIAR_WEBSITE;
 
 const std::string license =	
 	LIAR_NAME_FULL "\n"
-    "Copyright (C) 2004-2009 " LIAR_AUTHORS "\n"
+    "Copyright (C) 2004-2021 " LIAR_AUTHORS "\n"
 	"\n"
 	"This is free software; you can redistribute it and/or modify\n"
 	"it under the terms of the GNU General Public License as published by\n"
@@ -151,7 +169,7 @@ inline void generateOrthonormal(const TVector3D& k, TVector3D& i, TVector3D& j)
 template <typename RandomAccessIterator, typename Generator>
 void stratifier1D(RandomAccessIterator first, RandomAccessIterator last, Generator& generator)
 {
-	num::DistributionUniform<TScalar, num::RandomMT19937> uniform(generator);
+	num::DistributionUniform<TScalar, Generator> uniform(generator);
 	const std::ptrdiff_t n = last - first;
 	const TScalar scale = num::inv(static_cast<TScalar>(n));
 	for (std::ptrdiff_t k = 0; k < n; ++k)
@@ -170,7 +188,7 @@ void stratifier1D(RandomAccessRange& range, Generator& generator)
 template <typename RandomAccessIterator, typename Generator>
 void latinHypercube2D(RandomAccessIterator first, RandomAccessIterator last, Generator& generator)
 {
-	num::DistributionUniform<TScalar, num::RandomMT19937> uniform(generator);
+	num::DistributionUniform<TScalar, Generator> uniform(generator);
 	const std::ptrdiff_t n = last - first;
 	const TPoint2D::TValue scale = num::inv(static_cast<TPoint2D::TValue>(n));
 	for (std::ptrdiff_t k = 0; k < n; ++k)
@@ -206,6 +224,30 @@ inline TScalar sphericalTheta(const TVector3D& v)
 {
 	LASS_ASSERT(v.z >= -1 && v.z <= 1);
 	return num::acos(v.z);
+}
+
+template <typename T>
+bool isFinite(T x)
+{
+	return !num::isInf(x) && !num::isNaN(x);
+}
+template <typename T>
+inline bool isFinite(const prim::Vector3D<T>& x)
+{
+	return isFinite(x.squaredNorm());
+}
+
+template <typename T>
+bool isPositiveAndFinite(T x)
+{
+	return x >= 0 && !num::isInf(x) && !num::isNaN(x);
+}
+
+template <typename T>
+bool isNormalized(const T &x)
+{
+	typedef typename T::TValue TValue;
+	return num::abs(x.squaredNorm() - static_cast<TValue>(1)) < static_cast<TValue>(1e-6f);
 }
 
 }

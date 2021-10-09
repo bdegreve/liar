@@ -521,6 +521,9 @@ void Raster::doWriteRender(const OutputSample* first, const OutputSample* last)
     {
         while (first != last)
         {
+            LIAR_ASSERT_POSITIVE_FINITE(first->weight());
+            LIAR_ASSERT_POSITIVE_FINITE(first->alpha());
+            LIAR_ASSERT_FINITE(first->radiance().total());
             const TPoint2D& position = first->screenCoordinate();
             if (position.x >= 0 && position.y >= 0)
             {

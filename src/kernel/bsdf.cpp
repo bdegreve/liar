@@ -52,6 +52,9 @@ Bsdf::~Bsdf()
 
 BsdfOut Bsdf::evaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps allowedCaps) const
 {
+	LIAR_ASSERT_NORMALIZED(omegaIn);
+	LIAR_ASSERT_NORMALIZED(omegaOut);
+
 	// for reflection, omegaIn and omegaOut must lay in the same hemisphere determined by geometric normal
 	const bool reflective = (dot(omegaIn, omegaGeometricNormal_) > 0) == (dot(omegaOut, omegaGeometricNormal_) > 0);
 	util::clearMasked<BsdfCaps>(allowedCaps, reflective ? BsdfCaps::transmission : BsdfCaps::reflection);
@@ -60,18 +63,29 @@ BsdfOut Bsdf::evaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, Bsdf
 	{
 		return BsdfOut();
 	}
-	return doEvaluate(omegaIn, omegaOut, allowedCaps);
+	const BsdfOut out = doEvaluate(omegaIn, omegaOut, allowedCaps);
+
+	LIAR_ASSERT(isFinite(out.value), out.value << " from " << typeid(*this).name());
+	LIAR_ASSERT(isPositiveAndFinite(out.pdf), out.pdf << " from " << typeid(*this).name());
+	return out;
 }
 
 
 
 SampleBsdfOut Bsdf::sample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const
 {
+	LIAR_ASSERT_NORMALIZED(omegaIn);
+
 	if (!compatibleCaps(allowedCaps))
 	{
 		return SampleBsdfOut();
 	}
-	return doSample(omegaIn, sample, componentSample, allowedCaps);
+	const SampleBsdfOut out = doSample(omegaIn, sample, componentSample, allowedCaps);
+
+	LIAR_ASSERT(isFinite(out.value), out.value << " from " << typeid(*this).name());
+	LIAR_ASSERT(isPositiveAndFinite(out.pdf), out.pdf << " from " << typeid(*this).name());
+	LIAR_ASSERT(!(out.pdf > 0 && !isNormalized(out.omegaOut)), out.omegaOut << " (out.pdf=" << out.pdf << ") from " << typeid(*this).name());
+	return out;
 }
 
 
