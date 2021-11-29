@@ -130,9 +130,9 @@ void Flip::doSetState(const TPyObjectPtr& state)
 // --- bsdf ----------------------------------------------------------------------------------------
 
 Flip::Bsdf::Bsdf(
-		const Sample& sample, const IntersectionContext& context, BsdfCaps caps, const TBsdfPtr& child):
+		const Sample& sample, const IntersectionContext& context, BsdfCaps caps, TBsdfPtr&& child):
 	kernel::Bsdf(sample, context, caps), // caps are already flipped.
-	child_(child)
+	child_(std::forward<TBsdfPtr>(child))
 {
 }
 

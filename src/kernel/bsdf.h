@@ -165,12 +165,9 @@ private:
 	const Sample& sample_;
 	const IntersectionContext& context_; // no ownership!
 	BsdfCaps caps_;
-
-public:
-	size_t refCount_; // oops, public???
 };
 
-typedef util::SharedPtr<Bsdf, util::ObjectStorage, util::IntrusiveCounter<Bsdf, size_t, &Bsdf::refCount_> > TBsdfPtr;
+typedef std::unique_ptr<Bsdf> TBsdfPtr;
 
 }
 

@@ -53,7 +53,7 @@ private:
 	class Bsdf: public kernel::Bsdf
 	{
 	public:
-		Bsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps caps, const TBsdfPtr& child);
+		Bsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps caps, TBsdfPtr&& child);
 		static BsdfCaps flip(BsdfCaps caps);
 		static TVector3D flip(const TVector3D& omega);
 	private:

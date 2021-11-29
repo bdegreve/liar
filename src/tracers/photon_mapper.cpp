@@ -473,7 +473,7 @@ const Spectral PhotonMapper::doShadeSurface(
 		result += context.shader()->emission(sample, context, omega);
 	}
 
-	const TBsdfPtr bsdf = context.bsdf();
+	const TBsdfPtr& bsdf = context.bsdf();
 	if (!bsdf)
 	{
 		return result;

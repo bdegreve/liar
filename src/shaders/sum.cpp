@@ -68,12 +68,12 @@ const Spectral Sum::doEmission(const Sample& sample, const IntersectionContext& 
 
 TBsdfPtr Sum::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
-	TBsdfPtr::Rebind<SumBsdf>::Type result(new SumBsdf(sample, context, caps()));
+	std::unique_ptr<SumBsdf> bsdf(new SumBsdf(sample, context, caps()));
 	for (TChildren::const_iterator i = children_.begin(); i != children_.end(); ++i)
 	{
-		result->components_.push_back((*i)->bsdf(sample, context));
+		bsdf->components_.push_back((*i)->bsdf(sample, context));
 	}
-	return result;
+	return bsdf;
 }
 
 

@@ -141,7 +141,7 @@ void Lafortune::addLobe(TTexturePtr x, TTexturePtr y, TTexturePtr z, TTexturePtr
 TBsdfPtr Lafortune::doBsdf(const Sample& sample, const IntersectionContext& context) const
 {
 	const Spectral diffuse = diffuse_->lookUp(sample, context, SpectralType::Reflectant);
-	TBsdfPtr::Rebind<LafortuneBsdf>::Type bsdf(new LafortuneBsdf(sample, context, caps(), diffuse));
+	std::unique_ptr<LafortuneBsdf> bsdf(new LafortuneBsdf(sample, context, caps(), diffuse));
 	for (const TLobePtr& lobe : lobes_)
 	{
 		bsdf->addLobe(

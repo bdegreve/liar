@@ -50,8 +50,10 @@ namespace experimental
 	public:
 		ResetOnCopy(): value_() {}
 		ResetOnCopy(const T& x): value_(x) {}
+		ResetOnCopy(T&& x) : value_(std::forward<T>(x)) {}
 		ResetOnCopy(const ResetOnCopy&): value_() {}
 		ResetOnCopy& operator=(const T& x) { value_ = x; return *this; }
+		ResetOnCopy& operator=(T&& x) { value_ = std::forward<T>(x); return *this; }
 		ResetOnCopy& operator=(const ResetOnCopy& /*other*/) { value_ = T(); return *this; }
 		T& operator*() { return value_; }
 		bool operator!() const { return !value_; }

@@ -37,8 +37,7 @@ Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps ca
 	omegaGeometricNormal_(prim::normalTransform(context.geometricNormal(), context.localToBsdf())),
 	sample_(sample),
 	context_(context),
-	caps_(caps),
-	refCount_(0)
+	caps_(caps)
 {
 }
 

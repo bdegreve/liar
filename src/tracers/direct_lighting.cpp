@@ -173,7 +173,7 @@ const Spectral DirectLighting::doShadeSurface(
 		const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
 		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, bool highQuality) const
 {
-	const TBsdfPtr bsdf = context.bsdf();
+	const TBsdfPtr& bsdf = context.bsdf();
 
 	Spectral result;
 	if (context.rayGeneration() == 0 || !context.object().asLight())
