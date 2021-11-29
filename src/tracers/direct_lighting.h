@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 
 #include "tracers_common.h"
 #include "../kernel/ray_tracer.h"
-#include <lass/num/random.h>
+#include <random>
 
 namespace liar
 {
@@ -50,7 +50,7 @@ public:
 
 protected:
 
-	typedef num::RandomMT19937 TRandomSecondary;
+	typedef std::mt19937 TRandomSecondary;
 
 	void doRequestSamples(const TSamplerPtr& sampler);
 	void doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads);

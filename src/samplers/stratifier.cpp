@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,7 +41,6 @@ PY_CLASS_MEMBER_RW(Stratifier, jittered, setJittered)
 // --- public --------------------------------------------------------------------------------------
 
 Stratifier::Stratifier():
-	jitterGenerator_(numberGenerator_),
 	isJittered_(true)
 {
 	init();
@@ -50,7 +49,6 @@ Stratifier::Stratifier():
 
 
 Stratifier::Stratifier(const TResolution2D& resolution):
-	jitterGenerator_(numberGenerator_),
 	isJittered_(true)
 {
 	init(resolution);
@@ -59,7 +57,6 @@ Stratifier::Stratifier(const TResolution2D& resolution):
 
 
 Stratifier::Stratifier(const TResolution2D& resolution, size_t numberOfSamplesPerPixel):
-	jitterGenerator_(numberGenerator_),
 	isJittered_(true)
 {
 	init(resolution, numberOfSamplesPerPixel);
@@ -157,7 +154,7 @@ void Stratifier::doSetSamplesPerPixel(size_t samplesPerPixel)
 
 void Stratifier::doSeed(TSeed randomSeed)
 {
-	numberGenerator_.seed(randomSeed);
+	rng_.seed(randomSeed);
 }
 
 
@@ -225,9 +222,9 @@ void Stratifier::doSampleSubSequence1D(const TResolution2D&, size_t subPixel, TS
 			TSubSequence1D::iterator start = p;
 			for (size_t dk = 0; dk < nSubPixels; ++dk)
 			{
-				*p++ = (static_cast<TScalar>(k * nSubPixels + dk) + jitterGenerator_()) * scale;
+				*p++ = (static_cast<TScalar>(k * nSubPixels + dk) + jitter(rng_)) * scale;
 			}
-			std::random_shuffle(start, p, numberGenerator_);
+			std::shuffle(start, p, rng_);
 		}
 	}
 
@@ -239,7 +236,7 @@ void Stratifier::doSampleSubSequence1D(const TResolution2D&, size_t subPixel, TS
 	{
 		first[k] = subSequence[k * nSubPixels + subPixel];
 	}
-	std::random_shuffle(first, last, numberGenerator_); // to avoid inter-sequence coherence
+	std::shuffle(first, last, rng_); // to avoid inter-sequence coherence
 }
 
 
@@ -277,12 +274,12 @@ void Stratifier::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixel), 
 				{
 					for (size_t dv = 0; dv < sqrtNSubPixels; ++dv)
 					{
-						p->x = (static_cast<TScalar>(u * sqrtNSubPixels + du) + jitterGenerator_()) * scale;
-						p->y = (static_cast<TScalar>(v * sqrtNSubPixels + dv) + jitterGenerator_()) * scale;
+						p->x = (static_cast<TScalar>(u * sqrtNSubPixels + du) + jitter(rng_)) * scale;
+						p->y = (static_cast<TScalar>(v * sqrtNSubPixels + dv) + jitter(rng_)) * scale;
 						++p;
 					}
 				}
-				std::random_shuffle(start, p, numberGenerator_);
+				std::shuffle(start, p, rng_);
 			}
 		}
 	}
@@ -295,7 +292,7 @@ void Stratifier::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixel), 
 	{
 		first[k] = subSequence[k * nSubPixels + subPixel];
 	}
-	std::random_shuffle(first, last, numberGenerator_); // to avoid inter-sequence coherence
+	std::shuffle(first, last, rng_); // to avoid inter-sequence coherence
 }
 
 
@@ -322,9 +319,9 @@ const TSamplerPtr Stratifier::doClone() const
 
 const TPyObjectPtr Stratifier::doGetState() const
 {
-	std::vector<TNumberGenerator::TValue> numGenState;
-	numberGenerator_.getState(std::back_inserter(numGenState));
-	return python::makeTuple(numGenState, resolution_,	strataPerPixel_,
+	std::ostringstream rngState;
+	LASS_ENFORCE_STREAM(rngState << rng_);
+	return python::makeTuple(rngState.str(), resolution_, strataPerPixel_,
 		timeStrata_, lensStrata_, isJittered_);
 }
 
@@ -332,15 +329,16 @@ const TPyObjectPtr Stratifier::doGetState() const
 
 void Stratifier::doSetState(const TPyObjectPtr& state)
 {
-	std::vector<TNumberGenerator::TValue> numGenState;
+	std::string rngState;
 	TResolution2D resolution;
 	size_t strataPerPixel;
 	TStrata2D lensStrata;
 	TStrata1D timeStrata;
 
-	python::decodeTuple(state, numGenState, resolution, strataPerPixel, lensStrata, timeStrata, isJittered_);
+	python::decodeTuple(state, rngState, resolution, strataPerPixel, lensStrata, timeStrata, isJittered_);
 
-	numberGenerator_.setState(numGenState.begin(), numGenState.end());
+	std::istringstream stream(rngState);
+	LASS_ENFORCE_STREAM(stream >> rng_);
 	setResolution(resolution);
 	setSamplesPerPixel(strataPerPixel);
 	lensStrata_.swap(lensStrata);
@@ -354,9 +352,9 @@ Stratifier::TSample1D Stratifier::sampleStratum(size_t subPixel, TStrata1D& stra
 	LASS_ASSERT(subPixel < strataPerPixel_);
 	if (subPixel == 0)
 	{
-		stde::random_shuffle_r(strata, numberGenerator_);	
+		std::shuffle(strata.begin(), strata.end(), rng_);	
 	}
-	return (strata[subPixel] + (isJittered_ ? jitterGenerator_() : 0.5f)) * stratum1DSize_;
+	return (strata[subPixel] + jitter(rng_)) * stratum1DSize_;
 }
 
 
@@ -366,11 +364,11 @@ const Stratifier::TSample2D Stratifier::sampleStratum(size_t subPixel, TStrata2D
 	LASS_ASSERT(subPixel < strataPerPixel_);
 	if (subPixel == 0)
 	{
-		stde::random_shuffle_r(strata, numberGenerator_);	
+		std::shuffle(strata.begin(), strata.end(), rng_);
 	}
 	TVector2D position = strata[subPixel].position();
-	position.x += isJittered_ ? jitterGenerator_() : .5f;
-	position.y += isJittered_ ? jitterGenerator_() : .5f;
+	position.x += jitter(rng_);
+	position.y += jitter(rng_);
 	position *= stratum2DSize_;
 	return TSample2D(position);
 }

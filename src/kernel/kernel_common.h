@@ -169,14 +169,14 @@ inline void generateOrthonormal(const TVector3D& k, TVector3D& i, TVector3D& j)
 template <typename RandomAccessIterator, typename Generator>
 void stratifier1D(RandomAccessIterator first, RandomAccessIterator last, Generator& generator)
 {
-	num::DistributionUniform<TScalar, Generator> uniform(generator);
+	std::uniform_real_distribution<TScalar> uniform;
 	const std::ptrdiff_t n = last - first;
 	const TScalar scale = num::inv(static_cast<TScalar>(n));
 	for (std::ptrdiff_t k = 0; k < n; ++k)
 	{
-		first[k] = scale * (static_cast<TScalar>(k) + uniform());
+		first[k] = scale * (static_cast<TScalar>(k) + uniform(generator));
 	};
-	std::random_shuffle(first, last, generator);
+	std::shuffle(first, last, generator);
 }
 
 template <typename RandomAccessRange, typename Generator>
@@ -188,16 +188,16 @@ void stratifier1D(RandomAccessRange& range, Generator& generator)
 template <typename RandomAccessIterator, typename Generator>
 void latinHypercube2D(RandomAccessIterator first, RandomAccessIterator last, Generator& generator)
 {
-	num::DistributionUniform<TScalar, Generator> uniform(generator);
+	std::uniform_real_distribution<TScalar> uniform;
 	const std::ptrdiff_t n = last - first;
 	const TPoint2D::TValue scale = num::inv(static_cast<TPoint2D::TValue>(n));
 	for (std::ptrdiff_t k = 0; k < n; ++k)
 	{
-		first[k].x = scale * (static_cast<TScalar>(k) + uniform());
-		first[k].y = scale * (static_cast<TScalar>(k) + uniform());
+		first[k].x = scale * (static_cast<TScalar>(k) + uniform(generator));
+		first[k].y = scale * (static_cast<TScalar>(k) + uniform(generator));
 	};
-	std::random_shuffle(stde::member_iterator(first, &TPoint2D::x), stde::member_iterator(last, &TPoint2D::x), generator);
-	std::random_shuffle(stde::member_iterator(first, &TPoint2D::y), stde::member_iterator(last, &TPoint2D::y), generator);
+	std::shuffle(stde::member_iterator(first, &TPoint2D::x), stde::member_iterator(last, &TPoint2D::x), generator);
+	std::shuffle(stde::member_iterator(first, &TPoint2D::y), stde::member_iterator(last, &TPoint2D::y), generator);
 }
 
 template <typename RandomAccessRange, typename Generator>

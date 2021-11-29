@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "samplers_common.h"
 #include "halton.h"
 #include "../kernel/sample.h"
+#include <random>
 
 namespace liar
 {
@@ -94,7 +95,7 @@ void Halton::doSetState(const TPyObjectPtr& state)
 
 bool Halton::initialize()
 {
-	num::RandomMT19937 rng;
+	std::mt19937 rng;
 
 	const size_t n = primes_.size();
 	scramblers_.resize(n);
@@ -107,7 +108,7 @@ bool Halton::initialize()
 		{
 			scrambler[k] = k;
 		}
-		std::random_shuffle(scrambler.begin(), scrambler.end(), rng);
+		std::shuffle(scrambler.begin(), scrambler.end(), rng);
 	}
 
 	return true;

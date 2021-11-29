@@ -39,6 +39,7 @@
 #include <lass/num/random.h>
 #include <lass/util/dictionary.h>
 #include <lass/num/inverse_transform_sampling.h>
+#include <random>
 
 namespace liar
 {
@@ -217,9 +218,9 @@ private:
 	typedef util::Dictionary<std::string, MapType> TMapTypeDictionary;
 
 	typedef std::vector<TScalar> TLightCdf;
-	typedef num::RandomMT19937 TRandomPrimary;
-	typedef num::DistributionUniform<TScalar, TRandomPrimary> TUniformPrimary;
-	typedef num::DistributionUniform<TScalar, TRandomSecondary> TUniformSecondary;
+	typedef std::mt19937 TRandomPrimary;
+	typedef num::RandomXorShift128Plus TRandomPhoton;
+	typedef std::uniform_real_distribution<TScalar> TUniformDistribution;
 
 	enum
 	{
@@ -245,8 +246,8 @@ private:
 	bool hasSecondaryGather() const { return hasFinalGather() && (numSecondaryGatherRays_ > 0); }
 
 	size_t fillPhotonMaps(const TSamplerProgressivePtr& sampler, const TimePeriod& period);
-	void emitPhoton(const LightContext& light, TScalar lightPdf, const Sample& sample, TRandomSecondary::TValue secondarySeed);
-	void tracePhoton(const Sample& sample, const Spectral& power, const BoundedRay& ray, size_t geneneration, TUniformSecondary& uniform, bool isCaustic = false);
+	void emitPhoton(const LightContext& light, TScalar lightPdf, const Sample& sample, TRandomSecondary::result_type secondarySeed);
+	void tracePhoton(const Sample& sample, const Spectral& power, const BoundedRay& ray, size_t geneneration, TRandomPhoton& rng, bool isCaustic = false);
 	template <typename PhotonBuffer, typename PhotonMap> void buildPhotonMap(MapType mapType, PhotonBuffer& buffer, PhotonMap& map, TScalar powerScale);
 	void buildIrradianceMap(size_t numberOfThreads);
 	void buildVolumetricPhotonMap(const TPreliminaryVolumetricPhotonMap& preliminaryVolumetricMap, size_t numberOfThreads);

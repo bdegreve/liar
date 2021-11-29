@@ -572,8 +572,7 @@ namespace experimental
 
 size_t PhotonMapper::fillPhotonMaps(const TSamplerProgressivePtr& sampler, const TimePeriod& period)
 {
-	TRandomPrimary random;
-	TUniformPrimary uniform(random);
+	TRandomPrimary rng;
 	TPhotonBuffer& globalBuffer = shared_->globalBuffer_;
 
 	util::ProgressIndicator progress("filling photon map with " + util::stringCast<std::string>(globalMapSize_) + " photons");
@@ -611,7 +610,7 @@ size_t PhotonMapper::fillPhotonMaps(const TSamplerProgressivePtr& sampler, const
 		const LightContext* const light = lights().sample(*sample.subSequence1D(idLightSelector_), pdf);
 		if (light && pdf > 0)
 		{
-			const TRandomSecondary::TValue secondarySeed = random();
+			const TRandomSecondary::result_type secondarySeed = rng();
 			emitPhoton(*light, pdf, sample, secondarySeed);
 		}
 
@@ -628,10 +627,9 @@ size_t PhotonMapper::fillPhotonMaps(const TSamplerProgressivePtr& sampler, const
 
 void PhotonMapper::emitPhoton(
 		const LightContext& light, TScalar lightPdf, const Sample& sample,
-		TRandomSecondary::TValue secondarySeed)
+		TRandomSecondary::result_type secondarySeed)
 {
-	TRandomSecondary random(secondarySeed);
-	TUniformSecondary uniform(random);
+	TRandomPhoton rng(secondarySeed);
 
 	// let's cheat and use camera samples ;-)
 	// (only works because we're using a progressive sampler here)
@@ -644,7 +642,7 @@ void PhotonMapper::emitPhoton(
 	if (pdf > 0 && spectrum)
 	{
 		spectrum /= static_cast<Spectral::TValue>(lightPdf * pdf);
-		tracePhoton(sample, spectrum, ray, 0, uniform);
+		tracePhoton(sample, spectrum, ray, 0, rng);
 	}
 }
 
@@ -652,23 +650,24 @@ void PhotonMapper::emitPhoton(
 
 void PhotonMapper::tracePhoton(
 		const Sample& sample, const Spectral& power, const BoundedRay& ray,
-		size_t generation, TUniformSecondary& uniform, bool isCaustic)
+		size_t generation, TRandomPhoton& rng, bool isCaustic)
 {
 	if (!power)
 	{
 		return;
 	}
 
+	std::uniform_real_distribution<TScalar> uniform;
 	Intersection intersection;
 	scene()->intersect(sample, ray, intersection);
 
 	const TPoint3D hitPoint = ray.point(intersection.t());
 	TScalar tScatter, pdf;
-	const Spectral transmittance = mediumStack().sampleScatterOutOrTransmittance(sample, uniform(), bound(ray, ray.nearLimit(), intersection.t()), tScatter, pdf);
+	const Spectral transmittance = mediumStack().sampleScatterOutOrTransmittance(sample, uniform(rng), bound(ray, ray.nearLimit(), intersection.t()), tScatter, pdf);
 	Spectral transmittedPower = power * transmittance / static_cast<Spectral::TValue>(pdf);
 	// RR to keep power constant (if possible)
 	const TScalar transmittanceProbability = std::min<TScalar>(transmittedPower.absAverage() / power.absAverage(), TNumTraits::one);
-	if (!russianRoulette(transmittedPower, transmittanceProbability, uniform()))
+	if (!russianRoulette(transmittedPower, transmittanceProbability, uniform(rng)))
 	{
 		return;
 	}
@@ -682,7 +681,7 @@ void PhotonMapper::tracePhoton(
 		if (mayStore)
 		{
 			VolumetricPhoton photon(Photon(scatterPoint, ray.direction(), transmittedPower, sample), isDirect);
-			if (russianRoulette(photon.power, storageProbability_[mtVolume], uniform()))
+			if (russianRoulette(photon.power, storageProbability_[mtVolume], uniform(rng)))
 			{
 				shared_->volumetricBuffer_.push_back(photon);
 			}
@@ -695,19 +694,19 @@ void PhotonMapper::tracePhoton(
 		}
 		TVector3D dirOut;
 		TScalar pdfOut;
-		const Spectral reflectance = mediumStack().samplePhase(sample, TPoint2D(uniform(), uniform()), scatterPoint, ray.direction(), dirOut, pdfOut);
+		const Spectral reflectance = mediumStack().samplePhase(sample, TPoint2D(uniform(rng), uniform(rng)), scatterPoint, ray.direction(), dirOut, pdfOut);
 		if (pdfOut <= 0 || !reflectance)
 		{
 			return;
 		}
 		Spectral scatteredPower = transmittedPower * reflectance / static_cast<Spectral::TValue>(pdfOut);
 		const TScalar scatteredProbability = std::min<TScalar>(scatteredPower.absAverage() / transmittedPower.absAverage(), TNumTraits::one);
-		if (!russianRoulette(scatteredPower, scatteredProbability, uniform()))
+		if (!russianRoulette(scatteredPower, scatteredProbability, uniform(rng)))
 		{
 			return;
 		}
 		const BoundedRay scatteredRay(scatterPoint, ray.direction());
-		return tracePhoton(sample, scatteredPower, scatteredRay, generation + 1, uniform, false);
+		return tracePhoton(sample, scatteredPower, scatteredRay, generation + 1, rng, false);
 	}
 
 	if (!intersection)
@@ -726,7 +725,7 @@ void PhotonMapper::tracePhoton(
 		}
 		MediumChanger mediumChanger(mediumStack(), context.interior(), context.solidEvent());
 		const BoundedRay newRay = bound(ray, intersection.t() + liar::tolerance, ray.farLimit());
-		return tracePhoton(sample, transmittedPower, newRay, generation + 1, uniform, isCaustic);
+		return tracePhoton(sample, transmittedPower, newRay, generation + 1, rng, isCaustic);
 	}
 	shader->shadeContext(sample, context);
 
@@ -735,16 +734,16 @@ void PhotonMapper::tracePhoton(
 		Photon photon(hitPoint, -ray.direction(), transmittedPower, sample);
 		if (isCaustic)
 		{
-			if (russianRoulette(photon.power, storageProbability_[mtCaustics], uniform()))
+			if (russianRoulette(photon.power, storageProbability_[mtCaustics], uniform(rng)))
 			{
 				shared_->causticsBuffer_.push_back(photon);
 			}
 		}
 		const bool mayStorePhoton = (((generation > 0) || !isRayTracingDirect_) && !isCaustic) || hasFinalGather();
-		if (mayStorePhoton && russianRoulette(photon.power, storageProbability_[mtGlobal], uniform()))
+		if (mayStorePhoton && russianRoulette(photon.power, storageProbability_[mtGlobal], uniform(rng)))
 		{
 			shared_->globalBuffer_.push_back(photon);
-			if (ratioPrecomputedIrradiance_ > 0 && uniform() <= ratioPrecomputedIrradiance_)
+			if (ratioPrecomputedIrradiance_ > 0 && uniform(rng) <= ratioPrecomputedIrradiance_)
 			{
 				const TVector3D worldNormal = context.bsdfToWorld(TVector3D(0, 0, 1));
 				shared_->irradianceBuffer_.push_back(Irradiance(hitPoint, worldNormal));
@@ -768,8 +767,8 @@ void PhotonMapper::tracePhoton(
 	const TVector3D omegaIn = context.worldToBsdf(-ray.direction());
 	LASS_ASSERT(omegaIn.z > 0);
 
-	const TPoint2D sampleBsdf(uniform(), uniform());
-	const TScalar sampleComponent = uniform();
+	const TPoint2D sampleBsdf(uniform(rng), uniform(rng));
+	const TScalar sampleComponent = uniform(rng);
 	const SampleBsdfOut out = bsdf->sample(omegaIn, sampleBsdf, sampleComponent, BsdfCaps::all);
 	if (!out)
 	{
@@ -781,7 +780,7 @@ void PhotonMapper::tracePhoton(
 	const TScalar attenuation = newPower.average() / transmittedPower.average();
 	//LASS_ASSERT(attenuation < 1.1);
 	const TScalar scatterProbability = std::min(TNumTraits::one, attenuation);
-	if (!russianRoulette(newPower, scatterProbability, uniform()))
+	if (!russianRoulette(newPower, scatterProbability, uniform(rng)))
 	{
 		return;
 	}
@@ -790,7 +789,7 @@ void PhotonMapper::tracePhoton(
 	const bool newIsCaustic = isSpecular && (isCaustic || generation == 0);
 	MediumChanger mediumChanger(mediumStack(), context.interior(),
 		out.omegaOut.z < 0 ? context.solidEvent() : seNoEvent);
-	return tracePhoton(sample, newPower, newRay, generation + 1, uniform, newIsCaustic);
+	return tracePhoton(sample, newPower, newRay, generation + 1, rng, newIsCaustic);
 }
 
 

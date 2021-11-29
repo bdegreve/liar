@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,8 +30,7 @@
 
 #include "samplers_common.h"
 #include "../kernel/sampler_tiled.h"
-#include <lass/num/random.h>
-#include <lass/num/distribution.h>
+#include <random>
 
 namespace liar
 {
@@ -60,8 +59,8 @@ private:
 	typedef std::vector<TSubSequence1D> TSubSequence1DList;
 	typedef std::vector<TSubSequence2D> TSubSequence2DList;
 
-	typedef num::RandomMT19937 TNumberGenerator;
-	typedef num::DistributionUniform<TScalar, TNumberGenerator, num::rtRightOpen> TJitterGenerator;
+	typedef std::mt19937 TNumberGenerator;
+	typedef std::uniform_real_distribution<TScalar> TJitterGenerator;
 
 	void init(const TResolution2D& resolution = TResolution2D(320, 240), size_t iNumberOfSamples = 1);
 
@@ -87,9 +86,10 @@ private:
 
 	TSample1D sampleStratum(size_t subPixel, TStrata1D& strata);
 	const TSample2D sampleStratum(size_t subPixel, TStrata2D& strata);
+	TScalar jitter(TNumberGenerator& rng) { return isJittered_ ? jitter_(rng) : 0.5f; }
 
-	TNumberGenerator numberGenerator_;
-	TJitterGenerator jitterGenerator_;
+	TNumberGenerator rng_;
+	TJitterGenerator jitter_;
 
 	TResolution2D resolution_;
 	TVector2D reciprocalResolution_;

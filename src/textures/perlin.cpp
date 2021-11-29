@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -131,7 +131,7 @@ void Perlin::doSetState(const TPyObjectPtr& state)
 void Perlin::init(TSeed seed)
 {
 	seed_ = seed;
-	num::RandomParkMiller rng(seed_);
+	num::RandomXorShift128Plus rng(seed_);
 	for (size_t k = 0; k < dimension_; ++k)
 	{
 		size_t* table = hashTables_[k];
@@ -139,7 +139,7 @@ void Perlin::init(TSeed seed)
 		{
 			table[i] = i;
 		}
-		std::random_shuffle(table, table + hashSize_, rng);
+		std::shuffle(table, table + hashSize_, rng);
 		std::copy(table, table + hashPadding_, table + hashSize_); // fill padding
 	}
 }

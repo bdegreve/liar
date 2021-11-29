@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,7 +42,6 @@ PY_CLASS_MEMBER_RW(LatinHypercube, jittered, setJittered)
 // --- public --------------------------------------------------------------------------------------
 
 LatinHypercube::LatinHypercube():
-	jitterGenerator_(numberGenerator_),
 	isJittered_(true)
 {
 	init();
@@ -51,7 +50,6 @@ LatinHypercube::LatinHypercube():
 
 
 LatinHypercube::LatinHypercube(const TResolution2D& resolution):
-	jitterGenerator_(numberGenerator_),
 	isJittered_(true)
 {
 	init(resolution);
@@ -60,7 +58,6 @@ LatinHypercube::LatinHypercube(const TResolution2D& resolution):
 
 
 LatinHypercube::LatinHypercube(const TResolution2D& resolution, size_t numberOfSamplesPerPixel):
-	jitterGenerator_(numberGenerator_),
 	isJittered_(true)
 {
 	init(resolution, numberOfSamplesPerPixel);
@@ -148,7 +145,7 @@ void LatinHypercube::doSetSamplesPerPixel(size_t samplesPerPixel)
 
 void LatinHypercube::doSeed(TSeed randomSeed)
 {
-	numberGenerator_.seed(randomSeed);
+	rng_.seed(randomSeed);
 }
 
 
@@ -216,9 +213,9 @@ void LatinHypercube::doSampleSubSequence1D(const TResolution2D&, size_t subPixel
 			TSubSequence1D::iterator start = p;
 			for (size_t dk = 0; dk < nSubPixels; ++dk)
 			{
-				*p++ = (static_cast<TScalar>(k * nSubPixels + dk) + jitterGenerator_()) * scale;
+				*p++ = (static_cast<TScalar>(k * nSubPixels + dk) + jitter(rng_)) * scale;
 			}
-			std::random_shuffle(start, p, numberGenerator_);
+			std::shuffle(start, p, rng_);
 		}
 	}
 
@@ -230,7 +227,7 @@ void LatinHypercube::doSampleSubSequence1D(const TResolution2D&, size_t subPixel
 	{
 		first[k] = subSequence[k * nSubPixels + subPixel];
 	}
-	std::random_shuffle(first, last, numberGenerator_); // to avoid inter-sequence coherence
+	std::shuffle(first, last, rng_); // to avoid inter-sequence coherence
 }
 
 
@@ -261,14 +258,14 @@ void LatinHypercube::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixe
 			TSubSequence2D::iterator start = p;
 			for (size_t dk = 0; dk < nSubPixels; ++dk)
 			{
-				p->x = (static_cast<TScalar>(k * nSubPixels + dk) + jitterGenerator_()) * scale;
-				p->y = (static_cast<TScalar>(k * nSubPixels + dk) + jitterGenerator_()) * scale;
+				p->x = (static_cast<TScalar>(k * nSubPixels + dk) + jitter(rng_)) * scale;
+				p->y = (static_cast<TScalar>(k * nSubPixels + dk) + jitter(rng_)) * scale;
 				++p;
 			}
 			
 			// shuffle samples within stratum
-			std::random_shuffle(stde::member_iterator(start, &TSample2D::x), stde::member_iterator(p, &TSample2D::x), numberGenerator_);
-			std::random_shuffle(stde::member_iterator(start, &TSample2D::y), stde::member_iterator(p, &TSample2D::y), numberGenerator_);
+			std::shuffle(stde::member_iterator(start, &TSample2D::x), stde::member_iterator(p, &TSample2D::x), rng_);
+			std::shuffle(stde::member_iterator(start, &TSample2D::y), stde::member_iterator(p, &TSample2D::y), rng_);
 		}
 	}
 
@@ -284,8 +281,8 @@ void LatinHypercube::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixe
 	// and shuffle again. for a single sequence, it's sufficient to only shuffle the ys, 
 	// but to avoid inter-sequence coherence, we shuffle the xs too.
 	//
-	std::random_shuffle(stde::member_iterator(first, &TSample2D::x), stde::member_iterator(last, &TSample2D::x), numberGenerator_);
-	std::random_shuffle(stde::member_iterator(first, &TSample2D::y), stde::member_iterator(last, &TSample2D::y), numberGenerator_);
+	std::shuffle(stde::member_iterator(first, &TSample2D::x), stde::member_iterator(last, &TSample2D::x), rng_);
+	std::shuffle(stde::member_iterator(first, &TSample2D::y), stde::member_iterator(last, &TSample2D::y), rng_);
 }
 
 
@@ -299,22 +296,23 @@ const TSamplerPtr LatinHypercube::doClone() const
 
 const TPyObjectPtr LatinHypercube::doGetState() const
 {
-	std::vector<TNumberGenerator::TValue> numGenState;
-	numberGenerator_.getState(std::back_inserter(numGenState));
-	return python::makeTuple(numGenState, resolution_, samplesPerPixel_, isJittered_);
+	std::ostringstream rngState;
+	LASS_ENFORCE_STREAM(rngState << rng_);
+	return python::makeTuple(rngState.str(), resolution_, samplesPerPixel_, isJittered_);
 }
 
 
 
 void LatinHypercube::doSetState(const TPyObjectPtr& state)
 {
-	std::vector<TNumberGenerator::TValue> numGenState;
+	std::string rngState;
 	TResolution2D resolution;
 	size_t strataPerPixel;
 
-	python::decodeTuple(state, numGenState, resolution, strataPerPixel, isJittered_);
+	python::decodeTuple(state, rngState, resolution, strataPerPixel, isJittered_);
 
-	numberGenerator_.setState(numGenState.begin(), numGenState.end());
+	std::istringstream stream(rngState);
+	LASS_ENFORCE_STREAM(stream >> rng_);
 	setResolution(resolution);
 	setSamplesPerPixel(strataPerPixel);
 }
@@ -326,9 +324,9 @@ LatinHypercube::TSample1D LatinHypercube::sampleStratum(size_t subPixel, TStrata
 	LASS_ASSERT(subPixel < samplesPerPixel_);
 	if (subPixel == 0)
 	{
-		stde::random_shuffle_r(strata, numberGenerator_);	
+		std::shuffle(strata.begin(), strata.end(), rng_);
 	}
-	return (strata[subPixel] + (isJittered_ ? jitterGenerator_() : 0.5f)) * stratumSize_;
+	return (strata[subPixel] + jitter(rng_)) * stratumSize_;
 }
 
 
