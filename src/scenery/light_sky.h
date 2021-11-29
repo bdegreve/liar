@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -91,8 +91,8 @@ private:
 	void doSetLightState(const TPyObjectPtr& state);
 
 	void init(const TTexturePtr& radiance);
-	void buildPdf(TMap& pdf, TScalar& power, util::ProgressIndicator& progress) const;
-	void buildCdf(const TMap& iPdf, TMap& oMarginalCdfU, TMap& oConditionalCdfV, util::ProgressIndicator& progress) const;
+	void buildPdf(TMap& pdf, TScalar& power) const;
+	void buildCdf(const TMap& pdf, TMap& marginalCdfU, TMap& conditionalCdfV) const;
 	void sampleMap(const TPoint2D& sample, TScalar&, TScalar& j, TScalar& pdf) const;
 	const TVector3D direction(TScalar i, TScalar j) const;
 	const Spectral lookUpRadiance(const Sample& sample, TScalar i, TScalar j) const;

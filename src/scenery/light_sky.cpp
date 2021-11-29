@@ -27,6 +27,8 @@
 #include "../kernel/rgb_space.h"
 
 #include <lass/num/distribution_transformations.h>
+#include <lass/util/thread_pool.h>
+#include <mutex>
 
 #if LASS_COMPILER_TYPE == LASS_COMPILER_TYPE_MSVC
 #	pragma warning(disable: 4996) // std::copy may be unsafe
@@ -138,10 +140,9 @@ void LightSky::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod&)
 	const TScalar radius = sceneBounds_.radius();
 	fixedDistance_ = radius > 0 ? 1e3 * radius : 1e3;
 
-	util::ProgressIndicator progress("Preprocessing environment map");
 	TMap pdf;
-	buildPdf(pdf, power_, progress);
-	buildCdf(pdf, marginalCdfU_, conditionalCdfV_, progress);
+	buildPdf(pdf, power_);
+	buildCdf(pdf, marginalCdfU_, conditionalCdfV_);
 }
 
 
@@ -390,27 +391,53 @@ void LightSky::init(const TTexturePtr& radiance)
 
 
 
-void LightSky::buildPdf(TMap& pdf, TScalar& power, util::ProgressIndicator& progress) const
+void LightSky::buildPdf(TMap& pdf, TScalar& power) const
 {
+	typedef std::pair<size_t, size_t> TRange;
+
 	Sample dummy;
 
 	const size_t n = resolution_.x * resolution_.y;
 	TMap tempPdf(n);
 	TScalar averageIntensity = 0;
-	for (size_t i = 0; i < resolution_.x; ++i)
+	size_t progress = 0;
+	util::ProgressIndicator progressBar("Preprocessing environment map");
+	std::mutex mutex;
+
+	auto worker = [this, &tempPdf, &averageIntensity, &progress, &progressBar, &mutex, &dummy](const TRange& range)
 	{
-		const TScalar fi = static_cast<TScalar>(i) + .5f;
-		progress(.8 * static_cast<double>(i) / static_cast<double>(resolution_.x));
-		for (size_t j = 0; j < resolution_.y; ++j)
+		TScalar totalIntensity = 0;
+		for (size_t i = range.first; i < range.second; ++i)
 		{
-			const TScalar fj = static_cast<TScalar>(j) + .5f;
-			const TValue radiance = lookUpLuminance(dummy, fi, fj);;
-			const TScalar projectedArea = portal_ ? portal_->area(direction(fi, fj)) : (TNumTraits::pi * num::sqr(fixedDistance_));
-			const TValue intensity = static_cast<TValue>(radiance * projectedArea);
-			tempPdf[i * resolution_.y + j] = intensity;
-			averageIntensity += intensity;
+			const TScalar fi = static_cast<TScalar>(i) + .5f;
+			for (size_t j = 0; j < resolution_.y; ++j)
+			{
+				const TScalar fj = static_cast<TScalar>(j) + .5f;
+				const TValue radiance = lookUpLuminance(dummy, fi, fj);;
+				const TScalar projectedArea = portal_ ? portal_->area(direction(fi, fj)) : (TNumTraits::pi * num::sqr(fixedDistance_));
+				const TValue intensity = static_cast<TValue>(radiance * projectedArea);
+				tempPdf[i * resolution_.y + j] = intensity;
+				totalIntensity += intensity;
+			}
+		}
+		
+		{
+			std::lock_guard lock(mutex);
+			progress += range.second - range.first;
+			progressBar(static_cast<double>(progress) / static_cast<double>(resolution_.x));
+			averageIntensity += totalIntensity;
+		}
+	};
+
+	{
+		util::ThreadPool<TRange, decltype (worker), util::Spinning, util::SelfParticipating> threadPool(util::numberOfAvailableProcessors() / 2, 0, worker);
+		const size_t chunkSize = std::max<size_t>(resolution_.x / 100, 1);
+		for (size_t i = 0; i < resolution_.x; i += chunkSize)
+		{
+			threadPool.addTask(std::make_pair(i, std::min(i + chunkSize, resolution_.x)));
 		}
 	}
+
 	averageIntensity /= static_cast<TScalar>(n);
 
 	pdf.swap(tempPdf);
@@ -419,7 +446,7 @@ void LightSky::buildPdf(TMap& pdf, TScalar& power, util::ProgressIndicator& prog
 
 
 
-void LightSky::buildCdf(const TMap& pdf, TMap& oMarginalCdfU, TMap& oConditionalCdfV, util::ProgressIndicator& progress) const
+void LightSky::buildCdf(const TMap& pdf, TMap& oMarginalCdfU, TMap& oConditionalCdfV) const
 {
 	TMap marginalPdfU(resolution_.x);
 	TMap marginalCdfU(resolution_.x);
@@ -427,7 +454,6 @@ void LightSky::buildCdf(const TMap& pdf, TMap& oMarginalCdfU, TMap& oConditional
 	
 	for (size_t i = 0; i < resolution_.x; ++i)
 	{
-		progress(.8 + .2 * static_cast<double>(i) / static_cast<double>(resolution_.x));
 		const size_t offset = i * resolution_.y;
 		TMap::const_iterator pdfLine = pdf.begin() + offset;
 		TMap::iterator condCdfV = conditionalCdfV.begin() + offset;
