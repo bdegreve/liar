@@ -272,6 +272,18 @@ LinearInterpolator::Bsdf::Bsdf(
 }
 
 
+namespace
+{
+
+TVector3D bsdfToBsdf(const IntersectionContext& from, const IntersectionContext& to, const TVector3D& omega)
+{
+	return from.bsdfToWorld().matrix() == to.bsdfToWorld().matrix()
+		? omega
+		: to.worldToBsdf(from.bsdfToWorld(omega));
+}
+
+}
+
 
 BsdfOut LinearInterpolator::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps allowedCaps) const
 {
@@ -289,16 +301,16 @@ BsdfOut LinearInterpolator::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVe
 	BsdfOut out;
 	if (pa > 0)
 	{
-		const TVector3D wIn = a_.worldToBsdf(context().bsdfToWorld(omegaIn));
-		const TVector3D wOut = a_.worldToBsdf(context().bsdfToWorld(omegaOut));
+		const TVector3D wIn = bsdfToBsdf(context(), a_, omegaIn);
+		const TVector3D wOut = bsdfToBsdf(context(), a_, omegaOut);
 		out = a_.bsdf()->evaluate(wIn, wOut, allowedCaps);
 		out.value *= (1 - t_) * static_cast<TValue>(num::abs(wOut.z / omegaOut.z));
 		out.pdf *= pa / ptot;
 	}
 	if (pb > 0)
 	{
-		const TVector3D wIn = b_.worldToBsdf(context().bsdfToWorld(omegaIn));
-		const TVector3D wOut = b_.worldToBsdf(context().bsdfToWorld(omegaOut));
+		const TVector3D wIn = bsdfToBsdf(context(), b_, omegaIn);
+		const TVector3D wOut = bsdfToBsdf(context(), b_, omegaOut);
 		const BsdfOut outB = b_.bsdf()->evaluate(wIn, wOut, allowedCaps);
 		out.value.fma(outB.value, t_ * static_cast<TValue>(num::abs(wOut.z / omegaOut.z)));
 		out.pdf += outB.pdf * pb / ptot;
@@ -339,14 +351,14 @@ SampleBsdfOut LinearInterpolator::Bsdf::doSample(const TVector3D& omegaIn, const
 	componentSample /= pa;
 	LIAR_ASSERT(componentSample < 1, componentSample);
 
-	const TVector3D wInA = a->worldToBsdf(context().bsdfToWorld(omegaIn));
+	const TVector3D wInA = bsdfToBsdf(context(), *a, omegaIn);
 	SampleBsdfOut out = a->bsdf()->sample(wInA, sample, componentSample, allowedCaps);
 	if (out.pdf == 0)
 	{
 		return SampleBsdfOut();
 	}
 	const TVector3D wOutA = out.omegaOut;
-	out.omegaOut = context().worldToBsdf(a->bsdfToWorld(wOutA));
+	out.omegaOut = bsdfToBsdf(*a, context(), wOutA);
 	if (out.omegaOut.z == 0)
 	{
 		return SampleBsdfOut();
@@ -354,8 +366,8 @@ SampleBsdfOut LinearInterpolator::Bsdf::doSample(const TVector3D& omegaIn, const
 	out.value *= ta * static_cast<TValue>(num::abs(wOutA.z / out.omegaOut.z));
 	out.pdf *= pa;
 
-	const TVector3D wInB = b->worldToBsdf(context().bsdfToWorld(omegaIn));
-	const TVector3D wOutB = b->worldToBsdf(context().bsdfToWorld(out.omegaOut));
+	const TVector3D wInB = bsdfToBsdf(context(), *b, omegaIn);
+	const TVector3D wOutB = bsdfToBsdf(context(), *b, out.omegaOut);
 	BsdfOut outB = b->bsdf()->evaluate(wInB, wOutB, out.usedCaps);
 	if (outB.pdf > 0)
 	{
