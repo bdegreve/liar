@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -125,7 +125,7 @@ private:
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
-	void makeMipMaps(MipMapping mode) const;
+	void makeMipMaps() const;
 	MipMapLevel makeMipMap(const MipMapLevel& parent, prim::XY compressionAxis, size_t newSize) const;
 	MipMapLevel makeMipMapEven(const MipMapLevel& parent, prim::XY compressionAxis, size_t newSize) const;
 	MipMapLevel makeMipMapOdd(const MipMapLevel& parent, prim::XY compressionAxis, size_t newSize) const;
@@ -146,7 +146,7 @@ private:
 	TResolution2D resolution_;
 	AntiAliasing antiAliasing_;
 	MipMapping mipMapping_;
-	mutable MipMapping currentMipMapping_;
+	mutable std::atomic<MipMapping> currentMipMapping_;
 	mutable TMipMaps mipMaps_;
 	mutable size_t numLevelsU_;
 	mutable size_t numLevelsV_;

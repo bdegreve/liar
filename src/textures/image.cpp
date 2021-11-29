@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -214,12 +214,9 @@ bool Image::doIsChromatic() const
 
 const Image::TPixel Image::lookUp(const IntersectionContext& context) const
 {
-	LASS_LOCK(mutex_)
+	if (currentMipMapping_.load(std::memory_order_acquire) != mipMapping_)
 	{
-		if (mipMapping_ != currentMipMapping_)
-		{
-			makeMipMaps(mipMapping_);
-		}
+		makeMipMaps();
 	}
 
 	const TPoint2D& uv = context.uv();
@@ -307,68 +304,70 @@ void Image::doSetState(const TPyObjectPtr& state)
  *
  *  S. Guthe, P. Heckbert (2003): nVIDIA tech report: Non-Power-of-Two Mipmap Creation.
  *  http://developer.nvidia.com/object/np2_mipmapping.html
- *
- *  @warning not thread safe!  make sure you call it locked!
  */
-void Image::makeMipMaps(MipMapping mode) const
+void Image::makeMipMaps() const
 {
-	if (mipMapping_ == currentMipMapping_)
+	LASS_LOCK(mutex_)
 	{
-		return;
-	}
-
-	TMipMaps mipMaps(1, MipMapLevel(image_, resolution_));
-	size_t numLevelsU = 0, numLevelsV = 0;
-
-	switch (mode)
-	{
-	case mmNone:
-		numLevelsU = 1;
-		numLevelsV = 1;
-		break;
-
-	case mmIsotropic:
-		numLevelsU = static_cast<size_t>(num::floor(num::log2(
-			static_cast<TScalar>(std::max(resolution_.x, resolution_.y))))) + 1;
-		numLevelsV = 1;
-		for (size_t i = 1; i < numLevelsU; ++i)
+		if (currentMipMapping_.load(std::memory_order_relaxed) == mipMapping_)
 		{
-			const TScalar scale = num::inv(static_cast<TScalar>(1 << i));
-			const size_t width = static_cast<size_t>(num::floor(scale * static_cast<TScalar>(resolution_.x)));
-			const size_t height = static_cast<size_t>(num::floor(scale * static_cast<TScalar>(resolution_.y)));
-			MipMapLevel temp = makeMipMap(mipMaps.back(), 'x', width);
-			mipMaps.push_back(makeMipMap(temp, 'y', height));
+			return;
 		}
-		break;
 
-	case mmAnisotropic:
-		numLevelsU = static_cast<size_t>(num::floor(num::log2(static_cast<TScalar>(resolution_.x))) + 1);
-		numLevelsV = static_cast<size_t>(num::floor(num::log2(static_cast<TScalar>(resolution_.y))) + 1);
-		for (size_t j = 0; j < numLevelsV; ++j)
+		TMipMaps mipMaps(1, MipMapLevel(image_, resolution_));
+		size_t numLevelsU = 0, numLevelsV = 0;
+
+		switch (mipMapping_)
 		{
-			if (j > 0)
-			{
-				const size_t height = static_cast<size_t>(
-					num::floor(static_cast<TScalar>(resolution_.y) / (1 << j)));
-				mipMaps.push_back(makeMipMap(mipMaps[(j - 1) * numLevelsU], 'y', height));
-			}
+		case mmNone:
+			numLevelsU = 1;
+			numLevelsV = 1;
+			break;
+
+		case mmIsotropic:
+			numLevelsU = static_cast<size_t>(num::floor(num::log2(
+				static_cast<TScalar>(std::max(resolution_.x, resolution_.y))))) + 1;
+			numLevelsV = 1;
 			for (size_t i = 1; i < numLevelsU; ++i)
 			{
-				const size_t width = static_cast<size_t>(
-					num::floor(static_cast<TScalar>(resolution_.x) / (1 << i)));
-				mipMaps.push_back(makeMipMap(mipMaps.back(), 'x', width));
+				const TScalar scale = num::inv(static_cast<TScalar>(1 << i));
+				const size_t width = static_cast<size_t>(num::floor(scale * static_cast<TScalar>(resolution_.x)));
+				const size_t height = static_cast<size_t>(num::floor(scale * static_cast<TScalar>(resolution_.y)));
+				MipMapLevel temp = makeMipMap(mipMaps.back(), 'x', width);
+				mipMaps.push_back(makeMipMap(temp, 'y', height));
 			}
+			break;
+
+		case mmAnisotropic:
+			numLevelsU = static_cast<size_t>(num::floor(num::log2(static_cast<TScalar>(resolution_.x))) + 1);
+			numLevelsV = static_cast<size_t>(num::floor(num::log2(static_cast<TScalar>(resolution_.y))) + 1);
+			for (size_t j = 0; j < numLevelsV; ++j)
+			{
+				if (j > 0)
+				{
+					const size_t height = static_cast<size_t>(
+						num::floor(static_cast<TScalar>(resolution_.y) / (1 << j)));
+					mipMaps.push_back(makeMipMap(mipMaps[(j - 1) * numLevelsU], 'y', height));
+				}
+				for (size_t i = 1; i < numLevelsU; ++i)
+				{
+					const size_t width = static_cast<size_t>(
+						num::floor(static_cast<TScalar>(resolution_.x) / (1 << i)));
+					mipMaps.push_back(makeMipMap(mipMaps.back(), 'x', width));
+				}
+			}
+			break;
+
+		default:
+			LASS_ASSERT_UNREACHABLE;
 		}
-		break;
 
-	default:
-		LASS_ASSERT_UNREACHABLE;
+		mipMaps_.swap(mipMaps);
+		numLevelsU_ = numLevelsU;
+		numLevelsV_ = numLevelsV;
+
+		currentMipMapping_.store(mipMapping_, std::memory_order_release);
 	}
-
-	mipMaps_.swap(mipMaps);
-	numLevelsU_ = numLevelsU;
-	numLevelsV_ = numLevelsV;
-	currentMipMapping_ = mode;
 }
 
 
