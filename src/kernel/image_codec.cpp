@@ -200,7 +200,7 @@ ImageCodec::TImageHandle ImageCodecLass::doCreate(const std::wstring& path, cons
 {
 	typedef io::Image::TChromaticity TChromaticity;
 
-	std::auto_ptr<impl::LassImage> pimpl(new impl::LassImage);
+	std::unique_ptr<impl::LassImage> pimpl(new impl::LassImage);
 	pimpl->image.reset(resolution.y, resolution.x);
 	pimpl->rgbSpace = selectRgbSpace(rgbSpace);
 	if (!hasGammaCorrection_)
@@ -224,7 +224,7 @@ ImageCodec::TImageHandle ImageCodecLass::doCreate(const std::wstring& path, cons
 
 ImageCodec::TImageHandle ImageCodecLass::doOpen(const std::wstring& path, const TRgbSpacePtr& rgbSpace, const std::string&) const
 {
-	std::auto_ptr<impl::LassImage> pimpl(new impl::LassImage);
+	std::unique_ptr<impl::LassImage> pimpl(new impl::LassImage);
 	pimpl->image.open(path);
 	pimpl->rgbSpace = rgbSpace;
 	if (!pimpl->rgbSpace)

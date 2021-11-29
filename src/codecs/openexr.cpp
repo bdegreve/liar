@@ -102,7 +102,7 @@ class ImageCodecOpenEXR: public kernel::ImageCodec
 private:
 	TImageHandle doCreate(const std::wstring& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
 	{
-		std::auto_ptr<Handle> pimpl(new Handle(resolution, rgbSpace));
+		std::unique_ptr<Handle> pimpl(new Handle(resolution, rgbSpace));
 		pimpl->line.resize(resolution.x);
 		Imf::Header header(num::numCast<int>(resolution.x), num::numCast<int>(resolution.y));
 		Imf::Chromaticities chromaticities;
@@ -125,7 +125,7 @@ private:
 		const Imath::Box2i& dataWin = input->header().dataWindow();
 		const TResolution2D resolution(dispWin.max.x - dispWin.min.x + 1, dispWin.max.y - dispWin.min.y + 1);
 		const kernel::TRgbSpacePtr space = determineRgbSpaceForOpenFile(input->header(), rgbSpace);
-		std::auto_ptr<Handle> pimpl(new Handle(resolution, space));
+		std::unique_ptr<Handle> pimpl(new Handle(resolution, space));
 		pimpl->line.resize(num::numCast<size_t>(dataWin.max.x - dataWin.min.x + 1));
 		pimpl->istream.swap(istream);
 		pimpl->input.swap(input);
