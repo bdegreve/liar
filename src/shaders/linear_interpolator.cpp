@@ -313,10 +313,14 @@ SampleBsdfOut LinearInterpolator::Bsdf::doSample(const TVector3D& omegaIn, const
 	// LinearInterpolator does not shade context, but a_ and b_ might.
 	// so you need to transform omegaIn and omegaOut back to world and then to bsdf again
 
-	TScalar pa = a_.bsdf()->compatibleCaps(allowedCaps) ? (1 - t_) : 0;
-	TScalar pb = b_.bsdf()->compatibleCaps(allowedCaps) ? t_ : 0;
+	const IntersectionContext* a = &a_;
+	const IntersectionContext* b = &b_;
+	TValue ta = 1 - t_;
+	TValue tb = t_;
+	TValue pa = a->bsdf()->compatibleCaps(allowedCaps) ? ta : 0;
+	TValue pb = b->bsdf()->compatibleCaps(allowedCaps) ? tb : 0;
 	LASS_ASSERT(pa >= 0 && pb >= 0);
-	const TScalar ptot = pa + pb;
+	const TValue ptot = pa + pb;
 	if (ptot <= 0)
 	{
 		return SampleBsdfOut();
@@ -324,38 +328,42 @@ SampleBsdfOut LinearInterpolator::Bsdf::doSample(const TVector3D& omegaIn, const
 	pa /= ptot;
 	pb /= ptot;
 
-	SampleBsdfOut out;
-	if (componentSample < pa)
+	if (componentSample >= pa)
 	{
-		const TScalar cs = componentSample / pa;
-		const TVector3D wIn = a_.worldToBsdf(context().bsdfToWorld(omegaIn));
-		out = a_.bsdf()->sample(wIn, sample, cs, allowedCaps);\
-		const TVector3D wOut = out.omegaOut;
-		out.omegaOut = context().worldToBsdf(a_.bsdfToWorld(out.omegaOut));
-		if (out.omegaOut.z == 0)
-		{
-			return SampleBsdfOut();
-		}
-		out.value *= (1 - t_) * static_cast<TValue>(num::abs(wOut.z / out.omegaOut.z));
-		out.pdf *= pa;
+		componentSample -= pa;
+		std::swap(a, b);
+		std::swap(ta, tb);
+		std::swap(pa, pb);
 	}
-	else
-	{
-		LASS_ASSERT(pb > 0);
-		const TScalar cs = (componentSample - pa) / pb;
-		const TVector3D wIn = b_.worldToBsdf(context().bsdfToWorld(omegaIn));
-		out = b_.bsdf()->sample(wIn, sample, cs, allowedCaps);
-		const TVector3D wOut = out.omegaOut;
-		out.omegaOut = context().worldToBsdf(b_.bsdfToWorld(wOut));
-		if (out.omegaOut.z == 0)
-		{
-			return SampleBsdfOut();
-		}
-		out.value *= t_ * static_cast<TValue>(num::abs(wOut.z / out.omegaOut.z));
-		out.pdf *= pb;
-	}
-	return out;
+	LIAR_ASSERT(pa > 0, pa);
+	componentSample /= pa;
+	LIAR_ASSERT(componentSample < 1, componentSample);
 
+	const TVector3D wInA = a->worldToBsdf(context().bsdfToWorld(omegaIn));
+	SampleBsdfOut out = a->bsdf()->sample(wInA, sample, componentSample, allowedCaps);
+	if (out.pdf == 0)
+	{
+		return SampleBsdfOut();
+	}
+	const TVector3D wOutA = out.omegaOut;
+	out.omegaOut = context().worldToBsdf(a->bsdfToWorld(wOutA));
+	if (out.omegaOut.z == 0)
+	{
+		return SampleBsdfOut();
+	}
+	out.value *= ta * static_cast<TValue>(num::abs(wOutA.z / out.omegaOut.z));
+	out.pdf *= pa;
+
+	const TVector3D wInB = b->worldToBsdf(context().bsdfToWorld(omegaIn));
+	const TVector3D wOutB = b->worldToBsdf(context().bsdfToWorld(out.omegaOut));
+	BsdfOut outB = b->bsdf()->evaluate(wInB, wOutB, out.usedCaps);
+	if (outB.pdf > 0)
+	{
+		out.value.fma(outB.value, tb * static_cast<TValue>(num::abs(wOutB.z / out.omegaOut.z)));
+		out.pdf += outB.pdf * pb;
+	}
+
+	return out;
 }
 
 
