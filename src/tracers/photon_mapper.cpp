@@ -1116,8 +1116,8 @@ const Spectral PhotonMapper::gatherIndirect(
 		pTotal = 1;
 		/**/
 		LASS_ENFORCE(pTotal > 0);
-		std::transform(grid_.begin(), grid_.end(), grid_.begin(), 
-			std::bind2nd(std::plus<TScalar>(), alpha * pTotal / static_cast<TScalar>(num::sqr(gridSize))));
+		const TScalar s = alpha * pTotal / static_cast<TScalar>(num::sqr(gridSize));
+		std::transform(grid_.begin(), grid_.end(), grid_.begin(), [s](TScalar x) { return x + s; });
 		gatherDistribution_.reset(grid_.begin(), grid_.end(), gridSize, gridSize);
 	}
 

@@ -431,18 +431,13 @@ void LightSky::buildCdf(const TMap& pdf, TMap& oMarginalCdfU, TMap& oConditional
 		const size_t offset = i * resolution_.y;
 		TMap::const_iterator pdfLine = pdf.begin() + offset;
 		TMap::iterator condCdfV = conditionalCdfV.begin() + offset;
-		std::partial_sum(pdfLine, pdfLine + resolution_.y, condCdfV);
-		
+		std::partial_sum(pdfLine, pdfLine + resolution_.y, condCdfV);	
 		marginalPdfU[i]	= condCdfV[resolution_.y - 1];
-
-		std::transform(condCdfV, condCdfV + resolution_.y, condCdfV, 
-			std::bind2nd(std::divides<TScalar>(), marginalPdfU[i]));
+		std::transform(condCdfV, condCdfV + resolution_.y, condCdfV, [d = marginalPdfU[i]](TScalar x) { return x / d; });
 	}
 
 	std::partial_sum(marginalPdfU.begin(), marginalPdfU.end(), marginalCdfU.begin());
-	const TScalar total	= marginalCdfU.back();
-	std::transform(marginalCdfU.begin(), marginalCdfU.end(), marginalCdfU.begin(), 
-		std::bind2nd(std::divides<TScalar>(), total));
+	std::transform(marginalCdfU.begin(), marginalCdfU.end(), marginalCdfU.begin(), [d = marginalCdfU.back()](TScalar x) { return x / d; });
 
 	oMarginalCdfU.swap(marginalCdfU);
 	oConditionalCdfV.swap(conditionalCdfV);

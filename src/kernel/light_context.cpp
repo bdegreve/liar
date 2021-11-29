@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -280,7 +280,7 @@ void LightContexts::setSceneBound(const TAabb3D& bound, const TimePeriod& period
 		totalPower_ += contexts_[k].totalPower();
 		cdf_[k] = totalPower_;
 	}
-	std::transform(cdf_.begin(), cdf_.end(), cdf_.begin(), std::bind2nd(std::divides<TScalar>(), cdf_.back()));
+	std::transform(cdf_.begin(), cdf_.end(), cdf_.begin(), [this](TScalar cdf) { return cdf / totalPower_; });
 }
 
 
