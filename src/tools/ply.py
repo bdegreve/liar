@@ -111,70 +111,68 @@ def load(path: str) -> liar.scenery.TriangleMesh:
 
 
 def load_header(fp):
-    fp = io.TextIOWrapper(fp, encoding="ascii", errors="replace")
-    if fp.readline() != "ply\n":
-        raise ValueError(f"not a PLY file")
-    format = Format(fp.readline().strip())
+    with io.TextIOWrapper(fp, encoding="ascii", errors="replace") as fp_:
+        if fp_.readline() != "ply\n":
+            raise ValueError(f"not a PLY file")
+        format = Format(fp_.readline().strip())
 
-    elements = []
-    current_element = None
+        elements = []
+        current_element = None
 
-    while True:
-        line = fp.readline()
-        assert len(line) > 0
+        while True:
+            line = fp_.readline()
+            assert len(line) > 0
 
-        splitted_line = line.split()
-        command, fields = splitted_line[0], splitted_line[1:]
-        num_fields = len(fields)
+            splitted_line = line.split()
+            command, fields = splitted_line[0], splitted_line[1:]
+            num_fields = len(fields)
 
-        if command == "end_header":
-            assert num_fields == 0
-            break
+            if command == "end_header":
+                assert num_fields == 0
+                break
 
-        if command == "element":
-            assert num_fields == 2
-            name = fields[0]
-            number = int(fields[1])
-            current_element = Element(name, number)
-            elements.append(current_element)
-
-        elif command == "property":
-            assert num_fields > 0
-            prop_type = fields[0]
-            if prop_type == "list":
-                assert num_fields == 4
-                prop = Property(
-                    type_=prop_type,
-                    name=fields[3],
-                    num_type=fields[1],
-                    list_type=fields[2],
-                )
-            else:
+            if command == "element":
                 assert num_fields == 2
-                prop = Property(type_=prop_type, name=fields[1])
-            current_element.properties.append(prop)
+                name = fields[0]
+                number = int(fields[1])
+                current_element = Element(name, number)
+                elements.append(current_element)
 
-        elif command == "comment":
-            pass
+            elif command == "property":
+                assert num_fields > 0
+                prop_type = fields[0]
+                if prop_type == "list":
+                    assert num_fields == 4
+                    prop = Property(
+                        type_=prop_type,
+                        name=fields[3],
+                        num_type=fields[1],
+                        list_type=fields[2],
+                    )
+                else:
+                    assert num_fields == 2
+                    prop = Property(type_=prop_type, name=fields[1])
+                current_element.properties.append(prop)
 
-        else:
-            raise ValueError(f"Unsupported command {command}")
+            elif command == "comment":
+                pass
 
-    for element in elements:
-        element.data_type = namedtuple(
-            element.name, [prop.name for prop in element.properties]
+            else:
+                raise ValueError(f"Unsupported command {command}")
+
+        for element in elements:
+            element.data_type = namedtuple(
+                element.name, [prop.name for prop in element.properties]
+            )
+
+        return Header(
+            format=format,
+            elements={element.name: element for element in elements},
+            dataOffset=fp_.tell(),
         )
-
-    return Header(
-        format=format,
-        elements=OrderedDict((element.name, element) for element in elements),
-        dataOffset=fp.tell(),
-    )
 
 
 def load_data_ascii(fp, header: Header):
-    fp = io.TextIOWrapper(fp, encoding="ascii")
-
     field_convertors = {
         "int8": int,
         "uint8": int,
@@ -194,39 +192,42 @@ def load_data_ascii(fp, header: Header):
         "double": float,
     }
 
-    ply_data = {}
-    for element in header.elements.values():
-        element_data = []
-        for _index in range(element.number):
-            line = fp.readline()
-            assert len(line) > 0
+    with io.TextIOWrapper(fp, encoding="ascii") as fp_:
+        ply_data = {}
+        for element in header.elements.values():
+            element_data = []
+            for _index in range(element.number):
+                line = fp_.readline()
+                assert len(line) > 0
 
-            line_data = []
-            fields = line.split()
-            num_fields = len(fields)
-            f = 0
-            for prop in element.properties:
-                if prop.type_ == "list":
-                    assert f < num_fields
-                    list_length = field_convertors[prop.num_type](fields[f])
-                    f += 1
-                    list_data = []
-                    for k in range(list_length):
+                line_data = []
+                fields = line.split()
+                num_fields = len(fields)
+                f = 0
+                for prop in element.properties:
+                    if prop.type_ == "list":
                         assert f < num_fields
-                        list_data.append(field_convertors[prop.list_type](fields[f]))
+                        list_length = field_convertors[prop.num_type](fields[f])
                         f += 1
-                    line_data.append(list_data)
-                else:
-                    assert prop.num_type is None
-                    assert prop.list_type is None
-                    assert f < num_fields
-                    line_data.append(field_convertors[prop.type_](fields[f]))
-                    f += 1
-            assert f == num_fields
+                        list_data = []
+                        for k in range(list_length):
+                            assert f < num_fields
+                            list_data.append(
+                                field_convertors[prop.list_type](fields[f])
+                            )
+                            f += 1
+                        line_data.append(list_data)
+                    else:
+                        assert prop.num_type is None
+                        assert prop.list_type is None
+                        assert f < num_fields
+                        line_data.append(field_convertors[prop.type_](fields[f]))
+                        f += 1
+                assert f == num_fields
 
-            element_data.append(element.data_type(*line_data))
+                element_data.append(element.data_type(*line_data))
 
-        ply_data[element.name] = element_data
+            ply_data[element.name] = element_data
 
     return ply_data
 
