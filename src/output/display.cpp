@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -276,7 +276,7 @@ void Display::close()
 namespace
 {
 
-	typedef Display::TValue TValue;
+typedef Display::TValue TValue;
 
 void printThirdStops(std::ostringstream& stream, TValue stops)
 {
@@ -302,12 +302,26 @@ void printThirdStops(std::ostringstream& stream, TValue stops)
 	}
 }
 
+std::string toString(Display::ToneMapping toneMapping)
+{
+	using namespace lass::python;
+	LockGIL LASS_UNUSED(lock);
+	TPyObjPtr tmObj(pyBuildSimpleObject(toneMapping));
+	TPyObjPtr strObj(PyObject_Str(tmObj.get()));
+	std::string str;
+	if (pyGetSimpleObject(strObj.get(), str) != 0)
+	{
+		str = "<unknown>";
+	}
+	return std::move(str);
+}
+
 }
 
 const std::string Display::makeTitle() const
 {
 	std::ostringstream buffer;
-	buffer << title_ << " [" << toneMapping();
+	buffer << title_ << " [" << toString(toneMapping());
 	if (autoExposure())
 	{
 		printThirdStops(buffer, exposureStops());

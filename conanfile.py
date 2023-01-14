@@ -28,7 +28,7 @@ class LiarConan(ConanFile):
     generators = "cmake"
     exports_sources = ("*", "!build*", "!env*", "!venv*")
     requires = [
-        "Lass/1.11.0-35+gfdcf23e4@cocamware/testing",
+        "Lass/1.11.0-116+gd4cb9583@cocamware/testing",
     ]
     options = {
         "fPIC": [True, False],

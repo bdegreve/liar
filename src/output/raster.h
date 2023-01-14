@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,15 +45,29 @@ class LIAR_OUTPUT_DLL Raster: public RenderTarget
 public:
     typedef OutputSample::TValue TValue;
 
+    enum class ToneMapping
+    {
+        Linear = 0,
+        CompressY,
+        CompressRGB,
+        Reinhard2002Y,
+        Reinhard2002RGB,
+        ExponentialY,
+        ExponentialRGB,
+        DuikerY,
+        DuikerRGB,
+        size
+    };
+
     const TRgbSpacePtr& rgbSpace() const;
-    const std::string toneMapping() const;
+    ToneMapping toneMapping() const;
     TValue exposureStops() const;
     TValue exposureCorrectionStops() const;
     bool autoExposure() const;
     TValue middleGrey() const;
 
     void setRgbSpace(const TRgbSpacePtr& rgbSpace);
-    void setToneMapping(const std::string& mode);
+    void setToneMapping(ToneMapping mode);
     void setExposureStops(TValue fStops);
     void setExposureCorrectionStops(TValue stops);
     void setAutoExposure(bool enable = true);
@@ -82,21 +96,6 @@ protected:
 
 private:
 
-    enum ToneMapping
-    {
-        tmLinear = 0,
-        tmCompressY,
-        tmCompressRGB,
-        tmReinhard2002Y,
-        tmReinhard2002RGB,
-        tmExponentialY,
-        tmExponentialRGB,
-        tmDuikerY,
-        tmDuikerRGB,
-        numToneMapping
-    };
-    typedef util::Dictionary<std::string, ToneMapping> TToneMappingDictionary;
-
     const TResolution2D doResolution() const;
 
     void doWriteRender(const OutputSample* first, const OutputSample* last);
@@ -104,8 +103,6 @@ private:
     TValue sceneGain() const;
     TValue averageSceneLuminance() const;
     XYZ weighted(size_t index, TValue gain = 1) const;
-
-    static TToneMappingDictionary makeToneMappingDictionary();
 
     TRenderBuffer renderBuffer_;
     TTonemapBuffer tonemapBuffer_;
@@ -123,15 +120,13 @@ private:
     TValue maxSceneLuminance_;
     bool autoExposure_;
     mutable bool isDirtyAutoExposure_;
-    
-    static TToneMappingDictionary toneMappingDictionary_;
 };
 
-
-
 }
 
 }
+
+PY_SHADOW_STR_ENUM(LASS_DLL_EXPORT, liar::output::Raster::ToneMapping)
 
 #endif
 

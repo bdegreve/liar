@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,6 +26,20 @@
 
 #define TONEMAP_SAMPLES
 
+using ToneMapping = liar::output::Raster::ToneMapping;
+
+PY_DECLARE_STR_ENUM_EX(ToneMapping)("ToneMapping", {
+    { "Linear", ToneMapping::Linear, "Linear"},
+    { "CompressY", ToneMapping::CompressY, "CompressY"},
+    { "CompressRGB", ToneMapping::CompressRGB, "CompressRGB"},
+    { "Reinhard2002Y", ToneMapping::Reinhard2002Y, "Reinhard2002Y"},
+    { "Reinhard2002RGB", ToneMapping::Reinhard2002RGB, "Reinhard2002RGB"},
+    { "ExponentialY", ToneMapping::ExponentialY, "ExponentialY"},
+    { "ExponentialRGB", ToneMapping::ExponentialRGB, "ExponentialRGB"},
+    { "DuikerY", ToneMapping::DuikerY, "DuikerY"},
+    { "DuikerRGB", ToneMapping::DuikerRGB, "DuikerRGB"},
+    });
+
 namespace liar
 {
 namespace output
@@ -37,21 +51,9 @@ PY_CLASS_MEMBER_RW(Raster, toneMapping, setToneMapping)
 PY_CLASS_MEMBER_RW(Raster, exposureStops, setExposureStops)
 PY_CLASS_MEMBER_RW(Raster, exposureCorrectionStops, setExposureCorrectionStops)
 PY_CLASS_MEMBER_RW(Raster, autoExposure, setAutoExposure)
-PY_CLASS_MEMBER_RW(Raster, middleGrey, setMiddleGrey);
-PY_CLASS_STATIC_CONST(Raster, "TM_LINEAR", "linear");
-PY_CLASS_STATIC_CONST(Raster, "TM_COMPRESS_Y", "compress_y");
-PY_CLASS_STATIC_CONST(Raster, "TM_COMPRESS_XYZ", "compress_xyz");
-PY_CLASS_STATIC_CONST(Raster, "TM_COMPRESS_RGB", "compress_rgb");
-PY_CLASS_STATIC_CONST(Raster, "TM_REINHARD2002_Y", "reinhard2002_y");
-PY_CLASS_STATIC_CONST(Raster, "TM_EXPONENTIAL_Y", "exponential_y");
-PY_CLASS_STATIC_CONST(Raster, "TM_EXPONENTIAL_XYZ", "exponential_xyz");
-PY_CLASS_STATIC_CONST(Raster, "TM_EXPONENTIAL_RGB", "exponential_rgb");
-PY_CLASS_STATIC_CONST(Raster, "TM_DUIKER_Y", "duiker_y");
-PY_CLASS_STATIC_CONST(Raster, "TM_DUIKER_XYZ", "duiker_xyz");
-PY_CLASS_STATIC_CONST(Raster, "TM_DUIKER_RGB", "duiker_rgb");
+PY_CLASS_MEMBER_RW(Raster, middleGrey, setMiddleGrey)
+PY_CLASS_ENUM(Raster, Raster::ToneMapping)
  
-Raster::TToneMappingDictionary Raster::toneMappingDictionary_ = Raster::makeToneMappingDictionary();
-
 namespace
 {
     typedef Raster::TValue TValue;
@@ -86,9 +88,9 @@ const TRgbSpacePtr& Raster::rgbSpace() const
 
 
 
-const std::string Raster::toneMapping() const
+Raster::ToneMapping Raster::toneMapping() const
 {
-    return toneMappingDictionary_.key(toneMapping_);
+    return toneMapping_;
 }
 
 
@@ -113,21 +115,21 @@ Raster::TValue Raster::exposureStops() const
         {
             switch (toneMapping_)
             {
-            case tmLinear: // a = g * y
+            case ToneMapping::Linear: // a = g * y
                 autoGain = middleGrey_ / y;
                 break;
-            case tmCompressY: // a = g * y / (1 + g * y)  ->  g * y = a / (1 - a)
-            case tmCompressRGB: 
-            case tmReinhard2002Y:
-            case tmReinhard2002RGB:
+            case ToneMapping::CompressY: // a = g * y / (1 + g * y)  ->  g * y = a / (1 - a)
+            case ToneMapping::CompressRGB:
+            case ToneMapping::Reinhard2002Y:
+            case ToneMapping::Reinhard2002RGB:
                 autoGain = middleGrey_ / (y * (1 - middleGrey_));
                 break;
-            case tmExponentialY: // a = 1 - exp(-g * y)  ->  g * y = -ln(1 - a)
-            case tmExponentialRGB:
+            case ToneMapping::ExponentialY: // a = 1 - exp(-g * y)  ->  g * y = -ln(1 - a)
+            case ToneMapping::ExponentialRGB:
                 autoGain = -num::log1p(-middleGrey_) / y;
                 break;
-            case tmDuikerY:
-            case tmDuikerRGB:
+            case ToneMapping::DuikerY:
+            case ToneMapping::DuikerRGB:
                 autoGain = invFilmic(middleGrey_) / y;
                 break;
             default:
@@ -180,16 +182,15 @@ void Raster::setRgbSpace(const TRgbSpacePtr& rgbSpace)
 
 
 
-void Raster::setToneMapping(const std::string& toneMapping)
+void Raster::setToneMapping(Raster::ToneMapping toneMapping)
 {
     LASS_LOCK(renderLock_)
     {
-        const ToneMapping t = toneMappingDictionary_[stde::tolower(toneMapping)];
-        if (toneMapping_ == t)
+        if (toneMapping_ == toneMapping)
         {
             return;
         }
-        toneMapping_ = t;
+        toneMapping_ = toneMapping;
         renderDirtyBox_ += allTimeDirtyBox_;
     }
 }
@@ -261,7 +262,8 @@ void Raster::nextToneMapping()
 {
     LASS_LOCK(renderLock_)
     {
-        toneMapping_ = static_cast<ToneMapping>((toneMapping_ + 1) % numToneMapping);
+        using TInt = std::underlying_type_t<ToneMapping>;
+        toneMapping_ = static_cast<ToneMapping>((static_cast<TInt>(toneMapping_) + 1) % static_cast<TInt>(ToneMapping::size));
         renderDirtyBox_ += allTimeDirtyBox_;
     }
 }
@@ -273,7 +275,7 @@ void Raster::nextToneMapping()
 Raster::Raster(const TResolution2D& resolution):
     resolution_(resolution),
     rgbSpace_(RgbSpace::defaultSpace()),
-    toneMapping_(tmLinear),
+    toneMapping_(ToneMapping::Linear),
     exposureStops_(0.f),
     exposureCorrectionStops_(0.f),
     middleGrey_(.184f),
@@ -319,7 +321,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
 
         switch (toneMapping_)
         {
-        case tmLinear:
+        case ToneMapping::Linear:
             for (size_t j = min.y; j <= max.y; ++j)
             {
                 const size_t kBegin = j * resolution_.x + min.x;
@@ -334,7 +336,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
             }
             break;
 
-        case tmCompressY:
+        case ToneMapping::CompressY:
             for (size_t j = min.y; j <= max.y; ++j)
             {
                 const size_t kBegin = j * resolution_.x + min.x;
@@ -350,7 +352,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
             }
             break;
 
-        case tmCompressRGB:
+        case ToneMapping::CompressRGB:
             for (size_t j = min.y; j <= max.y; ++j)
             {
                 const size_t kBegin = j * resolution_.x + min.x;
@@ -366,7 +368,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
             }
             break;
 
-        case tmReinhard2002Y:
+        case ToneMapping::Reinhard2002Y:
             {
                 const TValue Lw = gain * maxSceneLuminance_;
                 const TValue invLwSquared = num::inv(Lw * Lw);
@@ -387,7 +389,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
             }
             break;
 
-        case tmReinhard2002RGB:
+        case ToneMapping::Reinhard2002RGB:
             {
                 const TValue Lw = gain * maxSceneLuminance_;
                 const TValue invLwSquared = num::inv(Lw * Lw);
@@ -411,7 +413,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
             }
             break;
 
-        case tmExponentialY:
+        case ToneMapping::ExponentialY:
             for (size_t j = min.y; j <= max.y; ++j)
             {
                 const size_t kBegin = j * resolution_.x + min.x;
@@ -430,7 +432,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
             }
             break;
 
-        case tmExponentialRGB:
+        case ToneMapping::ExponentialRGB:
             for (size_t j = min.y; j <= max.y; ++j)
             {
                 const size_t kBegin = j * resolution_.x + min.x;
@@ -446,7 +448,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
             }
             break;
 
-        case tmDuikerY:
+        case ToneMapping::DuikerY:
             for (size_t j = min.y; j <= max.y; ++j)
             {
                 const size_t kBegin = j * resolution_.x + min.x;
@@ -462,7 +464,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
             }
             break;
 
-        case tmDuikerRGB:
+        case ToneMapping::DuikerRGB:
             for (size_t j = min.y; j <= max.y; ++j)
             {
                 const size_t kBegin = j * resolution_.x + min.x;
@@ -614,24 +616,6 @@ inline XYZ Raster::weighted(size_t index, TValue gain) const
 {
     const TValue w = totalWeight_[index];
     return w > 0 ? renderBuffer_[index] * (gain / w) : XYZ(0);
-}
-
-
-
-Raster::TToneMappingDictionary Raster::makeToneMappingDictionary()
-{
-    TToneMappingDictionary result;
-    result.enableSuggestions();
-    result.add("linear", tmLinear);
-    result.add("compress_y", tmCompressY);
-    result.add("compress_rgb", tmCompressRGB);
-    result.add("reinhard2002_y", tmReinhard2002Y);
-    result.add("reinhard2002_rgb", tmReinhard2002RGB);
-    result.add("exponential_y", tmExponentialY);
-    result.add("exponential_rgb", tmExponentialRGB);
-    result.add("duiker_y", tmDuikerY);
-    result.add("duiker_rgb", tmDuikerRGB);
-    return result;
 }
 
 
