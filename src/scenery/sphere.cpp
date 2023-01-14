@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -180,6 +180,13 @@ const TAabb3D Sphere::doBoundingBox() const
 	TScalar radius = sphere_.radius();
 	TVector3D extent = TVector3D(radius, radius, radius);
 	return TAabb3D(sphere_.center() - extent, sphere_.center() + extent);
+}
+
+
+
+const TSphere3D Sphere::doBoundingSphere() const
+{
+	return sphere_;
 }
 
 

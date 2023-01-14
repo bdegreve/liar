@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -65,6 +65,7 @@ private:
 	void doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const override;
 	bool doContains(const Sample& sample, const TPoint3D& point) const override;
 	const TAabb3D doBoundingBox() const override;
+	const TSphere3D doBoundingSphere() const override;
 	TScalar doArea() const override;
 	TScalar doArea(const TVector3D& normal) const override;
 

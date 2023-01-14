@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -309,6 +309,18 @@ inline TScalar SceneObject::angularPdf(const Sample& sample, const TRay3D& ray, 
 inline const TAabb3D SceneObject::boundingBox() const
 {
 	return doBoundingBox();
+}
+
+
+
+/** get bounding sphere of object
+ *
+ *  @return
+ *		bounding sphere of object
+ */
+inline const TSphere3D SceneObject::boundingSphere() const
+{
+	return doBoundingSphere();
 }
 
 

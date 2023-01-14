@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -51,6 +51,7 @@
 #include <lass/prim/point_3d.h>
 #include <lass/prim/aabb_2d.h>
 #include <lass/prim/aabb_3d.h>
+#include <lass/prim/sphere_3d.h>
 #include <lass/prim/ray_3d.h>
 #include <lass/prim/color_rgba.h>
 #include <lass/prim/transformation_2d.h>
@@ -106,6 +107,7 @@ typedef prim::Vector3D<TScalar> TVector3D;
 typedef prim::Point3D<TScalar> TPoint3D;
 typedef prim::Ray3D<TScalar, prim::Normalized, prim::Unbounded> TRay3D;
 typedef prim::Aabb3D<TScalar> TAabb3D;
+typedef prim::Sphere3D<TScalar> TSphere3D;
 typedef prim::Transformation2D<TScalar> TTransformation2D;
 typedef prim::Transformation3D<TScalar> TTransformation3D;
 
@@ -123,7 +125,7 @@ const std::string website = LIAR_WEBSITE;
 
 const std::string license =	
 	LIAR_NAME_FULL "\n"
-    "Copyright (C) 2004-2021 " LIAR_AUTHORS "\n"
+    "Copyright (C) 2004-2023 " LIAR_AUTHORS "\n"
 	"\n"
 	"This is free software; you can redistribute it and/or modify\n"
 	"it under the terms of the GNU General Public License as published by\n"

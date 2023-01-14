@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -213,6 +213,13 @@ bool TriangleMesh::doContains(const Sample&, const TPoint3D&) const
 const TAabb3D TriangleMesh::doBoundingBox() const
 {
 	return mesh_.aabb();
+}
+
+
+
+const TSphere3D TriangleMesh::doBoundingSphere() const
+{
+	return prim::boundingSphere(mesh_);
 }
 
 

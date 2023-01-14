@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -149,7 +149,7 @@ void TriangleMeshComposite::doPreProcess(const TSceneObjectPtr& scene, const Tim
 		}
 	}
 
-	TMesh mesh(verts, normals, uvs, triangles);
+	TMesh mesh(std::move(verts), std::move(normals), std::move(uvs), triangles);
 
 	mesh_.swap(mesh);
 	backLinks_.swap(backLinks);
@@ -219,6 +219,26 @@ const TAabb3D TriangleMeshComposite::doBoundingBox() const
 		result += child->boundingBox();
 	}
 	return result;
+}
+
+
+
+const TSphere3D TriangleMeshComposite::doBoundingSphere() const
+{
+	if (!mesh_.aabb().isEmpty())
+	{
+		return prim::boundingSphere(mesh_);
+	}
+
+	// backup plan: compute from children.
+	const TChildren::const_iterator end = children_.end();
+	TMesh::TVertices vertices;
+	for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
+	{
+		const auto &verts = (*i)->vertices();
+		vertices.insert(vertices.end(), verts.begin(), verts.end());
+	}
+	return prim::boundingSphere(vertices);
 }
 
 

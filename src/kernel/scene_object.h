@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -123,6 +123,7 @@ public:
 	TScalar angularPdf(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TVector3D& normal) const;
 
 	const TAabb3D boundingBox() const;
+	const TSphere3D boundingSphere() const;
 	bool hasMotion() const;
 
 	TScalar area() const;
@@ -169,6 +170,7 @@ private:
 	virtual TScalar doAngularPdf(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TVector3D& normal) const;
 
 	virtual const TAabb3D doBoundingBox() const = 0;
+	virtual const TSphere3D doBoundingSphere() const;
 	virtual TScalar doArea() const = 0;
 	virtual TScalar doArea(const TVector3D& viewDirection) const = 0;
 	virtual void doLocalSpace(TTime time, TTransformation3D& localToWorld) const;

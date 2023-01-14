@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -265,6 +265,13 @@ TScalar SceneObject::doAngularPdf(const Sample& sample, const TRay3D& ray, Bound
 	normal = context.geometricNormal();
 
 	return num::sqr(intersection.t()) / num::abs(this->area() * dot(ray.direction(), normal));
+}
+
+
+
+const TSphere3D SceneObject::doBoundingSphere() const
+{
+	return prim::boundingSphere(doBoundingBox());
 }
 
 
