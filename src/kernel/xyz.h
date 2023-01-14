@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -118,12 +118,12 @@ inline XYZ max(const XYZ& a, const XYZ& b)
 	return XYZ(std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z));
 }
 
-inline TScalar average(const XYZ& a)
+inline XYZ::TValue average(const XYZ& a)
 {
 	return (a.x + a.y + a.z) / 3;
 }
 
-inline TScalar dot(const XYZ& a, const XYZ& b)
+inline XYZ::TValue dot(const XYZ& a, const XYZ& b)
 {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
