@@ -17,13 +17,15 @@ else()
 	endif()
 endif()
 
-# openexr 1.6.1: http://www.openexr.com/
-if (TARGET CONAN_PKG::openexr)
-	add_liar_codec(openexr CONAN_PKG::openexr)
+# openexr: http://www.openexr.com/
+find_package(OpenEXR)
+if (OpenEXR_FOUND)
+	add_liar_codec(openexr OpenEXR::IlmImf)
 endif()
 
-if (TARGET CONAN_PKG::lodepng)
-	add_liar_codec(lodepng CONAN_PKG::lodepng)
+find_package(lodepng)
+if(lodepng_FOUND)
+	add_liar_codec(lodepng lodepng::lodepng)
 endif()
 
 # libtiff: http://www.remotesensing.org/libtiff/

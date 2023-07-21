@@ -1,16 +1,26 @@
-from conans import ConanFile, CMake, tools, errors
-import errno
-import re
 import os
+import re
+import shutil
 import subprocess
+from pathlib import Path
+from typing import List, Optional
 
-def _get_version():
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import Git
+
+required_conan_version = ">=2.0.0"
+
+SELF_DIR = Path(__file__).absolute().parent
+
+
+def _get_version(conanfile: ConanFile) -> Optional[str]:
     try:
-        content = tools.load("CMakeLists.txt")
-    except EnvironmentError as err:
-        if err.errno == errno.ENOENT:
-            return None  # Assume conan metadata already knows
-        raise
+        content = (SELF_DIR / "CMakeLists.txt").read_text()
+    except FileNotFoundError:
+        return None  # Assume conan metadata already knows
     match = re.search(r"project\(liar VERSION (\d+\.\d+\.\d+)\)", content)
     assert match
     version = match.group(1)
@@ -20,15 +30,12 @@ def _get_version():
 
 class LiarConan(ConanFile):
     name = "liar"
-    version = _get_version()
     license = "GPL-2.0-or-later"
     author = "Bram de Greve <bram.degreve@bramz.net>"
     topics = "C++", "Python"
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
-    exports_sources = ("*", "!build*", "!env*", "!venv*")
     requires = [
-        "Lass/1.11.0-116+gd4cb9583@cocamware/testing",
+        "lass/1.11.0-140+g9ad7c83d",
     ]
     options = {
         "fPIC": [True, False],
@@ -44,67 +51,92 @@ class LiarConan(ConanFile):
         "have_libjpeg": True,
         "have_png": True,
         "have_lcms2": False,
-        "lass:shared": True,
-        "openexr:shared": False,
-        "libjpeg:shared": False,
-        "lodepng:shared": False,
-        "lcms:shared": False,
+        "lass/*:shared": True,
+        "openexr/*:shared": False,
+        "libjpeg/*:shared": False,
+        "lodepng/*:shared": False,
+        "lcms/*:shared": False,
         "spectral_mode": "RGB",
     }
 
+    def set_version(self):
+        self.version = self.version or _get_version(self)
+
+    def export_sources(self):
+        git = Git(self)
+        for src in git.included_files():
+            dest = os.path.join(self.export_sources_folder, src)
+            os.makedirs(os.path.dirname(dest), exist_ok=True)
+            shutil.copy2(src, dest)
+
     def requirements(self):
         if self.options.have_openexr:
-            self.requires("openexr/2.3.0@conan/stable")
+            self.requires("openexr/2.5.7")
         if self.options.have_libjpeg:
-            self.requires("libjpeg/9c@bincrafters/stable")
+            self.requires("libjpeg/9c")
         if self.options.have_png:
             self.requires("lodepng/cci.20200615")
         if self.options.have_lcms2:
-            self.requires("lcms/2.9@bincrafters/stable")
+            self.requires("lcms/2.9")
 
     def config_options(self):
-        if self.settings.compiler == "Visual Studio":
+        if str(self.settings.compiler) in ["msvc", "Visual Studio"]:
             del self.options.fPIC
 
-    def _cmake(self):
-        python = Python(self.options["Lass"].python_executable, self.settings)
-        if str(self.options["Lass"].python_version) != python.version:
-            raise errors.ConanInvalidConfiguration(
-                "python_version option not compatible with python_executable:"
-                "{} != {}".format(
-                    str(self.options["Lass"].python_version), python.version
+    def validate(self):
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, 17)
+        if self.settings.compiler.value in ["gcc", "clang"]:
+            if self.settings.compiler.libcxx in ["libstdc++"]:
+                raise ConanInvalidConfiguration(
+                    "gcc and clang require C++11 compatible libcxx"
                 )
+
+    def layout(self):
+        cmake_layout(self)
+
+    def generate(self):
+        lass = self.dependencies["lass"]
+        python = Python(lass.options.python_executable, self.settings)
+        if str(lass.options.python_version) != python.version:
+            raise ConanInvalidConfiguration(
+                "python_version option not compatible with python_executable:"
+                "{} != {}".format(str(self.options.python_version), python.version)
             )
-        if self.options["Lass"].python_debug != python.debug:
-            raise errors.ConanInvalidConfiguration(
+        if lass.options.python_debug != python.debug:
+            raise ConanInvalidConfiguration(
                 "python_debug option not compatible with python_executable."
             )
         if self.settings.os == "Windows":
             if python.debug and self.settings.build_type != "Debug":
-                raise errors.ConanInvalidConfiguration(
+                raise ConanInvalidConfiguration(
                     "Can't build non-debug Lass with debug Python on Windows."
                 )
 
-        cmake = CMake(self)
-        defs = {
-            "CMAKE_CONFIGURATION_TYPES": self.settings.build_type,
-            "BUILD_TESTING": self.develop and not self.in_local_cache,
-            "SPECTRAL_MODE": self.options.spectral_mode,
-            "Lass_DIR": os.path.join(self.deps_cpp_info["Lass"].rootpath, "cmake", "Lass"),
-            "Python_EXECUTABLE": python.executable,
-            "Python_LIBRARY": python.library,
-        }
+        tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_CONFIGURATION_TYPES"] = str(self.settings.build_type)
+        tc.cache_variables["SPECTRAL_MODE"] = str(self.options.spectral_mode)
+        tc.cache_variables["Lass_DIR"] = os.path.join(
+            lass.package_folder, "share", "Lass"
+        )
+        tc.variables["Python_EXECUTABLE"] = python.executable.as_posix()
+        tc.variables["Python_LIBRARY_RELEASE"] = python.library.as_posix()
+        tc.variables["Python_LIBRARY_DEBUG"] = python.library.as_posix()
         if self.options.have_lcms2:
-            defs["LCMS2_ENABLE"] = True
-        cmake.configure(source_folder=".", defs=defs)
-        return cmake
+            tc.cache_variables["LCMS2_ENABLE"] = True
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        cmake = self._cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
+        cmake.test()
 
     def package(self):
-        cmake = self._cmake()
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
@@ -115,21 +147,21 @@ class Python(object):
     """Build and config info of a Python"""
 
     def __init__(self, executable, settings):
-        self._executable = tools.which(str(executable))
+        found_executable = shutil.which(str(executable))
+        if not found_executable:
+            raise ConanInvalidConfiguration(
+                f"Python executable cannot be found: {executable!s}"
+            )
+        self._executable = Path(found_executable)
         self._os = settings.os
 
-        if not self._executable:
-            raise errors.ConanInvalidConfiguration(
-                "Python executable cannot be found: {!s}".format(self._executable)
-            )
-
     @property
-    def executable(self):
+    def executable(self) -> Path:
         """Full path to Python executable"""
         return self._executable
 
     @property
-    def version(self):
+    def version(self) -> str:
         """Short version like 3.7"""
         # pylint: disable=attribute-defined-outside-init
         try:
@@ -139,7 +171,7 @@ class Python(object):
             return self._version
 
     @property
-    def debug(self):
+    def debug(self) -> bool:
         """True if python library is built with Py_DEBUG"""
         # pylint: disable=attribute-defined-outside-init
         try:
@@ -152,7 +184,7 @@ class Python(object):
             return self._debug
 
     @property
-    def library(self):
+    def library(self) -> Path:
         """Full path to python library you should link to"""
         # pylint: disable=attribute-defined-outside-init
         try:
@@ -160,43 +192,41 @@ class Python(object):
         except AttributeError:
             if self._os == "Windows":
                 stdlib = self._get_python_path("stdlib")
-                version_nodot = self._get_config_var("py_version_nodot")
+                version = self._get_config_var("py_version_nodot")
                 postfix = "_d" if self.debug else ""
-                self._library = os.path.join(
-                    os.path.dirname(stdlib),
-                    "libs",
-                    "python{}{}.lib".format(version_nodot, postfix),
-                )
+                self._library = stdlib.parent / f"libs/python{version}{postfix}.lib"
             else:
                 fname = self._get_config_var("LDLIBRARY")
-                hints = []
+                hints: List[Path] = []
                 ld_library_path = os.getenv("LD_LIBRARY_PATH")
                 if ld_library_path:
-                    hints += ld_library_path.split(os.pathsep)
+                    hints.extend(
+                        Path(dirname) for dirname in ld_library_path.split(os.pathsep)
+                    )
                 hints += [
-                    self._get_config_var("LIBDIR"),
-                    self._get_config_var("LIBPL"),
+                    Path(self._get_config_var("LIBDIR")),
+                    Path(self._get_config_var("LIBPL")),
                 ]
                 for dirname in hints:
-                    candidate = os.path.join(dirname, fname)
-                    if os.path.isfile(candidate):
+                    candidate = dirname / fname
+                    if candidate.is_file():
                         self._library = candidate
                         break
                 else:
-                    raise RuntimeError("Unable to find {}".format(fname))
+                    raise RuntimeError(f"Unable to find {fname}")
             return self._library
 
-    def _get_python_path(self, key):
-        return self._query(
-            "import sysconfig; print(sysconfig.get_path({!r}))".format(key)
+    def _get_python_path(self, key: str) -> Path:
+        return Path(
+            self._query(f"import sysconfig; print(sysconfig.get_path({key!r}))")
         )
 
-    def _get_config_var(self, key):
+    def _get_config_var(self, key: str) -> str:
         return self._query(
-            "import sysconfig; print(sysconfig.get_config_var({!r}))".format(key)
+            f"import sysconfig; print(sysconfig.get_config_var({key!r}))"
         )
 
-    def _query(self, script):
+    def _query(self, script: str) -> str:
         return subprocess.check_output(
-            [self.executable, "-c", script], universal_newlines=True
+            [str(self.executable), "-c", script], text=True
         ).strip()

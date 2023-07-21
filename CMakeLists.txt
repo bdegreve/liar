@@ -2,11 +2,6 @@ cmake_minimum_required(VERSION 3.0)
 project(liar VERSION 0.2.0)
 list(APPEND CMAKE_MODULE_PATH "${liar_SOURCE_DIR}/cmake")
 
-if(EXISTS "${liar_BINARY_DIR}/conanbuildinfo.cmake")
-	include("${liar_BINARY_DIR}/conanbuildinfo.cmake")
-	conan_basic_setup(TARGETS)
-endif()
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${liar_BINARY_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${liar_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${liar_BINARY_DIR}/lib")
