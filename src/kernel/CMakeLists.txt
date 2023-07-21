@@ -58,7 +58,7 @@ target_link_libraries(libkernel
 	Lass::lass_python
 	${LCMS2_LIBRARIES}
 	)
-set_precompiled_header(libkernel kernel_common.h kernel_common.cpp)
+target_precompile_headers(libkernel PRIVATE kernel_common.h)
 install(
 	TARGETS libkernel
 	DESTINATION liar

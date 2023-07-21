@@ -110,13 +110,9 @@ include_directories(
 	BEFORE ${CMAKE_CURRENT_BINARY_DIR}
 	)
 
-add_liar_module(output)
-
 # display_impl.cpp does not use the precompiled header, we must disable it.
-if(MSVC)
-		set_property(
-				SOURCE display_impl.cpp
-				APPEND_STRING
-				PROPERTY COMPILE_FLAGS " /Y-"
-		)
-endif()
+set_property(
+	SOURCE display_impl.cpp
+	PROPERTY
+		SKIP_PRECOMPILE_HEADERS TRUE
+)

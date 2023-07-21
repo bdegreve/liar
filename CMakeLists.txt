@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.16)
 project(liar VERSION 0.2.0)
 list(APPEND CMAKE_MODULE_PATH "${liar_SOURCE_DIR}/cmake")
 
@@ -68,12 +68,6 @@ if (Python_EXECUTABLE AND NOT CMAKE_INSTALL_PREFIX)
 endif ()
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}")
 
-if (MSVC)
-	option(BUILD_USING_PRECOMPILED_HEADERS "Build using precompiled headers" ON)
-else()
-	set(BUILD_USING_PRECOMPILED_HEADERS OFF)
-endif()
-
 if (MSVC_IDE AND NOT MSVC_VERSION LESS 1400)
 	if (MSVC_VERSION LESS 1500)
 		set(_default_mp OFF)
@@ -114,49 +108,6 @@ endmacro()
 
 macro(_mark_target_as_python_module name)
 endmacro()
-
-function(set_precompiled_header target hdrfile srcpath)
-    if(NOT BUILD_USING_PRECOMPILED_HEADERS)
-        return()
-    endif()
-
-    if(MSVC_IDE)
-        set(pchpath "${CMAKE_CURRENT_BINARY_DIR}/${target}.dir/${CMAKE_CFG_INTDIR}/${hdrfile}.pch")
-    else()
-        set(pchpath "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${target}.dir/${hdrfile}.pch")
-    endif()
-    if(MSVC)
-        set_property(
-            TARGET "${target}"
-            APPEND_STRING
-            PROPERTY COMPILE_FLAGS " /Fp\"${pchpath}\" /Yu\"${hdrfile}\""
-        )
-        set_property(
-            SOURCE "${srcpath}"
-            APPEND_STRING
-            PROPERTY COMPILE_FLAGS " /Yc\"${hdrfile}\""
-        )
-        if (NOT MSVC_IDE)
-            get_target_property(sources "${target}" SOURCES)
-            list(REMOVE_ITEM sources "${srcpath}")
-            set_property(
-                SOURCE ${sources}
-                APPEND
-                PROPERTY OBJECT_DEPENDS "${pchpath}"
-            )
-        endif()
-    else()
-        #add_custom_command(
-        #    OUTPUT ${pchpath}
-        #    DEPENDS ${hdrfile}
-        #    COMMAND ...)
-        #set_source_files_properties(
-        #    ${test_SRCS}
-        #    PROPERTIES
-        #    OBJECT_DEPENDS ${_pchpath})
-    endif()
-endfunction()
-
 
 include(CMakeParseArguments)
 
@@ -225,7 +176,7 @@ function(add_liar_module name)
 		SRCS ${${name}_SRCS} ${_srcs}
 		LIBS ${${name}_LIBS}
 	)
-	set_precompiled_header("${name}" "${name}_common.h" "${name}_common.cpp")
+	target_precompile_headers("${name}" PRIVATE "${name}_common.h")
 endfunction()
 
 set(SPECTRAL_MODE "RGB" CACHE STRING "Computational mode for Spectral values")
