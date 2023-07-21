@@ -383,10 +383,11 @@ SampleBsdfOut Walter::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& s
 	}
 	else
 	{
+		using TValueTraits = num::NumTraits<TValue>;
 		const TValue eta = etaI_ / etaT_;
-		const TScalar cosThetaI = num::abs(dot(omegaIn, h));
-		const TScalar sinTheta2 = num::sqr(eta) * (TNumTraits::one - num::sqr(cosThetaI));
-		const TScalar cosThetaT = num::sqrt(std::max(TNumTraits::one - sinTheta2, TNumTraits::zero));
+		const TValue cosThetaI = static_cast<TValue>(num::abs(dot(omegaIn, h)));
+		const TValue sinTheta2 = num::sqr(eta) * (TValueTraits::one - num::sqr(cosThetaI));
+		const TValue cosThetaT = num::sqrt(std::max(TValueTraits::one - sinTheta2, TValueTraits::zero));
 		// const TVector3D omegaOut = ((eta * cosThetaI - num::sqrt(std::max<TScalar>(0, 1 + eta * (num::sqr(cosThetaI) - 1))) * h) - eta * omegaIn).normal();
 		const TVector3D omegaOut = (-eta * omegaIn + (eta * cosThetaI - cosThetaT) * h).normal();
 		if (omegaOut.z >= 0)
