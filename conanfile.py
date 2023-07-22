@@ -80,7 +80,7 @@ class LiarConan(ConanFile):
         if self.options.have_png:
             self.requires("lodepng/cci.20200615")
         if self.options.have_lcms2:
-            self.requires("lcms/2.9")
+            self.requires("lcms/2.14")
 
     def build_requirements(self):
         self.test_requires("gtest/1.14.0")

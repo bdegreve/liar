@@ -4,30 +4,6 @@ macro(EVAL)
 	endforeach()
 endmacro()
 
-
-option(LCMS2_ENABLE "Use LCMS2 as color conversion engine" "OFF")
-if (LCMS2_ENABLE)
-	find_package(LCMS2)
-	if (LCMS2_FOUND)
-		add_definitions(-DLIAR_HAVE_LCMS2_H=1)
-		include_directories(${LCMS2_INCLUDE_DIRS})
-		install(
-			FILES ${LCMS2_REDISTS}
-			DESTINATION liar
-			CONFIGURATIONS RELEASE MINSIZEREL RELWITHDEBINFO
-			)
-		install(
-			FILES ${LCMS2_DEBUG_REDISTS}
-			DESTINATION liar
-			CONFIGURATIONS DEBUG
-			)
-	else()
-		message(SEND_ERROR "LCMS2 not found. Fix or disable LCMS2.")
-	endif()
-endif()
-
-
-
 file(GLOB libkernel_SRCS
 	*.h
 	*.inl
@@ -48,7 +24,7 @@ elseif(APPLE)
 	set_target_properties(
 		libkernel
 		PROPERTIES
-			INSTALL_NAME_DIR "@rpath"
+		INSTALL_NAME_DIR "@rpath"
 		)
 else()
 	set_target_properties(
@@ -63,8 +39,8 @@ target_compile_definitions(libkernel
 		"$<$<CONFIG:RelWithDebInfo>:LIAR_DEBUG>"
 )
 target_link_libraries(libkernel
-	Lass::lass_python
-	${LCMS2_LIBRARIES}
+	PUBLIC
+		Lass::lass_python
 	)
 target_precompile_headers(libkernel PRIVATE kernel_common.h)
 if(WIN32)
@@ -79,3 +55,14 @@ install(
 	)
 
 add_liar_module_ex(kernel kernel_init.cpp)
+
+option(LCMS2_ENABLE "Use Little CMS as color conversion engine" "OFF")
+if (LCMS2_ENABLE)
+	find_package(lcms REQUIRED)
+	target_link_libraries(libkernel
+		PRIVATE lcms::lcms
+	)
+	target_compile_definitions(libkernel
+		PUBLIC LIAR_HAVE_LCMS2_H=1
+	)
+endif()
