@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2021-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,12 +22,10 @@
  */
 
 #include "../kernel/image_codec.h"
-#include <lass/io/binary_i_file.h>
-#include <lass/io/binary_i_memory_map.h>
-#include <lass/io/binary_o_file.h>
 #include <lass/io/arg_parser.h>
+#include <lass/util/wchar_support.h>
 
-#include "lodepng.h"
+#include <lodepng.h>
 
 #include <stdio.h>
 
@@ -41,8 +39,8 @@ namespace
 class ScopedFILE: lass::util::NonCopyable
 {
 public:
-	ScopedFILE(FILE* fp): fp_(fp) {}
-	~ScopedFILE() { fclose(fp_); }
+	explicit ScopedFILE(FILE* fp): fp_(fp) {}
+	~ScopedFILE() { ::fclose(fp_); }
 	operator FILE* () const { return fp_; }
 private:
 	FILE* fp_;
@@ -77,7 +75,12 @@ struct ReadHandle: public Handle
 		Handle(0, 0, rgbSpace),
 		bytes(0)
 	{
+#if defined(_WIN32)
 		ScopedFILE fp(::_wfopen(path.c_str(), L"rb"));
+#else
+		std::string utf8Path = util::wcharToUtf8(path);
+		ScopedFILE fp(::fopen(utf8Path.c_str(), "rb"));
+#endif
 		::fseek(fp, 0L, SEEK_END);
 		const long signedFileSize = ::ftell(fp);
 		LASS_ENFORCE(signedFileSize > 0);
@@ -119,7 +122,12 @@ struct WriteHandle: public Handle
 		{
 			throw lass::util::Exception(::lodepng_error_text(err));
 		}
+#if defined(_WIN32)
 		ScopedFILE fp(::_wfopen(path.c_str(), L"wb"));
+#else
+		std::string utf8Path = util::wcharToUtf8(path);
+		ScopedFILE fp(::fopen(utf8Path.c_str(), "wb"));
+#endif
 		const size_t bytesWritten = ::fwrite(out, sizeof(unsigned char), size, fp);
 		::free(out);
 		LASS_ENFORCE(bytesWritten == size);
