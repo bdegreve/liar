@@ -364,7 +364,6 @@ void Display::displayLoop()
 			display.title(makeTitle().c_str());
 		}
 
-#if LIAR_OUTPUT_HAVE_PIXELTOASTER_DIRTYBOX
 		PixelToaster::Rectangle box;
 		if (!displayDirtyBox_.isEmpty())
 		{
@@ -374,9 +373,7 @@ void Display::displayLoop()
 			box.yEnd = num::numCast<int>(displayDirtyBox_.max().y + 1);
 		}
 		LASS_ENFORCE(display.update(displayBuffer_, &box));
-#else
-		LASS_ENFORCE(display_.update(displayBuffer_));
-#endif
+
 		displayDirtyBox_.clear();
 		signal_.wait(250);
 	}
