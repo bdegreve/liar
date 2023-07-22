@@ -149,7 +149,8 @@ function(add_liar_module_ex name)
 		set_target_properties(
 			"${name}"
 			PROPERTIES
-			PREFIX ""
+				PREFIX ""
+				INSTALL_RPATH "$ORIGIN"
 			)
 	endif()
 	install(

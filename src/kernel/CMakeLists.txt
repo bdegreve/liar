@@ -42,11 +42,19 @@ set_target_properties(
 	PROPERTIES
 	COMPILE_FLAGS "${liar_CFLAGS}"
 	)
-if(APPLE)
+if(WIN32)
+	# pass
+elseif(APPLE)
 	set_target_properties(
 		libkernel
 		PROPERTIES
-		INSTALL_NAME_DIR "@rpath"
+			INSTALL_NAME_DIR "@rpath"
+		)
+else()
+	set_target_properties(
+		libkernel
+		PROPERTIES
+			INSTALL_RPATH "$ORIGIN"
 		)
 endif()
 target_compile_definitions(libkernel
