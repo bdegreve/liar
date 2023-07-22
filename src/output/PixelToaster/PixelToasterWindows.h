@@ -1,5 +1,5 @@
 // Windows Platform
-// Copyright © 2006-2007 Glenn Fiedler
+// Copyright ï¿½ 2006-2007 Glenn Fiedler
 // Part of the PixelToaster Framebuffer Library - http://www.pixeltoaster.com
 
 #define VC_EXTRALEAN 
@@ -9,6 +9,10 @@
 #include <windowsx.h>
 
 #include <d3d9.h>
+
+using std::min;
+using std::max;
+
 #include <gdiplus.h> // fallback when d3d9 is not available.
 
 #ifdef _MSC_VER
