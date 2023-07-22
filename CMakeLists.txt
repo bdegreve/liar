@@ -25,19 +25,32 @@ if (CMAKE_CONFIGURATION_TYPES)
 else()
 	set(_configs "${CMAKE_BUILD_TYPE}")
 endif()
-foreach(_config ${_configs})
-	string(TOUPPER "${_config}" _CONFIG)
-	get_target_property(_location Lass::lass IMPORTED_LOCATION_${_CONFIG})
-	get_target_property(_location_python Lass::lass_python IMPORTED_LOCATION_${_CONFIG})
-	if (NOT _location OR NOT _location_python)
-		#message(SEND_ERROR "can't find lass libraries for ${_config} build")
+foreach(_target Lass::lass Lass::lass_python)
+	get_target_property(_type "${_target}" TYPE)
+	if(NOT _type STREQUAL SHARED_LIBRARY)
+		continue()
 	endif()
-	install(
-		FILES "${_location}" "${_location_python}"
-		DESTINATION liar
-		CONFIGURATIONS ${_config}
+	foreach(_config ${_configs})
+		string(TOUPPER "${_config}" _CONFIG)
+		get_target_property(_location "${_target}" "IMPORTED_LOCATION_${_CONFIG}")
+		if (NOT _location)
+			message(SEND_ERROR "can't find ${_config} library of ${_target}")
+		endif()
+		install(
+			FILES "${_location}"
+			DESTINATION liar
+			CONFIGURATIONS ${_config}
 		)
+	endforeach()
 endforeach()
+unset(_location)
+unset(_CONFIG)
+unset(_config)
+unset(_type)
+unset(_target)
+unset(_configs)
+
+
 if (Python_LIBRARY_DEBUG)
 	set(CMAKE_DEBUG_POSTFIX _d)
 endif()
