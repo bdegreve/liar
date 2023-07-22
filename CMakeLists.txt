@@ -18,7 +18,7 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	set (CMAKE_INSTALL_PREFIX "" CACHE PATH "liar install prefix" FORCE)
 endif ()
 
-find_package(Lass 1.9 REQUIRED)
+find_package(Lass 1.11 REQUIRED)
 
 if (CMAKE_CONFIGURATION_TYPES)
 	set(_configs ${CMAKE_CONFIGURATION_TYPES})
