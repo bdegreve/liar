@@ -10,7 +10,11 @@ create_test_sourcelist(test_SRCS "main.cpp" ${test_files})
 
 include_directories(../src)
 add_executable(test_driver ${test_SRCS})
-target_link_libraries(test_driver libkernel)
+target_link_libraries(test_driver
+	PRIVATE
+		libkernel
+		Python::Python
+)
 
 foreach(fname ${test_files})
 	get_filename_component(test "${fname}" NAME_WE)
