@@ -10,6 +10,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Git
+from conan.tools.system.package_manager import Apt
 
 required_conan_version = ">=2.0.0"
 
@@ -43,6 +44,7 @@ class LiarConan(ConanFile):
         "have_libjpeg": [True, False],
         "have_png": [True, False],
         "have_lcms2": [True, False],
+        "have_x11": [True, False],
         "spectral_mode": ["RGB", "XYZ", "Banded", "Single"],
     }
     default_options = {
@@ -51,6 +53,7 @@ class LiarConan(ConanFile):
         "have_libjpeg": True,
         "have_png": True,
         "have_lcms2": False,
+        "have_x11": True,
         "lass/*:shared": True,
         "openexr/*:shared": False,
         "libjpeg/*:shared": False,
@@ -79,9 +82,16 @@ class LiarConan(ConanFile):
         if self.options.have_lcms2:
             self.requires("lcms/2.9")
 
+    def system_requirements(self):
+        # depending on the platform or the tools.system.package_manager:tool configuration
+        # only one of these will be executed
+        if self.options.get_safe("have_x11"):
+            Apt(self).install(["libx11-dev"])
+
     def config_options(self):
-        if str(self.settings.compiler) in ["msvc", "Visual Studio"]:
-            del self.options.fPIC
+        if self.settings.get_safe("os") == "Windows":
+            self.options.rm_safe("fPIC")
+            self.options.rm_safe("have_x11")
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
