@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -214,12 +214,28 @@ const RgbSpace::RGBA RgbSpace::linearConvert(const XYZ& xyz, TScalar alpha) cons
 
 
 
+namespace
+{
+
+template <typename T>
+T tonecurve(T x, T gamma)
+{
+	return x < 0
+		? -num::pow(-x, gamma)
+		: num::pow(x, gamma);
+}
+
+}
+
+
 const RgbSpace::RGBA RgbSpace::toGamma(const RGBA& rgba) const
 {
+	if (gamma_ == 1)
+		return rgba;
 	return RGBA(
-		num::pow(std::max<RGBA::TValue>(rgba.r, 0), invGamma_),
-		num::pow(std::max<RGBA::TValue>(rgba.g, 0), invGamma_),
-		num::pow(std::max<RGBA::TValue>(rgba.b, 0), invGamma_),
+		tonecurve(rgba.r, invGamma_),
+		tonecurve(rgba.g, invGamma_),
+		tonecurve(rgba.b, invGamma_),
 		rgba.a);
 }
 
@@ -227,10 +243,12 @@ const RgbSpace::RGBA RgbSpace::toGamma(const RGBA& rgba) const
 
 const RgbSpace::RGBA RgbSpace::toLinear(const RGBA& rgba) const
 {
+	if (gamma_ == 1)
+		return rgba;
 	return RGBA(
-		num::pow(std::max<RGBA::TValue>(rgba.r, 0), gamma_),
-		num::pow(std::max<RGBA::TValue>(rgba.g, 0), gamma_),
-		num::pow(std::max<RGBA::TValue>(rgba.b, 0), gamma_),
+		tonecurve(rgba.r, gamma_),
+		tonecurve(rgba.g, gamma_),
+		tonecurve(rgba.b, gamma_),
 		rgba.a);
 }
 
