@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ namespace openexr
 class LassIStream: public Imf::IStream
 {
 public:
-	LassIStream(const std::wstring& path): Imf::IStream(util::wcharToUtf8(path).c_str()), file_(path) {}
+	LassIStream(const std::filesystem::path& path) : Imf::IStream(path.string().c_str()), file_(path) {}
 	bool read(char c[/*n*/], int n) { file_.read(c, num::numCast<size_t>(n)); return true; }
 	Imf::Int64 tellg() { return num::numCast<Imf::Int64>( file_.tellg() ); }
 	void seekg(Imf::Int64 pos) { file_.seekg( num::numCast<long>(pos) ); }
@@ -54,7 +54,7 @@ private:
 class LassOStream: public Imf::OStream
 {
 public:
-	LassOStream(const std::wstring& path): Imf::OStream(util::wcharToUtf8(path).c_str()), file_(path) {}
+	LassOStream(const std::filesystem::path& path): Imf::OStream(path.string().c_str()), file_(path) {}
 	void write(const char c[], int n) { file_.write(c, num::numCast<size_t>(n)); }
 	Imf::Int64 tellp() { return num::numCast<Imf::Int64>( file_.tellp() ); }
 	void seekp(Imf::Int64 pos) { file_.seekp( num::numCast<long>(pos) ); }
@@ -100,7 +100,7 @@ inline TPoint2D V2fToPoint2D(const Imath::V2f& p)
 class ImageCodecOpenEXR: public kernel::ImageCodec
 {
 private:
-	TImageHandle doCreate(const std::wstring& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
+	TImageHandle doCreate(const std::filesystem::path& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
 	{
 		std::unique_ptr<Handle> pimpl(new Handle(resolution, rgbSpace));
 		pimpl->line.resize(resolution.x);
@@ -117,7 +117,7 @@ private:
 		return pimpl.release();
 	}
 
-	TImageHandle doOpen(const std::wstring& path, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
+	TImageHandle doOpen(const std::filesystem::path& path, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
 	{
 		std::unique_ptr<LassIStream> istream(new LassIStream(path));
 		std::unique_ptr<Imf::RgbaInputFile> input(new Imf::RgbaInputFile(*istream, 0));
@@ -224,7 +224,7 @@ private:
 void postInject(PyObject*)
 {
 	liar::kernel::TImageCodecMap& map = liar::kernel::imageCodecs();
-	map[L"exr"] = liar::kernel::TImageCodecPtr(new liar::openexr::ImageCodecOpenEXR);
+	map[".exr"] = liar::kernel::TImageCodecPtr(new liar::openexr::ImageCodecOpenEXR);
 	LASS_COUT << "liar.codecs.openexr imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n";
 }
 

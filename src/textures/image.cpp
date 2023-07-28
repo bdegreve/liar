@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include "../kernel/image_codec.h"
 #include <lass/io/file_attribute.h>
 #include <lass/stde/extended_string.h>
+#include <lass/python/export_traits_filesystem.h>
 
 namespace liar
 {
@@ -33,12 +34,13 @@ namespace textures
 {
 
 PY_DECLARE_CLASS_DOC(Image, "image file")
-PY_CLASS_CONSTRUCTOR_1(Image, const std::wstring&);
-PY_CLASS_CONSTRUCTOR_2(Image, const std::wstring&, const TRgbSpacePtr&);
-PY_CLASS_CONSTRUCTOR_3(Image, const std::wstring&, const std::string&, const std::string&);
-PY_CLASS_CONSTRUCTOR_4(Image, const std::wstring&, const std::string&, const std::string&, const TRgbSpacePtr&);
-PY_CLASS_METHOD_QUALIFIED_1(Image, loadFile, void, const std::wstring&)
-PY_CLASS_METHOD_QUALIFIED_2(Image, loadFile, void, const std::wstring&, const TRgbSpacePtr&)
+PY_CLASS_CONSTRUCTOR_1(Image, const std::filesystem::path&);
+PY_CLASS_CONSTRUCTOR_2(Image, const std::filesystem::path&, const TRgbSpacePtr&);
+PY_CLASS_CONSTRUCTOR_3(Image, const std::filesystem::path&, const std::string&, const std::string&);
+PY_CLASS_CONSTRUCTOR_4(Image, const std::filesystem::path&, const std::string&, const std::string&, const TRgbSpacePtr&);
+PY_CLASS_METHOD_QUALIFIED_1(Image, loadFile, void, const std::filesystem::path&)
+PY_CLASS_METHOD_QUALIFIED_2(Image, loadFile, void, const std::filesystem::path&, const TRgbSpacePtr&)
+PY_CLASS_MEMBER_R(Image, filename);
 PY_CLASS_MEMBER_R(Image, resolution);
 PY_CLASS_MEMBER_RW(Image, antiAliasing, setAntiAliasing);
 PY_CLASS_MEMBER_RW(Image, mipMapping, setMipMapping);
@@ -58,7 +60,7 @@ Image::MipMapping Image::defaultMipMapping_ = Image::mmAnisotropic;
 
 // --- public --------------------------------------------------------------------------------------
 
-Image::Image(const std::wstring& filename):
+Image::Image(const std::filesystem::path& filename):
 	antiAliasing_(defaultAntiAliasing_),
 	mipMapping_(defaultMipMapping_),
 	currentMipMapping_(mmUninitialized)
@@ -68,7 +70,7 @@ Image::Image(const std::wstring& filename):
 
 
 
-Image::Image(const std::wstring& filename, const TRgbSpacePtr& rgbSpace):
+Image::Image(const std::filesystem::path& filename, const TRgbSpacePtr& rgbSpace):
 	antiAliasing_(defaultAntiAliasing_),
 	mipMapping_(defaultMipMapping_),
 	currentMipMapping_(mmUninitialized)
@@ -79,7 +81,7 @@ Image::Image(const std::wstring& filename, const TRgbSpacePtr& rgbSpace):
 
 
 Image::Image(
-		const std::wstring& filename, const std::string& antiAliasing, 
+		const std::filesystem::path& filename, const std::string& antiAliasing,
 		const std::string& mipMapping):
 	currentMipMapping_(mmUninitialized)
 {
@@ -91,7 +93,7 @@ Image::Image(
 
 
 Image::Image(
-		const std::wstring& filename, const std::string& antiAliasing, 
+		const std::filesystem::path& filename, const std::string& antiAliasing,
 		const std::string& mipMapping, const TRgbSpacePtr& rgbSpace):
 	currentMipMapping_(mmUninitialized)
 {
@@ -102,14 +104,14 @@ Image::Image(
 
 
 
-void Image::loadFile(const std::wstring& filename)
+void Image::loadFile(const std::filesystem::path& filename)
 {
 	loadFile(filename, TRgbSpacePtr());
 }
 
 
 
-void Image::loadFile(const std::wstring& filename, const TRgbSpacePtr& rgbSpace)
+void Image::loadFile(const std::filesystem::path& filename, const TRgbSpacePtr& rgbSpace)
 {
 	ImageReader reader(filename, rgbSpace, "");
 	TResolution2D resolution = reader.resolution();
@@ -137,6 +139,13 @@ void Image::loadFile(const std::wstring& filename, const TRgbSpacePtr& rgbSpace)
 
 	currentMipMapping_ = mmUninitialized;
 	mipMaps_.clear();
+}
+
+
+
+const std::filesystem::path& Image::filename() const
+{
+	return filename_;
 }
 
 
@@ -287,7 +296,7 @@ const TPyObjectPtr Image::doGetState() const
 
 void Image::doSetState(const TPyObjectPtr& state)
 {
-	std::wstring filename;
+	std::filesystem::path filename;
 	std::string antiAliasing, mipMapping;
 	TRgbSpacePtr rgbSpace;
 	python::decodeTuple(state, filename, rgbSpace, antiAliasing, mipMapping);

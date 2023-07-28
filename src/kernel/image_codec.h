@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,11 +43,11 @@ public:
 	typedef void* TImageHandle;
 	virtual ~ImageCodec();
 
-	TImageHandle create(const std::wstring& path, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string& options) const 
+	TImageHandle create(const std::filesystem::path& path, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string& options) const
 	{
 		return doCreate(path, resolution, rgbSpace, options);
 	}
-	TImageHandle open(const std::wstring& path, const TRgbSpacePtr& rgbSpace, const std::string& options) const 
+	TImageHandle open(const std::filesystem::path& path, const TRgbSpacePtr& rgbSpace, const std::string& options) const
 	{
 		return doOpen(path, rgbSpace, options); 
 	}
@@ -75,8 +75,8 @@ public:
 	}
 
 private:
-	virtual TImageHandle doCreate(const std::wstring& path, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string& options) const = 0;
-	virtual TImageHandle doOpen(const std::wstring& path, const TRgbSpacePtr& rgbSpace, const std::string& options) const = 0;
+	virtual TImageHandle doCreate(const std::filesystem::path& path, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string& options) const = 0;
+	virtual TImageHandle doOpen(const std::filesystem::path& path, const TRgbSpacePtr& rgbSpace, const std::string& options) const = 0;
 	virtual void doClose(TImageHandle) const = 0;
 
 	virtual const TResolution2D doResolution(TImageHandle handle) const = 0;
@@ -87,18 +87,18 @@ private:
 };
 
 typedef python::PyObjectPtr<ImageCodec>::Type TImageCodecPtr;
-typedef std::map<std::wstring, TImageCodecPtr> TImageCodecMap;
+typedef std::map<std::string, TImageCodecPtr> TImageCodecMap;
 
 LIAR_KERNEL_DLL TImageCodecMap& LASS_CALL imageCodecs();
-LIAR_KERNEL_DLL const TImageCodecPtr& LASS_CALL imageCodec(const std::wstring& extension);
+LIAR_KERNEL_DLL const TImageCodecPtr& LASS_CALL imageCodec(const std::string& extension);
 
-LIAR_KERNEL_DLL void transcodeImage(const std::wstring& source, const std::wstring& dest, TRgbSpacePtr sourceSpace, const TRgbSpacePtr& destSpace);
+LIAR_KERNEL_DLL void transcodeImage(const std::filesystem::path& source, const std::filesystem::path& dest, TRgbSpacePtr sourceSpace, const TRgbSpacePtr& destSpace);
 
 class LIAR_KERNEL_DLL ImageReader: util::NonCopyable
 {
 public:
 
-	ImageReader(const std::wstring& path, const TRgbSpacePtr& rgbSpace = TRgbSpacePtr(), const std::string& options = "");
+	ImageReader(const std::filesystem::path& path, const TRgbSpacePtr& rgbSpace = TRgbSpacePtr(), const std::string& options = "");
 	~ImageReader();
 
 	const TResolution2D resolution() const { return codec_->resolution(handle_); }
@@ -116,7 +116,7 @@ class LIAR_KERNEL_DLL ImageWriter: util::NonCopyable
 {
 public:
 
-	ImageWriter(const std::wstring& path, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace = TRgbSpacePtr(), const std::string& options = "");
+	ImageWriter(const std::filesystem::path& path, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace = TRgbSpacePtr(), const std::string& options = "");
 	~ImageWriter();
 
 	const TResolution2D resolution() const { return codec_->resolution(handle_); }
@@ -139,8 +139,8 @@ public:
 protected:
 	TRgbSpacePtr selectRgbSpace(const TRgbSpacePtr& defaultCodecSpace = TRgbSpacePtr()) const;
 private:
-	virtual TImageHandle doCreate(const std::wstring& path, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string& options) const;
-	virtual TImageHandle doOpen(const std::wstring& path, const TRgbSpacePtr& rgbSpace, const std::string& options) const;
+	virtual TImageHandle doCreate(const std::filesystem::path& path, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string& options) const;
+	virtual TImageHandle doOpen(const std::filesystem::path& path, const TRgbSpacePtr& rgbSpace, const std::string& options) const;
 	virtual void doClose(TImageHandle handle) const;
 
 	virtual const TResolution2D doResolution(TImageHandle handle) const;

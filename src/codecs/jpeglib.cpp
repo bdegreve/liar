@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ namespace jpeglib
 class SourceMgr: public jpeg_source_mgr
 {
 public:
-	SourceMgr(const std::wstring& path):
+	SourceMgr(const std::filesystem::path& path):
 		file_(path),
 		buffer_(bufferLength)
 	{
@@ -120,7 +120,7 @@ private:
 class DestMgr: public jpeg_destination_mgr
 {
 public:
-	DestMgr(const std::wstring& path):
+	DestMgr(const std::filesystem::path& path):
 		file_(path),
 		buffer_(bufferLength)
 	{
@@ -187,7 +187,7 @@ struct ReadHandle: Handle
 {
 	jpeg_decompress_struct cinfo;
 	SourceMgr src;
-	ReadHandle(const std::wstring& path, const kernel::TRgbSpacePtr& rgbSpace):
+	ReadHandle(const std::filesystem::path& path, const kernel::TRgbSpacePtr& rgbSpace):
 		Handle(rgbSpace),
 		src(path)
 	{
@@ -212,7 +212,7 @@ struct WriteHandle: Handle
 {
 	jpeg_compress_struct cinfo;
 	DestMgr dest;
-	WriteHandle(const std::wstring& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string& options):
+	WriteHandle(const std::filesystem::path& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string& options):
 		Handle(rgbSpace),
 		dest(path)
 	{
@@ -247,12 +247,12 @@ struct WriteHandle: Handle
 class ImageCodecJpeg: public kernel::ImageCodec
 {
 private:
-	TImageHandle doCreate(const std::wstring& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string& options) const
+	TImageHandle doCreate(const std::filesystem::path& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string& options) const
 	{
 		return new WriteHandle(path, resolution, rgbSpace, options);
 	}
 
-	TImageHandle doOpen(const std::wstring& path, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
+	TImageHandle doOpen(const std::filesystem::path& path, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
 	{
 		return new ReadHandle(path, rgbSpace);
 	}
@@ -314,7 +314,7 @@ private:
 void postInject(PyObject*)
 {
 	liar::kernel::TImageCodecMap& map = liar::kernel::imageCodecs();
-	map[L"jpg"] = map[L"jpeg"] = liar::kernel::TImageCodecPtr(new liar::jpeglib::ImageCodecJpeg);
+	map[".jpg"] = map[".jpeg"] = liar::kernel::TImageCodecPtr(new liar::jpeglib::ImageCodecJpeg);
 	LASS_COUT << "liar.codecs.jpeglib imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n";
 }
 

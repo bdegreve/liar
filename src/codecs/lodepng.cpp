@@ -28,6 +28,7 @@
 #include <lodepng.h>
 
 #include <stdio.h>
+#include <filesystem>
 
 #if LASS_COMPILER_TYPE == LASS_COMPILER_TYPE_MSVC
 #	pragma warning(disable: 4996)
@@ -71,15 +72,14 @@ struct Handle
 
 struct ReadHandle: public Handle
 {
-	ReadHandle(const std::wstring& path, const kernel::TRgbSpacePtr& rgbSpace):
+	ReadHandle(const std::filesystem::path& path, const kernel::TRgbSpacePtr& rgbSpace):
 		Handle(0, 0, rgbSpace),
-		bytes(0)
+		bytes(nullptr)
 	{
 #if defined(_WIN32)
 		ScopedFILE fp(::_wfopen(path.c_str(), L"rb"));
 #else
-		std::string utf8Path = util::wcharToUtf8(path);
-		ScopedFILE fp(::fopen(utf8Path.c_str(), "rb"));
+		ScopedFILE fp(::fopen(path.c_str(), "rb"));
 #endif
 		::fseek(fp, 0L, SEEK_END);
 		const long signedFileSize = ::ftell(fp);
@@ -106,7 +106,7 @@ struct ReadHandle: public Handle
 
 struct WriteHandle: public Handle
 {
-	WriteHandle(const std::wstring& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace):
+	WriteHandle(const std::filesystem::path& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace):
 		Handle(num::numCast<unsigned>(resolution.x), num::numCast<unsigned>(resolution.y), rgbSpace),
 		path(path)
 	{
@@ -125,8 +125,7 @@ struct WriteHandle: public Handle
 #if defined(_WIN32)
 		ScopedFILE fp(::_wfopen(path.c_str(), L"wb"));
 #else
-		std::string utf8Path = util::wcharToUtf8(path);
-		ScopedFILE fp(::fopen(utf8Path.c_str(), "wb"));
+		ScopedFILE fp(::fopen(path.c_str(), "wb"));
 #endif
 		const size_t bytesWritten = ::fwrite(out, sizeof(unsigned char), size, fp);
 		::free(out);
@@ -137,7 +136,7 @@ struct WriteHandle: public Handle
 	{
 	}
 
-	const std::wstring path;
+	const std::filesystem::path path;
 	const std::string options;
 	std::vector<unsigned char> bytes;
 };
@@ -148,12 +147,12 @@ struct WriteHandle: public Handle
 class ImageCodecLodePng: public kernel::ImageCodec
 {
 private:
-	TImageHandle doCreate(const std::wstring& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
+	TImageHandle doCreate(const std::filesystem::path& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
 	{
 		return new WriteHandle(path, resolution, rgbSpace);
 	}
 
-	TImageHandle doOpen(const std::wstring& path, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
+	TImageHandle doOpen(const std::filesystem::path& path, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
 	{
 		return new ReadHandle(path, rgbSpace);
 	}
@@ -214,7 +213,7 @@ private:
 void postInject(PyObject*)
 {
 	liar::kernel::TImageCodecMap& map = liar::kernel::imageCodecs();
-	map[L"png"] = liar::kernel::TImageCodecPtr(new liar::lodepng::ImageCodecLodePng);
+	map[".png"] = liar::kernel::TImageCodecPtr(new liar::lodepng::ImageCodecLodePng);
 	LASS_COUT << "liar.codecs.lodepng imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n";
 }
 

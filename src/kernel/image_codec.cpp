@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 #include <lass/io/image.h>
 #include <lass/util/singleton.h>
 #include <lass/stde/extended_string.h>
+#include <lass/python/export_traits_filesystem.h>
 
 namespace liar
 {
@@ -39,9 +40,9 @@ PY_DECLARE_CLASS_DOC(ImageCodecLass, "Lass based image codec")
 PY_CLASS_CONSTRUCTOR_0(ImageCodecLass)
 LASS_EXECUTE_BEFORE_MAIN_EX(ImageCodecLass,
 	TImageCodecMap& map = imageCodecs();
-	map[L"tga"] = map[L"targa"] = TImageCodecPtr(new ImageCodecLass);
-	map[L"lass"] = map[L"hdr"] = map[L"pic"] = map[L"rgbe"] = map[L"pfm"] = TImageCodecPtr(new ImageCodecLass(false));
-	map[L"igi"] = TImageCodecPtr(new ImageCodecLass(false, CIEXYZ));
+	map[".tga"] = map[".targa"] = TImageCodecPtr(new ImageCodecLass);
+	map[".lass"] = map[".hdr"] = map[".pic"] = map[".rgbe"] = map[".pfm"] = TImageCodecPtr(new ImageCodecLass(false));
+	map[".igi"] = TImageCodecPtr(new ImageCodecLass(false, CIEXYZ));
 )
 
 // --- ImageCodec ----------------------------------------------------------------------------------
@@ -59,19 +60,19 @@ TImageCodecMap& imageCodecs()
 
 
 
-const TImageCodecPtr& imageCodec(const std::wstring& extension)
+const TImageCodecPtr& imageCodec(const std::string& extension)
 {
 	const TImageCodecMap& codecs = imageCodecs();
 	const TImageCodecMap::const_iterator candidate = codecs.find(stde::tolower(extension));
 	if (candidate == codecs.end())
 	{
-		LASS_THROW("No image codec registered for the extension '" << util::wcharToUtf8(extension) << "'");
+		LASS_THROW("No image codec registered for the extension '" << extension << "'");
 	}
 	return candidate->second;
 }
 
 
-void transcodeImage(const std::wstring& source, const std::wstring& dest, TRgbSpacePtr sourceSpace, const TRgbSpacePtr& destSpace)
+void transcodeImage(const std::filesystem::path& source, const std::filesystem::path& dest, TRgbSpacePtr sourceSpace, const TRgbSpacePtr& destSpace)
 {
 	ImageReader reader(source, sourceSpace);
 	sourceSpace = reader.rgbSpace(); // use actual source space
@@ -103,8 +104,8 @@ void transcodeImage(const std::wstring& source, const std::wstring& dest, TRgbSp
 // --- ImageReader ---------------------------------------------------------------------------------
 
 ImageReader::ImageReader(
-		const std::wstring& path, const TRgbSpacePtr& rgbSpace, const std::string& options):
-	codec_(imageCodec(io::fileExtension(path))),
+		const std::filesystem::path& path, const TRgbSpacePtr& rgbSpace, const std::string& options):
+	codec_(imageCodec(path.extension().string())),
 	handle_(0)
 {
 	handle_ = codec_->open(path, rgbSpace, options);
@@ -131,9 +132,9 @@ void ImageReader::readFull(prim::ColorRGBA* out) const
 // --- ImageWriter ---------------------------------------------------------------------------------
 
 ImageWriter::ImageWriter(
-		const std::wstring& path, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, 
+		const std::filesystem::path& path, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace,
 		const std::string& options):
-	codec_(imageCodec(io::fileExtension(path))),
+	codec_(imageCodec(path.extension().string())),
 	handle_(0)
 {
 	handle_ = codec_->create(path, resolution, rgbSpace, options);
@@ -165,7 +166,7 @@ namespace impl
 	{
 		io::Image image;
 		TRgbSpacePtr rgbSpace;
-		std::wstring path;
+		std::filesystem::path path;
 		size_t y = 0;
 		bool saveOnClose = false;
 	};
@@ -196,7 +197,7 @@ TRgbSpacePtr ImageCodecLass::selectRgbSpace(const TRgbSpacePtr& customSpace) con
 
 
 
-ImageCodec::TImageHandle ImageCodecLass::doCreate(const std::wstring& path, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string&) const
+ImageCodec::TImageHandle ImageCodecLass::doCreate(const std::filesystem::path& path, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string&) const
 {
 	typedef io::Image::TChromaticity TChromaticity;
 
@@ -222,7 +223,7 @@ ImageCodec::TImageHandle ImageCodecLass::doCreate(const std::wstring& path, cons
 
 
 
-ImageCodec::TImageHandle ImageCodecLass::doOpen(const std::wstring& path, const TRgbSpacePtr& rgbSpace, const std::string&) const
+ImageCodec::TImageHandle ImageCodecLass::doOpen(const std::filesystem::path& path, const TRgbSpacePtr& rgbSpace, const std::string&) const
 {
 	std::unique_ptr<impl::LassImage> pimpl(new impl::LassImage);
 	pimpl->image.open(path);

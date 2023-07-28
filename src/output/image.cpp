@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include "image.h"
 #include "../kernel/image_codec.h"
 #include <lass/io/file_attribute.h>
+#include <lass/python/export_traits_filesystem.h>
 
 #define TONEMAP_SAMPLES
 
@@ -34,14 +35,14 @@ namespace output
 {
 
 PY_DECLARE_CLASS_DOC(Image, "simple image render target");
-PY_CLASS_CONSTRUCTOR_2(Image, std::wstring, const TResolution2D&)
+PY_CLASS_CONSTRUCTOR_2(Image, std::filesystem::path, const TResolution2D&)
 PY_CLASS_METHOD(Image, save)
 PY_CLASS_MEMBER_RW(Image, path, setPath)
 PY_CLASS_MEMBER_RW(Image, options, setOptions)
 
 // --- public --------------------------------------------------------------------------------------
 
-Image::Image(const std::wstring& path, const TResolution2D& resolution):
+Image::Image(const std::filesystem::path& path, const TResolution2D& resolution):
     Raster(resolution),
     path_(path),
     options_("")
@@ -83,7 +84,7 @@ void Image::save()
 }
 
 
-const std::wstring& Image::path() const
+const std::filesystem::path& Image::path() const
 {
     return path_;
 }
@@ -97,7 +98,7 @@ const std::string& Image::options() const
 
 
 
-void Image::setPath(const std::wstring& path)
+void Image::setPath(const std::filesystem::path& path)
 {
     path_ = path;
 }

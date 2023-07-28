@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 #include <lass/prim/xy.h>
 #include <lass/util/dictionary.h>
 #include <lass/util/thread.h>
+#include <filesystem>
 
 namespace liar
 {
@@ -46,16 +47,17 @@ class LIAR_TEXTURES_DLL Image: public Texture
 	PY_HEADER(Texture)
 public:
 
-	explicit Image(const std::wstring& filename);
-	Image(const std::wstring& filename, const TRgbSpacePtr& rgbSpace);
-	Image(const std::wstring& filename, const std::string& antiAliasing, 
+	explicit Image(const std::filesystem::path& filename);
+	Image(const std::filesystem::path& filename, const TRgbSpacePtr& rgbSpace);
+	Image(const std::filesystem::path& filename, const std::string& antiAliasing,
 		const std::string& mipMapping);
-	Image(const std::wstring& filename, const std::string& antiAliasing, 
+	Image(const std::filesystem::path& filename, const std::string& antiAliasing,
 		const std::string& mipMapping, const TRgbSpacePtr& rgbSpace);
 
-	void loadFile(const std::wstring& filename);
-	void loadFile(const std::wstring& filename, const TRgbSpacePtr& rgbSpace);
+	void loadFile(const std::filesystem::path& filename);
+	void loadFile(const std::filesystem::path& filename, const TRgbSpacePtr& rgbSpace);
 
+	const std::filesystem::path& filename() const;
 	const TResolution2D& resolution() const;
 
 	const std::string antiAliasing() const;
@@ -140,7 +142,7 @@ private:
 	static TAntiAliasingDictionary makeAntiAliasingDictionary();
 	static TMipMappingDictionary makeMipMappingDictionary();
 
-	std::wstring filename_;
+	std::filesystem::path filename_;
 	TRgbSpacePtr rgbSpace_;
 	TPixels image_;
 	TResolution2D resolution_;

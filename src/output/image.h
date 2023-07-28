@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 
 #include "output_common.h"
 #include "raster.h"
+#include <filesystem>
 
 namespace liar
 {
@@ -45,15 +46,15 @@ class LIAR_OUTPUT_DLL Image: public Raster
     PY_HEADER(Raster)
 public:
 
-    Image(const std::wstring& filename, const TResolution2D& resolution);
+    Image(const std::filesystem::path& filename, const TResolution2D& resolution);
     ~Image();
 
     void save();
 
-    const std::wstring& path() const;
+    const std::filesystem::path& path() const;
     const std::string& options() const;
 
-    void setPath(const std::wstring& path);
+    void setPath(const std::filesystem::path& path);
     void setOptions(const std::string& options);
 
 private:
@@ -61,7 +62,7 @@ private:
     void doBeginRender();
     void doEndRender();
  
-    std::wstring path_;
+    std::filesystem::path path_;
     std::string options_;
     util::CriticalSection saveLock_;
 };
