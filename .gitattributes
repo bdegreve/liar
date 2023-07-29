@@ -1,0 +1,24 @@
+* text=auto eol=lf
+
+*.bat eol=crlf
+*.sln eol=crlf
+*.vcproj eol=crlf
+
+*.sh eol=lf
+
+*.xcf binary
+*.bmp binary
+*.tga binary
+*.targa binary
+*.lass binary
+*.hdr binary
+*.pic binary
+*.rgbe binary
+*.pfm binary
+*.igi binary
+*.png binary
+*.exr binary
+*.jpg binary
+*.jpeg binary
+*.psd binary
+*.pdf binary
