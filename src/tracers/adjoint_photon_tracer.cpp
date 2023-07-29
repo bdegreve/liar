@@ -197,7 +197,7 @@ const Spectral AdjointPhotonTracer::shadeSurface(const Sample& sample, const Dif
 
 SampleBsdfOut AdjointPhotonTracer::scatterSurface(const Sample& sample, const TBsdfPtr& bsdf, const TPoint3D& target, const TVector3D& omegaIn, size_t generation) const
 {
-	LIAR_ASSERT(num::abs(omegaIn.norm() - 1) < 1e-6f, "omegaIn=" << omegaIn)
+	LIAR_ASSERT(num::abs(omegaIn.norm() - 1) < 1e-6f, "omegaIn=" << omegaIn);
 
 	const TScalar strategyPdf = bsdf->hasCaps(BsdfCaps::diffuse) ? 0.5f : 1.0f;
 	if (strategySample(sample, generation) < strategyPdf)
@@ -246,7 +246,7 @@ SampleBsdfOut AdjointPhotonTracer::scatterSurface(const Sample& sample, const TB
 
 		const TVector3D omegaOut = bsdf->worldToBsdf(shadowRay.direction());
 		LIAR_ASSERT(num::abs(omegaOut.norm() - 1) < 1e-6f, 
-			"omegaOut=" << omegaIn << ", shadowRay.direction()=" << shadowRay.direction())
+			"omegaOut=" << omegaIn << ", shadowRay.direction()=" << shadowRay.direction());
 		const BsdfOut out = bsdf->evaluate(omegaIn, omegaOut, BsdfCaps::all);
 		if (!out)
 		{
