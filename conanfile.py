@@ -1,7 +1,9 @@
+import json
 import os
 import re
 import shutil
 import subprocess
+from collections.abc import Sequence
 from pathlib import Path
 from typing import List, Optional
 
@@ -139,6 +141,25 @@ class LiarConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
+        includedirs = [os.path.join(self.source_folder, "src"), self.build_folder]
+        includedirs.extend(str(path) for path in python.includedirs)
+        for _, dep in self.dependencies.items():
+            includedirs.extend(dep.cpp_info.includedirs)
+        c_cpp_properties = {
+            "configurations": [
+                {
+                    "name": "Conan",
+                    "intelliSenseMode": "${default}",
+                    "includePath": includedirs,
+                }
+            ],
+            "version": 4,
+        }
+        vscodedir = os.path.join(self.source_folder, ".vscode")
+        os.makedirs(vscodedir, exist_ok=True)
+        with open(os.path.join(vscodedir, "c_cpp_properties.json"), "w") as fp:
+            json.dump(c_cpp_properties, fp, indent=2)
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
@@ -225,6 +246,12 @@ class Python(object):
                 else:
                     raise RuntimeError(f"Unable to find {fname}")
             return self._library
+
+    @property
+    def includedirs(self) -> Sequence[Path]:
+        include = self._get_python_path("include")
+        platinclude = self._get_python_path("platinclude")
+        return list(set([include, platinclude]))
 
     def _get_python_path(self, key: str) -> Path:
         return Path(

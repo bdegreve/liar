@@ -6,3 +6,4 @@ __pycache__/
 *.pyc
 
 CMakeUserPresets.json
+/.vscode/c_cpp_properties.json
