@@ -9,6 +9,7 @@ from typing import List, Optional
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools import CppInfo
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Git
@@ -106,6 +107,8 @@ class LiarConan(ConanFile):
 
     def layout(self):
         cmake_layout(self)
+        self.cpp.source.includedirs = ["src"]
+        self.cpp.build.includedirs = ["."]
 
     def generate(self):
         lass = self.dependencies["lass"]
@@ -141,24 +144,9 @@ class LiarConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-        includedirs = [os.path.join(self.source_folder, "src"), self.build_folder]
-        includedirs.extend(str(path) for path in python.includedirs)
-        for _, dep in self.dependencies.items():
-            includedirs.extend(dep.cpp_info.includedirs)
-        c_cpp_properties = {
-            "configurations": [
-                {
-                    "name": "Conan",
-                    "intelliSenseMode": "${default}",
-                    "includePath": includedirs,
-                }
-            ],
-            "version": 4,
-        }
-        vscodedir = os.path.join(self.source_folder, ".vscode")
-        os.makedirs(vscodedir, exist_ok=True)
-        with open(os.path.join(vscodedir, "c_cpp_properties.json"), "w") as fp:
-            json.dump(c_cpp_properties, fp, indent=2)
+        vscode = VSCodeCCppProperties(self)
+        vscode.include_path.extend(str(path) for path in python.includedirs)
+        vscode.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -267,3 +255,99 @@ class Python(object):
         return subprocess.check_output(
             [str(self.executable), "-c", script], text=True
         ).strip()
+
+
+class VSCodeCCppProperties:
+    name: str
+    include_path: list[str]
+    defines: list[str]
+    compiler_args: list[str]
+    cpp_standard: str
+    intellisense_mode: str
+    configuration_provider: str | None
+    compile_commands: str | None
+
+    def __init__(self, conanfile: ConanFile, *, cmake: bool = True):
+        self._conanfile = conanfile
+
+        self.name = f"conan-{str(conanfile.settings.build_type).lower()}"
+
+        cpp_info = CppInfo(conanfile)
+        cpp_info.merge(conanfile.cpp.source)
+        cpp_info.set_relative_base_folder(conanfile.source_folder)
+        cpp_info.merge(conanfile.cpp.build)
+        cpp_info.set_relative_base_folder(conanfile.build_folder)
+        deps = conanfile.dependencies.host.topological_sort
+        for dep in reversed(deps.values()):
+            cpp_info.merge(dep.cpp_info.aggregated_components())
+
+        self.include_path = cpp_info.includedirs
+        self.defines = cpp_info.defines
+        self.compiler_args = cpp_info.cxxflags
+
+        cppstd = conanfile.settings.get_safe("compiler.cppstd")
+        self.cpp_standard = f"c++{cppstd.replace('gnu', '')}"
+
+        os_ = str(conanfile.settings.os).lower()
+        compiler = str(conanfile.settings.compiler).lower()
+        if compiler == "visual studio":  # old compiler setting in Conan 1
+            compiler = "msvc"
+        arch = str(conanfile.settings.arch)
+        if arch == "x86":
+            pass
+        elif arch == "x86_64":
+            arch = "x64"
+        elif arch.startswith("arm64"):
+            arch = "arm64"
+        elif match := re.match(r"armv(\d+)", arch):
+            if int(match.group(1)) < 8:
+                arch = "arm"
+            else:
+                arch = "arm64"
+        else:
+            raise ConanInvalidConfiguration(f"Unsupported architecture {arch}")
+        self.intellisense_mode = f"{os_}-{compiler}-{arch}"
+
+        self.configuration_provider = "ms-vscode.cmake-tools" if cmake else None
+        self.compile_commands = (
+            os.path.join(conanfile.build_folder, "compile_commands.json")
+            if (cmake and compiler != "msvc")
+            else None
+        )
+
+    def generate(self):
+        vscode_folder = os.path.join(self._conanfile.source_folder, ".vscode")
+        c_cpp_properties = os.path.join(vscode_folder, "c_cpp_properties.json")
+
+        try:
+            with open(c_cpp_properties) as fp:
+                data = json.load(fp)
+        except FileNotFoundError:
+            data = {
+                "configurations": [],
+                "version": 4,
+            }
+
+        configuration = {
+            "name": self.name,
+            "includePath": self.include_path,
+            "defines": self.defines,
+            "compilerArgs": self.compiler_args,
+            "cppStandard": self.cpp_standard,
+            "intelliSenseMode": self.intellisense_mode,
+        }
+        if self.configuration_provider:
+            configuration["configurationProvider"] = self.configuration_provider
+        if self.compile_commands:
+            configuration["compileCommands"] = self.compile_commands
+
+        for index, config in enumerate(data["configurations"]):
+            if config["name"] == configuration["name"]:
+                data["configurations"][index] = configuration
+                break
+        else:
+            data["configurations"].append(configuration)
+
+        os.makedirs(vscode_folder, exist_ok=True)
+        with open(c_cpp_properties, "w") as fp:
+            json.dump(data, fp, indent=2)

@@ -6,6 +6,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${liar_BINARY_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${liar_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${liar_BINARY_DIR}/lib")
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 macro(eval)
 	foreach(arg ${ARGN})
 		message(STATUS "${arg}: ${${arg}}")
