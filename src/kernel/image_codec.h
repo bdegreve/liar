@@ -27,7 +27,7 @@
 #include "kernel_common.h"
 #include "rgb_space.h"
 #include <lass/prim/aabb_2d.h>
-
+#include <filesystem>
 namespace liar
 {
 namespace kernel
