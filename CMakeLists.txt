@@ -140,9 +140,7 @@ function(add_liar_module_ex name)
 		set(_DESTINATION "liar")
 	endif()
 
-	add_library("${name}" MODULE
-		${_SRCS}
-		)
+	Python_add_library ("${name}" ${_SRCS} WITH_SOABI)
 	target_link_libraries("${name}"
 		PRIVATE libkernel
 		PRIVATE ${_LIBS}
@@ -150,21 +148,13 @@ function(add_liar_module_ex name)
 	set_target_properties(
 		"${name}"
 		PROPERTIES
-		COMPILE_FLAGS "${liar_CFLAGS}"
-		LINK_FLAGS "${liar_LDFLAGS}"
-		DEBUG_POSTFIX "${Lass_PYTHON_DEBUG_POSTFIX}"
+			COMPILE_FLAGS "${liar_CFLAGS}"
+			LINK_FLAGS "${liar_LDFLAGS}"
 		)
-	if (WIN32)
+	if (NOT WIN32)
 		set_target_properties(
 			"${name}"
 			PROPERTIES
-			SUFFIX ".pyd"
-			)
-	else()
-		set_target_properties(
-			"${name}"
-			PROPERTIES
-				PREFIX ""
 				INSTALL_RPATH "$ORIGIN"
 			)
 	endif()
