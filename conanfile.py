@@ -1,11 +1,8 @@
 import json
 import os
 import re
-import shutil
-import subprocess
-from collections.abc import Sequence
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -39,7 +36,7 @@ class LiarConan(ConanFile):
     topics = "C++", "Python"
     settings = "os", "compiler", "build_type", "arch"
     requires = [
-        "lass/1.11.0-140+g9ad7c83d",
+        "lass/1.11.0-156+g311bc450",
     ]
     options = {
         "fPIC": [True, False],
@@ -111,32 +108,9 @@ class LiarConan(ConanFile):
         self.cpp.build.includedirs = ["."]
 
     def generate(self):
-        lass = self.dependencies["lass"]
-        python = Python(lass.options.python_executable, self.settings)
-        if str(lass.options.python_version) != python.version:
-            raise ConanInvalidConfiguration(
-                "python_version option not compatible with python_executable:"
-                "{} != {}".format(str(self.options.python_version), python.version)
-            )
-        if lass.options.python_debug != python.debug:
-            raise ConanInvalidConfiguration(
-                "python_debug option not compatible with python_executable."
-            )
-        if self.settings.os == "Windows":
-            if python.debug and self.settings.build_type != "Debug":
-                raise ConanInvalidConfiguration(
-                    "Can't build non-debug Lass with debug Python on Windows."
-                )
-
         tc = CMakeToolchain(self)
         tc.cache_variables["CMAKE_CONFIGURATION_TYPES"] = str(self.settings.build_type)
         tc.cache_variables["SPECTRAL_MODE"] = str(self.options.spectral_mode)
-        tc.cache_variables["Lass_DIR"] = os.path.join(
-            lass.package_folder, "share", "Lass"
-        )
-        tc.variables["Python_EXECUTABLE"] = python.executable.as_posix()
-        tc.variables["Python_LIBRARY_RELEASE"] = python.library.as_posix()
-        tc.variables["Python_LIBRARY_DEBUG"] = python.library.as_posix()
         if self.options.have_lcms2:
             tc.cache_variables["LCMS2_ENABLE"] = True
         tc.generate()
@@ -145,7 +119,6 @@ class LiarConan(ConanFile):
         deps.generate()
 
         vscode = VSCodeCCppProperties(self)
-        vscode.include_path.extend(str(path) for path in python.includedirs)
         vscode.generate()
 
     def build(self):
@@ -160,101 +133,6 @@ class LiarConan(ConanFile):
 
     def package_info(self):
         self.env_info.PYTHONPATH.append(self.package_folder)
-
-
-class Python(object):
-    """Build and config info of a Python"""
-
-    def __init__(self, executable, settings):
-        found_executable = shutil.which(str(executable))
-        if not found_executable:
-            raise ConanInvalidConfiguration(
-                f"Python executable cannot be found: {executable!s}"
-            )
-        self._executable = Path(found_executable)
-        self._os = settings.os
-
-    @property
-    def executable(self) -> Path:
-        """Full path to Python executable"""
-        return self._executable
-
-    @property
-    def version(self) -> str:
-        """Short version like 3.7"""
-        # pylint: disable=attribute-defined-outside-init
-        try:
-            return self._version
-        except AttributeError:
-            self._version = self._get_config_var("py_version_short")
-            return self._version
-
-    @property
-    def debug(self) -> bool:
-        """True if python library is built with Py_DEBUG"""
-        # pylint: disable=attribute-defined-outside-init
-        try:
-            return self._debug
-        except AttributeError:
-            output = self._query(
-                "import sys; print(int(hasattr(sys, 'gettotalrefcount')))"
-            )
-            self._debug = bool(int(output))
-            return self._debug
-
-    @property
-    def library(self) -> Path:
-        """Full path to python library you should link to"""
-        # pylint: disable=attribute-defined-outside-init
-        try:
-            return self._library
-        except AttributeError:
-            if self._os == "Windows":
-                stdlib = self._get_python_path("stdlib")
-                version = self._get_config_var("py_version_nodot")
-                postfix = "_d" if self.debug else ""
-                self._library = stdlib.parent / f"libs/python{version}{postfix}.lib"
-            else:
-                fname = self._get_config_var("LDLIBRARY")
-                hints: List[Path] = []
-                ld_library_path = os.getenv("LD_LIBRARY_PATH")
-                if ld_library_path:
-                    hints.extend(
-                        Path(dirname) for dirname in ld_library_path.split(os.pathsep)
-                    )
-                hints += [
-                    Path(self._get_config_var("LIBDIR")),
-                    Path(self._get_config_var("LIBPL")),
-                ]
-                for dirname in hints:
-                    candidate = dirname / fname
-                    if candidate.is_file():
-                        self._library = candidate
-                        break
-                else:
-                    raise RuntimeError(f"Unable to find {fname}")
-            return self._library
-
-    @property
-    def includedirs(self) -> Sequence[Path]:
-        include = self._get_python_path("include")
-        platinclude = self._get_python_path("platinclude")
-        return list(set([include, platinclude]))
-
-    def _get_python_path(self, key: str) -> Path:
-        return Path(
-            self._query(f"import sysconfig; print(sysconfig.get_path({key!r}))")
-        )
-
-    def _get_config_var(self, key: str) -> str:
-        return self._query(
-            f"import sysconfig; print(sysconfig.get_config_var({key!r}))"
-        )
-
-    def _query(self, script: str) -> str:
-        return subprocess.check_output(
-            [str(self.executable), "-c", script], text=True
-        ).strip()
 
 
 class VSCodeCCppProperties:
