@@ -82,6 +82,9 @@ class LiarConan(ConanFile):
         if self.options.have_lcms2:
             self.requires("lcms/2.9")
 
+    def build_requirements(self):
+        self.test_requires("gtest/1.14.0")
+
     def system_requirements(self):
         # depending on the platform or the tools.system.package_manager:tool configuration
         # only one of these will be executed

@@ -1,35 +1,42 @@
-file(GLOB paths *.cpp)
-foreach(path ${paths})
-	if(${path} MATCHES ".*/test_[a-zA-Z0-9_]+\\.cpp")
-		get_filename_component(fname "${path}" NAME)
-		list(APPEND test_files "${fname}")
+set(test_SRCS)
+file(GLOB _paths *.cpp)
+foreach(_path ${_paths})
+	if(${_path} MATCHES ".*/test_[a-zA-Z0-9_]+\\.cpp")
+		list(APPEND test_SRCS "${_path}")
 	endif()
 endforeach()
+unset(_path)
+unset(_paths)
 
-create_test_sourcelist(test_SRCS "main.cpp" ${test_files})
+find_package(GTest REQUIRED)
 
-include_directories(../src)
 add_executable(test_driver ${test_SRCS})
 target_link_libraries(test_driver
 	PRIVATE
 		libkernel
 		Python::Python
+		GTest::gtest
+		GTest::gtest_main
+)
+target_include_directories(test_driver
+	PRIVATE
+		"${liar_SOURCE_DIR}/src"
 )
 
-foreach(fname ${test_files})
-	get_filename_component(test "${fname}" NAME_WE)
-	add_test(
-		NAME ${test}
-		COMMAND
-			Python::Interpreter "${CMAKE_CURRENT_SOURCE_DIR}/testenv.py"
-			"--with-library=$<TARGET_FILE:Lass::lass>"
-			"$<TARGET_FILE:test_driver>" "${test}"
-		)
-	list(APPEND tests ${test})
-endforeach()
-
+include(GoogleTest)
+gtest_add_tests(
+	TARGET test_driver
+	TEST_LIST tests
+)
 set_tests_properties(
 	${tests}
 	PROPERTIES
-	ENVIRONMENT "TEST_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
+		ENVIRONMENT "TEST_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
 	)
+if (WIN32)
+	set_tests_properties(
+		${tests}
+		PROPERTIES
+			ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Lass::lass>"
+		)
+endif()

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2014-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2014-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,6 +25,8 @@
 #include "kernel/rgb_space.h"
 #include <iostream>
 
+#include <gtest/gtest.h>
+
 namespace
 {
 
@@ -32,51 +34,18 @@ using namespace liar;
 using namespace liar::kernel;
 using namespace lass;
 
-struct Tester
+bool almostEqual(const Spectral& a, const Spectral& b)
 {
-	Tester() :
-		numTests(0),
-		numErrors(0)
+	constexpr Spectral::TValue tol = 1e-3f;
+	for (size_t i = 0; i < Spectral::numBands; ++i)
 	{
-	}
-	~Tester()
-	{
-		std::cerr << numErrors << "/" << numTests << " failed\n";
-	}
-
-	void check(const char* message, bool condition)
-	{
-		++numTests;
-		std::cerr << "* " << message << " ";
-		if (condition)
+		if (!num::almostEqual(a[i], b[i], tol))
 		{
-			std::cerr << "ok";
+			return false;
 		}
-		else
-		{
-			++numErrors;
-			std::cerr << "failed";
-		}
-		std::cerr << std::endl;
 	}
-	void checkClose(const char* message, TScalar a, TScalar b)
-	{
-		check(message, num::almostEqual(a, b, TScalar(1e-3f)));
-	}
-	void checkClose(const char* message, const Spectral& a, const Spectral& b)
-	{
-		bool ok = true;
-		for (size_t i = 0; i < Spectral::numBands; ++i)
-		{
-			ok &= num::almostEqual<Spectral::TValue>(a[i], b[i], 1e-3f);
-		}
-		check(message, ok);
-	}
-
-	int numErrors;
-	int numTests;
-};
-
+	return true;
+}
 
 bool test_xyz(const XYZ& xyz)
 {
@@ -161,26 +130,31 @@ int test_conversion()
 	return errors;
 }
 
-int test_interface()
+TEST(Spectrum, NumberOfBands)
 {
-	Tester t;
-
-	typedef Spectral::TValue TValue;
-
-	t.check("Spectral::numBands",
-#ifdef LIAR_SPECTRAL_BANDS
-		Spectral::numBands == LIAR_SPECTRAL_BANDS
+#if LIAR_SPECTRAL_MODE_BANDED
+	EXPECT_EQ(Spectral::numBands, LIAR_SPECTRAL_MODE_BANDED);
+#elif LIAR_SPECTRAL_MODE_SINGLE
+	EXPECT_EQ(Spectral::numBands, 1);
 #else
-		Spectral::numBands == 3
+	EXPECT_EQ(Spectral::numBands, 3);
 #endif
-	);
+}
+
+TEST(Spectrum, Constructors)
+{
+	Spectral zero;
+	EXPECT_EQ(zero.absAverage(), 0);
+	Spectral one(1);
+	EXPECT_EQ(one.absAverage(), 1);
+}
+
+TEST(Spectrum, Operators)
+{
+	using TValue = Spectral::TValue;
 
 	Spectral zero;
-	t.check("Default constructor", zero.absAverage() == 0);
-
 	Spectral one(1);
-	t.check("Scalar constructor ", one.absAverage() == 1);
-
 	Spectral a, b, c, d, e, f, g, h, k, m, n, o;
 	for (size_t i = 0; i < Spectral::numBands; ++i)
 	{
@@ -199,51 +173,44 @@ int test_interface()
 		o[i] = num::lerp(TValue(1), x * x, TValue(.3f));
 	}
 
-	t.checkClose("operator+ (spectrum, spectrum)", a + b, zero);
-	t.checkClose("operator+ (spectrum, spectrum)", a + a, c);
-	t.checkClose("operator- (spectrum, spectrum)", a - b, c);
-	t.checkClose("operator* (spectrum, spectrum)", a * b, e);
-	t.checkClose("operator/ (spectrum, spectrum)", e / a, b);
-	t.checkClose("operator+ (spectrum, scalar)", a + 1, h);
-	t.checkClose("operator- (spectrum, scalar)", a - (-1), h);
-	t.checkClose("operator* (spectrum, scalar)", a * 2, c);
-	t.checkClose("operator/ (spectrum, scalar)", c / 2, a);
-	t.checkClose("operator+ (scalar, spectrum)", 1 + a, h);
-	t.checkClose("operator- (scalar, spectrum)", 1 - b, h);
-	t.checkClose("operator* (scalar, spectrum)", 2 * a, c);
-	t.checkClose("operator/ (scalar, spectrum)", 2 / a, k);
+	EXPECT_PRED2(almostEqual, a + b, zero);
+	EXPECT_PRED2(almostEqual, a + a, c);
+	EXPECT_PRED2(almostEqual, a - b, c);
+	EXPECT_PRED2(almostEqual, a * b, e);
+	EXPECT_PRED2(almostEqual, e / a, b);
+	EXPECT_PRED2(almostEqual, a + 1, h);
+	EXPECT_PRED2(almostEqual, a - (-1), h);
+	EXPECT_PRED2(almostEqual, a * 2, c);
+	EXPECT_PRED2(almostEqual, c / 2, a);
+	EXPECT_PRED2(almostEqual, 1 + a, h);
+	EXPECT_PRED2(almostEqual, 1 - b, h);
+	EXPECT_PRED2(almostEqual, 2 * a, c);
+	EXPECT_PRED2(almostEqual, 2 / a, k);
 
 	Spectral y = one;
-	t.checkClose("fma (spectrum, spectrum)", y.fma(a, b), f);
+	EXPECT_PRED2(almostEqual, y.fma(a, b), f);
 	y = one;
-	t.checkClose("fma (spectrum, scalar)", y.fma(a, 2), g);
+	EXPECT_PRED2(almostEqual, y.fma(a, 2), g);
 	y = one;
-	t.checkClose("fma (scalar, spectrum)", y.fma(2, a), g);
+	EXPECT_PRED2(almostEqual, y.fma(2, a), g);
 
-	t.checkClose("average", b.average(), -(Spectral::numBands + 1.f) / 2.f);
+	EXPECT_FLOAT_EQ(b.average(), -(static_cast<TValue>(Spectral::numBands) + 1.f) / 2.f);
 	//t.checkClose("dot", a.dot(b), (a * b).total());
 
-	t.check("isZero", zero.isZero());
-	t.check("!isZero", !a.isZero());
-	t.check("operator!", !zero);
-	t.check("bool", static_cast<bool>(a));
+	EXPECT_TRUE(zero.isZero());
+	EXPECT_TRUE(!a.isZero());
+	EXPECT_TRUE(!zero);
+	EXPECT_TRUE(static_cast<bool>(a));
 
-	t.checkClose("abs", abs(b), a);
-	t.check("max", max(a, b) == a && max(b, a) == a);
-	t.checkClose("sqr", sqr(b), d);
-	t.checkClose("pow", pow(b, 2), d);
-	t.checkClose("sqrt", sqrt(d), a);
-	t.checkClose("exp", exp(a), m);
-	t.checkClose("clamp", clamp(a, TValue(1.5f), TValue(4.5f)), n);
-	t.checkClose("lerp", lerp(one, d, TValue(0.3f)), o);
-
-
-	return t.numErrors;
+	EXPECT_PRED2(almostEqual, abs(b), a);
+	EXPECT_EQ(max(a, b), a);
+	EXPECT_EQ(max(b, a), a);
+	EXPECT_PRED2(almostEqual, sqr(b), d);
+	EXPECT_PRED2(almostEqual, pow(b, 2), d);
+	EXPECT_PRED2(almostEqual, sqrt(d), a);
+	EXPECT_PRED2(almostEqual, exp(a), m);
+	EXPECT_PRED2(almostEqual, clamp(a, TValue(1.5f), TValue(4.5f)), n);
+	EXPECT_PRED2(almostEqual, lerp(one, d, TValue(0.3f)), o);
 }
 
-}
-
-int test_spectrum(int, char*[])
-{
-	return test_interface() + test_conversion();
 }
