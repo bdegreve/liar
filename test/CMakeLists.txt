@@ -22,6 +22,10 @@ target_include_directories(test_driver
 	PRIVATE
 		"${liar_SOURCE_DIR}/src"
 )
+set_target_properties(test_driver
+	PROPERTIES
+		VS_DEBUGGER_ENVIRONMENT "PATH=$<TARGET_FILE_DIR:Lass::lass>;%PATH%"
+)
 
 include(GoogleTest)
 gtest_add_tests(

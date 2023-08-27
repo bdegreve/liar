@@ -224,4 +224,8 @@ set(BUILD_TESTING "ON" CACHE BOOL "build test")
 if(BUILD_TESTING)
 	enable_testing()
 	add_subdirectory(test)
+	set_directory_properties(
+		PROPERTIES
+			VS_STARTUP_PROJECT test_driver
+	)
 endif()
