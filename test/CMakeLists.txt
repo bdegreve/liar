@@ -22,10 +22,6 @@ target_include_directories(test_driver
 	PRIVATE
 		"${liar_SOURCE_DIR}/src"
 )
-set_target_properties(test_driver
-	PROPERTIES
-		VS_DEBUGGER_ENVIRONMENT "PATH=$<TARGET_FILE_DIR:Lass::lass>;%PATH%"
-)
 
 include(GoogleTest)
 gtest_add_tests(
@@ -37,10 +33,3 @@ set_tests_properties(
 	PROPERTIES
 		ENVIRONMENT "TEST_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
 	)
-if (WIN32)
-	set_tests_properties(
-		${tests}
-		PROPERTIES
-			ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Lass::lass>"
-		)
-endif()

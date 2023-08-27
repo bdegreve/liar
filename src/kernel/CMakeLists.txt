@@ -67,6 +67,12 @@ target_link_libraries(libkernel
 	${LCMS2_LIBRARIES}
 	)
 target_precompile_headers(libkernel PRIVATE kernel_common.h)
+if(WIN32)
+	add_custom_command(TARGET libkernel POST_BUILD
+		COMMAND "${CMAKE_COMMAND}" ARGS -E copy_if_different "$<TARGET_RUNTIME_DLLS:libkernel>" "$<TARGET_FILE_DIR:libkernel>"
+		COMMAND_EXPAND_LISTS
+	)
+endif()
 install(
 	TARGETS libkernel
 	DESTINATION liar
