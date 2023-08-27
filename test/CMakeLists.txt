@@ -10,17 +10,45 @@ unset(_paths)
 
 find_package(GTest REQUIRED)
 
-add_executable(test_driver ${test_SRCS})
+if(NOT DEFINED liar_PYTHON_BASE_PREFIX)
+	if (NOT DEFINED _liar_PYTHON_BASE_PREFIX OR NOT Python_EXECUTABLE STREQUAL _liar_PYTHON_PREFIX_EXECUTABLE)
+		message(STATUS "Looking for sys.base_prefix")
+		execute_process(COMMAND "${Python_EXECUTABLE}" -c "import sys; sys.stdout.write(sys.base_prefix.replace('\\\\', '/'))"
+			RESULT_VARIABLE __liar_PYTHON_PREFIX_RESULT
+			OUTPUT_VARIABLE liar_PYTHON_BASE_PREFIX
+			ERROR_VARIABLE __liar_PYTHON_PREFIX_ERROR
+		)
+		if(NOT __liar_PYTHON_PREFIX_RESULT)
+			set(_liar_PYTHON_BASE_PREFIX "${liar_PYTHON_BASE_PREFIX}" CACHE INTERNAL "sys.base_prefix")
+			set(_liar_PYTHON_PREFIX_EXECUTABLE "${Python_EXECUTABLE}" CACHE INTERNAL "sys.base_prefix")
+			message(STATUS "Looking for sys.base_prefix - found: ${liar_PYTHON_BASE_PREFIX}")
+		else()
+			set(liar_PYTHON_BASE_PREFIX)
+			message(STATUS "Looking for sys.base_prefix - failed\n${__liar_PYTHON_PREFIX_ERROR}")
+		endif()
+	else()
+		set(liar_PYTHON_BASE_PREFIX "${_liar_PYTHON_BASE_PREFIX}")
+	endif()
+endif()
+
+
+add_executable(test_driver main.cpp ${test_SRCS})
 target_link_libraries(test_driver
 	PRIVATE
 		libkernel
 		Python::Python
 		GTest::gtest
-		GTest::gtest_main
 )
 target_include_directories(test_driver
 	PRIVATE
 		"${liar_SOURCE_DIR}/src"
+)
+target_compile_definitions(test_driver
+	PRIVATE
+		"ROOT_DIR=${liar_SOURCE_DIR}"
+		"TEST_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
+		"BIN_DIR=$<TARGET_FILE_DIR:libkernel>"
+		"PYTHON_BASE_PREFIX=${liar_PYTHON_BASE_PREFIX}"
 )
 
 include(GoogleTest)
