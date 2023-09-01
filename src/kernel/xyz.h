@@ -184,6 +184,8 @@ inline const XYZ chromaticity(const XYZ& xyz)
 	return sum == 0 ? 0 : xyz / sum;
 }
 
+LIAR_KERNEL_DLL std::ostream& LASS_CALL operator<<(std::ostream& os, const XYZ& xyz);
+
 }
 }
 
