@@ -64,7 +64,7 @@ struct Handle
 	{
 	}
 	virtual ~Handle() {}
-	const kernel::TRgbSpacePtr rgbSpace;
+	kernel::TRgbSpacePtr rgbSpace;
 	unsigned width;
 	unsigned height;
 	unsigned y;
@@ -89,11 +89,40 @@ struct ReadHandle: public Handle
 		std::vector<unsigned char> file(fileSize, '\0');
 		const size_t bytesRead = ::fread(&file[0], sizeof(unsigned char), fileSize, fp);
 		LASS_ENFORCE(bytesRead == fileSize);
-		const unsigned err = ::lodepng_decode32(&this->bytes, &this->width, &this->height, &file[0], fileSize);
+
+		::LodePNGState state;
+		::lodepng_state_init(&state);
+		const unsigned err = ::lodepng_decode(&this->bytes, &this->width, &this->height, &state, &file[0], fileSize);
 		if (err != 0)
 		{
 			throw lass::util::Exception(::lodepng_error_text(err));
 		}
+
+		if (!this->rgbSpace)
+		{
+			const auto& info = state.info_png;
+			if (info.srgb_defined)
+			{
+				this->rgbSpace = kernel::sRGB;
+			}
+			else if (info.chrm_defined)
+			{
+				const TPoint2D red(info.chrm_red_x / 100000.0, info.chrm_red_y / 100000.0);
+				const TPoint2D green(info.chrm_green_x / 100000.0, info.chrm_green_y / 100000.0);
+				const TPoint2D blue(info.chrm_blue_x / 100000.0, info.chrm_blue_y / 100000.0);
+				const TPoint2D white(info.chrm_white_x / 100000.0, info.chrm_white_y / 100000.0);
+				const auto gamma = static_cast<prim::ColorRGBA::TValue>(info.gama_defined
+					? (100000.0 / info.gama_gamma)
+					: 2.2);
+				this->rgbSpace.reset(new kernel::RgbSpace(red, green, blue, white, gamma));
+			}
+			else
+			{
+				this->rgbSpace = kernel::RgbSpace::defaultSpace();
+			}
+		}
+
+		::lodepng_state_cleanup(&state);
 	}
 
 	~ReadHandle()
