@@ -141,13 +141,13 @@ RgbSpace::RgbSpace(
 
 const XYZ RgbSpace::convert(const prim::ColorRGBA& rgb) const
 {
-	TScalar dummy;
+	XYZ::TValue dummy;
 	return convert(rgb, dummy);
 }
 
 
 
-const XYZ RgbSpace::convert(const prim::ColorRGBA& rgba, TScalar& alpha) const
+const XYZ RgbSpace::convert(const prim::ColorRGBA& rgba, XYZ::TValue& alpha) const
 {
 #ifdef LIAR_HAVE_LCMS2_H
 	alpha = rgba.a;
@@ -168,7 +168,7 @@ const prim::ColorRGBA RgbSpace::convert(const XYZ& xyz) const
 
 
 
-const prim::ColorRGBA RgbSpace::convert(const XYZ& xyz, TScalar alpha) const
+const prim::ColorRGBA RgbSpace::convert(const XYZ& xyz, XYZ::TValue alpha) const
 {
 #ifdef LIAR_HAVE_LCMS2_H
 	prim::ColorRGBA rgb;
@@ -184,15 +184,15 @@ const prim::ColorRGBA RgbSpace::convert(const XYZ& xyz, TScalar alpha) const
 
 const XYZ RgbSpace::linearConvert(const RGBA& rgb) const
 {
-	TScalar dummy;
+	XYZ::TValue dummy;
 	return linearConvert(rgb, dummy);
 }
 
 
 
-const XYZ RgbSpace::linearConvert(const RGBA& rgb, TScalar& alpha) const
+const XYZ RgbSpace::linearConvert(const RGBA& rgb, XYZ::TValue& alpha) const
 {
-	alpha = rgb.a;
+	alpha = static_cast<XYZ::TValue>(rgb.a);
 	return r_ * rgb.r + g_ * rgb.g + b_ * rgb.b;
 }
 
@@ -205,7 +205,7 @@ const RgbSpace::RGBA RgbSpace::linearConvert(const XYZ& xyz) const
 
 
 
-const RgbSpace::RGBA RgbSpace::linearConvert(const XYZ& xyz, TScalar alpha) const
+const RgbSpace::RGBA RgbSpace::linearConvert(const XYZ& xyz, XYZ::TValue alpha) const
 {
 	RGBA temp = x_ * static_cast<RGBA::TValue>(xyz.x) + y_ * static_cast<RGBA::TValue>(xyz.y) + z_ * static_cast<RGBA::TValue>(xyz.z);
 	temp.a = static_cast<RGBA::TValue>(alpha);
@@ -285,6 +285,13 @@ const TPoint2D& RgbSpace::white() const
 TScalar RgbSpace::gamma() const
 {
 	return gamma_;
+}
+
+
+
+RgbSpace::GammaCurve RgbSpace::curve() const
+{
+	return curve_;
 }
 
 

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -61,14 +61,14 @@ public:
 	RgbSpace(const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, const TPoint2D& white, RGBA::TValue gamma = 1);
 
 	const XYZ convert(const RGBA& rgb) const;
-	const XYZ convert(const RGBA& rgb, TScalar& alpha) const;
+	const XYZ convert(const RGBA& rgb, XYZ::TValue& alpha) const;
 	const RGBA convert(const XYZ& xyz) const;
-	const RGBA convert(const XYZ& xyz, TScalar alpha) const;
+	const RGBA convert(const XYZ& xyz, XYZ::TValue alpha) const;
 
 	const XYZ linearConvert(const RGBA& rgba) const;
-	const XYZ linearConvert(const RGBA& rgba, TScalar& alpha) const;
+	const XYZ linearConvert(const RGBA& rgba, XYZ::TValue& alpha) const;
 	const RGBA linearConvert(const XYZ& xyz) const;
-	const RGBA linearConvert(const XYZ& xyz, TScalar alpha) const;
+	const RGBA linearConvert(const XYZ& xyz, XYZ::TValue alpha) const;
 	const RGBA toGamma(const RGBA& rgba) const;
 	const RGBA toLinear(const RGBA& rgba) const;
 
