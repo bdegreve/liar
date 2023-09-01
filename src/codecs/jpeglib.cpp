@@ -27,6 +27,7 @@
 #include <lass/io/arg_parser.h>
 
 #include <cstdio>
+#include <csetjmp>
 #if LASS_HAVE_SYS_TYPES_H
 #	include <sys/types.h>
 #endif
@@ -167,13 +168,34 @@ private:
 	std::vector<JOCTET> buffer_;
 };
 
+
+struct ErrorMgr : public jpeg_error_mgr
+{
+	ErrorMgr()
+	{
+		jpeg_std_error(this);
+		this->error_exit = &ErrorMgr::errorExit;
+		lastErrorMsg[0] = '\0';
+	}
+	static void errorExit(j_common_ptr cinfo)
+	{
+		ErrorMgr* self = static_cast<ErrorMgr*>(cinfo->err);
+		(*(self->format_message)) (cinfo, self->lastErrorMsg);
+		jpeg_destroy(cinfo); // detroy any temp files
+		longjmp(self->setjmpBuffer, 1);
+	}
+	char lastErrorMsg[JMSG_LENGTH_MAX];
+	jmp_buf setjmpBuffer;
+};
+
+
 struct Handle
 {
 	typedef std::vector<JSAMPLE> TLine;
 	kernel::TRgbSpacePtr rgbSpace;
 	TResolution2D resolution;
 	TLine line;
-	jpeg_error_mgr jerr = {};
+	ErrorMgr jerr = {};
 	Handle(const kernel::TRgbSpacePtr& rgbSpace):
 		rgbSpace(rgbSpace ? rgbSpace : kernel::RgbSpace::defaultSpace())
 	{
@@ -183,6 +205,7 @@ struct Handle
 	}
 };
 
+
 struct ReadHandle: Handle
 {
 	jpeg_decompress_struct cinfo;
@@ -191,7 +214,11 @@ struct ReadHandle: Handle
 		Handle(rgbSpace),
 		src(path)
 	{
-		cinfo.err = jpeg_std_error(&jerr);
+		cinfo.err = &jerr;
+		if (setjmp(jerr.setjmpBuffer))
+		{
+			LASS_THROW_EX(kernel::ImageCodecError, "Failed to read " << path << ": " << jerr.lastErrorMsg);
+		}
 		jpeg_create_decompress(&cinfo);
 		cinfo.src = &src;
 		jpeg_read_header(&cinfo, TRUE);
@@ -222,7 +249,11 @@ struct WriteHandle: Handle
 		io::ArgValue<int> quality(parser, "q" ,"quality", "compression quality: 0-100");
 		parser.parse(options);
 
-		cinfo.err = jpeg_std_error(&jerr);
+		cinfo.err = &jerr;
+		if (setjmp(jerr.setjmpBuffer))
+		{
+			LASS_THROW_EX(kernel::ImageCodecError, "Failed to write " << path << ": " << jerr.lastErrorMsg);
+		}
 		jpeg_create_compress(&cinfo);
 		cinfo.dest = &dest;
 		cinfo.image_width = static_cast<JDIMENSION>(resolution.x);

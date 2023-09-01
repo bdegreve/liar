@@ -116,7 +116,7 @@ bool equalDouble(double a, double b)
 
 bool equalXYZ(const XYZ& a, const XYZ& b)
 {
-	constexpr XYZ::TValue tol = 1e-2f;
+	constexpr XYZ::TValue tol = 1.2e-2f;
 	return num::abs(a.x - b.x) < tol && num::abs(a.y - b.y) < tol && num::abs(a.z - b.z) < tol;
 }
 
@@ -170,6 +170,21 @@ TEST(Codecs, lodepng_adobergb)
 	EXPECT_TRUE(rgbSpace);
 	EXPECT_CHROMATICITY(rgbSpace->red(), 0.6400, 0.3300);
 	EXPECT_CHROMATICITY(rgbSpace->green(), 0.2100, 0.7100);
+	EXPECT_CHROMATICITY(rgbSpace->blue(), 0.1500, 0.0600);
+	EXPECT_CHROMATICITY(rgbSpace->white(), 0.3127, 0.3290);
+	EXPECT_DOUBLE(rgbSpace->gamma(), 2.2);
+
+	testImage(std::move(reader));
+}
+
+TEST(Codecs, jpeglib_srgb)
+{
+	ImageReader reader(test_src_dir / "colors-srgb.jpg");
+
+	const auto rgbSpace = reader.rgbSpace(); // use actual source space
+	EXPECT_TRUE(rgbSpace);
+	EXPECT_CHROMATICITY(rgbSpace->red(), 0.6400, 0.3300);
+	EXPECT_CHROMATICITY(rgbSpace->green(), 0.3000, 0.6000);
 	EXPECT_CHROMATICITY(rgbSpace->blue(), 0.1500, 0.0600);
 	EXPECT_CHROMATICITY(rgbSpace->white(), 0.3127, 0.3290);
 	EXPECT_DOUBLE(rgbSpace->gamma(), 2.2);

@@ -66,7 +66,7 @@ const TImageCodecPtr& imageCodec(const std::string& extension)
 	const TImageCodecMap::const_iterator candidate = codecs.find(stde::tolower(extension));
 	if (candidate == codecs.end())
 	{
-		LASS_THROW("No image codec registered for the extension '" << extension << "'");
+		LASS_THROW_EX(ImageCodecError, "No image codec registered for the extension '" << extension << "'");
 	}
 	return candidate->second;
 }

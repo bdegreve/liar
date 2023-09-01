@@ -33,6 +33,14 @@ namespace liar
 namespace kernel
 {
 
+class ImageCodecError : public util::ExceptionMixin<ImageCodecError>
+{
+public:
+	ImageCodecError(std::string msg, std::string loc) : util::ExceptionMixin<ImageCodecError>(std::move(msg), std::move(loc)) {}
+	~ImageCodecError() noexcept {}
+};
+
+
 /** Low level interface to image codecs
  */
 class LIAR_KERNEL_DLL ImageCodec: public python::PyObjectPlus
