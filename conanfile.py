@@ -76,7 +76,7 @@ class LiarConan(ConanFile):
         if self.options.have_openexr:
             self.requires("openexr/2.5.7")
         if self.options.have_libjpeg:
-            self.requires("libjpeg/9c")
+            self.requires("libjpeg-turbo/3.0.0")
         if self.options.have_png:
             self.requires("lodepng/cci.20200615")
         if self.options.have_lcms2:
