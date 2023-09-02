@@ -73,9 +73,9 @@ public:
 		return doRgbSpace(handle);
 	}
 
-	void readLine(TImageHandle handle, prim::ColorRGBA* out) const
+	void readLine(TImageHandle handle, XYZ* out, XYZ::TValue* alpha = nullptr) const
 	{
-		doReadLine(handle, out);
+		doReadLine(handle, out, alpha);
 	}
 	void writeLine(TImageHandle handle, const prim::ColorRGBA* in) const
 	{
@@ -90,7 +90,7 @@ private:
 	virtual const TResolution2D doResolution(TImageHandle handle) const = 0;
 	virtual const TRgbSpacePtr doRgbSpace(TImageHandle handle) const = 0;
 
-	virtual void doReadLine(TImageHandle handle, prim::ColorRGBA* out) const = 0;
+	virtual void doReadLine(TImageHandle handle, XYZ* out, XYZ::TValue *alpha) const = 0;
 	virtual void doWriteLine(TImageHandle handle, const prim::ColorRGBA* in) const = 0;
 };
 
@@ -100,7 +100,7 @@ typedef std::map<std::string, TImageCodecPtr> TImageCodecMap;
 LIAR_KERNEL_DLL TImageCodecMap& LASS_CALL imageCodecs();
 LIAR_KERNEL_DLL const TImageCodecPtr& LASS_CALL imageCodec(const std::string& extension);
 
-LIAR_KERNEL_DLL void transcodeImage(const std::filesystem::path& source, const std::filesystem::path& dest, TRgbSpacePtr sourceSpace, const TRgbSpacePtr& destSpace);
+LIAR_KERNEL_DLL void transcodeImage(const std::filesystem::path& source, const std::filesystem::path& dest, const TRgbSpacePtr& sourceSpace, TRgbSpacePtr destSpace);
 
 class LIAR_KERNEL_DLL ImageReader: util::NonCopyable
 {
@@ -111,8 +111,8 @@ public:
 
 	const TResolution2D resolution() const { return codec_->resolution(handle_); }
 	const TRgbSpacePtr rgbSpace() const { return codec_->rgbSpace(handle_); }
-	void readLine(prim::ColorRGBA* out) const { codec_->readLine(handle_, out); }
-	void readFull(prim::ColorRGBA* out) const;
+	void readLine(XYZ* out, XYZ::TValue* alpha = nullptr) const { codec_->readLine(handle_, out, alpha); }
+	void readFull(XYZ* out, XYZ::TValue* alpha = nullptr) const;
 private:
 	TImageCodecPtr codec_;
 	ImageCodec::TImageHandle handle_;
@@ -153,7 +153,7 @@ private:
 
 	virtual const TResolution2D doResolution(TImageHandle handle) const;
 	virtual const TRgbSpacePtr doRgbSpace(TImageHandle handle) const;
-	virtual void doReadLine(TImageHandle handle, prim::ColorRGBA* out) const;
+	virtual void doReadLine(TImageHandle handle, XYZ* out, XYZ::TValue* alpha) const;
 	virtual void doWriteLine(TImageHandle handle, const prim::ColorRGBA* in) const;
 
 	TRgbSpacePtr defaultCodecSpace_;

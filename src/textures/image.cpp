@@ -124,15 +124,9 @@ void Image::loadFile(const std::filesystem::path& filename, const TRgbSpacePtr& 
 	rgbSpace_ = reader.rgbSpace();
 
 	TPixels image(new TPixel[resolution.x * resolution.y]);
-	std::vector<prim::ColorRGBA> line(resolution.x);
-	TPixel* pixel = &image[0];
 	for (size_t i = 0; i < resolution.y; ++i)
 	{
-		reader.readLine(&line[0]);
-		for (size_t k = 0; k < resolution.x; ++k)
-		{
-			*pixel++ = rgbSpace_->convert(line[k]);
-		}
+		reader.readLine(&image[i * resolution.x]);
 	}
 
 	image_.swap(image);

@@ -149,14 +149,16 @@ private:
 		return static_cast<Handle*>(handle)->rgbSpace;
 	}
 
-	void doReadLine(TImageHandle handle, prim::ColorRGBA* out) const
+	void doReadLine(TImageHandle handle, kernel::XYZ* out, kernel::XYZ::TValue* alpha) const
 	{
-		const prim::ColorRGBA nodata(0, 0, 0, 0);
+		const kernel::XYZ nodata(0, 0, 0);
 
 		Handle* pimpl = static_cast<Handle*>(handle);
 		const Imath::Box2i& dispWin = pimpl->input->displayWindow();
 		const Imath::Box2i& dataWin = pimpl->input->dataWindow();
 		LASS_ENFORCE(pimpl->y <= dispWin.max.y);
+
+		const auto& rgbSpace = *pimpl->rgbSpace;
 
 		if (pimpl->y >= dataWin.min.y && pimpl->y <= dataWin.max.y)
 		{
@@ -170,17 +172,25 @@ private:
 				if (x >= dataWin.min.x && x <= dataWin.max.x)
 				{
 					const Imf::Rgba& pixel = line[static_cast<size_t>(x - dataWin.min.x)];
-					*out++ = prim::ColorRGBA(pixel.r, pixel.g, pixel.b, pixel.a);
+					const prim::ColorRGBA rgba(pixel.r, pixel.g, pixel.b, pixel.a);
+					kernel::XYZ::TValue a;
+					*out++ = rgbSpace.convert(rgba, a);
+					if (alpha)
+						*alpha++ = a;
 				}
 				else
 				{
 					*out++ = nodata;
+					if (alpha)
+						*alpha++ = 0.f;
 				}
 			}
 		}
 		else
 		{
 			std::fill_n(out, pimpl->resolution.x, nodata);
+			if (alpha)
+				std::fill_n(alpha, pimpl->resolution.x, 0);
 		}
 		++pimpl->y;
 	}

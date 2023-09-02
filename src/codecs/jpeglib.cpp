@@ -303,9 +303,10 @@ private:
 		return static_cast<Handle*>(handle)->rgbSpace;
 	}
 
-	void doReadLine(TImageHandle handle, prim::ColorRGBA* out) const
+	void doReadLine(TImageHandle handle, kernel::XYZ* out, kernel::XYZ::TValue* alpha) const
 	{
 		ReadHandle* pimpl = static_cast<ReadHandle*>(handle);
+		const auto& rgbSpace = *pimpl->rgbSpace;
 		LASS_ENFORCE(pimpl->cinfo.output_scanline < pimpl->cinfo.output_height);
 		JSAMPLE* line = &pimpl->line[0];
 		jpeg_read_scanlines(&pimpl->cinfo, &line, 1);
@@ -313,8 +314,10 @@ private:
 		for (size_t k = 0; k < n; k += 3)
 		{
 			const prim::ColorRGBA pixel(line[k] / 255.f, line[k + 1] / 255.f, line[k + 2] / 255.f, 1.f);
-			*out++ = pixel;
+			*out++ = rgbSpace.convert(pixel);
 		}
+		if (alpha)
+			std::fill_n(alpha, pimpl->resolution.x, 1.f);
 		if (pimpl->cinfo.output_scanline == pimpl->cinfo.output_height)
 		{
 			jpeg_finish_decompress(&pimpl->cinfo);

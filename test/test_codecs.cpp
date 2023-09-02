@@ -80,7 +80,6 @@ const std::filesystem::path test_src_dir(LASS_STRINGIFY(TEST_SOURCE_DIR));
 
 TRaster read(ImageReader&& reader)
 {
-	auto rgbSpace = reader.rgbSpace(); // use actual source space
 	const size_t nx = reader.resolution().x;
 	const size_t ny = reader.resolution().y;
 	if (nx == 0 || ny == 0)
@@ -88,18 +87,7 @@ TRaster read(ImageReader&& reader)
 		return TRaster();
 	}
 	TRaster raster(nx * ny);
-	std::vector<prim::ColorRGBA> line(nx);
-	for (size_t i = 0; i < ny; ++i)
-	{
-		reader.readLine(&line[0]);
-		const size_t k0 = i * nx;
-		for (size_t k = 0; k < nx; ++k)
-		{
-			TScalar alpha;
-			const prim::ColorRGBA& rgb = line[k];
-			raster[k0 + k] = rgbSpace->convert(line[k]);
-		}
-	}
+	reader.readFull(&raster[0]);
 	return raster;
 }
 

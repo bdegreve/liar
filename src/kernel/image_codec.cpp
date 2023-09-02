@@ -72,31 +72,31 @@ const TImageCodecPtr& imageCodec(const std::string& extension)
 }
 
 
-void transcodeImage(const std::filesystem::path& source, const std::filesystem::path& dest, TRgbSpacePtr sourceSpace, const TRgbSpacePtr& destSpace)
+void transcodeImage(const std::filesystem::path& source, const std::filesystem::path& dest, const TRgbSpacePtr& sourceSpace, TRgbSpacePtr destSpace)
 {
 	ImageReader reader(source, sourceSpace);
-	sourceSpace = reader.rgbSpace(); // use actual source space
 	const size_t nx = reader.resolution().x;
 	const size_t ny = reader.resolution().y;
 	if (nx == 0 || ny == 0)
 	{
 		return;
 	}
+	if (!destSpace)
+	{
+		destSpace = reader.rgbSpace(); // use actual input space
+	}
 	ImageWriter writer(dest, reader.resolution(), destSpace ? destSpace : sourceSpace);
-	std::vector<prim::ColorRGBA> line(nx);
+	std::vector<XYZ> src(nx);
+	std::vector<float> alpha(nx);
+	std::vector<prim::ColorRGBA> dst(nx);
 	for (size_t i = 0; i < ny; ++i)
 	{
-		reader.readLine(&line[0]);
-		if (destSpace)
+		reader.readLine(&src[0], &alpha[0]);
+		for (size_t k = 0; k < nx; ++k)
 		{
-			for (size_t k = 0; k < nx; ++k)
-			{
-				TScalar alpha;
-				const XYZ xyz = sourceSpace->convert(line[k], alpha);
-				line[k] = destSpace->convert(xyz, alpha);
-			}
+			dst[k] = destSpace->convert(src[k], alpha[k]);
 		}
-		writer.writeLine(&line[0]);
+		writer.writeLine(&dst[0]);
 	}
 }
 
@@ -117,13 +117,13 @@ ImageReader::~ImageReader()
 	handle_ = 0;
 }
 
-void ImageReader::readFull(prim::ColorRGBA* out) const
+void ImageReader::readFull(XYZ* out, XYZ::TValue* alpha) const
 {
 	const TResolution2D res = resolution();
 	const size_t size = res.x * res.y;
 	for (size_t k = 0; k < size; k += res.x)
 	{
-		readLine(out + k);
+		readLine(out + k, alpha ? alpha + k : nullptr);
 	}
 }
 
@@ -278,14 +278,21 @@ const TRgbSpacePtr ImageCodecLass::doRgbSpace(TImageHandle handle) const
 
 
 
-void ImageCodecLass::doReadLine(TImageHandle handle, prim::ColorRGBA* out) const
+void ImageCodecLass::doReadLine(TImageHandle handle, XYZ* out, XYZ::TValue* alpha) const
 {
 	impl::LassImage* pimpl = static_cast<impl::LassImage*>(handle);
 	const io::Image& image = pimpl->image;
+	const auto& rgbSpace = *pimpl->rgbSpace;
 	LASS_ENFORCE(pimpl->y < image.rows());
-	for (size_t x = 0; x < image.cols(); ++x)
+	if (alpha)
 	{
-		*out++ = image(pimpl->y, x);
+		for (size_t x = 0; x < image.cols(); ++x)
+			*out++ = rgbSpace.convert(image(pimpl->y, x), *alpha++);
+	}
+	else
+	{
+		for (size_t x = 0; x < image.cols(); ++x)
+			*out++ = rgbSpace.convert(image(pimpl->y, x));
 	}
 	++pimpl->y;
 }
