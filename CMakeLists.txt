@@ -121,9 +121,6 @@ macro(list_remove_regex listvar regex)
 	list(REMOVE_ITEM ${listvar} ${_to_be_removed})
 endmacro()
 
-macro(_mark_target_as_python_module name)
-endmacro()
-
 function(add_liar_module_ex name)
 	message(STATUS "add_liar_module ${name}")
 
