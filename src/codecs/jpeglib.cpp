@@ -223,7 +223,6 @@ struct ReadHandle: Handle
 		cinfo.src = &src;
 		jpeg_read_header(&cinfo, TRUE);
 		cinfo.out_color_space = JCS_RGB;
-		cinfo.output_gamma = this->rgbSpace->gamma();
 		jpeg_start_decompress(&cinfo);
 		LASS_ENFORCE(cinfo.output_components == 3);
 		resolution = TResolution2D(cinfo.output_width, cinfo.output_height);
@@ -260,7 +259,6 @@ struct WriteHandle: Handle
 		cinfo.image_height = static_cast<JDIMENSION>(resolution.y);
 		cinfo.input_components = 3;
 		cinfo.in_color_space = JCS_RGB;
-		cinfo.input_gamma = this->rgbSpace->gamma();
 		jpeg_set_defaults(&cinfo);
 		if (quality)
 		{
