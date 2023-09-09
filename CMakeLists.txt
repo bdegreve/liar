@@ -124,8 +124,6 @@ endmacro()
 macro(_mark_target_as_python_module name)
 endmacro()
 
-include(CMakeParseArguments)
-
 function(add_liar_module_ex name)
 	message(STATUS "add_liar_module ${name}")
 
