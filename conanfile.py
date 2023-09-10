@@ -52,7 +52,7 @@ class LiarConan(ConanFile):
         "have_openexr": True,
         "have_libjpeg": True,
         "have_png": True,
-        "have_lcms2": False,
+        "have_lcms2": True,
         "have_x11": True,
         "lass/*:shared": True,
         "openexr/*:shared": False,

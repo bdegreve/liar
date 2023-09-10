@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 #ifdef LIAR_HAVE_LCMS2_H
 
 #include "xyz.h"
+#include "rgb_space.h"
 
 namespace liar
 {
@@ -42,6 +43,13 @@ namespace kernel
 namespace impl
 {
 	class IccSpaceImpl;
+
+	struct IccSpaceImplDeleter
+	{
+		void operator()(IccSpaceImpl*) const;
+	};
+
+	using IccSpaceImplPtr = std::unique_ptr<IccSpaceImpl, IccSpaceImplDeleter>;
 }
 
 class IccSpace;
@@ -54,35 +62,27 @@ public:
 
 	typedef prim::ColorRGBA RGBA;
 
+	IccSpace(const void* iccProfileData, num::Tuint32 length);
 	IccSpace(const std::string& iccProfileString);
 	IccSpace(const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, const TPoint2D& white, TScalar gamma = 1);
-	~IccSpace();
+	IccSpace(const TRgbSpacePtr& rgbSpace);
 
 	const XYZ convert(const prim::ColorRGBA& rgb) const;
-	const XYZ convert(const prim::ColorRGBA& rgb, TScalar& alpha) const;
+	const XYZ convert(const prim::ColorRGBA& rgb, XYZ::TValue& alpha) const;
 	const prim::ColorRGBA convert(const XYZ& xyz) const;
-	const prim::ColorRGBA convert(const XYZ& xyz, TScalar alpha) const;
+	const prim::ColorRGBA convert(const XYZ& xyz, XYZ::TValue alpha) const;
 
-	TIccSpacePtr withGamma(TScalar gamma) const;
+	std::string iccProfile() const;
 
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const;
 	void setState(const TPyObjectPtr& state);
 
-	static const TIccSpacePtr& defaultSpace();
-	static void setDefaultSpace(const TIccSpacePtr& defaultSpace);
-
 	void swap(IccSpace& other);
 
 private:
 
-	void enforceChromaticity(const TPoint2D& c, const char* name) const;
-
-	impl::IccSpaceImpl* pimpl_;
-	XYZ r_;
-	XYZ g_;
-	XYZ b_;
-	TScalar gamma_;
+	impl::IccSpaceImplPtr pimpl_;
 };
 
 }
