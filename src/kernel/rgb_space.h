@@ -44,13 +44,6 @@ typedef python::PyObjectPtr<Spectrum>::Type TSpectrumPtr;
 class RgbSpace;
 typedef python::PyObjectPtr<RgbSpace>::Type TRgbSpacePtr;
 
-#ifdef LIAR_HAVE_LCMS2_H
-namespace impl
-{
-	class IccSpaceImpl;
-}
-#endif
-
 class LIAR_KERNEL_DLL RgbSpace: public python::PyObjectPlus
 {
 	PY_HEADER(python::PyObjectPlus)
@@ -98,16 +91,12 @@ private:
 	void init(const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, const TPoint2D& white, RGBA::TValue gamma);
 	void enforceChromaticity(const TPoint2D& c, const char* name) const;
 
-#ifdef LIAR_HAVE_LCMS2_H
-	impl::IccSpaceImpl* icc_;
-#else
 	RGBA x_;
 	RGBA y_;
 	RGBA z_;
 	XYZ r_;
 	XYZ g_;
 	XYZ b_;
-#endif
 	TPoint2D red_;
 	TPoint2D green_;
 	TPoint2D blue_;

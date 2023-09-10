@@ -26,11 +26,6 @@
 #include "spectrum.h"
 #include <lass/num/impl/matrix_solve.h>
 
-#ifdef LIAR_HAVE_LCMS2_H
-#	define CMS_DLL
-#	include <lcms2.h>
-#endif
-
 namespace liar
 {
 namespace kernel
@@ -75,61 +70,6 @@ PY_CLASS_STATIC_METHOD_DOC(RgbSpace, setDefaultSpace, "setDefaultSpace(RgbSpace)
 
 TRgbSpacePtr RgbSpace::defaultSpace_ = sRGB;
 
-#ifdef LIAR_HAVE_LCMS2_H
-
-namespace impl
-{
-
-template < typename T, typename R, R (CMSEXPORT *destructor) (T) >
-class AutoHandle
-{
-public:
-	AutoHandle(T handle = 0): handle_(handle) {}
-	AutoHandle(AutoHandle& other): handle_(other.handle_) { other.handle_ = 0; }
-	~AutoHandle() { if (handle_) destructor(handle_); }
-	AutoHandle& operator=(AutoHandle other) { swap(other); return *this; } // by copy
-	void swap(AutoHandle& other) { std::swap(handle_, other.handle_); }
-	T operator*() const { return handle_; }
-private:
-	T handle_;
-};
-
-typedef AutoHandle<cmsHPROFILE, cmsBool, cmsCloseProfile> AutoHPROFILE;
-typedef AutoHandle<cmsHTRANSFORM, void, cmsDeleteTransform> AutoHTRANSFORM;
-typedef AutoHandle<cmsToneCurve*, void, cmsFreeToneCurve> AutoToneCurve;
-
-template <typename T, cmsUInt32Number flt, cmsUInt32Number dbl> struct SelectFormat;
-template <cmsUInt32Number flt, cmsUInt32Number dbl> struct SelectFormat<float, flt, dbl> { enum { value=flt }; };
-template <cmsUInt32Number flt, cmsUInt32Number dbl> struct SelectFormat<double, flt, dbl> { enum { value=dbl }; };
-
-class IccSpaceImpl: public util::NonCopyable
-{
-public:
-	IccSpaceImpl(AutoHPROFILE& iccProfile): iccProfile_(iccProfile)
-	{
-		cmsUInt32Number flags = cmsFLAGS_NOCACHE;
-		AutoHPROFILE xyzProfile(cmsCreateXYZProfile());
-		toXYZtransform_ = cmsCreateTransform(*iccProfile_, rgbFormat_, *xyzProfile, xyzFormat_, INTENT_PERCEPTUAL, flags);
-		fromXYZtransform_ = cmsCreateTransform(*xyzProfile, xyzFormat_, *iccProfile_, rgbFormat_, INTENT_PERCEPTUAL, flags);
-	}
-	cmsHPROFILE iccProfile() const { return *iccProfile_; }
-	cmsHTRANSFORM toXYZtransform() const { return *toXYZtransform_; }
-	cmsHTRANSFORM fromXYZtransform() const { return *fromXYZtransform_; }
-private:
-	enum
-	{
-		rgbFormat_ = SelectFormat<prim::ColorRGBA::TValue, TYPE_RGB_FLT, TYPE_RGB_DBL>::value,
-		xyzFormat_ = SelectFormat<XYZ::TValue, TYPE_XYZ_FLT, TYPE_XYZ_DBL>::value,
-	};
-	AutoHPROFILE iccProfile_;
-	AutoHTRANSFORM toXYZtransform_;
-	AutoHTRANSFORM fromXYZtransform_;
-};
-
-}
-
-#endif
-
 RgbSpace::RgbSpace(
 		const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue,
 		const TPoint2D& white, RGBA::TValue gamma)
@@ -149,14 +89,7 @@ const XYZ RgbSpace::convert(const prim::ColorRGBA& rgb) const
 
 const XYZ RgbSpace::convert(const prim::ColorRGBA& rgba, XYZ::TValue& alpha) const
 {
-#ifdef LIAR_HAVE_LCMS2_H
-	alpha = rgba.a;
-	XYZ xyz;
-	cmsDoTransform(icc_->toXYZtransform(), &rgba, &xyz, 1);
-	return xyz;
-#else
 	return linearConvert(toLinear(rgba), alpha);
-#endif
 }
 
 
@@ -170,14 +103,7 @@ const prim::ColorRGBA RgbSpace::convert(const XYZ& xyz) const
 
 const prim::ColorRGBA RgbSpace::convert(const XYZ& xyz, XYZ::TValue alpha) const
 {
-#ifdef LIAR_HAVE_LCMS2_H
-	prim::ColorRGBA rgb;
-	cmsDoTransform(icc_->fromXYZtransform(), &xyz, &rgb, 1);
-	rgb.a = static_cast<prim::ColorRGBA::TValue>(alpha);
-	return rgb;
-#else
 	return toGamma(linearConvert(xyz, alpha));
-#endif
 }
 
 
@@ -285,13 +211,6 @@ const TPoint2D& RgbSpace::white() const
 TScalar RgbSpace::gamma() const
 {
 	return gamma_;
-}
-
-
-
-RgbSpace::GammaCurve RgbSpace::curve() const
-{
-	return curve_;
 }
 
 
@@ -407,33 +326,6 @@ void RgbSpace::init(
 	gamma_ = gamma;
 	invGamma_ = static_cast<RGBA::TValue>(num::inv(gamma));
 
-#ifdef LIAR_HAVE_LCMS2_H
-
-	cmsCIExyY whitePoint;
-	whitePoint.x = white.x;
-	whitePoint.y = white.y;
-	whitePoint.Y = 1;
-
-	cmsCIExyYTRIPLE primaries;
-	primaries.Red.x = red.x;
-	primaries.Red.y = red.y;
-	primaries.Red.Y = 1;
-	primaries.Green.x = green.x;
-	primaries.Green.y = green.y;
-	primaries.Green.Y = 1;
-	primaries.Blue.x = blue.x;
-	primaries.Blue.y = blue.y;
-	primaries.Blue.Y = 1;
-
-	impl::AutoToneCurve transferFunction = cmsBuildGamma(0, gamma);
-	cmsToneCurve* transferFunctions[3] = { *transferFunction, *transferFunction, *transferFunction };
-
-	impl::AutoHPROFILE iccProfile = cmsCreateRGBProfile(&whitePoint, &primaries, transferFunctions);
-
-	icc_ = new impl::IccSpaceImpl(iccProfile);
-
-#else
-
 	// see:
 	// http://www.babelcolor.com/download/A%20comparison%20of%20four%20multimedia%20RGB%20spaces.pdf
 	// http://www.polybytes.com/misc/Meet_CIECAM02.pdf
@@ -495,8 +387,6 @@ void RgbSpace::init(
 	x_ = RGBA(static_cast<RGBA::TValue>(invMat[0]), static_cast<RGBA::TValue>(invMat[4]), static_cast<RGBA::TValue>(invMat[8]));
 	y_ = RGBA(static_cast<RGBA::TValue>(invMat[1]), static_cast<RGBA::TValue>(invMat[5]), static_cast<RGBA::TValue>(invMat[9]));
 	z_ = RGBA(static_cast<RGBA::TValue>(invMat[2]), static_cast<RGBA::TValue>(invMat[6]), static_cast<RGBA::TValue>(invMat[10]));
-
-#endif
 }
 
 
