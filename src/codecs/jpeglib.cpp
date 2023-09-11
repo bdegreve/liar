@@ -25,6 +25,7 @@
 #include <lass/io/binary_i_file.h>
 #include <lass/io/binary_o_file.h>
 #include <lass/io/arg_parser.h>
+#include "../kernel/icc_space.h"
 
 #include <cstdio>
 #include <csetjmp>
@@ -206,6 +207,12 @@ struct Handle
 };
 
 
+struct JoctetDeleter
+{
+	void operator()(JOCTET* data) const { free(data); }
+};
+
+
 struct ReadHandle: Handle
 {
 	jpeg_decompress_struct cinfo;
@@ -221,7 +228,26 @@ struct ReadHandle: Handle
 		}
 		jpeg_create_decompress(&cinfo);
 		cinfo.src = &src;
+		jpeg_save_markers(&cinfo, JPEG_APP0 + 2, 0xFFFF);
 		jpeg_read_header(&cinfo, TRUE);
+
+#if LIAR_HAVE_LCMS2_H
+		std::unique_ptr<JOCTET, JoctetDeleter> iccData;
+		JOCTET* pIccData;
+		unsigned int iccDataLen;
+		if (jpeg_read_icc_profile(&cinfo, &pIccData, &iccDataLen))
+		{
+			iccData.reset(pIccData);
+			colorSpace.reset(new kernel::IccSpace(iccData.get(), iccDataLen));
+		}
+		else
+		{
+			colorSpace.reset(new kernel::IccSpace(this->rgbSpace));
+		}
+#else
+		colorSpace = this->rgbSpace;
+#endif
+
 		cinfo.out_color_space = JCS_RGB;
 		jpeg_start_decompress(&cinfo);
 		LASS_ENFORCE(cinfo.output_components == 3);
@@ -232,6 +258,11 @@ struct ReadHandle: Handle
 	{
 		jpeg_destroy_decompress(&cinfo);
 	}
+#if LIAR_HAVE_LCMS2_H
+	kernel::TIccSpacePtr colorSpace;
+#else
+	kernel::TRgbSpacePtr colorSpace;
+#endif
 };
 
 struct WriteHandle: Handle
@@ -264,6 +295,12 @@ struct WriteHandle: Handle
 		{
 			jpeg_set_quality(&cinfo, num::clamp(quality[0], 0, 100), TRUE);
 		}
+#if LIAR_HAVE_LCMS2_H
+		colorSpace.reset(new kernel::IccSpace(this->rgbSpace));
+		const auto iccProfile = colorSpace->iccProfile();
+		const auto iccProfileSize = num::numCast<unsigned int>(iccProfile.size());
+		jpeg_write_icc_profile(&cinfo, reinterpret_cast<const JOCTET*>(iccProfile.data()), iccProfileSize);
+#endif
 		jpeg_start_compress(&cinfo, TRUE);
 		line.resize(cinfo.image_width * static_cast<JDIMENSION>(cinfo.input_components));
 	}
@@ -271,6 +308,9 @@ struct WriteHandle: Handle
 	{
 		jpeg_destroy_compress(&cinfo);
 	}
+#if LIAR_HAVE_LCMS2_H
+	kernel::TIccSpacePtr colorSpace;
+#endif
 };
 
 class ImageCodecJpeg: public kernel::ImageCodec
@@ -304,7 +344,7 @@ private:
 	void doReadLine(TImageHandle handle, kernel::XYZ* out, kernel::XYZ::TValue* alpha) const
 	{
 		ReadHandle* pimpl = static_cast<ReadHandle*>(handle);
-		const auto& rgbSpace = *pimpl->rgbSpace;
+		const auto& colorSpace = *pimpl->colorSpace;
 		LASS_ENFORCE(pimpl->cinfo.output_scanline < pimpl->cinfo.output_height);
 		JSAMPLE* line = &pimpl->line[0];
 		jpeg_read_scanlines(&pimpl->cinfo, &line, 1);
@@ -312,7 +352,7 @@ private:
 		for (size_t k = 0; k < n; k += 3)
 		{
 			const prim::ColorRGBA pixel(line[k] / 255.f, line[k + 1] / 255.f, line[k + 2] / 255.f, 1.f);
-			*out++ = rgbSpace.convert(pixel);
+			*out++ = colorSpace.convert(pixel);
 		}
 		if (alpha)
 			std::fill_n(alpha, pimpl->resolution.x, 1.f);
