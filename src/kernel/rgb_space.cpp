@@ -357,23 +357,8 @@ void RgbSpace::init(
 
 	// then, make matrix that does chromatic adaptation from whitepoint W to whitepoint E
 
-	//const TVector3D E(1, 1, 1);
-
-	TScalar bradford[16] =
-	{
-		 0.8951f,  0.2664f, -0.1614f, 0,
-		-0.7502f,  1.7135f,  0.0367f, 0,
-		 0.0389f, -0.0685f,  1.0296f, 0,
-		0, 0, 0, 1
-	};
-	const TTransformation3D M_BFD(bradford, bradford + 16);
-
-	const TVector3D C_s = transform(W, M_BFD);
-	const TVector3D C_d(1, 1, 1); // = transform(E, M_BFD);
-	const TTransformation3D M_c = TTransformation3D::scaler(C_d / C_s);
-
-	// M_CAT = M_BFD^-1 * M_c * M_BFD, thus M_BFD is applied first, then M_c and finally M_BFD^-1
-	const TTransformation3D M_CAT = concatenate(concatenate(M_BFD, M_c), M_BFD.inverse());
+	const TVector3D E(1, 1, 1);
+	const TTransformation3D M_CAT = impl::chromaticAdaptationMatrix(W, E);
 
 	// M converts colors from RGB (with whitepoint W) to XYZ (CIE E)
 	const TTransformation3D M = concatenate(M_XYZ, M_CAT);
@@ -422,6 +407,31 @@ TSpectrumPtr rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSp
 TSpectrumPtr rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue, const TRgbSpacePtr& rgbSpace)
 {
 	return Spectrum::make(rgbSpace->convert(prim::ColorRGBA(red, green, blue)));
+}
+
+namespace impl
+{
+
+TTransformation3D chromaticAdaptationMatrix(const TVector3D& from, const TVector3D& to)
+{
+	// bradford matrix
+	const static TTransformation3D M_BFD {
+		 0.8951,  0.2664, -0.1614, 0,
+		-0.7502,  1.7135,  0.0367, 0,
+		 0.0389, -0.0685,  1.0296, 0,
+		 0,       0,       0,      1
+	};
+
+	const TVector3D C_s = transform(from, M_BFD);
+	const TVector3D C_d = transform(to, M_BFD);
+	const TTransformation3D M_c = TTransformation3D::scaler(C_d / C_s);
+
+	// M_CAT = M_BFD^-1 * M_c * M_BFD, thus M_BFD is applied first, then M_c and finally M_BFD^-1
+	const TTransformation3D M_CAT = concatenate(concatenate(M_BFD, M_c), M_BFD.inverse());
+
+	return M_CAT;
+}
+
 }
 
 }

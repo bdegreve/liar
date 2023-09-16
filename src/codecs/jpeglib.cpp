@@ -245,6 +245,7 @@ struct ReadHandle: Handle
 			{
 				iccData.reset(pIccData);
 				colorSpace.reset(new kernel::IccSpace(iccData.get(), iccDataLen));
+				this->rgbSpace = colorSpace->rgbSpace();
 			}
 			else
 			{

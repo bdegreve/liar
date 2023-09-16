@@ -233,6 +233,7 @@ void IccSpace::swap(IccSpace& other)
 }
 
 
+
 std::string IccSpace::iccProfile() const
 {
 	LASS_ASSERT(pimpl_->iccProfile());
@@ -244,6 +245,58 @@ std::string IccSpace::iccProfile() const
 	return buffer;
 }
 
+
+
+namespace
+{
+
+TPoint2D chromaticity(TScalar x, TScalar y, TScalar z)
+{
+	const TScalar sum = x + y + z;
+	return sum == 0
+		? TPoint2D()
+		: TPoint2D(x / sum, y / sum);
+}
+
+}
+
+
+TRgbSpacePtr IccSpace::rgbSpace() const
+{
+	cmsHPROFILE profile = pimpl_->iccProfile();
+	LASS_ASSERT(profile);
+	const cmsCIEXYZ* red = static_cast<cmsCIEXYZ *>(cmsReadTag(profile, cmsSigRedColorantTag));
+	const cmsCIEXYZ* green = static_cast<cmsCIEXYZ *>(cmsReadTag(profile, cmsSigGreenColorantTag));
+	const cmsCIEXYZ* blue = static_cast<cmsCIEXYZ *>(cmsReadTag(profile, cmsSigBlueColorantTag));
+	const cmsCIEXYZ* white = static_cast<cmsCIEXYZ *>(cmsReadTag(profile, cmsSigMediaWhitePointTag));
+	const auto gamma = static_cast<prim::ColorRGBA::TValue>(cmsDetectRGBProfileGamma(pimpl_->iccProfile(), 0.1));
+
+	if (!red || !green || !blue || !white || gamma < 0)
+	{
+		LASS_THROW("Not a valid RGB ICC profile");
+	}
+
+	const TVector3D W(white->X, white->Y, white->Z);
+	const TVector3D D50(cmsD50X, cmsD50Y, cmsD50Z);
+	const auto M_CAT_inv = impl::chromaticAdaptationMatrix(D50, W);
+
+	const TTransformation3D M{
+		red->X,   green->X,   blue->X,   0,
+		red->Y,   green->Y,   blue->Y,   0,
+		red->Z,   green->Z,   blue->Z,   0,
+		0,        0,          0,         1
+	};
+
+	const TTransformation3D M_XYZ = concatenate(M, M_CAT_inv);
+
+	const auto mat = M_XYZ.matrix();
+	const TPoint2D r = chromaticity(mat[0], mat[4], mat[8]);
+	const TPoint2D g = chromaticity(mat[1], mat[5], mat[9]);
+	const TPoint2D b = chromaticity(mat[2], mat[6], mat[10]);
+	const TPoint2D w = chromaticity(white->X, white->Y, white->Z);
+
+	return TRgbSpacePtr(new RgbSpace(r, g, b, w, gamma));
+}
 
 
 const TPyObjectPtr IccSpace::reduce() const

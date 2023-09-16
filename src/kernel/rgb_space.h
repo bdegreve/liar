@@ -134,6 +134,12 @@ const TRgbSpacePtr sRGB = TRgbSpacePtr(new RgbSpace(
 	TPoint2D(0.3127f, 0.3290f), // white point
 	2.2f)); // gamma
 
+
+namespace impl
+{
+	TTransformation3D chromaticAdaptationMatrix(const TVector3D& from, const TVector3D& to);
+}
+
 }
 
 }

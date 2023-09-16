@@ -73,6 +73,7 @@ public:
 	const prim::ColorRGBA convert(const XYZ& xyz, XYZ::TValue alpha) const;
 
 	std::string iccProfile() const;
+	TRgbSpacePtr rgbSpace() const;
 
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const;
