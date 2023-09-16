@@ -67,19 +67,37 @@ private:
 typedef AutoHandle<cmsHPROFILE, cmsBool, cmsCloseProfile> AutoHPROFILE;
 typedef AutoHandle<cmsHTRANSFORM, void, cmsDeleteTransform> AutoHTRANSFORM;
 typedef AutoHandle<cmsToneCurve*, void, cmsFreeToneCurve> AutoToneCurve;
+typedef AutoHandle<cmsContext, void, cmsDeleteContext> AutoContext;
+
+class Context
+{
+public:
+	cmsContext operator*() const
+	{
+		return *context_;
+	}
+	static Context& instance()
+	{
+		static Context context;
+		return context;
+	}
+private:
+	Context()
+	{
+		context_ = AutoContext(cmsCreateContext(0, this));
+		cmsSetLogErrorHandlerTHR(*context_, &Context::errorHandler);
+	}
+	static void errorHandler(cmsContext LASS_UNUSED(contextID), cmsUInt32Number errorCode, const char* text)
+	{
+		LASS_ASSERT(contextID == *instance().context_);
+		LASS_CERR << "LCMS error " << errorCode << ": " << text << std::endl;
+	}
+	AutoContext context_;
+};
 
 template <typename T, cmsUInt32Number flt, cmsUInt32Number dbl> struct SelectFormat;
 template <cmsUInt32Number flt, cmsUInt32Number dbl> struct SelectFormat<float, flt, dbl> { enum { value = flt }; };
 template <cmsUInt32Number flt, cmsUInt32Number dbl> struct SelectFormat<double, flt, dbl> { enum { value = dbl }; };
-
-void errorHandler(cmsContext contextID, cmsUInt32Number errorCode, const char* text)
-{
-	LASS_CERR << "LCMS error " << errorCode << ": " << text << std::endl;
-}
-
-LASS_EXECUTE_BEFORE_MAIN({
-	cmsSetLogErrorHandler(errorHandler);
-})
 
 void enforceChromaticity(const TPoint2D& chromaticity, const char* name)
 {
@@ -120,10 +138,11 @@ AutoHPROFILE createRGBProfile(const TPoint2D& red, const TPoint2D& green, const 
 	primaries.Blue.y = blue.y;
 	primaries.Blue.Y = 1;
 
-	AutoToneCurve transferFunction(cmsBuildGamma(0, gamma));
+	cmsContext context = *Context::instance();
+	AutoToneCurve transferFunction(cmsBuildGamma(context, gamma));
 	cmsToneCurve* transferFunctions[3] = { *transferFunction, *transferFunction, *transferFunction };
 
-	return AutoHPROFILE(cmsCreateRGBProfile(&whitePoint, &primaries, transferFunctions));
+	return AutoHPROFILE(cmsCreateRGBProfileTHR(context, &whitePoint, &primaries, transferFunctions));
 }
 
 }
@@ -136,10 +155,11 @@ class IccSpaceImpl: public util::NonCopyable
 public:
 	IccSpaceImpl(AutoHPROFILE&& iccProfile): iccProfile_(std::move(iccProfile))
 	{
+		cmsContext context = *Context::instance();
 		const TPoint2D whitepointE(1 / 3.0, 1 / 3.0);
 		AutoHPROFILE xyzProfile = createRGBProfile(TPoint2D(1, 0), TPoint2D(0, 1), TPoint2D(0, 0), whitepointE, 1);
-		toXYZtransform_ = AutoHTRANSFORM(cmsCreateTransform(*iccProfile_, rgbFormat, *xyzProfile, xyzFormat, INTENT_ABSOLUTE_COLORIMETRIC, cmsFLAGS_NOOPTIMIZE));
-		fromXYZtransform_ = AutoHTRANSFORM(cmsCreateTransform(*xyzProfile, xyzFormat, *iccProfile_, rgbFormat, INTENT_ABSOLUTE_COLORIMETRIC, cmsFLAGS_NOOPTIMIZE));
+		toXYZtransform_ = AutoHTRANSFORM(cmsCreateTransformTHR(context, *iccProfile_, rgbFormat, *xyzProfile, xyzFormat, INTENT_ABSOLUTE_COLORIMETRIC, cmsFLAGS_NOOPTIMIZE));
+		fromXYZtransform_ = AutoHTRANSFORM(cmsCreateTransformTHR(context, *xyzProfile, xyzFormat, *iccProfile_, rgbFormat, INTENT_ABSOLUTE_COLORIMETRIC, cmsFLAGS_NOOPTIMIZE));
 		if (!toXYZtransform_ || !fromXYZtransform_)
 		{
 			LASS_THROW("Not a valid RGB ICC profile");
@@ -167,7 +187,8 @@ void IccSpaceImplDeleter::operator()(IccSpaceImpl* pimpl) const
 
 IccSpace::IccSpace(const void* iccProfileData, num::Tuint32 length)
 {
-	AutoHPROFILE iccProfile(cmsOpenProfileFromMem(iccProfileData, length));
+	cmsContext context = *Context::instance();
+	AutoHPROFILE iccProfile(cmsOpenProfileFromMemTHR(context, iccProfileData, length));
 	pimpl_.reset(new impl::IccSpaceImpl(std::move(iccProfile)));
 }
 
