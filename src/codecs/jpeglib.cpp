@@ -329,32 +329,32 @@ struct WriteHandle: Handle
 class ImageCodecJpeg: public kernel::ImageCodec
 {
 private:
-	TImageHandle doCreate(const std::filesystem::path& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string& options) const
+	TImageHandle doCreate(const std::filesystem::path& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string& options) const override
 	{
 		return new WriteHandle(path, resolution, rgbSpace, options);
 	}
 
-	TImageHandle doOpen(const std::filesystem::path& path, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
+	TImageHandle doOpen(const std::filesystem::path& path, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const override
 	{
 		return new ReadHandle(path, rgbSpace);
 	}
 
-	void doClose(TImageHandle handle) const
+	void doClose(TImageHandle handle) const override
 	{
 		delete static_cast<Handle*>(handle);
 	}
 
-	const TResolution2D doResolution(TImageHandle handle) const
+	const TResolution2D doResolution(TImageHandle handle) const override
 	{
 		return static_cast<Handle*>(handle)->resolution;
 	}
 
-	const kernel::TRgbSpacePtr doRgbSpace(TImageHandle handle) const
+	const kernel::TRgbSpacePtr doRgbSpace(TImageHandle handle) const override
 	{
 		return static_cast<Handle*>(handle)->rgbSpace;
 	}
 
-	void doReadLine(TImageHandle handle, kernel::XYZA* out) const
+	void doReadLine(TImageHandle handle, kernel::XYZA* out) const override
 	{
 		ReadHandle* pimpl = static_cast<ReadHandle*>(handle);
 		const auto& colorSpace = *pimpl->colorSpace;
@@ -373,7 +373,7 @@ private:
 		}
 	}
 
-	void doWriteLine(TImageHandle handle, const prim::ColorRGBA* in) const
+	void doWriteLine(TImageHandle handle, const prim::ColorRGBA* in) const override
 	{
 		WriteHandle* pimpl = static_cast<WriteHandle*>(handle);
 		LASS_ENFORCE(pimpl->cinfo.next_scanline < pimpl->cinfo.image_height);

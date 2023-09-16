@@ -148,14 +148,14 @@ public:
 protected:
 	TRgbSpacePtr selectRgbSpace(const TRgbSpacePtr& defaultCodecSpace = TRgbSpacePtr()) const;
 private:
-	virtual TImageHandle doCreate(const std::filesystem::path& path, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string& options) const;
-	virtual TImageHandle doOpen(const std::filesystem::path& path, const TRgbSpacePtr& rgbSpace, const std::string& options) const;
-	virtual void doClose(TImageHandle handle) const;
+	TImageHandle doCreate(const std::filesystem::path& path, const TResolution2D& resolution, const TRgbSpacePtr& rgbSpace, const std::string& options) const override;
+	TImageHandle doOpen(const std::filesystem::path& path, const TRgbSpacePtr& rgbSpace, const std::string& options) const override;
+	void doClose(TImageHandle handle) const override;
 
-	virtual const TResolution2D doResolution(TImageHandle handle) const;
-	virtual const TRgbSpacePtr doRgbSpace(TImageHandle handle) const;
-	virtual void doReadLine(TImageHandle handle, XYZA* out) const;
-	virtual void doWriteLine(TImageHandle handle, const prim::ColorRGBA* in) const;
+	const TResolution2D doResolution(TImageHandle handle) const override;
+	const TRgbSpacePtr doRgbSpace(TImageHandle handle) const override;
+	void doReadLine(TImageHandle handle, XYZA* out) const override;
+	void doWriteLine(TImageHandle handle, const prim::ColorRGBA* in) const override;
 
 	TRgbSpacePtr defaultCodecSpace_;
 	bool hasGammaCorrection_;

@@ -197,17 +197,17 @@ struct WriteHandle: public Handle
 class ImageCodecLodePng: public kernel::ImageCodec
 {
 private:
-	TImageHandle doCreate(const std::filesystem::path& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
+	TImageHandle doCreate(const std::filesystem::path& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const override
 	{
 		return new WriteHandle(path, resolution, rgbSpace);
 	}
 
-	TImageHandle doOpen(const std::filesystem::path& path, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
+	TImageHandle doOpen(const std::filesystem::path& path, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const override
 	{
 		return new ReadHandle(path, rgbSpace);
 	}
 
-	void doClose(TImageHandle handle) const
+	void doClose(TImageHandle handle) const override
 	{
 		Handle* h = static_cast<Handle*>(handle);
 		if (WriteHandle* wh = dynamic_cast<WriteHandle*>(h))
@@ -215,18 +215,18 @@ private:
 		delete h;
 	}
 
-	const TResolution2D doResolution(TImageHandle handle) const
+	const TResolution2D doResolution(TImageHandle handle) const override
 	{
 		Handle& h = *static_cast<Handle*>(handle);
 		return TResolution2D(h.width, h.height);
 	}
 
-	const kernel::TRgbSpacePtr doRgbSpace(TImageHandle handle) const
+	const kernel::TRgbSpacePtr doRgbSpace(TImageHandle handle) const override
 	{
 		return static_cast<Handle*>(handle)->rgbSpace;
 	}
 
-	void doReadLine(TImageHandle handle, kernel::XYZA* out) const
+	void doReadLine(TImageHandle handle, kernel::XYZA* out) const override
 	{
 		ReadHandle* pimpl = static_cast<ReadHandle*>(handle);
 		LASS_ENFORCE(pimpl);
@@ -242,7 +242,7 @@ private:
 		++pimpl->y;
 	}
 
-	void doWriteLine(TImageHandle handle, const prim::ColorRGBA* in) const
+	void doWriteLine(TImageHandle handle, const prim::ColorRGBA* in) const override
 	{
 		WriteHandle* pimpl = static_cast<WriteHandle*>(handle);
 		LASS_ENFORCE(pimpl);

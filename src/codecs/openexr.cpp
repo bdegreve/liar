@@ -100,7 +100,7 @@ inline TPoint2D V2fToPoint2D(const Imath::V2f& p)
 class ImageCodecOpenEXR: public kernel::ImageCodec
 {
 private:
-	TImageHandle doCreate(const std::filesystem::path& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
+	TImageHandle doCreate(const std::filesystem::path& path, const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const override
 	{
 		std::unique_ptr<Handle> pimpl(new Handle(resolution, rgbSpace));
 		pimpl->line.resize(resolution.x);
@@ -117,7 +117,7 @@ private:
 		return pimpl.release();
 	}
 
-	TImageHandle doOpen(const std::filesystem::path& path, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const
+	TImageHandle doOpen(const std::filesystem::path& path, const kernel::TRgbSpacePtr& rgbSpace, const std::string&) const override
 	{
 		std::unique_ptr<LassIStream> istream(new LassIStream(path));
 		std::unique_ptr<Imf::RgbaInputFile> input(new Imf::RgbaInputFile(*istream, 0));
@@ -133,23 +133,23 @@ private:
 		return pimpl.release();
 	}
 
-	void doClose(TImageHandle handle) const
+	void doClose(TImageHandle handle) const override
 	{
 		Handle* h = static_cast<Handle*>(handle);
 		delete h;
 	}
 
-	const TResolution2D doResolution(TImageHandle handle) const
+	const TResolution2D doResolution(TImageHandle handle) const override
 	{
 		return static_cast<Handle*>(handle)->resolution;
 	}
 
-	const kernel::TRgbSpacePtr doRgbSpace(TImageHandle handle) const
+	const kernel::TRgbSpacePtr doRgbSpace(TImageHandle handle) const override
 	{
 		return static_cast<Handle*>(handle)->rgbSpace;
 	}
 
-	void doReadLine(TImageHandle handle, kernel::XYZA* out) const
+	void doReadLine(TImageHandle handle, kernel::XYZA* out) const override
 	{
 		const kernel::XYZA nodata(0, 0, 0, 0);
 
@@ -188,7 +188,7 @@ private:
 		++pimpl->y;
 	}
 
-	void doWriteLine(TImageHandle handle, const prim::ColorRGBA* in) const
+	void doWriteLine(TImageHandle handle, const prim::ColorRGBA* in) const override
 	{
 		Handle* pimpl = static_cast<Handle*>(handle);
 		Imf::RgbaOutputFile& output = *pimpl->output;
