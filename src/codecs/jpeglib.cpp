@@ -198,7 +198,7 @@ struct Handle
 	TLine line;
 	ErrorMgr jerr = {};
 	Handle(const kernel::TRgbSpacePtr& rgbSpace):
-		rgbSpace(rgbSpace ? rgbSpace : kernel::RgbSpace::defaultSpace())
+		rgbSpace(rgbSpace)
 	{
 	}
 	virtual ~Handle()
@@ -232,19 +232,31 @@ struct ReadHandle: Handle
 		jpeg_read_header(&cinfo, TRUE);
 
 #if LIAR_HAVE_LCMS2_H
-		std::unique_ptr<JOCTET, JoctetDeleter> iccData;
-		JOCTET* pIccData;
-		unsigned int iccDataLen;
-		if (jpeg_read_icc_profile(&cinfo, &pIccData, &iccDataLen))
-		{
-			iccData.reset(pIccData);
-			colorSpace.reset(new kernel::IccSpace(iccData.get(), iccDataLen));
-		}
-		else
+		if (this->rgbSpace)
 		{
 			colorSpace.reset(new kernel::IccSpace(this->rgbSpace));
 		}
+		else
+		{
+			std::unique_ptr<JOCTET, JoctetDeleter> iccData;
+			JOCTET* pIccData;
+			unsigned int iccDataLen;
+			if (jpeg_read_icc_profile(&cinfo, &pIccData, &iccDataLen))
+			{
+				iccData.reset(pIccData);
+				colorSpace.reset(new kernel::IccSpace(iccData.get(), iccDataLen));
+			}
+			else
+			{
+				this->rgbSpace = kernel::RgbSpace::defaultSpace();
+				colorSpace.reset(new kernel::IccSpace(this->rgbSpace));
+			}
+		}
 #else
+		if (!this->rgbSpace)
+		{
+			this->rgbSpace = kernel::RgbSpace::defaultSpace();
+		}
 		colorSpace = this->rgbSpace;
 #endif
 
