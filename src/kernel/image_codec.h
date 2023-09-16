@@ -26,6 +26,7 @@
 
 #include "kernel_common.h"
 #include "rgb_space.h"
+#include "xyza.h"
 #include <lass/prim/aabb_2d.h>
 #include <filesystem>
 namespace liar
@@ -73,9 +74,9 @@ public:
 		return doRgbSpace(handle);
 	}
 
-	void readLine(TImageHandle handle, XYZ* out, XYZ::TValue* alpha = nullptr) const
+	void readLine(TImageHandle handle, XYZA* out) const
 	{
-		doReadLine(handle, out, alpha);
+		doReadLine(handle, out);
 	}
 	void writeLine(TImageHandle handle, const prim::ColorRGBA* in) const
 	{
@@ -90,7 +91,7 @@ private:
 	virtual const TResolution2D doResolution(TImageHandle handle) const = 0;
 	virtual const TRgbSpacePtr doRgbSpace(TImageHandle handle) const = 0;
 
-	virtual void doReadLine(TImageHandle handle, XYZ* out, XYZ::TValue *alpha) const = 0;
+	virtual void doReadLine(TImageHandle handle, XYZA* out) const = 0;
 	virtual void doWriteLine(TImageHandle handle, const prim::ColorRGBA* in) const = 0;
 };
 
@@ -111,8 +112,8 @@ public:
 
 	const TResolution2D resolution() const { return codec_->resolution(handle_); }
 	const TRgbSpacePtr rgbSpace() const { return codec_->rgbSpace(handle_); }
-	void readLine(XYZ* out, XYZ::TValue* alpha = nullptr) const { codec_->readLine(handle_, out, alpha); }
-	void readFull(XYZ* out, XYZ::TValue* alpha = nullptr) const;
+	void readLine(XYZA* out) const { codec_->readLine(handle_, out); }
+	void readFull(XYZA* out) const;
 private:
 	TImageCodecPtr codec_;
 	ImageCodec::TImageHandle handle_;
@@ -153,7 +154,7 @@ private:
 
 	virtual const TResolution2D doResolution(TImageHandle handle) const;
 	virtual const TRgbSpacePtr doRgbSpace(TImageHandle handle) const;
-	virtual void doReadLine(TImageHandle handle, XYZ* out, XYZ::TValue* alpha) const;
+	virtual void doReadLine(TImageHandle handle, XYZA* out) const;
 	virtual void doWriteLine(TImageHandle handle, const prim::ColorRGBA* in) const;
 
 	TRgbSpacePtr defaultCodecSpace_;

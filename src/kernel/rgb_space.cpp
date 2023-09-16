@@ -41,10 +41,10 @@ PY_CLASS_MEMBER_R_DOC(RgbSpace, green, "(x_green, y_green)");
 PY_CLASS_MEMBER_R_DOC(RgbSpace, blue, "(x_blue, y_blue)");
 PY_CLASS_MEMBER_R_DOC(RgbSpace, white, "(x_white, y_white)");
 PY_CLASS_MEMBER_R_DOC(RgbSpace, gamma, "float");
-PY_CLASS_METHOD_QUALIFIED_NAME_1(RgbSpace, convert, const XYZ, const RgbSpace::RGBA&, "toXYZ")
-PY_CLASS_METHOD_QUALIFIED_NAME_1(RgbSpace, convert, const RgbSpace::RGBA, const XYZ&, "toRGBA")
-PY_CLASS_METHOD_QUALIFIED_NAME_1(RgbSpace, linearConvert, const XYZ, const RgbSpace::RGBA&, "toXYZlinear")
-PY_CLASS_METHOD_QUALIFIED_NAME_1(RgbSpace, linearConvert, const RgbSpace::RGBA, const XYZ&, "toRGBAlinear")
+PY_CLASS_METHOD_QUALIFIED_NAME_1(RgbSpace, toXYZ, const XYZ, const RgbSpace::RGBA&, "toXYZ")
+PY_CLASS_METHOD_QUALIFIED_NAME_1(RgbSpace, toRGBA, const RgbSpace::RGBA, const XYZ&, "toRGBA")
+PY_CLASS_METHOD_QUALIFIED_NAME_1(RgbSpace, toXYZlinear, const XYZ, const RgbSpace::RGBA&, "toXYZlinear")
+PY_CLASS_METHOD_QUALIFIED_NAME_1(RgbSpace, toRGBAlinear, const RgbSpace::RGBA, const XYZ&, "toRGBAlinear")
 PY_CLASS_METHOD_DOC(RgbSpace, linearSpace, "return RGB space with same chromaticities, but with gamma=1");
 PY_CLASS_METHOD_DOC(RgbSpace, withGamma, "return RGB space with same chromaticities, but with another gamma");
 PY_CLASS_METHOD_NAME(RgbSpace, operator==, python::methods::_eq_);
@@ -79,65 +79,75 @@ RgbSpace::RgbSpace(
 
 
 
-const XYZ RgbSpace::convert(const prim::ColorRGBA& rgb) const
+const XYZA RgbSpace::toXYZA(const prim::ColorRGBA& rgba) const
 {
-	XYZ::TValue dummy;
-	return convert(rgb, dummy);
+	return toXYZAlinear(toLinear(rgba));
 }
 
 
 
-const XYZ RgbSpace::convert(const prim::ColorRGBA& rgba, XYZ::TValue& alpha) const
+const XYZ RgbSpace::toXYZ(const prim::ColorRGBA& rgba) const
 {
-	return linearConvert(toLinear(rgba), alpha);
+	return toXYZlinear(toLinear(rgba));
 }
 
 
 
-const prim::ColorRGBA RgbSpace::convert(const XYZ& xyz) const
+const prim::ColorRGBA RgbSpace::toRGBA(const XYZA& xyza) const
 {
-	return convert(xyz, 1);
+	return toGamma(toRGBAlinear(xyza));
 }
 
 
 
-const prim::ColorRGBA RgbSpace::convert(const XYZ& xyz, XYZ::TValue alpha) const
+const prim::ColorRGBA RgbSpace::toRGBA(const XYZ& xyz) const
 {
-	return toGamma(linearConvert(xyz, alpha));
+	return toGamma(toRGBAlinear(xyz, 1));
 }
 
 
 
-const XYZ RgbSpace::linearConvert(const RGBA& rgb) const
+const prim::ColorRGBA RgbSpace::toRGBA(const XYZ& xyz, XYZ::TValue alpha) const
 {
-	XYZ::TValue dummy;
-	return linearConvert(rgb, dummy);
+	return toGamma(toRGBAlinear(xyz, alpha));
 }
 
 
 
-const XYZ RgbSpace::linearConvert(const RGBA& rgb, XYZ::TValue& alpha) const
+const XYZA RgbSpace::toXYZAlinear(const RGBA& rgba) const
 {
-	alpha = static_cast<XYZ::TValue>(rgb.a);
-	return r_ * rgb.r + g_ * rgb.g + b_ * rgb.b;
+	return XYZA(toXYZlinear(rgba), rgba.a);
 }
 
 
 
-const RgbSpace::RGBA RgbSpace::linearConvert(const XYZ& xyz) const
+const XYZ RgbSpace::toXYZlinear(const RGBA& rgba) const
 {
-	return linearConvert(xyz, 1);
+	return r_ * rgba.r + g_ * rgba.g + b_ * rgba.b;
 }
 
 
 
-const RgbSpace::RGBA RgbSpace::linearConvert(const XYZ& xyz, XYZ::TValue alpha) const
+const RgbSpace::RGBA RgbSpace::toRGBAlinear(const XYZA& xyza) const
 {
-	RGBA temp = x_ * static_cast<RGBA::TValue>(xyz.x) + y_ * static_cast<RGBA::TValue>(xyz.y) + z_ * static_cast<RGBA::TValue>(xyz.z);
-	temp.a = static_cast<RGBA::TValue>(alpha);
+	RGBA temp = x_ * static_cast<RGBA::TValue>(xyza.x) + y_ * static_cast<RGBA::TValue>(xyza.y) + z_ * static_cast<RGBA::TValue>(xyza.z);
+	temp.a = static_cast<RGBA::TValue>(xyza.a);
 	return temp;
 }
 
+
+
+const RgbSpace::RGBA RgbSpace::toRGBAlinear(const XYZ& xyz) const
+{
+	return toRGBAlinear(XYZA(xyz, 1));
+}
+
+
+
+const RgbSpace::RGBA RgbSpace::toRGBAlinear(const XYZ& xyz, XYZ::TValue alpha) const
+{
+	return toRGBAlinear(XYZA(xyz, alpha));
+}
 
 
 namespace
@@ -391,22 +401,22 @@ void RgbSpace::enforceChromaticity(const TPoint2D& c, const char* name) const
 
 TSpectrumPtr rgb(const RgbSpace::RGBA& rgba)
 {
-	return Spectrum::make(RgbSpace::defaultSpace()->convert(rgba));
+	return Spectrum::make(RgbSpace::defaultSpace()->toXYZ(rgba));
 }
 
 TSpectrumPtr rgb(const RgbSpace::RGBA& rgba, const TRgbSpacePtr& rgbSpace)
 {
-	return Spectrum::make(rgbSpace->convert(rgba));
+	return Spectrum::make(rgbSpace->toXYZ(rgba));
 }
 
 TSpectrumPtr rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue)
 {
-	return Spectrum::make(RgbSpace::defaultSpace()->convert(prim::ColorRGBA(red, green, blue)));
+	return Spectrum::make(RgbSpace::defaultSpace()->toXYZ(prim::ColorRGBA(red, green, blue)));
 }
 
 TSpectrumPtr rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue, const TRgbSpacePtr& rgbSpace)
 {
-	return Spectrum::make(rgbSpace->convert(prim::ColorRGBA(red, green, blue)));
+	return Spectrum::make(rgbSpace->toXYZ(prim::ColorRGBA(red, green, blue)));
 }
 
 namespace impl

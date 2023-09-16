@@ -330,7 +330,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
                 {
                     const XYZ linear = weighted(k, gain);
                     tonemapBuffer_[k] = !linear.isNaN()
-                        ? destSpace->convert(linear, alphaBuffer_[k])
+                        ? destSpace->toRGBA(linear, alphaBuffer_[k])
                         : pink;
                 }
             }
@@ -346,7 +346,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
                     const XYZ linear = weighted(k, gain);
                     const XYZ tonemapped = linear / (1 + linear.y);
                     tonemapBuffer_[k] = !tonemapped.isNaN()
-                        ? destSpace->convert(tonemapped, alphaBuffer_[k])
+                        ? destSpace->toRGBA(tonemapped, alphaBuffer_[k])
                         : pink;
                 }
             }
@@ -359,7 +359,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
                 const size_t kEnd = kBegin + nx;
                 for (size_t k = kBegin; k < kEnd; ++k)
                 {
-                    const prim::ColorRGBA linear = destSpace->linearConvert(weighted(k, gain), alphaBuffer_[k]);
+                    const prim::ColorRGBA linear = destSpace->toRGBAlinear(weighted(k, gain), alphaBuffer_[k]);
                     const prim::ColorRGBA tonemapped(linear.r / (1 + linear.r), linear.g / (1 + linear.g), linear.b / (1 + linear.b), linear.a);
                     tonemapBuffer_[k] = !tonemapped.isNaN()
                         ? destSpace->toGamma(tonemapped)
@@ -382,7 +382,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
                         const TValue L = linear.y;
                         const XYZ tonemapped = linear * ((1 + L * invLwSquared) / (1 + L));
                         tonemapBuffer_[k] = !tonemapped.isNaN()
-                            ? destSpace->convert(tonemapped, alphaBuffer_[k])
+                            ? destSpace->toRGBA(tonemapped, alphaBuffer_[k])
                             : pink;
                     }
                 }
@@ -399,7 +399,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
                     const size_t kEnd = kBegin + nx;
                     for (size_t k = kBegin; k < kEnd; ++k)
                     {
-                        const prim::ColorRGBA linear = destSpace->linearConvert(weighted(k, gain), alphaBuffer_[k]);
+                        const prim::ColorRGBA linear = destSpace->toRGBAlinear(weighted(k, gain), alphaBuffer_[k]);
                         const prim::ColorRGBA tonemapped(
                             static_cast<prim::ColorRGBA::TValue>(linear.r * (1 + linear.r * invLwSquared) / (1 + linear.r)),
                             static_cast<prim::ColorRGBA::TValue>(linear.g * (1 + linear.g * invLwSquared) / (1 + linear.g)),
@@ -426,7 +426,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
                         : (-num::expm1(-linear.y) / linear.y);
                     const XYZ tonemapped = linear * scale;
                     tonemapBuffer_[k] = !tonemapped.isNaN()
-                        ? destSpace->convert(tonemapped, alphaBuffer_[k])
+                        ? destSpace->toRGBA(tonemapped, alphaBuffer_[k])
                         : pink;
                 }
             }
@@ -439,7 +439,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
                 const size_t kEnd = kBegin + nx;
                 for (size_t k = kBegin; k < kEnd; ++k)
                 {
-                    const prim::ColorRGBA linear = destSpace->linearConvert(weighted(k, gain), alphaBuffer_[k]);
+                    const prim::ColorRGBA linear = destSpace->toRGBAlinear(weighted(k, gain), alphaBuffer_[k]);
                     const prim::ColorRGBA tonemapped(-num::expm1(-linear.r), -num::expm1(-linear.g), -num::expm1(-linear.b), linear.a);
                     tonemapBuffer_[k] = !tonemapped.isNaN()
                         ? destSpace->toGamma(tonemapped)
@@ -458,7 +458,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
                     const XYZ linear = weighted(k, gain);
                     const XYZ tonemapped = linear * (filmic(linear.y) / std::max(linear.y, static_cast<XYZ::TValue>(0.004)));
                     tonemapBuffer_[k] = !tonemapped.isNaN()
-                        ? destSpace->convert(tonemapped, alphaBuffer_[k])
+                        ? destSpace->toRGBA(tonemapped, alphaBuffer_[k])
                         : pink;
                 }
             }
@@ -471,7 +471,7 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
                 const size_t kEnd = kBegin + nx;
                 for (size_t k = kBegin; k < kEnd; ++k)
                 {
-                    const prim::ColorRGBA linear = destSpace->linearConvert(weighted(k, gain), alphaBuffer_[k]);
+                    const prim::ColorRGBA linear = destSpace->toRGBAlinear(weighted(k, gain), alphaBuffer_[k]);
                     const prim::ColorRGBA tonemapped(filmic(linear.r), filmic(linear.g), filmic(linear.b), linear.a);
                     tonemapBuffer_[k] = !tonemapped.isNaN()
                         ? destSpace->toGamma(tonemapped)

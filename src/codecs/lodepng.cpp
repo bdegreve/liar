@@ -226,7 +226,7 @@ private:
 		return static_cast<Handle*>(handle)->rgbSpace;
 	}
 
-	void doReadLine(TImageHandle handle, kernel::XYZ* out, kernel::XYZ::TValue* alpha) const
+	void doReadLine(TImageHandle handle, kernel::XYZA* out) const
 	{
 		ReadHandle* pimpl = static_cast<ReadHandle*>(handle);
 		LASS_ENFORCE(pimpl);
@@ -234,11 +234,10 @@ private:
 		LASS_ENFORCE(pimpl->y < pimpl->height);
 		const size_t lineSize = 4 * static_cast<size_t>(pimpl->width);
 		unsigned char* line = pimpl->bytes + pimpl->y * lineSize;
-		kernel::XYZ::TValue dummy;
 		for (size_t k = 0; k < lineSize; k += 4)
 		{
 			const prim::ColorRGBA pixel(line[k] / 255.f, line[k + 1] / 255.f, line[k + 2] / 255.f, line[k + 3] / 255.f);
-			*out++ = colorSpace.convert(pixel, alpha ? alpha[k] : dummy);
+			*out++ = colorSpace.toXYZA(pixel);
 		}
 		++pimpl->y;
 	}

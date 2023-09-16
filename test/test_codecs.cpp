@@ -31,7 +31,7 @@ using namespace liar::kernel;
 namespace
 {
 
-using TRaster = std::vector<XYZ>;
+using TRaster = std::vector<XYZA>;
 
 /*
 
@@ -124,11 +124,13 @@ void testImage(ImageReader&& reader)
 		for (size_t x = 0; x < 6; ++x)
 		{
 			const size_t k = k0 + (100 * x + 50);
-			if (!equalXYZ(raster[k], colors[y][x]))
+			const XYZ xyz = static_cast<XYZ>(raster[k]);
+			if (!equalXYZ(xyz, colors[y][x]))
 			{
 				ADD_FAILURE() << "[" << y << "," << x << "]: color "
-					<< raster[k] << " is not as expected " << colors[y][x];
+					<< xyz << " is not as expected " << colors[y][x];
 			}
+			EXPECT_DOUBLE(raster[k].a, 1.);
 		}
 	}
 }

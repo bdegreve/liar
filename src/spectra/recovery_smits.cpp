@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ RecoverySmits::RecoverySmits(const TSpectrumPtr& red, const TSpectrumPtr& green,
 
 Spectral RecoverySmits::doRecover(const XYZ& xyz, const Sample& sample, SpectralType type) const
 {
-	const prim::ColorRGBA rgb = rgbSpace_->linearConvert(xyz);
+	const prim::ColorRGBA rgb = rgbSpace_->toRGBAlinear(xyz);
 
 	Spectral result = white_->evaluate(sample, type);
 	if (rgb.r <= rgb.g)

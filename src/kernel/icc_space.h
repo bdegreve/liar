@@ -34,6 +34,7 @@
 #ifdef LIAR_HAVE_LCMS2_H
 
 #include "xyz.h"
+#include "xyza.h"
 #include "rgb_space.h"
 
 namespace liar
@@ -67,10 +68,8 @@ public:
 	IccSpace(const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, const TPoint2D& white, TScalar gamma = 1);
 	IccSpace(const TRgbSpacePtr& rgbSpace);
 
-	const XYZ convert(const prim::ColorRGBA& rgb) const;
-	const XYZ convert(const prim::ColorRGBA& rgb, XYZ::TValue& alpha) const;
-	const prim::ColorRGBA convert(const XYZ& xyz) const;
-	const prim::ColorRGBA convert(const XYZ& xyz, XYZ::TValue alpha) const;
+	const XYZA toXYZA(const prim::ColorRGBA& rgba) const;
+	const prim::ColorRGBA toRGBA(const XYZA& xyza) const;
 
 	std::string iccProfile() const;
 	TRgbSpacePtr rgbSpace() const;

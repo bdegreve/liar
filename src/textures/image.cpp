@@ -200,7 +200,7 @@ void Image::setDefaultMipMapping(const std::string& mode)
 
 const Spectral Image::doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const
 {
-	return Spectral::fromXYZ(lookUp(context), sample, type);
+	return Spectral::fromXYZ(static_cast<XYZ>(lookUp(context)), sample, type);
 }
 
 

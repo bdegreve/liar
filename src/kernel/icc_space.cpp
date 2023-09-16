@@ -213,37 +213,20 @@ IccSpace::IccSpace(const TRgbSpacePtr& rgbSpace) :
 }
 
 
-const XYZ IccSpace::convert(const prim::ColorRGBA& rgb) const
+const XYZA IccSpace::toXYZA(const prim::ColorRGBA& rgba) const
 {
-	XYZ xyz;
-	cmsDoTransform(pimpl_->toXYZtransform(), &rgb, &xyz, 1);
-	return xyz;
+	XYZA xyza(0, rgba.a);
+	cmsDoTransform(pimpl_->toXYZtransform(), &rgba, &xyza, 1);
+	return xyza;
 }
 
 
 
-const XYZ IccSpace::convert(const prim::ColorRGBA& rgb, XYZ::TValue& alpha) const
+const prim::ColorRGBA IccSpace::toRGBA(const XYZA& xyza) const
 {
-	alpha = rgb.a;
-	return convert(rgb);
-}
-
-
-
-const prim::ColorRGBA IccSpace::convert(const XYZ& xyz) const
-{
-	prim::ColorRGBA rgb;
-	cmsDoTransform(pimpl_->fromXYZtransform(), &xyz, &rgb, 1);
-	return rgb;
-}
-
-
-
-const prim::ColorRGBA IccSpace::convert(const XYZ& xyz, XYZ::TValue alpha) const
-{
-	prim::ColorRGBA rgb = convert(xyz);
-	rgb.a = static_cast<prim::ColorRGBA::TValue>(alpha);
-	return rgb;
+	prim::ColorRGBA rgba(0, xyza.a);
+	cmsDoTransform(pimpl_->fromXYZtransform(), &xyza, &rgba, 1);
+	return rgba;
 }
 
 

@@ -149,9 +149,9 @@ private:
 		return static_cast<Handle*>(handle)->rgbSpace;
 	}
 
-	void doReadLine(TImageHandle handle, kernel::XYZ* out, kernel::XYZ::TValue* alpha) const
+	void doReadLine(TImageHandle handle, kernel::XYZA* out) const
 	{
-		const kernel::XYZ nodata(0, 0, 0);
+		const kernel::XYZA nodata(0, 0, 0, 0);
 
 		Handle* pimpl = static_cast<Handle*>(handle);
 		const Imath::Box2i& dispWin = pimpl->input->displayWindow();
@@ -173,24 +173,17 @@ private:
 				{
 					const Imf::Rgba& pixel = line[static_cast<size_t>(x - dataWin.min.x)];
 					const prim::ColorRGBA rgba(pixel.r, pixel.g, pixel.b, pixel.a);
-					kernel::XYZ::TValue a;
-					*out++ = rgbSpace.convert(rgba, a);
-					if (alpha)
-						*alpha++ = a;
+					*out++ = rgbSpace.toXYZA(rgba);
 				}
 				else
 				{
 					*out++ = nodata;
-					if (alpha)
-						*alpha++ = 0.f;
 				}
 			}
 		}
 		else
 		{
 			std::fill_n(out, pimpl->resolution.x, nodata);
-			if (alpha)
-				std::fill_n(alpha, pimpl->resolution.x, 0);
 		}
 		++pimpl->y;
 	}
@@ -227,7 +220,7 @@ private:
 				V2fToPoint2D(chromas.blue),
 				V2fToPoint2D(chromas.white)));
 		}
-		return kernel::TRgbSpacePtr();
+		return kernel::RgbSpace::defaultSpace();
 	}
 };
 

@@ -32,6 +32,7 @@
 #include "textures_common.h"
 #include "../kernel/texture.h"
 #include "../kernel/rgb_space.h"
+#include "../kernel/xyza.h"
 #include <lass/prim/xy.h>
 #include <lass/util/dictionary.h>
 #include <lass/util/thread.h>
@@ -89,7 +90,7 @@ private:
 	};
 	typedef util::Dictionary<std::string, MipMapping> TMipMappingDictionary;
 
-	typedef XYZ TPixel;
+	typedef XYZA TPixel;
 	typedef util::SharedPtr<TPixel, util::ArrayStorage> TPixels;
 
 	class MipMapLevel

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -131,7 +131,7 @@ bool Spectral::isInitialized_ = Spectral::initialize();
 
 Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample&, SpectralType type)
 {
-	const RgbSpace::RGBA rgb = RgbSpace::defaultSpace()->linearConvert(xyz);
+	const RgbSpace::RGBA rgb = RgbSpace::defaultSpace()->toRGBAlinear(xyz);
 	return Spectral(TBands(rgb.r, rgb.g, rgb.b), type);
 }
 
@@ -143,13 +143,13 @@ Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, cons
 Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TValue>& values, SpectralType type)
 {
 	const XYZ xyz = standardObserver().tristimulus(wavelengths, values);
-	const RgbSpace::RGBA rgb = RgbSpace::defaultSpace()->linearConvert(xyz);
+	const RgbSpace::RGBA rgb = RgbSpace::defaultSpace()->toRGBAlinear(xyz);
 	return Spectral(TBands(rgb.r, rgb.g, rgb.b), type);
 }
 
 const XYZ Spectral::xyz(const Sample&) const
 {
-	return RgbSpace::defaultSpace()->linearConvert(RgbSpace::RGBA(v_[0], v_[1], v_[2]));
+	return RgbSpace::defaultSpace()->toXYZlinear(RgbSpace::RGBA(v_[0], v_[1], v_[2]));
 }
 
 #elif LIAR_SPECTRAL_MODE_XYZ

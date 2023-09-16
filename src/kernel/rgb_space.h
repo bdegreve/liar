@@ -31,6 +31,7 @@
 
 #include "kernel_common.h"
 #include "xyz.h"
+#include "xyza.h"
 
 
 namespace liar
@@ -53,15 +54,19 @@ public:
 
 	RgbSpace(const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, const TPoint2D& white, RGBA::TValue gamma = 1);
 
-	const XYZ convert(const RGBA& rgb) const;
-	const XYZ convert(const RGBA& rgb, XYZ::TValue& alpha) const;
-	const RGBA convert(const XYZ& xyz) const;
-	const RGBA convert(const XYZ& xyz, XYZ::TValue alpha) const;
 
-	const XYZ linearConvert(const RGBA& rgba) const;
-	const XYZ linearConvert(const RGBA& rgba, XYZ::TValue& alpha) const;
-	const RGBA linearConvert(const XYZ& xyz) const;
-	const RGBA linearConvert(const XYZ& xyz, XYZ::TValue alpha) const;
+	const XYZA toXYZA(const RGBA& rgba) const;
+	const XYZ toXYZ(const RGBA& rgba) const;
+	const RGBA toRGBA(const XYZA& xyza) const;
+	const RGBA toRGBA(const XYZ& xyz) const;
+	const RGBA toRGBA(const XYZ& xyz, XYZ::TValue alpha) const;
+
+	const XYZA toXYZAlinear(const RGBA& rgba) const;
+	const XYZ toXYZlinear(const RGBA& rgba) const;
+	const RGBA toRGBAlinear(const XYZA& xyza) const;
+	const RGBA toRGBAlinear(const XYZ& xyz) const;
+	const RGBA toRGBAlinear(const XYZ& xyz, XYZ::TValue alpha) const;
+
 	const RGBA toGamma(const RGBA& rgba) const;
 	const RGBA toLinear(const RGBA& rgba) const;
 

@@ -86,15 +86,14 @@ void transcodeImage(const std::filesystem::path& source, const std::filesystem::
 		destSpace = reader.rgbSpace(); // use actual input space
 	}
 	ImageWriter writer(dest, reader.resolution(), destSpace ? destSpace : sourceSpace);
-	std::vector<XYZ> src(nx);
-	std::vector<float> alpha(nx);
+	std::vector<XYZA> src(nx);
 	std::vector<prim::ColorRGBA> dst(nx);
 	for (size_t i = 0; i < ny; ++i)
 	{
-		reader.readLine(&src[0], &alpha[0]);
+		reader.readLine(&src[0]);
 		for (size_t k = 0; k < nx; ++k)
 		{
-			dst[k] = destSpace->convert(src[k], alpha[k]);
+			dst[k] = destSpace->toRGBA(src[k]);
 		}
 		writer.writeLine(&dst[0]);
 	}
@@ -117,13 +116,13 @@ ImageReader::~ImageReader()
 	handle_ = 0;
 }
 
-void ImageReader::readFull(XYZ* out, XYZ::TValue* alpha) const
+void ImageReader::readFull(XYZA* out) const
 {
 	const TResolution2D res = resolution();
 	const size_t size = res.x * res.y;
 	for (size_t k = 0; k < size; k += res.x)
 	{
-		readLine(out + k, alpha ? alpha + k : nullptr);
+		readLine(out + k);
 	}
 }
 
@@ -278,21 +277,15 @@ const TRgbSpacePtr ImageCodecLass::doRgbSpace(TImageHandle handle) const
 
 
 
-void ImageCodecLass::doReadLine(TImageHandle handle, XYZ* out, XYZ::TValue* alpha) const
+void ImageCodecLass::doReadLine(TImageHandle handle, XYZA* out) const
 {
 	impl::LassImage* pimpl = static_cast<impl::LassImage*>(handle);
 	const io::Image& image = pimpl->image;
 	const auto& rgbSpace = *pimpl->rgbSpace;
 	LASS_ENFORCE(pimpl->y < image.rows());
-	if (alpha)
+	for (size_t x = 0; x < image.cols(); ++x)
 	{
-		for (size_t x = 0; x < image.cols(); ++x)
-			*out++ = rgbSpace.convert(image(pimpl->y, x), *alpha++);
-	}
-	else
-	{
-		for (size_t x = 0; x < image.cols(); ++x)
-			*out++ = rgbSpace.convert(image(pimpl->y, x));
+		*out++ = rgbSpace.toXYZA(image(pimpl->y, x));
 	}
 	++pimpl->y;
 }
