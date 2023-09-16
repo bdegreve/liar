@@ -48,6 +48,8 @@ class LIAR_TEXTURES_DLL Image: public Texture
 	PY_HEADER(Texture)
 public:
 
+	typedef kernel::XYZA TPixel;
+
 	explicit Image(const std::filesystem::path& filename);
 	Image(const std::filesystem::path& filename, const TRgbSpacePtr& rgbSpace);
 	Image(const std::filesystem::path& filename, const std::string& antiAliasing,
@@ -65,6 +67,8 @@ public:
 	const std::string mipMapping() const;
 	void setAntiAliasing(const std::string& mode);
 	void setMipMapping(const std::string& mode);
+
+	const TPixel lookUp(const IntersectionContext& context) const;
 
 	static void setDefaultAntiAliasing(const std::string& mode);
 	static void setDefaultMipMapping(const std::string& mode);
@@ -90,7 +94,6 @@ private:
 	};
 	typedef util::Dictionary<std::string, MipMapping> TMipMappingDictionary;
 
-	typedef XYZA TPixel;
 	typedef util::SharedPtr<TPixel, util::ArrayStorage> TPixels;
 
 	class MipMapLevel
@@ -136,7 +139,6 @@ private:
 	void mipMapLevel(TScalar width, size_t numLevels,
 		size_t& level0, size_t& level1, TPixel::TValue& dLevel) const;
 
-	const TPixel lookUp(const IntersectionContext& context) const;
 	const TPixel nearest(size_t levelU, size_t levelV, const TPoint2D& uv) const;
 	const TPixel bilinear(size_t levelU, size_t levelV, const TPoint2D& uv) const;
 
@@ -160,6 +162,8 @@ private:
 	static AntiAliasing defaultAntiAliasing_;
 	static MipMapping defaultMipMapping_;
 };
+
+typedef python::PyObjectPtr<Image>::Type TImagePtr;
 
 }
 

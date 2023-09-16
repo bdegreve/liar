@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 // keep in alphabetical order please! [Bramz]
 //
 #include "abs.h"
+#include "alpha_channel.h"
 #include "angular_mapping.h"
 #include "binary_operator.h"
 #include "checker_board.h"
@@ -75,6 +76,7 @@ PY_MODULE_CLASS(textures, UnaryOperator)
 // keep in alphabetical order please! [Bramz]
 //
 PY_MODULE_CLASS(textures, Abs)
+PY_MODULE_CLASS(textures, AlphaChannel)
 PY_MODULE_CLASS(textures, AngularMapping)
 PY_MODULE_CLASS(textures, CheckerBoard)
 PY_MODULE_CLASS(textures, CheckerVolume)
