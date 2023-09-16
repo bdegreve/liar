@@ -24,6 +24,7 @@
 #include "../kernel/image_codec.h"
 #include <lass/io/arg_parser.h>
 #include <lass/util/wchar_support.h>
+#include "../kernel/icc_space.h"
 
 #include <lodepng.h>
 
@@ -105,6 +106,13 @@ struct ReadHandle: public Handle
 			{
 				this->rgbSpace = kernel::sRGB;
 			}
+#if LIAR_HAVE_LCMS2_H
+			else if (false && info.iccp_defined && info.iccp_profile_size > 0)
+			{
+				this->colorSpace.reset(new kernel::IccSpace(info.iccp_profile, info.iccp_profile_size));
+				this->rgbSpace = this->colorSpace->rgbSpace();
+			}
+#endif
 			else if (info.chrm_defined)
 			{
 				const TPoint2D red(info.chrm_red_x / 100000.0, info.chrm_red_y / 100000.0);
@@ -121,6 +129,14 @@ struct ReadHandle: public Handle
 				this->rgbSpace = kernel::RgbSpace::defaultSpace();
 			}
 		}
+		if (!this->colorSpace)
+		{
+#if LIAR_HAVE_LCMS2_H
+			this->colorSpace.reset(new kernel::IccSpace(this->rgbSpace));
+#else
+			this->colorSpace = this->rgbSpace;
+#endif
+		}
 
 		::lodepng_state_cleanup(&state);
 	}
@@ -131,6 +147,11 @@ struct ReadHandle: public Handle
 	}
 
 	unsigned char* bytes;
+#if LIAR_HAVE_LCMS2_H
+	kernel::TIccSpacePtr colorSpace;
+#else
+	kernel::TRgbSpacePtr colorSpace;
+#endif
 };
 
 struct WriteHandle: public Handle
@@ -209,7 +230,7 @@ private:
 	{
 		ReadHandle* pimpl = static_cast<ReadHandle*>(handle);
 		LASS_ENFORCE(pimpl);
-		const auto& rgbSpace = *pimpl->rgbSpace;
+		const auto& colorSpace = *pimpl->colorSpace;
 		LASS_ENFORCE(pimpl->y < pimpl->height);
 		const size_t lineSize = 4 * static_cast<size_t>(pimpl->width);
 		unsigned char* line = pimpl->bytes + pimpl->y * lineSize;
@@ -217,7 +238,7 @@ private:
 		for (size_t k = 0; k < lineSize; k += 4)
 		{
 			const prim::ColorRGBA pixel(line[k] / 255.f, line[k + 1] / 255.f, line[k + 2] / 255.f, line[k + 3] / 255.f);
-			*out++ = rgbSpace.convert(pixel, alpha ? alpha[k] : dummy);
+			*out++ = colorSpace.convert(pixel, alpha ? alpha[k] : dummy);
 		}
 		++pimpl->y;
 	}
