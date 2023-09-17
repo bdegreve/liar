@@ -14,8 +14,9 @@ repos:
       - id: mixed-line-ending
         args: [--fix=no]
   - repo: https://github.com/bdegreve/bramz-pre-commit-hooks.git
-    rev: 11b9312f25f34693211b214cc4c910cb1cc7c475
+    rev: 91ed690857473b83ae03feb0b12f34b824f625a1
     hooks:
       - id: bramz-fix-copyright
         args: [--author=Bram de Greve]
         exclude: '^conanfile\.py$'
+      - id: bramz-check-conan-requires
