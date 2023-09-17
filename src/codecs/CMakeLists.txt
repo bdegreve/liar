@@ -33,13 +33,9 @@ macro(add_liar_codec name)
 endmacro()
 
 # jpeglib: http://www.ijg.org/
-if (TARGET CONAN_PKG::libjpeg)
-	add_liar_codec(jpeglib CONAN_PKG::libjpeg)
-else()
-	find_package(JPEG)
-	if (JPEG_FOUND)
-		add_liar_codec(jpeglib JPEG::JPEG)
-	endif()
+find_package(JPEG)
+if (JPEG_FOUND)
+	add_liar_codec(jpeglib JPEG::JPEG)
 endif()
 
 # openexr: http://www.openexr.com/
@@ -51,17 +47,6 @@ endif()
 find_package(lodepng)
 if(lodepng_FOUND)
 	add_liar_codec(lodepng lodepng::lodepng)
-endif()
-
-# libtiff: http://www.remotesensing.org/libtiff/
-find_package(TIFF)
-if (TIFF_FOUND)
-	include_directories(
-		${TIFF_INCLUDE_DIR}
-		)
-	#add_liar_codec(tiff ${TIFF_LIBRARIES})
-	if (WIN32)
-	endif()
 endif()
 
 file(GLOB pyfiles "*.py")
