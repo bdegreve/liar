@@ -459,11 +459,11 @@ void LightSky::buildCdf(const TMap& pdf, TMap& oMarginalCdfU, TMap& oConditional
 		TMap::iterator condCdfV = conditionalCdfV.begin() + offset;
 		std::partial_sum(pdfLine, pdfLine + resolution_.y, condCdfV);
 		marginalPdfU[i]	= condCdfV[resolution_.y - 1];
-		std::transform(condCdfV, condCdfV + resolution_.y, condCdfV, [d = marginalPdfU[i]](TScalar x) { return x / d; });
+		std::transform(condCdfV, condCdfV + resolution_.y, condCdfV, [d = marginalPdfU[i]](TValue x) { return x / d; });
 	}
 
 	std::partial_sum(marginalPdfU.begin(), marginalPdfU.end(), marginalCdfU.begin());
-	std::transform(marginalCdfU.begin(), marginalCdfU.end(), marginalCdfU.begin(), [d = marginalCdfU.back()](TScalar x) { return x / d; });
+	std::transform(marginalCdfU.begin(), marginalCdfU.end(), marginalCdfU.begin(), [d = marginalCdfU.back()](TValue x) { return x / d; });
 
 	oMarginalCdfU.swap(marginalCdfU);
 	oConditionalCdfV.swap(conditionalCdfV);
