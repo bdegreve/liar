@@ -45,7 +45,7 @@ endif()
 # openexr: http://www.openexr.com/
 find_package(OpenEXR)
 if (OpenEXR_FOUND)
-	add_liar_codec(openexr OpenEXR::IlmImf)
+	add_liar_codec(openexr OpenEXR::OpenEXR)
 endif()
 
 find_package(lodepng)

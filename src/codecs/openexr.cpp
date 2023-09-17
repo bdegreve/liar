@@ -23,14 +23,8 @@
 
 #include "../kernel/image_codec.h"
 
-#if LASS_COMPILER_TYPE == LASS_COMPILER_TYPE_MSVC
-#	pragma warning(disable: 4996) // ImfName.h(103) : warning C4996: 'strncpy': This function or variable may be unsafe.
-#	pragma warning(disable: 4231) // ImfAttribute.h(410) : warning C4231: nonstandard extension used : 'extern' before template explicit instantiation
-#endif
-
 #include <OpenEXR/ImfRgbaFile.h>
 #include <OpenEXR/ImfStandardAttributes.h>
-#include <OpenEXR/ImfIO.h>
 #include <lass/io/binary_i_file.h>
 #include <lass/io/binary_o_file.h>
 
@@ -42,11 +36,12 @@ namespace openexr
 class LassIStream: public Imf::IStream
 {
 public:
+	using pos_type = lass::io::BinaryIFile::pos_type;
 	LassIStream(const std::filesystem::path& path) : Imf::IStream(path.string().c_str()), file_(path) {}
-	bool read(char c[/*n*/], int n) { file_.read(c, num::numCast<size_t>(n)); return true; }
-	Imf::Int64 tellg() { return num::numCast<Imf::Int64>( file_.tellg() ); }
-	void seekg(Imf::Int64 pos) { file_.seekg( num::numCast<long>(pos) ); }
-	void clear() {}
+	bool read(char c[/*n*/], int n) override { file_.read(c, num::numCast<size_t>(n)); return true; }
+	uint64_t tellg() override { return num::numCast<uint64_t>( file_.tellg() ); }
+	void seekg(uint64_t pos) override { file_.seekg( num::numCast<pos_type>(pos) ); }
+	void clear() override {}
 private:
 	lass::io::BinaryIFile file_;
 };
@@ -54,10 +49,11 @@ private:
 class LassOStream: public Imf::OStream
 {
 public:
+	using pos_type = lass::io::BinaryOFile::pos_type;
 	LassOStream(const std::filesystem::path& path): Imf::OStream(path.string().c_str()), file_(path) {}
-	void write(const char c[], int n) { file_.write(c, num::numCast<size_t>(n)); }
-	Imf::Int64 tellp() { return num::numCast<Imf::Int64>( file_.tellp() ); }
-	void seekp(Imf::Int64 pos) { file_.seekp( num::numCast<long>(pos) ); }
+	void write(const char c[], int n) override { file_.write(c, num::numCast<size_t>(n)); }
+	uint64_t tellp() override { return num::numCast<uint64_t>( file_.tellp() ); }
+	void seekp(uint64_t pos) override { file_.seekp( num::numCast<pos_type>(pos) ); }
 private:
 	lass::io::BinaryOFile file_;
 };
