@@ -1,5 +1,5 @@
 # LiAR isn't a raytracer
-# Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+# Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,9 +20,10 @@
 import enum
 import io
 import struct
-from collections import OrderedDict, namedtuple
-from dataclasses import dataclass, field
-from typing import List, Optional, OrderedDict
+import time
+from collections import namedtuple
+from dataclasses import dataclass
+from typing import Dict, List, Optional
 
 import liar.scenery
 
@@ -34,13 +35,48 @@ class Property:
     num_type: Optional[str] = None
     list_type: Optional[str] = None
 
+    def __init__(
+        self,
+        type_: str,
+        name: str,
+        num_type: Optional[str] = None,
+        list_type: Optional[str] = None,
+    ):
+        self.type_ = type_
+        self.name = name
+        self.num_type = num_type
+        self.list_type = list_type
+
+    def __repr__(self):
+        if self.num_type is None:
+            assert self.list_type is None
+            return f"Property({self.type_!r}, {self.name!r})"
+        else:
+            assert self.list_type is not None
+            return (
+                f"Property({self.type_!r}, {self.name!r}, {self.num_type!r}, "
+                + f"{self.list_type!r})"
+            )
+
 
 @dataclass
 class Element:
     name: str
     number: int
-    properties: OrderedDict[str, Property] = field(default_factory=list)
+    properties: List[Property]
     data_type: type = None
+
+    def __init__(self, name: str, number: int):
+        self.name = name
+        self.number = number
+        self.properties = []
+        self.data_type = None
+
+    def __repr__(self):
+        return (
+            f"Element({self.name!r}, {self.number!r}, {self.properties!r}, "
+            + f"{self.data_type!r})"
+        )
 
 
 class Format(enum.Enum):
@@ -52,21 +88,34 @@ class Format(enum.Enum):
 @dataclass
 class Header:
     format: Format
-    elements: List[Element]
+    elements: Dict[str, Element]
     dataOffset: int
+
+    def __init__(
+        self, *, format: Format, elements: Dict[str, Element], dataOffset: int
+    ):
+        self.format = format
+        self.elements = elements
+        self.dataOffset = dataOffset
+
+    def __repr__(self):
+        return f"Element({self.format!r}, {self.elements!r}, {self.dataOffset!r})"
 
 
 def load(path: str) -> liar.scenery.TriangleMesh:
-
+    t0 = time.perf_counter_ns()
+    tt0 = time.time()
     print(f"loading PLY file {path} ...")
 
     with open(path, "rb") as fp:
         header = load_header(fp)
+    # print(header)
     loadData = DATA_LOADERS[header.format]
     with open(path, "rb") as fp:
         fp.seek(header.dataOffset)
         data = loadData(fp, header)
 
+    t1 = time.perf_counter_ns()
     vertices = [(v.x, v.y, v.z) for v in data["vertex"]]
     try:
         normals = [(v.nx, v.ny, v.nz) for v in data["vertex"]]
@@ -104,10 +153,20 @@ def load(path: str) -> liar.scenery.TriangleMesh:
     aabb_min = tuple(min(v[k] for v in vertices) for k in range(3))
     aabb_max = tuple(max(v[k] for v in vertices) for k in range(3))
     print(
-        f"{len(vertices)} vertices, {len(triangles)} triangles, aabb [{aabb_min}, {aabb_max}]"
+        f"{len(vertices)} vertices, {len(triangles)} triangles, "
+        + f"aabb [{aabb_min}, {aabb_max}]"
     )
 
-    return liar.scenery.TriangleMesh(vertices, normals, uvs, triangles)
+    t2 = time.perf_counter_ns()
+    mesh = liar.scenery.TriangleMesh(vertices, normals, uvs, triangles)
+
+    t3 = time.perf_counter_ns()
+    tt3 = time.time()
+    print(
+        f"parsing={(t1-t0) / 1e6}ms, transform={(t2-t1) / 1e6}ms, "
+        + f"construct={(t3-t2) / 1e6}ms, total={(t3-t0) / 1e6}ms={tt3-tt0}s"
+    )
+    return mesh
 
 
 def load_header(fp):
@@ -250,29 +309,40 @@ def load_data_binary(fp, header: Header):
         "int": "i",
         "uint": "I",
         "float": "f",
-        "double": "F",
+        "double": "d",
     }
 
-    def read(fp, type_, count=1):
+    def read(fp, type_: str, count: int = 1):
         format = f"{byte_order}{count}{formats[type_]}"
         size = struct.calcsize(format)
         buffer = fp.read(size)
         return struct.unpack(format, buffer)
 
+    def _make_reader(type_: str):
+        format_ = f"{byte_order}{formats[type_]}"
+        struct_ = struct.Struct(format_)
+        size = struct_.size
+
+        def read(fp):
+            return struct_.unpack(fp.read(size))
+
+        return read
+
+    readers = {type_: _make_reader(type_) for type_ in formats}
+
+    def read_prop(prop: Property):
+        if prop.type_ == "list":
+            (count,) = readers[prop.num_type](fp)
+            return read(fp, prop.list_type, count)
+        else:
+            (value,) = readers[prop.type_](fp)
+            return value
+
     ply_data = {}
     for element in header.elements.values():
         element_data = []
         for _index in range(element.number):
-            line_data = []
-            for prop in element.properties:
-                if prop.type_ == "list":
-                    (count,) = read(fp, prop.num_type)
-                    values = read(fp, prop.list_type, count)
-                    line_data.append(values)
-                else:
-                    (value,) = read(fp, prop.type_)
-                    line_data.append(value)
-
+            line_data = [read_prop(prop) for prop in element.properties]
             element_data.append(element.data_type(*line_data))
 
         ply_data[element.name] = element_data

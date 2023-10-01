@@ -80,6 +80,21 @@ class LiarPathFinder(MetaPathFinder):
             spec.has_location = True  # to set __file__
             return spec
 
+        if fullname == "liar.tools":
+            location = os.path.join(self.src_dir, "tools", "__init__.py")
+            spec = ModuleSpec(
+                name=fullname,
+                loader=SourceFileLoader(fullname, location),
+                # origin=location,
+                is_package=True,
+            )
+            spec.submodule_search_locations = [
+                os.path.join(self.bin_dir, "tools"),
+                os.path.join(self.src_dir, "tools"),
+            ]
+            spec.has_location = True  # to set __file__
+            return spec
+
         return None
 
 
