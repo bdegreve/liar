@@ -316,7 +316,7 @@ std::string toString(Display::ToneMapping toneMapping)
 	{
 		str = "<unknown>";
 	}
-	return std::move(str);
+	return str;
 }
 
 }
