@@ -99,6 +99,13 @@ class LiarPathFinder(MetaPathFinder):
 
 
 def setup_liar_hooks(root_dir: str, bin_dir: str):
+    if any(finder.__class__.__name__ == "LiarPathFinder" for finder in sys.meta_path):
+        return  # already set up
+
+    if not os.path.isdir(bin_dir):
+        print(f"Skipping liar hooks: {bin_dir=} does not exist", file=sys.stderr)
+        return
+
     print(f"Setting up liar hooks {root_dir=}, {bin_dir=}", file=sys.stderr)
 
     src_dir = os.path.join(root_dir, "src")

@@ -61,3 +61,23 @@ set_tests_properties(
 	PROPERTIES
 		ENVIRONMENT "TEST_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
 	)
+
+get_cmake_property(_is_multi_config GENERATOR_IS_MULTI_CONFIG)
+if(_is_multi_config)
+	set(_liar_pth "${liar_BINARY_DIR}/$<CONFIGURATION>/liar.pth")
+else()
+	set(_liar_pth "${liar_BINARY_DIR}/liar.pth")
+endif()
+file(
+	GENERATE
+	OUTPUT "${_liar_pth}"
+	CONTENT "import os, importlib.util; \
+_liar_spec = importlib.util.spec_from_file_location('path_hooks', os.path.join('${CMAKE_CURRENT_SOURCE_DIR}', 'path_hooks.py')); \
+assert _liar_spec; \
+_liar_path_hooks = importlib.util.module_from_spec(_liar_spec); \
+_liar_spec.loader.exec_module(_liar_path_hooks); \
+_liar_path_hooks.setup_liar_hooks(root_dir='${liar_SOURCE_DIR}', bin_dir='$<TARGET_FILE_DIR:libkernel>'); \
+del _liar_spec, _liar_path_hooks"
+)
+unset(_liar_pth)
+unset(_is_multi_config)

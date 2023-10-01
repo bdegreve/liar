@@ -33,6 +33,7 @@ relwithdebinfo: build-RelWithDebInfo
 build-%: requirements
 	$(CONAN) install . --settings build_type=$* --options syspython/*:python_executable=$(PYTHON) --build missing --build=editable --conf=lass/*:tools.build:skip_test=True
 	$(CONAN) build . --settings build_type=$*
+	$(CP_P) build/$*/liar.pth $(SITE_PACKAGES)/liar.pth
 
 requirements: env/.dev-requirements.stamp
 
