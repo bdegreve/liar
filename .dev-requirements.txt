@@ -1,0 +1,7 @@
+conan>=2
+ipykernel
+numpy
+matplotlib
+scipy
+black
+isort
