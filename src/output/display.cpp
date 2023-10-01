@@ -230,8 +230,8 @@ void Display::onMouseButtonDown(PixelToaster::DisplayInterface&, PixelToaster::M
 {
     if ( mouse.buttons.left )
     {
-        beginDrag_.x = mouse.x / resolution().x;
-        beginDrag_.y = mouse.y / resolution().y;
+        beginDrag_.x = mouse.x / static_cast<TScalar>(resolution().x);
+        beginDrag_.y = mouse.y / static_cast<TScalar>(resolution().y);
     }
     else
     {
@@ -245,7 +245,10 @@ void Display::onMouseButtonUp(PixelToaster::DisplayInterface&, PixelToaster::Mou
 {
     if ( !num::isNaN( beginDrag_.x ) )
     {
-        TPoint2D endDrag((mouse.x + 1) / resolution().x, (mouse.y + 1) / resolution().y);
+        TPoint2D endDrag(
+            (mouse.x + 1) / static_cast<TScalar>(resolution().x),
+            (mouse.y + 1) / static_cast<TScalar>(resolution().y)
+        );
         LASS_CERR << "\nselected area: (" << beginDrag_ << ", " << endDrag << ")\n";
     }
 }
