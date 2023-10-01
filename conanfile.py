@@ -112,7 +112,6 @@ class LiarConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["CMAKE_CONFIGURATION_TYPES"] = str(self.settings.build_type)
         tc.cache_variables["SPECTRAL_MODE"] = str(self.options.spectral_mode)
         if self.options.have_lcms2:
             tc.cache_variables["LCMS2_ENABLE"] = True
