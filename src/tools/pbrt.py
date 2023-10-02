@@ -1,5 +1,5 @@
 # LiAR isn't a raytracer
-# Copyright (C) 2010-2021  Bram de Greve (bramz@users.sourceforge.net)
+# Copyright (C) 2010-2023  Bram de Greve (bramz@users.sourceforge.net)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -945,6 +945,15 @@ class PbrtScene(object):
         if not (factor == (1, 1, 1) or factor == 1):
             tex = liar.textures.Product(self._get_texture(factor), tex)
         return tex, res
+
+    def Integrator(self, name="path", **kwargs):
+        self.verify_options()
+        self.engine.tracer = getattr(self, "_integrator_" + name)(**kwargs)
+
+    def _integrator_path(self, maxdepth=5):
+        tracer = liar.tracers.AdjointPhotonTracer()
+        tracer.maxRayGeneration = maxdepth
+        return tracer
 
     def SurfaceIntegrator(self, name="directlighting", **kwargs):
         self.verify_options()
