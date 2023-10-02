@@ -59,8 +59,8 @@ private:
 
 	typedef PerThreadBuffer<OutputSample> TOutputBuffer;
 
-	static constexpr size_t filterWidth_ = 2;
-	static constexpr size_t filterExtent_ = 2 * filterWidth_ + 1;
+	static constexpr int filterWidth_ = 2;
+	static constexpr int filterExtent_ = 2 * filterWidth_ + 1;
 	static constexpr size_t filterFootprint_ = filterExtent_ * filterExtent_;
 	static constexpr size_t bufferSize_ = filterFootprint_ * 16;
 
