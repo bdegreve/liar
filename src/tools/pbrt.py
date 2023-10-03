@@ -181,6 +181,22 @@ class PbrtScene(object):
                 engine.target = liar.output.Splitter([engine.target, display])
         if self.__pixelFilter:
             self.__pixelFilter.target, engine.target = engine.target, self.__pixelFilter
+
+        meshes = [
+            shape
+            for shape in self.__objects
+            if isinstance(shape, liar.scenery.TriangleMesh)
+        ]
+        if len(meshes) > 1:
+            composite = liar.scenery.TriangleMeshComposite(meshes)
+            self.__objects = [
+                shape
+                for shape in self.__objects
+                if not isinstance(shape, liar.scenery.TriangleMesh)
+            ]
+            self.__objects.append(composite)
+            print(f"Combined {len(meshes)} triangle meshes in WorldEnd")
+
         engine.scene = liar.scenery.AabbTree(self.__objects)
         engine.scene.interior = self.__volume
         if self.__render_immediately:
