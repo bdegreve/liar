@@ -319,6 +319,10 @@ BsdfOut Walter::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omeg
 
 		const TValue rFresnel = fresnelDielectric(etaI_ / etaT_, omegaIn, h);
 		const TValue pdfRefl = pdfReflection(rFresnel, allowedCaps);
+		if (pdfRefl < 0)
+		{
+			return BsdfOut(); // neither reflection or transmission
+		}
 
 		const TValue d = D_ggx(h, alphaU_, alphaV_); // == pdfD
 		const TValue g = G2_ggx(omegaIn, omegaOut, h, alphaU_, alphaV_);
@@ -345,6 +349,10 @@ BsdfOut Walter::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omeg
 
 		const TValue rFresnel = fresnelDielectric(etaI_ / etaT_, omegaIn, h);
 		const TValue pdfRefl = pdfReflection(rFresnel, allowedCaps);
+		if (pdfRefl < 0)
+		{
+			return BsdfOut(); // neither reflection or transmission
+		}
 
 		const TValue d = D_ggx(h, alphaU_, alphaV_); // == pdfD
 		const TValue g = G2_ggx(omegaIn, omegaOut, h, alphaU_, alphaV_);
@@ -375,6 +383,10 @@ SampleBsdfOut Walter::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& s
 
 	const TValue rFresnel = fresnelDielectric(etaI_ / etaT_, omegaIn, h);
 	const TValue pdfRefl = pdfReflection(rFresnel, allowedCaps);
+	if (pdfRefl < 0)
+	{
+		return SampleBsdfOut(); // neither reflection or transmission
+	}
 
 	if (componentSample < pdfRefl)
 	{
@@ -417,7 +429,11 @@ TValue Walter::Bsdf::pdfReflection(TValue rFresnel, BsdfCaps allowedCaps) const
 {
 	const TValue powRefl = kernel::hasCaps(allowedCaps, BsdfCaps::reflection | BsdfCaps::glossy) ? reflectance_.absAverage() * rFresnel : 0;
 	const TValue powTrans = kernel::hasCaps(allowedCaps, BsdfCaps::transmission | BsdfCaps::glossy) ? transmittance_.absAverage() * (1 - rFresnel) : 0;
-	LASS_ASSERT(powRefl + powTrans > 0);
+	const TValue powTotal = powRefl + powTrans;
+	if (powTotal == 0)
+	{
+		return -1; // it's neither reflection nor transmission
+	}
 	return powRefl / (powRefl + powTrans);
 }
 
