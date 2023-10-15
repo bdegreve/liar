@@ -33,11 +33,19 @@ else()
 			INSTALL_RPATH "$ORIGIN"
 		)
 endif()
-target_compile_definitions(libkernel
-	PUBLIC
-		"$<$<CONFIG:Debug>:LIAR_DEBUG>"
-		"$<$<CONFIG:RelWithDebInfo>:LIAR_DEBUG>"
-)
+if(NOT DEFINED liar_DEBUG)
+	# enable it automatically for debug and relwithdebinfo builds
+	target_compile_definitions(libkernel
+		PUBLIC
+			"$<$<CONFIG:Debug>:LIAR_DEBUG>"
+			"$<$<CONFIG:RelWithDebInfo>:LIAR_DEBUG>"
+	)
+elseif(liar_DEBUG)
+	target_compile_definitions(libkernel
+		PUBLIC
+			LIAR_DEBUG
+	)
+endif()
 target_link_libraries(libkernel
 	PUBLIC
 		Lass::lass_python

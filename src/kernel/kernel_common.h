@@ -77,7 +77,7 @@
 		{\
 			if (!(predicate))\
 			{\
-				LASS_CERR << "\n" << LASS_PRETTY_FUNCTION << ": ASSERT FAILURE: " << LASS_STRINGIFY(predicate) << ": " << message << "\n";\
+				LASS_CERR << "\nASSERT FAILURE: " LASS_HERE ": " LASS_PRETTY_FUNCTION ": " LASS_STRINGIFY(predicate) << ": " << message << "\n";\
 				LASS_BREAK_HERE;\
 			}\
 		}\
