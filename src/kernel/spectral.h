@@ -160,6 +160,8 @@ public:
 	Spectral& inplerp(const Spectral& other, TParam f) { v_.inplerp(other.v_, f); return *this; }
     Spectral& inpsin() { v_.inpsin(); return *this; }
 
+	Spectral map(std::function<TValue(TValue)> func, SpectralType type) const { return Spectral(v_.map(func), type); }
+
 	bool operator==(const Spectral& other) const { return v_ == other.v_; }
 
 private:

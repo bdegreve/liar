@@ -1275,29 +1275,17 @@ def _color(*args):
 
 
 def _remap_roughness(roughness, *, remaproughness: bool):
+    # PBRT feeds roughness value directly into "alpha" parameter of the microfacet
+    # models. Liar uses the more common Disney and UE4 "roughness" parameter, which is
+    # the square root of alpha. So we need to remap the roughness value.
+    # If remaproughness is True, PBRT also applies a mapping to the roughness value,
+    # which is also replicated here.
     if isinstance(roughness, liar.Texture):
-        return roughness
-        if remaproughness:
-            # roughness = liar.textures.Max(roughness, liar.textures.Constant(1e-3))
-            # x = liar.textures.Log(roughness)
-            # roughness = liar.textures.Polynomial(x,
-            #    [1.62142, 0.819955, 0.1734, 0.0171201, 0.000640711])
-            pass
-        return liar.textures.Sqrt(roughness)
+        return liar.textures.RemapPbrtRoughness(roughness, remaproughness)
 
     r = roughness
-    if remaproughness:
-        roughness = max(roughness, 1e-3)
-        x = math.log(roughness)
-        roughness = (
-            1.62142
-            + 0.819955 * x
-            + 0.1734 * x ** 2
-            + 0.0171201 * x ** 3
-            + 0.000640711 * x ** 4
-        )
-    roughness = math.sqrt(max(roughness, 0))
-    print(f"_remap_roughness({r}, {remaproughness}) -> {roughness}")
+    roughness = liar.textures.RemapPbrtRoughness.remap(r, remaproughness)
+    #print(f"_remap_roughness({r}, {remaproughness}) -> {roughness}")
     return roughness
 
 

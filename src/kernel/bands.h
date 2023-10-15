@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -238,6 +238,16 @@ public:
         return *this;
     }
 
+	Bands map(std::function<TValue(TValue)> func) const
+	{
+		Bands result;
+		for (size_t i = 0; i < N; ++i)
+		{
+			result.v_[i] = func(v_[i]);
+		}
+		return result;
+	}
+
 	TValue dot(const Bands& other) const
 	{
 		TValue sum = TNumTraits::zero;
@@ -338,6 +348,8 @@ public:
 	Bands& inpclamp(TParam min, TParam max) { v_ = num::clamp(v_, min, max); return *this; }
 	Bands& inplerp(const Bands& other, TParam f) { v_ = num::lerp(v_, other.v_, f); return *this; }
     Bands& inpsin() { v_ = num::sin(v_); return *this; }
+
+	Bands map(std::function<TValue(TValue)> func) const { return Bands(func(v_)); }
 
 	TValue dot(const Bands& other) const { return v_ * other.v_; }
 	TValue average() const { return v_; }
@@ -542,6 +554,11 @@ public:
         v_[2] = num::sin(v_[2]);
         return *this;
     }
+
+	Bands map(std::function<TValue(TValue)> func) const
+	{
+		return Bands(func(v_[0]), func(v_[1]), func(v_[2]));
+	}
 
 	TValue dot(const Bands& other) const
 	{
