@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2021-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -311,11 +311,11 @@ BsdfOut Walter::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omeg
 {
 	LASS_ASSERT(shaders::hasCaps(allowedCaps, caps()));
 
-	LASS_ASSERT(omegaIn.z > 0);
+	LIAR_ASSERT(omegaIn.z > 0, "omegaIn=" << omegaIn);
 	if (omegaOut.z > 0)
 	{
 		const TVector3D h = (omegaIn + omegaOut).normal();
-		LASS_ASSERT(h.z > 0);
+		LIAR_ASSERT(h.z > 0, "h=" << h);
 
 		const TValue rFresnel = fresnelDielectric(etaI_ / etaT_, omegaIn, h);
 		const TValue pdfRefl = pdfReflection(rFresnel, allowedCaps);
@@ -327,12 +327,19 @@ BsdfOut Walter::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omeg
 
 		BsdfOut out(reflectance_, pdfRefl * pdfH * dh_dwo);
 		out.value *= rFresnel * d * g / static_cast<TValue>(4 * omegaIn.z * omegaOut.z);
+		LIAR_ASSERT_POSITIVE_FINITE(out.value);
+		LIAR_ASSERT_POSITIVE_FINITE(out.pdf);
 		return out;
 	}
 	else if (omegaOut.z < 0)
 	{
 		const TVector3D h = (-etaI_ * omegaIn - etaT_ * omegaOut).normal();
-		LASS_ASSERT(h.z > 0);
+		if (h.z <= 0)
+		{
+			// the microfacet normal is on the wrong side of the surface
+			return BsdfOut();
+		}
+
 		const TValue cosThetaI = static_cast<TValue>(num::abs(dot(omegaIn, h)));
 		const TValue cosThetaT = static_cast<TValue>(num::abs(dot(omegaOut, h)));
 
@@ -349,6 +356,8 @@ BsdfOut Walter::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omeg
 
 		// if (adjoint)
 		//	out.value *= num::sqr(etaI_) / num::sqr(etaT_)
+		LIAR_ASSERT_POSITIVE_FINITE(out.value);
+		LIAR_ASSERT_POSITIVE_FINITE(out.pdf);
 		return out;
 	}
 	return BsdfOut();
