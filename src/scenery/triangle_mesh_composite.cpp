@@ -159,15 +159,22 @@ void TriangleMeshComposite::doPreProcess(const TSceneObjectPtr& scene, const Tim
 
 void TriangleMeshComposite::doIntersect(const Sample&, const BoundedRay& ray, Intersection& result) const
 {
+	// also modify TriangleMesh::doIntersect, if you change this
 	TScalar t;
 	TMesh::TTriangleIterator triangle;
 	const prim::Result hit = mesh_.intersect(ray.unboundedRay(), triangle, t, ray.nearLimit());
 	if (hit == prim::rOne && ray.inRange(t))
 	{
+		const TScalar d = dot(ray.direction(), triangle->geometricNormal());
+		const SolidEvent se = (d < TNumTraits::zero)
+			? seEntering
+			: (d > TNumTraits::zero)
+			? seLeaving
+			: seNoEvent;
 		const size_t k = static_cast<size_t>(std::distance(mesh_.triangles().begin(), triangle));
 		TriangleMesh* const child = backLinks_[k].first;
 		const size_t k2 = k - backLinks_[k].second;
-		result = Intersection(child, t, seNoEvent, k2);
+		result = Intersection(child, t, se, k2);
 		result.push(this);
 	}
 	else

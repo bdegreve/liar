@@ -145,6 +145,7 @@ const TriangleMesh::TIndexTriangles TriangleMesh::triangles() const
 
 void TriangleMesh::doIntersect(const Sample&, const BoundedRay& ray, Intersection& result) const
 {
+	// also modify TriangleMeshComposite::doIntersect, if you change this
 	TScalar t;
 	TMesh::TTriangleIterator triangle;
 	const prim::Result hit = mesh_.intersect(ray.unboundedRay(), triangle, t, ray.nearLimit());
