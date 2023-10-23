@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -386,13 +386,13 @@ const Spectral AshikhminShirley::Bsdf::rhoD(const TVector3D& k1, const TVector3D
 const Spectral AshikhminShirley::Bsdf::rhoS(const TVector3D& k1, const TVector3D& k2, const TVector3D& h, TScalar& pdf) const
 {
 	const TScalar c = num::sqrt((powerU_ + 1) * (powerV_ + 1)) / (8 * TNumTraits::pi);
-	const TScalar n = powerU_ * num::sqr(h.x) + powerV_ * num::sqr(h.y);
+	const TScalar n = (powerU_ * num::sqr(h.x) + powerV_ * num::sqr(h.y));
 	const TScalar nn = h.z == 1 ? 0 : n / (1 - num::sqr(h.z));
 	LIAR_ASSERT_POSITIVE_FINITE(nn);
 	const TScalar hk = dot(h, k1);
 	LIAR_ASSERT(hk > 0 && hk <= 1, "hk=" << hk << " h=" << h << " k1=" << k1);
 	const Spectral F = specular_ + (1 - specular_) * temp::pow5(std::max(static_cast<Spectral::TValue>(1 - hk), 0.f));
-	const TScalar pdfH = 4 * c * num::pow(h.z, n);
+	const TScalar pdfH = 4 * c * num::pow(h.z, nn);
 	pdf = pdfH / (4 * hk);
 	LIAR_ASSERT_POSITIVE_FINITE(pdf);
 	return F * static_cast<Spectral::TValue>((c * num::pow(h.z, nn) / (hk * std::max(k1.z, k2.z))));
