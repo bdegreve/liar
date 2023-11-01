@@ -904,8 +904,10 @@ class PbrtScene(object):
         direction = geometry.subtract(to, from_)
         return liar.scenery.LightDirectional(direction, _color(L))
 
-    def _lightsource_infinite(self, L=(1, 1, 1), nsamples=1, mapname=None):
+    def _lightsource_infinite(self, L=(1, 1, 1), nsamples=1, mapname=None, scale=None):
         tex, res = self._get_light_texture(L, mapname)
+        if scale:
+            tex = liar.textures.Product(tex, liar.textures.Constant(_color(scale)))
         light = liar.scenery.LightSky(tex)
         if res:
             light.samplingResolution = res
