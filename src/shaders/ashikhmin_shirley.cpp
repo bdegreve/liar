@@ -237,7 +237,7 @@ TBsdfPtr AshikhminShirley::doBsdf(const Sample& sample, const IntersectionContex
 	const Spectral Rs = specular_->lookUp(sample, context, SpectralType::Reflectant);
 	const TValue nu = std::max<TValue>(specularPowerU_->scalarLookUp(sample, context), 0);
 	const TValue nv = std::max<TValue>(specularPowerV_->scalarLookUp(sample, context), 0);
-	return TBsdfPtr(new Bsdf(sample, context, Rd, Rs, nu, nv));
+	return TBsdfPtr(new Bsdf(sample, context, Rd * (1 - Rs), Rs, nu, nv));
 }
 
 
@@ -312,7 +312,7 @@ BsdfOut AshikhminShirley::Bsdf::doEvaluate(const TVector3D& k1, const TVector3D&
 		return BsdfOut();
 	}
 	const TScalar pd = kernel::hasCaps(allowedCaps, BsdfCaps::reflection | BsdfCaps::diffuse) ? diffuse_.absAverage() : 0;
-	const TScalar ps = kernel::hasCaps(allowedCaps, BsdfCaps::reflection | BsdfCaps::glossy) ? specular_.absAverage() : 0;
+	const TScalar ps = kernel::hasCaps(allowedCaps, BsdfCaps::reflection | BsdfCaps::glossy) ? (specular_.absAverage() + 1) / 2 : 0;
 	LASS_ASSERT(pd >= 0 && ps >= 0);
 	const TScalar ptot = pd + ps;
 
@@ -340,7 +340,7 @@ SampleBsdfOut AshikhminShirley::Bsdf::doSample(const TVector3D& k1, const TPoint
 		return SampleBsdfOut();
 	}
 	TScalar pd = kernel::hasCaps(allowedCaps, BsdfCaps::reflection | BsdfCaps::diffuse) ? diffuse_.absAverage() : 0;
-	TScalar ps = kernel::hasCaps(allowedCaps, BsdfCaps::reflection | BsdfCaps::glossy) ? specular_.absAverage() : 0;
+	TScalar ps = kernel::hasCaps(allowedCaps, BsdfCaps::reflection | BsdfCaps::glossy) ? (specular_.absAverage() + 1) / 2 : 0;
 	const TScalar ptot = pd + ps;
 	if (ptot <= 0)
 	{
@@ -378,7 +378,7 @@ const Spectral AshikhminShirley::Bsdf::rhoD(const TVector3D& k1, const TVector3D
 {
 	const TScalar a = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k1.z / 2));
 	const TScalar b = std::max(TNumTraits::zero, 1 - temp::pow5(1 - k2.z / 2));
-	return diffuse_ * (1 - specular_) * static_cast<Spectral::TValue>(a * b * 28.f / (23.f * TNumTraits::pi));
+	return diffuse_ * static_cast<Spectral::TValue>(a * b * 28.f / (23.f * TNumTraits::pi));
 }
 
 
