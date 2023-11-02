@@ -144,6 +144,7 @@ class PbrtScene(object):
         self.__objects = []
         self.__instances = {}
         self.__cur_instance = None
+        self.__fourier_materials = {}
         self.Material()
 
     def WorldEnd(self):
@@ -506,6 +507,14 @@ class PbrtScene(object):
         e = self._get_texture((94.117332, 94.117332, 94.117332))
         mat.addLobe(xy, xy, z, e)
         return mat
+
+    def _material_fourier(self, *, bsdffile: str):
+        try:
+            return self.__fourier_materials[bsdffile]
+        except KeyError:
+            mat = liar.shaders.Jakob(bsdffile)
+            self.__fourier_materials[bsdffile] = mat
+            return mat
 
     def _material_glass(
         self,

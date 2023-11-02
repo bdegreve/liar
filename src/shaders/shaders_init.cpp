@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@
 #include "conductor.h"
 #include "dielectric.h"
 #include "flip.h"
+#include "jakob.h"
 #include "lafortune.h"
 #include "lambert.h"
 #include "linear_interpolator.h"
@@ -54,6 +55,7 @@ PY_MODULE_CLASS(shaders, CookTorrance)
 PY_MODULE_CLASS(shaders, Conductor)
 PY_MODULE_CLASS(shaders, Dielectric)
 PY_MODULE_CLASS(shaders, Flip)
+PY_MODULE_CLASS(shaders, Jakob)
 PY_MODULE_CLASS(shaders, Lafortune)
 PY_MODULE_CLASS(shaders, Lambert)
 PY_MODULE_CLASS(shaders, LinearInterpolator)

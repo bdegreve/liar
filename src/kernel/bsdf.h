@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -154,6 +154,10 @@ public:
 
 	const TVector3D bsdfToWorld(const TVector3D& v) const;
 	const TVector3D worldToBsdf(const TVector3D& v) const;
+
+protected:
+
+	const Sample& sample() const { return sample_; }
 
 private:
 
