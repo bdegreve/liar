@@ -443,11 +443,15 @@ class PbrtScene(object):
     def _Material(self, name="matte", bumpmap=None, **kwargs):
         self.verify_world()
         try:
-            material = getattr(self, "_material_" + name)(**kwargs)
+            maker = getattr(self, "_material_" + name)
         except AttributeError:
             self.__logger.warning("unknown material %r", name)
-            kwargs = _filter_dict(kwargs, lambda key: key in ("Kd", "sigma"))
-            material = self._material_matte(Kd=_color(1, 0, 1))
+            kwargs = {
+                key: value for key, value in kwargs.items() if key in ("Kd", "sigma")
+            }
+            material = self._material_matte(**kwargs)
+        else:
+            material = maker(**kwargs)
         if bumpmap:
             material = liar.shaders.BumpMapping(material, self._get_texture(bumpmap))
         return material
@@ -1227,10 +1231,6 @@ def _unwrap(arg):
 def _split_as_tuples(xs, n):
     assert len(xs) % n == 0
     return [tuple(xs[k : k + n]) for k in range(0, len(xs), n)]
-
-
-def _filter_dict(mapping, predicate):
-    return dict((key, value) for key, value in mapping.items() if predicate(key))
 
 
 def _transpose(m):
