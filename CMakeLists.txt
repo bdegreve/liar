@@ -94,18 +94,27 @@ else()
 	set(BUILD_USING_MULTIPLE_PROCESSES OFF)
 endif ()
 
-set(liar_CFLAGS)
 set(liar_LDFLAGS)
 if(MSVC)
-	set (liar_CFLAGS "/EHsc")
+	add_compile_options("/EHsc")
 	if(NOT CMAKE_CL_64)
-		set (liar_CFLAGS "${liar_CFLAGS} /arch:SSE2 /fp:fast")
+		add_compile_options("/arch:SSE2" "/fp:fast")
 	endif()
 	if(BUILD_USING_MULTIPLE_PROCESSES)
-		set (liar_CFLAGS "${liar_CFLAGS} /MP")
+		add_compile_options("/MP")
 	endif()
 else()
-	set (liar_CFLAGS "-std=c++11 -fno-strict-aliasing -Wall -Wextra -Wformat=2 -Winit-self -Wconversion -Wno-unknown-pragmas -Wno-deprecated-declarations")
+	add_compile_options(
+		"-std=c++11"
+		"-fno-strict-aliasing"
+		"-Wall"
+		"-Wextra"
+		"-Wformat=2"
+		"-Winit-self"
+		"-Wconversion"
+		"-Wno-unknown-pragmas"
+		"-Wno-deprecated-declarations"
+	)
 	if(APPLE)
 		set (liar_LDFLAGS "-Wl,-rpath,@loader_path/.")
 	endif()
@@ -143,7 +152,6 @@ function(add_liar_module_ex name)
 	set_target_properties(
 		"${name}"
 		PROPERTIES
-			COMPILE_FLAGS "${liar_CFLAGS}"
 			LINK_FLAGS "${liar_LDFLAGS}"
 		)
 	if (NOT WIN32)
