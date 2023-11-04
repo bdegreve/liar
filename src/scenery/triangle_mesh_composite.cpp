@@ -101,6 +101,23 @@ void TriangleMeshComposite::doPreProcess(const TSceneObjectPtr& scene, const Tim
 	TIndexTriangles triangles;
 	TBackLinks backLinks;
 
+	size_t numVerts = 0;
+	size_t numNormals = 0;
+	size_t numUvs = 0;
+	size_t numTriangles = 0;
+	for (const auto& child : children_)
+	{
+		numVerts += child->vertices().size();
+		numNormals += child->normals().size();
+		numUvs += child->uvs().size();
+		numTriangles += child->triangles().size();
+	}
+	verts.reserve(numVerts);
+	normals.reserve(numNormals);
+	uvs.reserve(numUvs);
+	triangles.reserve(numTriangles);
+	backLinks.reserve(numTriangles);
+
 	const TChildren::const_iterator end = children_.end();
 	for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
 	{
