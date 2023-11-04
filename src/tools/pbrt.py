@@ -70,7 +70,7 @@ class PbrtScene(object):
         self.Camera()
         self.PixelFilter()
         self.Film()
-        self.SurfaceIntegrator()
+        self.Integrator()
         self.Sampler()
 
     def Identity(self):
@@ -981,21 +981,17 @@ class PbrtScene(object):
         self.verify_options()
         self.engine.tracer = getattr(self, "_integrator_" + name)(**kwargs)
 
+    def _integrator_directlighting(self, maxdepth=5, strategy="all"):
+        tracer = liar.tracers.DirectLighting()
+        tracer.maxRayGeneration = maxdepth
+        return tracer
+
     def _integrator_path(self, maxdepth=5):
         tracer = liar.tracers.AdjointPhotonTracer()
         tracer.maxRayGeneration = maxdepth
         return tracer
 
-    def SurfaceIntegrator(self, name="directlighting", **kwargs):
-        self.verify_options()
-        self.engine.tracer = getattr(self, "_surfaceintegrator_" + name)(**kwargs)
-
-    def _surfaceintegrator_directlighting(self, maxdepth=5, strategy="all"):
-        tracer = liar.tracers.DirectLighting()
-        tracer.maxRayGeneration = maxdepth
-        return tracer
-
-    def _surfaceintegrator_photonmap(
+    def _integrator_photonmap(
         self,
         causticphotons=20000,
         indirectphotons=100000,
@@ -1019,6 +1015,9 @@ class PbrtScene(object):
         tracer.numFinalGatherRays = finalgather and finalgathersamples
         tracer.isRayTracingDirect = not directwithphotons
         return tracer
+
+    def SurfaceIntegrator(self, name="directlighting", **kwargs):
+        self.Integrator(name, **kwargs)
 
     def VolumeIntegrator(self, *args, **kwargs):
         self.verify_options()
