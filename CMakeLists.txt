@@ -94,7 +94,6 @@ else()
 	set(BUILD_USING_MULTIPLE_PROCESSES OFF)
 endif ()
 
-set(liar_LDFLAGS)
 if(MSVC)
 	add_compile_options("/EHsc")
 	if(NOT CMAKE_CL_64)
@@ -115,9 +114,6 @@ else()
 		"-Wno-unknown-pragmas"
 		"-Wno-deprecated-declarations"
 	)
-	if(APPLE)
-		set (liar_LDFLAGS "-Wl,-rpath,@loader_path/.")
-	endif()
 endif()
 
 macro(list_remove_regex listvar regex)
@@ -160,6 +156,11 @@ function(add_liar_module_ex name)
 			PROPERTIES
 				INSTALL_RPATH "$ORIGIN"
 			)
+		if(APPLE)
+			target_link_options("${name}"
+				PRIVATE "-Wl,-rpath,@loader_path/."
+			)
+		endif()
 	endif()
 	install(
 		TARGETS "${name}"
