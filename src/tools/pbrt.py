@@ -1019,9 +1019,10 @@ class PbrtScene(object):
         self.verify_options()
         self.engine.tracer = getattr(self, "_integrator_" + name)(**kwargs)
 
-    def _integrator_directlighting(self, maxdepth=5, strategy="all"):
+    def _integrator_directlighting(self, maxdepth=5, strategy="all", _glossy=False):
         tracer = liar.tracers.DirectLighting()
         tracer.maxRayGeneration = maxdepth
+        tracer.traceGlossy = _glossy
         return tracer
 
     def _integrator_path(self, maxdepth=5):

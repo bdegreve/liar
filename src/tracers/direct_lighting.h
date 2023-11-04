@@ -48,6 +48,9 @@ public:
 	size_t numSecondaryLightSamples() const;
 	void setNumSecondaryLightSamples(size_t numSamples);
 
+	bool traceGlossy() const;
+	void setTraceGlossy(bool traceGlossy);
+
 protected:
 
 	typedef std::conditional_t<sizeof(TScalar) >= 8, std::mt19937_64, std::mt19937> TRandomSecondary;
@@ -83,6 +86,7 @@ private:
 	mutable TRandomSecondary secondarySampler_;
 
 	size_t numSecondaryLightSamples_;
+	bool traceGlossy_;
 };
 
 }

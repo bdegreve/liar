@@ -35,11 +35,13 @@ namespace tracers
 PY_DECLARE_CLASS_DOC(DirectLighting, "simple ray tracer")
 PY_CLASS_CONSTRUCTOR_0(DirectLighting)
 PY_CLASS_MEMBER_RW(DirectLighting, numSecondaryLightSamples, setNumSecondaryLightSamples)
+PY_CLASS_MEMBER_RW_DOC(DirectLighting, traceGlossy, setTraceGlossy, "Trace Glossy BSDF for camera rays")
 
 
 // --- public --------------------------------------------------------------------------------------
 
-DirectLighting::DirectLighting()
+DirectLighting::DirectLighting() :
+	traceGlossy_(true)
 {
 	setNumSecondaryLightSamples(1);
 }
@@ -60,6 +62,20 @@ void DirectLighting::setNumSecondaryLightSamples(size_t numSamples)
 	secondaryLightSamples_.resize(numSecondaryLightSamples_);
 	secondaryBsdfSamples_.resize(numSecondaryLightSamples_);
 	secondaryBsdfComponentSamples_.resize(numSecondaryLightSamples_);
+}
+
+
+
+bool DirectLighting::traceGlossy() const
+{
+	return traceGlossy_;
+}
+
+
+
+void DirectLighting::setTraceGlossy(bool traceGlossy)
+{
+	traceGlossy_ = traceGlossy;
 }
 
 
@@ -265,7 +281,8 @@ const Spectral DirectLighting::traceSpecularAndGlossy(
 	const Shader* const shader = context.shader();
 	LASS_ASSERT(shader);
 
-	if (!(shader->hasCaps(BsdfCaps::specular) || shader->hasCaps(BsdfCaps::glossy)))
+	const BsdfCaps glossy = traceGlossy_ ? BsdfCaps::glossy : BsdfCaps::none;
+	if (!shader->compatibleCaps(BsdfCaps::allSpecular | glossy))
 	{
 		return Spectral(0);
 	}
@@ -300,7 +317,7 @@ const Spectral DirectLighting::traceSpecularAndGlossy(
 		const difference_type n = highQuality ? bsdfSample.size() : 1;
 		for (difference_type i = 0; i < n; ++i)
 		{
-			const SampleBsdfOut out = bsdf->sample(omega, bsdfSample[i], compSample[i], BsdfCaps::reflection | BsdfCaps::specular | BsdfCaps::glossy);
+			const SampleBsdfOut out = bsdf->sample(omega, bsdfSample[i], compSample[i], BsdfCaps::reflection | BsdfCaps::specular | glossy);
 			if (!out)
 			{
 				continue;
@@ -335,7 +352,7 @@ const Spectral DirectLighting::traceSpecularAndGlossy(
 		const difference_type n = highQuality ? bsdfSample.size() : 1;
 		for (difference_type i = 0; i < n; ++i)
 		{
-			const SampleBsdfOut out = bsdf->sample(omega, bsdfSample[i], compSample[i], BsdfCaps::transmission | BsdfCaps::specular | BsdfCaps::glossy);
+			const SampleBsdfOut out = bsdf->sample(omega, bsdfSample[i], compSample[i], BsdfCaps::transmission | BsdfCaps::specular | glossy);
 			if (!out)
 			{
 				continue;
