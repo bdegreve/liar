@@ -24,6 +24,11 @@
 #include "scenery_common.h"
 #include "triangle_mesh.h"
 #include <lass/num/inverse_transform_sampling.h>
+#include <lass/python/export_traits_filesystem.h>
+
+#if LIAR_HAVE_HAPPLY
+#include <happly.h>
+#endif
 
 namespace liar
 {
@@ -52,10 +57,14 @@ PY_CLASS_METHOD(TriangleMesh, normals)
 PY_CLASS_METHOD(TriangleMesh, uvs)
 PY_CLASS_METHOD(TriangleMesh, triangles)
 
+#if LIAR_HAVE_HAPPLY
+PY_CLASS_STATIC_METHOD(TriangleMesh, loadPly)
+#endif
+
 // --- public --------------------------------------------------------------------------------------
 
-TriangleMesh::TriangleMesh(const TVertices& vertices, const TNormals& normals, const TUvs& uvs, const TIndexTriangles& triangles):
-	mesh_(vertices, normals, uvs, triangles),
+TriangleMesh::TriangleMesh(TVertices vertices, TNormals normals, TUvs uvs, const TIndexTriangles& triangles):
+	mesh_(std::move(vertices), std::move(normals), std::move(uvs), triangles),
 	area_(TNumTraits::zero)
 {
 	std::vector<TScalar> cdf;
@@ -135,6 +144,110 @@ const TriangleMesh::TIndexTriangles TriangleMesh::triangles() const
 	return triangles;
 }
 
+
+
+#if LIAR_HAVE_HAPPLY
+
+TTriangleMeshPtr TriangleMesh::loadPly(std::filesystem::path path)
+{
+	std::ifstream stream(path, std::ios::binary);
+	if (stream.fail())
+	{
+		throw std::runtime_error("TriangleMesh: Could not open file");
+	}
+	happly::PLYData ply(stream);
+	ply.validate();
+
+	auto &vertex = ply.getElement("vertex");
+	auto x = vertex.getProperty<TMesh::TPoint::TValue>("x");
+	auto y = vertex.getProperty<TMesh::TPoint::TValue>("y");
+	auto z = vertex.getProperty<TMesh::TPoint::TValue>("z");
+	LIAR_ASSERT(x.size() == vertex.count && y.size() == vertex.count && z.size() == vertex.count, "x, y, z must have same size");
+	TVertices vertices;
+	vertices.reserve(vertex.count);
+	for (size_t i = 0; i < vertex.count; ++i)
+	{
+		vertices.emplace_back(x[i], y[i], z[i]);
+	}
+
+	TNormals normals;
+	if (vertex.hasProperty("nx"))
+	{
+		auto nx = vertex.getProperty<TMesh::TVector::TValue>("nx");
+		auto ny = vertex.getProperty<TMesh::TVector::TValue>("ny");
+		auto nz = vertex.getProperty<TMesh::TVector::TValue>("nz");
+		LIAR_ASSERT(nx.size() == vertex.count && ny.size() == vertex.count && nz.size() == vertex.count, "nx, ny, nz must have same size");
+		normals.reserve(vertex.count);
+		for (size_t i = 0; i < vertex.count; ++i)
+		{
+			normals.emplace_back(nx[i], ny[i], nz[i]);
+		}
+	}
+
+	TUvs uvs;
+	if (vertex.hasProperty("u"))
+	{
+		auto u = vertex.getProperty<TMesh::TUv::TValue>("u");
+		auto v = vertex.getProperty<TMesh::TUv::TValue>("v");
+		LIAR_ASSERT(u.size() == vertex.count && v.size() == vertex.count, "u, v must have same size");
+		uvs.reserve(vertex.count);
+		for (size_t i = 0; i < vertex.count; ++i)
+		{
+			uvs.emplace_back(u[i], v[i]);
+		}
+	}
+
+	const bool hasNormals = !normals.empty();
+	const bool hasUvs = !uvs.empty();
+	TMesh::TIndexTriangle triangle;
+	if (!hasNormals)
+	{
+		triangle.normals[0] = TMesh::TIndexTriangle::null();
+		triangle.normals[1] = TMesh::TIndexTriangle::null();
+		triangle.normals[2] = TMesh::TIndexTriangle::null();
+	}
+	if (!hasUvs)
+	{
+		triangle.uvs[0] = TMesh::TIndexTriangle::null();
+		triangle.uvs[1] = TMesh::TIndexTriangle::null();
+		triangle.uvs[2] = TMesh::TIndexTriangle::null();
+	}
+	std::vector<std::vector<size_t>> faceIndices = ply.getFaceIndices<size_t>();
+	TIndexTriangles triangles;
+	for (const auto& indices : faceIndices)
+	{
+		const size_t n = indices.size();
+		if (n < 2)
+		{
+			throw std::runtime_error("TriangleMesh: faces must have at least 3 vertices");
+		}
+		for (size_t k = 1; k < n - 1; ++k)
+		{
+			const size_t i0 = indices[0];
+			const size_t i1 = indices[k];
+			const size_t i2 = indices[k + 1];
+			triangle.vertices[0] = i0;
+			triangle.vertices[1] = i1;
+			triangle.vertices[2] = i2;
+			if (hasNormals)
+			{
+				triangle.normals[0] = i0;
+				triangle.normals[1] = i1;
+				triangle.normals[2] = i2;
+			}
+			if (hasUvs)
+			{
+				triangle.uvs[0] = i0;
+				triangle.uvs[1] = i1;
+				triangle.uvs[2] = i2;
+			}
+		}
+		triangles.push_back(triangle);
+	}
+
+	return TTriangleMeshPtr(new TriangleMesh(std::move(vertices), std::move(normals), std::move(uvs), std::move(triangles)));
+}
+#endif
 
 
 // --- protected -----------------------------------------------------------------------------------

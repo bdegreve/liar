@@ -417,7 +417,13 @@ class PbrtScene(object):
         return mesh
 
     def _shape_plymesh(self, filename, alpha=None, shadowalpha=None):
-        mesh = ply.load(filename)
+        try:
+            load_ply = liar.scenery.TriangleMesh.loadPly
+        except AttributeError:
+            mesh = ply.load(filename)
+        else:
+            print(f"loading PLY file {filename} ...")
+            mesh = load_ply(filename)
         if alpha:
             mesh = liar.scenery.ClipMap(mesh, self._get_texture(alpha), 0.001)
         if shadowalpha:

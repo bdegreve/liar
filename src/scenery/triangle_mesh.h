@@ -36,6 +36,7 @@
 #include <lass/spat/aabb_tree.h>
 #include <lass/spat/aabp_tree.h>
 #include <lass/spat/quad_tree.h>
+#include <filesystem>
 
 namespace liar
 {
@@ -46,6 +47,9 @@ template<typename O, typename OT, typename SH>
 struct MyQuadTree: spat::QuadTree<O, OT>
 {
 };
+
+class TriangleMesh;
+using TTriangleMeshPtr = python::PyObjectPtr<TriangleMesh>::Type;
 
 class LIAR_SCENERY_DLL TriangleMesh: public SceneObject
 {
@@ -58,7 +62,7 @@ public:
 	typedef std::vector<TMesh::TUv> TUvs;
 	typedef std::vector<TMesh::TIndexTriangle> TIndexTriangles;
 
-	TriangleMesh(const TVertices& vertices, const TNormals& normals, const TUvs& uvs, const TIndexTriangles& triangles);
+	TriangleMesh(TVertices vertices, TNormals normals, TUvs uvs, const TIndexTriangles& triangles);
 
 	void smoothNormals();
 	void flatFaces();
@@ -70,6 +74,10 @@ public:
 	const TNormals& normals() const;
 	const TUvs& uvs() const;
 	const TIndexTriangles triangles() const;
+
+#if LIAR_HAVE_HAPPLY
+	static TTriangleMeshPtr loadPly(std::filesystem::path path);
+#endif
 
 private:
 
