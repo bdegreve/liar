@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -81,7 +81,7 @@ Texture::TValue FBm::doScalarLookUp(const Sample&, const IntersectionContext& co
 	const TValue idealNumOctaves = static_cast<TValue>(1 - num::log2(squaredFootprint) / 2);
 	const TValue realNumOctaves = num::clamp(idealNumOctaves, static_cast<TValue>(1), static_cast<TValue>(numOctaves_));
 	const size_t numOctaves = static_cast<size_t>(num::floor(realNumOctaves));
-	
+
 	const TVector3D p = context.point().position();
 
 	TValue result = 0;
@@ -119,4 +119,3 @@ void FBm::init(size_t numOctaves, TValue falloff)
 }
 
 // EOF
-

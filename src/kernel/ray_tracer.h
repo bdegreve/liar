@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -68,7 +68,7 @@ public:
 	/** @warning castRay is NOT THREAD SAFE!
 	 */
 	const Spectral castRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, bool highQuality = true) const
-	{ 
+	{
 		RayGenerationIncrementor incrementor(*this);
 		if (static_cast<size_t>(rayGeneration_) > maxRayGeneration_)
 		{
@@ -91,8 +91,8 @@ protected:
 	MediumStack& mediumStack() const { return mediumStack_; }
 
 	const Spectral estimateLightContribution(
-			const Sample& sample, const TBsdfPtr& bsdf, const LightContext& light, 
-			const Sample::TSubSequence2D& lightSamples,  const Sample::TSubSequence2D& bsdfSamples, const Sample::TSubSequence1D& componentSamples, 
+			const Sample& sample, const TBsdfPtr& bsdf, const LightContext& light,
+			const Sample::TSubSequence2D& lightSamples,  const Sample::TSubSequence2D& bsdfSamples, const Sample::TSubSequence1D& componentSamples,
 			const TPoint3D& target, const TVector3D& targetNormal, const TVector3D& omegaIn) const;
 
 	void requestLightAndSceneSamples(const TSamplerPtr& sampler);
@@ -110,21 +110,21 @@ private:
 	class RayGenerationIncrementor: public util::NonCopyable
 	{
 	public:
-		RayGenerationIncrementor(const RayTracer& rayTracer): 
-			rayTracer_(rayTracer) 
-		{ 
-			++rayTracer_.rayGeneration_; 
+		RayGenerationIncrementor(const RayTracer& rayTracer):
+			rayTracer_(rayTracer)
+		{
+			++rayTracer_.rayGeneration_;
 			LASS_ASSERT(rayTracer_.rayGeneration_ >= 0);
 		}
-		~RayGenerationIncrementor() 
+		~RayGenerationIncrementor()
 		{
 			LASS_ASSERT(rayTracer_.rayGeneration_ >= 0);
 			--rayTracer_.rayGeneration_;
 		}
 	private:
 		const RayTracer& rayTracer_;
-	};			
-	
+	};
+
 	friend class RayGenerationIncrementor;
 
 	TSceneObjectPtr scene_;

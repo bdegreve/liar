@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -104,7 +104,7 @@ const TVector3D& ProjectionPerspective::direction() const
 
 /** set @e direction of camera directly.
  */
-void ProjectionPerspective::setDirection(const TVector3D& direction) 
+void ProjectionPerspective::setDirection(const TVector3D& direction)
 {
 	directionNormal_ = direction.normal();
 	rightNormal_ = cross(directionNormal_, sky_).normal();
@@ -116,9 +116,9 @@ void ProjectionPerspective::setDirection(const TVector3D& direction)
 
 /** sets camera so it looks to @a target point.
  *  The ProjectionPerspective tilts around the @e sky vector towards @a target (
- *  so that @e position, @a target and the @e sky vector are coplanar), 
+ *  so that @e position, @a target and the @e sky vector are coplanar),
  *  and then pitches to line up @e direction with @a target.
- *  @e right and @e down are reset to be orthogonal to the direction and to 
+ *  @e right and @e down are reset to be orthogonal to the direction and to
  *  fit @e fovAngle and @e aspectRatio.
  */
 void ProjectionPerspective::lookAt(const TPoint3D& target)
@@ -290,7 +290,7 @@ void ProjectionPerspective::initTransformation()
 	direction_ = directionNormal_ * focalLength_;
 	right_ = rightNormal_ * width_;
 	up_ = upNormal_ * height_;
-	
+
 	const TPoint3D support = position_ + direction_ - (right_ + up_) / 2;
 	plane_ = TProjectionPlane(support, right_, up_);
 }

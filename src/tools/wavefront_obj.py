@@ -5,7 +5,7 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -38,25 +38,25 @@ def decode(lines, filename="", material=liar.shaders.AshikhminShirley, initial_m
 	if not '' in materials:
 		materials[''] = liar.shaders.Lambert(liar.textures.Constant(liar.rgb(1, 1, 1)))
 	currentMaterial = materials['']
-	
+
 	def _int_or_none(x):
 		try:
 			return int(x)
 		except:
 			return None
-	
+
 	def _floatTuple(iFields):
 		return tuple([float(x) for x in iFields])
-	
+
 	def _isZero(iTuple):
 		return min([x == 0 for x in iTuple])
-		
+
 	def _normalize(n):
 		norm = math.sqrt(sum([x * x for x in n]))
 		if norm == 0:
 			return n
 		return tuple([x / norm for x in n])
-		
+
 	def _loadMaterials(filename, materials):
 		currentMaterial = None
 		for line in open(filename):
@@ -71,7 +71,7 @@ def decode(lines, filename="", material=liar.shaders.AshikhminShirley, initial_m
 						material.specularPowerV = texture
 					except AttributeError:
 						pass
-						
+
 			fields = line.split()
 			if len(fields) > 0:
 				command, fields = fields[0], fields[1:]
@@ -113,7 +113,7 @@ def decode(lines, filename="", material=liar.shaders.AshikhminShirley, initial_m
 						try:
 							currentMaterial.diffuse = liar.textures.Image(fields[0])
 						except AttributeError:
-							pass				
+							pass
 				elif command == 'map_Ks':
 					_enforceFields(len(fields) == 1)
 					if currentMaterial:
@@ -128,10 +128,10 @@ def decode(lines, filename="", material=liar.shaders.AshikhminShirley, initial_m
 					_enforceFields(len(fields) == 1)
 					if currentMaterial:
 						_setSpecularPower(currentMaterial = liar.textures.Image(fields[0]))
-	
+
 	def _makeGroup(vertices, normals, uvs, faces, material):
 		components = (vertices, normals, uvs)
-		
+
 		# compress vertices, normals and uvs to only those that are used by faces
 		#
 		# see what vertices are used, and assign them a new index.
@@ -141,44 +141,44 @@ def decode(lines, filename="", material=liar.shaders.AshikhminShirley, initial_m
 				for i, UCs in zip(vertex, used_components):
 					if i != None and not i in UCs:
 						UCs[i] = len(UCs)
-		
+
 		# build new (compressed) lists of vertices, uvs and normals
 		sorted_components = [sorted(zip(UCs.values(), UCs.keys())) for UCs in used_components]
 		compressed_components = [[Cs[j] for i, j in SCs] for Cs, SCs in zip(components, sorted_components)]
-		
+
 		# replace old indices by new ones
 		for UCs in used_components:
 			UCs[None] = None
 		faces = [[[UCs[i] for i, UCs in zip(vertex, used_components)] for vertex in face] for face in faces]
-		
+
 		group = liar.scenery.TriangleMesh(compressed_components[0], compressed_components[1], compressed_components[2], faces)
 		group.shader = material
 		return group
-			
+
 	print ("loading Wavefront OBJ file %s ..." % filename)
-	
+
 	for line in lines:
-		
+
 		# python 3.0 compatibility:
 		if not isinstance(line, str):
 			line = line.decode()
-		
+
 		fields = line.split()
 		if len(fields) > 0:
-			
+
 			def _enforceFields(iSuccess):
 				assert iSuccess, "obj file %s has syntax error: %s" % (filename, line)
-			
+
 			command = fields[0]
 			fields = fields[1:]
 			if command == '#':
 				pass
-			
+
 			if command == 'mtllib':
 				_enforceFields(len(fields) > 0)
 				for mtl in fields:
 					_loadMaterials(mtl, materials)
-			
+
 			elif command == 'usemtl':
 				_enforceFields(len(fields) < 2)
 				try:
@@ -189,29 +189,29 @@ def decode(lines, filename="", material=liar.shaders.AshikhminShirley, initial_m
 					print ("obj file %s uses unknown material '%s', using default instead: %s" % (filename, name, line))
 					name = ''
 				currentMaterial = materials[name]
-			
+
 			elif command == 'g':
 				if len(faces) > 0:
 					numFaces += len(faces)
 					groups.append(_makeGroup(vertices, normals, uvs, faces, currentMaterial))
 					faces = []
-			
+
 			elif command == 'v':
 				_enforceFields(len(fields) == 3)
 				vertices.append(_floatTuple(fields))
-			
+
 			elif command == 'vn':
 				_enforceFields(len(fields) == 3)
 				normals.append(_normalize(_floatTuple(fields)))
-			
+
 			elif command == 'vt':
 				_enforceFields(len(fields) == 2 or len(fields) == 3)
 				uvs.append(_floatTuple(fields)[:2])
-			
+
 			elif command == 'f':
 				_enforceFields(len(fields) >= 3)
 				face = [[_int_or_none(x) for x in field.split('/')] for field in fields]
-				
+
 				# make sure all indices are in correct range
 				for vertex in face:
 					length = len(vertex)
@@ -223,8 +223,8 @@ def decode(lines, filename="", material=liar.shaders.AshikhminShirley, initial_m
 								vertex[k] += len(vectors[k])
 							else:
 								raise AssertionError("obj file %s has 0 index on line: %s" % (filename, line))
-				
-				# reformat vertex data to (v, vn, vt) and make sure its of length 3 
+
+				# reformat vertex data to (v, vn, vt) and make sure its of length 3
 				# (use None to fill missing values)
 				size = len(face)
 				numNormals = 0
@@ -245,28 +245,28 @@ def decode(lines, filename="", material=liar.shaders.AshikhminShirley, initial_m
 					if vn != None:
 						numNormals += 1
 					face[i] = (v, vn, vt)
-					
+
 				# make sure either none or all vertices have a normal/uv
 				if numNormals > 0 and numNormals < size:
 					#print "WARNING: either none or all face vertices must have normal, forcing to none"
 					face = [(v[0], None, v[2]) for v in face]
 				if numUvs > 0 and numUvs < size:
 					#print "WARNING: either none or all face vertices must have uv coord, forcing to none"
-					face = [(v[0], v[1], None) for v in face]				
-					
+					face = [(v[0], v[1], None) for v in face]
+
 				try:
 					triangles = geometry.triangulate_3d(*[vertices[v[0]] for v in face])
 				except AssertionError as error:
 					raise AssertionError("failed to triangulate %(face)r: %(error)s" % vars())
 				faces += [(face[a], face[b], face[c]) for a, b, c in triangles]
-	
+
 	if len(faces) > 0:
 		numFaces += len(faces)
 		groups.append(_makeGroup(vertices, normals, uvs, faces, currentMaterial))
 		faces = []
-	
+
 	print ("%s vertices, %s normals, %s uvs, %s faces" % (len(vertices), len(normals), len(uvs), numFaces))
-	
+
 	return groups, materials
 
 # EOF

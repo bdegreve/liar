@@ -110,7 +110,7 @@ private:
 		TPoint3D position;
 		TVector3D omegaIn;
 		XYZ power;
-		const Spectral spectralPower(const Sample& sample) const 
+		const Spectral spectralPower(const Sample& sample) const
 		{
 			return Spectral::fromXYZ(power, sample, SpectralType::Illuminant);
 		}

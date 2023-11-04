@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -91,13 +91,13 @@ DifferentialRay reflect(const IntersectionContext& context, const DifferentialRa
 	const TVector3D dIncident_dI = ray.differentialI().direction() - incident;
 	const TScalar dCosI_dI = -dot(dIncident_dI, normal) - dot(incident, context.dNormal_dI());
 	const TPoint3D supportI = support + context.dPoint_dI();
-	const TVector3D reflectedI = reflected + 
+	const TVector3D reflectedI = reflected +
 		dIncident_dI + 2 * (dCosI_dI * normal + cosI * context.dNormal_dI());
 
 	const TVector3D dIncident_dJ = ray.differentialJ().direction() - incident;
 	const TScalar dCosI_dJ = -dot(dIncident_dJ, normal) - dot(incident, context.dNormal_dJ());
 	const TPoint3D supportJ = support + context.dPoint_dJ();
-	const TVector3D reflectedJ = reflected + 
+	const TVector3D reflectedJ = reflected +
 		dIncident_dJ + 2 * (dCosI_dJ * normal + cosI * context.dNormal_dJ());
 
 	return DifferentialRay(
@@ -106,7 +106,7 @@ DifferentialRay reflect(const IntersectionContext& context, const DifferentialRa
 }
 
 
-DifferentialRay refract(const IntersectionContext& context, const DifferentialRay& ray, 
+DifferentialRay refract(const IntersectionContext& context, const DifferentialRay& ray,
 						TScalar iRefractionIndex1over2)
 {
 	const TVector3D& incident = ray.direction();
@@ -130,19 +130,19 @@ DifferentialRay refract(const IntersectionContext& context, const DifferentialRa
 
 	const TPoint3D& support = context.point();
 	const TVector3D transmitted = n * incident + alpha * normal;
-	
+
 	const TVector3D dIncident_dI = ray.differentialI().direction() - incident;
-	const TScalar dCosI_dI = -dot(context.dNormal_dI(), incident) - dot(normal, dIncident_dI); 
+	const TScalar dCosI_dI = -dot(context.dNormal_dI(), incident) - dot(normal, dIncident_dI);
  	const TPoint3D supportI = support + context.dPoint_dI();
-	const TVector3D transmittedI = transmitted + 
+	const TVector3D transmittedI = transmitted +
 		n * dIncident_dI + alpha * context.dNormal_dI() + dAlpha_dCosI * dCosI_dI * normal;
-	
+
 	const TVector3D dIncident_dJ = ray.differentialJ().direction() - incident;
-	const TScalar dCosI_dJ = -dot(context.dNormal_dJ(), incident) - dot(normal, dIncident_dJ); 
+	const TScalar dCosI_dJ = -dot(context.dNormal_dJ(), incident) - dot(normal, dIncident_dJ);
  	const TPoint3D supportJ = support + context.dPoint_dJ();
-	const TVector3D transmittedJ = transmitted + 
+	const TVector3D transmittedJ = transmitted +
 		n * dIncident_dJ + alpha * context.dNormal_dJ() + dAlpha_dCosI * dCosI_dJ * normal;
-	
+
 	return DifferentialRay(
 		BoundedRay(support, transmitted, tolerance, TNumTraits::infinity),
 		TRay3D(supportI, transmittedI), TRay3D(supportJ, transmittedJ));

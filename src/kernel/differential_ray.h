@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -61,8 +61,8 @@ public:
 
 	bool isValid() const { return centralRay_.unboundedRay().isValid(); }
 
-	friend LIAR_KERNEL_DLL DifferentialRay reflect(const IntersectionContext& context, const DifferentialRay& ray); 
-	friend LIAR_KERNEL_DLL DifferentialRay refract(const IntersectionContext& context, const DifferentialRay& ray, 
+	friend LIAR_KERNEL_DLL DifferentialRay reflect(const IntersectionContext& context, const DifferentialRay& ray);
+	friend LIAR_KERNEL_DLL DifferentialRay refract(const IntersectionContext& context, const DifferentialRay& ray,
 		TScalar refractionIndex1over2);
 
 private:
@@ -74,8 +74,8 @@ private:
 };
 
 LIAR_KERNEL_DLL DifferentialRay transform(const DifferentialRay& ray, const TTransformation3D& transformation);
-LIAR_KERNEL_DLL DifferentialRay reflect(const IntersectionContext& context, const DifferentialRay& ray); 
-LIAR_KERNEL_DLL DifferentialRay refract(const IntersectionContext& context, const DifferentialRay& ray, TScalar refractionIndex1over2); 
+LIAR_KERNEL_DLL DifferentialRay reflect(const IntersectionContext& context, const DifferentialRay& ray);
+LIAR_KERNEL_DLL DifferentialRay refract(const IntersectionContext& context, const DifferentialRay& ray, TScalar refractionIndex1over2);
 LIAR_KERNEL_DLL DifferentialRay bound(const DifferentialRay& ray, TScalar nearLimit, TScalar farLimit = TNumTraits::infinity);
 
 

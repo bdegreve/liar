@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -31,17 +31,17 @@ namespace kernel
 namespace impl
 {
 
-TTransformation2D scaler2D(TScalar scale) 
-{ 
-	return TTransformation2D::scaler(scale); 
+TTransformation2D scaler2D(TScalar scale)
+{
+	return TTransformation2D::scaler(scale);
 }
-TTransformation2D scalerPerAxis2D(const TVector2D& scale) 
-{ 
-	return TTransformation2D::scaler(scale); 
+TTransformation2D scalerPerAxis2D(const TVector2D& scale)
+{
+	return TTransformation2D::scaler(scale);
 }
-TTransformation2D concatenate2D(const TTransformation2D& first, const TTransformation2D& second) 
-{ 
-	return prim::concatenate(first, second); 
+TTransformation2D concatenate2D(const TTransformation2D& first, const TTransformation2D& second)
+{
+	return prim::concatenate(first, second);
 }
 TTransformation2D transformation2DFromSequence(const std::vector<TScalar>& sequence)
 {

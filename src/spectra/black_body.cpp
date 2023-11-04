@@ -39,7 +39,7 @@ PY_DECLARE_CLASS_DOC(BlackBody, "Black body radiation")
 namespace
 {
 	typedef BlackBody::TValue TValue;
-	
+
 	// https://en.wikipedia.org/wiki/Planck's_law#First_and_second_radiation_constants
 	const TValue h = 6.626070040e-34f; // planck constant
 	const TValue c = 299792458.0f; // speed of light

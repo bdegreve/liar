@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -51,33 +51,33 @@ Simple::Simple():
 	reflectance_(Texture::black()),
 	transmittance_(Texture::black()),
 	refractionIndex_(Texture::white())
-{	
+{
 }
 
 
 
 Simple::Simple(const TTexturePtr& iDiffuse):
-	Shader(BsdfCaps::all), 
+	Shader(BsdfCaps::all),
 	diffuse_(iDiffuse),
 	specular_(Texture::black()),
 	specularPower_(Texture::white()),
 	reflectance_(Texture::black()),
 	transmittance_(Texture::black()),
 	refractionIndex_(Texture::white())
-{	
+{
 }
 
 
 
 Simple::Simple(const TTexturePtr& iDiffuse, const TTexturePtr& iSpecular):
-	Shader(BsdfCaps::all), 
+	Shader(BsdfCaps::all),
 	diffuse_(iDiffuse),
 	specular_(iSpecular),
 	specularPower_(Texture::white()),
 	reflectance_(Texture::black()),
 	transmittance_(Texture::black()),
 	refractionIndex_(Texture::white())
-{	
+{
 }
 
 
@@ -186,7 +186,7 @@ TBsdfPtr Simple::doBsdf(const Sample& sample, const IntersectionContext& context
 
 
 
-const Spectrum Simple::doShade(	
+const Spectrum Simple::doShade(
 	const Sample& iSample,
 	const DifferentialRay& iPrimaryRay,
 	const Intersection& iIntersection,
@@ -204,7 +204,7 @@ const Spectrum Simple::doShade(
 	for (TLightSamplesRange::iterator i = lightSamples.begin(); i != lightSamples.end(); ++i)
 	{
 		const TScalar cosTheta = prim::dot(normal, i->direction());
-		
+
 		// diffuse lighting
 		//
 		if (cosTheta > TNumTraits::zero)

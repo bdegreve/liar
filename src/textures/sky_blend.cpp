@@ -124,4 +124,3 @@ Texture::TValue SkyBlend::weightA(const IntersectionContext& context) const
 }
 
 // EOF
-

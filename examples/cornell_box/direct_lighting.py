@@ -18,4 +18,3 @@ engine.scene = cornell_box.scene()
 engine.camera = cornell_box.camera()
 engine.target = scripting.makeRenderTarget(options.width, options.height, "direct_lighting.hdr", "Cornell Box with Direct Lighting only")
 engine.render()
-

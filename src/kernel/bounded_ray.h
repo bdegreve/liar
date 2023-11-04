@@ -68,7 +68,7 @@ public:
 	bool inRange(TScalar t) const
 	{
 		// must use the open range (nearLimit_, farLimit_).
-		// otherwise, shadow rays will always "self intersect" with the 
+		// otherwise, shadow rays will always "self intersect" with the
 		// light object is its generated for: t == farLimit_.
 		// So, make the range a bit _smaller_ using tolerance, not larger!
 		return t > nearLimit_ * (TNumTraits::one + tolerance) &&

@@ -44,7 +44,7 @@ def major_axis(normal):
 def triangulate_2d(*verts):
 	'''
 	triangulate((x1, y1), (x2, y2), ...) -> (a1, b1, c1), (a2, b2, c2), ...
-	
+
 	naive O(n**3) ear clipper.
 	'''
 	vert_indices = list(range(len(verts)))
@@ -78,7 +78,7 @@ def triangulate_2d(*verts):
 def in_triangle_2d(a, b, c, d):
 	'''
 	triangulate((x1, y1), (x2, y2), (x3, y3), (x4, y4)) -> True/False
-	
+
 	Returns true if (x4, y4) is a point within triangle (x1, y1), (x2, y2), (x3, y3)
 	'''
 	n = signed_area_2d(a, b, c)

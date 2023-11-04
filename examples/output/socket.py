@@ -25,4 +25,3 @@ def start_slave(k):
 childs = [start_slave(k) for k in range(numProcesses)]
 for child in childs:
     child.communicate()
-

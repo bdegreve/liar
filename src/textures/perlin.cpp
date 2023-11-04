@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -66,7 +66,7 @@ Texture::TValue Perlin::noise(const TPoint3D& point) const
 	const TPoint3D p0(num::floor(p.x), num::floor(p.y), num::floor(p.z));
 	const TValue3D dp(static_cast<TValue>(p.x - p0.x), static_cast<TValue>(p.y - p0.y), static_cast<TValue>(p.z - p0.z));
 	const TIndex i(static_cast<size_t>(p0.x), static_cast<size_t>(p0.y), static_cast<size_t>(p0.z));
-	
+
 	const TValue3D s = dp.transform(kernel);
 
 	const TValue g[1 << dimension_] =
@@ -150,7 +150,7 @@ Texture::TValue Perlin::gradient(size_t x, size_t y, size_t z, TValue dx, TValue
 {
 	LASS_ASSERT(x < (hashSize_ + hashPadding_) && y < (hashSize_ + hashPadding_) && z < (hashSize_ + hashPadding_));
 	const size_t hashed = hashTables_[0][x] ^ hashTables_[1][y] ^ hashTables_[2][z];
-	
+
 	switch (hashed % numGradients_)
 	{
 	case 0: return dx + dy;
@@ -194,4 +194,3 @@ Texture::TValue Perlin::kernel(TValue dx)
 }
 
 // EOF
-

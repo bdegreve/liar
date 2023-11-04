@@ -118,4 +118,3 @@ engine.camera = cornell_box.camera()
 engine.camera.shutterTime = .8 * (1 / fps)
 engine.target = scripting.makeRenderTarget(options.width, options.height, "tangle_cube_b_%d.jpg" % options.frame, display=options.display, fStops=0)
 engine.render((options.frame - .4) / fps)
-

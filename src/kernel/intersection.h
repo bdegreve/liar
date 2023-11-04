@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -57,7 +57,7 @@ public:
 	typedef std::size_t TSpecialField;
 
 	Intersection();
-	Intersection(const SceneObject* object, TScalar t, SolidEvent event, 
+	Intersection(const SceneObject* object, TScalar t, SolidEvent event,
 		TSpecialField special = 0);
 
 	void push(const SceneObject* object) { push(object, t(), 0); }
@@ -89,7 +89,7 @@ private:
 		const SceneObject* object;
 		TSpecialField special;
 
-		IntersectionInfo(const SceneObject* object, TScalar t, TSpecialField special): 
+		IntersectionInfo(const SceneObject* object, TScalar t, TSpecialField special):
 			t(t), object(object), special(special)
 		{
 		}
@@ -100,9 +100,9 @@ private:
 			util::AllocatorSingleton<
 				util::AllocatorPerThread<
 					util::AllocatorBinned<
-						util::AllocatorFreeList<>, 
+						util::AllocatorFreeList<>,
 						256
-					>						
+					>
 				>
 			>
 		>
@@ -113,11 +113,11 @@ private:
 
 	void descend() const;
 	void ascend() const;
-	
+
 	TIntersectionStack intersectionStack_;
 	mutable size_t currentLevel_;
 	SolidEvent solidEvent_;
-	
+
 	static Intersection empty_;
 };
 
@@ -126,10 +126,10 @@ private:
 class LIAR_KERNEL_DLL IntersectionDescendor: public util::NonCopyable
 {
 public:
-	IntersectionDescendor(const Intersection& intersection): 
-		intersection_(intersection) 
-	{ 
-		intersection_.descend(); 
+	IntersectionDescendor(const Intersection& intersection):
+		intersection_(intersection)
+	{
+		intersection_.descend();
 	}
 	~IntersectionDescendor()
 	{

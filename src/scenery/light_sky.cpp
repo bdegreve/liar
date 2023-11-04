@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -133,7 +133,7 @@ void LightSky::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod&)
 	{
 		portal_.reset(new Sphere(boundingSphere(scene->boundingBox())));
 	}*/
-	
+
 	sceneBounds_ = scene->boundingSphere();
 
 	// intersections with sky are always this distance removed from any point.
@@ -282,7 +282,7 @@ const Spectral LightSky::doEmission(const Sample& sample, const TRay3D& ray, Bou
 
 
 const Spectral LightSky::doSampleEmission(
-		const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
+		const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target,
 		BoundedRay& shadowRay, TScalar& pdf) const
 {
 	TScalar i, j;
@@ -420,7 +420,7 @@ void LightSky::buildPdf(TMap& pdf, TScalar& power) const
 				totalIntensity += intensity;
 			}
 		}
-		
+
 		{
 			std::lock_guard lock(mutex);
 			progress += range.second - range.first;
@@ -451,13 +451,13 @@ void LightSky::buildCdf(const TMap& pdf, TMap& oMarginalCdfU, TMap& oConditional
 	TMap marginalPdfU(resolution_.x);
 	TMap marginalCdfU(resolution_.x);
 	TMap conditionalCdfV(resolution_.x * resolution_.y);
-	
+
 	for (size_t i = 0; i < resolution_.x; ++i)
 	{
 		const size_t offset = i * resolution_.y;
 		TMap::const_iterator pdfLine = pdf.begin() + offset;
 		TMap::iterator condCdfV = conditionalCdfV.begin() + offset;
-		std::partial_sum(pdfLine, pdfLine + resolution_.y, condCdfV);	
+		std::partial_sum(pdfLine, pdfLine + resolution_.y, condCdfV);
 		marginalPdfU[i]	= condCdfV[resolution_.y - 1];
 		std::transform(condCdfV, condCdfV + resolution_.y, condCdfV, [d = marginalPdfU[i]](TScalar x) { return x / d; });
 	}

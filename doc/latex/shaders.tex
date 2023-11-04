@@ -1,11 +1,11 @@
 % Copyright (c)  2005  Bram de Greve.
-% 
-% Permission is granted to copy, distribute and/or modify 
-% this document under the terms of the GNU Free Documentation 
-% License, Version 1.2 or any later version published by the 
-% Free Software Foundation; with the Invariant Sections being 
-% the chapter ``Introduction", no Front-Cover Texts, and no 
-% Back-Cover Texts.  A copy of the license is included in the 
+%
+% Permission is granted to copy, distribute and/or modify
+% this document under the terms of the GNU Free Documentation
+% License, Version 1.2 or any later version published by the
+% Free Software Foundation; with the Invariant Sections being
+% the chapter ``Introduction", no Front-Cover Texts, and no
+% Back-Cover Texts.  A copy of the license is included in the
 % section entitled "GNU Free Documentation License".
 
 \chapter{Shaders module}
@@ -20,7 +20,7 @@ The most simple shader of all.  It simply returns the texture value
 
 \subsubsection*{constructors}
 \begin{itemize}
-	\item \kw{Unshaded()}: 
+	\item \kw{Unshaded()}:
 		creates a shader with a constant white texture
 	\item \kw{Unshaded(colour)}:
 		creates a shader with colour texture.
@@ -28,7 +28,7 @@ The most simple shader of all.  It simply returns the texture value
 
 \subsubsection*{members}
 \begin{itemize}
-	\item \kw{colour}: 
+	\item \kw{colour}:
 		get and set the colour texture.
 \end{itemize}
 
@@ -40,7 +40,7 @@ Models a perfect Lambertian surface.
 
 \subsubsection*{constructors}
 \begin{itemize}
-	\item \kw{Lambert()}: 
+	\item \kw{Lambert()}:
 		creates a shader with a constant white texture
 	\item \kw{Lambert(diffuse)}:
 		creates a shader with a diffuse colour texture.
@@ -48,7 +48,7 @@ Models a perfect Lambertian surface.
 
 \subsubsection*{members}
 \begin{itemize}
-	\item \kw{diffuse}: 
+	\item \kw{diffuse}:
 		get and set the diffuse colour texture.
 \end{itemize}
 
@@ -60,7 +60,7 @@ Models a classical surface material
 
 \subsubsection*{constructors}
 \begin{itemize}
-	\item \kw{Simple()}: 
+	\item \kw{Simple()}:
 		creates a shader with a constant white texture
 	\item \kw{Simple(diffuse)}:
 		creates a shader with a diffuse colour texture.
@@ -70,17 +70,17 @@ Models a classical surface material
 
 \subsubsection*{members}
 \begin{itemize}
-	\item \kw{diffuse}: 
+	\item \kw{diffuse}:
 		get and set the diffuse colour texture.
-	\item \kw{specular}: 
+	\item \kw{specular}:
 		get and set the diffuse colour texture.
-	\item \kw{specularPower}: 
+	\item \kw{specularPower}:
 		get and set the sharpness texture for the specular lighting.  This texture is evaulated as a scalar.
-	\item \kw{reflectance}: 
+	\item \kw{reflectance}:
 		get and set the reflectance colour texture.
-	\item \kw{transmittance}: 
+	\item \kw{transmittance}:
 		get and set the transmittance colour texture.
-	\item \kw{refractionIndex}: 
+	\item \kw{refractionIndex}:
 		get and set the texture that gives the relative index of refraction of the interior material with respect to the exterior metarial.  This texture is evaluated as a scalar.
 \end{itemize}
 
@@ -95,7 +95,7 @@ Models a classical surface material
 \begin{equation}
 	\begin{array}{lcl}
 		\sigma \left( t \right) &=& a \exp \left( -b \left( \Vect{op} \cdot \Vect u + t \, \Vect \omega \cdot \Vect u \right) \right)\\
-		&=& \frac A B \exp \left( -B t ) \right) 
+		&=& \frac A B \exp \left( -B t ) \right)
 			\text{ with } \begin{cases}
 				A = a \exp \left( -b \, \Vect{op} \cdot \Vect u \right)\\
 				B = b \, \Vect \omega \cdot \Vect u
@@ -113,7 +113,7 @@ Models a classical surface material
 \end{equation}
 
 \begin{equation}
-	\alpha_{r,max} = \lim_{d \rightarrow \infty} \alpha_r \left( d \right) = 
+	\alpha_{r,max} = \lim_{d \rightarrow \infty} \alpha_r \left( d \right) =
 		\begin{cases}
 			1 - \exp \left( -\frac A B \right) & \Leftrightarrow B > 0\\
 			1 & \Leftrightarrow B \leq 0

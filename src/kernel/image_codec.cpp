@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -232,10 +232,10 @@ ImageCodec::TImageHandle ImageCodecLass::doOpen(const std::filesystem::path& pat
 	{
 		io::Image::ColorSpace& colorSpace = pimpl->image.colorSpace();
 		pimpl->rgbSpace.reset(new RgbSpace(
-			TPoint2D(colorSpace.red), 
-			TPoint2D(colorSpace.green), 
-			TPoint2D(colorSpace.blue), 
-			TPoint2D(colorSpace.white), 
+			TPoint2D(colorSpace.red),
+			TPoint2D(colorSpace.green),
+			TPoint2D(colorSpace.blue),
+			TPoint2D(colorSpace.white),
 			colorSpace.gamma));
 	}
 	if (!hasGammaCorrection_)

@@ -136,10 +136,10 @@ public:
 	TValue dot(const Spectral& other) const { return v_.dot(other.v_); }
 	TValue average() const { return v_.average(); }
 	TValue absAverage() const
-	{ 
-		TBands av(v_); 
-		av.inpabs(); 
-		return av.average(); 
+	{
+		TBands av(v_);
+		av.inpabs();
+		return av.average();
 	}
 	TValue minimum() const { return v_.minimum(); }
 	TValue maximum() const { return v_.maximum(); }

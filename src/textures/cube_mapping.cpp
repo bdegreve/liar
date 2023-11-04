@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -54,7 +54,7 @@ void CubeMapping::doTransformContext(const Sample&, IntersectionContext& context
 	size_t i, j;
 	if (num::abs(n.z) >= num::abs(n.x) && num::abs(n.z) >= num::abs(n.y))
 	{
-		i = 0; 
+		i = 0;
 		j = 1;
 	}
 	else if (num::abs(n.y) >= num::abs(n.x))
@@ -70,7 +70,7 @@ void CubeMapping::doTransformContext(const Sample&, IntersectionContext& context
 	context.setUv(TPoint2D(context.point()[i], context.point()[j]));
 	context.setDUv_dI(TVector2D(context.dPoint_dI()[i], context.dPoint_dI()[j]));
 	context.setDUv_dJ(TVector2D(context.dPoint_dJ()[i], context.dPoint_dJ()[j]));
-	
+
 	const TVector2D dst_du(context.dPoint_dU()[i], context.dPoint_dU()[j]);
 	const TVector2D dst_dv(context.dPoint_dV()[i], context.dPoint_dV()[j]);
 	const TScalar matrix[4] = { dst_du.x, dst_dv.x, dst_du.y, dst_dv.y };
@@ -98,4 +98,3 @@ void CubeMapping::doTransformContext(const Sample&, IntersectionContext& context
 }
 
 // EOF
-

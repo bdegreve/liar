@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -123,7 +123,7 @@ const std::string version = LIAR_VERSION_FULL;
 const std::string authors = LIAR_AUTHORS;
 const std::string website = LIAR_WEBSITE;
 
-const std::string license =	
+const std::string license =
 	LIAR_NAME_FULL "\n"
     "Copyright (C) 2004-2023 " LIAR_AUTHORS "\n"
 	"\n"

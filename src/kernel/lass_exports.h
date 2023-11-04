@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -33,7 +33,7 @@ namespace kernel
 namespace impl
 {
 
-template 
+template
 <
 	typename T,
 	template <typename, typename> class PrimExportTraits,
@@ -41,7 +41,7 @@ template
 >
 struct PySpecialExportTraits: private PrimExportTraits<T, ExportTraits>
 {
-	typedef python::impl::ShadowTraits<typename python::ShadoweeTraits<T>::TShadow> TShadowTraits; 
+	typedef python::impl::ShadowTraits<typename python::ShadoweeTraits<T>::TShadow> TShadowTraits;
 	static PyObject* build(const liar::TTransformation2D& v)
 	{
 		return python::fromSharedPtrToNakedCast(TShadowTraits::buildObject(v));
@@ -70,7 +70,7 @@ namespace python
 {
 
 template <>
-struct PyExportTraits<liar::TTransformation2D>: 
+struct PyExportTraits<liar::TTransformation2D>:
 	public ::liar::kernel::impl::PySpecialExportTraits< liar::TTransformation2D, impl::PyExportTraitsPrimTransformation, PyExportTraits<liar::TTransformation2D> >
 {
 	static const char* className() { return "Transformation2D"; }

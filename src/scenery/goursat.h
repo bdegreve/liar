@@ -45,7 +45,7 @@ class LIAR_SCENERY_DLL Goursat: public SceneObject
 public:
     Goursat();
     Goursat(TScalar a, TScalar b, TScalar c);
-    
+
     TScalar a() const;
     TScalar b() const;
     TScalar c() const;

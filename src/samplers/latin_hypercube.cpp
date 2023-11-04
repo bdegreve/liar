@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -119,7 +119,7 @@ void LatinHypercube::doSetResolution(const TResolution2D& resolution)
 
 void LatinHypercube::doSetSamplesPerPixel(size_t samplesPerPixel)
 {
-	samplesPerPixel_ = samplesPerPixel; 
+	samplesPerPixel_ = samplesPerPixel;
 	stratumSize_ = num::inv(static_cast<TScalar>(samplesPerPixel_));
 	timeStrata_.resize(samplesPerPixel_);
 	wavelengthStrata_.resize(samplesPerPixel_);
@@ -192,7 +192,7 @@ void LatinHypercube::doSampleSubSequence1D(const TResolution2D&, size_t subPixel
 	const size_t nSubPixels = this->samplesPerPixel();
 	const size_t subSeqSize = this->subSequenceSize1D(id);
 	const size_t size = nSubPixels * subSeqSize;
-	
+
 	const size_t i = num::numCast<size_t>(id);
 	if (i >= subSequences1d_.size())
 	{
@@ -262,7 +262,7 @@ void LatinHypercube::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixe
 				p->y = (static_cast<TScalar>(k * nSubPixels + dk) + jitter(rng_)) * scale;
 				++p;
 			}
-			
+
 			// shuffle samples within stratum
 			std::shuffle(stde::member_iterator(start, &TSample2D::x), stde::member_iterator(p, &TSample2D::x), rng_);
 			std::shuffle(stde::member_iterator(start, &TSample2D::y), stde::member_iterator(p, &TSample2D::y), rng_);
@@ -278,7 +278,7 @@ void LatinHypercube::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixe
 		first[k] = subSequence[k * nSubPixels + subPixel];
 	}
 
-	// and shuffle again. for a single sequence, it's sufficient to only shuffle the ys, 
+	// and shuffle again. for a single sequence, it's sufficient to only shuffle the ys,
 	// but to avoid inter-sequence coherence, we shuffle the xs too.
 	//
 	std::shuffle(stde::member_iterator(first, &TSample2D::x), stde::member_iterator(last, &TSample2D::x), rng_);

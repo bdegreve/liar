@@ -25,13 +25,13 @@
  *  @brief Anistropic Microfacet Dielectric BSDF by Walter et al. (2007)
  *
  *  @par reference:
- *      @arg B. Walter, S. R. Marschner, H. Li, K. E. Torrance, 
+ *      @arg B. Walter, S. R. Marschner, H. Li, K. E. Torrance,
  *      <i>Microfacet Models for Refraction through Rough Surfaces</i>
  *      Proceedings of the 18th Eurographics conference on Rendering Techniques
  *      (EGSR'07). Eurographics Association, Goslar, DEU, 195–206 (2007)
- * 
+ *
  *      @arg B. Burley, <i>Physically-Based Shading at Disney</i> (2012)
- * 
+ *
  *      @arg E. Heitz, <i>Understanding the Masking-Shadowing Function in
  *      Microfacet-Based BRDFs</i>, Journal of Computer Graphics Techniques
  *      <b>3</b> (2), 48--107 (2014)

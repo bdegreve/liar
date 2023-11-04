@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -207,7 +207,7 @@ void Stratifier::doSampleSubSequence1D(const TResolution2D&, size_t subPixel, TS
 	{
 		LASS_ENFORCE(subPixel == 0);
 		subSequences1d_.resize(i + 1);
-	}		
+	}
 
 	if (subPixel == 0)
 	{
@@ -215,7 +215,7 @@ void Stratifier::doSampleSubSequence1D(const TResolution2D&, size_t subPixel, TS
 		const TScalar scale = num::inv(static_cast<TScalar>(size));
 
 		// generate interleaved samples: stratum1,subpixel1, stratum1,subpixel2, ... stratum2,subpixel1,stratum2,subpixel2
-		TSubSequence1D::iterator p = subSequences1d_[i].begin();	
+		TSubSequence1D::iterator p = subSequences1d_[i].begin();
 		for (size_t k = 0; k < subSeqSize; ++k)
 		{
 			// sample one stratum for all subpixels
@@ -231,7 +231,7 @@ void Stratifier::doSampleSubSequence1D(const TResolution2D&, size_t subPixel, TS
 	// pick a subpixel worth of samples
 	//
 	LASS_ASSERT(last - first == static_cast<std::ptrdiff_t>(subSeqSize));
-	const TSubSequence1D& subSequence = subSequences1d_[i];	
+	const TSubSequence1D& subSequence = subSequences1d_[i];
 	for (size_t k = 0; k < subSeqSize; ++k)
 	{
 		first[k] = subSequence[k * nSubPixels + subPixel];
@@ -251,8 +251,8 @@ void Stratifier::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixel), 
 	{
 		LASS_ENFORCE(subPixel == 0);
 		subSequences2d_.resize(i + 1);
-	}		
-	
+	}
+
 	if (subPixel == 0)
 	{
 		subSequences2d_[i].resize(nSubPixels * subSeqSize);
@@ -263,7 +263,7 @@ void Stratifier::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixel), 
 		const TScalar scale = num::inv(static_cast<TScalar>(sqrtNSubPixels * sqrtSubSeqSize));
 
 		// generate interleaved samples: stratum1,subpixel1, stratum1,subpixel2, ... stratum2,subpixel1,stratum2,subpixel2
-		TSubSequence2D::iterator p = subSequences2d_[i].begin();	
+		TSubSequence2D::iterator p = subSequences2d_[i].begin();
 		for (size_t u = 0; u < sqrtSubSeqSize; ++u)
 		{
 			for (size_t v = 0; v < sqrtSubSeqSize; ++v)
@@ -287,7 +287,7 @@ void Stratifier::doSampleSubSequence2D(const TResolution2D& LASS_UNUSED(pixel), 
 	// pick a subpixel worth of samples
 	//
 	LASS_ASSERT(last - first == static_cast<std::ptrdiff_t>(subSeqSize));
-	const TSubSequence2D& subSequence = subSequences2d_[i];		
+	const TSubSequence2D& subSequence = subSequences2d_[i];
 	for (size_t k = 0; k < subSeqSize; ++k)
 	{
 		first[k] = subSequence[k * nSubPixels + subPixel];
@@ -352,7 +352,7 @@ Stratifier::TSample1D Stratifier::sampleStratum(size_t subPixel, TStrata1D& stra
 	LASS_ASSERT(subPixel < strataPerPixel_);
 	if (subPixel == 0)
 	{
-		std::shuffle(strata.begin(), strata.end(), rng_);	
+		std::shuffle(strata.begin(), strata.end(), rng_);
 	}
 	return (strata[subPixel] + jitter(rng_)) * stratum1DSize_;
 }

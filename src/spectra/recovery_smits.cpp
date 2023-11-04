@@ -30,17 +30,17 @@ namespace spectra
 {
 
 PY_DECLARE_CLASS_DOC(RecoverySmits, "spectral recovery using Smits (2000)")
-	PY_CLASS_CONSTRUCTOR_8(RecoverySmits, 
-		const TSpectrumPtr&, const TSpectrumPtr&, const TSpectrumPtr&, 
-		const TSpectrumPtr&, const TSpectrumPtr&, const TSpectrumPtr&, 
+	PY_CLASS_CONSTRUCTOR_8(RecoverySmits,
+		const TSpectrumPtr&, const TSpectrumPtr&, const TSpectrumPtr&,
+		const TSpectrumPtr&, const TSpectrumPtr&, const TSpectrumPtr&,
 		const TSpectrumPtr&, const TRgbSpacePtr&)
 
 
 // --- public --------------------------------------------------------------------------------------
 
-RecoverySmits::RecoverySmits(const TSpectrumPtr& red, const TSpectrumPtr& green, const TSpectrumPtr& blue, 
-		const TSpectrumPtr& yellow, const TSpectrumPtr& magenta, const TSpectrumPtr& cyan, 
-		const TSpectrumPtr& white, 
+RecoverySmits::RecoverySmits(const TSpectrumPtr& red, const TSpectrumPtr& green, const TSpectrumPtr& blue,
+		const TSpectrumPtr& yellow, const TSpectrumPtr& magenta, const TSpectrumPtr& cyan,
+		const TSpectrumPtr& white,
 		const TRgbSpacePtr& rgbSpace) :
 	red_(red),
 	green_(green),

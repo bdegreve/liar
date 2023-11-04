@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -76,9 +76,9 @@ struct Handle
 	Handle(const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace):
 		rgbSpace((rgbSpace ? rgbSpace : kernel::sRGB)->linearSpace()),
 		resolution(resolution)
-	{	
+	{
 	}
-	~Handle() 
+	~Handle()
 	{
 		input.reset();
 		output.reset();
@@ -162,7 +162,7 @@ private:
 		{
 			Handle::TLine& line = pimpl->line;
 			pimpl->input->setFrameBuffer(
-				&line[0] - pimpl->y * static_cast<int>(line.size()) - dataWin.min.x, 
+				&line[0] - pimpl->y * static_cast<int>(line.size()) - dataWin.min.x,
 				1, line.size());
 			pimpl->input->readPixels(pimpl->y);
 			for (int x = dispWin.min.x; x <= dispWin.max.x; ++x)
@@ -231,7 +231,7 @@ void postInject(PyObject*)
 }
 }
 
-PY_DECLARE_MODULE_DOC(openexr, 
+PY_DECLARE_MODULE_DOC(openexr,
 	"OpenEXR image codec\n"
 	"\n"
 	"OpenEXR\n"

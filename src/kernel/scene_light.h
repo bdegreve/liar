@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -56,43 +56,43 @@ public:
 		return doEmission(sample, ray, shadowRay, pdf);
 	}
 
-	/** Sample radiance emitted by this light source and received at target (to be used as shadowRay.support()) 
+	/** Sample radiance emitted by this light source and received at target (to be used as shadowRay.support())
 	 */
 	const Spectral sampleEmission(
 			const Sample& cameraSample, const TPoint2D& lightSample, const TPoint3D& target,
 			BoundedRay& shadowRay, TScalar& pdf) const
-	{ 
+	{
 		return doSampleEmission(cameraSample, lightSample, target, shadowRay, pdf);
 	}
 
 	/** Sample radiance emitted by this light source and received at target (to be used as shadowRay.support()) with known normal.
 	 */
 	const Spectral sampleEmission(
-			const Sample& cameraSample, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D& targetNormal, 
+			const Sample& cameraSample, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D& targetNormal,
 			BoundedRay& shadowRay, TScalar& pdf) const
-	{ 
+	{
 		return doSampleEmission(cameraSample, lightSample, target, targetNormal, shadowRay, pdf);
 	}
 
 	/** Generate an emissionRay.
 	 */
 	const Spectral sampleEmission(
-			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
+			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
 			BoundedRay& emissionRay, TScalar& pdf) const
 	{
 		return doSampleEmission(cameraSample, lightSampleA, lightSampleB, emissionRay, pdf);
 	}
 
-	/** Return total power output for light, but averaged over all frequencies 
-	 */ 
+	/** Return total power output for light, but averaged over all frequencies
+	 */
 	TScalar totalPower() const
 	{
 		return doTotalPower();
 	}
 
-	size_t numberOfEmissionSamples() const 
-	{ 
-		return doNumberOfEmissionSamples(); 
+	size_t numberOfEmissionSamples() const
+	{
+		return doNumberOfEmissionSamples();
 	}
 	bool isSingular() const
 	{
@@ -115,22 +115,22 @@ private:
 
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
-	
+
 	virtual void doSetSceneBound(const TAabb3D& bound, const TimePeriod& period);
 	virtual const Spectral doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const = 0;
 	virtual const Spectral doSampleEmission(
-			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, 
+			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target,
 			BoundedRay& shadowRay, TScalar& pdf) const = 0;
 	virtual const Spectral doSampleEmission(
-			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D& targetNormal, 
+			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D& targetNormal,
 			BoundedRay& shadowRay, TScalar& pdf) const;
 	virtual const Spectral doSampleEmission(
-			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
+			const Sample& cameraSample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
 			BoundedRay& emissionRay, TScalar& pdf) const = 0;
 	virtual TScalar doTotalPower() const = 0;
 	virtual size_t doNumberOfEmissionSamples() const = 0;
 	virtual bool doIsSingular() const = 0;
-	
+
 	virtual const TPyObjectPtr doGetLightState() const = 0;
 	virtual void doSetLightState(const TPyObjectPtr& state) = 0;
 

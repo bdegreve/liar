@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -130,7 +130,7 @@ void SceneObject::setDefaultShader(const TShaderPtr& iDefaultShader)
 const TPyObjectPtr SceneObject::reduce() const
 {
 	return python::makeTuple(
-		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->_lassPyGetClassDef()->type())), 
+		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->_lassPyGetClassDef()->type())),
 		python::makeTuple(), this->getState());
 }
 
@@ -206,7 +206,7 @@ const TPoint3D SceneObject::doSampleSurface(const TPoint2D& /* sample */, TVecto
 const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TPoint3D& target, TVector3D& normal, TScalar& pdf) const
 {
 	const TPoint3D result = doSampleSurface(sample, normal, pdf);
-	
+
 	TVector3D toLight = result - target;
 	const TScalar squaredDistance = toLight.squaredNorm();
 	toLight /= num::sqrt(squaredDistance);
@@ -218,9 +218,9 @@ const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TPoint
 
 
 
-/** Some other objects may have an even better strategy for sampling a point on its 
+/** Some other objects may have an even better strategy for sampling a point on its
  *  surface when they know the target point and surface normal in that point.
- *  If they have, they can override this function, if not, the more general one will 
+ *  If they have, they can override this function, if not, the more general one will
  *  be called by default.
  */
 const TPoint3D SceneObject::doSampleSurface(const TPoint2D& sample, const TPoint3D& target, const TVector3D& /* targetNormal */, TVector3D& normal, TScalar& pdf) const

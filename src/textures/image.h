@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -95,9 +95,9 @@ private:
 	class MipMapLevel
 	{
 	public:
-		MipMapLevel(const TPixels& pixels, const TResolution2D& resolution): 
-			pixels_(pixels), 
-			resolution_(resolution) 
+		MipMapLevel(const TPixels& pixels, const TResolution2D& resolution):
+			pixels_(pixels),
+			resolution_(resolution)
 		{
 		}
 		MipMapLevel(const TResolution2D& resolution):
@@ -106,18 +106,18 @@ private:
 		{
 		}
 		TPixel& operator()(size_t x, size_t y)
-		{ 
-			return pixels_[y * resolution_.x + x]; 
+		{
+			return pixels_[y * resolution_.x + x];
 		}
-		const TPixel& operator()(size_t x, size_t y) const 
-		{ 
-			return pixels_[y * resolution_.x + x]; 
+		const TPixel& operator()(size_t x, size_t y) const
+		{
+			return pixels_[y * resolution_.x + x];
 		}
 		const TResolution2D& resolution() const { return resolution_; }
 	private:
 		TPixels pixels_;
 		TResolution2D resolution_;
-	};		
+	};
 	typedef std::vector<MipMapLevel> TMipMaps;
 
 	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const override;
@@ -132,7 +132,7 @@ private:
 	MipMapLevel makeMipMapEven(const MipMapLevel& parent, prim::XY compressionAxis, size_t newSize) const;
 	MipMapLevel makeMipMapOdd(const MipMapLevel& parent, prim::XY compressionAxis, size_t newSize) const;
 
-	void mipMapLevel(TScalar width, size_t numLevels, 
+	void mipMapLevel(TScalar width, size_t numLevels,
 		size_t& level0, size_t& level1, TPixel::TValue& dLevel) const;
 
 	const TPixel lookUp(const IntersectionContext& context) const;

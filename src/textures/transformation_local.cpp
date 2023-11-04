@@ -107,4 +107,3 @@ void TransformationLocal::doSetState(const TPyObjectPtr& state)
 }
 
 // EOF
-

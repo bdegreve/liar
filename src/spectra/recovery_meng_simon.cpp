@@ -63,7 +63,7 @@ struct RecoveryMengSimon::Impl
 	Impl(const TWavelengths& wavelengths, const TSamples& samples);
 
 	bool recover(const XYZ& xyz, const Impl::PointInfo* pi[3], TValue w[3]) const;
-	
+
 	const TAabb2D aabb{ XY{ -0.3f, -0.3f }, XY{ 1.0f, 1.2f } };
 	const TWavelengths wavelengths;
 	const TSamples samples;
@@ -151,7 +151,7 @@ Spectral RecoveryMengSimon::doRecover(const XYZ& xyz, const Sample& sample, Spec
 
 	LASS_ASSERT(ws[k] > ws[k - 1]);
 	const TWavelength t = (sample.wavelength() - ws[k - 1]) / (ws[k] - ws[k - 1]);
-	
+
 	const TValue v0 = w[0] * a[k - 1] + w[1] * b[k - 1] + w[2] * c[k - 1];
 	const TValue v1 = w[0] * a[k]     + w[1] * b[k]     + w[2] * c[k];
 	const TValue v = num::lerp(v0, v1, static_cast<TValue>(t));
@@ -223,7 +223,7 @@ RecoveryMengSimon::Impl::Impl(const TWavelengths& ws, const TSamples& ss):
 		auto edge = mesh.insertSite(xy);
 		TMesh::setPointHandle(edge, pointInfo);
 	}
-	
+
 	zero.values.resize(n, 0);
 	zero.max = 0;
 }

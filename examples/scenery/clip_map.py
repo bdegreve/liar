@@ -68,4 +68,3 @@ engine.scene = scenery.List([clipped_sphere, floor, wall1, wall2, light])
 engine.camera = camera
 engine.target = output.Splitter([image, display])
 engine.render()
-

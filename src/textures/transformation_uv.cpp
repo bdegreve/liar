@@ -113,4 +113,3 @@ void TransformationUv::doSetState(const TPyObjectPtr& state)
 }
 
 // EOF
-

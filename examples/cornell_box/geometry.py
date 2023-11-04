@@ -36,19 +36,19 @@ def getWalls():
 	white = shaders.Lambert(textures.Constant(rgb(hi, hi, hi)))
 	red = shaders.Lambert(textures.Constant(rgb(hi, lo, lo)))
 	green = shaders.Lambert(textures.Constant(rgb(lo, hi, lo)))
-	
+
 	floor = scenery.Parallelogram(scale(0, 0, 559.2), scale(552.8, 0, 0), scale(0, 0, -559.2))
 	floor.shader = white
 
 	ceiling = scenery.Parallelogram(scale(0.0, 548.8, 0), scale(556.0, 0, 0), scale(0, 0, 559.2))
 	ceiling.shader = white
-	
+
 	backwall = scenery.Parallelogram(scale(556, 0, 559.2), scale(-556.0, 0, 0), scale(0, 548.8, 0))
 	backwall.shader = white
-	
+
 	rightwall = scenery.Parallelogram(scale(0, 0, 559.2), scale(0, 0, -559.2), scale(0, 548.8, 0))
 	rightwall.shader = green
-	
+
 	leftwall = scenery.Parallelogram(scale(552.8, 0, 0), scale(0, 0, 559.2), scale(0, 548.8, 0))
 	leftwall.shader = red
 
@@ -61,9 +61,9 @@ def generateBox(ps, hs):
 		n = (u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0])
 		length = math.sqrt(sum([x * x for x in n]))
 		return tuple([x / length for x in n])
-	
+
 	verts = [scale(p[0], h, p[1]) for h in hs for p in ps]
-	
+
 	normal_groups = [
 		(0, 3, 1),
 		(4, 5, 7),
@@ -81,11 +81,11 @@ def generateBox(ps, hs):
 		((1, 6, 5), 3), ((1, 2, 6), 3),
 		((2, 7, 6), 4), ((2, 3, 7), 4),
 		((3, 4, 7), 5), ((3, 0, 4), 5)
-	]	
+	]
 	triangles = [((t[0], n), (t[1], n), (t[2], n))for t, n in triangle_groups]
-	
-	return scenery.TriangleMesh(verts, normals, [], triangles)	
-	
+
+	return scenery.TriangleMesh(verts, normals, [], triangles)
+
 def getBlocks():
 	white = shaders.Lambert(textures.Constant(rgb(.7, .7, .7)))
 	short = generateBox([(130.0, 65.0), (82.0, 225.0), (240.0, 272.0), (290.0, 114.0)], [0.05, 165.0])
@@ -102,5 +102,3 @@ def getCamera():
 	camera.sky = (0, 1, 0)
 	camera.direction = (0, 0, 1)
 	return camera
-
-	

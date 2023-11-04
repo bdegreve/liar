@@ -183,7 +183,7 @@ const Spectral LightProjection::doSampleEmission(const Sample& sample, const TPo
 
 	Intersection intersection(this, t, seNoEvent);
 	IntersectionContext context(*this, sample, ray, intersection, 0);
-	return intensity_->lookUp(sample, context, SpectralType::Illuminant) / 
+	return intensity_->lookUp(sample, context, SpectralType::Illuminant) /
 		static_cast<Spectral::TValue>(attenuation_->attenuation(distance, num::sqr(distance)));
 }
 

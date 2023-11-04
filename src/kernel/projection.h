@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -50,7 +50,7 @@ public:
 	const TRay3D ray(const TUv& uv, TScalar& pdf) const { return doRay(uv, pdf); }
 	const TRay3D ray(TScalar u, TScalar v, TScalar& pdf) const { return doRay(TUv(u, v), pdf); }
 	const TRay3D ray(TScalar u, TScalar v) const { TScalar pdf; return doRay(TUv(u, v), pdf); }
-	
+
 	const TUv uv(const TPoint3D& point, TRay3D& ray, TScalar& t) const { return doUv(point, ray, t); }
 
 	const TPyObjectPtr reduce() const;
@@ -79,4 +79,3 @@ typedef python::PyObjectPtr<Projection>::Type TProjectionPtr;
 #endif
 
 // EOF
-

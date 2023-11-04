@@ -7,7 +7,7 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -32,7 +32,7 @@ __version__ = "0.0"
 __bpydoc__ = """\
 Exports Blender scene to LiAR script.
 
-Usage: run the script from the menu or inside Blender.  
+Usage: run the script from the menu or inside Blender.
 """
 
 precision = 7
@@ -164,26 +164,26 @@ def compress_mesh(vertices, uvs, normals, face_groups):
 
 def encode_mesh_to_obj(vertices, normals, uvs, face_groups):
 	vertices, uvs, normals, face_groups = compress_mesh(vertices, normals, uvs, face_groups)
-	
+
 	lines = ["# --- vertices ---"]
 	for vert in vertices:
 		lines += ["v %s" % ' '.join(map(str_float, vert))]
-	
+
 	lines += ["", "# --- uvs ---"]
 	for uv in uvs:
 		lines += ["vt %s" % ' '.join(map(str_float, uv))]
-	
+
 	lines += ["", "# --- normals ---"]
 	for normal in normals:
 		lines += ["vn %s" % ' '.join(map(str_float, normal))]
-	
+
 	lines += ["", "# --- face groups ---"]
 	for face_group in face_groups:
 		lines += ["g"]
 		for face in face_group:
 			verts = ['/'.join(map(str_index, vert)).rstrip('/') for vert in face]
 			lines += ["f %s" % ' '.join(verts)]
-			
+
 	return '\n'.join(lines)
 
 
@@ -212,8 +212,8 @@ class LiarExporter(object):
 		self.materials = {}
 		self.textures = {}
 		self.images = {}
-	
-	def write_to_archive(self, filename, content): 
+
+	def write_to_archive(self, filename, content):
 		if self.is_compressing_archive:
 			try:
 				self.zip_file
@@ -228,18 +228,18 @@ class LiarExporter(object):
 			make_dir(self.archive_path)
 			f = file(os.path.join(self.archive_path, filename), 'w')
 			f.write(content)
-			f.close()           
-	
+			f.close()
+
 	def write_none(self, obj):
 		pass
-	
+
 	def write_image(self, texture):
 		assert(texture.getType() == 'Image')
 		image_name = texture.image.getName()
 		if image_name in self.images:
 			return
 		self.images[image_name] = True
-		
+
 		filename = texture.image.getFilename()
 		if texture.mipmap:
 			anti_aliasing = 'AA_TRILINEAR'
@@ -249,7 +249,7 @@ class LiarExporter(object):
 			mip_mapping = 'MM_NONE'
 		if not texture.interpol:
 			anti_aliasing = 'AA_NONE'
-		
+
 		self.script_file.write('''
 # --- image IM:%(image_name)s ---
 image = liar.textures.Image(fix_path(%(filename)r))
@@ -257,13 +257,13 @@ image.antiAliasing = liar.textures.Image.%(anti_aliasing)s
 image.mipMapping = liar.textures.Image.%(mip_mapping)s
 images['IM:%(image_name)s'] = image
 ''' % vars())
-	
+
 	def write_texture(self, texture):
 		name = texture.name
 		if name in self.textures:
 			return
 		self.textures[name] = True
-		
+
 		tex_type = texture.getType()
 		if tex_type == 'Image':
 			self.write_image(texture)
@@ -279,13 +279,13 @@ textures['TE:%(name)s'] = images['IM:%(image_name)s']
 textures['TE:%(name)s'] = liar.Texture.black()
 ''' % vars())
 		return "textures['TE:%(name)s']" % vars()
-	
+
 	def write_material(self, material):
 		name = material.name
 		if name in self.materials:
 			return
 		self.materials[name] = True
-		
+
 		channels = ""
 		for index in material.enabledTextures:
 			mtex = material.textures[index]
@@ -316,7 +316,7 @@ textures['TE:%(name)s'] = liar.Texture.black()
 				elif mtex.texco == Blender.Texture.TexCo['WIN']:
 					channel = "make_projection_mapping(%s)" % channel
 			channels += "\n\t%(index)d: %(channel)s," % vars()
-		
+
 		if material.alpha == 0:
 			ior = material.IOR
 			self.script_file.write(r'''
@@ -326,13 +326,13 @@ material.innerRefractionIndex = liar.textures.Constant(%(ior)r)
 materials['MA:%(name)s'] = material
 ''' % vars())
 			return
-		
+
 		diffuse = material.ref and const_texture(material.rgbCol, material.ref)
 		specular = material.spec and const_texture(material.specCol, material.spec)
 		specular_power = "liar.textures.Constant(%r)" % material.hard
 		mirror = material.rayMirr and const_texture(material.mirCol, material.rayMirr)
 		bumpmap = None
-		
+
 		for channel in material.enabledTextures:
 			mtex = material.textures[channel]
 			if not mtex:
@@ -346,14 +346,14 @@ materials['MA:%(name)s'] = material
 				specular_power = tex
 			if mtex.mapto & Blender.Texture.MapTo['NOR']:
 				bumpmap = tex
-				
+
 		self.script_file.write(r'''
 # --- material MA:%(name)s ---
 texture_channels = {%(channels)s
 	}
 material_components = []
 ''' % vars())
-		
+
 		if specular:
 			diff = diffuse or const_texture(0)
 			self.script_file.write(r'''
@@ -390,22 +390,22 @@ materials['MA:%(name)s'] = make_material(material_components, %(bumpmap)s)
 			self.script_file.write(r'''
 materials['MA:%(name)s'].subtractiveHack = True
 ''' % vars())
-	
+
 	def write_mesh(self, obj):
 		mesh = obj.getData(False, True)
 		name = mesh.name
 		if name in self.meshes:
 			return
 		self.meshes[name] = True
-		
+
 		num_materials = len(mesh.materials)
 		if num_materials == 0:
 			print('WARNING: no material assigned to mesh, skipping mesh')
 			return
-		
+
 		for k, v in mesh.properties.iteritems():
 			print("property %s: %s" % (k, v))
-		
+
 		# extract vertices, normals and uvs
 		vertices = [tuple(mvert.co) for mvert in mesh.verts]
 		if mesh.vertexUV:
@@ -413,15 +413,15 @@ materials['MA:%(name)s'].subtractiveHack = True
 		else:
 			uvs = []
 		normals = [tuple(mvert.no) for mvert in mesh.verts]
-		
+
 		# extract faces per material
 		face_groups = [[] for i in xrange(num_materials)]
 		for face in mesh.faces:
 			size = len(face.verts)
 			assert(size == 3 or size == 4)
-			
+
 			faceVerts = [mvert.index for mvert in face.verts]
-			
+
 			if mesh.vertexUV:
 				faceUvs = faceVerts
 			elif mesh.faceUV:
@@ -438,31 +438,31 @@ materials['MA:%(name)s'].subtractiveHack = True
 			else:
 				normals.append(tuple(face.no))
 				faceNormals = size * [len(normals) - 1]
-			
+
 			indices = list(zip(faceVerts, faceUvs, faceNormals))
 			assert(face.mat >= 0 and face.mat < num_materials)
 			face_groups[face.mat].append(indices)
-				
+
 		# determine used face groups
 		used_groups = [i for i in xrange(num_materials) if len(face_groups[i]) > 0]
 		if not used_groups:
 			print('WARNING: mesh has no faces, skipping mesh')
 			return
-				
+
 		# write used materials
 		for i in used_groups:
 			self.write_material(mesh.materials[i])
-		
+
 		# write groups to zip
 		file_name = mesh.name + ".obj"
 		content = encode_mesh_to_obj(vertices, uvs, normals, [face_groups[i] for i in used_groups])
 		self.write_to_archive(file_name, "# --- %(name)s ---\n\n%(content)s" % vars())
-		
+
 		if mesh.mode & Blender.Mesh.Modes['AUTOSMOOTH']:
 			auto_smooth_angle = ", auto_smooth_angle=%r" % mesh.maxSmoothAngle
 		else:
 			auto_smooth_angle = ""
-		
+
 		self.script_file.write('''
 # --- mesh ME:%(name)s ---
 face_groups = load_face_groups_from_archive(%(file_name)r%(auto_smooth_angle)s)
@@ -486,7 +486,7 @@ objects['OB:%(obj_name)s'] = meshes['ME:%(name)s']
 matrix = %(obj_matrix)s
 objects['OB:%(obj_name)s'] = liar.scenery.Transformation(meshes['ME:%(name)s'], matrix)
 ''' % vars())
-	
+
 	def write_lamp(self, obj):
 		lamp = obj.getData()
 		name = lamp.name
@@ -562,7 +562,7 @@ lamps['LA:%(name)s'] = light
 		else:
 			print("WARNING: Did not recognize lamp type '%s'" % lamp.type)
 			return
-		
+
 		obj_matrix = matrix_to_list(obj.matrix)
 		obj_name = obj.name
 		self.script_file.write(r'''
@@ -570,7 +570,7 @@ lamps['LA:%(name)s'] = light
 matrix = %(obj_matrix)r
 objects['OB:%(obj_name)s'] = liar.scenery.Transformation(lamps['LA:%(name)s'], matrix)
 ''' % vars())
-	
+
 	def write_camera(self, obj):
 		camera = obj.getData()
 		name = camera.name
@@ -595,7 +595,7 @@ camera.focusDistance = %(focus_dist)s
 camera.fNumber = %(f_stop)s
 cameras['CA:%(name)s'] = camera
 ''' % vars())
-	
+
 	def write_context(self, context):
 		from Blender.Scene import Render
 		image_types = {
@@ -794,11 +794,11 @@ objects['WO:%(name)s'] = world
 			'Camera': LiarExporter.write_camera,
 			'Empty': LiarExporter.write_none,
 			}
-			
+
 		scene = Blender.Scene.GetCurrent()
 		visible_layers = set(scene.getLayers())
 		print "scene layers", visible_layers
-		
+
 		for i, obj in enumerate(scene.objects):
 			if not visible_layers & set(obj.layers):
 				continue
@@ -806,14 +806,14 @@ objects['WO:%(name)s'] = world
 			obj_name = obj.getName()
 			print("- object '%(obj_name)s' of type '%(obj_type)s'" % vars())
 			obj_materials = obj.getMaterials()
-			if obj_type in object_writers:              
+			if obj_type in object_writers:
 				object_writers[obj_type](self, obj)
 			else:
 				print("WARNING: Did not recognize object type '%(obj_type)s'" % vars())
-				
+
 			for key, value in obj.properties.iteritems():
 				print key, value
-				
+
 			ipo = obj.getIpo()
 			if ipo:
 				print(ipo)
@@ -821,12 +821,12 @@ objects['WO:%(name)s'] = world
 				for curve in ipo.getCurves():
 					print(curve)
 					print(curve.getPoints())
-					
+
 			self.draw_progress(float(i+1) / len(scene.objects))
-			
-		self.write_world(scene.render)		
+
+		self.write_world(scene.render)
 		self.write_context(scene.render)
-	
+
 	def write_footer(self):
 		scene = Blender.Scene.GetCurrent()
 		active_camera = scene.objects.camera.getData().name
@@ -869,10 +869,10 @@ if __name__ == "__main__":
 		if os.path.exists(self.script_path):
 			if not Blender.Draw.PupMenu("Overwrite File?%t|Yes%x1|No%x0"):
 				return
-			
+
 		print("Exporting to LiAR '%s' ..." % self.script_path)
 		self.draw_progress(0)
-		
+
 		self.script_file = file(self.script_path, 'w')
 		self.write_header()
 		self.write_body()
@@ -884,7 +884,7 @@ if __name__ == "__main__":
 
 
 
-def export_callback(script_path):   
+def export_callback(script_path):
 	exporter = LiarExporter(script_path)
 	exporter.export()
 

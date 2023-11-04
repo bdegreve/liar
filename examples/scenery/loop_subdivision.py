@@ -24,9 +24,9 @@ floor_material = shaders.Lambert(textures.Constant(0.5))
 # This function makes a cube and applies some subdivision to it
 #
 def make_cube(subdiv_level, crease_level):
-	
+
 	# First, a triangle mesh of a cube is made =)
-	# The cube has an extra vertex in the middle of each face, to keep it nicely symmetric 
+	# The cube has an extra vertex in the middle of each face, to keep it nicely symmetric
 	# (instead of having to triangles per face, you now have four)
 	#
 	verts = [
@@ -40,22 +40,22 @@ def make_cube(subdiv_level, crease_level):
 	faces = [
 		(2, 0, 8), (0, 1, 8), (1, 3, 8), (3, 2, 8),
 		(4, 6, 9), (6, 7, 9), (7, 5, 9), (5, 4, 9),
-		(0, 4,10), (4, 5,10), (5, 1,10), (1, 0,10), 
+		(0, 4,10), (4, 5,10), (5, 1,10), (1, 0,10),
 		(6, 2,11), (2, 3,11), (3, 7,11), (7, 6,11),
 		(0, 2,12), (2, 6,12), (6, 4,12), (4, 0,12),
 		(3, 1,13), (1, 5,13), (5, 7,13), (7, 3,13)]
-	full_faces = [[(i, None, None) for i in face]for face in faces]	
+	full_faces = [[(i, None, None) for i in face]for face in faces]
 	cube = scenery.TriangleMesh(verts, [], [], full_faces)
-	
+
 	# Secondly, you must set the crease levels of the edges.
 	# Currently you can only do that using the autoCrease function, setting the crease level of sharp edges
 	#
 	cube.autoCrease(crease_level, 0)
-	
+
 	# At last, the subdivion surface algorithm is applied
 	#
 	cube.loopSubdivision(subdiv_level)
-	
+
 	# Now, the only thing left to do, is to give the cube some material properties, and to give it a position.
 	cube.shader = cube_material
 	theta = (subdiv_level + crease_level) * math.pi / 6
@@ -97,4 +97,3 @@ engine.scene = scenery.List([floor, light, scenery.AabbTree(cubes + creased_cube
 engine.camera = camera
 engine.target = output.Splitter([image, display])
 engine.render()
-

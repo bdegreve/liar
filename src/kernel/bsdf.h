@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -77,7 +77,7 @@ inline constexpr BsdfCaps& operator|= (BsdfCaps& a, BsdfCaps b) { a = a | b; ret
 struct BsdfIn
 {
 	BsdfIn(): omegaOut(), allowedCaps() {}
-	BsdfIn(const TVector3D& omegaOut, BsdfCaps allowedCaps): 
+	BsdfIn(const TVector3D& omegaOut, BsdfCaps allowedCaps):
 		omegaOut(omegaOut), allowedCaps(allowedCaps) {}
 	TVector3D omegaOut;
 	BsdfCaps allowedCaps;
@@ -90,7 +90,7 @@ struct BsdfOut
 	BsdfOut(const Spectral& value = Spectral(), TScalar pdf = 0): value(value), pdf(pdf) {}
 	bool operator!() const { return !(pdf > 0 && value); }
 	explicit operator bool() const { return pdf > 0 && value; }
-	BsdfOut& operator+=(const BsdfOut& other) 
+	BsdfOut& operator+=(const BsdfOut& other)
 	{
 		value += other.value;
 		pdf += other.pdf;
@@ -176,4 +176,3 @@ typedef std::unique_ptr<Bsdf> TBsdfPtr;
 #endif
 
 // EOF
-

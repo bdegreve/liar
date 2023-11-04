@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -51,10 +51,10 @@ public:
 
 	const TSceneObjectPtr& child() const;
 	void setChild(const TSceneObjectPtr& child);
-	
+
 	const TVector3D& localToWorld() const;
 	void setLocalToWorld(const TVector3D& localToWorld);
-	
+
 	const TVector3D worldToLocal() const;
 
 private:
@@ -62,7 +62,7 @@ private:
 	void doAccept(lass::util::VisitorBase& visitor);
 
 	void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
-	void doIntersect(const Sample& sample, const BoundedRay& ray, 
+	void doIntersect(const Sample& sample, const BoundedRay& ray,
 		Intersection& result) const;
 	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
 	void doLocalContext(const Sample& sample, const BoundedRay& ray,

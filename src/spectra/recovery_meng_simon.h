@@ -25,8 +25,8 @@
 *  @brief Spectral recovery based on work of Meng, J., Simon, F., Hanika, J. and Dachsbacher, C. (2015)
 *  @author Bram de Greve [Bramz]
 *
-*  Meng, J., Simon, F., Hanika, J. and Dachsbacher, C. (2015), 
-*  Physically Meaningful Rendering using Tristimulus Colours. 
+*  Meng, J., Simon, F., Hanika, J. and Dachsbacher, C. (2015),
+*  Physically Meaningful Rendering using Tristimulus Colours.
 *  Computer Graphics Forum, 34: 31–40. doi: 10.1111/cgf.12676
 */
 

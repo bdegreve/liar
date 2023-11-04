@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -105,7 +105,7 @@ Observer::Observer(const TWavelengths& wavelengths, const TXYZs& sensitivities):
 		Y += dXYZ_[k].y;
 	}
 	LASS_ENFORCE(Y > 0);
-	
+
 	const TValue invY = num::inv(Y);
 	const TScalar invCdf = num::inv(cdf_.back());
 
@@ -156,7 +156,7 @@ const XYZ Observer::sensitivity(TWavelength wavelength) const
 	{
 		return XYZ(0);
 	}
-	
+
 	const size_t k = static_cast<size_t>(std::distance(w_.begin(), i) - 1);
 	LASS_ASSERT(k < w_.size() - 1);
 
@@ -167,7 +167,7 @@ const XYZ Observer::sensitivity(TWavelength wavelength) const
 }
 
 
-/** Calculate tristimulus for spectrum where you have a sample for each wavelength in the observer 
+/** Calculate tristimulus for spectrum where you have a sample for each wavelength in the observer
  */
 const XYZ Observer::tristimulus(const TValues& spectrum) const
 {
@@ -250,13 +250,13 @@ TWavelength Observer::sample(TScalar sample, TScalar& pdf) const
 		pdf = 0;
 		return w_.back();
 	}
-	
+
 	const TScalar cdf1 = *stde::prev(i);
 	const TScalar cdf2 = *i;
 	const TScalar dcdf = cdf2 - cdf1;
 	LASS_ASSERT(dcdf > 0);
 	const TWavelength x = static_cast<TWavelength>((sample - cdf1) / dcdf);
-	
+
 	const size_t k = static_cast<size_t>(std::distance(cdf_.begin(), i));
 	LASS_ASSERT(k > 0 && k < cdf_.size());
 	const TWavelength w1 = w_[k - 1];

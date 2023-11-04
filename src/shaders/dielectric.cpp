@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -34,13 +34,13 @@ PY_DECLARE_CLASS_DOC(Dielectric, "dielectric Fresnel material (like glass)")
 PY_CLASS_CONSTRUCTOR_0(Dielectric)
 PY_CLASS_CONSTRUCTOR_1(Dielectric, const TTexturePtr&)
 PY_CLASS_CONSTRUCTOR_2(Dielectric, const TTexturePtr&, const TTexturePtr&)
-PY_CLASS_MEMBER_RW_DOC(Dielectric, innerRefractionIndex, setInnerRefractionIndex, 
+PY_CLASS_MEMBER_RW_DOC(Dielectric, innerRefractionIndex, setInnerRefractionIndex,
 	"index of refraction for material on inside")
-PY_CLASS_MEMBER_RW_DOC(Dielectric, outerRefractionIndex, setOuterRefractionIndex, 
+PY_CLASS_MEMBER_RW_DOC(Dielectric, outerRefractionIndex, setOuterRefractionIndex,
 	"index of refraction for material on outside")
-PY_CLASS_MEMBER_RW_DOC(Dielectric, reflectance, setReflectance, 
+PY_CLASS_MEMBER_RW_DOC(Dielectric, reflectance, setReflectance,
 	"multiplier for the Fresnel reflectance")
-PY_CLASS_MEMBER_RW_DOC(Dielectric, transmittance, setTransmittance, 
+PY_CLASS_MEMBER_RW_DOC(Dielectric, transmittance, setTransmittance,
 	"multiplier for the Fresnel transmittance")
 
 // --- public --------------------------------------------------------------------------------------
@@ -232,7 +232,7 @@ SampleBsdfOut Dielectric::DielectricBsdf::doSample(const TVector3D& omegaIn, con
 		return SampleBsdfOut();
 	}
 	const TValue probRefl = powRefl / (powRefl + powTrans);
-	
+
 	if (componentSample < probRefl)
 	{
 		const TVector3D omegaRefl(-omegaIn.x, -omegaIn.y, omegaIn.z);

@@ -191,7 +191,7 @@ const Spectral LightDirectional::doSampleEmission(const Sample& sample, const TP
 			return Spectral(0);
 		}
 		shadowRay = BoundedRay(target, -direction_, tolerance, intersection.t(), prim::IsAlreadyNormalized());
-	} 
+	}
 	pdf = TNumTraits::one;
 	return radiance_->evaluate(sample, SpectralType::Illuminant);
 }

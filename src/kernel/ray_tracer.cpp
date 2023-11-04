@@ -259,7 +259,7 @@ const Spectral RayTracer::estimateLightContribution(
 }
 
 
-/** Helper function for some RayTracer implementations to request 
+/** Helper function for some RayTracer implementations to request
  *  samples for lights and shaders. This is mostly for the DirectLighting one.
  */
 void RayTracer::requestLightAndSceneSamples(const TSamplerPtr& sampler)

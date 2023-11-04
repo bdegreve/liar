@@ -226,4 +226,3 @@ CheckerBoard::TAntiAliasingDictionary CheckerBoard::makeAntiAliasingDictionary()
 }
 
 // EOF
-

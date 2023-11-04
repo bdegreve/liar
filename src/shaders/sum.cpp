@@ -190,7 +190,7 @@ SampleBsdfOut Sum::SumBsdf::doSample(const TVector3D& omegaIn, const TPoint2D& s
 
 	const size_t n = activeComponents_.size();
 	const size_t k = std::min(
-		static_cast<size_t>(num::floor(static_cast<TScalar>(n) * componentSample)), 
+		static_cast<size_t>(num::floor(static_cast<TScalar>(n) * componentSample)),
 		activeComponents_.size() - 1);
 
 	SampleBsdfOut out = activeComponents_[k]->sample(omegaIn, sample, componentSample, allowedCaps);

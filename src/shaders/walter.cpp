@@ -31,7 +31,7 @@ namespace liar
 namespace shaders
 {
 
-PY_DECLARE_CLASS_DOC(Walter, 
+PY_DECLARE_CLASS_DOC(Walter,
 	"Anistropic Microfacet Dielectric BSDF by Walter et al. (2007)\n"
 	"\n"
 	"With GGX distribution (=Trowbridge-Reitz) and Smith shadow-masking\n"
@@ -264,7 +264,7 @@ inline TVector3D sampleD_ggx(const TPoint2D& sample, TScalar alphaU, TScalar alp
 
 	LASS_ASSERT(sample.y < TNumTraits::one);
 	const TScalar phi = 2 * TNumTraits::pi * sample.x;
-	const TScalar s = num::sqrt(sample.y / (TNumTraits::one - sample.y));	
+	const TScalar s = num::sqrt(sample.y / (TNumTraits::one - sample.y));
 	return TVector3D(s * alphaU * num::cos(phi), s * alphaV * num::sin(phi), 1).normal();
 }
 
@@ -277,7 +277,7 @@ inline TValue G1_ggx(const TVector3D& omega, const TVector3D& h, TScalar alphaU,
 	{
 		return 0;
 	}
-	return static_cast<TValue>(2 / 
+	return static_cast<TValue>(2 /
 		(1 + num::sqrt(1 + (num::sqr(omega.x * alphaU) + num::sqr(omega.y * alphaV)) / num::sqr(omega.z))));
 }
 
@@ -292,7 +292,7 @@ inline TValue G2_ggx(const TVector3D& omegaIn, const TVector3D& omegaOut, const 
 
 inline TValue fresnelDielectric(TValue ior, const TVector3D& omegaIn, const TVector3D& h)
 {
-	
+
 	const TValue cosI = num::abs(static_cast<TValue>(dot(omegaIn, h)));
 	LASS_ASSERT(cosI > 0);
 	const TValue sinT2 = num::sqr(ior) * (1 - num::sqr(cosI));
@@ -376,7 +376,7 @@ SampleBsdfOut Walter::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& s
 		}
 		const TValue g = G2_ggx(omegaIn, omegaOut, h, alphaU_, alphaV_);
 		const TValue dh_dwo = static_cast<TValue>(num::inv(4 * dot(omegaOut, h)));
-		
+
 		SampleBsdfOut out(omegaOut, reflectance_, pdfRefl * pdfH * dh_dwo, BsdfCaps::reflection | BsdfCaps::glossy);
 		out.value *= rFresnel * d * g / static_cast<TValue>(4 * omegaIn.z * omegaOut.z);
 		return out;

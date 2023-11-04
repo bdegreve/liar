@@ -69,4 +69,3 @@ Texture::TValue ContextMapping::doScalarLookUp(const Sample& sample, const Inter
 }
 
 // EOF
-

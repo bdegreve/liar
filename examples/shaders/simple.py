@@ -24,7 +24,7 @@ white = textures.Constant(rgb(1, 1, 1))
 blue_checkers = textures.CheckerBoard(blue, white)
 yellow_checkers = textures.CheckerBoard(yellow, white)
 
-# shaders 
+# shaders
 
 shader_list = []
 
@@ -64,7 +64,7 @@ x0 = -(len(shader_list) - 1.0) * dx / 2.0
 sphere_list = []
 for i in range(len(shader_list)):
 	sphere = scenery.Sphere()
-	sphere.center = (x0 + i * dx, 0, 1)	
+	sphere.center = (x0 + i * dx, 0, 1)
 	sphere.radius = 1
 	sphere.shader = shader_list[i]
 	sphere_list.append(sphere)

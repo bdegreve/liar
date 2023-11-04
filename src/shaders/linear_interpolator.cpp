@@ -175,7 +175,7 @@ TBsdfPtr LinearInterpolator::doBsdf(const Sample& sample, const IntersectionCont
 		return TBsdfPtr();
 	}
 
-	const TValue controlValue = control_->scalarLookUp(sample, context);	
+	const TValue controlValue = control_->scalarLookUp(sample, context);
 	TKeyShaders::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), controlValue,
 		[](const TKeyShader& key, TValue x) { return key.first < x; });
 

@@ -1325,4 +1325,3 @@ if __name__ == "__main__":
     options, args = parser.parse_args()
     for path in args:
         parse(path, render_immediately=True, **options.__dict__)
-

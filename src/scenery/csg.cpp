@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -132,28 +132,28 @@ void Csg::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection&
 	Intersection resultA;
 	Intersection resultB;
 	Intersection finalResult;
-	
+
 	childA_->intersect(sample, ray, resultA);
 	childB_->intersect(sample, ray, resultB);
 	while (!finalResult && (resultA && resultB))
 	{
 		if (num::almostEqual(resultA.t(), resultB.t(), tolerance))
 		{
-			LASS_META_ASSERT(seNoEvent == 0 && seEntering == 1 && 
+			LASS_META_ASSERT(seNoEvent == 0 && seEntering == 1 &&
 				seLeaving == 2 && numSolidEvent == 3,
 				SolidEvent_has_different_values_than_assumed);
-			LASS_META_ASSERT(oUnion == 0 && oIntersection == 1 && oDifference == 2 && 
+			LASS_META_ASSERT(oUnion == 0 && oIntersection == 1 && oDifference == 2 &&
 				numOperation == 3,
 				Operation_has_different_values_than_assumed);
 
-			static int whichOne[3][9] = 
-			{ 
+			static int whichOne[3][9] =
+			{
 				{ 1, 2, 0, 1, 1, 1, 0, 2, 1 },
 				{ 1, 1, 1, 2, 1, 2, 1, 1, 1 },
 				{ 0, 0, 1, 1, 0, 1, 1, 0, 0 }
 			};
-			static int event[3][9] = 
-			{ 
+			static int event[3][9] =
+			{
 				{ 2, 2, 0, 2, 0, 1, 0, 1, 1 },
 				{ 2, 0, 0, 0, 0, 0, 0, 0, 1 },
 				{ 0, 0, 1, 2, 0, 1, 2, 0, 0 }
@@ -275,7 +275,7 @@ void Csg::doLocalContext(const Sample& sample, const BoundedRay& ray,  const Int
 
 
 
-void Csg::doLocalSpace(TTime, TTransformation3D&) const 
+void Csg::doLocalSpace(TTime, TTransformation3D&) const
 {
 }
 

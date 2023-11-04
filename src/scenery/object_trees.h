@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -41,8 +41,8 @@ namespace liar
 namespace scenery
 {
 
-template 
-< 
+template
+<
 	template <typename, typename> class TreeTypedef
 >
 class ObjectTree: public SceneObject
@@ -50,7 +50,7 @@ class ObjectTree: public SceneObject
 public:
 
 	typedef std::vector<TSceneObjectPtr> TChildren;
-	
+
 	void add(const TSceneObjectPtr& child)
 	{
 		if (child->area() == TNumTraits::infinity)
@@ -199,7 +199,7 @@ private:
 	};
 
 	struct ObjectTraits
-	{	
+	{
 		typedef TChildren::value_type TObject;
 		typedef TAabb3D TAabb;
 		typedef BoundedRay TRay;
@@ -215,7 +215,7 @@ private:
 		typedef TPoint::TConstReference TConstReference;
 
 		typedef Info TInfo;
-		
+
 		enum { dimension = TPoint::dimension };
 
 		static const TAabb objectAabb(TObjectIterator object)
@@ -239,7 +239,7 @@ private:
 			{
 				LASS_ASSERT(temp.t() > minT);
 				t = temp.t();
-				if (info->intersectionResult->isEmpty() || 
+				if (info->intersectionResult->isEmpty() ||
 					temp.t() < info->intersectionResult->t())
 				{
 					info->intersectionResult->swap(temp);
@@ -271,9 +271,9 @@ private:
 			return TAabb(min, max);
 		}
 
-		static bool aabbContains(const TAabb& aabb, const TPoint& point) 
-		{ 
-			return aabb.contains(point); 
+		static bool aabbContains(const TAabb& aabb, const TPoint& point)
+		{
+			return aabb.contains(point);
 		}
 
 		static bool aabbContains(const TAabb& aabb, const TAabb& other)

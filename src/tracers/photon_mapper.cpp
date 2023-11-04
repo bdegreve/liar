@@ -1161,8 +1161,8 @@ const Spectral PhotonMapper::traceGatherRay(const Sample& sample, const BoundedR
 	Intersection intersection;
 	scene()->intersect(sample, ray, intersection);
 
-	const Spectral inScatter = gatherVolumetric ? 
-		estimateVolumetric(sample, bound(ray, ray.nearLimit(), intersection.t())) / static_cast<Spectral::TValue>(volumetricGatherQuality_) : 
+	const Spectral inScatter = gatherVolumetric ?
+		estimateVolumetric(sample, bound(ray, ray.nearLimit(), intersection.t())) / static_cast<Spectral::TValue>(volumetricGatherQuality_) :
 		Spectral();
 	if (!intersection)
 	{

@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -75,8 +75,8 @@ void writeSample(io::BinaryOStream& stream, const OutputSample& sample)
 	const TToken command = scSample;
 	const TPoint2D& screenCoordinate = sample.screenCoordinate();
 	const XYZ& radiance = sample.radiance();
-	stream << command 
-		<< static_cast<num::Tfloat32>(screenCoordinate.x) << static_cast<num::Tfloat32>(screenCoordinate.y) 
+	stream << command
+		<< static_cast<num::Tfloat32>(screenCoordinate.x) << static_cast<num::Tfloat32>(screenCoordinate.y)
 		<< static_cast<num::Tfloat32>(radiance.x) << static_cast<num::Tfloat32>(radiance.y) << static_cast<num::Tfloat32>(radiance.z)
 		<< static_cast<num::Tfloat32>(sample.depth()) << static_cast<num::Tfloat32>(sample.alpha()) << static_cast<num::Tfloat32>(sample.weight());
 }
@@ -99,4 +99,3 @@ bool readSample(io::BinaryIStream& stream, OutputSample& sample)
 }
 
 // EOF
-

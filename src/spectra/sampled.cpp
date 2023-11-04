@@ -29,7 +29,7 @@ namespace liar
 namespace spectra
 {
 
-PY_DECLARE_CLASS_DOC(Sampled, 
+PY_DECLARE_CLASS_DOC(Sampled,
 	"Sampled spectrum\n"
 	"\n"
 	"Sampled(wavelengths, values)")

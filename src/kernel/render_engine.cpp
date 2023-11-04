@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -189,10 +189,10 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 	}
 	if (!bucketBound_.contains(bucket))
 	{
-		LASS_THROW("can't render - render bucket '" << bucket 
+		LASS_THROW("can't render - render bucket '" << bucket
 			<< "' goes outside valid boundary '" << bucketBound_ << "'.");
 	}
-	
+
 	const TVector2D pixelSize = TVector2D(renderTarget_->resolution()).reciprocal();
 	const TimePeriod timePeriod = iFrameTime + camera_->shutterDelta();
 
@@ -266,7 +266,7 @@ void RenderEngine::render()
 
 // --- private -------------------------------------------------------------------------------------
 
-void RenderEngine::writeRender(const OutputSample* first, const OutputSample* last, 
+void RenderEngine::writeRender(const OutputSample* first, const OutputSample* last,
 		Progress& ioProgress)
 {
 	LASS_LOCK(lock_)
@@ -288,7 +288,7 @@ bool RenderEngine::isCanceling() const
 // --- Consumer ------------------------------------------------------------------------------------
 
 RenderEngine::Consumer::Consumer(
-		RenderEngine& engine, const TRayTracerPtr& rayTracer, const TSamplerPtr& sampler, 
+		RenderEngine& engine, const TRayTracerPtr& rayTracer, const TSamplerPtr& sampler,
 		Progress& progress, const TVector2D& pixelSize, const TimePeriod& timePeriod):
 	engine_(&engine),
 	rayTracer_(LASS_ENFORCE_POINTER(rayTracer)),
@@ -314,7 +314,7 @@ RenderEngine::Consumer::Consumer(const Consumer& other):
 
 
 RenderEngine::Consumer& RenderEngine::Consumer::operator=(const Consumer& other)
-{	
+{
 	engine_ = other.engine_;
 	rayTracer_ = other.rayTracer_->clone();
 	sampler_ = other.sampler_->clone();

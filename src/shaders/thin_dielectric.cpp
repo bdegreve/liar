@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -33,11 +33,11 @@ PY_DECLARE_CLASS_DOC(ThinDielectric, "thin dielectric material")
 PY_CLASS_CONSTRUCTOR_0(ThinDielectric)
 PY_CLASS_CONSTRUCTOR_1(ThinDielectric, const TTexturePtr&)
 PY_CLASS_CONSTRUCTOR_2(ThinDielectric, const TTexturePtr&, const TTexturePtr&)
-PY_CLASS_MEMBER_RW_DOC(ThinDielectric, innerRefractionIndex, setInnerRefractionIndex, 
+PY_CLASS_MEMBER_RW_DOC(ThinDielectric, innerRefractionIndex, setInnerRefractionIndex,
 	"index of refraction for material on inside")
-PY_CLASS_MEMBER_RW_DOC(ThinDielectric, outerRefractionIndex, setOuterRefractionIndex, 
+PY_CLASS_MEMBER_RW_DOC(ThinDielectric, outerRefractionIndex, setOuterRefractionIndex,
 	"index of refraction for material on outside")
-PY_CLASS_MEMBER_RW_DOC(ThinDielectric, transparency, setTransparency, 
+PY_CLASS_MEMBER_RW_DOC(ThinDielectric, transparency, setTransparency,
 	"colour of transparency")
 
 // --- public --------------------------------------------------------------------------------------
@@ -208,7 +208,7 @@ SampleBsdfOut ThinDielectric::Bsdf::doSample(const TVector3D& omegaIn, const TPo
 	const bool doTransmission = kernel::hasCaps(allowedCaps, capsTrans);
 	const TValue sr = doReflection ? (doTransmission ? average(R) : 1) : 0;
 	const TValue st = doTransmission ? (doReflection ? average(T) : 1) : 0;
-	
+
 	LASS_ASSERT(sr >= 0 && st >= 0);
 	if (sr <= 0 && st <= 0)
 	{

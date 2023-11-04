@@ -7,7 +7,7 @@ def makeRenderTarget(width, height, filename=None, title=None, display=True, fSt
     If filename is not none, an Image target will be make.
     '''
     from liar import output, sRGB
-    
+
     targets = []
 
     if filename:
@@ -18,7 +18,7 @@ def makeRenderTarget(width, height, filename=None, title=None, display=True, fSt
         image.toneMapping = toneMapping or "linear"
         image.rgbSpace = rgbSpace or sRGB
         targets.append(image)
-    
+
     if display:
         try:
             Display = output.Display
@@ -37,7 +37,7 @@ def makeRenderTarget(width, height, filename=None, title=None, display=True, fSt
                 display.exposure = fStops
             display.toneMapping = toneMapping or "linear"
             targets.append(display)
-    
+
     assert targets, "Failed to create any kind of render target"
     if len(targets) == 1:
         return targets[0]

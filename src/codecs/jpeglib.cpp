@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -59,9 +59,9 @@ public:
 		term_source = &SourceMgr::do_term_source;
 	}
 private:
-	enum 
-	{ 
-		bufferLength = 4096 
+	enum
+	{
+		bufferLength = 4096
 	};
 
 	static void do_init_source(j_decompress_ptr cinfo)
@@ -83,7 +83,7 @@ private:
 		{
 			self->buffer_[0] = 0xff;
 			self->buffer_[1] = JPEG_EOI;
-			self->bytes_in_buffer = 2;		
+			self->bytes_in_buffer = 2;
 		}
 		return TRUE;
 	}
@@ -129,8 +129,8 @@ public:
 		term_destination = &DestMgr::do_term_destination;
 	}
 private:
-	enum 
-	{ 
+	enum
+	{
 		bufferLength = 4096
 	};
 
@@ -178,7 +178,7 @@ struct Handle
 		rgbSpace(rgbSpace ? rgbSpace : kernel::RgbSpace::defaultSpace())
 	{
 	}
-	virtual ~Handle() 
+	virtual ~Handle()
 	{
 	}
 };
@@ -321,7 +321,7 @@ void postInject(PyObject*)
 }
 }
 
-PY_DECLARE_MODULE_DOC(jpeglib, 
+PY_DECLARE_MODULE_DOC(jpeglib,
 	"JPEG image codec\n"
 	"\n"
 	"this software is based in part on the work of the Independent JPEG Group\n"

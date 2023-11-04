@@ -18,4 +18,4 @@ if "win" in sys.platform:
 	prepend_dirs("PATH", lib_dirs)
 
 open("foo.txt", "w").write(repr(args))
-subprocess.check_call(args) 
+subprocess.check_call(args)

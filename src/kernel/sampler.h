@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -26,9 +26,9 @@
  *  @author Bram de Greve [Bramz]
  *
  *  @warning
- *  THE INTERFACE OF THE SAMPLER IS STILL PRELIMINARY.  The main problem is how to avoid that two 
+ *  THE INTERFACE OF THE SAMPLER IS STILL PRELIMINARY.  The main problem is how to avoid that two
  *  engines use the same sampler and thus screwing each other.  Or if they do use the same sampler,
- *  how can we manage they don't screw each other. 
+ *  how can we manage they don't screw each other.
  */
 
 #ifndef LIAR_GUARDIAN_OF_INCLUSION_KERNEL_SAMPLER_H
@@ -140,4 +140,3 @@ private:
 #endif
 
 // EOF
-

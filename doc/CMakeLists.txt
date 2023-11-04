@@ -1,6 +1,6 @@
 find_package(LATEX QUIET)
 if (LATEX_COMPILER)
-	file(GLOB_RECURSE THE_GUIDE_SRCS 
+	file(GLOB_RECURSE THE_GUIDE_SRCS
 		"latex/*.tex"
 		"latex/*.bib"
 		)
@@ -26,7 +26,7 @@ endif()
 
 find_package(Doxygen QUIET)
 if (DOXYGEN_EXECUTABLE)
-	file(GLOB_RECURSE DOXYGEN_SRCS 
+	file(GLOB_RECURSE DOXYGEN_SRCS
 		"*.doxygen"
 		)
 	add_custom_target(DOXYGEN

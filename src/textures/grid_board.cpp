@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -81,9 +81,9 @@ const Spectral GridBoard::doLookUp(const Sample& sample, const IntersectionConte
 {
 	const TScalar u = num::fractional(context.uv().x);
 	const TScalar v = num::fractional(context.uv().y);
-	const bool isA = u < halfThickness_.x || v < halfThickness_.x || 
+	const bool isA = u < halfThickness_.x || v < halfThickness_.x ||
 		u > (TNumTraits::one - halfThickness_.x) || v > (TNumTraits::one - halfThickness_.y);
-	return (isA ? textureA() : textureB())->lookUp(sample, context, type);	
+	return (isA ? textureA() : textureB())->lookUp(sample, context, type);
 }
 
 
@@ -106,4 +106,3 @@ Texture::TValue GridBoard::doScalarLookUp(const Sample& sample, const Intersecti
 }
 
 // EOF
-

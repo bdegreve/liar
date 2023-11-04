@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -49,11 +49,11 @@ public:
 	}
 	TImageHandle open(const std::filesystem::path& path, const TRgbSpacePtr& rgbSpace, const std::string& options) const
 	{
-		return doOpen(path, rgbSpace, options); 
+		return doOpen(path, rgbSpace, options);
 	}
-	void close(TImageHandle handle) const 
-	{ 
-		if (handle) doClose(handle); 
+	void close(TImageHandle handle) const
+	{
+		if (handle) doClose(handle);
 	}
 
 	const TResolution2D resolution(TImageHandle handle) const
@@ -81,7 +81,7 @@ private:
 
 	virtual const TResolution2D doResolution(TImageHandle handle) const = 0;
 	virtual const TRgbSpacePtr doRgbSpace(TImageHandle handle) const = 0;
-	
+
 	virtual void doReadLine(TImageHandle handle, prim::ColorRGBA* out) const = 0;
 	virtual void doWriteLine(TImageHandle handle, const prim::ColorRGBA* in) const = 0;
 };
@@ -145,7 +145,7 @@ private:
 
 	virtual const TResolution2D doResolution(TImageHandle handle) const;
 	virtual const TRgbSpacePtr doRgbSpace(TImageHandle handle) const;
-	virtual void doReadLine(TImageHandle handle, prim::ColorRGBA* out) const;	
+	virtual void doReadLine(TImageHandle handle, prim::ColorRGBA* out) const;
 	virtual void doWriteLine(TImageHandle handle, const prim::ColorRGBA* in) const;
 
 	TRgbSpacePtr defaultCodecSpace_;

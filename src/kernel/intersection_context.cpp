@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -82,59 +82,59 @@ const TBsdfPtr& IntersectionContext::bsdf() const
 
 
 
-void IntersectionContext::setPoint(const TPoint3D& point) 
-{ 
-	point_ = point; 
-	bsdfToLocalHasChanged(); 
+void IntersectionContext::setPoint(const TPoint3D& point)
+{
+	point_ = point;
+	bsdfToLocalHasChanged();
 }
 
 
 
-void IntersectionContext::setDPoint_dU(const TVector3D& dPoint_dU) 
-{ 
-	dPoint_dU_ = dPoint_dU; 
-	bsdfToLocalHasChanged(); 
+void IntersectionContext::setDPoint_dU(const TVector3D& dPoint_dU)
+{
+	dPoint_dU_ = dPoint_dU;
+	bsdfToLocalHasChanged();
 }
 
 
 
-void IntersectionContext::setDPoint_dV(const TVector3D& dPoint_dV) 
-{ 
-	dPoint_dV_ = dPoint_dV; 
-	bsdfToLocalHasChanged(); 
+void IntersectionContext::setDPoint_dV(const TVector3D& dPoint_dV)
+{
+	dPoint_dV_ = dPoint_dV;
+	bsdfToLocalHasChanged();
 }
 
 
 
-void IntersectionContext::setDPoint_dI(const TVector3D& dPoint_dI) 
-{ 
-	dPoint_dI_ = dPoint_dI; 
+void IntersectionContext::setDPoint_dI(const TVector3D& dPoint_dI)
+{
+	dPoint_dI_ = dPoint_dI;
 }
 
 
 
-void IntersectionContext::setDPoint_dJ(const TVector3D& dPoint_dJ) 
-{ 
-	dPoint_dJ_ = dPoint_dJ; 
+void IntersectionContext::setDPoint_dJ(const TVector3D& dPoint_dJ)
+{
+	dPoint_dJ_ = dPoint_dJ;
 }
 
 
 
-void IntersectionContext::setGeometricNormal(const TVector3D& geometricNormal) 
-{ 
-	geometricNormal_ = geometricNormal.normal(); 
+void IntersectionContext::setGeometricNormal(const TVector3D& geometricNormal)
+{
+	geometricNormal_ = geometricNormal.normal();
 }
 
 
 
 void IntersectionContext::setNormal(const TVector3D& normal)
-{ 
-	normal_ = normal.normal(); 
+{
+	normal_ = normal.normal();
 	if (geometricNormal_.isZero())
 	{
 		geometricNormal_ = normal_;
 	}
-	bsdfToLocalHasChanged(); 
+	bsdfToLocalHasChanged();
 }
 
 
@@ -288,7 +288,7 @@ void IntersectionContext::flipTo(const TVector3D& worldOmega)
 		normal_ = -normal_;
 		dNormal_dU_ = -dNormal_dU_;
 		dNormal_dV_ = -dNormal_dV_;
-		bsdfToLocalHasChanged(); 
+		bsdfToLocalHasChanged();
 	}
 	if (dot(worldGeometricNormal(), worldOmega) < 0)
 	{
@@ -300,7 +300,7 @@ void IntersectionContext::flipTo(const TVector3D& worldOmega)
 
 void IntersectionContext::setScreenSpaceDifferentialsI(
 		const TRay3D& dRay_dI, TVector3D& dPoint_dI, TVector3D& dNormal_dI, TVector2D& dUv_dI)
-{	
+{
 	const prim::Plane3D<TScalar, prim::Cartesian, prim::Unnormalized> plane(normal_, point_);
 	TScalar t;
 	const prim::Result result = prim::intersect(plane, dRay_dI, t);
@@ -331,7 +331,7 @@ void IntersectionContext::setScreenSpaceDifferentialsI(
 
 
 
-/** sets dirty flags caused by change in local to world transformation 
+/** sets dirty flags caused by change in local to world transformation
  */
 void IntersectionContext::localToWorldHasChanged()
 {
@@ -343,7 +343,7 @@ void IntersectionContext::localToWorldHasChanged()
 
 
 
-/** sets dirty flags caused by change in bsdf to local transformation 
+/** sets dirty flags caused by change in bsdf to local transformation
  */
 void IntersectionContext::bsdfToLocalHasChanged()
 {

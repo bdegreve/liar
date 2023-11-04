@@ -48,7 +48,7 @@ def scene():
     floor = scenery.Plane()
     floor.normal = (0, 0, 1)
     floor.d = 2.3
-    floor.shader = shaders.Lambert(textures.CheckerBoard(blue, white))  
+    floor.shader = shaders.Lambert(textures.CheckerBoard(blue, white))
     parts.append(floor)
 
     back = scenery.Plane()
@@ -62,7 +62,7 @@ def scene():
     #floor.shader.specular = textures.Constant(0.05)
     #floor.shader.specularPowerU = floor.shader.specularPowerV = textures.Constant(100)
 
-    
+
     light_shape = scenery.Disk()
     light_shape.center = (0, 0, 6)
     light_shape.normal = (0, 0, -1)
@@ -70,7 +70,7 @@ def scene():
     light = scenery.LightArea(light_shape)
     light.radiance = rgb(tuple([1000000] * 3))
     parts.append(light)
-    
+
     return scenery.List(parts)
 
 def camera():
@@ -88,4 +88,3 @@ def engine():
     eng.scene = scene()
     eng.camera = camera()
     return eng
-

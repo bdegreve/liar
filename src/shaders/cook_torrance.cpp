@@ -31,7 +31,7 @@ namespace liar
 namespace shaders
 {
 
-PY_DECLARE_CLASS_DOC(CookTorrance, 
+PY_DECLARE_CLASS_DOC(CookTorrance,
 	"Anisotropic Microfacet Conductor BRDF by Cook & Torrance (1981)\n"
 	"\n"
 	"with Beckmann distribution and V-cavity shadow-masking\n"
@@ -232,7 +232,7 @@ inline TScalar D_beckmann(const TVector3D& h, TScalar alphaU, TScalar alphaV)
 	const TScalar cosTheta2 = num::sqr(h.z);
 	if (cosTheta2 == TNumTraits::zero)
 		return TNumTraits::zero;
-	return num::exp(-(num::sqr(h.x / alphaU) + num::sqr(h.y / alphaV)) / cosTheta2) 
+	return num::exp(-(num::sqr(h.x / alphaU) + num::sqr(h.y / alphaV)) / cosTheta2)
 		/ (TNumTraits::pi * alphaU * alphaV * num::sqr(cosTheta2));
 }
 
@@ -256,7 +256,7 @@ inline TVector3D sampleD_beckmann(const TPoint2D& sample, TScalar alphaU, TScala
 	else
 	{
 		TScalar phi = std::atan(alphaV / alphaU * num::tan(2 * TNumTraits::pi * sample.y + TNumTraits::pi / 2));
-		if (sample.y > 0.5f) 
+		if (sample.y > 0.5f)
 			phi += TNumTraits::pi;
 		cosPhi = num::cos(phi);
 		sinPhi = num::sin(phi);
@@ -301,7 +301,7 @@ inline Spectral fresnelConductor(const Spectral& eta, const Spectral& kappa, con
 
 BsdfOut CookTorrance::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps LASS_UNUSED(allowedCaps)) const
 {
-	LASS_ASSERT(shaders::hasCaps(allowedCaps, caps())); 
+	LASS_ASSERT(shaders::hasCaps(allowedCaps, caps()));
 
 	LASS_ASSERT(omegaIn.z > 0);
 	if (omegaOut.z <= 0)
@@ -328,7 +328,7 @@ SampleBsdfOut CookTorrance::Bsdf::doSample(const TVector3D& omegaIn, const TPoin
 	if (omegaOut.z <= 0)
 	{
 		return SampleBsdfOut();
-	}	
+	}
 	return SampleBsdfOut(omegaOut, doEvaluate(omegaIn, omegaOut, allowedCaps), BsdfCaps::reflection | BsdfCaps::glossy);
 }
 

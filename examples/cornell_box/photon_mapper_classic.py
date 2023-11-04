@@ -52,4 +52,3 @@ engine.scene = cornell_box.scene()
 engine.camera = cornell_box.camera()
 engine.target = scripting.makeRenderTarget(options.size, options.size, "photon_mapper_classic.hdr", "Classic Cornell box with PhotonMapper")
 engine.render()
-

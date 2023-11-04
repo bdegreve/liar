@@ -417,7 +417,7 @@ void RgbSpace::init(
 	primaries.Blue.x = blue.x;
 	primaries.Blue.y = blue.y;
 	primaries.Blue.Y = 1;
-	
+
 	impl::AutoToneCurve transferFunction = cmsBuildGamma(0, gamma);
 	cmsToneCurve* transferFunctions[3] = { *transferFunction, *transferFunction, *transferFunction };
 
@@ -431,7 +431,7 @@ void RgbSpace::init(
 	// http://www.babelcolor.com/download/A%20comparison%20of%20four%20multimedia%20RGB%20spaces.pdf
 	// http://www.polybytes.com/misc/Meet_CIECAM02.pdf
 
-	// first, make matrix M_XYZ that will transform from linear (R,G,B) to (X,Y,Z) 
+	// first, make matrix M_XYZ that will transform from linear (R,G,B) to (X,Y,Z)
 
 	const TScalar z_r = 1 - red.x - red.y;
 	const TScalar z_g = 1 - green.x - green.y;

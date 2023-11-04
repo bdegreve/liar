@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -53,7 +53,7 @@ PY_CLASS_MEMBER_RW(Raster, exposureCorrectionStops, setExposureCorrectionStops)
 PY_CLASS_MEMBER_RW(Raster, autoExposure, setAutoExposure)
 PY_CLASS_MEMBER_RW(Raster, middleGrey, setMiddleGrey)
 PY_CLASS_ENUM(Raster, Raster::ToneMapping)
- 
+
 namespace
 {
     typedef Raster::TValue TValue;
@@ -401,8 +401,8 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
                     {
                         const prim::ColorRGBA linear = destSpace->linearConvert(weighted(k, gain), alphaBuffer_[k]);
                         const prim::ColorRGBA tonemapped(
-                            static_cast<prim::ColorRGBA::TValue>(linear.r * (1 + linear.r * invLwSquared) / (1 + linear.r)), 
-                            static_cast<prim::ColorRGBA::TValue>(linear.g * (1 + linear.g * invLwSquared) / (1 + linear.g)), 
+                            static_cast<prim::ColorRGBA::TValue>(linear.r * (1 + linear.r * invLwSquared) / (1 + linear.r)),
+                            static_cast<prim::ColorRGBA::TValue>(linear.g * (1 + linear.g * invLwSquared) / (1 + linear.g)),
                             static_cast<prim::ColorRGBA::TValue>(linear.b * (1 + linear.b * invLwSquared) / (1 + linear.b)),
                             linear.a);
                         tonemapBuffer_[k] = !tonemapped.isNaN()
@@ -560,7 +560,7 @@ void Raster::doWriteRender(const OutputSample* first, const OutputSample* last)
                     alphaBuffer_[k] += alpha;
                     XYZ& xyz = renderBuffer_[k];
                     xyz += first->radiance() * alpha;
-    
+
                     renderDirtyBox_ += TDirtyBox::TPoint(i, j);
                     if (w > 0 && xyz.y > 0)
                     {

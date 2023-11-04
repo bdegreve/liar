@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -144,7 +144,7 @@ void Display::doBeginRender()
 	}
 
 	beginRaster();
-	
+
 	if (!displayLoop_)
 	{
 		const size_t n = resolution().x * resolution().y;
@@ -348,7 +348,7 @@ void Display::displayLoop()
 	const int height = num::numCast<int>(resolution().y);
  	LASS_ENFORCE(display.open(makeTitle().c_str(), width, height, PixelToaster::Output::Windowed, PixelToaster::Mode::TrueColor));
 	display.listener(this);
-	
+
 	LASS_ENFORCE(display.update(displayBuffer_)); // full update of initial buffer
 
 	while (!isClosing_)
@@ -407,7 +407,7 @@ void Display::copyToDisplayBuffer(const TDirtyBox& box)
 }
 
 
-namespace 
+namespace
 {
     size_t bucket( TScalar x, size_t maxBucket )
     {

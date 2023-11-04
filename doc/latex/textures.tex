@@ -1,18 +1,18 @@
 % Copyright (c)  2005  Bram de Greve.
-% 
-% Permission is granted to copy, distribute and/or modify 
-% this document under the terms of the GNU Free Documentation 
-% License, Version 1.2 or any later version published by the 
-% Free Software Foundation; with the Invariant Sections being 
-% the chapter ``Introduction", no Front-Cover Texts, and no 
-% Back-Cover Texts.  A copy of the license is included in the 
+%
+% Permission is granted to copy, distribute and/or modify
+% this document under the terms of the GNU Free Documentation
+% License, Version 1.2 or any later version published by the
+% Free Software Foundation; with the Invariant Sections being
+% the chapter ``Introduction", no Front-Cover Texts, and no
+% Back-Cover Texts.  A copy of the license is included in the
 % section entitled "GNU Free Documentation License".
 
 \chapter{Textures module}
 
 The \kw{textures} module defines maps and functions that are used as input for the shaders.  Where shaders define the algorithms by which the appearance of the material is defined, textures provide the data for these algorithms.
 
-In this chapter, there are many references to the so called \emph{intersection context} or \emph{context} for short.  Textures are always queried in some geometrical context.  This context contains geometrical information about the intersection point this texture is looked up for.  The information available is listed in Table~\ref{tab:intersectionContext}.  The texture look up function can use this to compute the desired return value. 
+In this chapter, there are many references to the so called \emph{intersection context} or \emph{context} for short.  Textures are always queried in some geometrical context.  This context contains geometrical information about the intersection point this texture is looked up for.  The information available is listed in Table~\ref{tab:intersectionContext}.  The texture look up function can use this to compute the desired return value.
 
 Where appropriate, we'll define a texture using a formula $f\left(\ldots\right)$.  This function evaluates to the return value of the texture look up.  If specific values of the context are needed, this is directly mentioned as the parameters of this function.  For example $f\left(u, v\right)$ is a texture function that will the surface parameters (this probably the case for all 2D textures).  That means you must only use this textures on primitives that have this parameters availabe, or you can wrap the texture with a mapping texture to create the $\left(u, v\right)$ values from the 3D position.  If there are no specific requirements, three dots \ldots are used.  Inside this functions, other textures can be called.  The three dots indicate that the entire context is passed as argument.
 
@@ -47,17 +47,17 @@ The most simple texture of all.  Returns the same value no matter what's the int
 
 \subsubsection*{constructors}
 \begin{itemize}
-	\item \kw{Constant()}: 
+	\item \kw{Constant()}:
 		creates a constant white texture
 	\item \kw{Constant(scalar)}:
 		creates a constant texture with a scalar value.  The scalar value is converted to a uniform spectral value.
-	\item \kw{Constant(spectrum)}: 
+	\item \kw{Constant(spectrum)}:
 		creates a constant texture with a spectral value.
 \end{itemize}
 
 \subsubsection*{members}
 \begin{itemize}
-	\item \kw{value}: 
+	\item \kw{value}:
 		get and set the value of the texture.  You can set both scalar or spectral values, but the scalar value will be converted to a spectrum.  Thus you'll always get a spectral value in return
 \end{itemize}
 
@@ -76,7 +76,7 @@ Combines two input textures $A$ and $B$ in a checkerboard pattern.  From the int
 \begin{equation}
 	f\left(u, v\right) = \left\{
 		\begin{array}{lcl}
-			A\left(\ldots\right) & \Leftrightarrow & 
+			A\left(\ldots\right) & \Leftrightarrow &
 				\left(u - \left\lfloor u \right\rfloor < s_u\right) \wedge
 				\left(v - \left\lfloor v \right\rfloor < s_v\right) \\
 			B\left(\ldots\right) & \Leftrightarrow & \textnormal{otherwise}
@@ -86,19 +86,19 @@ Combines two input textures $A$ and $B$ in a checkerboard pattern.  From the int
 
 \subsubsection*{constructors}
 \begin{itemize}
-	\item \kw{CheckerBoard()}: 
+	\item \kw{CheckerBoard()}:
 		creates default black and white checkerboard.
-	\item \kw{CheckerBoard(textureA, textureB)}: 
+	\item \kw{CheckerBoard(textureA, textureB)}:
 		creates checkerboard with two textures.
 \end{itemize}
 
 \subsubsection*{members}
 \begin{itemize}
-	\item \kw{textureA}: 
+	\item \kw{textureA}:
 		get and set the first texture $A$
-	\item \kw{textureB}: 
+	\item \kw{textureB}:
 		get and set the second texture $B$
-	\item \kw{split}: 
+	\item \kw{split}:
 		get and set the split pair $\left(s_u, s_v\right)$
 \end{itemize}
 
@@ -111,9 +111,9 @@ Combines two input textures $A$ and $B$ in a grid pattern.  From the intersectio
 \begin{equation}
 	f\left(u, v\right) = \left\{
 		\begin{array}{lcl}
-			A\left(\ldots\right) & \Leftrightarrow & 
-				\left(u - \left\lfloor u \right\rfloor, v - \left\lfloor v \right\rfloor\right) \notin 
-				\left[\frac {d_x} 2, 1-\frac {d_x} 2\right) \times 
+			A\left(\ldots\right) & \Leftrightarrow &
+				\left(u - \left\lfloor u \right\rfloor, v - \left\lfloor v \right\rfloor\right) \notin
+				\left[\frac {d_x} 2, 1-\frac {d_x} 2\right) \times
 				\left[\frac {d_y} 2, 1-\frac {d_y} 2\right)\\
 			B\left(\ldots\right) & \Leftrightarrow & \textnormal{otherwise}
 		\end{array}
@@ -122,19 +122,19 @@ Combines two input textures $A$ and $B$ in a grid pattern.  From the intersectio
 
 \subsubsection*{constructors}
 \begin{itemize}
-	\item \kw{GridBoard()}: 
+	\item \kw{GridBoard()}:
 		creates default black and white grid.
-	\item \kw{GridBoard(textureA, textureB)}: 
+	\item \kw{GridBoard(textureA, textureB)}:
 		creates grid with two textures.
 \end{itemize}
 
 \subsubsection*{members}
 \begin{itemize}
-	\item \kw{textureA}: 
+	\item \kw{textureA}:
 		get and set the first texture $A$
-	\item \kw{textureB}: 
+	\item \kw{textureB}:
 		get and set the second texture $B$
-	\item \kw{thickness}: 
+	\item \kw{thickness}:
 		get and set the grid thickness pair $\left(d_u, d_v\right)$
 \end{itemize}
 
@@ -150,25 +150,25 @@ Currently, we can't handle much file formats.  Only 24 and 32 bit uncompressed T
 
 \subsubsection*{constructors}
 \begin{itemize}
-	\item \kw{Image(filename)}: 
+	\item \kw{Image(filename)}:
 		loads a file using default anti-aliasing and mip mapping modes.
-	\item \kw{Image(filename, antiAliasing, mipMapping)}: 
-		loads a file using specific anti-aliasing and mip-mapping modes.  
+	\item \kw{Image(filename, antiAliasing, mipMapping)}:
+		loads a file using specific anti-aliasing and mip-mapping modes.
 \end{itemize}
 
 \subsubsection*{members}
 \begin{itemize}
-	\item \kw{antiAliasing}: 
+	\item \kw{antiAliasing}:
 		get and set the anti-aliasing mode.  Valid modes are: \emph{none}, \emph{bilinear} and \emph{trilinear}.
-	\item \kw{mipMapping}: 
+	\item \kw{mipMapping}:
 		get and set the mip-mapping mode.  Valid modes are: \emph{none}, \emph{isotropic} and \emph{anisotropic}.
 \end{itemize}
 
 \subsubsection*{static methods}
 \begin{itemize}
-	\item \kw{setDefaultAntiAliasing}: 
+	\item \kw{setDefaultAntiAliasing}:
 		get and set the default anti-aliasing mode.  This default will be used for all \kw{Image}s that are created here after.
-	\item \kw{setDefaultMipMapping}: 
+	\item \kw{setDefaultMipMapping}:
 		get and set the default mip-mapping mode.  This default will be used for all \kw{Image}s that are created here after.
 \end{itemize}
 
@@ -188,10 +188,10 @@ Currently, we can't handle much file formats.  Only 24 and 32 bit uncompressed T
 
 \subsection{Uv}
 
-Mixes two input textures $A$ and $B$ using the context's $\left(u, v\right)$ coordinates.  When used with two \kw{Constant}(\ref{textures.Constant}) textures, this is handy to debug $\left(u, v\right)$ mappings.  Before mixing, $\left(u, v\right)$ are remapped to the $\left[0, 1\right) \times \left[0, 1\right)$ interval using the modulus operator.  
+Mixes two input textures $A$ and $B$ using the context's $\left(u, v\right)$ coordinates.  When used with two \kw{Constant}(\ref{textures.Constant}) textures, this is handy to debug $\left(u, v\right)$ mappings.  Before mixing, $\left(u, v\right)$ are remapped to the $\left[0, 1\right) \times \left[0, 1\right)$ interval using the modulus operator.
 
 \begin{equation}
-	f\left(u, v\right) = 
+	f\left(u, v\right) =
 		\left(u - \left\lfloor u \right\rfloor\right) A\left(\ldots\right) +
 		\left(v - \left\lfloor v \right\rfloor\right) B\left(\ldots\right)
 \end{equation}
@@ -221,7 +221,7 @@ Similar to the CheckerBoard (\ref{textures.CheckerBoard}), but in 3D.  Combines 
 \begin{equation}
 	f\left(x, y, z\right) = \left\{
 		\begin{array}{lcl}
-			A\left(\ldots\right) & \Leftrightarrow & 
+			A\left(\ldots\right) & \Leftrightarrow &
 				\left[
 					\left(x - \left\lfloor x \right\rfloor < s_x\right) \wedge
 					\left(y - \left\lfloor y \right\rfloor < s_y\right)
@@ -331,7 +331,7 @@ Calculates product of $N$ factor textures $F_i$.  Evaluates to black if there ar
 \end{itemize}
 
 
- 
+
 \subsection{Time}
 
 Converts the context's time $\tau$ to a texture value.
@@ -345,4 +345,3 @@ Converts the context's time $\tau$ to a texture value.
 	\item \kw{Time()}:
 		creates a \kw{Time} texture.
 \end{itemize}
-

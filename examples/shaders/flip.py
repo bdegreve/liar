@@ -27,7 +27,7 @@ white = textures.Constant(rgb(1, 1, 1))
 blue_checkers = textures.CheckerBoard(blue, white)
 yellow_checkers = textures.CheckerBoard(yellow, white)
 
-# shaders 
+# shaders
 
 shader_list = [
 	shaders.Flip(shaders.Mirror(red)),
@@ -57,7 +57,7 @@ dx = -2.5
 x0 = -(len(shader_list) - 1.0) * dx / 2.0
 for i in range(len(shader_list)):
 	disk = scenery.Disk()
-	disk.center = (x0 + i * dx, 0, 1)	
+	disk.center = (x0 + i * dx, 0, 1)
 	disk.normal = (0, -1, 0)
 	disk.radius = 1
 	disk.shader = shader_list[i]

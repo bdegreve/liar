@@ -69,4 +69,3 @@ engine.scene.interior = mediums.Bounded(fog, engine.scene.boundingBox())
 engine.camera = camera
 engine.target = output.Splitter([image, display])
 engine.render()
-

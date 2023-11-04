@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -233,7 +233,7 @@ const Spectral LightArea::doSampleEmission(
 {
 	LASS_ASSERT(surface_);
 	TVector3D normalLight;
-	const TPoint3D pointLight = 
+	const TPoint3D pointLight =
 		surface_->sampleSurface(lightSample, target, normalTarget, normalLight, pdf);
 
 	TVector3D toLight = pointLight - target;
@@ -253,7 +253,7 @@ const Spectral LightArea::doSampleEmission(
 
 
 const Spectral LightArea::doSampleEmission(
-		const Sample& sample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB, 
+		const Sample& sample, const TPoint2D& lightSampleA, const TPoint2D& lightSampleB,
 		BoundedRay& emissionRay, TScalar& pdf) const
 {
 	TVector3D originNormal;
@@ -273,7 +273,7 @@ const Spectral LightArea::doSampleEmission(
 
 	TVector3D originU, originV;
 	generateOrthonormal(originNormal, originU, originV);
-	
+
 	TScalar directionPdf;
 	TVector3D localDirection = num::cosineHemisphere(lightSampleB, directionPdf).position();
 	const TVector3D direction = originU * localDirection.x + originV * localDirection.y
@@ -310,7 +310,7 @@ bool LightArea::doIsSingular() const
 
 const TPyObjectPtr LightArea::doGetLightState() const
 {
-	return python::makeTuple(surface_, radiance_, attenuation_, 
+	return python::makeTuple(surface_, radiance_, attenuation_,
 		numberOfEmissionSamples_, isSingleSided_);
 }
 

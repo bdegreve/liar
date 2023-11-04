@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -93,7 +93,7 @@ private:
 	class Consumer
 	{
 	public:
-		Consumer(RenderEngine& engine, const TRayTracerPtr& rayTracer, const TSamplerPtr& sampler, 
+		Consumer(RenderEngine& engine, const TRayTracerPtr& rayTracer, const TSamplerPtr& sampler,
 			Progress& progress, const TVector2D& pixelSize, const TimePeriod& timePeriod);
 		Consumer(const Consumer& other);
 		Consumer& operator=(const Consumer& other);

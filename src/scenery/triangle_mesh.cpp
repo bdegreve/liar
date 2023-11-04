@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -31,21 +31,21 @@ namespace scenery
 {
 
 PY_DECLARE_CLASS_DOC(TriangleMesh, "a simple triangle mesh")
-PY_CLASS_CONSTRUCTOR_4(TriangleMesh, 
-	const TriangleMesh::TVertices&, 
-	const TriangleMesh::TNormals&, 
-	const TriangleMesh::TUvs&, 
+PY_CLASS_CONSTRUCTOR_4(TriangleMesh,
+	const TriangleMesh::TVertices&,
+	const TriangleMesh::TNormals&,
+	const TriangleMesh::TUvs&,
  	const TriangleMesh::TIndexTriangles&)
-PY_CLASS_METHOD_DOC(TriangleMesh, smoothNormals, 
+PY_CLASS_METHOD_DOC(TriangleMesh, smoothNormals,
 	"smoothNormals(maxAngleInRadians)\n"
 	"generate smooth vertex normals.  maxAngleInRadians is the maximum angle (in radians) that is "
 	"allowed between the smooth vertex normal and face normal of the triangle.  If the angle "
 	"between both normals is less than this maximum, the vertex normal is used to create the "
 	"illusion of a smooth edge.  If not, the face normal is preserved to keep hard edges.")
 PY_CLASS_METHOD(TriangleMesh, flatFaces)
-PY_CLASS_METHOD(TriangleMesh, loopSubdivision) 
-PY_CLASS_METHOD(TriangleMesh, autoSew) 
-PY_CLASS_METHOD(TriangleMesh, autoCrease) 
+PY_CLASS_METHOD(TriangleMesh, loopSubdivision)
+PY_CLASS_METHOD(TriangleMesh, autoSew)
+PY_CLASS_METHOD(TriangleMesh, autoCrease)
 
 PY_CLASS_METHOD(TriangleMesh, vertices)
 PY_CLASS_METHOD(TriangleMesh, normals)
@@ -187,7 +187,7 @@ void TriangleMesh::doLocalContext(const Sample&, const BoundedRay& ray, const In
 	const TMesh::TTriangle& triangle = mesh_.triangles()[intersection.specialField()];
 
 	TMesh::TIntersectionContext context;
-	TScalar t2;	
+	TScalar t2;
 	const prim::Result LASS_UNUSED(r) = triangle.intersect(ray.unboundedRay(), t2, ray.nearLimit(), &context);
 #pragma LASS_FIXME("why can t != t2?")
 	LASS_ASSERT(r == prim::rOne /*&& t == t2*/);

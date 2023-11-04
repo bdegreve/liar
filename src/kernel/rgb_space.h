@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -59,7 +59,7 @@ public:
 	typedef prim::ColorRGBA RGBA;
 
 	RgbSpace(const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, const TPoint2D& white, RGBA::TValue gamma = 1);
-	
+
 	const XYZ convert(const RGBA& rgb) const;
 	const XYZ convert(const RGBA& rgb, TScalar& alpha) const;
 	const RGBA convert(const XYZ& xyz) const;
@@ -130,7 +130,7 @@ LIAR_KERNEL_DLL TSpectrumPtr rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TVa
 /** @relates RgbSpace
  */
 const TRgbSpacePtr CIEXYZ = TRgbSpacePtr(new RgbSpace(
-	TPoint2D(1, 0), // red primary 
+	TPoint2D(1, 0), // red primary
 	TPoint2D(0, 1), // green primary
 	TPoint2D(0, 0), // blue primary
 	TPoint2D(TScalar(1) / 3, TScalar(1) / 3), // white point
@@ -139,7 +139,7 @@ const TRgbSpacePtr CIEXYZ = TRgbSpacePtr(new RgbSpace(
 /** @relates RgbSpace
  */
 const TRgbSpacePtr sRGB = TRgbSpacePtr(new RgbSpace(
-	TPoint2D(0.6400f, 0.3300f), // red primary 
+	TPoint2D(0.6400f, 0.3300f), // red primary
 	TPoint2D(0.3000f, 0.6000f), // green primary
 	TPoint2D(0.1500f, 0.0600f), // blue primary
 	TPoint2D(0.3127f, 0.3290f), // white point

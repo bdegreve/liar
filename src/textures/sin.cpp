@@ -66,4 +66,3 @@ Texture::TValue Sin::doScalarLookUp(const Sample& sample, const IntersectionCont
 }
 
 // EOF
-

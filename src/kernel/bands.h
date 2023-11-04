@@ -279,7 +279,7 @@ public:
 	{
 		for (size_t i = 0; i < N; ++i)
 		{
-			if (v_[i] != other.v_[i]) 
+			if (v_[i] != other.v_[i])
 			{
 				return false;
 			}

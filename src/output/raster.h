@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -99,7 +99,7 @@ private:
     const TResolution2D doResolution() const;
 
     void doWriteRender(const OutputSample* first, const OutputSample* last);
- 
+
     TValue sceneGain() const;
     TValue averageSceneLuminance() const;
     XYZ weighted(size_t index, TValue gain = 1) const;

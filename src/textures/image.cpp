@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -245,9 +245,9 @@ const Image::TPixel Image::lookUp(const IntersectionContext& context) const
 			numLevelsU_, levelU0, levelU1, dLevelU);
 		break;
 	case mmAnisotropic:
-		mipMapLevel(std::max(num::abs(dUv_dI.x), num::abs(dUv_dJ.x)), 
+		mipMapLevel(std::max(num::abs(dUv_dI.x), num::abs(dUv_dJ.x)),
 			numLevelsU_, levelU0, levelU1, dLevelU);
-		mipMapLevel(std::max(num::abs(dUv_dI.y), num::abs(dUv_dJ.y)), 
+		mipMapLevel(std::max(num::abs(dUv_dI.y), num::abs(dUv_dJ.y)),
 			numLevelsV_, levelV0, levelV1, dLevelV);
 		break;
 	default:
@@ -260,13 +260,13 @@ const Image::TPixel Image::lookUp(const IntersectionContext& context) const
 	case aaNone:
 		result = nearest(levelU0, levelV0, uv);
 		break;
-		
+
 	case aaBilinear:
 		result = bilinear(levelU0, levelV0, uv);
 		break;
 
 	case aaTrilinear:
-		result = 
+		result =
 			bilinear(levelU0, levelV0, uv) * (1 - dLevelU) +
 			bilinear(levelU1, levelV0, uv) * dLevelU;
 		if (levelV0 != levelV1)
@@ -474,7 +474,7 @@ Image::MipMapLevel Image::makeMipMapOdd(
 			{
 				level(x, k) = w0 * parent(x, k0) + w1 * parent(x, k1) + w2 * parent(x, k2);
 			}
-		}			
+		}
 	}
 
 	return level;
@@ -513,13 +513,13 @@ const Image::TPixel Image::nearest(size_t levelU, size_t levelV, const TPoint2D&
 {
 	LASS_ASSERT(levelU < numLevelsU_ && levelV < numLevelsV_);
 	const MipMapLevel& mipMap = mipMaps_[levelV * numLevelsU_ + levelU];
-	
+
 	const TResolution2D& res = mipMap.resolution();
 	const TScalar x = num::fractional(uv.x) * static_cast<TScalar>(res.x);
 	const TScalar y = num::fractional(1.f - uv.y) * static_cast<TScalar>(res.y);
 	const size_t x0 = static_cast<size_t>(num::floor(x));
 	const size_t y0 = static_cast<size_t>(num::floor(y));
-	
+
 	return mipMap(x0, y0);
 }
 
@@ -584,4 +584,3 @@ Image::TMipMappingDictionary Image::makeMipMappingDictionary()
 }
 
 // EOF
-

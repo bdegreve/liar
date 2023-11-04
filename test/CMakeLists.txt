@@ -19,8 +19,8 @@ target_link_libraries(test_driver
 foreach(fname ${test_files})
 	get_filename_component(test "${fname}" NAME_WE)
 	add_test(
-		NAME ${test} 
-		COMMAND 
+		NAME ${test}
+		COMMAND
 			Python::Interpreter "${CMAKE_CURRENT_SOURCE_DIR}/testenv.py"
 			"--with-library=$<TARGET_FILE:Lass::lass>"
 			"$<TARGET_FILE:test_driver>" "${test}"

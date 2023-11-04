@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -95,7 +95,7 @@ IccSpace::IccSpace(const std::string& iccProfileString)
 
 
 IccSpace::IccSpace(
-		const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue, 
+		const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue,
 		const TPoint2D& white, TScalar gamma)
 {
 	enforceChromaticity(red, "red");
@@ -126,7 +126,7 @@ IccSpace::IccSpace(
 	primaries.Blue.x = blue.x;
 	primaries.Blue.y = blue.y;
 	primaries.Blue.Y = 1;
-	
+
 	impl::AutoToneCurve transferFunction = cmsBuildGamma(0, gamma);
 	cmsToneCurve* transferFunctions[3] = { *transferFunction, *transferFunction, *transferFunction };
 
@@ -194,7 +194,7 @@ TIccSpacePtr IccSpace::withGamma(TScalar gamma) const
 const TPyObjectPtr IccSpace::reduce() const
 {
 	return python::makeTuple(
-		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->_lassPyGetClassDef()->type())), 
+		python::fromNakedToSharedPtrCast<PyObject>(reinterpret_cast<PyObject*>(this->_lassPyGetClassDef()->type())),
 		python::makeTuple(), this->getState());
 }
 

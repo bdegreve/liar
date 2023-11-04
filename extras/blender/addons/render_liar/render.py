@@ -51,21 +51,21 @@ class EchoHandler(asyncore.dispatcher):
             p[3] += a
             self.__weightBuffer[address] += w
             self.__result.layers[0].rect = [[x * w for x in p] for p, w in zip(self.__displayBuffer, self.__weightBuffer)]
-        elif code == 4: # scIsCanceling 
+        elif code == 4: # scIsCanceling
             self.send(struct.pack("<B", 0))
-        elif code == 1: # scBeginRender 
+        elif code == 1: # scBeginRender
             pixel_count = engine.size_x * engine.size_y
             self.__result = engine.begin_result(0, 0, engine.size_x, engine.size_y)
             self.__displayBuffer = [[0.0, 0.0, 0.0, 0.0] for k in range(pixel_count)]
             self.__weightBuffer = [0] * pixel_count
-        elif code == 2: # scEndRender 
+        elif code == 2: # scEndRender
             self.close()
-        elif code == 3: # scResolution 
+        elif code == 3: # scResolution
             self.send(struct.pack("<II", engine.size_x, engine.size_y))
         else:
             print("OOPS, unexpected code {}".format(code))
             self.close()
-        
+
 
     def __readstruct(self, fmt):
         n = struct.calcsize(fmt)
@@ -108,7 +108,7 @@ def render_scene(self, scene):
     from render_liar import export
     import bpy
     import subprocess
-    
+
     addon_prefs = bpy.context.user_preferences.addons[__package__].preferences
     python_binary = addon_prefs.python_binary
     if not _test_liar(python_binary):
@@ -123,8 +123,8 @@ def render_scene(self, scene):
     asyncore.loop()
     process.wait()
     return True
-    
-    
+
+
 def _test_liar(python_binary):
     import subprocess
     try:

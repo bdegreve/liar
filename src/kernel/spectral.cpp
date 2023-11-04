@@ -190,7 +190,7 @@ Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, cons
 	{
 		return Spectral(0);
 	}
-	
+
 	const size_t k = static_cast<size_t>(std::distance(wavelengths.begin(), i));
 	LASS_ASSERT(k > 0 && k < wavelengths.size());
 
@@ -227,7 +227,7 @@ std::ostream& operator<<(std::ostream& s, const Spectral& a)
 	for (size_t k = 0; k < Spectral::numBands; ++k)
 	{
 		s << (k == 0 ? "[" : ", ") << a[k];
-	}	
+	}
 	s << "]";
 	return s;
 }

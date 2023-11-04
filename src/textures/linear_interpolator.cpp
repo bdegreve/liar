@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -68,7 +68,7 @@ LinearInterpolator::LinearInterpolator(const TKeyTextures& keyTextures, const TT
 
 
 
-/** return list of key textures 
+/** return list of key textures
  */
 const LinearInterpolator::TKeyTextures& LinearInterpolator::keys() const
 {
@@ -141,7 +141,7 @@ const Spectral LinearInterpolator::doLookUp(const Sample& sample, const Intersec
 
 	TKeyTexture sentinel(keyValue, TTexturePtr());
 	TKeyTextures::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), sentinel, LesserKey());
-	
+
 	if (i == keys_.begin())
 	{
 		return keys_.front().second->lookUp(sample, context, type);
@@ -150,12 +150,12 @@ const Spectral LinearInterpolator::doLookUp(const Sample& sample, const Intersec
 	{
 		return keys_.back().second->lookUp(sample, context, type);
 	}
-	
+
 	TKeyTextures::const_iterator prevI = stde::prev(i);
 	LASS_ASSERT(prevI->first != i->first); // due to lower_bound
 
 	const TValue t = (keyValue - prevI->first) / (i->first - prevI->first);
-	
+
 	return Spectral(lerp(
 		prevI->second->lookUp(sample, context, SpectralType::Illuminant),
 		i->second->lookUp(sample, context, SpectralType::Illuminant),
@@ -226,4 +226,3 @@ void LinearInterpolator::doSetState(const TPyObjectPtr& state)
 }
 
 // EOF
-

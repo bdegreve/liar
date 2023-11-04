@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -97,7 +97,7 @@ const Spectral AdjointPhotonTracer::tracePhoton(const Sample& sample, const Diff
 		else
 		{
 			return Spectral(0);
-		}	
+		}
 	}
 
 	Intersection intersection;
@@ -151,7 +151,7 @@ const Spectral AdjointPhotonTracer::shadeSurface(const Sample& sample, const Dif
 		result += emission;
 	}
 
-	
+
 	if (const Shader* const shader = context.shader())
 	{
 		const TVector3D omegaIn = context.worldToBsdf(-ray.direction());
@@ -245,7 +245,7 @@ SampleBsdfOut AdjointPhotonTracer::scatterSurface(const Sample& sample, const TB
 		pdf *= lightPdf * (1 - strategyPdf);
 
 		const TVector3D omegaOut = bsdf->worldToBsdf(shadowRay.direction());
-		LIAR_ASSERT(num::abs(omegaOut.norm() - 1) < 1e-6f, 
+		LIAR_ASSERT(num::abs(omegaOut.norm() - 1) < 1e-6f,
 			"omegaOut=" << omegaIn << ", shadowRay.direction()=" << shadowRay.direction());
 		const BsdfOut out = bsdf->evaluate(omegaIn, omegaOut, BsdfCaps::all);
 		if (!out)
@@ -360,4 +360,3 @@ void AdjointPhotonTracer::doSetState(const TPyObjectPtr&)
 
 }
 }
-

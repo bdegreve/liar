@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -110,7 +110,7 @@ void Sky::doLocalContext(const Sample&, const BoundedRay& ray, const Intersectio
 	//
 	result.setDNormal_dU(-dDir_dU);
 	result.setDNormal_dV(-dDir_dV);
-	
+
 	// dR/du = r * dD/du    dR/dv = r * dD/dv
 	//
 	result.setDPoint_dU(radius_ * dDir_dU);
