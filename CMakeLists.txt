@@ -95,10 +95,15 @@ else()
 endif ()
 
 if(MSVC)
-	add_compile_options("/EHsc")
-	if(NOT CMAKE_CL_64)
-		add_compile_options("/arch:SSE2" "/fp:fast")
-	endif()
+	add_compile_options(
+		"/EHsc"
+		"/arch:AVX2"
+		"/fp:fast"
+		"$<$<CONFIG:Release>:/GL>"
+	)
+	add_link_options(
+		"$<$<CONFIG:Release>:/LTCG>"
+	)
 	if(BUILD_USING_MULTIPLE_PROCESSES)
 		add_compile_options("/MP")
 	endif()
@@ -106,6 +111,7 @@ else()
 	add_compile_options(
 		"-std=c++11"
 		"-fno-strict-aliasing"
+		"-march=haswell"
 		"-Wall"
 		"-Wextra"
 		"-Wformat=2"
