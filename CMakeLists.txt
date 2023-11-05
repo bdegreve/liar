@@ -113,7 +113,6 @@ if(MSVC)
 	endif()
 else()
 	add_compile_options(
-		"-std=c++11"
 		"-fno-strict-aliasing"
 		"-march=haswell"
 		"$<$<CONFIG:Release>:-g>"
