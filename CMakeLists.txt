@@ -100,9 +100,13 @@ if(MSVC)
 		"/arch:AVX2"
 		"/fp:fast"
 		"$<$<CONFIG:Release>:/GL>"
+		"$<$<CONFIG:Release>:/Zi>"
 	)
 	add_link_options(
 		"$<$<CONFIG:Release>:/LTCG>"
+		"$<$<CONFIG:Release>:/DEBUG>"
+		"$<$<CONFIG:Release>:/OPT:REF>"
+		"$<$<CONFIG:Release>:/OPT:ICF>"
 	)
 	if(BUILD_USING_MULTIPLE_PROCESSES)
 		add_compile_options("/MP")
@@ -112,6 +116,7 @@ else()
 		"-std=c++11"
 		"-fno-strict-aliasing"
 		"-march=haswell"
+		"$<$<CONFIG:Release>:-g>"
 		"-Wall"
 		"-Wextra"
 		"-Wformat=2"
