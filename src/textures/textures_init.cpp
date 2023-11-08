@@ -50,6 +50,7 @@
 #include "projection_mapping.h"
 #include "ray_generation.h"
 #include "remap_pbrt_roughness.h"
+#include "scale.h"
 #include "screen_space.h"
 #include "sin.h"
 #include "sky_blend.h"
@@ -99,6 +100,7 @@ PY_MODULE_CLASS(textures, Product)
 PY_MODULE_CLASS(textures, ProjectionMapping)
 PY_MODULE_CLASS(textures, RayGeneration)
 PY_MODULE_CLASS(textures, RemapPbrtRoughness)
+PY_MODULE_CLASS(textures, Scale)
 PY_MODULE_CLASS(textures, Sin)
 PY_MODULE_CLASS(textures, SkyBlend)
 PY_MODULE_CLASS(textures, Sqr)
