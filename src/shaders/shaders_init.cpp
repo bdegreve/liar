@@ -36,6 +36,7 @@
 #include "lambert.h"
 #include "linear_interpolator.h"
 #include "mirror.h"
+#include "oren_nayar.h"
 //#include "null_shader.h"
 //#include "simple.h"
 #include "sum.h"
@@ -60,6 +61,7 @@ PY_MODULE_CLASS(shaders, Lafortune)
 PY_MODULE_CLASS(shaders, Lambert)
 PY_MODULE_CLASS(shaders, LinearInterpolator)
 PY_MODULE_CLASS(shaders, Mirror)
+PY_MODULE_CLASS(shaders, OrenNayar)
 //PY_MODULE_CLASS(shaders, NullShader)
 //PY_MODULE_CLASS(shaders, Simple)
 PY_MODULE_CLASS(shaders, Sum)

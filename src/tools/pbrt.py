@@ -546,8 +546,12 @@ class PbrtScene(object):
         glass.transmittance = self._get_texture(Kt)
         return glass
 
-    def _material_matte(self, Kd=1, sigma=0):
-        return liar.shaders.Lambert(self._get_texture(Kd))
+    def _material_matte(self, Kd=0.5, sigma=0):
+        if sigma == 0:
+            return liar.shaders.Lambert(self._get_texture(Kd))
+        # convert from degrees to radians
+        sigma = liar.textures.Scale(self._get_texture(sigma), math.pi / 180)
+        return liar.shaders.OrenNayar(self._get_texture(Kd), sigma)
 
     def _material_metal(
         self,
