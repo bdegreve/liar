@@ -358,10 +358,7 @@ void Display::displayLoop()
 	{
 		if (autoUpdate_)
 		{
-			LASS_LOCK(renderLock())
-			{
-				displayDirtyBox_ = tonemap(rgbSpace());
-			}
+			displayDirtyBox_ = tonemap(rgbSpace());
 			copyToDisplayBuffer(displayDirtyBox_);
 			histogram();
 			display.title(makeTitle().c_str());

@@ -103,7 +103,7 @@ Raster::TValue Raster::exposureStops() const
     {
         return exposureStops_;
     }
-    LASS_LOCK(renderLock_)
+    std::lock_guard<std::recursive_mutex> lock(renderLock_);
     {
         if (!isDirtyAutoExposure_)
         {
@@ -173,99 +173,85 @@ Raster::TValue Raster::middleGrey() const
 
 void Raster::setRgbSpace(const TRgbSpacePtr& rgbSpace)
 {
-    LASS_LOCK(renderLock_)
-    {
-        rgbSpace_ = rgbSpace;
-        renderDirtyBox_ += allTimeDirtyBox_;
-    }
+    std::lock_guard<std::recursive_mutex> lock(renderLock_);
+    rgbSpace_ = rgbSpace;
+    renderDirtyBox_ += allTimeDirtyBox_;
 }
 
 
 
 void Raster::setToneMapping(Raster::ToneMapping toneMapping)
 {
-    LASS_LOCK(renderLock_)
+    std::lock_guard<std::recursive_mutex> lock(renderLock_);
+    if (toneMapping_ == toneMapping)
     {
-        if (toneMapping_ == toneMapping)
-        {
-            return;
-        }
-        toneMapping_ = toneMapping;
-        renderDirtyBox_ += allTimeDirtyBox_;
+        return;
     }
+    toneMapping_ = toneMapping;
+    renderDirtyBox_ += allTimeDirtyBox_;
 }
 
 
 
 void Raster::setExposureStops(TValue stops)
 {
-    LASS_LOCK(renderLock_)
+    std::lock_guard<std::recursive_mutex> lock(renderLock_);
+    autoExposure_ = false;
+    if (exposureStops_ == stops)
     {
-        autoExposure_ = false;
-        if (exposureStops_ == stops)
-        {
-            return;
-        }
-        exposureStops_ = stops;
-        renderDirtyBox_ += allTimeDirtyBox_;
+        return;
     }
+    exposureStops_ = stops;
+    renderDirtyBox_ += allTimeDirtyBox_;
 }
 
 
 
 void Raster::setExposureCorrectionStops(TValue stops)
 {
-    LASS_LOCK(renderLock_)
+    std::lock_guard<std::recursive_mutex> lock(renderLock_);
+    if (exposureCorrectionStops_ == stops)
     {
-        if (exposureCorrectionStops_ == stops)
-        {
-            return;
-        }
-        exposureCorrectionStops_ = stops;
-        renderDirtyBox_ += allTimeDirtyBox_;
+        return;
     }
+    exposureCorrectionStops_ = stops;
+    renderDirtyBox_ += allTimeDirtyBox_;
 }
 
 
 
 void Raster::setAutoExposure(bool enable)
 {
-    LASS_LOCK(renderLock_)
+    std::lock_guard<std::recursive_mutex> lock(renderLock_);
+    if (autoExposure_ == enable)
     {
-        if (autoExposure_ == enable)
-        {
-            return;
-        }
-        autoExposure_ = enable;
-        renderDirtyBox_ += allTimeDirtyBox_;
+        return;
     }
+    autoExposure_ = enable;
+    renderDirtyBox_ += allTimeDirtyBox_;
 }
 
 
 
 void Raster::setMiddleGrey(TValue level)
 {
-    LASS_LOCK(renderLock_)
+    std::lock_guard<std::recursive_mutex> lock(renderLock_);
+    if (middleGrey_ == level)
     {
-        if (middleGrey_ == level)
-        {
-            return;
-        }
-        middleGrey_ = level;
-        renderDirtyBox_ += allTimeDirtyBox_;
+        return;
     }
+    middleGrey_ = level;
+    renderDirtyBox_ += allTimeDirtyBox_;
 }
 
 
 
 void Raster::nextToneMapping()
 {
-    LASS_LOCK(renderLock_)
-    {
-        using TInt = std::underlying_type_t<ToneMapping>;
-        toneMapping_ = static_cast<ToneMapping>((static_cast<TInt>(toneMapping_) + 1) % static_cast<TInt>(ToneMapping::size));
-        renderDirtyBox_ += allTimeDirtyBox_;
-    }
+    std::lock_guard<std::recursive_mutex> lock(renderLock_);
+    using TInt = std::underlying_type_t<ToneMapping>;
+    toneMapping_ = static_cast<ToneMapping>((static_cast<TInt>(toneMapping_) + 1) % static_cast<TInt>(ToneMapping::size));
+    renderDirtyBox_ += allTimeDirtyBox_;
 }
 
 
@@ -289,18 +275,16 @@ Raster::Raster(const TResolution2D& resolution):
 
 void Raster::beginRaster()
 {
-    LASS_LOCK(renderLock_)
-    {
-        const size_t n = resolution_.x * resolution_.y;
-        renderBuffer_.assign(n, XYZ());
-        tonemapBuffer_.assign(n, prim::ColorRGBA(0,0,0,0));
-        totalWeight_.assign(n, 0);
-        alphaBuffer_.assign(n, 0);
-        renderDirtyBox_.clear();
-        allTimeDirtyBox_.clear();
-        maxSceneLuminance_ = 0;
-        isDirtyAutoExposure_ = true;
-    }
+    std::lock_guard<std::recursive_mutex> lock(renderLock_);
+    const size_t n = resolution_.x * resolution_.y;
+    renderBuffer_.assign(n, XYZ());
+    tonemapBuffer_.assign(n, prim::ColorRGBA(0,0,0,0));
+    totalWeight_.assign(n, 0);
+    alphaBuffer_.assign(n, 0);
+    renderDirtyBox_.clear();
+    allTimeDirtyBox_.clear();
+    maxSceneLuminance_ = 0;
+    isDirtyAutoExposure_ = true;
 }
 
 
@@ -310,179 +294,178 @@ Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
     // do not automatically use rgbSpace_ as destSpace, as some image writers may use a slightly different space,
     // so destSpace should be provided by the actual output device
 
-    LASS_LOCK(renderLock_)
+    std::lock_guard<std::recursive_mutex> lock(renderLock_);
+
+    const TValue gain = sceneGain(); // get gain first, as it can change the dirtybox
+
+    const TDirtyBox::TPoint min = renderDirtyBox_.min();
+    const TDirtyBox::TPoint max = renderDirtyBox_.max();
+    const size_t nx = max.x - min.x + 1;
+    const prim::ColorRGBA pink(1, 0, 1);
+
+    switch (toneMapping_)
     {
-        const TValue gain = sceneGain(); // get gain first, as it can change the dirtybox
-
-        const TDirtyBox::TPoint min = renderDirtyBox_.min();
-        const TDirtyBox::TPoint max = renderDirtyBox_.max();
-        const size_t nx = max.x - min.x + 1;
-        const prim::ColorRGBA pink(1, 0, 1);
-
-        switch (toneMapping_)
+    case ToneMapping::Linear:
+        for (size_t j = min.y; j <= max.y; ++j)
         {
-        case ToneMapping::Linear:
-            for (size_t j = min.y; j <= max.y; ++j)
+            const size_t kBegin = j * resolution_.x + min.x;
+            const size_t kEnd = kBegin + nx;
+            for (size_t k = kBegin; k < kEnd; ++k)
             {
-                const size_t kBegin = j * resolution_.x + min.x;
-                const size_t kEnd = kBegin + nx;
-                for (size_t k = kBegin; k < kEnd; ++k)
-                {
-                    const XYZ linear = weighted(k, gain);
-                    tonemapBuffer_[k] = !linear.isNaN()
-                        ? destSpace->toRGBA(linear, alphaBuffer_[k])
-                        : pink;
-                }
+                const XYZ linear = weighted(k, gain);
+                tonemapBuffer_[k] = !linear.isNaN()
+                    ? destSpace->toRGBA(linear, alphaBuffer_[k])
+                    : pink;
             }
-            break;
-
-        case ToneMapping::CompressY:
-            for (size_t j = min.y; j <= max.y; ++j)
-            {
-                const size_t kBegin = j * resolution_.x + min.x;
-                const size_t kEnd = kBegin + nx;
-                for (size_t k = kBegin; k < kEnd; ++k)
-                {
-                    const XYZ linear = weighted(k, gain);
-                    const XYZ tonemapped = linear / (1 + linear.y);
-                    tonemapBuffer_[k] = !tonemapped.isNaN()
-                        ? destSpace->toRGBA(tonemapped, alphaBuffer_[k])
-                        : pink;
-                }
-            }
-            break;
-
-        case ToneMapping::CompressRGB:
-            for (size_t j = min.y; j <= max.y; ++j)
-            {
-                const size_t kBegin = j * resolution_.x + min.x;
-                const size_t kEnd = kBegin + nx;
-                for (size_t k = kBegin; k < kEnd; ++k)
-                {
-                    const prim::ColorRGBA linear = destSpace->toRGBAlinear(weighted(k, gain), alphaBuffer_[k]);
-                    const prim::ColorRGBA tonemapped(linear.r / (1 + linear.r), linear.g / (1 + linear.g), linear.b / (1 + linear.b), linear.a);
-                    tonemapBuffer_[k] = !tonemapped.isNaN()
-                        ? destSpace->toGamma(tonemapped)
-                        : pink;
-                }
-            }
-            break;
-
-        case ToneMapping::Reinhard2002Y:
-            {
-                const TValue Lw = gain * maxSceneLuminance_;
-                const TValue invLwSquared = num::inv(Lw * Lw);
-                for (size_t j = min.y; j <= max.y; ++j)
-                {
-                    const size_t kBegin = j * resolution_.x + min.x;
-                    const size_t kEnd = kBegin + nx;
-                    for (size_t k = kBegin; k < kEnd; ++k)
-                    {
-                        const XYZ linear = weighted(k, gain);
-                        const TValue L = linear.y;
-                        const XYZ tonemapped = linear * ((1 + L * invLwSquared) / (1 + L));
-                        tonemapBuffer_[k] = !tonemapped.isNaN()
-                            ? destSpace->toRGBA(tonemapped, alphaBuffer_[k])
-                            : pink;
-                    }
-                }
-            }
-            break;
-
-        case ToneMapping::Reinhard2002RGB:
-            {
-                const TValue Lw = gain * maxSceneLuminance_;
-                const TValue invLwSquared = num::inv(Lw * Lw);
-                for (size_t j = min.y; j <= max.y; ++j)
-                {
-                    const size_t kBegin = j * resolution_.x + min.x;
-                    const size_t kEnd = kBegin + nx;
-                    for (size_t k = kBegin; k < kEnd; ++k)
-                    {
-                        const prim::ColorRGBA linear = destSpace->toRGBAlinear(weighted(k, gain), alphaBuffer_[k]);
-                        const prim::ColorRGBA tonemapped(
-                            static_cast<prim::ColorRGBA::TValue>(linear.r * (1 + linear.r * invLwSquared) / (1 + linear.r)),
-                            static_cast<prim::ColorRGBA::TValue>(linear.g * (1 + linear.g * invLwSquared) / (1 + linear.g)),
-                            static_cast<prim::ColorRGBA::TValue>(linear.b * (1 + linear.b * invLwSquared) / (1 + linear.b)),
-                            linear.a);
-                        tonemapBuffer_[k] = !tonemapped.isNaN()
-                            ? destSpace->toGamma(tonemapped)
-                            : pink;
-                    }
-                }
-            }
-            break;
-
-        case ToneMapping::ExponentialY:
-            for (size_t j = min.y; j <= max.y; ++j)
-            {
-                const size_t kBegin = j * resolution_.x + min.x;
-                const size_t kEnd = kBegin + nx;
-                for (size_t k = kBegin; k < kEnd; ++k)
-                {
-                    const XYZ linear = weighted(k, gain);
-                    const XYZ::TValue scale = linear.y < 1e-8
-                        ? 1 - linear.y / 2
-                        : (-num::expm1(-linear.y) / linear.y);
-                    const XYZ tonemapped = linear * scale;
-                    tonemapBuffer_[k] = !tonemapped.isNaN()
-                        ? destSpace->toRGBA(tonemapped, alphaBuffer_[k])
-                        : pink;
-                }
-            }
-            break;
-
-        case ToneMapping::ExponentialRGB:
-            for (size_t j = min.y; j <= max.y; ++j)
-            {
-                const size_t kBegin = j * resolution_.x + min.x;
-                const size_t kEnd = kBegin + nx;
-                for (size_t k = kBegin; k < kEnd; ++k)
-                {
-                    const prim::ColorRGBA linear = destSpace->toRGBAlinear(weighted(k, gain), alphaBuffer_[k]);
-                    const prim::ColorRGBA tonemapped(-num::expm1(-linear.r), -num::expm1(-linear.g), -num::expm1(-linear.b), linear.a);
-                    tonemapBuffer_[k] = !tonemapped.isNaN()
-                        ? destSpace->toGamma(tonemapped)
-                        : pink;
-                }
-            }
-            break;
-
-        case ToneMapping::DuikerY:
-            for (size_t j = min.y; j <= max.y; ++j)
-            {
-                const size_t kBegin = j * resolution_.x + min.x;
-                const size_t kEnd = kBegin + nx;
-                for (size_t k = kBegin; k < kEnd; ++k)
-                {
-                    const XYZ linear = weighted(k, gain);
-                    const XYZ tonemapped = linear * (filmic(linear.y) / std::max(linear.y, static_cast<XYZ::TValue>(0.004)));
-                    tonemapBuffer_[k] = !tonemapped.isNaN()
-                        ? destSpace->toRGBA(tonemapped, alphaBuffer_[k])
-                        : pink;
-                }
-            }
-            break;
-
-        case ToneMapping::DuikerRGB:
-            for (size_t j = min.y; j <= max.y; ++j)
-            {
-                const size_t kBegin = j * resolution_.x + min.x;
-                const size_t kEnd = kBegin + nx;
-                for (size_t k = kBegin; k < kEnd; ++k)
-                {
-                    const prim::ColorRGBA linear = destSpace->toRGBAlinear(weighted(k, gain), alphaBuffer_[k]);
-                    const prim::ColorRGBA tonemapped(filmic(linear.r), filmic(linear.g), filmic(linear.b), linear.a);
-                    tonemapBuffer_[k] = !tonemapped.isNaN()
-                        ? destSpace->toGamma(tonemapped)
-                        : pink;
-                }
-            }
-            break;
-
-        default:
-            LASS_ENFORCE_UNREACHABLE;
         }
+        break;
+
+    case ToneMapping::CompressY:
+        for (size_t j = min.y; j <= max.y; ++j)
+        {
+            const size_t kBegin = j * resolution_.x + min.x;
+            const size_t kEnd = kBegin + nx;
+            for (size_t k = kBegin; k < kEnd; ++k)
+            {
+                const XYZ linear = weighted(k, gain);
+                const XYZ tonemapped = linear / (1 + linear.y);
+                tonemapBuffer_[k] = !tonemapped.isNaN()
+                    ? destSpace->toRGBA(tonemapped, alphaBuffer_[k])
+                    : pink;
+            }
+        }
+        break;
+
+    case ToneMapping::CompressRGB:
+        for (size_t j = min.y; j <= max.y; ++j)
+        {
+            const size_t kBegin = j * resolution_.x + min.x;
+            const size_t kEnd = kBegin + nx;
+            for (size_t k = kBegin; k < kEnd; ++k)
+            {
+                const prim::ColorRGBA linear = destSpace->toRGBAlinear(weighted(k, gain), alphaBuffer_[k]);
+                const prim::ColorRGBA tonemapped(linear.r / (1 + linear.r), linear.g / (1 + linear.g), linear.b / (1 + linear.b), linear.a);
+                tonemapBuffer_[k] = !tonemapped.isNaN()
+                    ? destSpace->toGamma(tonemapped)
+                    : pink;
+            }
+        }
+        break;
+
+    case ToneMapping::Reinhard2002Y:
+        {
+            const TValue Lw = gain * maxSceneLuminance_;
+            const TValue invLwSquared = num::inv(Lw * Lw);
+            for (size_t j = min.y; j <= max.y; ++j)
+            {
+                const size_t kBegin = j * resolution_.x + min.x;
+                const size_t kEnd = kBegin + nx;
+                for (size_t k = kBegin; k < kEnd; ++k)
+                {
+                    const XYZ linear = weighted(k, gain);
+                    const TValue L = linear.y;
+                    const XYZ tonemapped = linear * ((1 + L * invLwSquared) / (1 + L));
+                    tonemapBuffer_[k] = !tonemapped.isNaN()
+                        ? destSpace->toRGBA(tonemapped, alphaBuffer_[k])
+                        : pink;
+                }
+            }
+        }
+        break;
+
+    case ToneMapping::Reinhard2002RGB:
+        {
+            const TValue Lw = gain * maxSceneLuminance_;
+            const TValue invLwSquared = num::inv(Lw * Lw);
+            for (size_t j = min.y; j <= max.y; ++j)
+            {
+                const size_t kBegin = j * resolution_.x + min.x;
+                const size_t kEnd = kBegin + nx;
+                for (size_t k = kBegin; k < kEnd; ++k)
+                {
+                    const prim::ColorRGBA linear = destSpace->toRGBAlinear(weighted(k, gain), alphaBuffer_[k]);
+                    const prim::ColorRGBA tonemapped(
+                        static_cast<prim::ColorRGBA::TValue>(linear.r * (1 + linear.r * invLwSquared) / (1 + linear.r)),
+                        static_cast<prim::ColorRGBA::TValue>(linear.g * (1 + linear.g * invLwSquared) / (1 + linear.g)),
+                        static_cast<prim::ColorRGBA::TValue>(linear.b * (1 + linear.b * invLwSquared) / (1 + linear.b)),
+                        linear.a);
+                    tonemapBuffer_[k] = !tonemapped.isNaN()
+                        ? destSpace->toGamma(tonemapped)
+                        : pink;
+                }
+            }
+        }
+        break;
+
+    case ToneMapping::ExponentialY:
+        for (size_t j = min.y; j <= max.y; ++j)
+        {
+            const size_t kBegin = j * resolution_.x + min.x;
+            const size_t kEnd = kBegin + nx;
+            for (size_t k = kBegin; k < kEnd; ++k)
+            {
+                const XYZ linear = weighted(k, gain);
+                const XYZ::TValue scale = linear.y < 1e-8
+                    ? 1 - linear.y / 2
+                    : (-num::expm1(-linear.y) / linear.y);
+                const XYZ tonemapped = linear * scale;
+                tonemapBuffer_[k] = !tonemapped.isNaN()
+                    ? destSpace->toRGBA(tonemapped, alphaBuffer_[k])
+                    : pink;
+            }
+        }
+        break;
+
+    case ToneMapping::ExponentialRGB:
+        for (size_t j = min.y; j <= max.y; ++j)
+        {
+            const size_t kBegin = j * resolution_.x + min.x;
+            const size_t kEnd = kBegin + nx;
+            for (size_t k = kBegin; k < kEnd; ++k)
+            {
+                const prim::ColorRGBA linear = destSpace->toRGBAlinear(weighted(k, gain), alphaBuffer_[k]);
+                const prim::ColorRGBA tonemapped(-num::expm1(-linear.r), -num::expm1(-linear.g), -num::expm1(-linear.b), linear.a);
+                tonemapBuffer_[k] = !tonemapped.isNaN()
+                    ? destSpace->toGamma(tonemapped)
+                    : pink;
+            }
+        }
+        break;
+
+    case ToneMapping::DuikerY:
+        for (size_t j = min.y; j <= max.y; ++j)
+        {
+            const size_t kBegin = j * resolution_.x + min.x;
+            const size_t kEnd = kBegin + nx;
+            for (size_t k = kBegin; k < kEnd; ++k)
+            {
+                const XYZ linear = weighted(k, gain);
+                const XYZ tonemapped = linear * (filmic(linear.y) / std::max(linear.y, static_cast<XYZ::TValue>(0.004)));
+                tonemapBuffer_[k] = !tonemapped.isNaN()
+                    ? destSpace->toRGBA(tonemapped, alphaBuffer_[k])
+                    : pink;
+            }
+        }
+        break;
+
+    case ToneMapping::DuikerRGB:
+        for (size_t j = min.y; j <= max.y; ++j)
+        {
+            const size_t kBegin = j * resolution_.x + min.x;
+            const size_t kEnd = kBegin + nx;
+            for (size_t k = kBegin; k < kEnd; ++k)
+            {
+                const prim::ColorRGBA linear = destSpace->toRGBAlinear(weighted(k, gain), alphaBuffer_[k]);
+                const prim::ColorRGBA tonemapped(filmic(linear.r), filmic(linear.g), filmic(linear.b), linear.a);
+                tonemapBuffer_[k] = !tonemapped.isNaN()
+                    ? destSpace->toGamma(tonemapped)
+                    : pink;
+            }
+        }
+        break;
+
+    default:
+        LASS_ENFORCE_UNREACHABLE;
     }
 
     TDirtyBox box = renderDirtyBox_;
@@ -520,13 +503,6 @@ void Raster::clearDirtyBox()
 
 
 
-util::CriticalSection& Raster::renderLock() const
-{
-    return renderLock_;
-}
-
-
-
 // --- private -------------------------------------------------------------------------------------
 
 const TResolution2D Raster::doResolution() const
@@ -535,42 +511,71 @@ const TResolution2D Raster::doResolution() const
 }
 
 
+namespace
+{
+
+struct Splat
+{
+    size_t index;
+    XYZ xyz;
+    TValue weight;
+    TValue alpha;
+};
+
+}
 
 void Raster::doWriteRender(const OutputSample* first, const OutputSample* last)
 {
-    LASS_ASSERT(resolution_.x > 0 && resolution_.y > 0);
-    LASS_LOCK(renderLock_)
+    static thread_local std::vector<Splat> buffer;
+    const size_t size = static_cast<size_t>(last - first);
+    if (buffer.size() < size)
     {
-        while (first != last)
-        {
-            LIAR_ASSERT_POSITIVE_FINITE(first->weight());
-            LIAR_ASSERT_POSITIVE_FINITE(first->alpha());
-            LIAR_ASSERT_FINITE(first->radiance().total());
-            const TPoint2D& position = first->screenCoordinate();
-            if (position.x >= 0 && position.y >= 0)
-            {
-                const size_t i = static_cast<size_t>(num::floor(position.x * static_cast<TScalar>(resolution_.x)));
-                const size_t j = static_cast<size_t>(num::floor(position.y * static_cast<TScalar>(resolution_.y)));
-                if (i < resolution_.x && j < resolution_.y)
-                {
-                    const size_t k = j * resolution_.x + i;
-                    TValue& w = totalWeight_[k];
-                    w += first->weight();
-                    const TValue alpha = first->weight() * first->alpha();
-                    alphaBuffer_[k] += alpha;
-                    XYZ& xyz = renderBuffer_[k];
-                    xyz += first->radiance() * alpha;
+        buffer.resize(size);
+    }
 
-                    renderDirtyBox_ += TDirtyBox::TPoint(i, j);
-                    if (w > 0 && xyz.y > 0)
-                    {
-                        maxSceneLuminance_ = std::max(xyz.y / w, maxSceneLuminance_);
-                    }
-                }
+    LASS_ASSERT(resolution_.x > 0 && resolution_.y > 0);
+    TDirtyBox dirtyBox;
+    auto splat = buffer.begin();
+    while (first != last)
+    {
+        LIAR_ASSERT_POSITIVE_FINITE(first->weight());
+        LIAR_ASSERT_POSITIVE_FINITE(first->alpha());
+        LIAR_ASSERT_FINITE(first->radiance().total());
+        const TPoint2D& position = first->screenCoordinate();
+        if (position.x >= 0 && position.y >= 0)
+        {
+            const size_t i = static_cast<size_t>(num::floor(position.x * static_cast<TScalar>(resolution_.x)));
+            const size_t j = static_cast<size_t>(num::floor(position.y * static_cast<TScalar>(resolution_.y)));
+            if (i < resolution_.x && j < resolution_.y)
+            {
+                splat->index = j * resolution_.x + i;
+                splat->weight = first->weight();
+                splat->alpha = splat->weight * first->alpha();
+                splat->xyz = splat->alpha * first->radiance();
+                dirtyBox += TDirtyBox::TPoint(i, j);
             }
-            ++first;
         }
-        allTimeDirtyBox_ += renderDirtyBox_;
+        ++first;
+        ++splat;
+    }
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(renderLock_);
+        for (auto s = buffer.begin(); s != splat; ++s)
+        {
+            const size_t k = s->index;
+            TValue& w = totalWeight_[k];
+            w += s->weight;
+            alphaBuffer_[k] += s->alpha;
+            XYZ& xyz = renderBuffer_[k];
+            xyz += s->xyz;
+            if (w > 0 && xyz.y > 0)
+            {
+                maxSceneLuminance_ = std::max(xyz.y / w, maxSceneLuminance_);
+            }
+        }
+        renderDirtyBox_ += dirtyBox;
+        allTimeDirtyBox_ += dirtyBox;
         isDirtyAutoExposure_ = true;
     }
 }
@@ -589,7 +594,7 @@ Raster::TValue Raster::averageSceneLuminance() const
 {
     TValue sumLogY = 0;
     size_t coverage = 0;
-    LASS_LOCK(renderLock_)
+    std::lock_guard<std::recursive_mutex> lock(renderLock_);
     {
         for (size_t k = 0, n = renderBuffer_.size(); k < n; ++k)
         {

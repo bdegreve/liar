@@ -92,8 +92,6 @@ protected:
     const TDirtyBox& dirtyBox() const;
     void clearDirtyBox();
 
-    util::CriticalSection& renderLock() const;
-
 private:
 
     const TResolution2D doResolution() const;
@@ -110,7 +108,7 @@ private:
     TValueBuffer alphaBuffer_;
     mutable TDirtyBox renderDirtyBox_;
     TDirtyBox allTimeDirtyBox_;
-    mutable util::CriticalSection renderLock_;
+    mutable std::recursive_mutex   renderLock_;
     TResolution2D resolution_;
     TRgbSpacePtr rgbSpace_;
     ToneMapping toneMapping_;
