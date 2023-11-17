@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -62,12 +62,10 @@ SocketClient::~SocketClient()
 
 const TResolution2D SocketClient::doResolution() const
 {
+	std::lock_guard<std::mutex> lock(mutex_);
 	TResolution2D resolution;
-	LASS_LOCK(socketLock_)
-	{
-		writeCommand(ostream_, scResolution);
-		LASS_ENFORCE(readResolution(istream_, resolution));
-	}
+	writeCommand(ostream_, scResolution);
+	LASS_ENFORCE(readResolution(istream_, resolution));
 	return resolution;
 }
 
@@ -75,10 +73,8 @@ const TResolution2D SocketClient::doResolution() const
 
 void SocketClient::doBeginRender()
 {
-	LASS_LOCK(socketLock_)
-	{
-		writeCommand(ostream_, scBeginRender);
-	}
+	std::lock_guard<std::mutex> lock(mutex_);
+	writeCommand(ostream_, scBeginRender);
 	isCancelingLoop_.reset(util::threadFun(util::makeCallback(this, &SocketClient::isCancelingLoop), util::threadJoinable));
 	isCancelingLoop_->run();
 }
@@ -87,24 +83,20 @@ void SocketClient::doBeginRender()
 
 void SocketClient::doWriteRender(const OutputSample* first, const OutputSample* last)
 {
-	LASS_LOCK(socketLock_)
+	std::lock_guard<std::mutex> lock(mutex_);
+	while (first != last)
 	{
-		while (first != last)
-		{
-			writeSample(ostream_, *first++);
-		}
-		ostream_.flush();
+		writeSample(ostream_, *first++);
 	}
+	ostream_.flush();
 }
 
 
 
 void SocketClient::doEndRender()
 {
-	LASS_LOCK(socketLock_)
-	{
-		writeCommand(ostream_, scEndRender);
-	}
+	std::lock_guard<std::mutex> lock(mutex_);
+	writeCommand(ostream_, scEndRender);
 	isQuiting_ = true;
 	isCancelingLoop_->join();
 }
@@ -123,7 +115,7 @@ void SocketClient::isCancelingLoop()
 	while (!isQuiting_ && !isCanceling_)
 	{
 		bool isCanceling = false;
-		LASS_LOCK(socketLock_)
+		std::lock_guard<std::mutex> lock(mutex_);
 		{
 			writeCommand(ostream_, scIsCanceling);
 			if (!ostream_.good())
