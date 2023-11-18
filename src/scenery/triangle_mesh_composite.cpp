@@ -93,6 +93,11 @@ void TriangleMeshComposite::doAccept(util::VisitorBase& visitor)
 
 void TriangleMeshComposite::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period)
 {
+	if (!mesh_.triangles().empty())
+	{
+		return;
+	}
+
 	typedef TIndexTriangles::value_type TIndexTriangle;
 
 	TVertices verts;
@@ -165,6 +170,8 @@ void TriangleMeshComposite::doPreProcess(const TSceneObjectPtr& scene, const Tim
 			backLinks.push_back( std::make_pair(&child, triangleOffset) );
 		}
 	}
+
+	LASS_COUT << "Combined " << children_.size() << " triangle meshes into one with " << triangles.size() << " triangles." << std::endl;
 
 	TMesh mesh(std::move(verts), std::move(normals), std::move(uvs), triangles);
 
