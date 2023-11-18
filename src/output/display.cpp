@@ -375,7 +375,7 @@ void Display::displayLoop()
 		LASS_ENFORCE(display.update(displayBuffer_, &box));
 
 		displayDirtyBox_.clear();
-		signal_.wait(250);
+		signal_.wait(2000);
 	}
 
 	display.close();
