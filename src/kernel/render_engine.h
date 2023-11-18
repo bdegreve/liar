@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -86,6 +86,7 @@ private:
 		Progress& operator+=(size_t numNewSamplesWritten);
 	private:
 		util::ProgressIndicator indicator_;
+		std::mutex mutex_;
 		size_t numSamplesWritten_;
 		size_t totalNumSamples_;
 	};
@@ -117,8 +118,6 @@ private:
 	TRenderTargetPtr renderTarget_;
 	TSamplerPtr sampler_;
 	TSceneObjectPtr scene_;
-	util::Semaphore lock_;
-	util::Condition signal_;
 	size_t numberOfThreads_;
 	bool isDirty_;
 

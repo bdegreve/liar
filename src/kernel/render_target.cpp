@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -61,13 +61,10 @@ const TResolution2D RenderTarget::resolution() const
 
 void RenderTarget::beginRender()
 {
-	LASS_LOCK(lock_)
+	if (!isRendering_)
 	{
-		if (!isRendering_)
-		{
-			doBeginRender();
-			isRendering_ = true;
-		}
+		doBeginRender();
+		isRendering_ = true;
 	}
 }
 
@@ -75,12 +72,9 @@ void RenderTarget::beginRender()
 
 void RenderTarget::writeRender(const OutputSample* first, const OutputSample* last)
 {
-	LASS_LOCK(lock_)
+	LASS_ASSERT(isRendering_);
+	if (isRendering_)
 	{
-		if (!isRendering_)
-		{
-			beginRender();
-		}
 		doWriteRender(first, last);
 	}
 }
@@ -89,13 +83,10 @@ void RenderTarget::writeRender(const OutputSample* first, const OutputSample* la
 
 void RenderTarget::endRender()
 {
-	LASS_LOCK(lock_)
+	if (isRendering_)
 	{
-		if (isRendering_)
-		{
-			doEndRender();
-			isRendering_ = false;
-		}
+		doEndRender();
+		isRendering_ = false;
 	}
 }
 

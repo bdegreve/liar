@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -221,6 +221,7 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 
 	TThreadPool pool(numberOfThreads_, std::max<size_t>(2 * numberOfThreads_, 16), consumer);
 
+	renderTarget_->beginRender();
 	TTaskPtr task = sampler_->getTask();
 	while (task)
 	{
@@ -269,11 +270,8 @@ void RenderEngine::render()
 void RenderEngine::writeRender(const OutputSample* first, const OutputSample* last,
 		Progress& ioProgress)
 {
-	LASS_LOCK(lock_)
-	{
-		renderTarget_->writeRender(first, last);
-		ioProgress += static_cast<unsigned>(last - first);
-	}
+	renderTarget_->writeRender(first, last);
+	ioProgress += static_cast<unsigned>(last - first);
 }
 
 
@@ -382,6 +380,7 @@ RenderEngine::Progress::~Progress()
 
 RenderEngine::Progress& RenderEngine::Progress::operator+=(size_t numNewSamplesWritten)
 {
+	std::lock_guard<std::mutex> lock(mutex_);
 	numSamplesWritten_ += numNewSamplesWritten;
 	indicator_(static_cast<double>(numSamplesWritten_) / static_cast<double>(totalNumSamples_));
 	return *this;
