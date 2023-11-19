@@ -52,6 +52,7 @@ PY_CLASS_MEMBER_RW(Raster, exposureStops, setExposureStops)
 PY_CLASS_MEMBER_RW(Raster, exposureCorrectionStops, setExposureCorrectionStops)
 PY_CLASS_MEMBER_RW(Raster, autoExposure, setAutoExposure)
 PY_CLASS_MEMBER_RW(Raster, middleGrey, setMiddleGrey)
+PY_CLASS_MEMBER_RW(Raster, maxSampleLuminance, setMaxSampleLuminance)
 PY_CLASS_ENUM(Raster, Raster::ToneMapping)
 
 namespace
@@ -171,6 +172,13 @@ Raster::TValue Raster::middleGrey() const
 
 
 
+Raster::TValue Raster::maxSampleLuminance() const
+{
+	return maxSampleLuminance_;
+}
+
+
+
 void Raster::setRgbSpace(const TRgbSpacePtr& rgbSpace)
 {
     std::lock_guard<std::recursive_mutex> lock(renderLock_);
@@ -246,6 +254,14 @@ void Raster::setMiddleGrey(TValue level)
 
 
 
+void Raster::setMaxSampleLuminance(TValue level)
+{
+    std::lock_guard<std::recursive_mutex> lock(renderLock_);
+    maxSampleLuminance_ = level;
+}
+
+
+
 void Raster::nextToneMapping()
 {
     std::lock_guard<std::recursive_mutex> lock(renderLock_);
@@ -265,6 +281,7 @@ Raster::Raster(const TResolution2D& resolution):
     exposureStops_(0.f),
     exposureCorrectionStops_(0.f),
     middleGrey_(.184f),
+    maxSampleLuminance_(num::NumTraits<TValue>::infinity),
     maxSceneLuminance_(0),
     autoExposure_(true),
     isDirtyAutoExposure_(false)
@@ -548,10 +565,15 @@ void Raster::doWriteRender(const OutputSample* first, const OutputSample* last)
             const size_t j = static_cast<size_t>(num::floor(position.y * static_cast<TScalar>(resolution_.y)));
             if (i < resolution_.x && j < resolution_.y)
             {
+                XYZ xyz = first->radiance();
+                if (xyz.y > maxSampleLuminance_)
+                {
+                    xyz *= maxSampleLuminance_ / xyz.y;
+                }
                 splat->index = j * resolution_.x + i;
                 splat->weight = first->weight();
                 splat->alpha = splat->weight * first->alpha();
-                splat->xyz = splat->alpha * first->radiance();
+                splat->xyz = splat->alpha * xyz;
                 dirtyBox += TDirtyBox::TPoint(i, j);
             }
         }

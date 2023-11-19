@@ -179,6 +179,7 @@ class PbrtScene(object):
                     w = h * camera.aspectRatio
                 display = Display("PBRT powered by LiAR!", (int(w), int(h)))
                 display.exposureStops = getattr(engine.target, "exposureStops", 0)
+                display.maxSampleLuminance = engine.target.maxSampleLuminance
                 engine.target = liar.output.Splitter([engine.target, display])
         if self.__pixelFilter:
             self.__pixelFilter.target, engine.target = engine.target, self.__pixelFilter
@@ -351,10 +352,16 @@ class PbrtScene(object):
         self.__film = getattr(self, "_film_" + name)(**kwargs)
 
     def _film_image(
-        self, filename="pbrt.exr", writefrequency=-1, premultiplyalpha=True, scale=1
+        self,
+        filename="pbrt.exr",
+        writefrequency=-1,
+        premultiplyalpha=True,
+        scale=1,
+        maxsampleluminance=math.inf,
     ):
         film = liar.output.Image(filename, self.resolution)
         film.exposureStops = math.log2(scale)
+        film.maxSampleLuminance = min(maxsampleluminance, 1e38)
         return film
 
     def PixelFilter(self, name="box", **kwargs):

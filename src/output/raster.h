@@ -65,6 +65,7 @@ public:
     TValue exposureCorrectionStops() const;
     bool autoExposure() const;
     TValue middleGrey() const;
+    TValue maxSampleLuminance() const;
 
     void setRgbSpace(const TRgbSpacePtr& rgbSpace);
     void setToneMapping(ToneMapping mode);
@@ -72,6 +73,7 @@ public:
     void setExposureCorrectionStops(TValue stops);
     void setAutoExposure(bool enable = true);
     void setMiddleGrey(TValue grey);
+    void setMaxSampleLuminance(TValue luminance);
 
     void nextToneMapping();
 
@@ -115,6 +117,7 @@ private:
     mutable TValue exposureStops_;
     TValue exposureCorrectionStops_;
     TValue middleGrey_;
+    TValue maxSampleLuminance_;
     TValue maxSceneLuminance_;
     bool autoExposure_;
     mutable bool isDirtyAutoExposure_;
