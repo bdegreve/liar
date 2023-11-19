@@ -32,7 +32,6 @@ from typing import Any, Dict, List
 
 import liar
 import liar.tools.spd
-from liar.tools import ply
 
 
 class Verbosity(enum.Enum):
@@ -424,13 +423,8 @@ class PbrtScene(object):
         return mesh
 
     def _shape_plymesh(self, filename, alpha=None, shadowalpha=None):
-        try:
-            load_ply = liar.scenery.TriangleMesh.loadPly
-        except AttributeError:
-            mesh = ply.load(filename)
-        else:
-            print(f"loading PLY file {filename} ...")
-            mesh = load_ply(filename)
+        print(f"loading PLY file {filename} ...")
+        mesh = liar.scenery.TriangleMesh.loadPly(filename)
         if alpha:
             mesh = liar.scenery.ClipMap(mesh, self._get_texture(alpha), 0.001)
         if shadowalpha:
