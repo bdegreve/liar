@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -199,7 +199,7 @@ SampleBsdfOut AdjointPhotonTracer::scatterSurface(const Sample& sample, const TB
 {
 	LIAR_ASSERT(num::abs(omegaIn.norm() - 1) < 1e-6f, "omegaIn=" << omegaIn);
 
-	const TScalar strategyPdf = bsdf->hasCaps(BsdfCaps::diffuse) ? 0.5f : 1.0f;
+	const TScalar strategyPdf = bsdf->hasCaps(BsdfCaps::diffuse) || bsdf->hasCaps(BsdfCaps::glossy) ? 0.5f : 1.0f;
 	if (strategySample(sample, generation) < strategyPdf)
 	{
 		// sample BSDF.
