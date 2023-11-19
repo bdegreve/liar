@@ -195,6 +195,18 @@ const Spectral AdjointPhotonTracer::shadeSurface(const Sample& sample, const Dif
 
 
 
+namespace
+{
+
+inline Spectral::TValue powerHeuristic(TScalar pdfA, TScalar pdfB)
+{
+	return static_cast<Spectral::TValue>(num::sqr(pdfA) / (num::sqr(pdfA) + num::sqr(pdfB)));
+}
+
+}
+
+
+
 SampleBsdfOut AdjointPhotonTracer::scatterSurface(const Sample& sample, const TBsdfPtr& bsdf, const TPoint3D& target, const TVector3D& omegaIn, size_t generation) const
 {
 	LIAR_ASSERT(num::abs(omegaIn.norm() - 1) < 1e-6f, "omegaIn=" << omegaIn);
@@ -213,6 +225,7 @@ SampleBsdfOut AdjointPhotonTracer::scatterSurface(const Sample& sample, const TB
 
 		// linear search through the lights. So this will only work great if there aren't too many.
 		TRay3D ray(target, bsdf->bsdfToWorld(out.omegaOut));
+		TScalar pdfLights = 0;
 		for (const LightContext& light : lights())
 		{
 			TScalar pdfLight;
@@ -220,41 +233,59 @@ SampleBsdfOut AdjointPhotonTracer::scatterSurface(const Sample& sample, const TB
 			light.emission(sample, ray, shadowRay, pdfLight);
 			if (pdfLight > 0)
 			{
-				out.pdf += (1 - strategyPdf) * lights().pdf(&light) * pdfLight;
+				pdfLights += lights().pdf(&light) * pdfLight;
 			}
 		}
+		pdfLights *= (1 - strategyPdf);
 
+		out.value *= powerHeuristic(out.pdf, pdfLights);
 		return out;
 	}
 	else
 	{
-		TScalar lightPdf;
-		const LightContext* light = lights().sample(lightChoiceSample(sample, generation), lightPdf);
-		if (!light || lightPdf <= 0)
+		// sample one light
+		TScalar pdfLightContext;
+		const LightContext* light = lights().sample(lightChoiceSample(sample, generation), pdfLightContext);
+		if (!light || pdfLightContext <= 0)
 		{
 			return SampleBsdfOut();
 		}
-
 		BoundedRay shadowRay;
-		TScalar pdf;
-		light->sampleEmission(sample, lightSample(sample, generation), target, shadowRay, pdf);
-		if (pdf <= 0)
+		TScalar pdfLight;
+		light->sampleEmission(sample, lightSample(sample, generation), target, shadowRay, pdfLight);
+		if (pdfLight <= 0)
 		{
 			return SampleBsdfOut();
 		}
-		pdf *= lightPdf * (1 - strategyPdf);
+		TScalar pdf = pdfLightContext * pdfLight;
 
+		// add pdfs of other lights ...
+		for (const LightContext& other : lights())
+		{
+			if (&other == light)
+				continue;
+			TScalar pdfOther;
+			BoundedRay otherRay;
+			other.emission(sample, shadowRay.unboundedRay(), otherRay, pdfOther);
+			if (pdfOther > 0)
+			{
+				pdf += lights().pdf(&other) * pdfOther;
+			}
+		}
+
+		pdf *= (1 - strategyPdf);
+
+		// evaluate the BSDF
 		const TVector3D omegaOut = bsdf->worldToBsdf(shadowRay.direction());
-		LIAR_ASSERT(num::abs(omegaOut.norm() - 1) < 1e-6f,
-			"omegaOut=" << omegaIn << ", shadowRay.direction()=" << shadowRay.direction());
+		LIAR_ASSERT_NORMALIZED(omegaOut);
 		const BsdfOut out = bsdf->evaluate(omegaIn, omegaOut, BsdfCaps::all);
 		if (!out)
 		{
 			return SampleBsdfOut();
 		}
-		pdf += out.pdf * strategyPdf;
 
-		return SampleBsdfOut(omegaOut, out.value, pdf, BsdfCaps::all);
+		const Spectral value = out.value * powerHeuristic(pdf, out.pdf * strategyPdf);
+		return SampleBsdfOut(omegaOut, value, pdf, BsdfCaps::all);
 	}
 }
 
