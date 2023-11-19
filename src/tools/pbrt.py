@@ -724,19 +724,25 @@ class PbrtScene(object):
             assert index is None, "uber: eta and index cannot both be set."
 
         layers = []
+        if Kd:
+            layers.append(self._material_matte(Kd=Kd))
         if Ks:
+            # The glossy component uses a dielectric fresnel equation on a
+            # TrowbridgeReitzDistribution microfacet distribution, with only
+            # reflection (no transmission). This corresponds to the Walter
+            # shader with transmission set to zero.
             layers.append(
-                self._material_substrate(
-                    Kd=Kd,
-                    Ks=Ks,
+                self._material_glass(
+                    Kr=Ks,
+                    Kt=0,
+                    eta=eta,
                     uroughness=uroughness,
                     vroughness=vroughness,
                     remaproughness=remaproughness,
                 )
             )
-        elif Kd:
-            layers.append(self._material_matte(Kd=Kd))
         if Kr or Kt:
+            # Specular reflection and transmission
             layers.append(self._material_glass(Kr=Kr, Kt=Kt, eta=eta))
         if len(layers) == 1:
             mat = layers[0]
