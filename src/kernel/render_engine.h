@@ -105,6 +105,7 @@ private:
 		TSamplerPtr sampler_;
 		Progress* progress_;
 		TVector2D pixelSize_;
+		TVector2D sampleSize_;
 		TimePeriod timePeriod_;
 	};
 

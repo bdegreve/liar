@@ -193,7 +193,6 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 			<< "' goes outside valid boundary '" << bucketBound_ << "'.");
 	}
 
-	const TVector2D pixelSize = TVector2D(renderTarget_->resolution()).reciprocal();
 	const TimePeriod timePeriod = iFrameTime + camera_->shutterDelta();
 
 	if (isDirty_)
@@ -207,14 +206,21 @@ void RenderEngine::render(TTime iFrameTime, const TBucket& bucket)
 
 	// we need an unbounded progress indicator ...
 	size_t numberOfSamples = num::NumTraits<size_t>::max;
+	TVector2D sampleSize = TVector2D(renderTarget_->resolution()).reciprocal();
 	if (SamplerTiled* sampler = dynamic_cast<SamplerTiled*>(sampler_.get()))
 	{
 		numberOfSamples = sampler->resolution().x * sampler->resolution().y * sampler->samplesPerPixel();
+		sampleSize /= num::sqrt(TScalar(sampler->samplesPerPixel()));
+	}
+	else
+	{
+		// sampler is unbounded, we don't know how many samples we'll take per pixel. So just take a guess.
+		sampleSize /= 10;
 	}
 	Progress progress("rendering bucket " + util::stringCast<std::string>(bucket), numberOfSamples);
 
 	sampler_->setBucket(bucket); // bit unorthodox, since we modify sampler here.
-	Consumer consumer(*this, rayTracer_, sampler_, progress, pixelSize, timePeriod);
+	Consumer consumer(*this, rayTracer_, sampler_, progress, sampleSize, timePeriod);
 
 	typedef Sampler::TTaskPtr TTaskPtr;
 	typedef util::ThreadPool<TTaskPtr, Consumer> TThreadPool;
@@ -287,12 +293,12 @@ bool RenderEngine::isCanceling() const
 
 RenderEngine::Consumer::Consumer(
 		RenderEngine& engine, const TRayTracerPtr& rayTracer, const TSamplerPtr& sampler,
-		Progress& progress, const TVector2D& pixelSize, const TimePeriod& timePeriod):
+		Progress& progress, const TVector2D& sampleSize, const TimePeriod& timePeriod):
 	engine_(&engine),
 	rayTracer_(LASS_ENFORCE_POINTER(rayTracer)),
 	sampler_(LASS_ENFORCE_POINTER(sampler)),
 	progress_(&progress),
-	pixelSize_(pixelSize),
+	sampleSize_(sampleSize),
 	timePeriod_(timePeriod)
 {
 }
@@ -304,7 +310,7 @@ RenderEngine::Consumer::Consumer(const Consumer& other):
 	rayTracer_(other.rayTracer_->clone()),
 	sampler_(other.sampler_->clone()),
 	progress_(other.progress_),
-	pixelSize_(other.pixelSize_),
+	sampleSize_(other.sampleSize_),
 	timePeriod_(other.timePeriod_)
 {
 }
@@ -317,7 +323,7 @@ RenderEngine::Consumer& RenderEngine::Consumer::operator=(const Consumer& other)
 	rayTracer_ = other.rayTracer_->clone();
 	sampler_ = other.sampler_->clone();
 	progress_ = other.progress_;
-	pixelSize_ = other.pixelSize_;
+	sampleSize_ = other.sampleSize_;
 	timePeriod_ = other.timePeriod_;
 	return *this;
 }
@@ -340,7 +346,7 @@ void RenderEngine::Consumer::operator()(const Sampler::TTaskPtr& task)
 			return;
 		}
 
-		const DifferentialRay primaryRay = engine_->camera_->primaryRay(sample, pixelSize_);
+		const DifferentialRay primaryRay = engine_->camera_->primaryRay(sample, sampleSize_);
 		sample.setWeight(engine_->camera_->weight(primaryRay));
 		TScalar alpha;
 		TScalar tIntersection;
