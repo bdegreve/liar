@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,9 +52,13 @@ LightContext::LightContext(const TObjectPath& objectPathToLight, const SceneLigh
 
 
 
-void LightContext::setSceneBound(const TAabb3D& /*bound*/, const TimePeriod& /*period*/)
+void LightContext::setSceneBound(const TSphere3D& bounds)
 {
-	//light_->setSceneBound(bound, period);
+	if (auto* light = dynamic_cast<SceneLightGlobal*>(const_cast<SceneLight*>(light_)))
+	{
+#pragma LASS_TODO("Verify that global lights don't have transformations")
+		light->setSceneBound(bounds);
+	}
 }
 
 
@@ -265,7 +269,7 @@ void LightContexts::gatherContexts(const TSceneObjectPtr& scene)
 
 
 
-void LightContexts::setSceneBound(const TAabb3D& bound, const TimePeriod& period)
+void LightContexts::setSceneBound(const TSphere3D& bounds)
 {
 	size_t n = contexts_.size();
 	if (n == 0)
@@ -276,7 +280,7 @@ void LightContexts::setSceneBound(const TAabb3D& bound, const TimePeriod& period
 	totalPower_ = 0;
 	for (size_t k = 0; k < n; ++k)
 	{
-		contexts_[k].setSceneBound(bound, period);
+		contexts_[k].setSceneBound(bounds);
 		totalPower_ += contexts_[k].totalPower();
 		cdf_[k] = totalPower_;
 	}

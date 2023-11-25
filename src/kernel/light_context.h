@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ public:
 	int idBsdfSamples() const { return idBsdfSamples_; }
 	int idBsdfComponentSamples() const { return idBsdfComponentSamples_; }
 
-	void setSceneBound(const TAabb3D& bound, const TimePeriod& period);
+	void setSceneBound(const TSphere3D& bounds);
 	void requestSamples(const TSamplerPtr& sampler);
 
 	const Spectral emission(const Sample& cameraSample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const;
@@ -102,7 +102,7 @@ public:
 	void clear();
 	void add(const LightContext& context);
 	void gatherContexts(const TSceneObjectPtr& scene);
-	void setSceneBound(const TAabb3D& bound, const TimePeriod& period);
+	void setSceneBound(const TSphere3D& bounds);
 	void requestSamples(const TSamplerPtr& sampler);
 
 	const LightContext* operator[](size_t i) const;

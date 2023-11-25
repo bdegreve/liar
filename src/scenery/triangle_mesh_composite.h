@@ -65,7 +65,7 @@ private:
 	typedef std::vector< std::pair<TriangleMesh*, size_t> > TBackLinks;
 
 	void doAccept(lass::util::VisitorBase& visitor);
-	void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
+	void doPreProcess(const TimePeriod& period);
 
 	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
 	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;

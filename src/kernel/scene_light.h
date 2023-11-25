@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,8 +43,6 @@ class LIAR_KERNEL_DLL SceneLight: public SceneObject
 {
 	PY_HEADER(SceneObject)
 public:
-
-	void setSceneBound(const TAabb3D& bound, const TimePeriod& period);
 
 	/** Return radiance emitted by this light source and received at ray.support() along that ray.
 		Adjusts shadowRay to be bounded by ray.support() and the point of emission.
@@ -116,7 +114,7 @@ private:
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
-	virtual void doSetSceneBound(const TAabb3D& bound, const TimePeriod& period);
+
 	virtual const Spectral doEmission(const Sample& sample, const TRay3D& ray, BoundedRay& shadowRay, TScalar& pdf) const = 0;
 	virtual const Spectral doSampleEmission(
 			const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target,
@@ -139,6 +137,20 @@ private:
 
 typedef python::PyObjectPtr<SceneLight>::Type TSceneLightPtr;
 
+
+/** @class liar::SceneLight
+ *  @brief global lights can only exists in global space, and cannot be transformed
+ *  @author Bram de Greve [Bramz]
+ */
+class LIAR_KERNEL_DLL SceneLightGlobal: public SceneLight
+{
+	PY_HEADER(SceneLight)
+public:
+	void setSceneBound(const TSphere3D& bound);
+private:
+	LASS_UTIL_VISITOR_DO_ACCEPT;
+	virtual void doSetSceneBound(const TSphere3D& bound) = 0;
+};
 
 }
 

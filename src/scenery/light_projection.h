@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ private:
 
 	LASS_UTIL_VISITOR_DO_ACCEPT;
 
-	void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
+	void doPreProcess(const TimePeriod& period);
 
 	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
 	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;

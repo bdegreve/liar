@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -96,12 +96,12 @@ private:
 		postAccept(visitor, *this);
 	}
 
-	void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period)
+	void doPreProcess(const TimePeriod& period)
 	{
 		const TChildren::const_iterator end = allChildren_.end();
 		for (TChildren::const_iterator i = allChildren_.begin(); i != end; ++i)
 		{
-			(*i)->preProcess(scene, period);
+			(*i)->preProcess(period);
 		}
 		tree_.reset(smallChildren_.begin(), smallChildren_.end());
 	}

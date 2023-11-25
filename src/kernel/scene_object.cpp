@@ -165,7 +165,7 @@ SceneObject::SceneObject():
 
 // --- private -------------------------------------------------------------------------------------
 
-void SceneObject::doPreProcess(const TSceneObjectPtr&, const TimePeriod&)
+void SceneObject::doPreProcess(const TimePeriod&)
 {
 	// not all objects need this
 }

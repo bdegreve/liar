@@ -91,7 +91,7 @@ void TriangleMeshComposite::doAccept(util::VisitorBase& visitor)
 
 
 
-void TriangleMeshComposite::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period)
+void TriangleMeshComposite::doPreProcess(const TimePeriod& period)
 {
 	if (!mesh_.triangles().empty())
 	{
@@ -127,7 +127,7 @@ void TriangleMeshComposite::doPreProcess(const TSceneObjectPtr& scene, const Tim
 	for (TChildren::const_iterator i = children_.begin(); i != end; ++i)
 	{
 		TriangleMesh& child = **i;
-		child.preProcess(scene, period);
+		child.preProcess(period);
 
 		const TVertices& childVerts = child.vertices();
 		const TNormals& childNormals = child.normals();

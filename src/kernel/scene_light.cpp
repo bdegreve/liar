@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,12 +35,11 @@ PY_CLASS_MEMBER_RW_DOC(SceneLight, isShadowless, setShadowless,
 	"determines if light can be blocked to cause shadows.  By default it's false which "
 	"means shadows will be casted\n")
 
+PY_DECLARE_CLASS_DOC(SceneLightGlobal, "Abstract base class of global scene light")
+
 // --- public --------------------------------------------------------------------------------------
 
-void SceneLight::setSceneBound(const TAabb3D& bound, const TimePeriod& period)
-{
-	doSetSceneBound(bound, period);
-}
+
 
 
 
@@ -77,12 +76,6 @@ void SceneLight::doSetState(const TPyObjectPtr& state)
 
 
 
-void SceneLight::doSetSceneBound(const TAabb3D&, const TimePeriod&)
-{
-}
-
-
-
 const Spectral SceneLight::doSampleEmission(
 		const Sample& sample, const TPoint2D& lightSample, const TPoint3D& target, const TVector3D&,
 		BoundedRay& shadowRay, TScalar& pdf) const
@@ -96,6 +89,13 @@ const Spectral SceneLight::doSampleEmission(
 // --- free ----------------------------------------------------------------------------------------
 
 
+
+// --- SceneLightGlobal ----------------------------------------------------------------------------
+
+void SceneLightGlobal::setSceneBound(const TSphere3D& bound)
+{
+	doSetSceneBound(bound);
+}
 
 }
 

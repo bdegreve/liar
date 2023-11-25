@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -109,15 +109,6 @@ void LightDirectional::setPortal(const TSceneObjectPtr& portal)
 
 
 // --- private -------------------------------------------------------------------------------------
-
-void LightDirectional::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod&)
-{
-	const prim::Sphere3D<TScalar> bounds = prim::boundingSphere(scene->boundingBox());
-	const TPoint3D diskCenter = bounds.center() - bounds.radius() * direction_;
-	defaultPortal_.reset(new Disk(diskCenter, direction_, bounds.radius()));
-}
-
-
 
 void LightDirectional::doIntersect(const Sample&, const BoundedRay&, Intersection& result) const
 {
@@ -239,6 +230,14 @@ size_t LightDirectional::doNumberOfEmissionSamples() const
 bool LightDirectional::doIsSingular() const
 {
 	return true;
+}
+
+
+
+void LightDirectional::doSetSceneBound(const TSphere3D& bounds)
+{
+	const TPoint3D diskCenter = bounds.center() - bounds.radius() * direction_;
+	defaultPortal_.reset(new Disk(diskCenter, direction_, bounds.radius()));
 }
 
 

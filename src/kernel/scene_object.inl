@@ -28,17 +28,12 @@ namespace kernel
 
 /** do some preprocessing before rendering.
  *
- *	@param scene [in]
- *		pointer to the entire scene.
  *  @param period [in]
  *		timespan covered by render.
- *
- *	@remark you can't rely on the scene being preprocessed when this function is called,
- *		since this function is called at the very same monent scene _is_ preprocessed!
  */
-inline void SceneObject::preProcess(const TSceneObjectPtr& scene, const TimePeriod& period)
+inline void SceneObject::preProcess(const TimePeriod& period)
 {
-	doPreProcess(scene, period);
+	doPreProcess(period);
 }
 
 

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -114,9 +114,9 @@ void ClipMap::doAccept(util::VisitorBase& visitor)
 
 
 
-void ClipMap::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period)
+void ClipMap::doPreProcess(const TimePeriod& period)
 {
-	child_->preProcess(scene, period);
+	child_->preProcess(period);
 }
 
 

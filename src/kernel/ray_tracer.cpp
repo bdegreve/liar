@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -119,8 +119,7 @@ void RayTracer::requestSamples(const TSamplerPtr& sampler)
 
 void RayTracer::preProcess(const TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads)
 {
-	const TAabb3D sceneBound = scene_->boundingBox();
-	lights_.setSceneBound(sceneBound, period);
+	lights_.setSceneBound(scene_->boundingSphere());
 	doPreProcess(sampler, period, numberOfThreads);
 }
 

@@ -105,7 +105,7 @@ public:
 
 	virtual ~SceneObject();
 
-	void preProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
+	void preProcess(const TimePeriod& period);
 
 	void intersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
 	void intersect(const Sample& sample, const DifferentialRay& ray, Intersection& result) const;
@@ -156,7 +156,7 @@ private:
 
 	LASS_UTIL_VISITOR_DO_ACCEPT;
 
-	virtual void doPreProcess(const TSceneObjectPtr& scene, const TimePeriod& period);
+	virtual void doPreProcess(const TimePeriod& period);
 	virtual void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const = 0;
 	virtual bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const = 0;
 	virtual void doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const = 0;

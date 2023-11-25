@@ -127,19 +127,8 @@ void LightSky::setSamplingResolution(const TResolution2D& resolution)
 
 // --- private -------------------------------------------------------------------------------------
 
-void LightSky::doPreProcess(const TSceneObjectPtr& scene, const TimePeriod&)
+void LightSky::doPreProcess(const TimePeriod&)
 {
-	/*if (!portal_)
-	{
-		portal_.reset(new Sphere(boundingSphere(scene->boundingBox())));
-	}*/
-
-	sceneBounds_ = scene->boundingSphere();
-
-	// intersections with sky are always this distance removed from any point.
-	const TScalar radius = sceneBounds_.radius();
-	fixedDistance_ = radius > 0 ? 1e3 * radius : 1e3;
-
 	TMap pdf;
 	buildPdf(pdf, power_);
 	buildCdf(pdf, marginalCdfU_, conditionalCdfV_);
@@ -364,6 +353,20 @@ size_t LightSky::doNumberOfEmissionSamples() const
 bool LightSky::doIsSingular() const
 {
 	return false;
+}
+
+
+
+void LightSky::doSetSceneBound(const TSphere3D& bound)
+{
+	/*if (!portal_)
+	{
+		portal_.reset(bound);
+	}*/
+
+	// intersections with sky are always this distance removed from any point.
+	const TScalar radius = bound.radius();
+	fixedDistance_ = radius > 0 ? 1e3 * radius : 1e3;
 }
 
 
