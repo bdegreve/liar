@@ -51,6 +51,7 @@ private:
 	void doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads);
 	const Spectral doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const;
 	const TRayTracerPtr doClone() const;
+	void doSeed(num::Tuint32) override;
 
 	const Spectral tracePhoton(const Sample& sample, const DifferentialRay& ray, TScalar& tIntersection, TScalar& alpha, size_t generation) const;
 	const Spectral shadeSurface(const Sample& sample, const DifferentialRay& primaryRay, const Intersection& intersection, size_t generation) const;

@@ -45,6 +45,7 @@ PY_CLASS_METHOD_QUALIFIED_1(RenderEngine, render, void, TTime)
 PY_CLASS_METHOD_QUALIFIED_1(RenderEngine, render, void, const RenderEngine::TBucket&)
 PY_CLASS_METHOD_QUALIFIED_2(RenderEngine, render, void, TTime, const RenderEngine::TBucket&)
 PY_CLASS_STATIC_CONST(RenderEngine, "AUTO_NUMBER_OF_THREADS", int(RenderEngine::autoNumberOfThreads));
+PY_CLASS_METHOD_DOC(RenderEngine, seed, "seed the samplers and tracers with a 32 bit unsigned integer")
 
 
 const RenderEngine::TBucket RenderEngine::bucketBound_(
@@ -57,6 +58,7 @@ RenderEngine::RenderEngine():
 	numberOfThreads_(autoNumberOfThreads),
 	isDirty_(false)
 {
+	seed(0);
 }
 
 
@@ -267,6 +269,13 @@ void RenderEngine::render()
 
 
 
+void RenderEngine::seed(num::Tuint32 seed)
+{
+	seedGenerator_.seed(seed ^ 0xbad5eed);
+}
+
+
+
 // --- protected -----------------------------------------------------------------------------------
 
 
@@ -313,19 +322,8 @@ RenderEngine::Consumer::Consumer(const Consumer& other):
 	sampleSize_(other.sampleSize_),
 	timePeriod_(other.timePeriod_)
 {
-}
-
-
-
-RenderEngine::Consumer& RenderEngine::Consumer::operator=(const Consumer& other)
-{
-	engine_ = other.engine_;
-	rayTracer_ = other.rayTracer_->clone();
-	sampler_ = other.sampler_->clone();
-	progress_ = other.progress_;
-	sampleSize_ = other.sampleSize_;
-	timePeriod_ = other.timePeriod_;
-	return *this;
+	rayTracer_->seed(static_cast<RayTracer::TSeed>(engine_->seedGenerator_()));
+	sampler_->seed(static_cast<Sampler::TSeed>(engine_->seedGenerator_()));
 }
 
 

@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -69,9 +69,9 @@ Halton::TTaskPtr Halton::doGetTask()
 }
 
 
-void Halton::doSeed(TSeed randomSeed)
+void Halton::doSeed(TSeed /*randomSeed*/)
 {
-	nextId_ = randomSeed;
+	// As a global deterministic sampler, we don't need to seed anything.
 }
 
 

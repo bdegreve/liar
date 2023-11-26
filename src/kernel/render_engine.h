@@ -76,6 +76,8 @@ public:
 	void render(const TBucket& bucket);
 	void render();
 
+	void seed(num::Tuint32 seed);
+
 private:
 
 	class Progress
@@ -97,7 +99,7 @@ private:
 		Consumer(RenderEngine& engine, const TRayTracerPtr& rayTracer, const TSamplerPtr& sampler,
 			Progress& progress, const TVector2D& pixelSize, const TimePeriod& timePeriod);
 		Consumer(const Consumer& other);
-		Consumer& operator=(const Consumer& other);
+		Consumer& operator=(const Consumer& other) = delete;
 		void operator()(const Sampler::TTaskPtr& task);
 	private:
 		RenderEngine* engine_;
@@ -121,6 +123,7 @@ private:
 	TSceneObjectPtr scene_;
 	size_t numberOfThreads_;
 	bool isDirty_;
+	std::minstd_rand seedGenerator_;
 
 	static const TBucket bucketBound_;
 };

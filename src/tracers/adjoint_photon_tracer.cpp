@@ -376,6 +376,14 @@ const TRayTracerPtr AdjointPhotonTracer::doClone() const
 
 
 
+void AdjointPhotonTracer::doSeed(num::Tuint32 seed)
+{
+	std::seed_seq seq { seed };
+	random_.seed(seq);
+}
+
+
+
 const TPyObjectPtr AdjointPhotonTracer::doGetState() const
 {
 	return python::makeTuple();

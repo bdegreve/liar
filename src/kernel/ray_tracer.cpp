@@ -134,6 +134,13 @@ const TRayTracerPtr RayTracer::clone() const
 
 
 
+void RayTracer::seed(num::Tuint32 seed)
+{
+	doSeed(seed);
+}
+
+
+
 const TPyObjectPtr RayTracer::reduce() const
 {
 	return python::makeTuple(

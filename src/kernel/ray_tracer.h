@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -54,6 +54,8 @@ class LIAR_KERNEL_DLL RayTracer: public python::PyObjectPlus
 	PY_HEADER(python::PyObjectPlus)
 public:
 
+	typedef num::Tuint32 TSeed;
+
 	virtual ~RayTracer();
 
 	const TSceneObjectPtr& scene() const;
@@ -78,6 +80,7 @@ public:
 	}
 
 	const TRayTracerPtr clone() const;
+	void seed(TSeed seed);
 
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const;
@@ -103,6 +106,7 @@ private:
 	virtual void doPreProcess(const TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads) = 0;
 	virtual const Spectral doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const = 0;
 	virtual const TRayTracerPtr doClone() const = 0;
+	virtual void doSeed(num::Tuint32 seed) = 0;
 
 	virtual const TPyObjectPtr doGetState() const = 0;
 	virtual void doSetState(const TPyObjectPtr& state) = 0;
