@@ -199,6 +199,7 @@ void Display::onKeyDown(PixelToaster::DisplayInterface& display, PixelToaster::K
 	case Key::Separator:
 	case Key::Subtract:
 		exposureStep = -exposureStep;
+		[[fallthrough]];
 	case Key::Equals:
 	case Key::Add:
 		{
