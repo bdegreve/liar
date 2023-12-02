@@ -1,5 +1,5 @@
 // Unix Platform
-// Copyright © 2004-2007 Glenn Fiedler
+// Copyright ï¿½ 2004-2007 Glenn Fiedler
 // Part of the PixelToaster Framebuffer Library - http://www.pixeltoaster.com
 
 // X11 version implemented by Bram de Greve <bramz@users.sourceforge.net>
@@ -290,7 +290,7 @@ namespace PixelToaster
 			trueColorConverter_ = 0;
 			floatingPointConverter_ = 0;
 			isShuttingDown_ = false;
-			Format destFormat_ = Format::Unknown;		
+			destFormat_ = Format::Unknown;		
 		}
 
 	private:
