@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -109,7 +109,7 @@ void BlackBody::setScale(TValue scale)
 
 const Spectral BlackBody::doEvaluate(const Sample& sample, SpectralType type) const
 {
-	return Spectral::fromFunc([=](TWavelength w) {
+	return Spectral::fromFunc([this](TWavelength w) {
 		const TWavelength w5 = num::sqr(num::sqr(w)) * w;
 		return scale_ * static_cast<TValue>(c1 / (w5 * num::expm1(c2 / (w * temperature_))));
 	}, sample, type);

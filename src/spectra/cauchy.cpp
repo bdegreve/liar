@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ void Cauchy::setC(TParam c)
 
 const Spectral Cauchy::doEvaluate(const Sample& sample, SpectralType type) const
 {
-	return Spectral::fromFunc([=](TWavelength w) {
+	return Spectral::fromFunc([this](TWavelength w) {
 		const TWavelength w_um = w * 1e6f; // in micrometers
 		return static_cast<TValue>(b_ + c_ / num::sqr(w_um));
 	}, sample, type);
