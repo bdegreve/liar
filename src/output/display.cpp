@@ -411,7 +411,7 @@ namespace
 {
     size_t bucket( TScalar x, size_t maxBucket )
     {
-        return std::min(static_cast<size_t>( std::max(num::round(x * maxBucket), TScalar(0)) ), maxBucket );
+        return std::min(static_cast<size_t>( std::max(num::round(x * static_cast<TScalar>(maxBucket)), TScalar(0)) ), maxBucket );
     }
 }
 
@@ -461,12 +461,12 @@ void Display::histogram()
         max = std::max(histo[k].y, max);
         max = std::max(histo[k].z, max);
     }
-    const TScalar scale = max > 0 ? TScalar(histoHeight) / max : TScalar(0);
+    const TScalar scale = max > 0 ? TScalar(histoHeight) / TScalar(max) : TScalar(0);
     for (size_t k = 0; k < numBuckets; ++k)
     {
-        histo[k].x = static_cast<size_t>(histo[k].x * scale);
-        histo[k].y = static_cast<size_t>(histo[k].y * scale);
-        histo[k].z = static_cast<size_t>(histo[k].z * scale);
+        histo[k].x = static_cast<size_t>(static_cast<TScalar>(histo[k].x) * scale);
+        histo[k].y = static_cast<size_t>(static_cast<TScalar>(histo[k].y) * scale);
+        histo[k].z = static_cast<size_t>(static_cast<TScalar>(histo[k].z) * scale);
     }
     for (size_t j = 0; j < histoHeight; ++j)
     {
