@@ -132,7 +132,7 @@ bool Spectral::isInitialized_ = Spectral::initialize();
 Spectral Spectral::fromXYZ(const XYZ& xyz, const Sample&, SpectralType type)
 {
 	const RgbSpace::RGBA rgb = RgbSpace::defaultSpace()->toRGBAlinear(xyz);
-	return Spectral(TBands(rgb.r, rgb.g, rgb.b), type);
+	return max(Spectral(TBands(rgb.r, rgb.g, rgb.b), type), 0);
 }
 
 Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, const std::vector<TValue>& values, const Sample&, SpectralType type)
@@ -144,7 +144,7 @@ Spectral Spectral::fromSampled(const std::vector<TWavelength>& wavelengths, cons
 {
 	const XYZ xyz = standardObserver().tristimulus(wavelengths, values);
 	const RgbSpace::RGBA rgb = RgbSpace::defaultSpace()->toRGBAlinear(xyz);
-	return Spectral(TBands(rgb.r, rgb.g, rgb.b), type);
+	return max(Spectral(TBands(rgb.r, rgb.g, rgb.b), type), 0);
 }
 
 const XYZ Spectral::xyz(const Sample&) const
