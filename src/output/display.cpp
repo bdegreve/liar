@@ -308,16 +308,9 @@ void printThirdStops(std::ostringstream& stream, TValue stops)
 
 std::string toString(Display::ToneMapping toneMapping)
 {
-	using namespace lass::python;
-	LockGIL LASS_UNUSED(lock);
-	TPyObjPtr tmObj(pyBuildSimpleObject(toneMapping));
-	TPyObjPtr strObj(PyObject_Str(tmObj.get()));
-	std::string str;
-	if (pyGetSimpleObject(strObj.get(), str) != 0)
-	{
-		str = "<unknown>";
-	}
-	return str;
+	auto& enumDef = lass::python::PyExportTraits<Display::ToneMapping>::enumDefinition;
+	auto val = enumDef.getValue(toneMapping);
+	return val ? *val : "unknown";
 }
 
 }
