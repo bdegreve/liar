@@ -74,6 +74,8 @@ public:
 		RayGenerationIncrementor incrementor(*this);
 		if (static_cast<size_t>(rayGeneration_) > maxRayGeneration_)
 		{
+			tIntersection = TNumTraits::infinity;
+			alpha = 0;
 			return Spectral();
 		}
 		return doCastRay(sample, primaryRay, tIntersection, alpha, static_cast<size_t>(rayGeneration_), highQuality);
