@@ -306,7 +306,7 @@ size_t Stratifier::doRoundSize2D(size_t requestedSize) const
 	const size_t lowSize = num::sqr(lowSqrt);
 	const size_t highSize = num::sqr(highSqrt);
 	LASS_ASSERT(requestedSize >= lowSqrt && requestedSize <= highSize);
-	return (requestedSize - lowSqrt) < (highSize - requestedSize) ? lowSize : highSize;
+	return (requestedSize - lowSize) < (highSize - requestedSize) ? lowSize : highSize;
 }
 
 
