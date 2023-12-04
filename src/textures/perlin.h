@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,8 +45,7 @@ class LIAR_TEXTURES_DLL Perlin: public Texture
 	PY_HEADER(Texture)
 public:
 
-	typedef num::RandomXorShift128Plus TRandom;
-	typedef TRandom::result_type TSeed;
+	typedef num::Tuint32 TSeed;
 
 	Perlin();
 	Perlin(TSeed seed);

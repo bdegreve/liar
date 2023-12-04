@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,11 @@
 
 #include "textures_common.h"
 #include "perlin.h"
+#if LIAR_HAVE_PCG
+#	include <pcg_random.hpp>
+#else
+#	include <random>
+#endif
 
 namespace liar
 {
@@ -131,7 +136,11 @@ void Perlin::doSetState(const TPyObjectPtr& state)
 void Perlin::init(TSeed seed)
 {
 	seed_ = seed;
-	num::RandomXorShift128Plus rng(seed_);
+#if LIAR_HAVE_PCG
+	pcg32_k2_fast rng(seed_);
+#else
+	std::minstd_rand rng(seed_);
+#endif
 	for (size_t k = 0; k < dimension_; ++k)
 	{
 		size_t* table = hashTables_[k];

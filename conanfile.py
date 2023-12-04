@@ -84,6 +84,7 @@ class LiarConan(ConanFile):
         if self.options.have_lcms2:
             self.requires("lcms/2.14")
         self.requires("happly/cci.20200822")
+        self.requires("pcg-cpp/cci.20220409")
 
     def build_requirements(self):
         self.test_requires("gtest/1.14.0")

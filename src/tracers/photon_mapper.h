@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,6 +40,9 @@
 #include <lass/util/dictionary.h>
 #include <lass/num/inverse_transform_sampling.h>
 #include <random>
+#if LIAR_HAVE_PCG
+#	include <pcg_random.hpp>
+#endif
 
 namespace liar
 {
@@ -219,7 +222,11 @@ private:
 
 	typedef std::vector<TScalar> TLightCdf;
 	typedef std::mt19937 TRandomPrimary;
-	typedef num::RandomXorShift128Plus TRandomPhoton;
+#if LIAR_HAVE_PCG
+	typedef pcg32_k2_fast TRandomPhoton;
+#else
+	typedef std::minstd_rand TRandomPhoton;
+#endif
 	typedef std::uniform_real_distribution<TScalar> TUniformDistribution;
 
 	enum

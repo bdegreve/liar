@@ -69,3 +69,15 @@ if (LCMS2_ENABLE)
 		PUBLIC LIAR_HAVE_LCMS2_H=1
 	)
 endif()
+
+find_package(pcg-cpp)
+if(pcg-cpp_FOUND)
+	target_link_libraries(libkernel
+		PUBLIC
+			pcg-cpp::pcg-cpp
+	)
+	target_compile_definitions(libkernel
+		PUBLIC
+			LIAR_HAVE_PCG=1
+	)
+endif()
