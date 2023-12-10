@@ -226,6 +226,7 @@ class PbrtScene(object):
         assert (
             self.__cur_instance is None
         ), "ObjectBegin called inside of instance definition"
+        self.__cur_instance_name = name
         self.__cur_instance = self.__instances[name] = []
 
     def ObjectEnd(self):
@@ -245,8 +246,13 @@ class PbrtScene(object):
                 if not isinstance(shape, liar.scenery.TriangleMesh)
             ]
             self.__cur_instance.append(composite)
+            print(
+                f"Combined {len(meshes)} triangle meshes in "
+                f"Object {self.__cur_instance_name}"
+            )
 
         self.__cur_instance = None
+        self.__cur_instance_name = None
 
     def ObjectInstance(self, name):
         self.verify_world()
