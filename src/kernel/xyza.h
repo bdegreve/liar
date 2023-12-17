@@ -86,6 +86,11 @@ public:
 	{
 		return XYZ(x, y, z);
 	}
+
+	bool isNaN() const
+	{
+		return std::isnan(x) || std::isnan(y) || std::isnan(z) || std::isnan(a);
+	}
 };
 
 inline XYZA operator+(const XYZA& a, const XYZA& b)

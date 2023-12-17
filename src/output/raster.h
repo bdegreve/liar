@@ -102,7 +102,7 @@ private:
 
     TValue sceneGain() const;
     TValue averageSceneLuminance() const;
-    XYZ weighted(size_t index, TValue gain = 1) const;
+    XYZA weighted(size_t index, TValue gain = 1) const;
 
     TRenderBuffer renderBuffer_;
     TTonemapBuffer tonemapBuffer_;
