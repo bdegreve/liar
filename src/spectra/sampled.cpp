@@ -99,6 +99,32 @@ TSpectrumPtr Sampled::resample(const TWavelengths& wavelengths) const
 
 // --- private -------------------------------------------------------------------------------------
 
+Sampled::TValue Sampled::doCall(TWavelength wavelength) const
+{
+	if (wavelength < wavelengths_.front() || wavelength > wavelengths_.back())
+	{
+		return 0;
+	}
+	const auto i = std::upper_bound(wavelengths_.begin(), wavelengths_.end(), wavelength);
+	if (i == wavelengths_.begin())
+	{
+		return values_.front();
+	}
+	if (i == wavelengths_.end())
+	{
+		return values_.back();
+	}
+
+	const size_t k = static_cast<size_t>(std::distance(wavelengths_.begin(), i));
+	LASS_ASSERT(k > 0 && k < wavelengths_.size());
+	const TWavelength w1 = wavelengths_[k - 1];
+	const TWavelength w2 = wavelengths_[k];
+	const TValue t = static_cast<TValue>((wavelength - w1) / (w2 - w1));
+	return num::lerp(values_[k - 1], values_[k], t);
+}
+
+
+
 const Spectral Sampled::doEvaluate(const Sample& sample, SpectralType type) const
 {
 	return Spectral::fromSampled(wavelengths_, values_, sample, type);

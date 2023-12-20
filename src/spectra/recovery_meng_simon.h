@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -76,6 +76,7 @@ public:
 private:
 
 	Spectral doRecover(const XYZ& xyz, const Sample& sample, SpectralType type) const override;
+	TValue doRecover(const XYZ& xyz, TWavelength wavelength) const override;
 
 	struct Impl;
 	std::unique_ptr<Impl> pimpl_;

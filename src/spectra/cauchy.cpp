@@ -72,6 +72,14 @@ void Cauchy::setC(TParam c)
 
 // --- private -------------------------------------------------------------------------------------
 
+Cauchy::TValue Cauchy::doCall(TWavelength wavelength) const
+{
+	const TWavelength w_um = wavelength * 1e6f; // in micrometers
+	return static_cast<TValue>(b_ + c_ / num::sqr(w_um));
+}
+
+
+
 const Spectral Cauchy::doEvaluate(const Sample& sample, SpectralType type) const
 {
 	return Spectral::fromFunc([this](TWavelength w) {

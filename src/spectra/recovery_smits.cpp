@@ -119,6 +119,65 @@ Spectral RecoverySmits::doRecover(const XYZ& xyz, const Sample& sample, Spectral
 }
 
 
+
+Recovery::TValue RecoverySmits::doRecover(const XYZ& xyz, TWavelength wavelength) const
+{
+	const prim::ColorRGBA rgb = rgbSpace_->toRGBAlinear(xyz);
+
+	TValue result = (*white_)(wavelength);
+	if (rgb.r <= rgb.g)
+	{
+		if (rgb.r <= rgb.b)
+		{
+			result *= rgb.r;
+			if (rgb.g <= rgb.b)
+			{
+				LASS_ASSERT(rgb.r <= rgb.g && rgb.r <= rgb.b && rgb.g <= rgb.b);
+				result += (rgb.g - rgb.r) * (*cyan_)(wavelength);
+				result += (rgb.b - rgb.g) * (*blue_)(wavelength);
+			}
+			else
+			{
+				LASS_ASSERT(rgb.r <= rgb.b && rgb.r <= rgb.g && rgb.b <= rgb.g);
+				result += (rgb.b - rgb.r) * (*cyan_)(wavelength);
+				result += (rgb.g - rgb.b) * (*green_)(wavelength);
+			}
+		}
+		else
+		{
+			LASS_ASSERT(rgb.b <= rgb.r && rgb.b <= rgb.g && rgb.r <= rgb.g);
+			result *= rgb.b;
+			result += (rgb.r - rgb.b) * (*yellow_)(wavelength);
+			result += (rgb.g - rgb.r) * (*green_)(wavelength);
+		}
+	}
+	else if (rgb.g <= rgb.b)
+	{
+		result *= rgb.g;
+		if (rgb.r <= rgb.b)
+		{
+			LASS_ASSERT(rgb.g <= rgb.r && rgb.g <= rgb.b && rgb.r <= rgb.b);
+			result += (rgb.r - rgb.g) * (*magenta_)(wavelength);
+			result += (rgb.b - rgb.r) * (*blue_)(wavelength);
+		}
+		else
+		{
+			LASS_ASSERT(rgb.g <= rgb.b && rgb.g <= rgb.r && rgb.b <= rgb.r);
+			result += (rgb.b - rgb.g) * (*magenta_)(wavelength);
+			result += (rgb.r - rgb.b) * (*red_)(wavelength);
+		}
+	}
+	else
+	{
+		LASS_ASSERT(rgb.b <= rgb.g && rgb.b <= rgb.r && rgb.g <= rgb.r);
+		result *= rgb.b;
+		result += (rgb.g - rgb.b) * (*yellow_)(wavelength);
+		result += (rgb.r - rgb.g) * (*red_)(wavelength);
+	}
+
+	return result;
+}
+
 }
 }
 

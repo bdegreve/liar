@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 
 #include "kernel_common.h"
 #include "spectrum.h"
+#include "recovery.h"
 
 namespace liar
 {
@@ -32,6 +33,7 @@ namespace kernel
 PY_DECLARE_CLASS_DOC(Spectrum, "Abstract base class of spectrum definitionas")
 	PY_CLASS_MEMBER_R(Spectrum, luminance)
 	PY_CLASS_MEMBER_R(Spectrum, isFlat)
+	PY_CLASS_METHOD_NAME(Spectrum, operator(), python::methods::_call_)
 	PY_CLASS_METHOD_NAME(Spectrum, reduce, "__reduce__")
 	PY_CLASS_METHOD_NAME(Spectrum, getState, "__getstate__")
 	PY_CLASS_METHOD_NAME(Spectrum, setState, "__setstate__")
@@ -57,6 +59,14 @@ PY_CLASS_MEMBER_R(TSpectrumXYZ, value)
 Spectrum::~Spectrum()
 {
 }
+
+
+
+Spectrum::TValue Spectrum::operator()(TWavelength wavelength) const
+{
+	return doCall(wavelength);
+}
+
 
 
 Spectral Spectrum::evaluate(const Sample& sample, SpectralType type) const
@@ -155,6 +165,11 @@ SpectrumFlat::TValue SpectrumFlat::value() const
 	return value_;
 }
 
+SpectrumFlat::TValue SpectrumFlat::doCall(TWavelength /* wavelength */) const
+{
+	return value_;
+}
+
 const Spectral SpectrumFlat::doEvaluate(const Sample&, SpectralType type) const
 {
 	return Spectral(value_, type);
@@ -189,6 +204,11 @@ SpectrumXYZ::SpectrumXYZ(const XYZ& value) :
 const XYZ& SpectrumXYZ::value() const
 {
 	return value_;
+}
+
+SpectrumXYZ::TValue SpectrumXYZ::doCall(TWavelength wavelength) const
+{
+	return standardRecovery().recover(value_, wavelength);
 }
 
 const Spectral SpectrumXYZ::doEvaluate(const Sample& sample, SpectralType type) const

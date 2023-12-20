@@ -107,6 +107,13 @@ void BlackBody::setScale(TValue scale)
 
 // --- private -------------------------------------------------------------------------------------
 
+
+BlackBody::TValue BlackBody::doCall(TWavelength wavelength) const
+{
+	const TWavelength w5 = num::sqr(num::sqr(wavelength)) * wavelength;
+	return scale_ * static_cast<TValue>(c1 / (w5 * num::expm1(c2 / (wavelength * temperature_))));
+}
+
 const Spectral BlackBody::doEvaluate(const Sample& sample, SpectralType type) const
 {
 	return Spectral::fromFunc([this](TWavelength w) {

@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -53,6 +53,8 @@ public:
 
 	virtual ~Spectrum();
 
+	TValue operator()(TWavelength wavelength) const;
+
 	Spectral evaluate(const Sample& sample, SpectralType type) const;
 	TValue luminance() const;
 	bool isFlat() const;
@@ -70,9 +72,8 @@ public:
 protected:
 	Spectrum();
 
-	void preEvaluate();
-
 private:
+	virtual TValue doCall(TWavelength wavelength) const = 0;
 	virtual const Spectral doEvaluate(const Sample& sample, SpectralType type) const = 0;
 	virtual TValue doLuminance() const = 0;
 	virtual bool doIsFlat() const;
@@ -95,6 +96,7 @@ public:
 	explicit SpectrumFlat(Spectral::TParam value);
 	Spectral::TValue value() const;
 private:
+	TValue doCall(TWavelength wavelength) const override;
 	const Spectral doEvaluate(const Sample& sample, SpectralType type) const override;
 	TValue doLuminance() const override;
 	bool doIsFlat() const override;
@@ -111,6 +113,7 @@ public:
 	explicit SpectrumXYZ(const XYZ& value);
 	const XYZ& value() const;
 private:
+	TValue doCall(TWavelength wavelength) const override;
 	const Spectral doEvaluate(const Sample& sample, SpectralType type) const override;
 	TValue doLuminance() const override;
 	const TPyObjectPtr doGetState() const override;

@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -178,6 +178,40 @@ Spectral RecoveryMengSimon::doRecover(const XYZ& xyz, const Sample& sample, Spec
 	return Spectral::fromSampled(pimpl_->wavelengths, r, sample, type);
 #endif
 }
+
+
+
+Recovery::TValue RecoveryMengSimon::doRecover(const XYZ& xyz, TWavelength wavelength) const
+{
+	const Impl::PointInfo* pi[3];
+	TValue w[3];
+	if (!pimpl_->recover(xyz, pi, w))
+	{
+		return 0;
+	}
+	const TValues& a = pi[0]->values;
+	const TValues& b = pi[1]->values;
+	const TValues& c = pi[2]->values;
+
+	const TWavelengths& ws = pimpl_->wavelengths;
+	const auto i = std::upper_bound(ws.begin(), ws.end(), wavelength);
+	if (i == ws.begin() || i == ws.end())
+	{
+		return 0;
+	}
+	const size_t k = static_cast<size_t>(std::distance(ws.begin(), i));
+	LASS_ASSERT(k > 0 && k < ws.size());
+
+	LASS_ASSERT(ws[k] > ws[k - 1]);
+	const TWavelength t = (wavelength - ws[k - 1]) / (ws[k] - ws[k - 1]);
+
+	const TValue v0 = w[0] * a[k - 1] + w[1] * b[k - 1] + w[2] * c[k - 1];
+	const TValue v1 = w[0] * a[k] + w[1] * b[k] + w[2] * c[k];
+	const TValue v = num::lerp(v0, v1, static_cast<TValue>(t));
+
+	return v;
+}
+
 
 
 RecoveryMengSimon::Impl::Impl(const TWavelengths& ws, const TSamples& ss):
