@@ -44,7 +44,7 @@ Sampled::Sampled(const TWavelengths& wavelengths, const TValues& values):
 	wavelengths_(wavelengths),
 	values_(values)
 {
-	tristimulus_ = standardObserver().tristimulus(wavelengths, values);
+	update();
 }
 
 
@@ -132,12 +132,6 @@ const Spectral Sampled::doEvaluate(const Sample& sample, SpectralType type) cons
 
 
 
-Sampled::TValue Sampled::doLuminance() const
-{
-	return tristimulus_.y;
-}
-
-
 const TPyObjectPtr Sampled::doGetState() const
 {
 	return python::makeTuple(wavelengths_, values_);
@@ -148,7 +142,6 @@ const TPyObjectPtr Sampled::doGetState() const
 void Sampled::doSetState(const TPyObjectPtr& state)
 {
 	python::decodeTuple(state, wavelengths_, values_);
-	tristimulus_ = standardObserver().tristimulus(wavelengths_, values_);
 }
 
 

@@ -31,6 +31,7 @@ namespace kernel
 {
 
 PY_DECLARE_CLASS_DOC(Spectrum, "Abstract base class of spectrum definitionas")
+	PY_CLASS_MEMBER_R(Spectrum, tristimulus)
 	PY_CLASS_MEMBER_R(Spectrum, luminance)
 	PY_CLASS_MEMBER_R(Spectrum, isFlat)
 	PY_CLASS_METHOD_NAME(Spectrum, operator(), python::methods::_call_)
@@ -69,15 +70,29 @@ Spectrum::TValue Spectrum::operator()(TWavelength wavelength) const
 
 
 
-Spectral Spectrum::evaluate(const Sample& sample, SpectralType type) const
+Spectral Spectrum::evaluate([[maybe_unused]] const Sample& sample, SpectralType type) const
 {
-	return doEvaluate(sample, type);
+#if LIAR_SPECTRAL_SAMPLE_INDEPENDENT
+	return Spectral(evaluated_, type);
+#else
+	Spectral s = doEvaluate(sample, type);
+	LIAR_ASSERT(s.minimum() >= 0, "Spectrum::evaluate: negative value: " << s);
+	return s;
+#endif
 }
+
+
+
+XYZ Spectrum::tristimulus() const
+{
+	return tristimulus_;
+}
+
 
 
 Spectrum::TValue Spectrum::luminance() const
 {
-	return doLuminance();
+	return tristimulus_.y;
 }
 
 
@@ -135,6 +150,7 @@ const TPyObjectPtr Spectrum::getState() const
 void Spectrum::setState(const TPyObjectPtr& state)
 {
 	doSetState(state);
+	update();
 }
 
 
@@ -142,6 +158,23 @@ void Spectrum::setState(const TPyObjectPtr& state)
 
 Spectrum::Spectrum()
 {
+}
+
+
+
+void Spectrum::update()
+{
+	const auto ws = standardObserver().wavelengths();
+	std::vector<TValue> values;
+	values.reserve(ws.size());
+	for (TWavelength w : ws)
+	{
+		values.push_back(doCall(w));
+	}
+#if LIAR_SPECTRAL_SAMPLE_INDEPENDENT
+	evaluated_ = Spectral::fromSampled(ws, values, SpectralType::Illuminant);
+#endif
+	tristimulus_ = standardObserver().tristimulus(values);
 }
 
 
@@ -158,6 +191,10 @@ namespace impl
 SpectrumFlat::SpectrumFlat(TParam value) :
 	value_(value)
 {
+#if LIAR_SPECTRAL_SAMPLE_INDEPENDENT
+	evaluated_ = Spectral(value);
+#endif
+	tristimulus_ = value_;
 }
 
 SpectrumFlat::TValue SpectrumFlat::value() const
@@ -173,11 +210,6 @@ SpectrumFlat::TValue SpectrumFlat::doCall(TWavelength /* wavelength */) const
 const Spectral SpectrumFlat::doEvaluate(const Sample&, SpectralType type) const
 {
 	return Spectral(value_, type);
-}
-
-SpectrumFlat::TValue SpectrumFlat::doLuminance() const
-{
-	return value_;
 }
 
 bool SpectrumFlat::doIsFlat() const
@@ -199,6 +231,10 @@ void SpectrumFlat::doSetState(const TPyObjectPtr& state)
 SpectrumXYZ::SpectrumXYZ(const XYZ& value) :
 	value_(value)
 {
+#if LIAR_SPECTRAL_SAMPLE_INDEPENDENT
+	update(); // still the best way to recover the spectrum
+#endif
+	tristimulus_ = value_;
 }
 
 const XYZ& SpectrumXYZ::value() const
@@ -214,11 +250,6 @@ SpectrumXYZ::TValue SpectrumXYZ::doCall(TWavelength wavelength) const
 const Spectral SpectrumXYZ::doEvaluate(const Sample& sample, SpectralType type) const
 {
 	return Spectral::fromXYZ(value_, sample, type);
-}
-
-SpectrumXYZ::TValue SpectrumXYZ::doLuminance() const
-{
-	return value_.y;
 }
 
 const TPyObjectPtr SpectrumXYZ::doGetState() const

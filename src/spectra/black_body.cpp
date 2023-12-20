@@ -66,6 +66,7 @@ BlackBody::BlackBody(TValue temperature, TValue scale) :
 	temperature_(temperature),
 	scale_(scale)
 {
+	update();
 }
 
 
@@ -102,21 +103,6 @@ const Spectral BlackBody::doEvaluate(const Sample& sample, SpectralType type) co
 		const TWavelength w5 = num::sqr(num::sqr(w)) * w;
 		return scale_ * static_cast<TValue>(c1 / (w5 * num::expm1(c2 / (w * temperature_))));
 	}, sample, type);
-}
-
-
-
-BlackBody::TValue BlackBody::doLuminance() const
-{
-	// we should be able to do this better
-	const Observer::TWavelengths& ws = standardObserver().wavelengths();
-	TValue acc = 0;
-	for (TWavelength w : ws)
-	{
-		const TWavelength w5 = num::sqr(num::sqr(w)) * w;
-		acc += static_cast<TValue>(c1 / (w5 * num::expm1(c2 / (w * temperature_))));
-	}
-	return scale_ * acc / static_cast<TValue>(ws.size());
 }
 
 

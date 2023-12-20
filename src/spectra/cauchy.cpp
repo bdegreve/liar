@@ -39,6 +39,7 @@ Cauchy::Cauchy(TParam b, TParam c) :
 	b_(b),
 	c_(c)
 {
+	update();
 }
 
 
@@ -76,12 +77,6 @@ const Spectral Cauchy::doEvaluate(const Sample& sample, SpectralType type) const
 	}, sample, type);
 }
 
-
-
-Cauchy::TValue Cauchy::doLuminance() const
-{
-	return b_;
-}
 
 
 const TPyObjectPtr Cauchy::doGetState() const

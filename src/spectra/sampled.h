@@ -55,14 +55,12 @@ private:
 
 	TValue doCall(TWavelength wavelength) const override;
 	const Spectral doEvaluate(const Sample& sample, SpectralType type) const override;
-	TValue doLuminance() const override;
 
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
 	TWavelengths wavelengths_;
 	TValues values_;
-	XYZ tristimulus_;
 };
 
 }

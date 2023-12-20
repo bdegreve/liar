@@ -37,6 +37,11 @@ namespace liar
 {
 namespace kernel
 {
+namespace impl
+{
+	class SpectrumFlat;
+	class SpectrumXYZ;
+}
 
 class Sample;
 
@@ -56,6 +61,7 @@ public:
 	TValue operator()(TWavelength wavelength) const;
 
 	Spectral evaluate(const Sample& sample, SpectralType type) const;
+	XYZ tristimulus() const;
 	TValue luminance() const;
 	bool isFlat() const;
 
@@ -72,17 +78,26 @@ public:
 protected:
 	Spectrum();
 
+	void update();
+
 private:
 	virtual TValue doCall(TWavelength wavelength) const = 0;
 	virtual const Spectral doEvaluate(const Sample& sample, SpectralType type) const = 0;
-	virtual TValue doLuminance() const = 0;
 	virtual bool doIsFlat() const;
 
 	virtual const TPyObjectPtr doGetState() const = 0;
 	virtual void doSetState(const TPyObjectPtr& state) = 0;
 
+	friend class impl::SpectrumFlat;
+	friend class impl::SpectrumXYZ;
+
 	static TSpectrumPtr white_;
 	static TSpectrumPtr black_;
+
+#if LIAR_SPECTRAL_SAMPLE_INDEPENDENT
+	Spectral evaluated_;
+#endif
+	XYZ tristimulus_;
 };
 
 
@@ -98,7 +113,6 @@ public:
 private:
 	TValue doCall(TWavelength wavelength) const override;
 	const Spectral doEvaluate(const Sample& sample, SpectralType type) const override;
-	TValue doLuminance() const override;
 	bool doIsFlat() const override;
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
@@ -115,7 +129,6 @@ public:
 private:
 	TValue doCall(TWavelength wavelength) const override;
 	const Spectral doEvaluate(const Sample& sample, SpectralType type) const override;
-	TValue doLuminance() const override;
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 	XYZ value_;

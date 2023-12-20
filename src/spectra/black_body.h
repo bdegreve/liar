@@ -51,13 +51,18 @@ private:
 
 	TValue doCall(TWavelength wavelength) const override;
 	const Spectral doEvaluate(const Sample& sample, SpectralType type) const override;
-	TValue doLuminance() const override;
 
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
+#if LIAR_SPECTRAL_SAMPLE_INDEPENDENT
+	void updateValue();
+	Spectral value_;
+#endif
+
 	TValue temperature_;
 	TValue scale_;
+	TValue invNorm_;
 };
 
 }
