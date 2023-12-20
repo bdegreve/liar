@@ -31,7 +31,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List
 
 import liar
-import liar.tools.spd
+from liar.tools.spd import load_builtin_refractive_index
 
 
 class Verbosity(enum.Enum):
@@ -562,13 +562,23 @@ class PbrtScene(object):
 
     def _material_metal(
         self,
-        eta,
-        k,
+        *,
+        eta=None,
+        k=None,
         roughness=0.01,
         uroughness=None,
         vroughness=None,
         remaproughness=True,
     ):
+        if eta is None or k is None:
+            try:
+                _n, _k = self.__copper
+            except AttributeError:
+                _n, _k = self.__copper = load_builtin_refractive_index("Cu")
+            if eta is None:
+                eta = _n
+            if k is None:
+                k = _k
         if uroughness is None:
             uroughness = roughness
         if vroughness is None:

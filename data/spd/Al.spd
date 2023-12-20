@@ -1,0 +1,27 @@
+# Complex refractive index n+jk for Aluminium
+#
+# Source:
+#
+#  H.-J. Hagemann, W. Gudat, and C. Kunz.
+#  Optical constants from the far infrared to the x-ray region: Mg, Al, Cu, Ag, Au, Bi, C, and Al2O3.
+#  DESY report SR-74/7 (1974)
+#  http://dx.doi.org/10.3204/PUBDB-2018-00701
+#
+#  Table 3, page 1, from 1.2eV to 7eV
+#
+#  Converted photon energy to wavelength with E=hc/w => w[nm]=1239.84193/E
+#
+# w[nm]	n	k
+177.1	0.098	1.93
+248.0	0.183	2.88
+310.0	0.298	3.70
+413.3	0.548	5.00
+495.9	0.771	5.91
+619.9	1.292	7.28
+688.8	1.731	7.96
+729.3	2.082	8.34
+774.9	2.588	8.55
+826.6	2.829	7.75
+885.6	1.916	7.75
+953.7	1.250	8.68
+1033.2	0.994	9.73

@@ -21,22 +21,23 @@ import os
 import sys
 from importlib.abc import MetaPathFinder
 from importlib.machinery import ModuleSpec, SourceFileLoader
+from pathlib import Path
 
 
 class LiarLoader(SourceFileLoader):
     def __init__(self, fullname, path, *, data_dir: str):
         super().__init__(fullname, path)
-        self.data_dir = data_dir
+        self.self_dir = Path(path).parent
+        self.data_dir = Path(data_dir)
 
-    def get_data(self, path):
-        dirname, basename = os.path.split(path)
-        if dirname and os.path.basename(dirname) == "data":
-            data_path = os.path.join(self.data_dir, basename)
-            try:
-                with open(data_path, "rb") as fp:
-                    return fp.read()
-            except FileNotFoundError:
-                pass
+    def get_data(self, path: str) -> bytes:
+        try:
+            rel_path = Path(path).relative_to(self.self_dir)
+            if rel_path.parts[0] == "data":
+                data_path = self.data_dir / rel_path.relative_to("data")
+                return data_path.read_bytes()
+        except (FileNotFoundError, ValueError):
+            pass
         return super().get_data(path)
 
 

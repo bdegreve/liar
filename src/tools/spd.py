@@ -1,5 +1,5 @@
 # LiAR isn't a raytracer
-# Copyright (C) 2004-2015  Bram de Greve (bramz@users.sourceforge.net)
+# Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,9 +23,12 @@ try:
 except ImportError:
     from cStringIO import StringIO
 
+import pkgutil
+
+from liar.spectra import Sampled
+
 
 def load(fp):
-    from liar.spectra import Sampled
     valid_line = lambda line: line and not line.startswith('#') and not line.startswith(';')
 
     lines = filter(valid_line, (line.strip() for line in fp))
@@ -43,8 +46,13 @@ def loads(s):
     return load(fp)
 
 
+def load_builtin_refractive_index(material) -> tuple[Sampled, Sampled]:
+    data = pkgutil.get_data("liar", f"data/spd/{material}.spd").decode("utf-8")
+    n, k = loads(data)
+    return n, k
+
+
 def dump(obj, fp):
-    from liar.spectra import Sampled
     if isinstance(obj, Sampled):
         obj = [obj]
     if len(obj) == 0:

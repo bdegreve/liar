@@ -1,0 +1,30 @@
+# Complex refractive index n+jk for Gold
+#
+# Source:
+#
+#  H.-J. Hagemann, W. Gudat, and C. Kunz.
+#  Optical constants from the far infrared to the x-ray region: Mg, Al, Cu, Ag, Au, Bi, C, and Al2O3.
+#  DESY report SR-74/7 (1974)
+#  http://dx.doi.org/10.3204/PUBDB-2018-00701
+#
+#  Table 5, page 1, from 1.0eV to 4.4eV
+#
+#  Converted photon energy to wavelength with E=hc/w => w[nm]=1239.84193/E
+#
+# w[nm]	n	k
+281.7	1.848	1.87
+295.2	1.927	1.89
+309.9	1.995	1.88
+326.2	2.039	1.86
+344.4	2.024	1.81
+359.3	1.967	1.84
+375.7	1.960	1.88
+393.6	1.960	1.89
+413.2	1.950	1.86
+442.8	1.826	1.81
+476.8	1.541	1.71
+516.6	0.878	2.01
+563.5	0.613	2.64
+619.9	0.487	3.31
+826.5	0.418	5.13
+1239.8	0.375	8.36
