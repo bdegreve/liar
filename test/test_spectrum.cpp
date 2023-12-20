@@ -21,11 +21,12 @@
  *  http://liar.bramz.net/
  */
 
-#include "kernel/spectral.h"
+#include "kernel/spectrum.h"
 #include "kernel/rgb_space.h"
 #include <iostream>
 
 #include <gtest/gtest.h>
+#include <lass/python/python_api.h>
 
 namespace
 {
@@ -130,6 +131,35 @@ int test_conversion()
 	return errors;
 }
 
+template <typename R, typename... Args > R callMethod(const python::TPyObjPtr& obj, const char* method, Args&&... args)
+{
+	using namespace lass::python;
+
+	LockGIL LASS_UNUSED(lock);
+	auto tuple = makeTuple(std::forward<Args>(args)...);
+
+	TPyObjPtr callable(PY_ENFORCE_POINTER(PyObject_GetAttrString(obj.get(), method)));
+	TPyObjPtr ret(PY_ENFORCE_POINTER(PyObject_CallObject(callable.get(), tuple.get())));
+	typedef ArgumentTraits<R> TraitsR;
+	typename TraitsR::TStorage temp;
+	PY_ENFORCE_ZERO(pyGetSimpleObject(ret.get(), temp));
+	return TraitsR::arg(temp);
+}
+
+template <typename R> R getAttr(const python::TPyObjPtr& obj, const char* name)
+{
+	using namespace lass::python;
+
+	LockGIL LASS_UNUSED(lock);
+	TPyObjPtr attrObj(PY_ENFORCE_POINTER(PyObject_GetAttrString(obj.get(), name)));
+	typedef ArgumentTraits<R> TraitsR;
+	typename TraitsR::TStorage temp;
+	PY_ENFORCE_ZERO(pyGetSimpleObject(attrObj.get(), temp));
+	return TraitsR::arg(temp);
+}
+
+}
+
 TEST(Spectrum, NumberOfBands)
 {
 #if LIAR_SPECTRAL_MODE_BANDED
@@ -213,4 +243,26 @@ TEST(Spectrum, Operators)
 	EXPECT_PRED2(almostEqual, lerp(one, d, TValue(0.3f)), o);
 }
 
+TEST(Spectrum, Sampled)
+{
+	using TWavelengths = std::vector<TWavelength>;
+	using TValues = std::vector<Spectrum::TValue>;
+
+	{
+		auto sampled = lass::python::evaluate("liar.spectra.Sampled([400e-9, 500e-9, 600e-9], [0.1, 0.2, 0.])");
+
+		TWavelengths ws = { 350e-9f, 375e-9f, 400e-9f, 425e-9f, 450e-9f, 475e-9f, 500e-9f, 525e-9f, 550e-9f, 575e-9f, 600e-9f, 625e-9f, 650e-9f };
+		TValues vs =      { 0.f,     0.f,     0.1f,    0.125f,  0.15f,   0.175f,  0.2f,    0.15f,   0.1f,    0.05f,   0.f, 0.f, 0.f };
+
+		auto resampled = callMethod<TSpectrumPtr>(sampled, "resample", ws);
+		auto ws2 = getAttr<TWavelengths>(resampled, "wavelengths");
+		auto vs2 = getAttr<TValues>(resampled, "values");
+		EXPECT_EQ(ws2.size(), ws.size());
+		EXPECT_EQ(vs2.size(), vs2.size());
+
+		for (size_t i = 0, n = std::min(ws.size(), ws2.size()); i < n; ++i)
+			EXPECT_NEAR(ws[i], ws2[i], 1e-6f) << " at index " << i;
+		for (size_t i = 0, n = std::min(vs.size(), vs2.size()); i < n; ++i)
+			EXPECT_NEAR(vs[i], vs2[i], 1e-6f) << " at index " << i;
+	}
 }

@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -65,29 +65,27 @@ TSpectrumPtr Sampled::resample(const TWavelengths& wavelengths) const
 	const size_t n = wavelengths.size();
 	TValues values(n, 0);
 
-	if (wavelengths_.size() == 1)
-	{
-		// special case, not much hope here ...
-	}
+	LASS_ENFORCE(wavelengths_.size() > 1);
 
 	size_t i = 0;
-	for (size_t k = 1, m = wavelengths_.size(); k < m; ++k)
+
 	{
-		const TWavelength w1 = wavelengths_[k - 1];
-		const TWavelength w2 = wavelengths_[k];
-		while (wavelengths[i] < w1 && i < n)
+		const TWavelength w0 = wavelengths_[0];
+		while (wavelengths[i] < w0 && i < n)
 		{
 			++i;
 		}
-		if (i == n)
+	}
+
+	for (size_t k = 1, m = wavelengths_.size(); k < m && i < n; ++k)
+	{
+		const TWavelength w1 = wavelengths_[k - 1];
+		const TWavelength w2 = wavelengths_[k];
+		while (wavelengths[i] < w2 && i < n)
 		{
-			break;
-		}
-		const TWavelength w = wavelengths[i];
-		if (w < w2)
-		{
-			const TValue t = static_cast<TValue>((w - w1) / (w2 - w1));
+			const TValue t = static_cast<TValue>((wavelengths[i] - w1) / (w2 - w1));
 			values[i] = num::lerp(values_[k - 1], values_[k], t);
+			++i;
 		}
 	}
 
