@@ -58,11 +58,11 @@ class LIAR_KERNEL_DLL Spectral
 public:
 
 #if LIAR_SPECTRAL_MODE_BANDED
-	enum { numBands = LIAR_SPECTRAL_MODE_BANDED };
+	constexpr static size_t numBands = LIAR_SPECTRAL_MODE_BANDED;
 #elif LIAR_SPECTRAL_MODE_RGB || LIAR_SPECTRAL_MODE_XYZ
-	enum { numBands = 3 };
+	constexpr static size_t numBands = 3;
 #elif LIAR_SPECTRAL_MODE_SINGLE
-	enum { numBands = 1 };
+	constexpr static size_t numBands = 1;
 #else
 	error Invalid spectral mode
 #endif

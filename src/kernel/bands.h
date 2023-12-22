@@ -47,7 +47,7 @@ public:
 	typedef typename util::CallTraits<T>::TConstReference TConstReference;
 	typedef num::NumTraits<T> TNumTraits;
 
-	enum { numBands = N };
+	constexpr static size_t numBands = N;
 
 	Bands(TParam f = TNumTraits::zero)
 	{
