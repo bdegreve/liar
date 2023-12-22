@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include "cauchy.h"
 #include "recovery_meng_simon.h"
 #include "recovery_smits.h"
+#include "r0_conductor.h"
 #include "sampled.h"
 
 using namespace liar::spectra;
@@ -43,6 +44,7 @@ PY_MODULE_CLASS(spectra, BlackBody)
 PY_MODULE_CLASS(spectra, Cauchy)
 PY_MODULE_CLASS(spectra, RecoveryMengSimon)
 PY_MODULE_CLASS(spectra, RecoverySmits)
+PY_MODULE_CLASS(spectra, R0Conductor)
 PY_MODULE_CLASS(spectra, Sampled)
 
 
