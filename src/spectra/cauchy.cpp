@@ -29,29 +29,37 @@ namespace liar
 namespace spectra
 {
 
-PY_DECLARE_CLASS_DOC(Cauchy, "Cauchy's equation")
+PY_DECLARE_CLASS_DOC(Cauchy,
+	"Cauchy's equation for dispersive refractive index:\n"
+	"\n"
+	"n(w) = a + b / w^2, with w the wavelength in micrometers\n"
+	"\n"
+	"Cauchy(a, b)\n"
+)
 PY_CLASS_CONSTRUCTOR_2(Cauchy, Cauchy::TParam, Cauchy::TParam)
+PY_CLASS_MEMBER_R(Cauchy, a)
+PY_CLASS_MEMBER_R(Cauchy, b)
 
 
 // --- public --------------------------------------------------------------------------------------
 
-Cauchy::Cauchy(TParam b, TParam c) :
-	b_(b),
-	c_(c)
+Cauchy::Cauchy(TParam a, TParam b) :
+	a_(a),
+	b_(b)
 {
 	update();
+}
+
+
+Cauchy::TValue Cauchy::a() const
+{
+	return a_;
 }
 
 
 Cauchy::TValue Cauchy::b() const
 {
 	return b_;
-}
-
-
-Cauchy::TValue Cauchy::c() const
-{
-	return c_;
 }
 
 
@@ -64,7 +72,7 @@ Cauchy::TValue Cauchy::c() const
 Cauchy::TValue Cauchy::doCall(TWavelength wavelength) const
 {
 	const TWavelength w_um = wavelength * 1e6f; // in micrometers
-	return static_cast<TValue>(b_ + c_ / num::sqr(w_um));
+	return static_cast<TValue>(a_ + b_ / num::sqr(w_um));
 }
 
 
@@ -73,7 +81,7 @@ const Spectral Cauchy::doEvaluate(const Sample& sample, SpectralType type) const
 {
 	return Spectral::fromFunc([this](TWavelength w) {
 		const TWavelength w_um = w * 1e6f; // in micrometers
-		return static_cast<TValue>(b_ + c_ / num::sqr(w_um));
+		return static_cast<TValue>(a_ + b_ / num::sqr(w_um));
 	}, sample, type);
 }
 
@@ -81,14 +89,14 @@ const Spectral Cauchy::doEvaluate(const Sample& sample, SpectralType type) const
 
 const TPyObjectPtr Cauchy::doGetState() const
 {
-	return python::makeTuple(b_, c_);
+	return python::makeTuple(a_, b_);
 }
 
 
 
 void Cauchy::doSetState(const TPyObjectPtr& state)
 {
-	python::decodeTuple(state, b_, c_);
+	python::decodeTuple(state, a_, b_);
 }
 
 

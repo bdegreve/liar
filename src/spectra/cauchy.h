@@ -41,10 +41,10 @@ class LIAR_SPECTRA_DLL Cauchy : public Spectrum
 	PY_HEADER(Spectrum)
 public:
 
-	Cauchy(TParam b, TParam c);
+	Cauchy(TParam a, TParam b);
 
+	TValue a() const;
 	TValue b() const;
-	TValue c() const;
 
 private:
 
@@ -54,8 +54,8 @@ private:
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
+	TValue a_;
 	TValue b_;
-	TValue c_;
 };
 
 }
