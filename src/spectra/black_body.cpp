@@ -38,18 +38,25 @@ PY_DECLARE_CLASS_DOC(BlackBody,
 	PY_CLASS_CONSTRUCTOR_2(BlackBody, BlackBody::TValue, BlackBody::TValue)
 	PY_CLASS_MEMBER_R_DOC(BlackBody, temperature, "temperature in Kelvin")
 	PY_CLASS_MEMBER_R(BlackBody, scale)
+	PY_CLASS_MEMBER_R(BlackBody, peakWavelength)
 
 namespace
 {
 	typedef BlackBody::TValue TValue;
 
 	// https://en.wikipedia.org/wiki/Planck's_law#First_and_second_radiation_constants
-	const TValue h = 6.626070040e-34f; // planck constant
-	const TValue c = 299792458.0f; // speed of light
-	const TValue kb = 1.3806488e-23f; // boltzmann constant
+	constexpr TValue h = 6.626070040e-34f; // planck constant
+	constexpr TValue c = 299792458.0f; // speed of light
+	constexpr TValue kb = 1.3806488e-23f; // boltzmann constant
 
-	const TValue c1 = 2 * h * num::sqr(c);
-	const TValue c2 = h * c / kb;
+	constexpr TValue c1 = 2 * h * c * c;
+	constexpr TValue c2 = h * c / kb;
+
+	TValue planck(TValue w, TValue temperature)
+	{
+		const TValue w5 = num::sqr(num::sqr(w)) * w;
+		return c1 / (w5 * num::expm1(c2 / (w * temperature)));
+	}
 }
 
 
@@ -66,6 +73,7 @@ BlackBody::BlackBody(TValue temperature, TValue scale) :
 	temperature_(temperature),
 	scale_(scale)
 {
+	invNorm_ = num::inv(planck(peakWavelength(), temperature));
 	update();
 }
 
@@ -84,6 +92,13 @@ TValue BlackBody::scale() const
 }
 
 
+
+TWavelength BlackBody::peakWavelength() const
+{
+	return 2.897771955e-3f / temperature_;
+}
+
+
 // --- protected -----------------------------------------------------------------------------------
 
 
@@ -93,16 +108,13 @@ TValue BlackBody::scale() const
 
 BlackBody::TValue BlackBody::doCall(TWavelength wavelength) const
 {
-	const TWavelength w5 = num::sqr(num::sqr(wavelength)) * wavelength;
-	return scale_ * static_cast<TValue>(c1 / (w5 * num::expm1(c2 / (wavelength * temperature_))));
+	return scale_ * invNorm_ * planck(wavelength, temperature_);;
 }
+
 
 const Spectral BlackBody::doEvaluate(const Sample& sample, SpectralType type) const
 {
-	return Spectral::fromFunc([this](TWavelength w) {
-		const TWavelength w5 = num::sqr(num::sqr(w)) * w;
-		return scale_ * static_cast<TValue>(c1 / (w5 * num::expm1(c2 / (w * temperature_))));
-	}, sample, type);
+	return Spectral::fromFunc([this](TWavelength w) { return scale_ * invNorm_ * planck(w, temperature_); }, sample, type);
 }
 
 

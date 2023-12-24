@@ -46,6 +46,7 @@ public:
 
 	TValue temperature() const;
 	TValue scale() const;
+	TWavelength peakWavelength() const;
 
 private:
 
