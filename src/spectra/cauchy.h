@@ -44,10 +44,7 @@ public:
 	Cauchy(TParam b, TParam c);
 
 	TValue b() const;
-	void setB(TParam b);
-
 	TValue c() const;
-	void setC(TParam c);
 
 private:
 

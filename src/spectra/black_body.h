@@ -41,16 +41,11 @@ class LIAR_SPECTRA_DLL BlackBody: public Spectrum
 	PY_HEADER(Spectrum)
 public:
 
-	BlackBody(TValue temperature);
+	explicit BlackBody(TValue temperature);
+	BlackBody(TValue temperature, TValue scale);
 
 	TValue temperature() const;
-	void setTemperature(TValue temperature);
-
-	TValue temperatureCelcius() const;
-	void setTemperatureCelcius(TValue temperature);
-
 	TValue scale() const;
-	void setScale(TValue scale);
 
 private:
 

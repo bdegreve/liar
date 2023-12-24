@@ -29,12 +29,15 @@ namespace liar
 namespace spectra
 {
 
-PY_DECLARE_CLASS_DOC(BlackBody, "Black body radiation")
+PY_DECLARE_CLASS_DOC(BlackBody,
+	"Black body radiation\n"
+	"\n"
+	"BlackBody(temperature, scale=1)"
+)
 	PY_CLASS_CONSTRUCTOR_1(BlackBody, BlackBody::TValue)
-	PY_CLASS_MEMBER_RW(BlackBody, temperature, setTemperature)
-	PY_CLASS_MEMBER_RW(BlackBody, temperatureCelcius, setTemperatureCelcius)
-	PY_CLASS_MEMBER_RW(BlackBody, scale, setScale)
-
+	PY_CLASS_CONSTRUCTOR_2(BlackBody, BlackBody::TValue, BlackBody::TValue)
+	PY_CLASS_MEMBER_R_DOC(BlackBody, temperature, "temperature in Kelvin")
+	PY_CLASS_MEMBER_R(BlackBody, scale)
 
 namespace
 {
@@ -53,8 +56,15 @@ namespace
 // --- public --------------------------------------------------------------------------------------
 
 BlackBody::BlackBody(TValue temperature) :
+	BlackBody(temperature, 1)
+{
+}
+
+
+
+BlackBody::BlackBody(TValue temperature, TValue scale) :
 	temperature_(temperature),
-	scale_(1)
+	scale_(scale)
 {
 }
 
@@ -67,37 +77,9 @@ TValue BlackBody::temperature() const
 
 
 
-void BlackBody::setTemperature(TValue temperature)
-{
-	temperature_ = temperature;
-}
-
-
-
-TValue BlackBody::temperatureCelcius() const
-{
-	return temperature_ - 273.15f;
-}
-
-
-
-void BlackBody::setTemperatureCelcius(TValue temperature)
-{
-	temperature_ = temperature + 273.15f;
-}
-
-
-
 TValue BlackBody::scale() const
 {
 	return scale_;
-}
-
-
-
-void BlackBody::setScale(TValue scale)
-{
-	scale_ = scale;
 }
 
 

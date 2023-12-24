@@ -1161,8 +1161,7 @@ class PbrtScene(object):
     _arg_color = _arg_rgb
 
     def _arg_blackbody(self, temperature, scale=1):
-        blackbody = liar.spectra.BlackBody(temperature)
-        blackbody.scale = scale
+        blackbody = liar.spectra.BlackBody(temperature, scale)
         return [blackbody]
 
     def _arg_spectrum(self, *values):

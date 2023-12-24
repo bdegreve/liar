@@ -48,21 +48,9 @@ Cauchy::TValue Cauchy::b() const
 }
 
 
-void Cauchy::setB(TParam b)
-{
-	b_ = b;
-}
-
-
 Cauchy::TValue Cauchy::c() const
 {
 	return c_;
-}
-
-
-void Cauchy::setC(TParam c)
-{
-	c_ = c;
 }
 
 
