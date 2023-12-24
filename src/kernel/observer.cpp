@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -189,17 +189,33 @@ const XYZ Observer::tristimulus(const TValues& spectrum) const
  */
 const XYZ Observer::tristimulus(const TWavelengths& wavelengths, const TValues& spectrum) const
 {
-	const size_t n = wavelengths.size();
-	LASS_ASSERT(n == spectrum.size());
-	LASS_ASSERT(n > 1);
+	const size_t n = w_.size();
+	const size_t m = wavelengths.size();
+	LASS_ENFORCE(m > 1);
+	LASS_ENFORCE(spectrum.size() == m);
 
-	// Triangular integration.
-	XYZ acc = sensitivity(wavelengths[0]) * spectrum[0] * static_cast<TValue>((wavelengths[1] - wavelengths[0]) / 2);
-	for (size_t k = 1; k < n - 1; ++k)
+	size_t i = 0;
+
 	{
-		acc += sensitivity(wavelengths[k]) * spectrum[k] * static_cast<TValue>((wavelengths[k + 1] - wavelengths[k - 1]) / 2);
+		const TWavelength w0 = wavelengths[0];
+		while (w_[i] < w0 && i < n)
+		{
+			++i;
+		}
 	}
-	acc += sensitivity(wavelengths[n - 1]) * spectrum[n - 1] * static_cast<TValue>((wavelengths[n - 1] - wavelengths[n - 2]) / 2);
+
+	XYZ acc;
+	for (size_t k = 1; k < m && i < n; ++k)
+	{
+		const TWavelength w0 = wavelengths[k - 1];
+		const TWavelength w1 = wavelengths[k];
+		while (w_[i] < w1 && i < n)
+		{
+			const TValue t = static_cast<TValue>((w_[i] - w0) / (w1 - w0));
+			acc += dXYZ_[i] * num::lerp(spectrum[k - 1], spectrum[k], t);
+			++i;
+		}
+	}
 
 	return acc;
 }
@@ -227,8 +243,35 @@ Observer::TValue Observer::luminance(const TValues& spectrum) const
 */
 Observer::TValue Observer::luminance(const TWavelengths& wavelengths, const TValues& spectrum) const
 {
-	// i'm too lazy.
-	return tristimulus(wavelengths, spectrum).y;
+	const size_t n = w_.size();
+	const size_t m = wavelengths.size();
+	LASS_ENFORCE(m > 1);
+	LASS_ENFORCE(spectrum.size() == m);
+
+	size_t i = 0;
+
+	{
+		const TWavelength w0 = wavelengths[0];
+		while (w_[i] < w0 && i < n)
+		{
+			++i;
+		}
+	}
+
+	TValue y = 0;
+	for (size_t k = 1; k < m && i < n; ++k)
+	{
+		const TWavelength w0 = wavelengths[k - 1];
+		const TWavelength w1 = wavelengths[k];
+		while (w_[i] < w1 && i < n)
+		{
+			const TValue t = static_cast<TValue>((w_[i] - w0) / (w1 - w0));
+			y += dXYZ_[i].y * num::lerp(spectrum[k - 1], spectrum[k], t);
+			++i;
+		}
+	}
+
+	return y;
 }
 
 
