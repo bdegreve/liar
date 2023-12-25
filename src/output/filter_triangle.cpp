@@ -38,7 +38,7 @@ PY_CLASS_MEMBER_RW(FilterTriangle, width, setWidth)
 // --- public --------------------------------------------------------------------------------------
 
 FilterTriangle::FilterTriangle(const TRenderTargetPtr& target):
-	FilterTriangle(target, 2)
+	FilterTriangle(target, 1)
 {
 }
 
@@ -166,7 +166,7 @@ bool FilterTriangle::doIsCanceling() const
 
 inline FilterTriangle::TValue FilterTriangle::filterKernel(TValue x) const
 {
-	return std::max(num::NumTraits<TValue>::zero, num::abs(x - width_));
+	return std::max(num::NumTraits<TValue>::zero, width_ - num::abs(x));
 }
 
 
