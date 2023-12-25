@@ -50,14 +50,15 @@ PY_CLASS_MEMBER_RW(LightSky, samplingResolution, setSamplingResolution)
 
 // --- public --------------------------------------------------------------------------------------
 
-LightSky::LightSky()
+LightSky::LightSky():
+	LightSky(Texture::white())
 {
-	init(Texture::white());
 }
 
 
 
-LightSky::LightSky(const TTexturePtr& radiance)
+LightSky::LightSky(const TTexturePtr& radiance):
+	fixedDistance_(1e3)
 {
 	init(radiance);
 }
