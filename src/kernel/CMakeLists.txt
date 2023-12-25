@@ -28,6 +28,13 @@ else()
 			INSTALL_RPATH "$ORIGIN"
 		)
 endif()
+if(NOT WIN32)
+	set_target_properties(
+		libkernel
+		PROPERTIES
+			OUTPUT_NAME "kernel"
+		)
+endif()
 if(NOT DEFINED liar_DEBUG)
 	# enable it automatically for debug and relwithdebinfo builds
 	target_compile_definitions(libkernel
