@@ -814,9 +814,14 @@ class PbrtScene(object):
         return liar.textures.FBm(octaves, roughness)
 
     def _texture_imagemap(
-        self, filename, wrap="repeat", maxanisotropy=8, trilinear=False, gamma=1
+        self,
+        filename,
+        wrap="repeat",
+        maxanisotropy=8,
+        trilinear: bool = False,
+        gamma: bool | None = None,
     ):
-        return liar.textures.Image(filename, _RGB_SPACE.withGamma(gamma))
+        return liar.textures.Image(filename, _rgb_space(filename, gamma))
 
     def _texture_mix(self, tex1=0, tex2=1, amount=0.5):
         tex1, tex2, amount = (
@@ -857,7 +862,7 @@ class PbrtScene(object):
         # arg as a path to an image file
         try:
             if os.path.isfile(arg):
-                tex = liar.textures.Image(arg, _RGB_SPACE)
+                tex = liar.textures.Image(arg, _rgb_space(arg))
         except TypeError:
             pass
         if not tex:
@@ -1156,7 +1161,7 @@ class PbrtScene(object):
         return map(liar.Spectrum.XYZ, _split_as_tuples(values, 3))
 
     def _arg_rgb(self, *values):
-        return [liar.rgb(rgb, _RGB_SPACE) for rgb in _split_as_tuples(values, 3)]
+        return [liar.rgb(rgb, _RGB_SPACE_LINEAR) for rgb in _split_as_tuples(values, 3)]
 
     _arg_color = _arg_rgb
 
@@ -1313,7 +1318,7 @@ def _color(*args):
             r, g, b = arg
     else:
         r, g, b = args
-    return liar.rgb(r, g, b, _RGB_SPACE)
+    return liar.rgb(r, g, b, _RGB_SPACE_LINEAR)
 
 
 def _remap_roughness(roughness, *, remaproughness: bool):
@@ -1338,7 +1343,16 @@ def _luminance(x) -> float:
         return float(x)
 
 
-_RGB_SPACE = liar.sRGB.linearSpace()
+def _rgb_space(filename: str, gamma: bool | None = None) -> liar.RgbSpace:
+    if gamma is None:
+        _, ext = os.path.splitext(filename)
+        gamma = ext.lower() in (".png", ".tga", ".jpg", ".jpeg")
+    return _RGB_SPACE_GAMMA if gamma else _RGB_SPACE_LINEAR
+
+
+_RGB_SPACE_GAMMA = liar.sRGB
+_RGB_SPACE_LINEAR = liar.sRGB.linearSpace()
+liar.RgbSpace.setDefaultSpace(_RGB_SPACE_GAMMA)
 
 
 if __name__ == "__main__":
