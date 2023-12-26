@@ -22,35 +22,9 @@ endif ()
 
 find_package(Lass 1.11 REQUIRED)
 
-if (CMAKE_CONFIGURATION_TYPES)
-	set(_configs ${CMAKE_CONFIGURATION_TYPES})
-else()
-	set(_configs "${CMAKE_BUILD_TYPE}")
-endif()
-foreach(_target Lass::lass Lass::lass_python)
-	get_target_property(_type "${_target}" TYPE)
-	if(NOT _type STREQUAL SHARED_LIBRARY)
-		continue()
-	endif()
-	foreach(_config ${_configs})
-		string(TOUPPER "${_config}" _CONFIG)
-		get_target_property(_location "${_target}" "IMPORTED_LOCATION_${_CONFIG}")
-		if (NOT _location)
-			message(SEND_ERROR "can't find ${_config} library of ${_target}")
-		endif()
-		install(
-			FILES "${_location}"
-			DESTINATION liar
-			CONFIGURATIONS ${_config}
-		)
-	endforeach()
-endforeach()
-unset(_location)
-unset(_CONFIG)
-unset(_config)
-unset(_type)
-unset(_target)
-unset(_configs)
+install(IMPORTED_RUNTIME_ARTIFACTS Lass::lass Lass::lass_python
+	DESTINATION liar
+)
 
 
 if (Python_LIBRARY_DEBUG)
