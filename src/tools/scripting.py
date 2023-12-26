@@ -1,3 +1,22 @@
+# LiAR isn't a raytracer
+# Copyright (C) 2012-2023  Bram de Greve (bramz@users.sourceforge.net)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# http://liar.bramz.net/
+
 _MAX_DISPLAY_WIDTH, _MAX_DISPLAY_HEIGHT = 1500, 1000 # is there a may to figure this out dynamically?
 
 def makeRenderTarget(width, height, filename=None, title=None, display=True, fStops=None, rgbSpace=None, toneMapping=None):
@@ -15,7 +34,7 @@ def makeRenderTarget(width, height, filename=None, title=None, display=True, fSt
         if not fStops is None:
             image.exposureStops = fStops
             image.autoExposure = False
-        image.toneMapping = toneMapping or "linear"
+        image.toneMapping = toneMapping or output.Image.ToneMapping.Linear
         image.rgbSpace = rgbSpace or sRGB
         targets.append(image)
 
@@ -30,12 +49,12 @@ def makeRenderTarget(width, height, filename=None, title=None, display=True, fSt
                 resolution = int(scale * width), int(scale * height)
             else:
                 resolution = width, height
-            display = output.Display(title or filename or "", resolution)
+            display = Display(title or filename or "", resolution)
             display.rgbSpace = rgbSpace or sRGB
             if not fStops is None:
                 display.autoExposure = False
                 display.exposure = fStops
-            display.toneMapping = toneMapping or "linear"
+            display.toneMapping = toneMapping or Display.ToneMapping.Linear
             targets.append(display)
 
     assert targets, "Failed to create any kind of render target"
