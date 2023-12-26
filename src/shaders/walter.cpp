@@ -71,7 +71,7 @@ Walter::Walter(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outer
 	transmittance_(Texture::white()),
 	roughnessU_(Texture::black()),
 	roughnessV_(Texture::black()),
-	numberOfSamples_(9)
+	numberOfSamples_(1)
 {
 }
 

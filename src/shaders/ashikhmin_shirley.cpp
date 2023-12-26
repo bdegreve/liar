@@ -67,7 +67,7 @@ AshikhminShirley::AshikhminShirley(const TTexturePtr& iDiffuse, const TTexturePt
 	Shader(BsdfCaps::reflection | BsdfCaps::diffuse | BsdfCaps::glossy),
 	diffuse_(iDiffuse),
 	specular_(iSpecular),
-	numberOfSamples_(9)
+	numberOfSamples_(1)
 {
 	setRoughnessU(Texture::black());
 	setRoughnessV(Texture::black());
