@@ -96,8 +96,8 @@ private:
 	int findWeights(TValue mu, TValue weight[4]) const;
 	size_t getCoefficients(int indexIn, const TValue weightsIn[4], int indexOut, const TValue weightsOut[4], std::vector<TValue>& coefficients) const;
 	TValue cdfMuOut(int indexIn, const TValue weightsIn[4], int indexOut) const;
-	TValue pdfMuOut(int indexIn, const TValue weightsIn[4], int indexOut, const TValue weightsOut[4]) const;
-	TValue sampleMuOut(int indexIn, const TValue weightsIn[4], TValue sample, TValue& pdfMuOut) const;
+	TValue pdfMuOut(int indexIn, const TValue weightsIn[4], int indexOut, const TValue weightsOut[4], BsdfCaps allowedCaps) const;
+	TValue sampleMuOut(int indexIn, const TValue weightsIn[4], TValue sample, BsdfCaps allowedCaps, TValue& pdfMuOut) const;
 
 	std::vector<TValue> nodes_;
 	std::vector<TValue> cdf_;
@@ -106,8 +106,9 @@ private:
 	std::vector<TValue> coefficients_;
 	size_t numChannels_;
 	size_t maxLength_;
-	int numNodes_;
 	size_t numberOfSamples_;
+	int numNodes_;
+	int nodeZero_;
 };
 
 

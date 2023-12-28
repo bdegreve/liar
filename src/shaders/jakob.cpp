@@ -193,6 +193,39 @@ void Jakob::doSetState(const TPyObjectPtr& state)
 
 
 
+namespace
+{
+
+	using TValue = Jakob::TValue;
+
+	int findNode(std::function<TValue(int)> func, int size, TValue x)
+	{
+		if (x < func(0) || x >= func(size - 1))
+		{
+			return -1;
+		}
+		int first = 0;
+		int last = size - 1;
+		while (first + 1 < last)
+		{
+			int mid = first + (last - first) / 2;
+			LASS_ASSERT(mid > first && mid < last);
+			if (func(mid) <= x)
+			{
+				first = mid;
+			}
+			else
+			{
+				last = mid;
+			}
+		}
+		return first;
+	}
+
+}
+
+
+
 void Jakob::init(std::vector<TValue> nodes, std::vector<TValue> cdf, std::vector<size_t> offsets, std::vector<size_t> lengths, std::vector<TValue> coefficients, size_t numChannels)
 {
 	nodes_ = std::move(nodes);
@@ -219,6 +252,7 @@ void Jakob::init(std::vector<TValue> nodes, std::vector<TValue> cdf, std::vector
 			throw std::runtime_error("Nodes must be increasing");
 		}
 	}
+	nodeZero_ = findNode([this](int i) { return nodes_[i]; }, numNodes_, TValue(0));
 
 	if (offsets_.size() != static_cast<size_t>(numNodes_ * numNodes_))
 	{
@@ -244,6 +278,44 @@ void Jakob::init(std::vector<TValue> nodes, std::vector<TValue> cdf, std::vector
 			throw std::runtime_error("Offsets and lengths must not overlap");
 		}
 	}
+
+	// figure out if we have reflection and/or transmission
+	// we do this by checking if the cdf at mu=0 is the maximum or minimum
+	//
+	// Remember: top side of interface is muIn > 0 but muOut < 0 !
+	//
+	BsdfCaps caps = BsdfCaps::glossy;
+	// indexIn < nodeZero_ => muIn < 0: bottom side of interface
+	for (int indexIn = 0; indexIn < nodeZero_; ++indexIn)
+	{
+		const auto cdfZero = cdf_[indexIn * numNodes_ + nodeZero_];
+		// indexOut = 0 => muOut < 0: top side of interface => transmission
+		if (cdf_[indexIn * numNodes_ + 0] < cdfZero)
+		{
+			caps |= BsdfCaps::transmission;
+		}
+		// indexOut = numNodes_ - 1 => muOut > 0: bottom side of interface => reflection
+		if (cdf_[indexIn * numNodes_ + (numNodes_ - 1)] > cdfZero)
+		{
+			caps |= BsdfCaps::reflection;
+		}
+	}
+	// indexIn > nodeZero_ => muIn > 0: top side of interface
+	for (int indexIn = nodeZero_; indexIn < numNodes_; ++indexIn)
+	{
+		const auto cdfZero = cdf_[indexIn * numNodes_ + nodeZero_];
+		// indexOut = 0 => muOut < 0: top side of interface => reflection
+		if (cdf_[indexIn * numNodes_ + 0] < cdfZero)
+		{
+			caps |= BsdfCaps::reflection;
+		}
+		// indexOut = numNodes_ - 1 => muOut > 0: bottom side of interface => transmission
+		if (cdf_[indexIn * numNodes_ + (numNodes_ - 1)] > cdfZero)
+		{
+			caps |= BsdfCaps::transmission;
+		}
+	}
+	setCaps(caps);
 }
 
 
@@ -317,39 +389,6 @@ void Jakob::load(lass::io::BinaryIStream& stream)
 	}
 
 	init(std::move(nodes), std::move(cdf), std::move(offsets), std::move(lengths), std::move(coefficients), header.numChannels);
-}
-
-
-
-namespace
-{
-
-using TValue = Jakob::TValue;
-
-int findNode(std::function<TValue(int)> func, int size, TValue x)
-{
-	if (x < func(0) || x >= func(size - 1))
-	{
-		return -1;
-	}
-	int first = 0;
-	int last = size - 1;
-	while (first + 1 < last)
-	{
-		int mid = first + (last - first) / 2;
-		LASS_ASSERT(mid > first && mid < last);
-		if (func(mid) <= x)
-		{
-			first = mid;
-		}
-		else
-		{
-			last = mid;
-		}
-	}
-	return first;
-}
-
 }
 
 
@@ -497,18 +536,40 @@ TValue Jakob::cdfMuOut(int indexIn, const TValue weightsIn[4], int indexOut) con
 
 #define CHEAPOUT 0
 
-TValue Jakob::pdfMuOut(int indexIn, const TValue weightsIn[4], int indexOut, const TValue weightsOut[4]) const
+TValue Jakob::pdfMuOut(int indexIn, const TValue weightsIn[4], int indexOut, const TValue weightsOut[4], BsdfCaps allowedCaps) const
 {
+	const bool allowReflection = kernel::hasCaps(allowedCaps, BsdfCaps::reflection);
+	const bool allowTransmission = kernel::hasCaps(allowedCaps, BsdfCaps::transmission);
+	LASS_ASSERT(allowReflection || allowTransmission);
+
 	if (indexOut < 0 || indexOut >= numNodes_ - 1)
 	{
 		return 0;
 	}
 	auto cdf = [this, indexIn, weightsIn](int indexOut) { return this->cdfMuOut(indexIn, weightsIn, indexOut); };
 	const TValue cdfMax = cdf(numNodes_ - 1);
-	if (cdfMax <= 0)
+	TValue cdfNorm;
+	if (allowReflection && allowTransmission)
+	{
+		cdfNorm = cdfMax;
+	}
+	else
+	{
+		const TValue cdfZero = cdf(nodeZero_);
+		if (allowReflection)
+		{
+			cdfNorm = cdfZero; // mu < 0
+		}
+		else
+		{
+			cdfNorm = cdfMax - cdfZero; // mu > 0
+		}
+	}
+	if (cdfNorm <= 0)
 	{
 		return 0;
 	}
+
 #if CHEAPOUT
 	// we're going to cheap out, and asume a linear cdf between the nodes
 	LASS_UNUSED(weightsOut);
@@ -516,7 +577,7 @@ TValue Jakob::pdfMuOut(int indexIn, const TValue weightsIn[4], int indexOut, con
 	LASS_ASSERT(dMuOut > 0);
 	const TValue dCdf = cdf(indexOut + 1) - cdf(indexOut);
 	//LASS_ASSERT(dCdf >= 0);
-	return dCdf / (dMuOut * cdfMax);
+	return dCdf / (dMuOut * cdfNorm);
 #else
 	TValue value = 0;
 	for (int i = 0; i < 4; ++i)
@@ -543,24 +604,48 @@ TValue Jakob::pdfMuOut(int indexIn, const TValue weightsIn[4], int indexOut, con
 			}
 		}
 	}
-	return value / cdfMax;
+	return value / cdfNorm;
 #endif
 }
 
 
 
-TValue Jakob::sampleMuOut(int indexIn, const TValue weightsIn[4], TValue sample, TValue& pdfMuOut) const
+TValue Jakob::sampleMuOut(int indexIn, const TValue weightsIn[4], TValue sample, BsdfCaps allowedCaps, TValue& pdfMuOut) const
 {
-	auto cdf = [this, indexIn, weightsIn](int indexOut) { return cdfMuOut(indexIn, weightsIn, indexOut); };
-	const TValue cdfMax = cdf(numNodes_ - 1);
-	if (cdfMax <= 0)
-	{
-		pdfMuOut = 0;
-		return 0.5f;
-	}
+	const bool allowReflection = kernel::hasCaps(allowedCaps, BsdfCaps::reflection);
+	const bool allowTransmission = kernel::hasCaps(allowedCaps, BsdfCaps::transmission);
+	LASS_ASSERT(allowReflection || allowTransmission);
 
 	// scale sample by maximum CDF value, and find interval so that cdf(indexOut) <= sample < cdf(indexOut + 1)
-	sample *= cdfMax;
+	auto cdf = [this, indexIn, weightsIn](int indexOut) { return cdfMuOut(indexIn, weightsIn, indexOut); };
+	const TValue cdfMax = cdf(numNodes_ - 1);
+	TValue cdfNorm;
+	if (allowReflection && allowTransmission)
+	{
+		cdfNorm = cdfMax;
+		sample *= cdfNorm;
+	}
+	else
+	{
+		const TValue cdfZero = cdf(nodeZero_);
+		if (allowReflection)
+		{
+			// must only sample mu < 0
+			cdfNorm = cdfZero;
+			sample *= cdfNorm;
+		}
+		else
+		{
+			// must only sample mu > 0
+			cdfNorm = cdfMax - cdfZero;
+			sample = cdfZero + sample * cdfNorm;
+		}
+	}
+	if (cdfNorm <= 0)
+	{
+		pdfMuOut = 0;
+		return 0;
+	}
 
 	const int indexOut = findNode(cdf, numNodes_, sample);
 	LIAR_ASSERT(indexOut >= 0, "indexOut=" << indexOut << ", sample=" << sample << ", cdfMax=" << cdfMax);
@@ -584,7 +669,7 @@ TValue Jakob::sampleMuOut(int indexIn, const TValue weightsIn[4], TValue sample,
 	const TValue dCdf = cdf1 - cdf0;
 	LASS_ASSERT(dCdf > 0);
 
-	pdfMuOut = dCdf / (dMuOut * cdfMax);
+	pdfMuOut = dCdf / (dMuOut * cdfNorm);
 	return  muOut0 + dMuOut * (sample - cdf0) / dCdf;
 #else
 	auto a0 = [this, indexIn, weightsIn](int indexOut)
@@ -692,7 +777,7 @@ TValue Jakob::sampleMuOut(int indexIn, const TValue weightsIn[4], TValue sample,
 		Fhat -= sample;
 		if (num::abs(Fhat) < tol || (end - begin) < tol)
 		{
-			pdfMuOut = fhat / cdfMax;
+			pdfMuOut = fhat / cdfNorm;
 			return muOut0 + t * dMuOut;
 		}
 		if (Fhat < 0)
@@ -819,7 +904,7 @@ Jakob::Bsdf::Bsdf(const Jakob* parent, const Sample& sample, const IntersectionC
 {
 }
 
-BsdfOut Jakob::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps LASS_UNUSED(allowedCaps)) const
+BsdfOut Jakob::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps allowedCaps) const
 {
 	LASS_ASSERT(shaders::compatibleCaps(allowedCaps, caps()));
 
@@ -827,6 +912,8 @@ BsdfOut Jakob::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omega
 	{
 		return BsdfOut();
 	}
+
+	LASS_ASSERT(kernel::hasCaps(allowedCaps, omegaIn.z * omegaOut.z > 0 ? BsdfCaps::reflection : BsdfCaps::transmission));
 
 	const TValue muIn = static_cast<TValue>(omegaIn.z);
 	TValue weightsIn[4];
@@ -838,7 +925,7 @@ BsdfOut Jakob::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omega
 	{
 		return BsdfOut();
 	}
-	const TValue pdfMuOut = parent_->pdfMuOut(indexIn, weightsIn, indexOut, weightsOut);
+	const TValue pdfMuOut = parent_->pdfMuOut(indexIn, weightsIn, indexOut, weightsOut, allowedCaps);
 
 	const size_t length = parent_->getCoefficients(indexIn, weightsIn, indexOut, weightsOut, coefficients_);
 	if (length == 0 || coefficients_[0] <= 0)
@@ -857,7 +944,7 @@ BsdfOut Jakob::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omega
 
 
 
-SampleBsdfOut Jakob::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar, BsdfCaps LASS_UNUSED(allowedCaps)) const
+SampleBsdfOut Jakob::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar, BsdfCaps allowedCaps) const
 {
 	LASS_ASSERT(shaders::compatibleCaps(allowedCaps, caps()));
 
@@ -870,7 +957,7 @@ SampleBsdfOut Jakob::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sa
 	}
 
 	TValue pdfMuOut;
-	const TValue muOut = parent_->sampleMuOut(indexIn, weightsIn, static_cast<TValue>(sample.x), pdfMuOut);
+	const TValue muOut = parent_->sampleMuOut(indexIn, weightsIn, static_cast<TValue>(sample.x), allowedCaps, pdfMuOut);
 	if (pdfMuOut <= 0)
 	{
 		return SampleBsdfOut();
