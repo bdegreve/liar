@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 
 #include "shaders_common.h"
 #include "cook_torrance.h"
+#include "microfacet_beckmann.h"
 #include "../kernel/ray_tracer.h"
 #include <lass/num/distribution_transformations.h>
 
@@ -43,6 +44,7 @@ PY_CLASS_MEMBER_RW_DOC(CookTorrance, absorptionCoefficient, setAbsorptionCoeffic
 PY_CLASS_MEMBER_RW_DOC(CookTorrance, reflectance, setReflectance, "additional reflectance multiplier")
 PY_CLASS_MEMBER_RW_DOC(CookTorrance, roughnessU, setRoughnessU, "linear roughness [0-1] in U direction: alphaU = roughnesU ** 2")
 PY_CLASS_MEMBER_RW_DOC(CookTorrance, roughnessV, setRoughnessV, "linear roughness [0-1] in V direction: alphaV = roughnesV ** 2")
+PY_CLASS_MEMBER_RW_DOC(CookTorrance, mdf, setMdf, "microfacet distribution")
 PY_CLASS_MEMBER_RW_DOC(CookTorrance, numberOfSamples, setNumberOfSamples, "number of samples for Monte Carlo simulations")
 
 // --- public --------------------------------------------------------------------------------------
@@ -68,6 +70,7 @@ CookTorrance::CookTorrance(const TTexturePtr& refractionIndex, const TTexturePtr
 	reflectance_(Texture::white()),
 	roughnessU_(Texture::black()),
 	roughnessV_(Texture::black()),
+	mdf_(MicrofacetBeckmann::instance()),
 	numberOfSamples_(1)
 {
 }
@@ -144,6 +147,18 @@ void CookTorrance::setRoughnessV(const TTexturePtr& roughness)
 
 
 
+const TMicrofacetDistributionPtr& CookTorrance::mdf() const
+{
+	return mdf_;
+}
+
+
+void CookTorrance::setMdf(const TMicrofacetDistributionPtr& mdf)
+{
+	mdf_ = mdf;
+}
+
+
 size_t CookTorrance::numberOfSamples() const
 {
 	return numberOfSamples_;
@@ -181,7 +196,7 @@ TBsdfPtr CookTorrance::doBsdf(const Sample& sample, const IntersectionContext& c
 	const Spectral reflectance = reflectance_->lookUp(sample, context, SpectralType::Reflectant);
 	const TValue alphaU = num::sqr(std::max<TValue>(roughnessU_->scalarLookUp(sample, context), 1e-3f));
 	const TValue alphaV = num::sqr(std::max<TValue>(roughnessV_->scalarLookUp(sample, context), 1e-3f));
-	return TBsdfPtr(new Bsdf(sample, context, eta, kappa, reflectance, alphaU, alphaV));
+	return TBsdfPtr(new Bsdf(sample, context, eta, kappa, reflectance, mdf_.get(), alphaU, alphaV));
 }
 
 
@@ -200,76 +215,21 @@ void CookTorrance::doSetState(const TPyObjectPtr& iState)
 
 
 
-CookTorrance::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& eta, const Spectral& kappa, const Spectral& reflectance, TValue alphaU, TValue alphaV):
+CookTorrance::Bsdf::Bsdf(
+		const Sample& sample, const IntersectionContext& context, const Spectral& eta, const Spectral& kappa, const Spectral& reflectance,
+		const MicrofacetDistribution* mdf, TValue alphaU, TValue alphaV):
 	kernel::Bsdf(sample, context, BsdfCaps::reflection | BsdfCaps::glossy),
 	eta_(eta),
 	kappa_(kappa),
 	reflectance_(reflectance),
+	mdf_(mdf),
 	alphaU_(alphaU),
 	alphaV_(alphaV)
 {
 }
 
-
-
 namespace
 {
-
-// An Overview of BRDF Models, Rosana Montesand Carlos Ureña, Technical Report LSI-2012-001
-// Dept. Lenguajes y Sistemas Informáticos University of Granada, Granada, Spain
-
-// BECKMANN P., SPIZZICHINO A.: The Scattering of Electromagnetic Waves from Rough Surfaces.
-// Pergamon Press, New York, 1963. Reprinted in 1987 by Artech House Publishers, Norwood, Massachusetts
-
-inline TScalar D_beckmann(const TVector3D& h, TScalar alphaU, TScalar alphaV)
-{
-	// original isotropic Beckmann distribution
-	// D = 1 / (m^2 cos^4 theta) * exp -{ (tan^2 theta) / m^2 }
-	//
-	// anisotropic roughness: 1/m^2 -> cos^2 phi / m_x^2 + sin^2 phi / m_y^2
-	// and cos^2 phi = h_x^2 / sin^2 theta
-
-	const TScalar cosTheta2 = num::sqr(h.z);
-	if (cosTheta2 == TNumTraits::zero)
-		return TNumTraits::zero;
-	return num::exp(-(num::sqr(h.x / alphaU) + num::sqr(h.y / alphaV)) / cosTheta2)
-		/ (TNumTraits::pi * alphaU * alphaV * num::sqr(cosTheta2));
-}
-
-
-inline TVector3D sampleD_beckmann(const TPoint2D& sample, TScalar alphaU, TScalar alphaV)
-{
-	LASS_ASSERT(sample.x < TNumTraits::one);
-	const TScalar s = num::log(TNumTraits::one - sample.x);
-	LASS_ASSERT(!num::isInf(s));
-
-	TScalar cosPhi;
-	TScalar sinPhi;
-	TScalar tanTheta2;
-	if (alphaU == alphaV)
-	{
-		const TScalar phi = 2 * TNumTraits::pi * sample.y;
-		cosPhi = num::cos(phi);
-		sinPhi = num::sin(phi);
-		tanTheta2 = -s * num::sqr(alphaU);
-	}
-	else
-	{
-		TScalar phi = std::atan(alphaV / alphaU * num::tan(2 * TNumTraits::pi * sample.y + TNumTraits::pi / 2));
-		if (sample.y > 0.5f)
-			phi += TNumTraits::pi;
-		cosPhi = num::cos(phi);
-		sinPhi = num::sin(phi);
-		tanTheta2 = -s / (num::sqr(cosPhi / alphaU) + num::sqr(sinPhi / alphaV));
-	}
-
-	const TScalar cosTheta2 = num::inv(1 + tanTheta2);
-	const TScalar cosTheta = num::sqrt(cosTheta2);
-	const TScalar sinTheta = num::sqrt(std::max(1 - cosTheta2, TNumTraits::zero));
-
-	return TVector3D(cosPhi * sinTheta, sinPhi * sinTheta, cosTheta);
-}
-
 
 inline TScalar G(const TVector3D& omegaIn, const TVector3D& omegaOut, const TVector3D& h)
 {
@@ -309,9 +269,10 @@ BsdfOut CookTorrance::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D
 		return BsdfOut();
 	}
 	const TVector3D h = (omegaIn + omegaOut).normal();
-	const TScalar d = D_beckmann(h, alphaU_, alphaV_); // == pdfD
+	TValue pdfH;
+	const TValue d = mdf_->D(h, alphaU_, alphaV_, pdfH);
 	const TScalar g = G(omegaIn, omegaOut, h);
-	const TScalar pdf = d * h.z / (4 * dot(omegaIn, h));
+	const TScalar pdf = pdfH / (4 * dot(omegaIn, h));
 	BsdfOut out(reflectance_, pdf);
 	out.value *= static_cast<Spectral::TValue>(d * g / (4 * omegaIn.z * omegaOut.z));
 	out.value *= fresnelConductor(eta_, kappa_, omegaIn, h);
@@ -323,7 +284,7 @@ BsdfOut CookTorrance::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D
 SampleBsdfOut CookTorrance::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar /*componentSample*/, BsdfCaps allowedCaps) const
 {
 	LASS_ASSERT(omegaIn.z > 0);
-	const TVector3D h = sampleD_beckmann(sample, alphaU_, alphaV_);
+	const TVector3D h = mdf_->sampleH(sample, alphaU_, alphaV_);
 	const TVector3D omegaOut = h.reflect(omegaIn);
 	if (omegaOut.z <= 0)
 	{

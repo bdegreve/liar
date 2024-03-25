@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include "camera.h"
 #include "image_codec.h"
 #include "medium.h"
+#include "microfacet.h"
 #include "observer.h"
 #include "projection.h"
 #include "projection_perspective.h"
@@ -83,6 +84,7 @@ PY_MODULE_CLASS(kernel, liar::kernel::Camera)
 PY_MODULE_CLASS(kernel, liar::kernel::ImageCodec)
 PY_MODULE_CLASS(kernel, liar::kernel::ImageCodecLass)
 PY_MODULE_CLASS(kernel, liar::kernel::Medium)
+PY_MODULE_CLASS(kernel, liar::kernel::MicrofacetDistribution)
 PY_MODULE_CLASS(kernel, liar::kernel::Observer)
 PY_MODULE_CLASS(kernel, liar::kernel::Projection)
 	PY_MODULE_CLASS(kernel, liar::kernel::ProjectionPerspective)

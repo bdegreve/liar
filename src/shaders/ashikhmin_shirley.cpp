@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 
 #include "shaders_common.h"
 #include "ashikhmin_shirley.h"
+#include "microfacet_blinn.h"
 #include "../kernel/ray_tracer.h"
 #include <lass/num/distribution_transformations.h>
 
@@ -40,6 +41,7 @@ PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, roughnessU, setRoughnessU, "linear roug
 PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, roughnessV, setRoughnessV, "linear roughness [0-1] of specular component in V direction: alphaV = roughnessV ** 2")
 PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specularPowerU, setSpecularPowerU, "rollof power [0-inf] of specular component in U direction: powerU = max(2 / alphaU ** 2 - 2, 0)")
 PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specularPowerV, setSpecularPowerV, "rollof power [0-inf] of specular component in V direction: powerV = max(2 / alphaV ** 2 - 2, 0)")
+PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, mdf, setMdf, "microfacet distribution")
 PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, numberOfSamples, setNumberOfSamples, "number of samples for Monte Carlo simulations")
 
 using PowerFromRoughness = AshikhminShirley::PowerFromRoughness;
@@ -67,6 +69,7 @@ AshikhminShirley::AshikhminShirley(const TTexturePtr& iDiffuse, const TTexturePt
 	Shader(BsdfCaps::reflection | BsdfCaps::diffuse | BsdfCaps::glossy),
 	diffuse_(iDiffuse),
 	specular_(iSpecular),
+	mdf_(MicrofacetBlinn::instance()),
 	numberOfSamples_(1)
 {
 	setRoughnessU(Texture::black());
@@ -191,6 +194,19 @@ void AshikhminShirley::setSpecularPowerV(const TTexturePtr& specularPower)
 
 
 
+const TMicrofacetDistributionPtr& AshikhminShirley::mdf() const
+{
+	return mdf_;
+}
+
+
+
+void AshikhminShirley::setMdf(const TMicrofacetDistributionPtr& mdf)
+{
+	mdf_ = mdf;
+}
+
+
 size_t AshikhminShirley::numberOfSamples() const
 {
 	return numberOfSamples_;
@@ -235,9 +251,9 @@ TBsdfPtr AshikhminShirley::doBsdf(const Sample& sample, const IntersectionContex
 	typedef Spectral::TValue TValue;
 	const Spectral Rd = diffuse_->lookUp(sample, context, SpectralType::Reflectant);
 	const Spectral Rs = specular_->lookUp(sample, context, SpectralType::Reflectant);
-	const TValue nu = std::max<TValue>(specularPowerU_->scalarLookUp(sample, context), 0);
-	const TValue nv = std::max<TValue>(specularPowerV_->scalarLookUp(sample, context), 0);
-	return TBsdfPtr(new Bsdf(sample, context, Rd * (1 - Rs), Rs, nu, nv));
+	const TValue alphaU = num::sqr(std::max<TValue>(roughnessU_->scalarLookUp(sample, context), 0));
+	const TValue alphaV = num::sqr(std::max<TValue>(roughnessV_->scalarLookUp(sample, context), 0));
+	return TBsdfPtr(new Bsdf(sample, context, Rd * (1 - Rs), Rs, mdf_.get(), alphaU, alphaV));
 }
 
 
@@ -294,12 +310,15 @@ void AshikhminShirley::doSetState(const TPyObjectPtr& iState)
 
 
 
-AshikhminShirley::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& diffuse, const Spectral& specular, TScalar powerU, TScalar powerV) :
+AshikhminShirley::Bsdf::Bsdf(
+		const Sample& sample, const IntersectionContext& context, const Spectral& diffuse, const Spectral& specular,
+		const MicrofacetDistribution* mdf, TValue alphaU, TValue alphaV) :
 	kernel::Bsdf(sample, context, BsdfCaps::reflection | BsdfCaps::diffuse | BsdfCaps::glossy),
 	diffuse_(diffuse),
 	specular_(specular),
-	powerU_(powerU),
-	powerV_(powerV)
+	mdf_(mdf),
+	alphaU_(alphaU),
+	alphaV_(alphaV)
 {
 }
 
@@ -360,7 +379,7 @@ SampleBsdfOut AshikhminShirley::Bsdf::doSample(const TVector3D& k1, const TPoint
 	else
 	{
 		LIAR_ASSERT(ps > 0, "ps=" << ps);
-		const TVector3D h = sampleH(sample);
+		const TVector3D h = mdf_->sampleH(sample, alphaU_, alphaV_);
 		out.omegaOut = h.reflect(k1);
 		if (out.omegaOut.z > 0)
 		{
@@ -385,55 +404,15 @@ const Spectral AshikhminShirley::Bsdf::rhoD(const TVector3D& k1, const TVector3D
 
 const Spectral AshikhminShirley::Bsdf::rhoS(const TVector3D& k1, const TVector3D& k2, const TVector3D& h, TScalar& pdf) const
 {
-	const TScalar c = num::sqrt((powerU_ + 1) * (powerV_ + 1)) / (8 * TNumTraits::pi);
-	const TScalar n = (powerU_ * num::sqr(h.x) + powerV_ * num::sqr(h.y));
-	const TScalar nn = h.z == 1 ? 0 : n / (1 - num::sqr(h.z));
-	LIAR_ASSERT_POSITIVE_FINITE(nn);
+	using TValue = MicrofacetDistribution::TValue;
 	const TScalar hk = dot(h, k1);
 	LIAR_ASSERT(hk > 0 && hk <= 1, "hk=" << hk << " h=" << h << " k1=" << k1);
 	const Spectral F = specular_ + (1 - specular_) * temp::pow5(std::max(static_cast<Spectral::TValue>(1 - hk), 0.f));
-	const TScalar pdfH = 4 * c * num::pow(h.z, nn);
+	TValue pdfH;
+	const TValue D = mdf_->D(h, alphaU_, alphaV_, pdfH);
 	pdf = pdfH / (4 * hk);
 	LIAR_ASSERT_POSITIVE_FINITE(pdf);
-	return F * static_cast<Spectral::TValue>((c * num::pow(h.z, nn) / (hk * std::max(k1.z, k2.z))));
-}
-
-
-
-const TVector3D AshikhminShirley::Bsdf::sampleH(const TPoint2D& sample) const
-{
-	const TScalar f = num::sqrt((powerU_ + 1) / (powerV_ + 1));
-	TScalar phi;
-	if (sample.x < .5f)
-	{
-		if (sample.x < .25f)
-		{
-			phi = num::atan(f * num::tan(2 * TNumTraits::pi * sample.x));
-		}
-		else
-		{
-			phi = TNumTraits::pi - num::atan(f * num::tan(2 * TNumTraits::pi * (.5f - sample.x)));
-		}
-	}
-	else
-	{
-		if (sample.x < .75f)
-		{
-			phi = TNumTraits::pi + num::atan(f * num::tan(2 * TNumTraits::pi * (sample.x - .5f)));
-		}
-		else
-		{
-			phi = 2 * TNumTraits::pi - num::atan(f * num::tan(2 * TNumTraits::pi * (1.f - sample.x)));
-		}
-	}
-
-	const TScalar cosPhi = num::cos(phi);
-	const TScalar sinPhi = num::sin(phi);
-	const TScalar n = powerU_ * num::sqr(cosPhi) + powerV_ * num::sqr(sinPhi);
-
-	const TScalar cosTheta = std::pow(1 - sample.y, num::inv(n + 1));
-	const TScalar sinTheta = num::sqrt(std::max(TNumTraits::zero, 1 - num::sqr(cosTheta)));
-	return TVector3D(cosPhi * sinTheta, sinPhi * sinTheta, cosTheta);
+	return F * static_cast<Spectral::TValue>(D / (4 * hk * std::max(k1.z, k2.z)));
 }
 
 

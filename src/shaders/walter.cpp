@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2021-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2021-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 
 #include "shaders_common.h"
 #include "walter.h"
+#include "microfacet_trowbridge_reitz.h"
 #include "../kernel/ray_tracer.h"
 #include <lass/num/distribution_transformations.h>
 
@@ -45,6 +46,7 @@ PY_CLASS_MEMBER_RW_DOC(Walter, reflectance, setReflectance, "additional reflecta
 PY_CLASS_MEMBER_RW_DOC(Walter, transmittance, setTransmittance, "additional transmittance multiplier")
 PY_CLASS_MEMBER_RW_DOC(Walter, roughnessU, setRoughnessU, "linear roughness [0-1] in U direction: alphaU = roughnesU ** 2")
 PY_CLASS_MEMBER_RW_DOC(Walter, roughnessV, setRoughnessV, "linear roughness [0-1] in V direction: alphaV = roughnesV ** 2")
+PY_CLASS_MEMBER_RW_DOC(Walter, mdf, setMdf, "microfacet distribution")
 PY_CLASS_MEMBER_RW_DOC(Walter, numberOfSamples, setNumberOfSamples, "number of samples for Monte Carlo simulations")
 
 // --- public --------------------------------------------------------------------------------------
@@ -71,6 +73,7 @@ Walter::Walter(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outer
 	transmittance_(Texture::white()),
 	roughnessU_(Texture::black()),
 	roughnessV_(Texture::black()),
+	mdf_(MicrofacetTrowbridgeReitz::instance()),
 	numberOfSamples_(1)
 {
 }
@@ -161,6 +164,20 @@ void Walter::setRoughnessV(const TTexturePtr& roughness)
 
 
 
+const TMicrofacetDistributionPtr& Walter::mdf() const
+{
+	return mdf_;
+}
+
+
+
+void Walter::setMdf(const TMicrofacetDistributionPtr& mdf)
+{
+	mdf_ = mdf;
+}
+
+
+
 size_t Walter::numberOfSamples() const
 {
 	return numberOfSamples_;
@@ -208,7 +225,7 @@ TBsdfPtr Walter::doBsdf(const Sample& sample, const IntersectionContext& context
 	const Spectral transmittance = transmittance_->lookUp(sample, context, SpectralType::Reflectant);
 	const TValue mu = num::sqr(std::max<TValue>(roughnessU_->scalarLookUp(sample, context), 1e-3f));
 	const TValue mv = num::sqr(std::max<TValue>(roughnessV_->scalarLookUp(sample, context), 1e-3f));
-	return TBsdfPtr(new Bsdf(sample, context, reflectance, transmittance, etaI, etaT, mu, mv));
+	return TBsdfPtr(new Bsdf(sample, context, reflectance, transmittance, etaI, etaT, mdf_.get(), mu, mv));
 }
 
 
@@ -227,10 +244,13 @@ void Walter::doSetState(const TPyObjectPtr& iState)
 
 
 
-Walter::Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& reflectance, const Spectral& transmittance, TValue etaI, TValue etaT, TValue alphaU, TValue alphaV):
+Walter::Bsdf::Bsdf(
+		const Sample& sample, const IntersectionContext& context, const Spectral& reflectance, const Spectral& transmittance, TValue etaI, TValue etaT,
+	const MicrofacetDistribution* mdf, TValue alphaU, TValue alphaV):
 	kernel::Bsdf(sample, context, BsdfCaps::transmission | BsdfCaps::glossy),
 	reflectance_(reflectance),
 	transmittance_(transmittance),
+	mdf_(mdf),
 	etaI_(etaI),
 	etaT_(etaT),
 	alphaU_(alphaU),
@@ -244,51 +264,6 @@ namespace
 {
 
 using TValue = Spectral::TValue;
-
-inline TValue D_ggx(const TVector3D& h, TValue alphaU, TValue alphaV)
-{
-	// B. Burley, Physically-Based Shading at Disney, 2012, Appendix B.2
-
-	constexpr TValue pi = num::NumTraits<TValue>::pi;
-	const TValue hx = static_cast<TValue>(h.x);
-	const TValue hy = static_cast<TValue>(h.y);
-	const TValue hz = static_cast<TValue>(h.z);
-	LASS_ASSERT(hz > 0);
-	return num::inv(pi * alphaU * alphaV * num::sqr(num::sqr(hx / alphaU) + num::sqr(hy / alphaV) + num::sqr(hz)));
-}
-
-
-inline TVector3D sampleD_ggx(const TPoint2D& sample, TScalar alphaU, TScalar alphaV)
-{
-	// B. Burley, Physically-Based Shading at Disney, 2012, Appendix B.2
-
-	LASS_ASSERT(sample.y < TNumTraits::one);
-	const TScalar phi = 2 * TNumTraits::pi * sample.x;
-	const TScalar s = num::sqrt(sample.y / (TNumTraits::one - sample.y));
-	return TVector3D(s * alphaU * num::cos(phi), s * alphaV * num::sin(phi), 1).normal();
-}
-
-
-inline TValue G1_ggx(const TVector3D& omega, const TVector3D& h, TScalar alphaU, TScalar alphaV)
-{
-	// E. Heitz, Understanding the Masking-Shadowing Function in Microfacet-Based BRDFs, 2014, p86.
-
-	if (dot(omega, h) * omega.z <= 0) // same effect as X+(v.m / v.n): 1 if both have same sign, 0 otherwise
-	{
-		return 0;
-	}
-	return static_cast<TValue>(2 /
-		(1 + num::sqrt(1 + (num::sqr(omega.x * alphaU) + num::sqr(omega.y * alphaV)) / num::sqr(omega.z))));
-}
-
-
-
-inline TValue G2_ggx(const TVector3D& omegaIn, const TVector3D& omegaOut, const TVector3D& h, TScalar alphaU, TScalar alphaV)
-{
-	return G1_ggx(omegaIn, h, alphaU, alphaV) * G1_ggx(omegaOut, h, alphaU, alphaV);
-}
-
-
 
 inline TValue fresnelDielectric(TValue ior, const TVector3D& omegaIn, const TVector3D& h)
 {
@@ -324,9 +299,9 @@ BsdfOut Walter::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omeg
 			return BsdfOut(); // neither reflection or transmission
 		}
 
-		const TValue d = D_ggx(h, alphaU_, alphaV_); // == pdfD
-		const TValue g = G2_ggx(omegaIn, omegaOut, h, alphaU_, alphaV_);
-		const TValue pdfH = d * static_cast<TValue>(h.z);
+		TValue pdfH;
+		const TValue d = mdf_->D(h, alphaU_, alphaV_, pdfH);
+		const TValue g = mdf_->G1(omegaIn, h, alphaU_, alphaV_) * mdf_->G1(omegaOut, h, alphaU_, alphaV_);
 		const TValue dh_dwo = static_cast<TValue>(num::inv(4 * dot(omegaIn, h)));
 
 		BsdfOut out(reflectance_, pdfRefl * pdfH * dh_dwo);
@@ -354,9 +329,9 @@ BsdfOut Walter::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omeg
 			return BsdfOut(); // neither reflection or transmission
 		}
 
-		const TValue d = D_ggx(h, alphaU_, alphaV_); // == pdfD
-		const TValue g = G2_ggx(omegaIn, omegaOut, h, alphaU_, alphaV_);
-		const TValue pdfH = d * static_cast<TValue>(h.z);
+		TValue pdfH;
+		const TValue d = mdf_->D(h, alphaU_, alphaV_, pdfH);
+		const TValue g = mdf_->G1(omegaIn, h, alphaU_, alphaV_) * mdf_->G1(omegaOut, h, alphaU_, alphaV_);
 		const TValue dh_dwo = num::sqr(etaT_) * cosThetaT / num::sqr(etaI_ * cosThetaI + etaT_ * cosThetaT);
 
 		BsdfOut out(transmittance_, (1 - pdfRefl) * pdfH * dh_dwo);
@@ -376,10 +351,10 @@ BsdfOut Walter::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVector3D& omeg
 SampleBsdfOut Walter::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const
 {
 	LASS_ASSERT(omegaIn.z > 0);
-	const TVector3D h = sampleD_ggx(sample, alphaU_, alphaV_);
+	const TVector3D h = mdf_->sampleH(sample, alphaU_, alphaV_);
 	LASS_ASSERT(h.z > 0);
-	const TValue d = D_ggx(h, alphaU_, alphaV_);
-	const TValue pdfH = d * static_cast<TValue>(h.z);
+	TValue pdfH;
+	const TValue d = mdf_->D(h, alphaU_, alphaV_, pdfH);
 
 	const TValue rFresnel = fresnelDielectric(etaI_ / etaT_, omegaIn, h);
 	const TValue pdfRefl = pdfReflection(rFresnel, allowedCaps);
@@ -395,7 +370,7 @@ SampleBsdfOut Walter::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& s
 		{
 			return SampleBsdfOut();
 		}
-		const TValue g = G2_ggx(omegaIn, omegaOut, h, alphaU_, alphaV_);
+		const TValue g = mdf_->G1(omegaIn, h, alphaU_, alphaV_) * mdf_->G1(omegaOut, h, alphaU_, alphaV_);
 		const TValue dh_dwo = static_cast<TValue>(num::inv(4 * dot(omegaOut, h)));
 
 		SampleBsdfOut out(omegaOut, reflectance_, pdfRefl * pdfH * dh_dwo, BsdfCaps::reflection | BsdfCaps::glossy);
@@ -415,8 +390,7 @@ SampleBsdfOut Walter::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& s
 		{
 			return SampleBsdfOut();
 		}
-		const TValue g = G2_ggx(omegaIn, omegaOut, h, alphaU_, alphaV_);
-		const TValue pdfH = d * static_cast<TValue>(h.z);
+		const TValue g = mdf_->G1(omegaIn, h, alphaU_, alphaV_) * mdf_->G1(omegaOut, h, alphaU_, alphaV_);
 		const TValue dh_dwo = num::sqr(etaT_) * cosThetaT / num::sqr(etaI_ * cosThetaI + etaT_ * cosThetaT);
 		SampleBsdfOut out(omegaOut, transmittance_, (1 - pdfRefl) * pdfH * dh_dwo, BsdfCaps::transmission | BsdfCaps::glossy);
 		out.value *= ((1 - rFresnel) * d * g * (cosThetaI * dh_dwo)) / static_cast<TValue>(num::abs(omegaIn.z * omegaOut.z));

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@
 #include "shaders_common.h"
 #include "../kernel/shader.h"
 #include "../kernel/texture.h"
+#include "../kernel/microfacet.h"
 
 namespace liar
 {
@@ -65,25 +66,30 @@ public:
 	const TTexturePtr& roughnessV() const;
 	void setRoughnessV(const TTexturePtr& roughness);
 
+	const TMicrofacetDistributionPtr& mdf() const;
+	void setMdf(const TMicrofacetDistributionPtr& mdf);
+
 	size_t numberOfSamples() const;
 	void setNumberOfSamples(size_t number);
 
-	class Bsdf: public kernel::Bsdf
+private:
+
+	class Bsdf : public kernel::Bsdf
 	{
 	public:
 		typedef Spectral::TValue TValue;
-		Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& eta, const Spectral& kappa, const Spectral& reflectance, TValue alphaU, TValue alphaV);
+		Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& eta, const Spectral& kappa, const Spectral& reflectance,
+			const MicrofacetDistribution* mdf, TValue alphaU, TValue alphaV);
 	private:
 		BsdfOut doEvaluate(const TVector3D& k1, const TVector3D& k2, BsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const;
 		Spectral eta_;
 		Spectral kappa_;
 		Spectral reflectance_;
+		const MicrofacetDistribution* mdf_;
 		TValue alphaU_;
 		TValue alphaV_;
 	};
-
-private:
 
 	size_t doNumReflectionSamples() const;
 
@@ -99,6 +105,7 @@ private:
 	TTexturePtr reflectance_;
 	TTexturePtr roughnessU_;
 	TTexturePtr roughnessV_;
+	TMicrofacetDistributionPtr mdf_;
 	size_t numberOfSamples_;
 };
 

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@
 #include "shaders_common.h"
 #include "../kernel/shader.h"
 #include "../kernel/texture.h"
+#include "../kernel/microfacet.h"
 
 namespace liar
 {
@@ -69,13 +70,20 @@ public:
 	const TTexturePtr& specularPowerV() const;
 	void setSpecularPowerV(const TTexturePtr& specularPower);
 
+	const TMicrofacetDistributionPtr& mdf() const;
+	void setMdf(const TMicrofacetDistributionPtr& mdf);
+
 	size_t numberOfSamples() const;
 	void setNumberOfSamples(size_t number);
 
 	class Bsdf: public kernel::Bsdf
 	{
 	public:
-		Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& diffuse, const Spectral& specular, TScalar powerU, TScalar powerV);
+		using TValue = Texture::TValue;
+
+		Bsdf(
+			const Sample& sample, const IntersectionContext& context, const Spectral& diffuse, const Spectral& specular,
+			const MicrofacetDistribution* mdf, TValue alphaU, TValue alphaV);
 	private:
 		BsdfOut doEvaluate(const TVector3D& k1, const TVector3D& k2, BsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const;
@@ -84,8 +92,9 @@ public:
 		const TVector3D sampleH(const TPoint2D& sample) const;
 		Spectral diffuse_;
 		Spectral specular_;
-		TScalar powerU_;
-		TScalar powerV_;
+		const MicrofacetDistribution* mdf_;
+		TValue alphaU_;
+		TValue alphaV_;
 	};
 
 	class PowerFromRoughness: public Texture
@@ -128,8 +137,6 @@ private:
 
 	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
 
-	const TVector3D sampleH(const TPoint2D& sample, TScalar nu, TScalar nv/*, TScalar& pdf*/) const ;
-
 	const TPyObjectPtr doGetState() const;
 	void doSetState(const TPyObjectPtr& state);
 
@@ -139,6 +146,7 @@ private:
 	TTexturePtr roughnessV_;
 	TTexturePtr specularPowerU_;
 	TTexturePtr specularPowerV_;
+	TMicrofacetDistributionPtr mdf_;
 	size_t numberOfSamples_;
 };
 

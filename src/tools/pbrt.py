@@ -1,5 +1,5 @@
 # LiAR isn't a raytracer
-# Copyright (C) 2010-2023  Bram de Greve (bramz@users.sourceforge.net)
+# Copyright (C) 2010-2024  Bram de Greve (bramz@users.sourceforge.net)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -56,6 +56,7 @@ class PbrtScene(object):
     ):
         self.__logger = logging.getLogger("liar.tools.pbrt")
         self.__logger.setLevel(verbosity.value)
+        self.__trowbridge_reitz = liar.shaders.MicrofacetTrowbridgeReitz()
         self.engine = liar.RenderEngine()
         self.engine.numberOfThreads = (
             threads or liar.RenderEngine.AUTO_NUMBER_OF_THREADS
@@ -545,6 +546,7 @@ class PbrtScene(object):
             uroughness = _remap_roughness(uroughness, remaproughness=remaproughness)
             vroughness = _remap_roughness(vroughness, remaproughness=remaproughness)
             glass = liar.shaders.Walter(self._get_texture(eta))
+            glass.mdf = self.__trowbridge_reitz
             glass.roughnessU = self._get_texture(uroughness)
             glass.roughnessV = self._get_texture(vroughness)
         else:
@@ -588,6 +590,7 @@ class PbrtScene(object):
         material = liar.shaders.CookTorrance(
             self._get_texture(eta), self._get_texture(k)
         )
+        material.mdf = self.__trowbridge_reitz
         material.roughnessU = self._get_texture(uroughness)
         material.roughnessV = self._get_texture(vroughness)
         return material
@@ -659,6 +662,7 @@ class PbrtScene(object):
         shader = liar.shaders.AshikhminShirley(
             self._get_texture(Kd), self._get_texture(Ks)
         )
+        shader.mdf = self.__trowbridge_reitz
         shader.roughnessU = self._get_texture(uroughness)
         shader.roughnessV = self._get_texture(vroughness)
         return shader
@@ -695,6 +699,7 @@ class PbrtScene(object):
         if Ks:
             roughness = _remap_roughness(roughness, remaproughness=remaproughness)
             layer = liar.shaders.Walter(self._get_texture(1.5))
+            layer.mdf = self.__trowbridge_reitz
             layer.reflectance = liar.textures.Product(
                 [self._get_texture(Ks), self._get_texture(reflect),]
             )
