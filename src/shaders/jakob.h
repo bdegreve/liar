@@ -80,7 +80,7 @@ private:
 	private:
 		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps allowedCaps) const;
 		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const;
-		Spectral spectral(TValue y, size_t length, TScalar cosPhi, TValue muOut) const;
+		Spectral spectral(TValue y, size_t length, double cosPhi, TValue muOut) const;
 		mutable std::vector<TValue> coefficients_;
 		const Jakob* parent_;
 	};

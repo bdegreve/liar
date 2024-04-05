@@ -250,7 +250,7 @@ const Spectral LightSky::doEmission(const Sample& sample, const TRay3D& ray, Bou
 	const TScalar ny = static_cast<TScalar>(resolution_.y);
 
 	const TVector3D dir = ray.direction();
-	LASS_ASSERT(num::almostEqual(context.uv().x, num::fractional(num::atan2(dir.y, dir.x) / (2 * TNumTraits::pi)), 1e-5));
+	LASS_ASSERT(num::almostEqual(context.uv().x, num::fractional(num::atan2(dir.y, dir.x) / (2 * TNumTraits::pi)), TScalar(1e-5)));
 	const TScalar i = context.uv().x * nx;
 	const TScalar j = (dir.z + 1) * ny / 2; // cylindrical coordinate.
 
@@ -367,7 +367,8 @@ void LightSky::doSetSceneBound(const TSphere3D& bound)
 
 	// intersections with sky are always this distance removed from any point.
 	const TScalar radius = bound.radius();
-	fixedDistance_ = radius > 0 ? 1e3 * radius : 1e3;
+	constexpr TScalar farAway = static_cast<TScalar>(1e3);
+	fixedDistance_ = radius > 0 ? farAway * radius : farAway;
 }
 
 

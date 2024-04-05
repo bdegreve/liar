@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2012  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -168,7 +168,7 @@ void Goursat::doIntersect(const Sample& sample, const BoundedRay& ray, Intersect
     tMax = std::min(tMax, ray.farLimit());
     LASS_ASSERT(tMin >= ray.nearLimit() && tMax > tMin);
 
-    const TScalar tStep = .1;
+    const TScalar tStep = static_cast<TScalar>(.1);
     const TScalar tTolerance = 2 * liar::tolerance;
 
     if (useSphereTracing_)
@@ -179,7 +179,7 @@ void Goursat::doIntersect(const Sample& sample, const BoundedRay& ray, Intersect
         while (t1 < tMax)
         {
             const TScalar g1 = gradient(p1, abc).norm();
-            const TScalar dt = g1 > 0 ? (std::abs(v1 / g1) / 2) : 0;
+            const TScalar dt = g1 > 0 ? (num::abs(v1 / g1) / 2) : 0;
             /*
             TScalar t2 = t1 + dt;
             TPoint3D p2 = ray.point(t2);
@@ -355,7 +355,7 @@ void Goursat::doSetState(const TPyObjectPtr& state)
 
 inline TPoint3D Goursat::abc(TTime t) const
 {
-    return abc0_ + (t - t0_) * dAbc_;
+    return abc0_ + static_cast<TScalar>(t - t0_) * dAbc_;
 }
 
 

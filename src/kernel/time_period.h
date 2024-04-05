@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ public:
 	TTime end() const { return end_; }
 	TTime duration() const { return end_ - begin_; }
 
-	TTime interpolate(TScalar tau) const { return num::lerp(begin_, end_, tau); }
+	TTime interpolate(TScalar tau) const { return num::lerp(begin_, end_, static_cast<TTime>(tau)); }
 
 	TimePeriod& operator+=(TTime offset)
 	{

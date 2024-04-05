@@ -53,7 +53,7 @@ public:
 
 	void add(const TSceneObjectPtr& child)
 	{
-		if (child->area() == TNumTraits::infinity)
+		if (num::isInf(child->area()))
 		{
 			bigChildren_.add(child);
 		}

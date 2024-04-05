@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -220,7 +220,7 @@ const Spectral Fog::doPhase(const Sample& sample, const TPoint3D&, const TVector
 	const TScalar a = 1 - g2;
 	const TScalar b = 1 + g2;
 	const TScalar c = b - 2 * g * cosTheta;
-	TScalar p = a / (4 * TNumTraits::pi * num::pow(c, 1.5));
+	TScalar p = a / (4 * TNumTraits::pi * num::pow(c, TScalar(1.5)));
 	if (num::isInf(p))
 	{
 		p = 1;
@@ -250,7 +250,7 @@ const Spectral Fog::doSamplePhase(const Sample& sample, const TPoint2D& phaseSam
 		const TScalar b = 1 + g2;
 		const TScalar c = b - 2 * g * cosTheta;
 		cosTheta = ( b - num::sqr(a / (1 + g * p)) ) / (2 * g);
-		pdf = a / (4 * TNumTraits::pi * num::pow(c, 1.5));
+		pdf = a / (4 * TNumTraits::pi * num::pow(c, TScalar(1.5)));
 	}
 
 	TVector3D u, v;

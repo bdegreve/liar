@@ -34,7 +34,8 @@
 #define LIAR_EMAIL "bramz@users.sourceforge.net"
 #define LIAR_WEBSITE "http://liar.bramz.net/"
 
-#define LIAR_SCALAR double
+#cmakedefine LIAR_USE_DOUBLE 1
+#define LIAR_SCALAR @LIAR_SCALAR@
 #define LIAR_VALUE float
 #define LIAR_WAVELENGTH float
 #define LIAR_TIME double

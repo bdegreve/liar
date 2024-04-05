@@ -189,6 +189,14 @@ else()
 	message(FATAL_ERROR "Invalid value for SPECTRAL_MODE: ${SPECTRAL_MODE}")
 endif()
 
+option(liar_USE_DOUBLE "Use double precision for geometry" OFF)
+set(LIAR_USE_DOUBLE "${liar_USE_DOUBLE}")
+if(LIAR_USE_DOUBLE)
+	set(LIAR_SCALAR double)
+else()
+	set(LIAR_SCALAR float)
+endif()
+
 configure_file(
 	"${CMAKE_CURRENT_LIST_DIR}/src/config.h.in"
 	"${CMAKE_CURRENT_BINARY_DIR}/config.h"

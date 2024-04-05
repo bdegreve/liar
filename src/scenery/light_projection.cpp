@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -262,7 +262,7 @@ void LightProjection::buildPdf(TMap& pdfMap, TScalar& power, util::ProgressIndic
 	for (size_t i = 0; i < resolution_.x; ++i)
 	{
 		const TScalar u = (static_cast<TScalar>(i) + .5f) * invResolution_.x;
-		progress(.5 * u);
+		progress(static_cast<double>(.5 * u));
 		for (size_t j = 0; j < resolution_.y; ++j)
 		{
 			const TScalar v = (static_cast<TScalar>(j) +.5f) * invResolution_.y;

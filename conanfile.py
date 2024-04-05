@@ -46,6 +46,7 @@ class LiarConan(ConanFile):
         "have_lcms2": [True, False],
         "have_x11": [True, False],
         "spectral_mode": ["RGB", "XYZ", "Banded", "Single"],
+        "use_double": [True, False],
         "debug": [True, False, "auto"],
     }
     default_options = {
@@ -61,6 +62,7 @@ class LiarConan(ConanFile):
         "lodepng/*:shared": False,
         "lcms/*:shared": False,
         "spectral_mode": "RGB",
+        "use_double": False,
         "debug": "auto",
     }
 
@@ -121,6 +123,7 @@ class LiarConan(ConanFile):
             tc.cache_variables["LCMS2_ENABLE"] = True
         if self.options.debug != "auto":
             tc.variables["liar_DEBUG"] = self.options.debug
+        tc.cache_variables["liar_USE_DOUBLE"] = bool(self.options.use_double)
         tc.generate()
 
         deps = CMakeDeps(self)

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2023-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -805,8 +805,8 @@ using TValue = Jakob::TValue;
 
 double cosPhi(const TVector3D& omegaA, const TVector3D& omegaB)
 {
-	const TVector2D a(omegaA.x, omegaA.y);
-	const TVector2D b(omegaB.x, omegaB.y);
+	const prim::Vector2D<double> a(omegaA.x, omegaA.y);
+	const prim::Vector2D<double> b(omegaB.x, omegaB.y);
 	const double squaredNorm = a.squaredNorm() * b.squaredNorm();
 	return squaredNorm > 0
 		? num::clamp(dot(a, b) / num::sqrt(squaredNorm), -1., 1.)
@@ -831,8 +831,9 @@ TValue fourier(const TValue* coefficients, size_t length, double cosPhi)
 }
 
 
-double sampleFourier(const TValue* coefficients, size_t length, TScalar sample, TValue& value, TScalar& pdfPhi)
+double sampleFourier(const TValue* coefficients, size_t length, double sample, TValue& value, TScalar& pdfPhi)
 {
+	using TDoubleTraits = num::NumTraits<double>;
 	constexpr double tol = 1e-6;
 
 	LASS_ASSERT(length > 0);
@@ -843,9 +844,9 @@ double sampleFourier(const TValue* coefficients, size_t length, TScalar sample, 
 		: 2 * sample;
 
 	double begin = 0;
-	double end = TNumTraits::pi;
-	double phi = TNumTraits::pi / 2;
-	const double maxF = coefficients[0] * 2 * TNumTraits::pi;
+	double end = TDoubleTraits::pi;
+	double phi = TDoubleTraits::pi / 2;
+	const double maxF = coefficients[0] * 2 * TDoubleTraits::pi;
 	sample *= maxF / 2;
 	while (true)
 	{
@@ -880,9 +881,9 @@ double sampleFourier(const TValue* coefficients, size_t length, TScalar sample, 
 		if (num::abs(F) < tol || (end - begin) < tol)
 		{
 			if (flip)
-				phi = 2 * TNumTraits::pi - phi;
+				phi = 2 * TDoubleTraits::pi - phi;
 			value = static_cast<TValue>(f);
-			pdfPhi = f / maxF;
+			pdfPhi = static_cast<TScalar>(f / maxF);
 			return phi;
 		}
 		phi -= F / f;
@@ -973,21 +974,21 @@ SampleBsdfOut Jakob::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sa
 
 	TValue y;
 	TScalar pdfPhi;
-	const TScalar phi = sampleFourier(coefficients_.data(), length, sample.y, y, pdfPhi);
+	const auto phi = sampleFourier(coefficients_.data(), length, static_cast<double>(sample.y), y, pdfPhi);
 	if (pdfPhi <= 0)
 	{
 		return SampleBsdfOut();
 	}
 
-	const TScalar sinThetaIn = num::sqrt(std::max(1 - num::sqr(omegaIn.z), 0.));
-	const TScalar cosPhiIn = sinThetaIn > 0 ? omegaIn.x / sinThetaIn : 1.;
-	const TScalar sinPhiIn = sinThetaIn > 0 ? omegaIn.y / sinThetaIn : 0.;
-	const TScalar cosPhi = num::cos(phi);
-	const TScalar sinPhi = num::sin(phi);
-	const TScalar cosPhiOut = cosPhiIn * cosPhi - sinPhiIn * sinPhi;
-	const TScalar sinPhiOut = cosPhiIn * sinPhi + sinPhiIn * cosPhi;
+	const TScalar sinThetaIn = num::sqrt(std::max(1 - num::sqr(omegaIn.z), TNumTraits::zero));
+	const TScalar cosPhiIn = sinThetaIn > 0 ? omegaIn.x / sinThetaIn : 1;
+	const TScalar sinPhiIn = sinThetaIn > 0 ? omegaIn.y / sinThetaIn : 0;
+	const auto cosPhi = num::cos(phi);
+	const auto sinPhi = num::sin(phi);
+	const TScalar cosPhiOut = static_cast<TScalar>(cosPhiIn * cosPhi - sinPhiIn * sinPhi);
+	const TScalar sinPhiOut = static_cast<TScalar>(cosPhiIn * sinPhi + sinPhiIn * cosPhi);
 	const TScalar cosThetaOut = -muOut;
-	const TScalar sinThetaOut = num::sqrt(std::max(1 - num::sqr(cosThetaOut), 0.));
+	const TScalar sinThetaOut = num::sqrt(std::max(1 - num::sqr(cosThetaOut), TNumTraits::zero));
 	const TVector3D omegaOut(-cosPhiOut * sinThetaOut, -sinPhiOut * sinThetaOut, cosThetaOut);
 
 	const Spectral value = spectral(y, length, cosPhi, muOut);
@@ -998,7 +999,7 @@ SampleBsdfOut Jakob::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sa
 
 
 
-Spectral Jakob::Bsdf::spectral(TValue y, size_t length, TScalar cosPhi, TValue muOut) const
+Spectral Jakob::Bsdf::spectral(TValue y, size_t length, double cosPhi, TValue muOut) const
 {
 	if (parent_->numChannels_ == 1)
 	{

@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -200,8 +200,8 @@ bool Halton::TaskHalton::doDrawSample(Sampler& sampler, const TimePeriod& period
 		filmOffset.x + filmX_() * filmDelta.x,
 		filmOffset.y + filmY_() * filmDelta.y));
 	sample.setLensSample(TSample2D(lensX_(), lensY_()));
-	sample.setTime(period.interpolate(time_()));
-	sample.setWavelengthSample(wavelength_());
+	sample.setTime(period.interpolate(static_cast<TScalar>(time_())));
+	sample.setWavelengthSample(static_cast<TSample1D>(wavelength_()));
 
 	size_t primeIndex = 0;
 	for (size_t i = 0, n = halton.numSubSequences1D(); i < n; ++i)

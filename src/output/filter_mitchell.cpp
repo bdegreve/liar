@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -118,14 +118,14 @@ void FilterMitchell::doWriteRender(const OutputSample* first, const OutputSample
 		TVector2D f[filterExtent_];
 		for (int i = 0; i < filterExtent_; ++i)
 		{
-			f[i] = filterKernel(dp + (static_cast<TScalar>(i) - filterWidth_));
+			f[i] = filterKernel(dp + static_cast<TScalar>(i - filterWidth_));
 		}
 		for (int j = 0; j < filterExtent_; ++j)
 		{
-			const TScalar y = (p0.y + j - filterWidth_) * invRes.y;
+			const TScalar y = (p0.y + static_cast<TScalar>(j - filterWidth_)) * invRes.y;
 			for (int i = 0; i < filterExtent_; ++i)
 			{
-				const TScalar x = (p0.x + i - filterWidth_) * invRes.x;
+				const TScalar x = (p0.x + static_cast<TScalar>(i - filterWidth_)) * invRes.x;
 				const TScalar w = f[i].x * f[j].y;
 				LASS_ASSERT(output != end);
 				*output++ = OutputSample(*first, TPoint2D(x, y), static_cast<OutputSample::TValue>(w));
