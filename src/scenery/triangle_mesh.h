@@ -33,20 +33,13 @@
 #include "../kernel/scene_object.h"
 
 #include <lass/prim/triangle_mesh_3d.h>
-#include <lass/spat/aabb_tree.h>
-#include <lass/spat/aabp_tree.h>
-#include <lass/spat/quad_tree.h>
+#include <lass/spat/qbvh_tree.h>
 #include <filesystem>
 
 namespace liar
 {
 namespace scenery
 {
-
-template<typename O, typename OT, typename SH>
-struct MyQuadTree: spat::QuadTree<O, OT>
-{
-};
 
 class TriangleMesh;
 using TTriangleMeshPtr = python::PyObjectPtr<TriangleMesh>::Type;
@@ -56,7 +49,7 @@ class LIAR_SCENERY_DLL TriangleMesh: public SceneObject
 	PY_HEADER(SceneObject)
 public:
 
-	typedef prim::TriangleMesh3D<TScalar, spat::AabbTree, spat::SAHSplitHeuristics> TMesh;
+	typedef prim::TriangleMesh3D<TScalar, spat::QbvhTree, spat::SAHSplitHeuristics> TMesh;
 	typedef std::vector<TMesh::TPoint> TVertices;
 	typedef TMesh::TNormals TNormals;
 	typedef std::vector<TMesh::TUv> TUvs;

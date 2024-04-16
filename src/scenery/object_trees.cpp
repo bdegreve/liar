@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -49,6 +49,13 @@ PY_CLASS_CONSTRUCTOR_1(OctTree, const OctTree::TChildren&)
 PY_CLASS_METHOD_QUALIFIED_1(OctTree, add, void, const TSceneObjectPtr&)
 PY_CLASS_METHOD_QUALIFIED_1(OctTree, add, void, const OctTree::TChildren&)
 PY_CLASS_METHOD(OctTree, children)
+
+PY_DECLARE_CLASS_DOC(QbvhTree, "QBVH tree of child objects")
+PY_CLASS_CONSTRUCTOR_0(QbvhTree)
+PY_CLASS_CONSTRUCTOR_1(QbvhTree, const QbvhTree::TChildren&)
+PY_CLASS_METHOD_QUALIFIED_1(QbvhTree, add, void, const TSceneObjectPtr&)
+PY_CLASS_METHOD_QUALIFIED_1(QbvhTree, add, void, const QbvhTree::TChildren&)
+PY_CLASS_METHOD(QbvhTree, children)
 
 }
 

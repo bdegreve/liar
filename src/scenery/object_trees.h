@@ -35,6 +35,7 @@
 #include <lass/spat/aabb_tree.h>
 #include <lass/spat/aabp_tree.h>
 #include <lass/spat/quad_tree.h>
+#include <lass/spat/qbvh_tree.h>
 
 namespace liar
 {
@@ -337,6 +338,7 @@ namespace impl
 template <typename O, typename OT> using AabbTree = ::lass::spat::AabbTree<O, OT, ::lass::spat::SAHSplitHeuristics>;
 template <typename O, typename OT> using AabpTree = ::lass::spat::AabpTree<O, OT, ::lass::spat::SAHSplitHeuristics>;
 template <typename O, typename OT> using OctTree = ::lass::spat::QuadTree<O, OT>;
+template <typename O, typename OT> using QbvhTree = ::lass::spat::QbvhTree<O, OT, ::lass::spat::SAHSplitHeuristics>;
 
 }
 
@@ -357,6 +359,7 @@ template <typename O, typename OT> using OctTree = ::lass::spat::QuadTree<O, OT>
 LIAR_SCENERY_DEFINE_OBJECT_TREE(AabbTree);
 LIAR_SCENERY_DEFINE_OBJECT_TREE(AabpTree);
 LIAR_SCENERY_DEFINE_OBJECT_TREE(OctTree);
+LIAR_SCENERY_DEFINE_OBJECT_TREE(QbvhTree);
 
 }
 

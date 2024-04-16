@@ -199,7 +199,8 @@ class PbrtScene(object):
             self.__objects.append(composite)
             print(f"Combined {len(meshes)} triangle meshes in WorldEnd")
 
-        engine.scene = liar.scenery.AabbTree(self.__objects)
+        print(f"WorldEnd: {len(self.__objects)} objects")
+        engine.scene = liar.scenery.QbvhTree(self.__objects)
         engine.scene.interior = self.__volume
         if self.__render_immediately:
             self.render()
