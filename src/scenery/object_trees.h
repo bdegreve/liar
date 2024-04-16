@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ namespace scenery
 
 template
 <
-	template <typename, typename> class TreeTypedef
+	template <typename, typename> class TreeType
 >
 class ObjectTree: public SceneObject
 {
@@ -112,7 +112,7 @@ private:
 		Info info;
 		info.sample = &sample;
 		info.intersectionResult = &treeResult;
-		TScalar t;
+		TScalar t = TNumTraits::infinity;
 		if (tree_.intersect(ray, t, ray.nearLimit(), &info) != smallChildren_.end() && t < ray.farLimit())
 		{
 			LASS_ASSERT(treeResult);
@@ -200,7 +200,7 @@ private:
 
 	struct ObjectTraits
 	{
-		typedef TChildren::value_type TObject;
+		typedef TSceneObjectPtr TObject;
 		typedef TAabb3D TAabb;
 		typedef BoundedRay TRay;
 
@@ -305,6 +305,11 @@ private:
 			return false;
 		}
 
+		static TValue aabbSurfaceArea(const TAabb& aabb)
+		{
+			return aabb.area();
+		}
+
 		static const TAabb aabbJoin(const TAabb& a, const TAabb& b) { return a + b; }
 		static const TPoint aabbMin(const TAabb& aabb) { return aabb.min(); }
 		static const TPoint aabbMax(const TAabb& aabb) { return aabb.max(); }
@@ -318,8 +323,7 @@ private:
 		static const TVector vectorReciprocal(const TVector& vector) { return vector.reciprocal();	}
 	};
 
-	typedef typename TreeTypedef<TChildren::value_type, ObjectTraits>::Type TTree;
-	//typedef spat::AabbTree<TChildren::value_type, ObjectTraits> TTree;
+	typedef TreeType<TSceneObjectPtr, ObjectTraits> TTree;
 
 	TChildren allChildren_;
 	TChildren smallChildren_;
@@ -327,29 +331,32 @@ private:
 	TTree tree_;
 };
 
+namespace impl
+{
+
+template <typename O, typename OT> using AabbTree = ::lass::spat::AabbTree<O, OT, ::lass::spat::SAHSplitHeuristics>;
+template <typename O, typename OT> using AabpTree = ::lass::spat::AabpTree<O, OT, ::lass::spat::SAHSplitHeuristics>;
+template <typename O, typename OT> using OctTree = ::lass::spat::QuadTree<O, OT>;
+
+}
+
 #pragma LASS_TODO("There's no proper way yet to export templated classes to python, think of a way [Bramz]")
 
-#define LIAR_SCENERY_DEFINE_OBJECT_TREE(i_name, t_ObjectTreeTemplate)\
-	template <typename ObjectType, typename ObjectTraits>\
-	struct LASS_CONCATENATE( ObjectTreeTypedef_, i_name )\
-	{\
-		typedef t_ObjectTreeTemplate<ObjectType, ObjectTraits> Type;\
-	};\
-	class LIAR_SCENERY_DLL i_name:\
-		public ObjectTree< LASS_CONCATENATE( ObjectTreeTypedef_, i_name ) >\
+#define LIAR_SCENERY_DEFINE_OBJECT_TREE(i_name)\
+	class LIAR_SCENERY_DLL i_name: public ObjectTree< impl::i_name >\
 	{\
 		PY_HEADER(SceneObject)\
 	public:\
-		typedef ObjectTree< LASS_CONCATENATE( ObjectTreeTypedef_, i_name ) > TObjectTree;\
+		typedef ObjectTree< impl::i_name > TObjectTree;\
 		i_name(): TObjectTree() {}\
 		i_name(const TChildren& children): TObjectTree(children) {}\
 		template <typename InputIterator> i_name(InputIterator begin, InputIterator end): TObjectTree(begin, end) {}\
 	};\
 	/**/
 
-LIAR_SCENERY_DEFINE_OBJECT_TREE(AabbTree, ::lass::spat::AabbTree);
-LIAR_SCENERY_DEFINE_OBJECT_TREE(AabpTree, ::lass::spat::AabpTree);
-LIAR_SCENERY_DEFINE_OBJECT_TREE(OctTree, ::lass::spat::QuadTree);
+LIAR_SCENERY_DEFINE_OBJECT_TREE(AabbTree);
+LIAR_SCENERY_DEFINE_OBJECT_TREE(AabpTree);
+LIAR_SCENERY_DEFINE_OBJECT_TREE(OctTree);
 
 }
 

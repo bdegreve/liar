@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ class LIAR_SCENERY_DLL TriangleMesh: public SceneObject
 	PY_HEADER(SceneObject)
 public:
 
-	typedef prim::TriangleMesh3D<TScalar, spat::AabbTree, spat::DefaultSplitHeuristics> TMesh;
+	typedef prim::TriangleMesh3D<TScalar, spat::AabbTree, spat::SAHSplitHeuristics> TMesh;
 	typedef std::vector<TMesh::TPoint> TVertices;
 	typedef TMesh::TNormals TNormals;
 	typedef std::vector<TMesh::TUv> TUvs;
