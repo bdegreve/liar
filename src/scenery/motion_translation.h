@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -49,21 +49,21 @@ public:
 
 private:
 
-	void doAccept(lass::util::VisitorBase& visitor);
+	void doAccept(lass::util::VisitorBase& visitor) override;
 
-	void doPreProcess(const TimePeriod& period);
-	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
-	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
-	void doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const;
-	void doLocalSpace(TTime time, TTransformation3D& localToWorld) const;
-	bool doContains(const Sample& sample, const TPoint3D& point) const;
-	const TAabb3D doBoundingBox() const;
-	TScalar doArea() const;
-	TScalar doArea(const TVector3D& normal) const;
-	bool doHasMotion() const { return true; }
+	void doPreProcess(const TimePeriod& period) override;
+	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const override;
+	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const override;
+	void doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const override;
+	void doLocalSpace(TTime time, TTransformation3D& localToWorld) const override;
+	bool doContains(const Sample& sample, const TPoint3D& point) const override;
+	const TAabb3D doBoundingBox() const override;
+	TScalar doArea() const override;
+	TScalar doArea(const TVector3D& normal) const override;
+	bool doHasMotion() const override { return true; }
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	const TVector3D localToWorldOffset(TTime time) const;
 

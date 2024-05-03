@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve
+ *  Copyright (C) 2004-2024  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -50,8 +50,8 @@ public:
 	void setTransformation(const TTransformation3D& transformation);
 
 protected:
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 private:
 	void doTransformContext(const Sample& sample, IntersectionContext& context) const override;

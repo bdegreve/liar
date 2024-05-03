@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -86,13 +86,13 @@ public:
 
 private:
 
-	const BoundedRay doGenerateRay(const Sample& sample, const TVector2D& screenSpaceDelta) const;
-	const TimePeriod doShutterDelta() const;
-	TScalar doWeight(const TRay3D& ray) const;
-	TScalar doAsDepth(const TRay3D& ray, TScalar t) const;
+	const BoundedRay doGenerateRay(const Sample& sample, const TVector2D& screenSpaceDelta) const override;
+	const TimePeriod doShutterDelta() const override;
+	TScalar doWeight(const TRay3D& ray) const override;
+	TScalar doAsDepth(const TRay3D& ray, TScalar t) const override;
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	void initTransformation();
 

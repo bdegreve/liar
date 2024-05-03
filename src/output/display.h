@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -72,14 +72,14 @@ private:
 
 	typedef std::vector<PixelToaster::FloatingPointPixel> TDisplayBuffer;
 
-	void doBeginRender();
-	void doEndRender();
-	bool doIsCanceling() const;
+	void doBeginRender() override;
+	void doEndRender() override;
+	bool doIsCanceling() const override;
 
-	void onKeyDown(PixelToaster::DisplayInterface& display, PixelToaster::Key key);
-	void onMouseButtonDown(PixelToaster::DisplayInterface& display, PixelToaster::Mouse );
-	void onMouseButtonUp(PixelToaster::DisplayInterface& display, PixelToaster::Mouse );
-	bool onClose(PixelToaster::DisplayInterface& display);
+	void onKeyDown(PixelToaster::DisplayInterface& display, PixelToaster::Key key) override;
+	void onMouseButtonDown(PixelToaster::DisplayInterface& display, PixelToaster::Mouse ) override;
+	void onMouseButtonUp(PixelToaster::DisplayInterface& display, PixelToaster::Mouse ) override;
+	bool onClose(PixelToaster::DisplayInterface& display) override;
 
 	void displayLoop();
 	void copyToDisplayBuffer(const TDirtyBox& box);

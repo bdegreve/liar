@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -51,10 +51,10 @@ public:
 
 private:
 
-	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
+	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const override;
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	TTexturePtr diffuse_;
 };
@@ -64,8 +64,8 @@ class LambertBsdf: public Bsdf
 public:
 	LambertBsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps caps, const Spectral& diffuse);
 private:
-	BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps allowedCaps) const;
-	SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const;
+	BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps allowedCaps) const override;
+	SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const override;
 	Spectral diffuseOverPi_;
 };
 

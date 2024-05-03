@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -55,14 +55,14 @@ protected:
 
 	typedef std::conditional_t<sizeof(TScalar) >= 8, std::mt19937_64, std::mt19937> TRandomSecondary;
 
-	void doRequestSamples(const TSamplerPtr& sampler);
-	void doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads);
-	const Spectral doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const;
-	const TRayTracerPtr doClone() const;
+	void doRequestSamples(const TSamplerPtr& sampler) override;
+	void doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads) override;
+	const Spectral doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const override;
+	const TRayTracerPtr doClone() const override;
 	void doSeed(num::Tuint32 seed) override;
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	virtual const Spectral doShadeMedium(const kernel::Sample& sample, const kernel::BoundedRay& ray, Spectral& transparency) const;
 	virtual const Spectral doShadeSurface(const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,

@@ -81,8 +81,8 @@ private:
 		Bsdf(const Sample& sample, const IntersectionContext& context, const Spectral& eta, const Spectral& kappa, const Spectral& reflectance,
 			const MicrofacetDistribution* mdf, TValue alphaU, TValue alphaV);
 	private:
-		BsdfOut doEvaluate(const TVector3D& k1, const TVector3D& k2, BsdfCaps allowedCaps) const;
-		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const;
+		BsdfOut doEvaluate(const TVector3D& k1, const TVector3D& k2, BsdfCaps allowedCaps) const override;
+		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const override;
 		Spectral eta_;
 		Spectral kappa_;
 		Spectral reflectance_;
@@ -91,14 +91,14 @@ private:
 		TValue alphaV_;
 	};
 
-	size_t doNumReflectionSamples() const;
+	size_t doNumReflectionSamples() const override;
 
-	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
+	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const override;
 
 	const TVector3D sampleH(const TPoint2D& sample, TScalar nu, TScalar nv/*, TScalar& pdf*/) const ;
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	TTexturePtr refractionIndex_;
 	TTexturePtr absorptionCoefficient_;

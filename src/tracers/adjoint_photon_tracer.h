@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -47,10 +47,10 @@ private:
 
 	typedef std::conditional_t<sizeof(TScalar) >= 8, std::mt19937_64, std::mt19937> TRandom;
 
-	void doRequestSamples(const TSamplerPtr& sampler);
-	void doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads);
-	const Spectral doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const;
-	const TRayTracerPtr doClone() const;
+	void doRequestSamples(const TSamplerPtr& sampler) override;
+	void doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads) override;
+	const Spectral doCastRay(const Sample& sample, const DifferentialRay& primaryRay, TScalar& tIntersection, TScalar& alpha, size_t generation, bool highQuality) const override;
+	const TRayTracerPtr doClone() const override;
 	void doSeed(num::Tuint32) override;
 
 	const Spectral tracePhoton(const Sample& sample, const DifferentialRay& ray, TScalar& tIntersection, TScalar& alpha, size_t generation) const;
@@ -65,8 +65,8 @@ private:
 	Sample::TSample1D scatterSample(const Sample& sample, size_t generation) const;
 	Sample::TSample2D scatterPhaseSample(const Sample& sample, size_t generation) const;
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	typedef Sampler::TSubSequenceId TSampleId;
 	typedef std::vector<TSampleId> TSampleIds;

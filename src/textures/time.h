@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ public:
 private:
 	const Spectral doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const override;
 	TValue doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
-	bool doIsChromatic() const;
+	bool doIsChromatic() const override;
 
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;

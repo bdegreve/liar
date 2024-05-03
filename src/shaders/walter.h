@@ -91,8 +91,8 @@ private:
 			const Sample& sample, const IntersectionContext& context, const Spectral& reflectance, const Spectral& transmittance, TValue etaI, TValue etaT,
 			const MicrofacetDistribution* mdf, TValue alphaU, TValue alphaV);
 	private:
-		BsdfOut doEvaluate(const TVector3D& k1, const TVector3D& k2, BsdfCaps allowedCaps) const;
-		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const;
+		BsdfOut doEvaluate(const TVector3D& k1, const TVector3D& k2, BsdfCaps allowedCaps) const override;
+		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const override;
 		TValue pdfReflection(TValue rFresnel, BsdfCaps allowedCaps) const;
 		Spectral reflectance_;
 		Spectral transmittance_;
@@ -110,8 +110,8 @@ private:
 
 	const TVector3D sampleH(const TPoint2D& sample, TScalar nu, TScalar nv/*, TScalar& pdf*/) const ;
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	TTexturePtr innerRefractionIndex_;
 	TTexturePtr outerRefractionIndex_;

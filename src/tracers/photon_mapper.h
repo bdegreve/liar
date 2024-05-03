@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -238,16 +238,16 @@ private:
 	friend class VolumetricWorker;
 
 	// RayTracer
-	void doRequestSamples(const TSamplerPtr& sampler);
-	void doPreProcess(const TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads);
-	const TRayTracerPtr doClone() const;
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	void doRequestSamples(const TSamplerPtr& sampler) override;
+	void doPreProcess(const TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads) override;
+	const TRayTracerPtr doClone() const override;
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	// DirectLighting
-	const Spectral doShadeMedium(const kernel::Sample& sample, const kernel::BoundedRay& ray, Spectral& transparency) const;
+	const Spectral doShadeMedium(const kernel::Sample& sample, const kernel::BoundedRay& ray, Spectral& transparency) const override;
 	const Spectral doShadeSurface(const kernel::Sample& sample, const DifferentialRay& primaryRay, const IntersectionContext& context,
-		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, bool highQuality) const;
+		const TPoint3D& point, const TVector3D& normal, const TVector3D& omega, bool highQuality) const override;
 
 	bool hasFinalGather() const { return isRayTracingDirect_ && (numFinalGatherRays_ > 0); }
 	bool hasSecondaryGather() const { return hasFinalGather() && (numSecondaryGatherRays_ > 0); }

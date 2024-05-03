@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -72,8 +72,8 @@ private:
 	size_t doNumReflectionSamples() const override;
 	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const override;
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	void init(
 		const TTexturePtr& refractionIndex = Texture::white(), const TTexturePtr& absorptionCoefficient = Texture::white(),

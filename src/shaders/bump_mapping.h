@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -55,17 +55,17 @@ public:
 
 private:
 
-	void doRequestSamples(const TSamplerPtr& sampler);
-	size_t doNumReflectionSamples() const;
-	size_t doNumTransmissionSamples() const;
+	void doRequestSamples(const TSamplerPtr& sampler) override;
+	size_t doNumReflectionSamples() const override;
+	size_t doNumTransmissionSamples() const override;
 
-	void doShadeContext(const Sample& sample, IntersectionContext& context) const;
+	void doShadeContext(const Sample& sample, IntersectionContext& context) const override;
 	const Spectral doEmission(const Sample& sample, const IntersectionContext& context,
-		const TVector3D& omegaOut) const;
-	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
+		const TVector3D& omegaOut) const override;
+	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const override;
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	const TVector2D dDisplacement_dUv(const Sample& sample, IntersectionContext& context) const;
 

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -57,21 +57,21 @@ private:
 		static BsdfCaps flip(BsdfCaps caps);
 		static TVector3D flip(const TVector3D& omega);
 	private:
-		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps allowedCaps) const;
-		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const;
+		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps allowedCaps) const override;
+		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const override;
 		TBsdfPtr child_;
 	};
 
-	void doShadeContext(const Sample& sample, IntersectionContext& context) const;
-	const Spectral doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const;
-	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
+	void doShadeContext(const Sample& sample, IntersectionContext& context) const override;
+	const Spectral doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const override;
+	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const override;
 
-	void doRequestSamples(const TSamplerPtr& sampler);
-	size_t doNumReflectionSamples() const;
-	size_t doNumTransmissionSamples() const;
+	void doRequestSamples(const TSamplerPtr& sampler) override;
+	size_t doNumReflectionSamples() const override;
+	size_t doNumTransmissionSamples() const override;
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	TShaderPtr child_;
 };

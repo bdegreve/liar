@@ -76,20 +76,20 @@ private:
 
 	LASS_UTIL_VISITOR_DO_ACCEPT
 
-	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const;
-	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const;
-	void doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const;
-	bool doContains(const Sample& sample, const TPoint3D& point) const;
-	const TAabb3D doBoundingBox() const;
-	const TSphere3D doBoundingSphere() const;
-	TScalar doArea() const;
-	TScalar doArea(const TVector3D& normal) const;
+	void doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const override;
+	bool doIsIntersecting(const Sample& sample, const BoundedRay& ray) const override;
+	void doLocalContext(const Sample& sample, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const override;
+	bool doContains(const Sample& sample, const TPoint3D& point) const override;
+	const TAabb3D doBoundingBox() const override;
+	const TSphere3D doBoundingSphere() const override;
+	TScalar doArea() const override;
+	TScalar doArea(const TVector3D& normal) const override;
 
 	bool doHasSurfaceSampling() const override;
 	const TPoint3D doSampleSurface(const TPoint2D& sample, TVector3D& normal, TScalar& pdf) const override;
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	TMesh mesh_;
 	std::vector<TScalar> cdf_;

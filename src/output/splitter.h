@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -54,11 +54,11 @@ public:
 
 private:
 
-	const TResolution2D doResolution() const;
-	void doBeginRender();
-	void doWriteRender(const OutputSample* first, const OutputSample* last);
-	void doEndRender();
-	bool doIsCanceling() const;
+	const TResolution2D doResolution() const override;
+	void doBeginRender() override;
+	void doWriteRender(const OutputSample* first, const OutputSample* last) override;
+	void doEndRender() override;
+	bool doIsCanceling() const override;
 
 	TChildren children_;
 };

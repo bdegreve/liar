@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -81,11 +81,11 @@ private:
 
 	typedef prim::Plane3D<TScalar, prim::Parametric, prim::Unnormalized> TProjectionPlane;
 
-	const TRay3D doRay(const TUv& uv, TScalar& pdf) const;
-	const TUv doUv(const TPoint3D& point, TRay3D& ray, TScalar& t) const;
+	const TRay3D doRay(const TUv& uv, TScalar& pdf) const override;
+	const TUv doUv(const TPoint3D& point, TRay3D& ray, TScalar& t) const override;
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	void initTransformation();
 

@@ -85,8 +85,8 @@ public:
 			const Sample& sample, const IntersectionContext& context, const Spectral& diffuse, const Spectral& specular,
 			const MicrofacetDistribution* mdf, TValue alphaU, TValue alphaV);
 	private:
-		BsdfOut doEvaluate(const TVector3D& k1, const TVector3D& k2, BsdfCaps allowedCaps) const;
-		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const;
+		BsdfOut doEvaluate(const TVector3D& k1, const TVector3D& k2, BsdfCaps allowedCaps) const override;
+		SampleBsdfOut doSample(const TVector3D& k1, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const override;
 		const Spectral rhoD(const TVector3D& k1, const TVector3D& k2) const;
 		const Spectral rhoS(const TVector3D& k1, const TVector3D& k2, const TVector3D& h, TScalar& pdf) const;
 		const TVector3D sampleH(const TPoint2D& sample) const;
@@ -133,12 +133,12 @@ public:
 
 private:
 
-	size_t doNumReflectionSamples() const;
+	size_t doNumReflectionSamples() const override;
 
-	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
+	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const override;
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	TTexturePtr diffuse_;
 	TTexturePtr specular_;

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2023-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -65,18 +65,18 @@ private:
 		using TValue = Spectral::TValue;
 		Bsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps caps, const Spectral& diffuse, TValue a, TValue b);
 	private:
-		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps allowedCaps) const;
-		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const;
+		BsdfOut doEvaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, BsdfCaps allowedCaps) const override;
+		SampleBsdfOut doSample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const override;
 		Spectral eval(const TVector3D& omegaIn, const TVector3D& omegaOut) const;
 		Spectral diffuseOverPi_;
 		TValue a_;
 		TValue b_;
 	};
 
-	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const;
+	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const override;
 
-	const TPyObjectPtr doGetState() const;
-	void doSetState(const TPyObjectPtr& state);
+	const TPyObjectPtr doGetState() const override;
+	void doSetState(const TPyObjectPtr& state) override;
 
 	TTexturePtr diffuse_;
 	TTexturePtr sigma_;
