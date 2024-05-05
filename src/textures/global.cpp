@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -49,12 +49,12 @@ Global::Global(const TTexturePtr& texture):
 
 void Global::doTransformContext(const Sample&, IntersectionContext& context) const
 {
-	const TTransformation3D& localToWorld = context.localToWorld();
-	context.setPoint(prim::transform(context.point(), localToWorld));
-	context.setDPoint_dI(prim::transform(context.dPoint_dI(), localToWorld));
-	context.setDPoint_dJ(prim::transform(context.dPoint_dJ(), localToWorld));
-	context.setDPoint_dU(prim::transform(context.dPoint_dU(), localToWorld));
-	context.setDPoint_dV(prim::transform(context.dPoint_dV(), localToWorld));
+	const auto localToWorld = context.localToWorld();
+	context.setPoint(localToWorld.transform(context.point()));
+	context.setDPoint_dI(localToWorld.transform(context.dPoint_dI()));
+	context.setDPoint_dJ(localToWorld.transform(context.dPoint_dJ()));
+	context.setDPoint_dU(localToWorld.transform(context.dPoint_dU()));
+	context.setDPoint_dV(localToWorld.transform(context.dPoint_dV()));
 #pragma LASS_TODO("perhaps we need to transform other Uv dependent quantities as well [Brams]")
 }
 

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,13 +34,13 @@
 #include "shader.h"
 #include "medium.h"
 #include "solid_event.h"
+#include "matrix_4x4.h"
+#include "differential_ray.h"
 
 namespace liar
 {
 namespace kernel
 {
-
-class DifferentialRay;
 
 namespace experimental
 {
@@ -62,12 +62,70 @@ namespace experimental
 	};
 }
 
+
 class LIAR_KERNEL_DLL IntersectionContext
 {
 public:
 
+	class LIAR_KERNEL_DLL Transformation
+	{
+	public:
+		using TMatrix = Matrix4x4<TScalar>;
+
+		TVector3D transform(const TVector3D& v) const { return (*forward_) * v; }
+		TPoint3D transform(const TPoint3D& p) const { return (*forward_) * p; }
+		TRay3D transform(const TRay3D& ray) const
+		{
+			return TRay3D(transform(ray.support()), transform(ray.direction()));
+		}
+		TRay3D transform(const TRay3D& ray, TScalar& tScale) const
+		{
+			const TPoint3D support = transform(ray.support());
+			const TVector3D direction = transform(ray.direction());
+			lass::prim::impl::RayParameterRescaler<TRay3D::TNormalizingPolicy>::rescale(tScale, direction);
+			return TRay3D(support, direction);
+		}
+		BoundedRay transform(const BoundedRay& ray) const
+		{
+			TScalar tScale = TNumTraits::one;
+			const TRay3D transformedRay = transform(ray.unboundedRay(), tScale);
+			return BoundedRay(transformedRay, ray.nearLimit() * tScale, ray.farLimit() * tScale);
+		}
+		DifferentialRay transform(const DifferentialRay& ray) const
+		{
+			return DifferentialRay(
+				transform(ray.centralRay()),
+				transform(ray.differentialI()),
+				transform(ray.differentialJ()));
+		}
+		TVector3D normalTransform(const TVector3D& n) const
+		{
+			invert();
+			return n * (*reverse_);
+		}
+
+		const TMatrix& matrix() const { return *forward_; }
+
+		Transformation inverse() const
+		{
+			invert();
+			return Transformation(reverse_, forward_, nullptr);
+		}
+
+	private:
+		friend class IntersectionContext;
+
+		Transformation(TMatrix* forward, TMatrix* reverse, bool* reverseIsDirty);
+		void invert() const;
+
+		TMatrix* forward_;
+		TMatrix* reverse_;
+		bool* reverseIsDirty_;
+	};
+
 	IntersectionContext(const SceneObject& object, const Sample& sample, const BoundedRay& primaryRay, const Intersection& intersection, size_t rayGeneration);
 	IntersectionContext(const SceneObject& object, const Sample& sample, const DifferentialRay& primaryRay, const Intersection& intersection, size_t rayGeneration);
+	IntersectionContext(const IntersectionContext& other) = default;
 
 	const kernel::Sample& sample() const { return sample_; }
 	const SceneObject& object() const { LASS_ASSERT(object_); return *object_; }
@@ -131,20 +189,22 @@ public:
 	void transformBy(const TTransformation3D& transformation);
 	void translateBy(const TVector3D& offset);
 
-	const TTransformation3D& localToWorld() const { return localToWorld_; }
-	const TTransformation3D& worldToLocal() const;
+	Transformation localToWorld() const { return Transformation(const_cast<TMatrix*>(&localToWorld_), &worldToLocal_, &hasDirtyWorldToLocal_); }
+	Transformation worldToLocal() const;
 	const TVector3D worldNormal() const;
 	const TVector3D worldGeometricNormal() const;
 
-	const TTransformation3D& bsdfToLocal() const;
-	const TTransformation3D& localToBsdf() const;
+	Transformation bsdfToLocal() const;
+	Transformation localToBsdf() const;
 
-	const TTransformation3D& bsdfToWorld() const;
-	const TTransformation3D& worldToBsdf() const;
-	const TVector3D bsdfToWorld(const TVector3D& v) const { return prim::transform(v, bsdfToWorld()).normal(); }
-	const TVector3D worldToBsdf(const TVector3D& v) const { return prim::transform(v, worldToBsdf()).normal(); }
+	Transformation bsdfToWorld() const;
+	Transformation worldToBsdf() const;
+	const TVector3D bsdfToWorld(const TVector3D& v) const { return bsdfToWorld().transform(v).normal(); }
+	const TVector3D worldToBsdf(const TVector3D& v) const { return worldToBsdf().transform(v).normal(); }
 
 private:
+
+	using TMatrix = Transformation::TMatrix;
 
 	void init(const SceneObject& object, const BoundedRay& primaryRay, const Intersection& intersection, size_t rayGeneration);
 	void flipTo(const TVector3D& worldOmega);
@@ -153,6 +213,13 @@ private:
 
 	void localToWorldHasChanged();
 	void bsdfToLocalHasChanged();
+
+	TMatrix localToWorld_;
+	mutable TMatrix worldToLocal_;
+	mutable TMatrix bsdfToLocal_;
+	mutable TMatrix localToBsdf_;
+	mutable TMatrix bsdfToWorld_;
+	mutable TMatrix worldToBsdf_;
 
 	TAabb3D bounds_;
 
@@ -180,13 +247,6 @@ private:
 	const kernel::Sample& sample_;
 	mutable experimental::ResetOnCopy<TBsdfPtr> bsdf_;
 
-	TTransformation3D localToWorld_;
-	mutable TTransformation3D worldToLocal_;
-	mutable TTransformation3D bsdfToLocal_;
-	mutable TTransformation3D localToBsdf_;
-	mutable TTransformation3D bsdfToWorld_;
-	mutable TTransformation3D worldToBsdf_;
-
 	size_t rayGeneration_;
 	SolidEvent solidEvent_;
 	bool hasScreenSpaceDifferentials_;
@@ -196,6 +256,8 @@ private:
 	mutable bool hasDirtyBsdfToWorld_;
 	mutable bool hasDirtyWorldToBsdf_;
 };
+
+static_assert(alignof(IntersectionContext) >= alignof(IntersectionContext::Transformation::TMatrix));
 
 }
 

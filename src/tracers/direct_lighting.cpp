@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -287,10 +287,11 @@ const Spectral DirectLighting::traceSpecularAndGlossy(
 		return Spectral(0);
 	}
 
-	const TVector3D dNormal_dI = prim::normalTransform(context.dNormal_dI(), context.localToWorld());
-	const TVector3D dNormal_dJ = prim::normalTransform(context.dNormal_dJ(), context.localToWorld());
-	const TVector3D dPoint_dI = prim::transform(context.dPoint_dI(), context.localToWorld());
-	const TVector3D dPoint_dJ = prim::transform(context.dPoint_dJ(), context.localToWorld());
+	const auto localToWorld = context.localToWorld();
+	const TVector3D dNormal_dI = localToWorld.normalTransform(context.dNormal_dI());
+	const TVector3D dNormal_dJ = localToWorld.normalTransform(context.dNormal_dJ());
+	const TVector3D dPoint_dI = localToWorld.transform(context.dPoint_dI());
+	const TVector3D dPoint_dJ = localToWorld.transform(context.dPoint_dJ());
 
 	Spectral result;
 	if (bsdf->hasCaps(BsdfCaps::reflection) && shader->idReflectionSamples() != -1)

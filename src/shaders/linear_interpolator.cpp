@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -149,17 +149,17 @@ const Spectral LinearInterpolator::doEmission(const Sample& sample, const Inters
 
 	const TValue t = (controlValue - prevI->first) / (i->first - prevI->first);
 
-	const TVector3D omegaLocal = prim::transform(omegaOut, context.bsdfToLocal());
+	const TVector3D omegaLocal = context.bsdfToLocal().transform(omegaOut);
 
 	const TShaderPtr& shaderA = prevI->second;
 	IntersectionContext contextA = context;
 	shaderA->shadeContext(sample, contextA);
-	const TVector3D omegaA = prim::transform(omegaLocal, contextA.localToBsdf());
+	const TVector3D omegaA = contextA.localToBsdf().transform(omegaLocal);
 
 	const TShaderPtr& shaderB = i->second;
 	IntersectionContext contextB = context;
 	shaderB->shadeContext(sample, contextB);
-	const TVector3D omegaB = prim::transform(omegaLocal, contextB.localToBsdf());
+	const TVector3D omegaB = contextB.localToBsdf().transform(omegaLocal);
 
 	return lerp(
 		shaderA->emission(sample, contextA, omegaA),
@@ -277,9 +277,7 @@ namespace
 
 TVector3D bsdfToBsdf(const IntersectionContext& from, const IntersectionContext& to, const TVector3D& omega)
 {
-	return from.bsdfToWorld().matrix() == to.bsdfToWorld().matrix()
-		? omega
-		: to.worldToBsdf(from.bsdfToWorld(omega));
+	return to.worldToBsdf(from.bsdfToWorld(omega));
 }
 
 }
@@ -302,18 +300,24 @@ BsdfOut LinearInterpolator::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVe
 	if (pa > 0)
 	{
 		const TVector3D wIn = bsdfToBsdf(context(), a_, omegaIn);
-		const TVector3D wOut = bsdfToBsdf(context(), a_, omegaOut);
-		out = a_.bsdf()->evaluate(wIn, wOut, allowedCaps);
-		out.value *= (1 - t_) * static_cast<TValue>(num::abs(wOut.z / omegaOut.z));
-		out.pdf *= pa / ptot;
+		if (wIn.z > 0)
+		{
+			const TVector3D wOut = bsdfToBsdf(context(), a_, omegaOut);
+			out = a_.bsdf()->evaluate(wIn, wOut, allowedCaps);
+			out.value *= (1 - t_) * static_cast<TValue>(num::abs(wOut.z / omegaOut.z));
+			out.pdf *= pa / ptot;
+		}
 	}
 	if (pb > 0)
 	{
 		const TVector3D wIn = bsdfToBsdf(context(), b_, omegaIn);
-		const TVector3D wOut = bsdfToBsdf(context(), b_, omegaOut);
-		const BsdfOut outB = b_.bsdf()->evaluate(wIn, wOut, allowedCaps);
-		out.value.fma(outB.value, t_ * static_cast<TValue>(num::abs(wOut.z / omegaOut.z)));
-		out.pdf += outB.pdf * pb / ptot;
+		if (wIn.z > 0)
+		{
+			const TVector3D wOut = bsdfToBsdf(context(), b_, omegaOut);
+			const BsdfOut outB = b_.bsdf()->evaluate(wIn, wOut, allowedCaps);
+			out.value.fma(outB.value, t_ * static_cast<TValue>(num::abs(wOut.z / omegaOut.z)));
+			out.pdf += outB.pdf * pb / ptot;
+		}
 	}
 	return out;
 }
@@ -352,6 +356,10 @@ SampleBsdfOut LinearInterpolator::Bsdf::doSample(const TVector3D& omegaIn, const
 	LIAR_ASSERT(componentSample < 1, componentSample);
 
 	const TVector3D wInA = bsdfToBsdf(context(), *a, omegaIn);
+	if (wInA.z <= 0)
+	{
+		return SampleBsdfOut();
+	}
 	SampleBsdfOut out = a->bsdf()->sample(wInA, sample, componentSample, allowedCaps);
 	if (out.pdf == 0)
 	{
@@ -367,12 +375,15 @@ SampleBsdfOut LinearInterpolator::Bsdf::doSample(const TVector3D& omegaIn, const
 	out.pdf *= pa;
 
 	const TVector3D wInB = bsdfToBsdf(context(), *b, omegaIn);
-	const TVector3D wOutB = bsdfToBsdf(context(), *b, out.omegaOut);
-	BsdfOut outB = b->bsdf()->evaluate(wInB, wOutB, out.usedCaps);
-	if (outB.pdf > 0)
+	if (wInB.z > 0)
 	{
-		out.value.fma(outB.value, tb * static_cast<TValue>(num::abs(wOutB.z / out.omegaOut.z)));
-		out.pdf += outB.pdf * pb;
+		const TVector3D wOutB = bsdfToBsdf(context(), *b, out.omegaOut);
+		BsdfOut outB = b->bsdf()->evaluate(wInB, wOutB, out.usedCaps);
+		if (outB.pdf > 0)
+		{
+			out.value.fma(outB.value, tb * static_cast<TValue>(num::abs(wOutB.z / out.omegaOut.z)));
+			out.pdf += outB.pdf * pb;
+		}
 	}
 
 	return out;

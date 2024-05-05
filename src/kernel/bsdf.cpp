@@ -34,7 +34,7 @@ namespace kernel
 // --- public --------------------------------------------------------------------------------------
 
 Bsdf::Bsdf(const Sample& sample, const IntersectionContext& context, BsdfCaps caps):
-	omegaGeometricNormal_(prim::normalTransform(context.geometricNormal(), context.localToBsdf())),
+	omegaGeometricNormal_(context.localToBsdf().normalTransform(context.geometricNormal())),
 	sample_(sample),
 	context_(context),
 	caps_(caps)

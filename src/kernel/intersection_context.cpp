@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,6 +28,8 @@
 #include <lass/num/impl/matrix_solve.h>
 #include <lass/prim/impl/plane_3d_impl_detail.h>
 #include <lass/prim/plane_3d.h>
+
+#include <bit>
 
 namespace liar
 {
@@ -57,7 +59,7 @@ IntersectionContext::IntersectionContext(const SceneObject& object, const Sample
 
 	if (ray.hasDifferentials())
 	{
-		DifferentialRay localRay = transform(ray, worldToLocal());
+		DifferentialRay localRay = worldToLocal().transform(ray);
 		setScreenSpaceDifferentialsI(localRay.differentialI(), dPoint_dI_, dNormal_dI_, dUv_dI_);
 		setScreenSpaceDifferentialsI(localRay.differentialJ(), dPoint_dJ_, dNormal_dJ_, dUv_dJ_);
 		hasScreenSpaceDifferentials_ = true;
@@ -148,7 +150,8 @@ void IntersectionContext::setShader(const Shader* shader)
 
 void IntersectionContext::transformBy(const TTransformation3D& transformation)
 {
-	localToWorld_ = prim::concatenate(localToWorld_, transformation);
+	const TMatrix transfo(transformation.matrix());
+	localToWorld_ = transfo * localToWorld_; // right to left multiplication
 	localToWorldHasChanged();
 }
 
@@ -156,45 +159,40 @@ void IntersectionContext::transformBy(const TTransformation3D& transformation)
 
 void IntersectionContext::translateBy(const TVector3D& offset)
 {
-	const TTransformation3D translation = TTransformation3D::translation(offset);
-	localToWorld_ = prim::concatenate(localToWorld_, translation);
+	const TMatrix transfo(offset);
+	localToWorld_ = transfo * localToWorld_; // right to left multiplication
 	localToWorldHasChanged();
 }
 
 
 
-const TTransformation3D& IntersectionContext::worldToLocal() const
+IntersectionContext::Transformation IntersectionContext::worldToLocal() const
 {
-	if (hasDirtyWorldToLocal_)
-	{
-		worldToLocal_ = localToWorld().inverse();
-		hasDirtyWorldToLocal_ = false;
-		LASS_ASSERT(hasDirtyWorldToBsdf_);
-	}
-	return worldToLocal_;
+	LASS_ASSERT(hasDirtyWorldToLocal_ ? hasDirtyWorldToBsdf_ : true); // if worldToLocal is dirty, worldToBsdf should be too
+	return localToWorld().inverse();
 }
 
 
 
 const TVector3D IntersectionContext::worldNormal() const
 {
-	return prim::normalTransform(normal_, localToWorld()).normal();
+	return localToWorld().normalTransform(normal_).normal();
 }
 
 
 
 const TVector3D IntersectionContext::worldGeometricNormal() const
 {
-	return prim::normalTransform(geometricNormal_, localToWorld()).normal();
+	return localToWorld().normalTransform(geometricNormal_).normal();
 }
 
 
 
-const TTransformation3D& IntersectionContext::bsdfToLocal() const
+IntersectionContext::Transformation IntersectionContext::bsdfToLocal() const
 {
 	if (!hasDirtyBsdfToLocal_)
 	{
-		return bsdfToLocal_;
+		return Transformation(&bsdfToLocal_, &localToBsdf_, &hasDirtyLocalToBsdf_);
 	}
 	TVector3D u = normal_.reject(dPoint_dU_);
 	TVector3D v = normal_.reject(dPoint_dV_);
@@ -212,46 +210,36 @@ const TTransformation3D& IntersectionContext::bsdfToLocal() const
 	{
 		u = cross(v, normal_);
 	}
-	bsdfToLocal_ = TTransformation3D(point_, u.normal(), v.normal(), normal_);
+	bsdfToLocal_ = TMatrix(point_, u.normal(), v.normal(), normal_);
 	hasDirtyBsdfToLocal_ = false;
 	LASS_ASSERT(hasDirtyLocalToBsdf_ && hasDirtyBsdfToWorld_ && hasDirtyWorldToBsdf_);
-	return bsdfToLocal_;
+	return Transformation(&bsdfToLocal_, &localToBsdf_, &hasDirtyLocalToBsdf_);
 }
 
 
 
-const TTransformation3D& IntersectionContext::localToBsdf() const
+IntersectionContext::Transformation IntersectionContext::localToBsdf() const
 {
-	if (hasDirtyLocalToBsdf_)
-	{
-		localToBsdf_ = bsdfToLocal().inverse();
-		hasDirtyLocalToBsdf_ = false;
-	}
-	return localToBsdf_;
+	return bsdfToLocal().inverse();
 }
 
 
 
-const TTransformation3D& IntersectionContext::bsdfToWorld() const
+IntersectionContext::Transformation IntersectionContext::bsdfToWorld() const
 {
 	if (hasDirtyBsdfToWorld_)
 	{
-		bsdfToWorld_ = prim::concatenate(bsdfToLocal(), localToWorld());
+		bsdfToWorld_ = localToWorld_ * bsdfToLocal().matrix(); // from right to left
 		hasDirtyBsdfToWorld_ = false;
 	}
-	return bsdfToWorld_;
+	return Transformation(&bsdfToWorld_, &worldToBsdf_, &hasDirtyWorldToBsdf_);
 }
 
 
 
-const TTransformation3D& IntersectionContext::worldToBsdf() const
+IntersectionContext::Transformation IntersectionContext::worldToBsdf() const
 {
-	if (hasDirtyWorldToBsdf_)
-	{
-		worldToBsdf_ = bsdfToWorld().inverse();
-		hasDirtyWorldToBsdf_ = false;
-	}
-	return worldToBsdf_;
+	return bsdfToWorld().inverse();
 }
 
 
@@ -270,7 +258,7 @@ void IntersectionContext::init(const SceneObject& object, const BoundedRay& ray,
 	solidEvent_ = seNoEvent;
 	hasScreenSpaceDifferentials_ = false;
 	bsdf_ = TBsdfPtr();
-	localToWorld_ = worldToLocal_ = TTransformation3D::identity();
+	localToWorld_ = worldToLocal_ = TMatrix::identity();
 	hasDirtyWorldToLocal_ = false;
 	bsdfToLocalHasChanged();
 
@@ -354,6 +342,27 @@ void IntersectionContext::bsdfToLocalHasChanged()
 	hasDirtyWorldToBsdf_ = true;
 }
 
+
+
+// --- Transformation ------------------------------------------------------------------------------
+
+IntersectionContext::Transformation::Transformation(TMatrix* forward, TMatrix* reverse, bool* reverseIsDirty):
+	forward_(forward),
+	reverse_(reverse),
+	reverseIsDirty_(reverseIsDirty)
+{
+	LIAR_ASSERT(forward_ && std::bit_cast<std::uintptr_t>(forward_) % 32 == 0, "forward is not 32-byte aligned: " << std::bit_cast<std::uintptr_t>(forward_));
+	LIAR_ASSERT(reverse_ && std::bit_cast<std::uintptr_t>(reverse_) % 32 == 0, "reverse is not 32-byte aligned: " << std::bit_cast<std::uintptr_t>(reverse_));
+}
+
+void IntersectionContext::Transformation::invert() const
+{
+	if (reverseIsDirty_ && *reverseIsDirty_)
+	{
+		*reverse_ = forward_->inverted();
+		*reverseIsDirty_ = false;
+	}
+}
 
 
 // --- free ----------------------------------------------------------------------------------------
