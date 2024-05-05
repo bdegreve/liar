@@ -1124,7 +1124,7 @@ namespace PixelToaster
 					D3DDISPLAYMODE mode;
 					if ( SUCCEEDED( direct3d->EnumAdapterModes( D3DADAPTER_DEFAULT, fmt, i, &mode ) ) )
 					{
-						if ( mode.Width >= width && mode.Height >= height && ( bestWidth == 0 || mode.Width <= bestWidth && mode.Height <= bestHeight ) )
+						if ( mode.Width >= width && mode.Height >= height && ( bestWidth == 0 || ( mode.Width <= bestWidth && mode.Height <= bestHeight ) ) )
 						{
 							bestWidth = mode.Width;
 							bestHeight = mode.Height;
