@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2021-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2021-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include <filesystem>
 
-#if LASS_COMPILER_TYPE == LASS_COMPILER_TYPE_MSVC
+#if LASS_PLATFORM_TYPE == LASS_PLATFORM_TYPE_WIN32
 #	pragma warning(disable: 4996)
 #endif
 
