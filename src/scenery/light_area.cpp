@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,8 +52,9 @@ LightArea::LightArea(const TSceneObjectPtr& iSurface):
 {
 	if (!surface_->hasSurfaceSampling())
 	{
+		const auto &s = *surface_;
 		LASS_THROW("The object used a surface for a LightArea must support surface sampling. "
-			"Objects of type '" << typeid(*surface_).name() << "' don't support that.");
+			"Objects of type '" << typeid(s).name() << "' don't support that.");
 	}
 
 	LASS_ASSERT(surface_);

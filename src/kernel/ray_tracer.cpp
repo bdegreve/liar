@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -128,7 +128,8 @@ void RayTracer::preProcess(const TSamplerPtr& sampler, const TimePeriod& period,
 const TRayTracerPtr RayTracer::clone() const
 {
 	const TRayTracerPtr result = doClone();
-	LASS_ASSERT(typeid(*result) == typeid(*this));
+	[[maybe_unused]] const auto& tracer = *result;
+	LASS_ASSERT(typeid(tracer) == typeid(*this));
 	return result;
 }
 
