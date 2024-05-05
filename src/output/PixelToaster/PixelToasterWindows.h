@@ -1297,7 +1297,6 @@ namespace PixelToaster
 		Format textureFormat;
 		Mode mode;
 		bool windowed;
-		bool lost;
 		bool drawAsQuad;
 		bool scalesUp;
 	};
