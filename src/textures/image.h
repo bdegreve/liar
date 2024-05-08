@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -100,27 +100,59 @@ private:
 	{
 	public:
 		MipMapLevel(const TPixels& pixels, const TResolution2D& resolution):
-			pixels_(pixels),
-			resolution_(resolution)
+			MipMapLevel(resolution)
 		{
+			for (size_t y = 0; y < resolution.y; ++y)
+			{
+				for (size_t x = 0; x < resolution.x; ++x)
+				{
+					(*this)(x, y) = pixels[y * resolution.x + x];
+				}
+			}
 		}
 		MipMapLevel(const TResolution2D& resolution):
-			pixels_(new TPixel[resolution.x * resolution.y]),
-			resolution_(resolution)
+			pixels_(new TPixel[roundUp(resolution.x) * roundUp(resolution.y)]),
+			resolution_(resolution),
+			numBlocksX_(block(roundUp(resolution.x)))
 		{
 		}
 		TPixel& operator()(size_t x, size_t y)
 		{
-			return pixels_[y * resolution_.x + x];
+			return pixels_[address(x, y)];
 		}
 		const TPixel& operator()(size_t x, size_t y) const
 		{
-			return pixels_[y * resolution_.x + x];
+			return pixels_[address(x, y)];
 		}
 		const TResolution2D& resolution() const { return resolution_; }
 	private:
+		constexpr static size_t logBlockSize = 2;
+		constexpr static size_t blockSize = 1 << logBlockSize;
+
+		static size_t block(size_t i)
+		{
+			return i >> logBlockSize;
+		}
+		static size_t blockOffset(size_t i)
+		{
+			return i & (blockSize - 1);
+		}
+		static size_t roundUp(size_t size)
+		{
+			return (size + blockSize - 1) & ~(blockSize - 1);
+		}
+		size_t address(size_t x, size_t y) const
+		{
+			const size_t bx = block(x);
+			const size_t by = block(y);
+			const size_t ox = blockOffset(x);
+			const size_t oy = blockOffset(y);
+			return (by * numBlocksX_ + bx) * blockSize * blockSize + oy * blockSize + ox;
+		}
+
 		TPixels pixels_;
 		TResolution2D resolution_;
+		size_t numBlocksX_;
 	};
 	typedef std::vector<MipMapLevel> TMipMaps;
 
