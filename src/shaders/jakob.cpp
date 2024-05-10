@@ -994,7 +994,7 @@ SampleBsdfOut Jakob::Bsdf::doSample(const TVector3D& omegaIn, const TPoint2D& sa
 	const Spectral value = spectral(y, length, cosPhi, muOut);
 	const TScalar pdf = pdfMuOut * pdfPhi;
 	const BsdfCaps usedCaps = (omegaOut.z < 0 ? BsdfCaps::transmission : BsdfCaps::reflection) | BsdfCaps::glossy;
-	return SampleBsdfOut(omegaOut, value, pdf, usedCaps);
+	return SampleBsdfOut(omegaOut.normal(), value, pdf, usedCaps);
 }
 
 

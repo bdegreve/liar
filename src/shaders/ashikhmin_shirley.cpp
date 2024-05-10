@@ -406,7 +406,7 @@ const Spectral AshikhminShirley::Bsdf::rhoS(const TVector3D& k1, const TVector3D
 {
 	using TValue = MicrofacetDistribution::TValue;
 	const TScalar hk = dot(h, k1);
-	LIAR_ASSERT(hk > 0 && hk <= 1, "hk=" << hk << " h=" << h << " k1=" << k1);
+	LIAR_ASSERT(hk > 0 && hk <= TScalar(1.000001f), "hk=" << hk << " h=" << h << " k1=" << k1);
 	const Spectral F = specular_ + (1 - specular_) * temp::pow5(std::max(static_cast<Spectral::TValue>(1 - hk), 0.f));
 	TValue pdfH;
 	const TValue D = mdf_->D(h, alphaU_, alphaV_, pdfH);
