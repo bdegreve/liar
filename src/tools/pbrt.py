@@ -1017,6 +1017,8 @@ class PbrtScene(object):
             tex.mipMapping = "none"
         except AttributeError:
             pass
+        else:
+            tex.antiAliasing = "bilinear"
         if not (factor == (1, 1, 1) or factor == 1):
             tex = liar.textures.Product(self._get_texture(factor), tex)
         return tex, res
