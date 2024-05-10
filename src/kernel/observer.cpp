@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -82,11 +82,16 @@ Observer::Observer(const TWavelengths& wavelengths, const TXYZs& sensitivities):
 		const TWavelength w_next = w_[k + 1];
 		const XYZ& xyz_next = xyz_[k + 1];
 
+		if (w_next <= w)
+		{
+			LASS_THROW("Wavelengths must be strictly increasing.");
+		}
+
 		dxyz_dw_.push_back((xyz_next - xyz) / static_cast<TValue>(w_next - w));
 		dXYZ_.push_back(xyz * static_cast<TValue>((w_next - w_prev) / 2));
 
 		w_prev = w;
-		cdf_.push_back(cdf_.back() + xyz.absTotal());
+		cdf_.push_back(cdf_.back() + (xyz + xyz_next).absTotal() * (w_next - w));
 	}
 
 	{
@@ -95,7 +100,6 @@ Observer::Observer(const TWavelengths& wavelengths, const TXYZs& sensitivities):
 
 		dxyz_dw_.push_back(XYZ(0, 0, 0));
 		dXYZ_.push_back(xyz * static_cast<TValue>((w - w_prev) / 2));
-		cdf_.push_back(cdf_.back() + xyz.absTotal());
 	}
 
 	// rescale so that tristimulus of `1' spectrum gives Y == 1, and that cdf_.back() == 1.
@@ -283,19 +287,20 @@ TWavelength Observer::sample(TScalar sample, TScalar& pdf) const
 
 	if (i == cdf_.begin())
 	{
-		LASS_ASSERT(false); // should never happen since *i > sample >= 0 and cdf_[0] = 0
+		LASS_ASSERT(false); // should never happen since 0 <= sample < *i and cdf_[0] = 0
 		pdf = 0;
 		return w_.front();
 	}
 	if (i == cdf_.end())
 	{
-		LASS_ASSERT(false); // should never happen since cdf_.back() == 1 > sample
+		LASS_ASSERT(false); // should never happen since sample < 1 == cdf_.back()
 		pdf = 0;
 		return w_.back();
 	}
 
 	const TScalar cdf1 = *stde::prev(i);
 	const TScalar cdf2 = *i;
+	LASS_ASSERT(cdf1 <= sample && sample < cdf2);
 	const TScalar dcdf = cdf2 - cdf1;
 	LASS_ASSERT(dcdf > 0);
 	const TWavelength x = static_cast<TWavelength>((sample - cdf1) / dcdf);
