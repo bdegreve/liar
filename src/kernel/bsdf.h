@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -120,7 +120,18 @@ struct SampleBsdfOut
 	explicit operator bool() const { return pdf > 0 && value; }
 };
 
-typedef util::AllocatorBinned< util::AllocatorConcurrentFreeList<> > TBsdfAllocator;
+typedef util::AllocatorPerThread<
+	util::AllocatorBinned<
+		util::AllocatorFreeList<
+			util::AllocatorFixed<
+				util::AllocatorAlignedAlloc<64>
+			>
+		>,
+		4096,
+		util::BinnerPadded<64>,
+		util::AllocatorAlignedAlloc<64>
+	>
+> TBsdfAllocator;
 
 inline constexpr bool hasCaps(BsdfCaps capsUnderTest, BsdfCaps wantedCaps)
 {

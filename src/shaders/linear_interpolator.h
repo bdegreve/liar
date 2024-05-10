@@ -77,6 +77,9 @@ private:
 		TValue t_;
 	};
 
+	static_assert(sizeof(Bsdf) <= 4096, "Bsdf must fit in freelist");
+	static_assert(alignof(Bsdf) >= alignof(IntersectionContext));
+
 	const Spectral doEmission(const Sample& sample, const IntersectionContext& context, const TVector3D& omegaOut) const override;
 	TBsdfPtr doBsdf(const Sample& sample, const IntersectionContext& context) const override;
 
