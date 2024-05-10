@@ -1365,10 +1365,11 @@ liar.RgbSpace.setDefaultSpace(_RGB_SPACE_GAMMA)
 if __name__ == "__main__":
     # use the module as a commandline script
     logging.basicConfig(level=logging.DEBUG, format="%(message)s")
-    from optparse import OptionParser
+    from argparse import ArgumentParser
 
-    parser = OptionParser()
-    parser.add_option(
+    parser = ArgumentParser()
+    parser.add_argument("path", nargs="+", help="path to a PBRT file")
+    parser.add_argument(
         "-q",
         "--quiet",
         action="store_const",
@@ -1376,28 +1377,29 @@ if __name__ == "__main__":
         dest="verbosity",
         default=Verbosity.NORMAL,
     )
-    parser.add_option(
+    parser.add_argument(
         "-v",
         "--verbose",
         action="store_const",
         const=Verbosity.VERBOSE,
         dest="verbosity",
     )
-    parser.add_option(
+    parser.add_argument(
         "-d",
         "--display",
         action="store_true",
         dest="display",
         default=False,
-        help="show progress in preview display [default=%default]",
+        help="show progress in preview display [default=%(default)s]",
     )
-    parser.add_option(
+    parser.add_argument(
         "-t",
         "--threads",
         action="store",
-        type="int",
+        type=int,
         help="number of threads for rendering",
     )
-    options, args = parser.parse_args()
-    for path in args:
-        parse(path, render_immediately=True, **options.__dict__)
+    args = vars(parser.parse_args())
+    paths = args.pop("path")
+    for path in paths:
+        parse(path, render_immediately=True, **args)
