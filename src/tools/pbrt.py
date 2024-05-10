@@ -53,6 +53,7 @@ class PbrtScene(object):
         render_immediately=True,
         display=True,
         threads=None,
+        texture_antialiasing="bilinear",
     ):
         self.__logger = logging.getLogger("liar.tools.pbrt")
         self.__logger.setLevel(verbosity.value)
@@ -66,6 +67,7 @@ class PbrtScene(object):
         self.__named_coordinate_systems = {}
         self.__render_immediately = render_immediately
         self.__display = display
+        self.__texture_antialiasing = texture_antialiasing
         self.__named_materials = {}
         self.Camera()
         self.PixelFilter()
@@ -827,7 +829,9 @@ class PbrtScene(object):
         trilinear: bool = False,
         gamma: bool | None = None,
     ):
-        return liar.textures.Image(filename, _rgb_space(filename, gamma))
+        tex = liar.textures.Image(filename, _rgb_space(filename, gamma))
+        tex.antiAliasing = self.__texture_antialiasing
+        return tex
 
     def _texture_mix(self, tex1=0, tex2=1, amount=0.5):
         tex1, tex2, amount = (
@@ -869,6 +873,7 @@ class PbrtScene(object):
         try:
             if os.path.isfile(arg):
                 tex = liar.textures.Image(arg, _rgb_space(arg))
+                tex.antiAliasing = self.__texture_antialiasing
         except TypeError:
             pass
         if not tex:
@@ -1400,6 +1405,12 @@ if __name__ == "__main__":
         action="store",
         type=int,
         help="number of threads for rendering",
+    )
+    parser.add_argument(
+        "--texture-antialiasing",
+        choices=("none", "bilinear", "trilinear"),
+        default="bilinear",
+        help="default is bilinear which is sufficient if there's lot of oversampling    ",
     )
     args = vars(parser.parse_args())
     paths = args.pop("path")
