@@ -197,6 +197,9 @@ else()
 	set(LIAR_SCALAR float)
 endif()
 
+option(liar_HAVE_AVX "Use AVX intrinsics" ON)
+set(LIAR_HAVE_AVX "${liar_HAVE_AVX}")
+
 configure_file(
 	"${CMAKE_CURRENT_LIST_DIR}/src/config.h.in"
 	"${CMAKE_CURRENT_BINARY_DIR}/config.h"

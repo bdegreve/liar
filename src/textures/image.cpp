@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,6 +27,10 @@
 #include <lass/io/file_attribute.h>
 #include <lass/stde/extended_string.h>
 #include <lass/python/export_traits_filesystem.h>
+
+#if LIAR_HAVE_AVX
+#	include <array>
+#endif
 
 namespace liar
 {
@@ -248,7 +252,7 @@ const Image::TPixel Image::lookUp(const IntersectionContext& context) const
 		LASS_ASSERT_UNREACHABLE;
 	}
 
-	TPixel result;
+	TPackedPixel result;
 	switch (antiAliasing_)
 	{
 	case aaNone:
@@ -260,6 +264,24 @@ const Image::TPixel Image::lookUp(const IntersectionContext& context) const
 		break;
 
 	case aaTrilinear:
+#if LIAR_HAVE_AVX
+		{
+			const __m128 du = _mm_set1_ps(dLevelU);
+			const __m128 du1 = _mm_sub_ps(_mm_set1_ps(1.f), du);
+			const __m128 p00 = bilinear(levelU0, levelV0, uv);
+			const __m128 p10 = bilinear(levelU1, levelV0, uv);
+			result = _mm_add_ps(_mm_mul_ps(du1, p00), _mm_mul_ps(du, p10));
+			if (levelV0 != levelV1)
+			{
+				const __m128 dv = _mm_set1_ps(dLevelV);
+				const __m128 dv1 = _mm_sub_ps(_mm_set1_ps(1.f), dv);
+				const __m128 p01 = bilinear(levelU0, levelV1, uv);
+				const __m128 p11 = bilinear(levelU1, levelV1, uv);
+				const __m128 p1 = _mm_add_ps(_mm_mul_ps(du1, p01), _mm_mul_ps(du, p11));
+				result = _mm_add_ps(_mm_mul_ps(dv1, result), _mm_mul_ps(dv, p1));
+			}
+		}
+#else
 		result =
 			bilinear(levelU0, levelV0, uv) * (1 - dLevelU) +
 			bilinear(levelU1, levelV0, uv) * dLevelU;
@@ -270,15 +292,19 @@ const Image::TPixel Image::lookUp(const IntersectionContext& context) const
 				bilinear(levelU0, levelV1, uv) * (1 - dLevelU) +
 				bilinear(levelU1, levelV1, uv) * dLevelU);
 		}
+#endif
 		break;
 
 	default:
-		LASS_ASSERT_UNREACHABLE;
+		LASS_ENFORCE_UNREACHABLE;
 	}
 
+#if LIAR_HAVE_AVX
+	return std::bit_cast<TPixel>(result);
+#else
 	return result;
+#endif
 }
-
 
 
 const TPyObjectPtr Image::doGetState() const
@@ -402,6 +428,9 @@ Image::MipMapLevel Image::makeMipMapEven(
 		return parent;
 	}
 
+#if LIAR_HAVE_AVX
+	const __m128 half = _mm_set1_ps(0.5f);
+#endif
 	MipMapLevel level(resolution);
 	if (compressionAxis == 'x')
 	{
@@ -410,7 +439,13 @@ Image::MipMapLevel Image::makeMipMapEven(
 		{
 			for (size_t x = 0; x < resolution.x; ++x)
 			{
+#if LIAR_HAVE_AVX
+				const __m128 p0 = parent(2 * x, y);
+				const __m128 p1 = parent(2 * x + 1, y);
+				level(x, y) = _mm_mul_ps(_mm_add_ps(p0, p1), half);
+#else
 				level(x, y) = (parent(2 * x, y) + parent(2 * x + 1, y)) / 2;
+#endif
 			}
 		}
 	}
@@ -421,7 +456,13 @@ Image::MipMapLevel Image::makeMipMapEven(
 		{
 			for (size_t x = 0; x < resolution.x; ++x)
 			{
+#if LIAR_HAVE_AVX
+				const __m128 p0 = parent(x, 2 * y);
+				const __m128 p1 = parent(x, 2 * y + 1);
+				level(x, y) = _mm_mul_ps(_mm_add_ps(p0, p1), half);
+#else
 				level(x, y) = (parent(x, 2 * y) + parent(x, 2 * y + 1)) / 2;
+#endif
 			}
 		}
 	}
@@ -451,22 +492,46 @@ Image::MipMapLevel Image::makeMipMapOdd(
 		const size_t k0 = 2 * k;
 		const size_t k1 = k0 + 1;
 		const size_t k2 = k0 + 2;
+
 		const TValue w0 = scale * static_cast<TValue>(newSize - k);
 		const TValue w1 = scale * static_cast<TValue>(newSize);
 		const TValue w2 = scale * static_cast<TValue>(k + 1);
+#if LIAR_HAVE_AVX
+		const __m128 pw0 = _mm_set1_ps(w0);
+		const __m128 pw1 = _mm_set1_ps(w1);
+		const __m128 pw2 = _mm_set1_ps(w2);
+#endif
 
 		if (compressX)
 		{
 			for (size_t y = 0; y < resolution.y; ++y)
 			{
-				level(k, y) = w0 * parent(k0, y) + w1 * parent(k1, y) + w2 * parent(k2, y);
+				const auto p0 = parent(k0, y);
+				const auto p1 = parent(k1, y);
+				const auto p2 = parent(k2, y);
+#if LIAR_HAVE_AVX
+				level(k, y) = _mm_add_ps(
+					_mm_add_ps(_mm_mul_ps(pw0, p0), _mm_mul_ps(p1, p1)),
+					_mm_mul_ps(pw2, p2));
+#else
+				level(k, y) = w0 * p0 + w1 * p1 + w2 * p2;
+#endif
 			}
 		}
 		else
 		{
 			for (size_t x = 0; x < resolution.x; ++x)
 			{
-				level(x, k) = w0 * parent(x, k0) + w1 * parent(x, k1) + w2 * parent(x, k2);
+				const auto p0 = parent(x, k0);
+				const auto p1 = parent(x, k1);
+				const auto p2 = parent(x, k2);
+#if LIAR_HAVE_AVX
+				level(x, k) = _mm_add_ps(
+					_mm_add_ps(_mm_mul_ps(pw0, p0), _mm_mul_ps(pw1, p1)),
+					_mm_mul_ps(pw2, p2));
+#else
+				level(x, k) = w0 * p0 + w1 * p1 + w2 * p2;
+#endif
 			}
 		}
 	}
@@ -502,8 +567,8 @@ void Image::mipMapLevel(
 
 
 
-
-const Image::TPixel Image::nearest(size_t levelU, size_t levelV, const TPoint2D& uv) const
+Image::TPackedPixel
+Image::nearest(size_t levelU, size_t levelV, const TPoint2D& uv) const
 {
 	LASS_ASSERT(levelU < numLevelsU_ && levelV < numLevelsV_);
 	const MipMapLevel& mipMap = mipMaps_[levelV * numLevelsU_ + levelU];
@@ -519,12 +584,63 @@ const Image::TPixel Image::nearest(size_t levelU, size_t levelV, const TPoint2D&
 
 
 
-
-const Image::TPixel Image::bilinear(size_t levelU, size_t levelV, const TPoint2D& uv) const
+Image::TPackedPixel
+Image::bilinear(size_t levelU, size_t levelV, const TPoint2D& uv) const
 {
 	LASS_ASSERT(levelU < numLevelsU_ && levelV < numLevelsV_);
 	const MipMapLevel& mipMap = mipMaps_[levelV * numLevelsU_ + levelU];
 
+#if LIAR_HAVE_AVX
+	const __m128 one = _mm_set1_ps(1.f);
+
+	// duv = (u, 1 - v), goes from (0, 0) to (1, 1)
+	const __m128d uv_ = _mm_set_pd(1 - uv.y, uv.x);
+	const __m128d uv0 = _mm_floor_pd(uv_);
+	const __m128 duv = _mm_cvtpd_ps(_mm_sub_pd(uv_, uv0));
+
+	// xy goes from (0, 0) to (res.x, res.y)
+	const int resX = static_cast<int>(mipMap.resolution().x);
+	const int resY = static_cast<int>(mipMap.resolution().y);
+	const __m128i res = _mm_set_epi32(0, 0, resY, resX);
+	const __m128 resf = _mm_cvtepi32_ps(res);
+	const __m128 xy = _mm_sub_ps(_mm_mul_ps(duv, resf), _mm_set1_ps(0.5f));
+	const __m128 xy0 = _mm_floor_ps(xy);
+	const __m128 dxy = _mm_sub_ps(xy, xy0);
+
+	const __m128i ij0 = _mm_cvtps_epi32(xy0);
+	const __m128i ij0mask = _mm_cmplt_epi32(ij0, _mm_setzero_si128());
+	const __m128i ij0mod = _mm_add_epi32(ij0, _mm_and_si128(res, ij0mask));
+	static_assert(sizeof(ij0mod) == sizeof(int) * 4);
+	const auto ij0int = std::bit_cast<std::array<int, 4>>(ij0mod);
+
+	const __m128i ij1 = _mm_add_epi32(ij0, _mm_set1_epi32(1));
+	const __m128i ij1mask = _mm_cmplt_epi32(ij1, res);
+	const __m128i ij1mod = _mm_and_si128(ij1, ij1mask);
+	static_assert(sizeof(ij1mod) == sizeof(int) * 4);
+	const auto ij1int = std::bit_cast<std::array<int, 4>>(ij1mod);
+
+	const int i0 = ij0int[0];
+	const int j0 = ij0int[1];
+	const int i1 = ij1int[0];
+	const int j1 = ij1int[1];
+	LIAR_ASSERT(i0 >= 0 && i0 < resX, "i0 = " << i0 << ", res.x = " << resX);
+	LIAR_ASSERT(j0 >= 0 && j0 < resY, "j0 = " << j0 << ", res.y = " << resY);
+	LIAR_ASSERT(i1 >= 0 && i1 < resX, "i1 = " << i1 << ", res.x = " << resX);
+	LIAR_ASSERT(j1 >= 0 && j1 < resY, "j1 = " << j1 << ", res.y = " << resY);
+
+	const __m128 dx = _mm_shuffle_ps(dxy, dxy, _MM_SHUFFLE(0, 0, 0, 0));
+	const __m128 dx1 = _mm_sub_ps(one, dx);
+	const __m128 p00 = mipMap(i0, j0);
+	const __m128 p10 = mipMap(i1, j0);
+	const __m128 p0 = _mm_add_ps(_mm_mul_ps(dx1, p00), _mm_mul_ps(dx, p10));
+	const __m128 p01 = mipMap(i0, j1);
+	const __m128 p11 = mipMap(i1, j1);
+	const __m128 p1 = _mm_add_ps(_mm_mul_ps(dx1, p01), _mm_mul_ps(dx, p11));
+
+	const __m128 dy = _mm_shuffle_ps(dxy, dxy, _MM_SHUFFLE(1, 1, 1, 1));
+	const __m128 dy1 = _mm_sub_ps(one, dy);
+	return _mm_add_ps(_mm_mul_ps(dy1, p0), _mm_mul_ps(dy, p1));
+#else
 	const TResolution2D& res = mipMap.resolution();
 	const TScalar nx = static_cast<TScalar>(res.x);
 	const TScalar ny = static_cast<TScalar>(res.y);
@@ -543,6 +659,7 @@ const Image::TPixel Image::bilinear(size_t levelU, size_t levelV, const TPoint2D
 	return
 		(mipMap(i0, j0) * (1 - dx) + mipMap(i1, j0) * dx) * (1 - dy) +
 		(mipMap(i0, j1) * (1 - dx) + mipMap(i1, j1) * dx) * dy;
+#endif
 }
 
 

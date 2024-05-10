@@ -38,6 +38,11 @@
 #include <lass/util/thread.h>
 #include <filesystem>
 
+#if LIAR_HAVE_AVX
+#	include <immintrin.h>
+#	include <bit>
+#endif
+
 namespace liar
 {
 namespace textures
@@ -96,9 +101,20 @@ private:
 
 	typedef util::SharedPtr<TPixel, util::ArrayStorage> TPixels;
 
+#if LIAR_HAVE_AVX
+	using TPackedPixel = __m128;
+#else
+	using TPackedPixel = TPixel;
+#endif
+	using TPackedPixels = util::SharedPtr<TPackedPixel, util::ArrayStorage>;
+
 	class MipMapLevel
 	{
 	public:
+
+		static_assert(sizeof(TPackedPixel) == sizeof(TPixel));
+		static_assert(std::is_same_v<TPixel::TValue, float>);
+
 		MipMapLevel(const TPixels& pixels, const TResolution2D& resolution):
 			MipMapLevel(resolution)
 		{
@@ -106,21 +122,25 @@ private:
 			{
 				for (size_t x = 0; x < resolution.x; ++x)
 				{
+#if LIAR_HAVE_AVX
+					(*this)(x, y) = std::bit_cast<TPackedPixel>(pixels[y * resolution.x + x]);
+#else
 					(*this)(x, y) = pixels[y * resolution.x + x];
+#endif
 				}
 			}
 		}
 		MipMapLevel(const TResolution2D& resolution):
-			pixels_(new TPixel[roundUp(resolution.x) * roundUp(resolution.y)]),
-			resolution_(resolution),
+			pixels_(new TPackedPixel[roundUp(resolution.x) * roundUp(resolution.y)]),
+			resolution_(resolution.x, resolution.y),
 			numBlocksX_(block(roundUp(resolution.x)))
 		{
 		}
-		TPixel& operator()(size_t x, size_t y)
+		TPackedPixel& operator()(size_t x, size_t y)
 		{
 			return pixels_[address(x, y)];
 		}
-		const TPixel& operator()(size_t x, size_t y) const
+		const TPackedPixel& operator()(size_t x, size_t y) const
 		{
 			return pixels_[address(x, y)];
 		}
@@ -150,7 +170,7 @@ private:
 			return (by * numBlocksX_ + bx) * blockSize * blockSize + oy * blockSize + ox;
 		}
 
-		TPixels pixels_;
+		TPackedPixels pixels_;
 		TResolution2D resolution_;
 		size_t numBlocksX_;
 	};
@@ -171,8 +191,8 @@ private:
 	void mipMapLevel(TScalar width, size_t numLevels,
 		size_t& level0, size_t& level1, TPixel::TValue& dLevel) const;
 
-	const TPixel nearest(size_t levelU, size_t levelV, const TPoint2D& uv) const;
-	const TPixel bilinear(size_t levelU, size_t levelV, const TPoint2D& uv) const;
+	TPackedPixel nearest(size_t levelU, size_t levelV, const TPoint2D& uv) const;
+	TPackedPixel bilinear(size_t levelU, size_t levelV, const TPoint2D& uv) const;
 
 	static TAntiAliasingDictionary makeAntiAliasingDictionary();
 	static TMipMappingDictionary makeMipMappingDictionary();

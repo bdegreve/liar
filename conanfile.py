@@ -45,8 +45,10 @@ class LiarConan(ConanFile):
         "have_png": [True, False],
         "have_lcms2": [True, False],
         "have_x11": [True, False],
+        "have_avx": [True, False],
         "spectral_mode": ["RGB", "XYZ", "Banded", "Single"],
         "use_double": [True, False],
+        "have_avx": [True, False],
         "debug": [True, False, "auto"],
     }
     default_options = {
@@ -56,6 +58,7 @@ class LiarConan(ConanFile):
         "have_png": True,
         "have_lcms2": True,
         "have_x11": True,
+        "have_avx": True,
         "lass/*:shared": True,
         "openexr/*:shared": False,
         "libjpeg/*:shared": False,
@@ -63,6 +66,7 @@ class LiarConan(ConanFile):
         "lcms/*:shared": False,
         "spectral_mode": "RGB",
         "use_double": False,
+        "have_avx": True,
         "debug": "auto",
     }
 
@@ -101,6 +105,8 @@ class LiarConan(ConanFile):
         if self.settings.get_safe("os") == "Windows":
             self.options.rm_safe("fPIC")
             self.options.rm_safe("have_x11")
+        if self.settings.arch not in ["x86", "x86_64"]:
+            self.options.rm_safe("have_avx")
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
@@ -124,6 +130,7 @@ class LiarConan(ConanFile):
         if self.options.debug != "auto":
             tc.variables["liar_DEBUG"] = self.options.debug
         tc.cache_variables["liar_USE_DOUBLE"] = bool(self.options.use_double)
+        tc.cache_variables["liar_HAVE_AVX"] = self.options.get_safe("have_avx", False)
         tc.generate()
 
         deps = CMakeDeps(self)
