@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -164,7 +164,8 @@ const Spectral AdjointPhotonTracer::shadeSurface(const Sample& sample, const Dif
 		const TBsdfPtr bsdf = shader->bsdf(sample, context);
 		if (bsdf)
 		{
-			const TPoint3D target = ray.point(intersection.t());
+			const TPoint3D target = context.localToWorld().transform(context.point());
+			LIAR_ASSERT(squaredDistance(target, ray.point(intersection.t())) < liar::tolerance, " target=" << target << " ray(t)=" << ray.point(intersection.t()));
 			SampleBsdfOut out = scatterSurface(sample, bsdf, target, omegaIn, generation);
 			if (out)
 			{

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -130,18 +130,20 @@ bool Sphere::doIsIntersecting(const Sample&, const BoundedRay& ray) const
 void Sphere::doLocalContext(const Sample&, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const
 {
 	const TScalar t = intersection.t();
-	const TPoint3D point = ray.point(t);
 	result.setT(t);
+
+	// reproject point on sphere for higher accuracy
+	const TPoint3D rayPoint = ray.point(t);
+	const TVector3D R = rayPoint - sphere_.center();
+	const TVector3D normal = R.normal();
+	const TPoint3D point = sphere_.center() + sphere_.radius() * normal;
 	result.setPoint(point);
+	result.setNormal(normal);
 
 	//                 [sin theta * cos phi]
 	// R = r * N = r * [sin theta * sin phi]
 	//                 [cos theta          ]
 	//
-	const TVector3D R = point - sphere_.center();
-	const TVector3D normal = R.normal();
-	result.setNormal(normal);
-
 	// phi = 2pi * u
 	// theta = pi * v
 	//

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -293,19 +293,18 @@ void TriangleMesh::doLocalContext(const Sample&, const BoundedRay& ray, const In
 	result.setBounds(this->boundingBox());
 
 	const TScalar t = intersection.t();
-	const TPoint3D point = ray.point(t);
 	result.setT(t);
-	result.setPoint(point);
 
 	LASS_ASSERT(intersection.specialField() < mesh_.triangles().size());
 	const TMesh::TTriangle& triangle = mesh_.triangles()[intersection.specialField()];
 
 	TMesh::TIntersectionContext context;
 	TScalar t2;
-	const prim::Result LASS_UNUSED(r) = triangle.intersect(ray.unboundedRay(), t2, ray.nearLimit(), &context);
+	[[maybe_unused]] const prim::Result hit = triangle.intersect(ray.unboundedRay(), t2, ray.nearLimit(), &context);
 #pragma LASS_FIXME("why can t != t2?")
-	LASS_ASSERT(r == prim::rOne /*&& t == t2*/);
+	LASS_ASSERT(hit == prim::rOne /*&& t == t2*/);
 
+	result.setPoint(context.point);
 	result.setGeometricNormal(context.geometricNormal);
 	result.setNormal(context.normal);
 	result.setDPoint_dU(context.dPoint_dU);

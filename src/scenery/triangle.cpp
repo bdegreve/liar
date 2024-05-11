@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -82,11 +82,17 @@ void Triangle::doLocalContext(const kernel::Sample&, const BoundedRay& ray, cons
 	LASS_ASSERT(hit == prim::rOne && ray.inRange(t));
 	LASS_ASSERT(t == intersection.t());
 
-	result.setPoint(ray.point(intersection.t()));
+	// using the triangle geometry to calculate intersection point
+	// is more accurate than using the ray with a large and inaccurate t.
+	const TVector3D dU = triangle_[1] - triangle_[0];
+	const TVector3D dV = triangle_[2] - triangle_[0];
+	const TPoint3D point = triangle_[0] + uv.x * dU + uv.y * dV;
+
+	result.setPoint(point);
 	result.setT(intersection.t());
 	result.setUv(uv);
-	result.setDPoint_dU(triangle_[1] - triangle_[0]);
-	result.setDPoint_dV(triangle_[2] - triangle_[0]);
+	result.setDPoint_dU(dU);
+	result.setDPoint_dV(dV);
 	result.setNormal(triangle_.plane().normal());
 	result.setDNormal_dU(TVector3D());
 	result.setDNormal_dV(TVector3D());

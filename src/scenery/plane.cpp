@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -165,7 +165,11 @@ bool Plane::doIsIntersecting(const Sample&, const BoundedRay& ray) const
 
 void Plane::doLocalContext(const Sample&, const BoundedRay& ray, const Intersection& intersection, IntersectionContext& result) const
 {
-	result.setPoint(ray.point(intersection.t()));
+	const TPoint3D rayPoint = ray.point(intersection.t());
+	// reproject it on the plane for higher accuracy
+	const TPoint3D point = plane_.project(rayPoint);
+	result.setPoint(point);
+
 	TVector3D dPoint_dU;
 	TVector3D dPoint_dV;
 	plane_.getDirections(dPoint_dU, dPoint_dV);
@@ -178,7 +182,7 @@ void Plane::doLocalContext(const Sample&, const BoundedRay& ray, const Intersect
 
 	result.setGeometricNormal(result.normal());
 
-	result.setUv(plane_.uv(result.point()));
+	result.setUv(plane_.uv(point));
 	result.setT(intersection.t());
 }
 
