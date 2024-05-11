@@ -168,10 +168,39 @@ inline void generateOrthonormal(const TVector3D& k, TVector3D& i, TVector3D& j)
 	j.normalize();
 }
 
+
+/** Uniform distribution over real right-open interval [a, b)
+ *
+ * This is a wrapper around std::uniform_real_distribution that ensures that the result is always less than b.
+ * Although std::uniform_real_distribution claims to be right-open, most implementations can still return b.
+ * https://github.com/microsoft/STL/issues/1074
+ */
+template <typename T>
+class UniformRealDistribution: public std::uniform_real_distribution<T>
+{
+public:
+	using result_type = typename std::uniform_real_distribution<T>::result_type;
+	UniformRealDistribution(result_type a = 0, result_type b = 1): std::uniform_real_distribution<T>(a, b) {}
+	template< class Generator >
+	result_type operator()(Generator& generator)
+	{
+		const auto b = this->b();
+		while (true)
+		{
+			const auto x = std::uniform_real_distribution<T>::operator()(generator);
+			if (x < b)
+			{
+				return x;
+			}
+		}
+	}
+};
+
+
 template <typename RandomAccessIterator, typename Generator>
 void stratifier1D(RandomAccessIterator first, RandomAccessIterator last, Generator& generator)
 {
-	std::uniform_real_distribution<TScalar> uniform;
+	UniformRealDistribution<TNumTraits::baseType> uniform;
 	const std::ptrdiff_t n = last - first;
 	const TScalar scale = num::inv(static_cast<TScalar>(n));
 	for (std::ptrdiff_t k = 0; k < n; ++k)
@@ -190,7 +219,7 @@ void stratifier1D(RandomAccessRange& range, Generator& generator)
 template <typename RandomAccessIterator, typename Generator>
 void latinHypercube2D(RandomAccessIterator first, RandomAccessIterator last, Generator& generator)
 {
-	std::uniform_real_distribution<TScalar> uniform;
+	UniformRealDistribution<TNumTraits::baseType> uniform;
 	const std::ptrdiff_t n = last - first;
 	const TPoint2D::TValue scale = num::inv(static_cast<TPoint2D::TValue>(n));
 	for (std::ptrdiff_t k = 0; k < n; ++k)

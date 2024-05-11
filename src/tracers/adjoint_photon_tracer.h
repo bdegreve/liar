@@ -46,6 +46,7 @@ public:
 private:
 
 	typedef std::conditional_t<sizeof(TScalar) >= 8, std::mt19937_64, std::mt19937> TRandom;
+	typedef UniformRealDistribution<TNumTraits::baseType> TUniformRealDistribution;
 
 	void doRequestSamples(const TSamplerPtr& sampler) override;
 	void doPreProcess(const kernel::TSamplerPtr& sampler, const TimePeriod& period, size_t numberOfThreads) override;

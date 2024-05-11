@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -657,7 +657,7 @@ void PhotonMapper::tracePhoton(
 		return;
 	}
 
-	std::uniform_real_distribution<TScalar> uniform;
+	TUniformDistribution uniform;
 	Intersection intersection;
 	scene()->intersect(sample, ray, intersection);
 

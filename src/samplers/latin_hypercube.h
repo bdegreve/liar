@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -58,8 +58,9 @@ private:
 	typedef std::vector<TSubSequence1D> TSubSequence1DList;
 	typedef std::vector<TSubSequence2D> TSubSequence2DList;
 
-	typedef std::conditional_t<sizeof(TScalar) >= 8, std::mt19937_64, std::mt19937> TNumberGenerator;
-	typedef std::uniform_real_distribution<TScalar> TJitterGenerator;
+	typedef num::NumTraits<TScalar>::baseType TRandomScalar;
+	typedef std::conditional_t<sizeof(TRandomScalar) >= 8, std::mt19937_64, std::mt19937> TNumberGenerator;
+	typedef UniformRealDistribution<TRandomScalar> TJitterGenerator;
 
 	void init(const TResolution2D& resolution = TResolution2D(320, 240), size_t numberOfSamples = 1);
 

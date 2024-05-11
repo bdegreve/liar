@@ -227,7 +227,7 @@ private:
 #else
 	typedef std::minstd_rand TRandomPhoton;
 #endif
-	typedef std::uniform_real_distribution<TScalar> TUniformDistribution;
+	typedef UniformRealDistribution<TScalar> TUniformDistribution;
 
 	enum
 	{

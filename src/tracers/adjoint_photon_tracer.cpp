@@ -88,7 +88,7 @@ const Spectral AdjointPhotonTracer::tracePhoton(const Sample& sample, const Diff
 	if (generation >= maxRayGeneration())
 	{
 		// play russian roulette to see if we continue.
-		std::uniform_real_distribution<TScalar> uniform;
+		TUniformRealDistribution uniform;
 		const TScalar survivalPdf = 0.5;
 		if (uniform(random_) < survivalPdf)
 		{
@@ -297,7 +297,7 @@ Sample::TSample1D AdjointPhotonTracer::strategySample(const Sample& sample, size
 	{
 		return *sample.subSequence1D(strategySample_[generation]);
 	}
-	std::uniform_real_distribution<Sample::TSample1D> uniform;
+	TUniformRealDistribution uniform;
 	return uniform(random_);
 }
 
@@ -308,7 +308,7 @@ Sample::TSample2D AdjointPhotonTracer::bsdfSample(const Sample& sample, size_t g
 	{
 		return *sample.subSequence2D(bsdfSample_[generation]);
 	}
-	std::uniform_real_distribution<Sample::TSample2D::TValue> uniform;
+	TUniformRealDistribution uniform;
 	return Sample::TSample2D(uniform(random_), uniform(random_));
 }
 
@@ -319,7 +319,7 @@ Sample::TSample1D AdjointPhotonTracer::bsdfComponentSample(const Sample& sample,
 	{
 		return *sample.subSequence1D(bsdfComponentSample_[generation]);
 	}
-	std::uniform_real_distribution<Sample::TSample1D> uniform;
+	TUniformRealDistribution uniform;
 	return uniform(random_);
 }
 
@@ -330,7 +330,7 @@ Sample::TSample1D AdjointPhotonTracer::lightChoiceSample(const Sample& sample, s
 	{
 		return *sample.subSequence1D(lightChoiceSample_[generation]);
 	}
-	std::uniform_real_distribution<Sample::TSample1D> uniform;
+	TUniformRealDistribution uniform;
 	return uniform(random_);
 }
 
@@ -341,7 +341,7 @@ Sample::TSample2D AdjointPhotonTracer::lightSample(const Sample& sample, size_t 
 	{
 		return *sample.subSequence2D(lightSample_[generation]);
 	}
-	std::uniform_real_distribution<Sample::TSample2D::TValue> uniform;
+	TUniformRealDistribution uniform;
 	return Sample::TSample2D(uniform(random_), uniform(random_));
 }
 
@@ -352,7 +352,7 @@ Sample::TSample1D AdjointPhotonTracer::scatterSample(const Sample& sample, size_
 	{
 		return *sample.subSequence1D(scatterSample_[generation]);
 	}
-	std::uniform_real_distribution<Sample::TSample1D> uniform;
+	TUniformRealDistribution uniform;
 	return uniform(random_);
 }
 
@@ -363,7 +363,7 @@ Sample::TSample2D AdjointPhotonTracer::scatterPhaseSample(const Sample& sample, 
 	{
 		return *sample.subSequence2D(scatterPhaseSample_[generation]);
 	}
-	std::uniform_real_distribution<Sample::TSample2D::TValue> uniform;
+	TUniformRealDistribution uniform;
 	return Sample::TSample2D(uniform(random_), uniform(random_));
 }
 
