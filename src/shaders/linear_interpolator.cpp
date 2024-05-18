@@ -333,34 +333,36 @@ SampleBsdfOut LinearInterpolator::Bsdf::doSample(const TVector3D& omegaIn, const
 	const IntersectionContext* b = &b_;
 	TValue ta = 1 - t_;
 	TValue tb = t_;
-	TValue pa = a->bsdf()->compatibleCaps(allowedCaps) ? ta : 0;
-	TValue pb = b->bsdf()->compatibleCaps(allowedCaps) ? tb : 0;
-	LASS_ASSERT(pa >= 0 && pb >= 0);
-	const TValue ptot = pa + pb;
-	if (ptot <= 0)
+	TValue pdfA = a->bsdf()->compatibleCaps(allowedCaps) ? ta : 0;
+	TValue pdfB = b->bsdf()->compatibleCaps(allowedCaps) ? tb : 0;
+	LASS_ASSERT(pdfA >= 0 && pdfB >= 0);
+	const TValue pdfTot = pdfA + pdfB;
+	if (pdfTot <= 0)
 	{
 		return SampleBsdfOut();
 	}
-	pa /= ptot;
-	pb /= ptot;
+	pdfA /= pdfTot;
+	pdfB /= pdfTot;
 
-	if (componentSample >= pa)
+	if (componentSample >= pdfA)
 	{
-		componentSample -= pa;
+		componentSample -= pdfA;
 		std::swap(a, b);
 		std::swap(ta, tb);
-		std::swap(pa, pb);
+		std::swap(pdfA, pdfB);
 	}
-	LIAR_ASSERT(pa > 0, pa);
-	componentSample /= pa;
-	LIAR_ASSERT(componentSample < 1, componentSample);
+	LIAR_ASSERT(pdfA > 0, pdfA);
+	constexpr TScalar maxSample = TNumTraits::one - TNumTraits::epsilon / 2; // largest scalar under 1
+	static_assert(maxSample < TNumTraits::one);
+	const TScalar compSampleA = std::min(componentSample / pdfA, maxSample);
+	LIAR_ASSERT(compSampleA < 1, "componentSample=" << componentSample << ", pdfA=" << pdfA << ", compSampleA=" << compSampleA);
 
 	const TVector3D wInA = bsdfToBsdf(context(), *a, omegaIn);
 	if (wInA.z <= 0)
 	{
 		return SampleBsdfOut();
 	}
-	SampleBsdfOut out = a->bsdf()->sample(wInA, sample, componentSample, allowedCaps);
+	SampleBsdfOut out = a->bsdf()->sample(wInA, sample, compSampleA, allowedCaps);
 	if (out.pdf == 0)
 	{
 		return SampleBsdfOut();
@@ -372,7 +374,7 @@ SampleBsdfOut LinearInterpolator::Bsdf::doSample(const TVector3D& omegaIn, const
 		return SampleBsdfOut();
 	}
 	out.value *= ta * static_cast<TValue>(num::abs(wOutA.z / out.omegaOut.z));
-	out.pdf *= pa;
+	out.pdf *= pdfA;
 
 	const TVector3D wInB = bsdfToBsdf(context(), *b, omegaIn);
 	if (wInB.z > 0)
@@ -382,7 +384,7 @@ SampleBsdfOut LinearInterpolator::Bsdf::doSample(const TVector3D& omegaIn, const
 		if (outB.pdf > 0)
 		{
 			out.value.fma(outB.value, tb * static_cast<TValue>(num::abs(wOutB.z / out.omegaOut.z)));
-			out.pdf += outB.pdf * pb;
+			out.pdf += outB.pdf * pdfB;
 		}
 	}
 
