@@ -80,8 +80,8 @@ public:
 	TTime shutterOpenDelta() const;
 	TTime shutterCloseDelta() const;
 	TTime shutterTime() const;
-	void setShutterOpenDelta(TTime shutterOpenDelta);
-	void setShutterCloseDelta(TTime shutterCloseDelta);
+	void setShutterOpenDelta(TTimeDelta shutterOpenDelta);
+	void setShutterCloseDelta(TTimeDelta shutterCloseDelta);
 	void setShutterTime(TTime shutterTime);
 
 private:
