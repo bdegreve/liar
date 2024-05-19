@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -190,7 +190,9 @@ void LightSky::doLocalContext(const Sample&, const BoundedRay& ray, const Inters
 	const TScalar sinTheta = num::sin(theta);
 	const TScalar cosTheta_sinTheta = dir.z / sinTheta;
 	const TVector3D dDir_dU = 2 * TNumTraits::pi * TVector3D(-dir.y, dir.x, 0);
-	const TVector3D dDir_dV = -TNumTraits::pi * TVector3D(cosTheta_sinTheta * dir.x, cosTheta_sinTheta * dir.y, -sinTheta);
+	const TVector3D dDir_dV = num::isInf(cosTheta_sinTheta)
+		? TVector3D(TNumTraits::zero, TNumTraits::zero, TNumTraits::zero)
+		: - TNumTraits::pi * TVector3D(cosTheta_sinTheta * dir.x, cosTheta_sinTheta * dir.y, -sinTheta);
 
 	// dN/du = -dD/du    dN/dv = -dD/dv
 	//
