@@ -290,6 +290,7 @@ BsdfOut LinearInterpolator::Bsdf::doEvaluate(const TVector3D& omegaIn, const TVe
 
 	// FIXME: get rid of the cosTheta correction
 	// * static_cast<TValue>(num::abs(wOut.z / omegaOut.z));
+	LIAR_ASSERT(num::abs(omegaOut.z) >= TNumTraits::minStrictPositive, "Cannot evaluate with very small omegaOut.z: " << omegaOut);
 
 	TScalar pa = a_.bsdf()->compatibleCaps(allowedCaps) ? (1 - t_) : 0;
 	TScalar pb = b_.bsdf()->compatibleCaps(allowedCaps) ? t_ : 0;

@@ -54,6 +54,11 @@ BsdfOut Bsdf::evaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, Bsdf
 	LIAR_ASSERT_NORMALIZED(omegaIn);
 	LIAR_ASSERT_NORMALIZED(omegaOut);
 	LIAR_ASSERT(omegaIn.z > 0, "omegaIn=" << omegaIn);
+	if (omegaOut.z == TNumTraits::zero)
+	{
+		return BsdfOut();
+	}
+
 
 	// for reflection, omegaIn and omegaOut must lay in the same hemisphere determined by geometric normal
 	const bool reflective = (dot(omegaIn, omegaGeometricNormal_) > 0) == (dot(omegaOut, omegaGeometricNormal_) > 0);
