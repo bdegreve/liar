@@ -85,9 +85,9 @@
 #else
 #	define LIAR_ASSERT( predicate, message )
 #endif
-#define LIAR_ASSERT_FINITE( x ) LIAR_ASSERT( isFinite(x), (x) )
-#define LIAR_ASSERT_POSITIVE_FINITE( x ) LIAR_ASSERT( isPositiveAndFinite(x), (x) )
-#define LIAR_ASSERT_NORMALIZED( x ) LIAR_ASSERT( isNormalized(x), LASS_STRINGIFY(x) << "=" << x << " norm=" << x.norm() )
+#define LIAR_ASSERT_FINITE( x ) LIAR_ASSERT( ::liar::kernel::isFinite(x), (x) )
+#define LIAR_ASSERT_POSITIVE_FINITE( x ) LIAR_ASSERT( ::liar::kernel::isPositiveAndFinite(x), (x) )
+#define LIAR_ASSERT_NORMALIZED( x ) LIAR_ASSERT( ::liar::kernel::isNormalized(x), LASS_STRINGIFY(x) << "=" << x << " norm=" << x.norm() )
 
 namespace liar
 {
@@ -261,6 +261,11 @@ template <typename T>
 bool isFinite(T x)
 {
 	return !num::isInf(x) && !num::isNaN(x);
+}
+template <typename T>
+inline bool isFinite(const prim::Vector2D<T>& x)
+{
+	return isFinite(x.squaredNorm());
 }
 template <typename T>
 inline bool isFinite(const prim::Vector3D<T>& x)

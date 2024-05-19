@@ -171,12 +171,12 @@ public:
 
 	void setGeometricNormal(const TVector3D& geometricNormal);
 	void setNormal(const TVector3D& normal);
-	void setDNormal_dU(const TVector3D& dNormal_dU) { dNormal_dU_ = dNormal_dU; }
-	void setDNormal_dV(const TVector3D& dNormal_dV) { dNormal_dV_ = dNormal_dV; }
+	void setDNormal_dU(const TVector3D& dNormal_dU) { LIAR_ASSERT_FINITE(dNormal_dU); dNormal_dU_ = dNormal_dU; }
+	void setDNormal_dV(const TVector3D& dNormal_dV) { LIAR_ASSERT_FINITE(dNormal_dV); dNormal_dV_ = dNormal_dV; }
 	void setUv(const TPoint2D& uv) { uv_ = uv; }
 	void setUv(const TScalar u, const TScalar iV) { uv_.x = u; uv_.y = iV; }
-	void setDUv_dI(const TVector2D& dUv_dI) { dUv_dI_ = dUv_dI; }
-	void setDUv_dJ(const TVector2D& dUv_dJ) { dUv_dJ_ = dUv_dJ; }
+	void setDUv_dI(const TVector2D& dUv_dI) { LIAR_ASSERT_FINITE(dUv_dI); dUv_dI_ = dUv_dI; }
+	void setDUv_dJ(const TVector2D& dUv_dJ) { LIAR_ASSERT_FINITE(dUv_dJ); dUv_dJ_ = dUv_dJ; }
 	void setT(TScalar t) { t_ = t; }
 	void setShader(const Shader* shader);
 	void setShader(const TShaderPtr& shader) { setShader(shader.get()); }
