@@ -154,8 +154,9 @@ const Spectral AdjointPhotonTracer::shadeSurface(const Sample& sample, const Dif
 
 	if (const Shader* const shader = context.shader())
 	{
-		const TVector3D omegaIn = context.worldToBsdf(-ray.direction());
-		LASS_ASSERT(omegaIn.z > 0);
+		TVector3D omegaIn = context.worldToBsdf(-ray.direction());
+		LIAR_ASSERT(omegaIn.z >= -TNumTraits::epsilon, "omegaIn=" << omegaIn);
+		omegaIn.z = std::max(omegaIn.z, TNumTraits::epsilon);
 
 		if (!light)
 		{

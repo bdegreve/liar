@@ -53,6 +53,7 @@ BsdfOut Bsdf::evaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, Bsdf
 {
 	LIAR_ASSERT_NORMALIZED(omegaIn);
 	LIAR_ASSERT_NORMALIZED(omegaOut);
+	LIAR_ASSERT(omegaIn.z > 0, "omegaIn=" << omegaIn);
 
 	// for reflection, omegaIn and omegaOut must lay in the same hemisphere determined by geometric normal
 	const bool reflective = (dot(omegaIn, omegaGeometricNormal_) > 0) == (dot(omegaOut, omegaGeometricNormal_) > 0);
@@ -74,6 +75,7 @@ BsdfOut Bsdf::evaluate(const TVector3D& omegaIn, const TVector3D& omegaOut, Bsdf
 SampleBsdfOut Bsdf::sample(const TVector3D& omegaIn, const TPoint2D& sample, TScalar componentSample, BsdfCaps allowedCaps) const
 {
 	LIAR_ASSERT_NORMALIZED(omegaIn);
+	LIAR_ASSERT(omegaIn.z > 0, "omegaIn=" << omegaIn);
 
 	if (!compatibleCaps(allowedCaps))
 	{
