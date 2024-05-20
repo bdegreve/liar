@@ -31,6 +31,7 @@
 
 #include "scenery_common.h"
 #include "../kernel/scene_object.h"
+#include "../kernel/texture.h"
 
 #include <lass/prim/triangle_mesh_3d.h>
 #include <lass/spat/qbvh_tree.h>
@@ -68,6 +69,11 @@ public:
 	const TUvs& uvs() const;
 	const TIndexTriangles triangles() const;
 
+	const TTexturePtr& alphaMask() const;
+	Texture::TValue alphaThreshold() const;
+	void setAlphaMask(const TTexturePtr& alphaMask);
+	void setAlphaThreshold(Texture::TValue alphaThreshold);
+
 #if LIAR_HAVE_HAPPLY
 	static TTriangleMeshPtr loadPly(std::filesystem::path path);
 #endif
@@ -93,7 +99,9 @@ private:
 
 	TMesh mesh_;
 	std::vector<TScalar> cdf_;
+	TTexturePtr alphaMask_;
 	TScalar area_;
+	Texture::TValue alphaThreshold_;
 };
 
 

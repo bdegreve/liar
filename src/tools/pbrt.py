@@ -436,7 +436,8 @@ class PbrtScene(object):
         print(f"loading PLY file {filename} ...")
         mesh = liar.scenery.TriangleMesh.loadPly(filename)
         if alpha:
-            mesh = liar.scenery.ClipMap(mesh, self._get_texture(alpha), 0.001)
+             mesh.alphaMask = self._get_texture(alpha)
+             mesh.alphaThreshold = 0.001
         if shadowalpha:
             assert shadowalpha is alpha
         return mesh

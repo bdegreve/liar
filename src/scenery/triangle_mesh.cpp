@@ -57,6 +57,9 @@ PY_CLASS_METHOD(TriangleMesh, normals)
 PY_CLASS_METHOD(TriangleMesh, uvs)
 PY_CLASS_METHOD(TriangleMesh, triangles)
 
+PY_CLASS_MEMBER_RW(TriangleMesh, alphaMask, setAlphaMask)
+PY_CLASS_MEMBER_RW(TriangleMesh, alphaThreshold, setAlphaThreshold)
+
 #if LIAR_HAVE_HAPPLY
 PY_CLASS_STATIC_METHOD(TriangleMesh, loadPly)
 #endif
@@ -65,7 +68,9 @@ PY_CLASS_STATIC_METHOD(TriangleMesh, loadPly)
 
 TriangleMesh::TriangleMesh(TVertices vertices, TNormals normals, TUvs uvs, const TIndexTriangles& triangles):
 	mesh_(std::move(vertices), std::move(normals), std::move(uvs), triangles),
-	area_(TNumTraits::zero)
+	alphaMask_(nullptr),
+	area_(TNumTraits::zero),
+	alphaThreshold_(0.5f)
 {
 	std::vector<TScalar> cdf;
 	cdf_.reserve(mesh_.triangles().size());
@@ -144,6 +149,33 @@ const TriangleMesh::TIndexTriangles TriangleMesh::triangles() const
 	return triangles;
 }
 
+
+
+const TTexturePtr& TriangleMesh::alphaMask() const
+{
+	return alphaMask_;
+}
+
+
+
+Texture::TValue TriangleMesh::alphaThreshold() const
+{
+	return alphaThreshold_;
+}
+
+
+
+void TriangleMesh::setAlphaMask(const TTexturePtr& alphaMask)
+{
+	alphaMask_ = alphaMask;
+}
+
+
+
+void TriangleMesh::setAlphaThreshold(Texture::TValue alphaThreshold)
+{
+	alphaThreshold_ = alphaThreshold;
+}
 
 
 #if LIAR_HAVE_HAPPLY
@@ -256,14 +288,21 @@ TTriangleMeshPtr TriangleMesh::loadPly(std::filesystem::path path)
 
 // --- private -------------------------------------------------------------------------------------
 
-void TriangleMesh::doIntersect(const Sample&, const BoundedRay& ray, Intersection& result) const
+void TriangleMesh::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
 {
-	// also modify TriangleMeshComposite::doIntersect, if you change this
-	TScalar t;
-	TMesh::TTriangleIterator triangle;
-	const prim::Result hit = mesh_.intersect(ray.unboundedRay(), triangle, t, ray.nearLimit());
-	if (hit == prim::rOne && ray.inRange(t))
+	Intersection intersection;
+	TScalar tMin = ray.nearLimit();
+	while (true)
 	{
+		TScalar t;
+		TMesh::TTriangleIterator triangle;
+		const prim::Result hit = mesh_.intersect(ray.unboundedRay(), triangle, t, tMin);
+		if (!(hit == prim::rOne && ray.inRange(t)))
+		{
+			result = Intersection::empty();
+			return;
+		}
+
 		const TScalar d = dot(ray.direction(), triangle->geometricNormal());
 		const SolidEvent se = (d < TNumTraits::zero)
 			? seEntering
@@ -271,11 +310,23 @@ void TriangleMesh::doIntersect(const Sample&, const BoundedRay& ray, Intersectio
 			? seLeaving
 			: seNoEvent;
 		const size_t k = static_cast<size_t>(std::distance(mesh_.triangles().begin(), triangle));
-		result = Intersection(this, t, se, k);
-	}
-	else
-	{
-		result = Intersection::empty();
+
+		if (!alphaMask_)
+		{
+			result = Intersection(this, t, se, k);
+			return;
+		}
+
+		intersection = Intersection(this, t, se, k);
+		const IntersectionContext context(*this, sample, ray, intersection, 0);
+		if (alphaMask_->scalarLookUp(sample, context) >= alphaThreshold_)
+		{
+			intersection.push(this);
+			result.swap(intersection);
+			return;
+		}
+
+		tMin = intersection.t();
 	}
 }
 

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -181,29 +181,47 @@ void TriangleMeshComposite::doPreProcess(const TimePeriod& period)
 
 
 
-void TriangleMeshComposite::doIntersect(const Sample&, const BoundedRay& ray, Intersection& result) const
+void TriangleMeshComposite::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
 {
-	// also modify TriangleMesh::doIntersect, if you change this
-	TScalar t;
-	TMesh::TTriangleIterator triangle;
-	const prim::Result hit = mesh_.intersect(ray.unboundedRay(), triangle, t, ray.nearLimit());
-	if (hit == prim::rOne && ray.inRange(t))
+	Intersection intersection;
+	TScalar tMin = ray.nearLimit();
+	while (true)
 	{
-		const TScalar d = dot(ray.direction(), triangle->geometricNormal());
-		const SolidEvent se = (d < TNumTraits::zero)
-			? seEntering
-			: (d > TNumTraits::zero)
-			? seLeaving
-			: seNoEvent;
-		const size_t k = static_cast<size_t>(std::distance(mesh_.triangles().begin(), triangle));
-		TriangleMesh* const child = backLinks_[k].first;
-		const size_t k2 = k - backLinks_[k].second;
-		result = Intersection(child, t, se, k2);
-		result.push(this);
-	}
-	else
-	{
-		result = Intersection::empty();
+		TScalar t;
+		TMesh::TTriangleIterator triangle;
+		const prim::Result hit = mesh_.intersect(ray.unboundedRay(), triangle, t, tMin);
+		if (hit == prim::rOne && ray.inRange(t))
+		{
+			const TScalar d = dot(ray.direction(), triangle->geometricNormal());
+			const SolidEvent se = (d < TNumTraits::zero)
+				? seEntering
+				: (d > TNumTraits::zero)
+				? seLeaving
+				: seNoEvent;
+			const size_t k = static_cast<size_t>(std::distance(mesh_.triangles().begin(), triangle));
+			TriangleMesh* const child = backLinks_[k].first;
+			const size_t k2 = k - backLinks_[k].second;
+			intersection = Intersection(child, t, se, k2);
+			intersection.push(this);
+
+			if (child->alphaMask())
+			{
+				const IntersectionContext context(*this, sample, ray, intersection, 0);
+				if (child->alphaMask()->scalarLookUp(sample, context) < child->alphaThreshold())
+				{
+					tMin = intersection.t();
+					continue;
+				}
+			}
+
+			result.swap(intersection);
+			return;
+		}
+		else
+		{
+			result = Intersection::empty();
+			return;
+		}
 	}
 }
 
