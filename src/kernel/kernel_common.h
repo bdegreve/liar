@@ -89,6 +89,11 @@
 #define LIAR_ASSERT_POSITIVE_FINITE( x ) LIAR_ASSERT( ::liar::kernel::isPositiveAndFinite(x), (x) )
 #define LIAR_ASSERT_NORMALIZED( x ) LIAR_ASSERT( ::liar::kernel::isNormalized(x), LASS_STRINGIFY(x) << "=" << x << " norm=" << x.norm() )
 
+#if LASS_COMPILER_TYPE == LASS_COMPILER_TYPE_MSVC
+#	define LIAR_FORCE_INLINE __forceinline
+#else
+#	define LIAR_FORCE_INLINE inline __attribute__((always_inline))
+#endif
 namespace liar
 {
 
