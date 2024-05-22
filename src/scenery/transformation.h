@@ -73,6 +73,7 @@ private:
 
 	TSceneObjectPtr child_;
 	TTransformation3D localToWorld_;
+	TTransformation3D worldToLocal_;
 };
 
 
