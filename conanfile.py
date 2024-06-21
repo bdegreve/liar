@@ -110,7 +110,7 @@ class LiarConan(ConanFile):
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, 17)
+            check_min_cppstd(self, 20)
         if self.settings.compiler.value in ["gcc", "clang"]:
             if self.settings.compiler.libcxx in ["libstdc++"]:
                 raise ConanInvalidConfiguration(
