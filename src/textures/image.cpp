@@ -27,6 +27,7 @@
 #include <lass/io/file_attribute.h>
 #include <lass/stde/extended_string.h>
 #include <lass/python/export_traits_filesystem.h>
+#include <lass/util/stop_watch.h>
 
 #if LIAR_HAVE_AVX
 #	include <array>
@@ -117,6 +118,11 @@ void Image::loadFile(const std::filesystem::path& filename)
 
 void Image::loadFile(const std::filesystem::path& filename, const TRgbSpacePtr& rgbSpace)
 {
+	util::Clock clock;
+	util::StopWatch stopWatch(clock);
+	stopWatch.start();
+	LASS_CERR << "Loading image " << filename << "... " << std::flush;
+
 	ImageReader reader(filename, rgbSpace, "");
 	TResolution2D resolution = reader.resolution();
 	if (resolution.x == 0 || resolution.y == 0)
@@ -137,6 +143,9 @@ void Image::loadFile(const std::filesystem::path& filename, const TRgbSpacePtr& 
 
 	currentMipMapping_ = mmUninitialized;
 	mipMaps_.clear();
+
+	stopWatch.stop();
+	LASS_CERR << stopWatch.time() << "s\n";
 }
 
 
