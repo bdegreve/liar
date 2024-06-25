@@ -110,12 +110,14 @@ void TriangleMeshComposite::doPreProcess(const TimePeriod& period)
 	size_t numNormals = 0;
 	size_t numUvs = 0;
 	size_t numTriangles = 0;
+	hasAlphaMasks_ = false;
 	for (const auto& child : children_)
 	{
 		numVerts += child->vertices().size();
 		numNormals += child->normals().size();
 		numUvs += child->uvs().size();
 		numTriangles += child->triangles().size();
+		hasAlphaMasks_ |= static_cast<bool>(child->alphaMask());
 	}
 	verts.reserve(numVerts);
 	normals.reserve(numNormals);
@@ -183,53 +185,49 @@ void TriangleMeshComposite::doPreProcess(const TimePeriod& period)
 
 void TriangleMeshComposite::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
 {
+	// also modify TriangleMesh::doIntersects, if you change this
+
+	auto filter = hasAlphaMasks_
+		? [this, &sample, &ray](TMesh::TTriangleIterator triangle, TScalar t) { return this->triangleFilter(triangle, t, sample, ray); }
+		: TMesh::TFilter();
+
 	Intersection intersection;
-	TScalar tMin = ray.nearLimit();
-	while (true)
+	TScalar t;
+	TMesh::TTriangleIterator triangle;
+	const prim::Result hit = mesh_.intersectFilter(ray.unboundedRay(), triangle, t, ray.nearLimit(), filter);
+	if (hit == prim::rOne && ray.inRange(t))
 	{
-		TScalar t;
-		TMesh::TTriangleIterator triangle;
-		const prim::Result hit = mesh_.intersect(ray.unboundedRay(), triangle, t, tMin);
-		if (hit == prim::rOne && ray.inRange(t))
-		{
-			const TScalar d = dot(ray.direction(), triangle->geometricNormal());
-			const SolidEvent se = (d < TNumTraits::zero)
-				? seEntering
-				: (d > TNumTraits::zero)
-				? seLeaving
-				: seNoEvent;
-			const size_t k = static_cast<size_t>(std::distance(mesh_.triangles().begin(), triangle));
-			TriangleMesh* const child = backLinks_[k].first;
-			const size_t k2 = k - backLinks_[k].second;
-			intersection = Intersection(child, t, se, k2);
-			intersection.push(this);
+		const TScalar d = dot(ray.direction(), triangle->geometricNormal());
+		const SolidEvent se = (d < TNumTraits::zero)
+			? seEntering
+			: (d > TNumTraits::zero)
+			? seLeaving
+			: seNoEvent;
+		const size_t k = static_cast<size_t>(std::distance(mesh_.triangles().begin(), triangle));
+		TriangleMesh* const child = backLinks_[k].first;
+		const size_t k2 = k - backLinks_[k].second;
+		intersection = Intersection(child, t, se, k2);
+		intersection.push(this);
 
-			if (child->alphaMask())
-			{
-				const IntersectionContext context(*this, sample, ray, intersection, 0);
-				if (child->alphaMask()->scalarLookUp(sample, context) < child->alphaThreshold())
-				{
-					tMin = intersection.t();
-					continue;
-				}
-			}
-
-			result.swap(intersection);
-			return;
-		}
-		else
-		{
-			result = Intersection::empty();
-			return;
-		}
+		result.swap(intersection);
+	}
+	else
+	{
+		result = Intersection::empty();
 	}
 }
 
 
 
-bool TriangleMeshComposite::doIsIntersecting(const Sample&, const BoundedRay& ray) const
+bool TriangleMeshComposite::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
 {
-	return mesh_.intersects(ray.unboundedRay(), ray.nearLimit(), ray.farLimit());
+	// also modify TriangleMesh::doIntersects, if you change this
+
+	auto filter = hasAlphaMasks_
+		? [this, &sample, &ray](TMesh::TTriangleIterator triangle, TScalar t) { return this->triangleFilter(triangle, t, sample, ray); }
+		: TMesh::TFilter();
+
+	return mesh_.intersectsFilter(ray.unboundedRay(), ray.nearLimit(), ray.farLimit(), filter);
 }
 
 
@@ -317,6 +315,33 @@ const TPyObjectPtr TriangleMeshComposite::doGetState() const
 void TriangleMeshComposite::doSetState(const TPyObjectPtr& state)
 {
 	LASS_ENFORCE(python::decodeTuple(state, children_));
+}
+
+
+
+bool TriangleMeshComposite::triangleFilter(TMesh::TTriangleIterator triangle, TScalar t, const Sample& sample, const BoundedRay& ray) const
+{
+	const size_t k = static_cast<size_t>(std::distance(mesh_.triangles().begin(), triangle));
+	TriangleMesh* const child = backLinks_[k].first;
+	if (!child->alphaMask())
+	{
+		return true;
+	}
+
+	const TScalar d = dot(ray.direction(), triangle->geometricNormal());
+	const SolidEvent se = (d < TNumTraits::zero)
+		? seEntering
+		: (d > TNumTraits::zero)
+		? seLeaving
+		: seNoEvent;
+
+	const size_t k2 = k - backLinks_[k].second;
+	Intersection intersection(child, t, se, k2);
+	intersection.push(this);
+
+	const IntersectionContext context(*this, sample, ray, intersection, 0);
+
+	return child->alphaMask()->scalarLookUp(sample, context) >= child->alphaThreshold();
 }
 
 

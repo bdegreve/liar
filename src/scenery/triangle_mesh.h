@@ -97,6 +97,8 @@ private:
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
+	bool triangleFilter(TMesh::TTriangleIterator triangle, TScalar t, const Sample& sample, const BoundedRay& ray) const;
+
 	TMesh mesh_;
 	std::vector<TScalar> cdf_;
 	TTexturePtr alphaMask_;

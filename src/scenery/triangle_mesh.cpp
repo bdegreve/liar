@@ -290,19 +290,17 @@ TTriangleMeshPtr TriangleMesh::loadPly(std::filesystem::path path)
 
 void TriangleMesh::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
 {
-	Intersection intersection;
-	TScalar tMin = ray.nearLimit();
-	while (true)
-	{
-		TScalar t;
-		TMesh::TTriangleIterator triangle;
-		const prim::Result hit = mesh_.intersect(ray.unboundedRay(), triangle, t, tMin);
-		if (!(hit == prim::rOne && ray.inRange(t)))
-		{
-			result = Intersection::empty();
-			return;
-		}
+	// also modify TriangleMeshComposite::doIntersect, if you change this
 
+	auto filter = alphaMask_
+		? [this, &sample, &ray](TMesh::TTriangleIterator triangle, TScalar t) { return this->triangleFilter(triangle, t, sample, ray); }
+		: TMesh::TFilter();
+
+	TScalar t;
+	TMesh::TTriangleIterator triangle;
+	const prim::Result hit = mesh_.intersectFilter(ray.unboundedRay(), triangle, t, ray.nearLimit(), filter);
+	if (hit == prim::rOne && ray.inRange(t))
+	{
 		const TScalar d = dot(ray.direction(), triangle->geometricNormal());
 		const SolidEvent se = (d < TNumTraits::zero)
 			? seEntering
@@ -310,31 +308,25 @@ void TriangleMesh::doIntersect(const Sample& sample, const BoundedRay& ray, Inte
 			? seLeaving
 			: seNoEvent;
 		const size_t k = static_cast<size_t>(std::distance(mesh_.triangles().begin(), triangle));
-
-		if (!alphaMask_)
-		{
-			result = Intersection(this, t, se, k);
-			return;
-		}
-
-		intersection = Intersection(this, t, se, k);
-		const IntersectionContext context(*this, sample, ray, intersection, 0);
-		if (alphaMask_->scalarLookUp(sample, context) >= alphaThreshold_)
-		{
-			intersection.push(this);
-			result.swap(intersection);
-			return;
-		}
-
-		tMin = intersection.t();
+		result = Intersection(this, t, se, k);
+	}
+	else
+	{
+		result = Intersection::empty();
 	}
 }
 
 
 
-bool TriangleMesh::doIsIntersecting(const Sample&, const BoundedRay& ray) const
+bool TriangleMesh::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
 {
-	return mesh_.intersects(ray.unboundedRay(), ray.nearLimit(), ray.farLimit());
+	// also modify TriangleMeshComposite::doIntersects, if you change this
+
+	auto filter = alphaMask_
+		? [this, &sample, &ray](TMesh::TTriangleIterator triangle, TScalar t) { return this->triangleFilter(triangle, t, sample, ray); }
+		: TMesh::TFilter();
+
+	return mesh_.intersectsFilter(ray.unboundedRay(), ray.nearLimit(), ray.farLimit(), filter);
 }
 
 
@@ -463,6 +455,28 @@ void TriangleMesh::doSetState(const TPyObjectPtr& state)
 	mesh_ = TMesh(vertices, normals, uvs, triangles);
 }
 
+
+
+bool TriangleMesh::triangleFilter(TMesh::TTriangleIterator triangle, TScalar t, const Sample& sample, const BoundedRay& ray) const
+{
+	if (!alphaMask_)
+	{
+		return true;
+	}
+
+	const TScalar d = dot(ray.direction(), triangle->geometricNormal());
+	const SolidEvent se = (d < TNumTraits::zero)
+		? seEntering
+		: (d > TNumTraits::zero)
+		? seLeaving
+		: seNoEvent;
+	const size_t k = static_cast<size_t>(std::distance(mesh_.triangles().begin(), triangle));
+
+	const Intersection intersection(this, t, se, k);
+	const IntersectionContext context(*this, sample, ray, intersection, 0);
+
+	return alphaMask_->scalarLookUp(sample, context) >= alphaThreshold_;
+}
 
 
 // --- free ----------------------------------------------------------------------------------------
