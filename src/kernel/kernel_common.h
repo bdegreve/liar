@@ -106,6 +106,8 @@ typedef LIAR_WAVELENGTH TWavelength;
 
 typedef num::NumTraits<TScalar> TNumTraits;
 
+inline TScalar operator""_s(long double x) { return static_cast<TScalar>(x); }
+
 typedef prim::Vector2D<TScalar> TVector2D;
 typedef prim::Point2D<TScalar> TPoint2D;
 typedef prim::Vector3D<TScalar> TVector3D;

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -426,10 +426,10 @@ TTransformation3D chromaticAdaptationMatrix(const TVector3D& from, const TVector
 {
 	// bradford matrix
 	const static TTransformation3D M_BFD {
-		 0.8951,  0.2664, -0.1614, 0,
-		-0.7502,  1.7135,  0.0367, 0,
-		 0.0389, -0.0685,  1.0296, 0,
-		 0,       0,       0,      1
+		 0.8951_s,  0.2664_s, -0.1614_s, 0._s,
+		-0.7502_s,  1.7135_s,  0.0367_s, 0._s,
+		 0.0389_s, -0.0685_s,  1.0296_s, 0._s,
+		 0._s,      0._s,      0._s,     1._s
 	};
 
 	const TVector3D C_s = transform(from, M_BFD);

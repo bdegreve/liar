@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -124,19 +124,19 @@ LIAR_KERNEL_DLL TSpectrumPtr rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TVa
 /** @relates RgbSpace
  */
 const TRgbSpacePtr CIEXYZ = TRgbSpacePtr(new RgbSpace(
-	TPoint2D(1, 0), // red primary
-	TPoint2D(0, 1), // green primary
-	TPoint2D(0, 0), // blue primary
-	TPoint2D(TScalar(1) / 3, TScalar(1) / 3), // white point
-	1)); // gamma
+	TPoint2D(1.0_s, 0.0_s), // red primary
+	TPoint2D(0.0_s, 1.0_s), // green primary
+	TPoint2D(0.0_s, 0.0_s), // blue primary
+	TPoint2D(1.0_s / 3, 1.0_s / 3), // white point
+	1.0f)); // gamma
 
 /** @relates RgbSpace
  */
 const TRgbSpacePtr sRGB = TRgbSpacePtr(new RgbSpace(
-	TPoint2D(0.6400f, 0.3300f), // red primary
-	TPoint2D(0.3000f, 0.6000f), // green primary
-	TPoint2D(0.1500f, 0.0600f), // blue primary
-	TPoint2D(0.3127f, 0.3290f), // white point
+	TPoint2D(0.6400_s, 0.3300_s), // red primary
+	TPoint2D(0.3000_s, 0.6000_s), // green primary
+	TPoint2D(0.1500_s, 0.0600_s), // blue primary
+	TPoint2D(0.3127_s, 0.3290_s), // white point
 	2.2f)); // gamma
 
 

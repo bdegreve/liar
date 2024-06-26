@@ -1088,7 +1088,7 @@ const Spectral PhotonMapper::gatherIndirect(
 	if (doImportanceGathering && gatherStage == 0)
 	{
 		const size_t gridSize = 8;
-		const TScalar alpha = 0.05;
+		const TScalar alpha = 0.05_s;
 		grid_.resize(num::sqr(gridSize));
 		std::fill(grid_.begin(), grid_.end(), 0);
 		TScalar pTotal = 0;
