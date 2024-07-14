@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ namespace scenery
 
 PY_DECLARE_CLASS_DOC(ClipMap, "Applies clip map to child object")
 PY_CLASS_CONSTRUCTOR_2(ClipMap, const TSceneObjectPtr&, const TTexturePtr&)
-PY_CLASS_CONSTRUCTOR_3(ClipMap, const TSceneObjectPtr&, const TTexturePtr&, TScalar)
+PY_CLASS_CONSTRUCTOR_3(ClipMap, const TSceneObjectPtr&, const TTexturePtr&, ClipMap::TValue)
 PY_CLASS_MEMBER_RW(ClipMap, child, setChild)
 PY_CLASS_MEMBER_RW(ClipMap, clipMap, setClipMap)
 PY_CLASS_MEMBER_RW(ClipMap, threshold, setThreshold)
@@ -47,7 +47,7 @@ ClipMap::ClipMap(const TSceneObjectPtr& child, const TTexturePtr& clipMap):
 
 
 
-ClipMap::ClipMap(const TSceneObjectPtr& child, const TTexturePtr& clipMap, TScalar threshold):
+ClipMap::ClipMap(const TSceneObjectPtr& child, const TTexturePtr& clipMap, TValue threshold):
 	 child_(LASS_ENFORCE_POINTER(child)),
 	clipMap_(clipMap),
 	threshold_(threshold)
@@ -84,14 +84,14 @@ void ClipMap::setClipMap(const TTexturePtr& clipMap)
 
 
 
-TScalar ClipMap::threshold() const
+ClipMap::TValue ClipMap::threshold() const
 {
 	return threshold_;
 }
 
 
 
-void ClipMap::setThreshold(TScalar threshold)
+void ClipMap::setThreshold(TValue threshold)
 {
 	threshold_ = threshold;
 }

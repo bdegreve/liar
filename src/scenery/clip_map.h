@@ -42,9 +42,10 @@ class LIAR_SCENERY_DLL ClipMap: public SceneObject
 {
 	PY_HEADER(SceneObject)
 public:
+	using TValue = Texture::TValue;
 
 	ClipMap(const TSceneObjectPtr& child, const TTexturePtr& clipMap);
-	ClipMap(const TSceneObjectPtr& child, const TTexturePtr& clipMap, TScalar threshold);
+	ClipMap(const TSceneObjectPtr& child, const TTexturePtr& clipMap, TValue threshold);
 
 	const TSceneObjectPtr& child() const;
 	void setChild(const TSceneObjectPtr& child);
@@ -52,8 +53,8 @@ public:
 	const TTexturePtr& clipMap() const;
 	void setClipMap(const TTexturePtr& clipMap);
 
-	TScalar threshold() const;
-	void setThreshold(TScalar threshold);
+	TValue threshold() const;
+	void setThreshold(TValue threshold);
 
 private:
 
@@ -73,7 +74,7 @@ private:
 
 	TSceneObjectPtr child_;
 	TTexturePtr clipMap_;
-	TScalar threshold_;
+	TValue threshold_;
 };
 
 
