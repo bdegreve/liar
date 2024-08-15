@@ -36,7 +36,7 @@ class LiarConan(ConanFile):
     topics = "C++", "Python"
     settings = "os", "compiler", "build_type", "arch"
     requires = [
-        "lass/1.11.0-169+g6e7a5e7d",
+        "lass/1.11.0-229+g04ef6743",
     ]
     options = {
         "fPIC": [True, False],
