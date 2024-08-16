@@ -63,7 +63,6 @@ if(MSVC)
 	add_compile_options(
 		"/EHsc"
 		"/arch:AVX2"
-		"/fp:fast"
 		"$<$<CONFIG:Release>:/GL>"
 		"$<$<CONFIG:Release>:/Zi>"
 	)
