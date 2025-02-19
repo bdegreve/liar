@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -484,14 +484,18 @@ void LightSky::sampleMap(const TPoint2D& sample, TScalar& i, TScalar& j, TScalar
 		std::lower_bound(marginalCdfU_.begin(), marginalCdfU_.end(), sample.x) - marginalCdfU_.begin()));
 	const TScalar u0 = ii > 0 ? marginalCdfU_[ii - 1] : TNumTraits::zero;
 	const TScalar margPdfU = marginalCdfU_[ii] - u0;
-	i = static_cast<TScalar>(ii) + (sample.x - u0) / margPdfU;
+	i = static_cast<TScalar>(ii) + (margPdfU > 0
+		? (sample.x - u0) / margPdfU
+		: 0);
 
 	TMap::const_iterator condCdfV = conditionalCdfV_.begin() + ii * resolution_.y;
 	const size_t jj = std::min(resolution_.y - 1, static_cast<size_t>(
 		std::lower_bound(condCdfV, condCdfV + resolution_.y, sample.y) - condCdfV));
 	const TValue v0 = jj > 0 ? condCdfV[jj - 1] : 0;
 	const TValue condPdfV = condCdfV[jj] - v0;
-	j = static_cast<TScalar>(jj) + (sample.y - v0) / condPdfV;
+	j = static_cast<TScalar>(jj) + (condPdfV > 0
+		? (sample.y - v0) / condPdfV
+		: 0);
 
 	pdf = margPdfU * condPdfV * static_cast<TScalar>(resolution_.x * resolution_.y) / (4 * TNumTraits::pi);
 }
