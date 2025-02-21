@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@
 #include "scenery_common.h"
 #include "../kernel/scene_object.h"
 #include "../kernel/transformation.h"
+#include "../kernel/matrix_4x4.h"
 
 namespace liar
 {
@@ -56,6 +57,8 @@ public:
 
 private:
 
+	typedef Matrix4x4<TScalar> TMatrix;
+
 	void doAccept(lass::util::VisitorBase& visitor) override;
 
 	void doPreProcess(const TimePeriod& period) override;
@@ -73,7 +76,7 @@ private:
 
 	TSceneObjectPtr child_;
 	TTransformation3D localToWorld_;
-	TTransformation3D worldToLocal_;
+	TMatrix worldToLocal_;
 };
 
 

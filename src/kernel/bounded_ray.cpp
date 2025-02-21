@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -152,13 +152,55 @@ BoundedRay transform(const BoundedRay& ray, const TTransformation3D& transformat
  *	LASS_ASSERT(newRay.point(newParameter) ==
  *		prim::transform(ray.point(parameter), transformation));
  *	@endcode.
-
  */
 BoundedRay transform(const BoundedRay& ray, const TTransformation3D& transformation,
 					 TScalar& parameter)
 {
 	TScalar tScale = TNumTraits::one;
 	TRay3D transformedRay = prim::transform(ray.unboundedRay(), transformation, tScale);
+	parameter *= tScale;
+	return BoundedRay(transformedRay, ray.nearLimit() * tScale, ray.farLimit() * tScale);
+}
+
+
+
+/** @relates BoundedRay
+ *  Transform a bounded ray, renormalize and adjust its bounds.
+ *
+ *	The scalar bounds must be adjusted because of the renormalization, so that the
+ *	following equation is valid for both limits (equations shows us the nearLimit only):
+ *
+ *	@code
+ *	BoundedRay newRay = transform(ray, transformation);
+ *	LASS_ASSERT(newRay.point(newRay.nearLimit()) == transformation * ray.point(ray.nearLimit()));
+ *	@endcode.
+ */
+BoundedRay transform(const BoundedRay& ray, const Matrix4x4<TScalar>& transformation)
+{
+	TScalar tScale = TNumTraits::one;
+	TRay3D transformedRay = transform(ray.unboundedRay(), transformation, tScale);
+	return BoundedRay(transformedRay, ray.nearLimit() * tScale, ray.farLimit() * tScale);
+}
+
+
+
+/** @relates BoundedRay
+ *	Transform a bounded ray, renormalize and adjust its bounds and @a parameter.
+ *
+ *	The scalar bounds and @a parameter must be adjusted because of the renormalization, so
+ *	that @a parameter refers to the correct point on the transformed ray:
+ *
+ *	@code
+ *	TScalar newParameter = parameter;
+ *	BoundedRay newRay = transform(ray, transformation, newParameter);
+ *	LASS_ASSERT(newRay.point(newParameter) == transformation * ray.point(parameter));
+ *	@endcode.
+ */
+BoundedRay transform(const BoundedRay& ray, const Matrix4x4<TScalar>& transformation,
+	TScalar& parameter)
+{
+	TScalar tScale = TNumTraits::one;
+	TRay3D transformedRay = transform(ray.unboundedRay(), transformation, tScale);
 	parameter *= tScale;
 	return BoundedRay(transformedRay, ray.nearLimit() * tScale, ray.farLimit() * tScale);
 }

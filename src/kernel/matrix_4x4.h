@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2024-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -512,6 +512,38 @@ private:
 #pragma pop_macro("swizzle1_ps")
 
 #endif
+
+/** @relates Matrix4x4
+ *	Transform a TRay3D and renormalize.
+ */
+inline TRay3D transform(const TRay3D& ray, const Matrix4x4<TScalar>& transformation)
+{
+	const TPoint3D support = transformation * ray.support();
+	const TVector3D direction = transformation * ray.direction();
+	return TRay3D(support, direction);
+}
+
+
+/** @relates Matrix4x4
+ *	Transform a TRay3D, renormalize and adjust @a parameter.
+ *
+ *	The scalar bounds and @a parameter must be adjusted because of the renormalization, so
+ *	that @a parameter refers to the correct point on the transformed ray:
+ *
+ *	@code
+ *	TScalar newParameter = parameter;
+ *	TRay3D newRay = transform(ray, transformation, newParameter);
+ *	LASS_ASSERT(newRay.point(newParameter) == transformation * ray.point(parameter);
+ *	@endcode.
+ */
+inline TRay3D transform(const TRay3D& ray, const Matrix4x4<TScalar>& transformation, TScalar& parameter)
+{
+	const TPoint3D support = transformation * ray.support();
+	const TVector3D direction = transformation * ray.direction();
+	const TScalar norm = direction.norm();
+	parameter *= norm;
+	return TRay3D(support, direction / norm, prim::IsAlreadyNormalized());
+}
 
 }
 }

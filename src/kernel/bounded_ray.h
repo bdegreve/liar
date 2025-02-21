@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 #define LIAR_GUARDIAN_OF_INCLUSION_KERNEL_BOUNDED_RAY_H
 
 #include "kernel_common.h"
+#include "matrix_4x4.h"
 
 namespace liar
 {
@@ -87,6 +88,8 @@ private:
 
 LIAR_KERNEL_DLL BoundedRay transform(const BoundedRay& ray, const TTransformation3D& transformation);
 LIAR_KERNEL_DLL BoundedRay transform(const BoundedRay& ray, const TTransformation3D& transformation, TScalar& parameter);
+LIAR_KERNEL_DLL BoundedRay transform(const BoundedRay& ray, const Matrix4x4<TScalar>& transformation);
+LIAR_KERNEL_DLL BoundedRay transform(const BoundedRay& ray, const Matrix4x4<TScalar>& transformation, TScalar& parameter);
 LIAR_KERNEL_DLL BoundedRay translate(const BoundedRay& ray, const TVector3D& offset);
 LIAR_KERNEL_DLL BoundedRay bound(const BoundedRay& ray, TScalar nearLimit, TScalar farLimit = TNumTraits::infinity);
 LIAR_KERNEL_DLL BoundedRay bound(const BoundedRay& ray, const TAabb3D& box);

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -74,6 +74,7 @@ private:
 };
 
 LIAR_KERNEL_DLL DifferentialRay transform(const DifferentialRay& ray, const TTransformation3D& transformation);
+LIAR_KERNEL_DLL DifferentialRay transform(const DifferentialRay& ray, const Matrix4x4<TScalar>& transformation);
 LIAR_KERNEL_DLL DifferentialRay reflect(const IntersectionContext& context, const DifferentialRay& ray);
 LIAR_KERNEL_DLL DifferentialRay refract(const IntersectionContext& context, const DifferentialRay& ray, TScalar refractionIndex1over2);
 LIAR_KERNEL_DLL DifferentialRay bound(const DifferentialRay& ray, TScalar nearLimit, TScalar farLimit = TNumTraits::infinity);

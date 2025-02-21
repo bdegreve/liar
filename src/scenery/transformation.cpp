@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ PY_CLASS_MEMBER_R(Transformation, worldToLocal)
 Transformation::Transformation(const TSceneObjectPtr& child, const TTransformation3D& localToWorld):
 	child_(child),
 	localToWorld_(localToWorld),
-	worldToLocal_(localToWorld.inverse())
+	worldToLocal_(localToWorld.inverseMatrix())
 {
 }
 
@@ -51,7 +51,7 @@ Transformation::Transformation(const TSceneObjectPtr& child, const TTransformati
 Transformation::Transformation(const TSceneObjectPtr& child, const TPyTransformation3DPtr& localToWorld):
 	child_(child),
 	localToWorld_(localToWorld ? localToWorld->transformation() : TTransformation3D::identity()),
-	worldToLocal_(localToWorld_.inverse())
+	worldToLocal_(localToWorld_.inverseMatrix())
 {
 }
 
@@ -81,14 +81,14 @@ const TTransformation3D& Transformation::localToWorld() const
 void Transformation::setLocalToWorld(const TTransformation3D& localToWorld)
 {
 	localToWorld_ = localToWorld;
-	worldToLocal_ = localToWorld.inverse();
+	worldToLocal_ = localToWorld.inverseMatrix();
 }
 
 
 
 const TTransformation3D Transformation::worldToLocal() const
 {
-	return worldToLocal_;
+	return localToWorld_.inverse();
 }
 
 
@@ -116,7 +116,7 @@ void Transformation::doAccept(util::VisitorBase& visitor)
 void Transformation::doIntersect(const Sample& sample, const BoundedRay& ray, Intersection& result) const
 {
 	TScalar tScaler = TNumTraits::one;
-	const BoundedRay localRay = transform(ray, worldToLocal(), tScaler);
+	const BoundedRay localRay = transform(ray, worldToLocal_, tScaler);
 	child_->intersect(sample, localRay, result);
 	if (result)
 	{
@@ -128,7 +128,7 @@ void Transformation::doIntersect(const Sample& sample, const BoundedRay& ray, In
 
 bool Transformation::doIsIntersecting(const Sample& sample, const BoundedRay& ray) const
 {
-	const BoundedRay localRay = transform(ray, worldToLocal());
+	const BoundedRay localRay = transform(ray, worldToLocal_);
 	return child_->isIntersecting(sample, localRay);
 }
 
@@ -139,7 +139,7 @@ void Transformation::doLocalContext(const Sample& sample, const BoundedRay& ray,
 	IntersectionDescendor descendor(intersection);
 	LASS_ASSERT(intersection.object() == child_.get());
 
-	const BoundedRay localRay = ::liar::kernel::transform(ray, worldToLocal());
+	const BoundedRay localRay = transform(ray, worldToLocal_);
 	child_->localContext(sample, localRay, intersection, result);
 
 	result.transformBy(localToWorld_);
@@ -157,7 +157,7 @@ void Transformation::doLocalSpace(TTime, TTransformation3D& localToWorld) const
 
 bool Transformation::doContains(const Sample& sample, const TPoint3D& point) const
 {
-	const TPoint3D localPoint = transform(point, worldToLocal());
+	const TPoint3D localPoint = worldToLocal_ * point;
 	return child_->contains(sample, localPoint);
 }
 
@@ -194,7 +194,7 @@ const TPyObjectPtr Transformation::doGetState() const
 void Transformation::doSetState(const TPyObjectPtr& state)
 {
 	LASS_ENFORCE(python::decodeTuple(state, child_, localToWorld_));
-	worldToLocal_ = localToWorld_.inverse();
+	worldToLocal_ = localToWorld_.inverseMatrix();
 }
 
 

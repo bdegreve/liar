@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -74,30 +74,10 @@ public:
 
 		TVector3D transform(const TVector3D& v) const { return (*forward_) * v; }
 		TPoint3D transform(const TPoint3D& p) const { return (*forward_) * p; }
-		TRay3D transform(const TRay3D& ray) const
-		{
-			return TRay3D(transform(ray.support()), transform(ray.direction()));
-		}
-		TRay3D transform(const TRay3D& ray, TScalar& tScale) const
-		{
-			const TPoint3D support = transform(ray.support());
-			const TVector3D direction = transform(ray.direction());
-			lass::prim::impl::RayParameterRescaler<TRay3D::TNormalizingPolicy>::rescale(tScale, direction);
-			return TRay3D(support, direction);
-		}
-		BoundedRay transform(const BoundedRay& ray) const
-		{
-			TScalar tScale = TNumTraits::one;
-			const TRay3D transformedRay = transform(ray.unboundedRay(), tScale);
-			return BoundedRay(transformedRay, ray.nearLimit() * tScale, ray.farLimit() * tScale);
-		}
-		DifferentialRay transform(const DifferentialRay& ray) const
-		{
-			return DifferentialRay(
-				transform(ray.centralRay()),
-				transform(ray.differentialI()),
-				transform(ray.differentialJ()));
-		}
+		TRay3D transform(const TRay3D& ray) const { return kernel::transform(ray, *forward_); }
+		TRay3D transform(const TRay3D& ray, TScalar& tScale) const { return kernel::transform(ray, *forward_, tScale); }
+		BoundedRay transform(const BoundedRay& ray) const { return kernel::transform(ray, *forward_); }
+		DifferentialRay transform(const DifferentialRay& ray) const { return kernel::transform(ray, *forward_); }
 		TVector3D normalTransform(const TVector3D& n) const
 		{
 			invert();
