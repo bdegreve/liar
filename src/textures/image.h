@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -106,7 +106,6 @@ private:
 #else
 	using TPackedPixel = TPixel;
 #endif
-	using TPackedPixels = util::SharedPtr<TPackedPixel, util::ArrayStorage>;
 
 	class MipMapLevel
 	{
@@ -130,30 +129,48 @@ private:
 				}
 			}
 		}
-		MipMapLevel(const TResolution2D& resolution):
-			pixels_(new TPackedPixel[roundUp(resolution.x) * roundUp(resolution.y)]),
-			resolution_(resolution.x, resolution.y),
-			numBlocksX_(block(roundUp(resolution.x)))
+		MipMapLevel(const TResolution2D& resolution) :
+			numBlocksX_(block(roundUp(resolution.x))),
+			numBlocksY_(block(roundUp(resolution.y))),
+			resolution_(resolution.x, resolution.y)
 		{
+			blocks_.resize(numBlocksX_ * numBlocksY_);
 		}
 		TPackedPixel& operator()(size_t x, size_t y)
 		{
-			return pixels_[address(x, y)];
+			return blocks_[block(x, y)].pixels[blockOffset(y)][blockOffset(x)];
 		}
 		const TPackedPixel& operator()(size_t x, size_t y) const
 		{
-			return pixels_[address(x, y)];
+			return blocks_[block(x, y)].pixels[blockOffset(y)][blockOffset(x)];
 		}
 		const TResolution2D& resolution() const { return resolution_; }
 	private:
 		constexpr static size_t logBlockSize = 2;
 		constexpr static size_t blockSize = 1 << logBlockSize;
+#ifdef __cpp_lib_hardware_interference_size
+		constexpr static size_t blockAlignment = std::hardware_constructive_interference_size;
+#else
+		constexpr static size_t blockAlignment = 64;
+#endif
 
-		static size_t block(size_t i)
+		struct alignas(blockAlignment) Block
+		{
+			TPackedPixel pixels[blockSize][blockSize];
+		};
+		static_assert(alignof(Block) % alignof(TPackedPixel) == 0, "Assume a whole number of TPackedPixels fit on one cacheline");
+
+		using TBlocks = std::vector<Block>;
+
+		LIAR_FORCE_INLINE static size_t block(size_t i)
 		{
 			return i >> logBlockSize;
 		}
-		static size_t blockOffset(size_t i)
+		LIAR_FORCE_INLINE size_t block(size_t x, size_t y) const
+		{
+			return block(x) * numBlocksY_ + block(y); // column major blocks, with row major pixels in blocks
+		}
+		LIAR_FORCE_INLINE static size_t blockOffset(size_t i)
 		{
 			return i & (blockSize - 1);
 		}
@@ -170,9 +187,10 @@ private:
 			return (by * numBlocksX_ + bx) * blockSize * blockSize + oy * blockSize + ox;
 		}
 
-		TPackedPixels pixels_;
-		TResolution2D resolution_;
+		TBlocks blocks_;
 		size_t numBlocksX_;
+		size_t numBlocksY_;
+		TResolution2D resolution_;
 	};
 	typedef std::vector<MipMapLevel> TMipMaps;
 
