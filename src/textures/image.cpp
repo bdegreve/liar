@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -553,9 +553,27 @@ Image::MipMapLevel Image::makeMipMapOdd(
 void Image::mipMapLevel(
 	TScalar width, size_t numLevels, size_t& level0, size_t& level1, TPixel::TValue& dLevel) const
 {
-	const TScalar maxLevel = static_cast<TScalar>(numLevels - 1);
-	const TScalar level = maxLevel + num::log2(std::max(width, TScalar(1e-9f)));
-	if (level < TNumTraits::one)
+	// See notes/mipmap_log2_approx.ipynb for details.
+
+	LIAR_ASSERT_POSITIVE_FINITE(width);
+	LASS_ASSERT(numLevels > 0);
+	const int maxLevel = static_cast<int>(numLevels) - 1;
+
+	// level = maxLevel + log2(width)
+	// level0 = floor(level)
+	// level1 = level0 + 1
+	// dLevel = level - level0
+
+	static_assert(sizeof(int) == sizeof(float));
+	const float w = std::max(static_cast<float>(width), 1e-9f);
+	const int i = std::bit_cast<int>(w);
+
+	// width = 2^e * m, with 1 <= m < 2
+	// log2(width) = e + log2(m) ≈ e + (m - 1)
+
+	const int e = (i >> 23) - 127; // extract integer exponent
+	const int level = maxLevel + e;
+	if (level < 0)
 	{
 		level0 = level1 = 0;
 		dLevel = 0;
@@ -567,10 +585,11 @@ void Image::mipMapLevel(
 	}
 	else
 	{
-		const TScalar floorLevel = num::floor(level);
-		level0 = static_cast<size_t>(floorLevel);
-		level1 = level0 + 1;
-		dLevel = static_cast<TPixel::TValue>(level - floorLevel);
+		level0 = level;
+		level1 = level + 1;
+
+		const float m = std::bit_cast<float>((127 << 23) | (i & 0x7fffff)); // extract significand
+		dLevel = m - 1.f;
 	}
 }
 
