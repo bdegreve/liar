@@ -55,12 +55,26 @@ public:
 
 	typedef kernel::XYZA TPixel;
 
+	enum class AntiAliasing
+	{
+		none = 0,
+		bilinear,
+		trilinear,
+	};
+
+	enum class MipMapping
+	{
+		none = 0,
+		isotropic,
+		anisotropic,
+	};
+
 	explicit Image(const std::filesystem::path& filename);
 	Image(const std::filesystem::path& filename, const TRgbSpacePtr& rgbSpace);
-	Image(const std::filesystem::path& filename, const std::string& antiAliasing,
-		const std::string& mipMapping);
-	Image(const std::filesystem::path& filename, const std::string& antiAliasing,
-		const std::string& mipMapping, const TRgbSpacePtr& rgbSpace);
+	Image(const std::filesystem::path& filename, AntiAliasing antiAliasing,
+		MipMapping mipMapping);
+	Image(const std::filesystem::path& filename, AntiAliasing antiAliasing,
+		MipMapping mipMapping, const TRgbSpacePtr& rgbSpace);
 
 	void loadFile(const std::filesystem::path& filename);
 	void loadFile(const std::filesystem::path& filename, const TRgbSpacePtr& rgbSpace);
@@ -68,36 +82,17 @@ public:
 	const std::filesystem::path& filename() const;
 	const TResolution2D& resolution() const;
 
-	const std::string antiAliasing() const;
-	const std::string mipMapping() const;
-	void setAntiAliasing(const std::string& mode);
-	void setMipMapping(const std::string& mode);
+	AntiAliasing antiAliasing() const;
+	MipMapping mipMapping() const;
+	void setAntiAliasing(AntiAliasing antiAliasing);
+	void setMipMapping(MipMapping mipMapping);
 
 	const TPixel lookUp(const IntersectionContext& context) const;
 
-	static void setDefaultAntiAliasing(const std::string& mode);
-	static void setDefaultMipMapping(const std::string& mode);
+	static void setDefaultAntiAliasing(AntiAliasing antiAliasing);
+	static void setDefaultMipMapping(MipMapping mipMapping);
 
 private:
-
-	enum AntiAliasing
-	{
-		aaNone = 0,
-		aaBilinear,
-		aaTrilinear,
-		numAntiAliasing
-	};
-	typedef util::Dictionary<std::string, AntiAliasing> TAntiAliasingDictionary;
-
-	enum MipMapping
-	{
-		mmNone = 0,
-		mmIsotropic,
-		mmAnisotropic,
-		numMipMapping,
-		mmUninitialized = numMipMapping
-	};
-	typedef util::Dictionary<std::string, MipMapping> TMipMappingDictionary;
 
 	typedef util::SharedPtr<TPixel, util::ArrayStorage> TPixels;
 
@@ -212,9 +207,6 @@ private:
 	TPackedPixel nearest(size_t levelU, size_t levelV, const TPoint2D& uv) const;
 	TPackedPixel bilinear(size_t levelU, size_t levelV, const TPoint2D& uv) const;
 
-	static TAntiAliasingDictionary makeAntiAliasingDictionary();
-	static TMipMappingDictionary makeMipMappingDictionary();
-
 	std::filesystem::path filename_;
 	TRgbSpacePtr rgbSpace_;
 	TPixels image_;
@@ -227,8 +219,6 @@ private:
 	mutable size_t numLevelsV_;
 	mutable util::Semaphore mutex_;
 
-	static TAntiAliasingDictionary antiAliasingDictionary_;
-	static TMipMappingDictionary mipMappingDictionary_;
 	static AntiAliasing defaultAntiAliasing_;
 	static MipMapping defaultMipMapping_;
 };
@@ -238,6 +228,9 @@ typedef python::PyObjectPtr<Image>::Type TImagePtr;
 }
 
 }
+
+PY_SHADOW_STR_ENUM(LASS_DLL_EXPORT, liar::textures::Image::AntiAliasing)
+PY_SHADOW_STR_ENUM(LASS_DLL_EXPORT, liar::textures::Image::MipMapping)
 
 #endif
 

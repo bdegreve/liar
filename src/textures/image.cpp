@@ -33,16 +33,32 @@
 #	include <array>
 #endif
 
+using AntiAliasing = liar::textures::Image::AntiAliasing;
+using MipMapping = liar::textures::Image::MipMapping;
+
+PY_DECLARE_STR_ENUM_EX(AntiAliasing)("AntiAliasing", {
+	{ "none", AntiAliasing::none, "none"},
+	{ "bilinear", AntiAliasing::bilinear, "bilinear"},
+	{ "trilinear", AntiAliasing::trilinear, "trilinear"},
+	});
+
+PY_DECLARE_STR_ENUM_EX(MipMapping)("MipMapping", {
+	{ "none", MipMapping::none, "none"},
+	{ "isotropic", MipMapping::isotropic, "isotropic"},
+	{ "anisotropic", MipMapping::anisotropic, "anisotropic"},
+	});
+
 namespace liar
 {
 namespace textures
 {
 
 PY_DECLARE_CLASS_DOC(Image, "image file")
+
 PY_CLASS_CONSTRUCTOR_1(Image, const std::filesystem::path&);
 PY_CLASS_CONSTRUCTOR_2(Image, const std::filesystem::path&, const TRgbSpacePtr&);
-PY_CLASS_CONSTRUCTOR_3(Image, const std::filesystem::path&, const std::string&, const std::string&);
-PY_CLASS_CONSTRUCTOR_4(Image, const std::filesystem::path&, const std::string&, const std::string&, const TRgbSpacePtr&);
+PY_CLASS_CONSTRUCTOR_3(Image, const std::filesystem::path&, AntiAliasing, MipMapping);
+PY_CLASS_CONSTRUCTOR_4(Image, const std::filesystem::path&, AntiAliasing, MipMapping, const TRgbSpacePtr&);
 PY_CLASS_METHOD_QUALIFIED_1(Image, loadFile, void, const std::filesystem::path&)
 PY_CLASS_METHOD_QUALIFIED_2(Image, loadFile, void, const std::filesystem::path&, const TRgbSpacePtr&)
 PY_CLASS_MEMBER_R(Image, filename);
@@ -51,24 +67,18 @@ PY_CLASS_MEMBER_RW(Image, antiAliasing, setAntiAliasing);
 PY_CLASS_MEMBER_RW(Image, mipMapping, setMipMapping);
 PY_CLASS_STATIC_METHOD(Image, setDefaultAntiAliasing);
 PY_CLASS_STATIC_METHOD(Image, setDefaultMipMapping);
-PY_CLASS_STATIC_CONST(Image, "AA_NONE", "none");
-PY_CLASS_STATIC_CONST(Image, "AA_BILINEAR", "bilinear");
-PY_CLASS_STATIC_CONST(Image, "AA_TRILINEAR", "trilinear");
-PY_CLASS_STATIC_CONST(Image, "MM_NONE", "none");
-PY_CLASS_STATIC_CONST(Image, "MM_ISOTROPIC", "isotropic");
-PY_CLASS_STATIC_CONST(Image, "MM_ANISOTROPIC", "anisotropic");
+PY_CLASS_ENUM(Image, Image::AntiAliasing)
+PY_CLASS_ENUM(Image, Image::MipMapping)
 
-Image::TAntiAliasingDictionary Image::antiAliasingDictionary_ = Image::makeAntiAliasingDictionary();
-Image::TMipMappingDictionary Image::mipMappingDictionary_ = Image::makeMipMappingDictionary();
-Image::AntiAliasing Image::defaultAntiAliasing_ = Image::aaTrilinear;
-Image::MipMapping Image::defaultMipMapping_ = Image::mmAnisotropic;
+Image::AntiAliasing Image::defaultAntiAliasing_ = Image::AntiAliasing::trilinear;
+Image::MipMapping Image::defaultMipMapping_ = Image::MipMapping::anisotropic;
 
 // --- public --------------------------------------------------------------------------------------
 
 Image::Image(const std::filesystem::path& filename):
 	antiAliasing_(defaultAntiAliasing_),
 	mipMapping_(defaultMipMapping_),
-	currentMipMapping_(mmUninitialized)
+	currentMipMapping_(MipMapping(-1))
 {
 	loadFile(filename);
 }
@@ -78,7 +88,7 @@ Image::Image(const std::filesystem::path& filename):
 Image::Image(const std::filesystem::path& filename, const TRgbSpacePtr& rgbSpace):
 	antiAliasing_(defaultAntiAliasing_),
 	mipMapping_(defaultMipMapping_),
-	currentMipMapping_(mmUninitialized)
+	currentMipMapping_(MipMapping(-1))
 {
 	loadFile(filename, rgbSpace);
 }
@@ -86,9 +96,9 @@ Image::Image(const std::filesystem::path& filename, const TRgbSpacePtr& rgbSpace
 
 
 Image::Image(
-		const std::filesystem::path& filename, const std::string& antiAliasing,
-		const std::string& mipMapping):
-	currentMipMapping_(mmUninitialized)
+		const std::filesystem::path& filename, AntiAliasing antiAliasing,
+		MipMapping mipMapping):
+	currentMipMapping_(MipMapping(-1))
 {
 	loadFile(filename);
 	setAntiAliasing(antiAliasing);
@@ -98,9 +108,9 @@ Image::Image(
 
 
 Image::Image(
-		const std::filesystem::path& filename, const std::string& antiAliasing,
-		const std::string& mipMapping, const TRgbSpacePtr& rgbSpace):
-	currentMipMapping_(mmUninitialized)
+		const std::filesystem::path& filename, AntiAliasing antiAliasing,
+		MipMapping mipMapping, const TRgbSpacePtr& rgbSpace):
+	currentMipMapping_(MipMapping(-1))
 {
 	loadFile(filename, rgbSpace);
 	setAntiAliasing(antiAliasing);
@@ -141,7 +151,7 @@ void Image::loadFile(const std::filesystem::path& filename, const TRgbSpacePtr& 
 
 	image_.swap(image);
 
-	currentMipMapping_ = mmUninitialized;
+	currentMipMapping_ = MipMapping(-1);
 	mipMaps_.clear();
 
 	stopWatch.stop();
@@ -164,44 +174,44 @@ const TResolution2D& Image::resolution() const
 
 
 
-const std::string Image::antiAliasing() const
+Image::AntiAliasing Image::antiAliasing() const
 {
-	return antiAliasingDictionary_.key(antiAliasing_);
+	return antiAliasing_;
 }
 
 
 
-const std::string Image::mipMapping() const
+Image::MipMapping Image::mipMapping() const
 {
-	return mipMappingDictionary_.key(mipMapping_);
+	return mipMapping_;
 }
 
 
 
-void Image::setAntiAliasing(const std::string& mode)
+void Image::setAntiAliasing(AntiAliasing antiAliasing)
 {
-	antiAliasing_ = antiAliasingDictionary_[stde::tolower(mode)];
+	antiAliasing_ = antiAliasing;
 }
 
 
 
-void Image::setMipMapping(const std::string& mode)
+void Image::setMipMapping(MipMapping mipMapping)
 {
-	mipMapping_ = mipMappingDictionary_[stde::tolower(mode)];
+	mipMapping_ = mipMapping;
 }
 
 
 
-void Image::setDefaultAntiAliasing(const std::string& mode)
+void Image::setDefaultAntiAliasing(AntiAliasing antiAliasing)
 {
-	defaultAntiAliasing_ = antiAliasingDictionary_[stde::tolower(mode)];
+	defaultAntiAliasing_ = antiAliasing;
 }
 
 
 
-void Image::setDefaultMipMapping(const std::string& mode)
+void Image::setDefaultMipMapping(MipMapping mipMapping)
 {
-	defaultMipMapping_ = mipMappingDictionary_[stde::tolower(mode)];
+	defaultMipMapping_ = mipMapping;
 }
 
 
@@ -243,15 +253,15 @@ const Image::TPixel Image::lookUp(const IntersectionContext& context) const
 	TPixel::TValue dLevelU = 0, dLevelV = 0;
 	switch (mipMapping_)
 	{
-	case mmNone:
+	case MipMapping::none:
 		break;
-	case mmIsotropic:
+	case MipMapping::isotropic:
 		mipMapLevel(std::max(
 				std::max(num::abs(dUv_dI.x), num::abs(dUv_dJ.x)),
 				std::max(num::abs(dUv_dI.y), num::abs(dUv_dJ.y))),
 			numLevelsU_, levelU0, levelU1, dLevelU);
 		break;
-	case mmAnisotropic:
+	case MipMapping::anisotropic:
 		mipMapLevel(std::max(num::abs(dUv_dI.x), num::abs(dUv_dJ.x)),
 			numLevelsU_, levelU0, levelU1, dLevelU);
 		mipMapLevel(std::max(num::abs(dUv_dI.y), num::abs(dUv_dJ.y)),
@@ -264,15 +274,15 @@ const Image::TPixel Image::lookUp(const IntersectionContext& context) const
 	TPackedPixel result;
 	switch (antiAliasing_)
 	{
-	case aaNone:
+	case AntiAliasing::none:
 		result = nearest(levelU0, levelV0, uv);
 		break;
 
-	case aaBilinear:
+	case AntiAliasing::bilinear:
 		result = bilinear(levelU0, levelV0, uv);
 		break;
 
-	case aaTrilinear:
+	case AntiAliasing::trilinear:
 #if LIAR_HAVE_AVX
 		{
 			const __m128 du = _mm_set1_ps(dLevelU);
@@ -326,7 +336,8 @@ const TPyObjectPtr Image::doGetState() const
 void Image::doSetState(const TPyObjectPtr& state)
 {
 	std::filesystem::path filename;
-	std::string antiAliasing, mipMapping;
+	AntiAliasing antiAliasing;
+	MipMapping mipMapping;
 	TRgbSpacePtr rgbSpace;
 	python::decodeTuple(state, filename, rgbSpace, antiAliasing, mipMapping);
 
@@ -357,12 +368,12 @@ void Image::makeMipMaps() const
 
 		switch (mipMapping_)
 		{
-		case mmNone:
+		case MipMapping::none:
 			numLevelsU = 1;
 			numLevelsV = 1;
 			break;
 
-		case mmIsotropic:
+		case MipMapping::isotropic:
 			numLevelsU = static_cast<size_t>(num::floor(num::log2(
 				static_cast<TScalar>(std::max(resolution_.x, resolution_.y))))) + 1;
 			numLevelsV = 1;
@@ -376,7 +387,7 @@ void Image::makeMipMaps() const
 			}
 			break;
 
-		case mmAnisotropic:
+		case MipMapping::anisotropic:
 			numLevelsU = static_cast<size_t>(num::floor(num::log2(static_cast<TScalar>(resolution_.x))) + 1);
 			numLevelsV = static_cast<size_t>(num::floor(num::log2(static_cast<TScalar>(resolution_.y))) + 1);
 			for (size_t j = 0; j < numLevelsV; ++j)
@@ -689,32 +700,6 @@ Image::bilinear(size_t levelU, size_t levelV, const TPoint2D& uv) const
 		(mipMap(i0, j1) * (1 - dx) + mipMap(i1, j1) * dx) * dy;
 #endif
 }
-
-
-
-Image::TAntiAliasingDictionary Image::makeAntiAliasingDictionary()
-{
-	TAntiAliasingDictionary result;
-	result.enableSuggestions();
-	result.add("none", aaNone);
-	result.add("bilinear", aaBilinear);
-	result.add("trilinear", aaTrilinear);
-	return result;
-}
-
-
-
-Image::TMipMappingDictionary Image::makeMipMappingDictionary()
-{
-	TMipMappingDictionary result;
-	result.enableSuggestions();
-	result.add("none", mmNone);
-	result.add("isotropic", mmIsotropic);
-	result.add("anisotropic", mmAnisotropic);
-	return result;
-}
-
-
 
 // --- free ----------------------------------------------------------------------------------------
 
