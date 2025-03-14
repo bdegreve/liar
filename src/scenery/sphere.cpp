@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -156,9 +156,11 @@ void Sphere::doLocalContext(const Sample&, const BoundedRay& ray, const Intersec
 	//               [0                   ]                 [-sin theta          ]
 	//
 	const TScalar sinTheta = num::sin(theta);
-	const TVector3D dNormal_dU = 2 * TNumTraits::pi * TVector3D(-normal.y, normal.x, 0);
 	const TScalar cosTheta_sinTheta = normal.z / sinTheta;
-	const TVector3D dNormal_dV = TNumTraits::pi * TVector3D(cosTheta_sinTheta * normal.x, cosTheta_sinTheta * normal.y, -sinTheta);
+	const TVector3D dNormal_dU = 2 * TNumTraits::pi * TVector3D(-normal.y, normal.x, 0);
+	const TVector3D dNormal_dV = sinTheta != 0
+		? TNumTraits::pi * TVector3D(cosTheta_sinTheta * normal.x, cosTheta_sinTheta * normal.y, -sinTheta)
+		: TNumTraits::pi * TVector3D(num::cos(phi), num::sin(phi), 0);
 	result.setDNormal_dU(dNormal_dU);
 	result.setDNormal_dV(dNormal_dV);
 
