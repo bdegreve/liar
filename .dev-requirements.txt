@@ -1,4 +1,4 @@
-conan>=2
+conan==2.14.0
 ipykernel
 numpy
 matplotlib
