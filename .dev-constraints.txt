@@ -54,6 +54,7 @@ pywin32==308
 pyyaml==6.0.2
 pyzmq==26.2.1
 requests==2.32.3
+ruff==0.11.0
 scipy==1.15.2
 setuptools==75.8.0
 six==1.17.0

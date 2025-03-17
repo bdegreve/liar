@@ -3,6 +3,5 @@ ipykernel
 numpy
 matplotlib
 scipy
-black
-isort
+ruff
 pre-commit
