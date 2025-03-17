@@ -38,8 +38,9 @@ build-%: requirements
 requirements: env/.dev-requirements.stamp
 
 env/.dev-requirements.stamp: .dev-requirements.txt .dev-constraints.txt env
-	$(PYTHON) -m pip install --upgrade pip setuptools wheel --constraint .dev-constraints.txt
-	$(PYTHON) -m pip install --requirement .dev-requirements.txt --constraint .dev-constraints.txt
+	$(PYTHON) -m pip install --upgrade uv --constraint .dev-constraints.txt
+	$(PYTHON) -m uv pip install --upgrade pip setuptools wheel uv --constraint .dev-constraints.txt
+	$(PYTHON) -m uv pip install --requirement .dev-requirements.txt --constraint .dev-constraints.txt
 	$(TOUCH) env/.dev-requirements.stamp
 
 env:
