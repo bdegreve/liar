@@ -41,6 +41,7 @@ env/.dev-requirements.stamp: .dev-requirements.txt .dev-constraints.txt env
 	$(PYTHON) -m pip install --upgrade uv --constraint .dev-constraints.txt
 	$(PYTHON) -m uv pip install --upgrade pip setuptools wheel uv --constraint .dev-constraints.txt
 	$(PYTHON) -m uv pip install --requirement .dev-requirements.txt --constraint .dev-constraints.txt
+	$(PYTHON) -m pre_commit install
 	$(TOUCH) env/.dev-requirements.stamp
 
 env:
