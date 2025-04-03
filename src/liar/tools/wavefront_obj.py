@@ -17,10 +17,11 @@
 #
 # http://liar.bramz.net/
 
+import math
+
 import liar.scenery
 import liar.shaders
 import liar.textures
-import math
 
 
 def load(filename, *args, **kwargs):

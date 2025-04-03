@@ -1,15 +1,17 @@
 #! /usr/bin/env python
 
-import scipy
-import scipy.optimize
+import json
+
+import colour.difference.delta_e
+import colour.models.cie_lab
+import colour.plotting
 import numpy as np
 import numpy.linalg as linalg
 import numpy.ma
-import colour.plotting
-import colour.difference.delta_e
-import colour.models.cie_lab
 import pylab
-import json
+import scipy
+import scipy.optimize
+
 import liar
 import liar.tools.rgb_spaces
 

@@ -18,8 +18,8 @@
 # http://liar.bramz.net/
 
 import importlib
-import pkgutil
 import logging
+import pkgutil
 
 _logger = logging.getLogger(__name__)
 

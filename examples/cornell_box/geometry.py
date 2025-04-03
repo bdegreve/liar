@@ -10,8 +10,9 @@
 # Homepage of cornell box:
 # http://www.graphics.cornell.edu/online/box/
 
-from liar import *
 import math
+
+from liar import *
 
 s = 0.01
 

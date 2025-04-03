@@ -109,9 +109,11 @@ class ServerThing(asyncore.dispatcher):
 
 
 def render_scene(self, scene):
-    from render_liar import export
-    import bpy
     import subprocess
+
+    import bpy
+
+    from render_liar import export
 
     addon_prefs = bpy.context.user_preferences.addons[__package__].preferences
     python_binary = addon_prefs.python_binary

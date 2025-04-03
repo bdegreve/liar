@@ -1,7 +1,8 @@
-from render_liar import LIAR, auto_register, export
+import os
+
 import bpy
 from bpy_extras.io_utils import ExportHelper
-import os
+from render_liar import LIAR, auto_register, export
 
 
 @auto_register

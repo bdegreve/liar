@@ -38,9 +38,10 @@ Usage: run the script from the menu or inside Blender.
 precision = 7
 
 
-import Blender
-import sys
 import math
+import sys
+
+import Blender
 
 try:
     import os

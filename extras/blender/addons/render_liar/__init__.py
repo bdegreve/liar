@@ -31,8 +31,9 @@ bl_info = {
     "category": "Render",
 }
 
-import bpy
 import sys
+
+import bpy
 
 # import sys
 # sys.path.append(r"C:\local\winpdb-1.4.8")
@@ -74,9 +75,9 @@ class LiarRender(bpy.types.RenderEngine):
             self._render_scene(scene)
 
     def _render_scene(self, scene):
-        from render_liar import render, export
-
         from imp import reload
+
+        from render_liar import export, render
 
         reload(render)
         reload(export)
@@ -114,8 +115,8 @@ _compat_list = []
 
 
 def register():
-    import render_liar.properties.camera
     import render_liar.operators.export
+    import render_liar.properties.camera
     import render_liar.ui.camera
     import render_liar.ui.render
 

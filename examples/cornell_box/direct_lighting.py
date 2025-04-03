@@ -7,7 +7,7 @@
 # http://liar.bramz.net/
 
 from liar import *
-from liar.tools import scripting, cornell_box
+from liar.tools import cornell_box, scripting
 
 options = scripting.renderOptions(width=800, height=800, super_sampling=9)
 

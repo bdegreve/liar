@@ -20,10 +20,11 @@
 precision = 7
 
 
-import bpy
-import sys
 import math
 import os
+import sys
+
+import bpy
 
 
 def liar_log(str):

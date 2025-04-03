@@ -7,14 +7,16 @@ Using Brian Smits' algorithm described in "An RGB to Spectrum Conversion for Ref
 https://www.cs.utah.edu/~bes/papers/color/
 """
 
+import os
+import re
+
 import scipy
 import scipy.linalg
 import scipy.optimize
 from matplotlib import pyplot
+
 import liar
 import liar.tools.rgb_spaces
-import os
-import re
 
 
 def main(

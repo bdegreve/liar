@@ -1,5 +1,5 @@
 # LiAR isn't a raytracer
-# Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+# Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,9 +19,9 @@
 
 
 import json as _json
+import os as _os
 import pkgutil as _pkgutil
 import sys as _sys
-import os as _os
 
 # adjust dlopen flags so we can share symbols across extension modules
 # http://liar.bramz.net/2007/01/28/shared-libraries-dlopen-and-rtti/
@@ -34,7 +34,7 @@ else:
     _sys.setdlopenflags(_os.RTLD_NOW | _os.RTLD_GLOBAL)
 
 
-from liar.kernel import *
+from liar.kernel import *  # noqa: I001, kernel must be imported first!
 import liar.cameras
 import liar.codecs
 import liar.mediums

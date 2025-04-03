@@ -20,7 +20,6 @@
 import os
 from urllib.request import urlopen
 
-
 __all__ = ["download"]
 
 

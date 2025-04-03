@@ -1,8 +1,8 @@
-from render_liar import LIAR, auto_register
-import bpy
-from bpy import props
 import sys
 
+import bpy
+from bpy import props
+from render_liar import LIAR, auto_register
 
 enum_aperture_types = (
     ("RADIUS", "Radius", "Directly change the size of the aperture"),

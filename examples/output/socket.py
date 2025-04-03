@@ -6,8 +6,9 @@
 # Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
 # http://liar.bramz.net/
 
-import sys
 import subprocess
+import sys
+
 from _scene import *
 
 (numProcesses,) = list(map(int, sys.argv[1:])) or [2]

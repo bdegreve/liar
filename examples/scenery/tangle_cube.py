@@ -6,10 +6,11 @@
 # Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
 # http://liar.bramz.net/
 
-from liar import *
-from liar.tools import cornell_box, scripting, rgb_spaces
 import math
 import sys
+
+from liar import *
+from liar.tools import cornell_box, rgb_spaces, scripting
 
 no_display = "--no-display" in sys.argv
 

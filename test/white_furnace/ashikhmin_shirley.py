@@ -17,8 +17,8 @@
 #
 # http://liar.bramz.net/
 
-import os
 import math
+import os
 
 from liar import *
 

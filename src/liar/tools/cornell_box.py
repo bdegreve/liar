@@ -10,9 +10,10 @@
 # Homepage of cornell box:
 # http://www.graphics.cornell.edu/online/box/
 
+import math
+
 from liar import *
 from liar.tools import spd
-import math
 
 
 def scene():

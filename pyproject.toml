@@ -6,6 +6,9 @@ target-version = 'py310'
 # isort (I) and unsorted-dunder-all (RUF022).
 extend-select = ["I", "RUF022"]
 
+[tool.ruff.lint.isort]
+known-first-party = ["liar"]
+
 [build-system]
 requires = ["wheel"]
 # https://peps.python.org/pep-0517/

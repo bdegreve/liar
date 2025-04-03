@@ -23,7 +23,9 @@ def auto_downloader(url):
     filename = os.path.basename(url)
     if not os.path.isfile(filename):
         print("Downloading '%s' ..." % url)
-        import urllib.request, urllib.parse, urllib.error
+        import urllib.error
+        import urllib.parse
+        import urllib.request
 
         file(filename, "wb").write(urllib.request.urlopen(url).read())
     return filename

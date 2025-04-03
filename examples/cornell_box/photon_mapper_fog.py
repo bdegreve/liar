@@ -6,8 +6,9 @@
 # Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
 # http://liar.bramz.net/
 
-from liar import *
 import geometry
+
+from liar import *
 
 if False:
     width = 1024

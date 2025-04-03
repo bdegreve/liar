@@ -6,8 +6,9 @@
 # Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
 # http://liar.bramz.net/
 
-from liar import *
 import math
+
+from liar import *
 
 if True:
     width = 800

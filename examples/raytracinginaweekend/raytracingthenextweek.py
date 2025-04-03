@@ -1,11 +1,12 @@
 import math
 
+from _drand48 import DRand48
+
 from liar import RenderEngine, RgbSpace, Transformation2D, Transformation3D, rgb, sRGB
 from liar.cameras import PerspectiveCamera
 from liar.mediums import Fog
-from liar.output import Display
+from liar.output import Display, Splitter
 from liar.output import Image as OutputImage
-from liar.output import Splitter
 from liar.samplers import Halton, LatinHypercube
 from liar.scenery import (
     AabbTree,
@@ -43,8 +44,6 @@ from liar.textures import (
 from liar.tools.download import download
 from liar.tools.geometry import negate
 from liar.tracers import AdjointPhotonTracer
-
-from _drand48 import DRand48
 
 nx = 800
 ny = 800

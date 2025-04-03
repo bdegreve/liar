@@ -7,6 +7,7 @@
 # http://liar.bramz.net/
 
 import sys
+
 from _scene import *
 
 address, port, x_left, x_right = sys.argv[1:]

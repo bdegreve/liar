@@ -1,5 +1,7 @@
 import math
 
+from _drand48 import DRand48 as DRand48new
+
 from liar import RenderEngine, RgbSpace, rgb, sRGB
 from liar.cameras import PerspectiveCamera
 from liar.output import Display, Image, Splitter
@@ -9,8 +11,6 @@ from liar.shaders import Dielectric, Lambert, Mirror, Unshaded
 from liar.textures import Constant, SkyBlend
 from liar.tools.geometry import norm, subtract
 from liar.tracers import AdjointPhotonTracer
-
-from _drand48 import DRand48 as DRand48new
 
 nx = 1200
 ny = 800
