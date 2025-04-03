@@ -23,7 +23,7 @@
 
 #include <gtest/gtest.h>
 
-#include "kernel/image_codec.h"
+#include <liar/kernel/image_codec.h>
 
 using namespace liar;
 using namespace liar::kernel;

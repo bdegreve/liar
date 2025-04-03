@@ -21,8 +21,8 @@
  *  http://liar.bramz.net/
  */
 
-#include "kernel/spectrum.h"
-#include "kernel/rgb_space.h"
+#include <liar/kernel/spectrum.h>
+#include <liar/kernel/rgb_space.h>
 #include <iostream>
 
 #include <gtest/gtest.h>

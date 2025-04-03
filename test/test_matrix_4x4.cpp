@@ -23,7 +23,7 @@
 
 #include <gtest/gtest.h>
 
-#include "kernel/matrix_4x4.h"
+#include <liar/kernel/matrix_4x4.h>
 
 using TMatrixF = liar::kernel::Matrix4x4<float>;
 using TVectorF = lass::prim::Vector3D<float>;

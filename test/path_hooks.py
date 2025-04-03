@@ -55,7 +55,7 @@ class LiarPathFinder(MetaPathFinder):
         del target  # unused
 
         if fullname == "liar":
-            location = os.path.join(self.src_dir, "__init__.py")
+            location = os.path.join(self.src_dir, "liar", "__init__.py")
             # spec_from_file_location doesn't work: it starts executing the module
             # code without importing the extension modules ...
             # return spec_from_file_location(fullname, loader=LiarLoader(fullname, location))
@@ -65,12 +65,15 @@ class LiarPathFinder(MetaPathFinder):
                 origin=location,
                 is_package=True,
             )
-            spec.submodule_search_locations = [self.bin_dir, self.src_dir]
+            spec.submodule_search_locations = [
+                self.bin_dir,
+                os.path.join(self.src_dir, "liar"),
+            ]
             spec.has_location = True  # to set __file__
             return spec
 
         if fullname == "liar.codecs":
-            location = os.path.join(self.src_dir, "codecs", "__init__.py")
+            location = os.path.join(self.src_dir, "liar", "codecs", "__init__.py")
             spec = ModuleSpec(
                 name=fullname,
                 loader=SourceFileLoader(fullname, location),
@@ -82,7 +85,7 @@ class LiarPathFinder(MetaPathFinder):
             return spec
 
         if fullname == "liar.tools":
-            location = os.path.join(self.src_dir, "tools", "__init__.py")
+            location = os.path.join(self.src_dir, "liar", "tools", "__init__.py")
             spec = ModuleSpec(
                 name=fullname,
                 loader=SourceFileLoader(fullname, location),
@@ -90,8 +93,7 @@ class LiarPathFinder(MetaPathFinder):
                 is_package=True,
             )
             spec.submodule_search_locations = [
-                os.path.join(self.bin_dir, "tools"),
-                os.path.join(self.src_dir, "tools"),
+                os.path.join(self.src_dir, "liar", "tools"),
             ]
             spec.has_location = True  # to set __file__
             return spec

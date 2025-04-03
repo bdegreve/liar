@@ -1,4 +1,4 @@
-#include "kernel/observer.h"
+#include <liar/kernel/observer.h>
 #include <lass/num/random.h>
 #include <lass/num/distribution.h>
 #include <lass/util/environment.h>
