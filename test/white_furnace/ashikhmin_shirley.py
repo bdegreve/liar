@@ -37,12 +37,14 @@ nv = 10000
 # Rs = 0.05
 # Rd = 1
 
-material = liar.shaders.AshikhminShirley(liar.textures.Constant(Rd), liar.textures.Constant(Rs))
+material = liar.shaders.AshikhminShirley(
+    liar.textures.Constant(Rd), liar.textures.Constant(Rs)
+)
 material.specularPowerU = liar.textures.Constant(nu)
 material.specularPowerV = liar.textures.Constant(nv)
 
 tracer = tracers.AdjointPhotonTracer()
-#tracer = tracers.DirectLighting()
+# tracer = tracers.DirectLighting()
 
 light = scenery.LightSky(textures.Constant(1))
 light.shader = shaders.Unshaded(light.radiance)
@@ -61,7 +63,7 @@ resolution = 800
 fname = os.path.splitext(__file__)[0] + ".exr"
 outputs = [
     output.Image(fname, (resolution, resolution)),
-    output.Display(fname, (resolution, resolution))
+    output.Display(fname, (resolution, resolution)),
 ]
 for out in outputs:
     out.exposureStops = -1
@@ -73,5 +75,5 @@ engine.sampler = samplers.Halton()
 engine.scene = scenery.List([sphere, light])
 engine.camera = camera
 engine.target = output.Splitter(outputs)
-#engine.numberOfThreads = 1
+# engine.numberOfThreads = 1
 engine.render()

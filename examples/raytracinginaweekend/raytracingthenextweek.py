@@ -166,7 +166,12 @@ def final():
                                             ),
                                             Transformation3D.scaler(0.001),
                                         ),
-                                        Product([Constant(5), Abs(FBm(7)),]),
+                                        Product(
+                                            [
+                                                Constant(5),
+                                                Abs(FBm(7)),
+                                            ]
+                                        ),
                                     ]
                                 ),
                                 Transformation3D.scaler(0.1),

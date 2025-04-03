@@ -17,14 +17,27 @@
 #
 # http://liar.bramz.net/
 
-_MAX_DISPLAY_WIDTH, _MAX_DISPLAY_HEIGHT = 1500, 1000 # is there a may to figure this out dynamically?
+_MAX_DISPLAY_WIDTH, _MAX_DISPLAY_HEIGHT = (
+    1500,
+    1000,
+)  # is there a may to figure this out dynamically?
 
-def makeRenderTarget(width, height, filename=None, title=None, display=True, fStops=None, rgbSpace=None, toneMapping=None):
-    '''
+
+def makeRenderTarget(
+    width,
+    height,
+    filename=None,
+    title=None,
+    display=True,
+    fStops=None,
+    rgbSpace=None,
+    toneMapping=None,
+):
+    """
     Width and height are mandatory.
     If supported, a Display will be made with a maximum size of 800 pixels
     If filename is not none, an Image target will be make.
-    '''
+    """
     from liar import output, sRGB
 
     targets = []
@@ -44,7 +57,9 @@ def makeRenderTarget(width, height, filename=None, title=None, display=True, fSt
         except AttributeError:
             pass
         else:
-            scale = min(float(_MAX_DISPLAY_WIDTH) / width, float(_MAX_DISPLAY_HEIGHT) / height)
+            scale = min(
+                float(_MAX_DISPLAY_WIDTH) / width, float(_MAX_DISPLAY_HEIGHT) / height
+            )
             if scale < 1:
                 resolution = int(scale * width), int(scale * height)
             else:
@@ -66,14 +81,22 @@ def makeRenderTarget(width, height, filename=None, title=None, display=True, fSt
 def renderOptions(**kwargs):
     import sys
     from optparse import OptionParser
+
     parser = OptionParser()
-    for (switch, default) in kwargs.items():
+    for switch, default in kwargs.items():
         if isinstance(default, int):
-            t = 'int'
+            t = "int"
         elif isinstance(default, float):
-            t = 'float'
+            t = "float"
         else:
-            t = 'string'
-        parser.add_option('', '--%s' % switch.replace('_', '-'), action='store', type=t, default=default, help="[default=%default]")
+            t = "string"
+        parser.add_option(
+            "",
+            "--%s" % switch.replace("_", "-"),
+            action="store",
+            type=t,
+            default=default,
+            help="[default=%default]",
+        )
     options, args = parser.parse_args()
     return options

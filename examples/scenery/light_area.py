@@ -9,13 +9,13 @@
 from liar import *
 
 if 0:
-	width = 800
-	height = 600
-	super_sampling = 9
+    width = 800
+    height = 600
+    super_sampling = 9
 else:
-	width = 320
-	height = 240
-	super_sampling = 4
+    width = 320
+    height = 240
+    super_sampling = 4
 
 
 red = textures.Constant(rgb(1, 0, 0))
@@ -33,7 +33,7 @@ floor.d = 0
 floor.shader = shaders.Lambert(textures.CheckerBoard(blue, white))
 
 I = 40
-s = .5
+s = 0.5
 h = 4
 surface = scenery.Sphere((0, 0, h), s)
 light = scenery.LightArea(surface)

@@ -24,17 +24,13 @@ floor.shader = checkers
 sphere = scenery.Sphere((0, 0, 1), 1)
 sphere.shader = checkers3D
 
-transformed_sphere = scenery.Transformation(sphere,
-	[[2, 0, 0, 3.5],
-	 [0, 2, 0, 0],
-	 [0, 0, 2, 0],
-	 [0, 0, 0, 1]])
+transformed_sphere = scenery.Transformation(
+    sphere, [[2, 0, 0, 3.5], [0, 2, 0, 0], [0, 0, 2, 0], [0, 0, 0, 1]]
+)
 
-transformed_sphere_forcing_shader = scenery.Transformation(sphere,
-	[[2, 0, 0, -3.5],
-	[0, 2, 0, 0],
-	[0, 0, 2, 0],
-	[0, 0, 0, 1]])
+transformed_sphere_forcing_shader = scenery.Transformation(
+    sphere, [[2, 0, 0, -3.5], [0, 2, 0, 0], [0, 0, 2, 0], [0, 0, 0, 1]]
+)
 transformed_sphere_forcing_shader.shader = checkers3D
 transformed_sphere_forcing_shader.isOverridingShader = True
 
@@ -56,7 +52,16 @@ image = output.Image("transformation.hdr", (width, height))
 engine = RenderEngine()
 engine.tracer = tracers.DirectLighting()
 engine.sampler = samplers.Stratifier((width, height), super_sampling)
-engine.scene = scenery.List([floor, sphere, transformed_sphere, transformed_sphere_forcing_shader, light1, light2])
+engine.scene = scenery.List(
+    [
+        floor,
+        sphere,
+        transformed_sphere,
+        transformed_sphere_forcing_shader,
+        light1,
+        light2,
+    ]
+)
 engine.camera = camera
 engine.target = image
 engine.render()

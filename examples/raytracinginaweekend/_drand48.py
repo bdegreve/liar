@@ -1,7 +1,7 @@
 class DRand48(object):
     a = 0x5DEECE66D
     c = 0xB
-    m = 2 ** 48
+    m = 2**48
 
     def __init__(self, seed=None):
         if seed is None:

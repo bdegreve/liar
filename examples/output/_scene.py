@@ -1,10 +1,10 @@
-'''
+"""
 Geometry for the output examples
 
 LiAR isn't a raytracer
 Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
 http://liar.bramz.net/
-'''
+"""
 
 from liar import *
 
@@ -17,10 +17,11 @@ else:
     height = 600
     super_sampling = 1
 
+
 def scene():
     red = textures.Constant(rgb(0.9, 0.1, 0.1))
-    blue = textures.Constant(rgb(0.1, 0.1, .9))
-    white = textures.Constant(rgb(.9, .9, .9))
+    blue = textures.Constant(rgb(0.1, 0.1, 0.9))
+    white = textures.Constant(rgb(0.9, 0.9, 0.9))
 
     parts = []
     sphere = scenery.Sphere()
@@ -33,15 +34,15 @@ def scene():
     sphere.shader = shaders.AshikhminShirley()
     sphere.shader.diffuse = red
     sphere.shader.specular = textures.Constant(0.05)
-    sphere.shader.specularPowerU = sphere.shader.specularPowerV = textures.Constant(1000)
+    sphere.shader.specularPowerU = sphere.shader.specularPowerV = textures.Constant(
+        1000
+    )
 
-    #sphere.shader = shaders.Dielectric()
-    #sphere.shader.innerRefractionIndex = textures.Constant(2)
-    #sphere.interior = mediums.Beer(rgb(0.5, 0.5, 0))
+    # sphere.shader = shaders.Dielectric()
+    # sphere.shader.innerRefractionIndex = textures.Constant(2)
+    # sphere.interior = mediums.Beer(rgb(0.5, 0.5, 0))
 
-
-    #sphere = scenery.MotionTranslation(sphere, (0, 0, 0), (1, 0, 0))
-
+    # sphere = scenery.MotionTranslation(sphere, (0, 0, 0), (1, 0, 0))
 
     parts.append(sphere)
 
@@ -57,11 +58,10 @@ def scene():
     back.shader = shaders.Lambert(textures.CheckerBoard(blue, white))
     parts.append(back)
 
-    #floor.shader = back.shader = shaders.AshikhminShirley()
-    #floor.shader.diffuse = textures.CheckerBoard(blue, white)
-    #floor.shader.specular = textures.Constant(0.05)
-    #floor.shader.specularPowerU = floor.shader.specularPowerV = textures.Constant(100)
-
+    # floor.shader = back.shader = shaders.AshikhminShirley()
+    # floor.shader.diffuse = textures.CheckerBoard(blue, white)
+    # floor.shader.specular = textures.Constant(0.05)
+    # floor.shader.specularPowerU = floor.shader.specularPowerV = textures.Constant(100)
 
     light_shape = scenery.Disk()
     light_shape.center = (0, 0, 6)
@@ -73,6 +73,7 @@ def scene():
 
     return scenery.List(parts)
 
+
 def camera():
     cam = cameras.PerspectiveCamera()
     cam.position = (0, 5, 3)
@@ -80,6 +81,7 @@ def camera():
     cam.farLimit = 15
     cam.shutterCloseDelta = 0.3
     return cam
+
 
 def engine():
     eng = RenderEngine()

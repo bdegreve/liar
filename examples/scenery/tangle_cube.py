@@ -10,7 +10,8 @@ from liar import *
 from liar.tools import cornell_box, scripting, rgb_spaces
 import math
 import sys
-no_display =  "--no-display" in sys.argv
+
+no_display = "--no-display" in sys.argv
 
 fps = 25.0
 num_frames = 25
@@ -25,42 +26,42 @@ speed_y = (2 * math.pi * num_rotations_y) / t_max
 speed_z = (2 * math.pi * num_rotations_z) / t_max
 
 
-#if False:
-#	width = 800
-#	height = 800
-#	super_sampling = 4
-#	global_size = 200000
-#	caustics_quality = 1
-#	gather_rays = 36
-#else:
-#	width = 400
-#	height = 400
-#	super_sampling = 1
-#	global_size = 10000
-#	caustics_quality = 1
-#	raytrace_direct = True
-#	gather_rays = 9
+# if False:
+# width = 800
+# height = 800
+# super_sampling = 4
+# global_size = 200000
+# caustics_quality = 1
+# gather_rays = 36
+# else:
+# width = 400
+# height = 400
+# super_sampling = 1
+# global_size = 10000
+# caustics_quality = 1
+# raytrace_direct = True
+# gather_rays = 9
 
 if False:
     options = scripting.renderOptions(
         width=400,
         height=400,
         super_sampling=16,
-        global_size = 200000,
-        caustics_quality=1.,
-        gather_rays = 81
-        )
+        global_size=200000,
+        caustics_quality=1.0,
+        gather_rays=81,
+    )
 else:
     options = scripting.renderOptions(
         frame=12,
         width=400,
         height=400,
         super_sampling=4,
-        global_size = 5000,
-        caustics_quality=1.,
-        gather_rays = 16,
-        display=1
-        )
+        global_size=5000,
+        caustics_quality=1.0,
+        gather_rays=16,
+        display=1,
+    )
 
 raytrace_direct = True
 
@@ -76,12 +77,12 @@ photonMapper.ratioPrecomputedIrradiance = 0.25
 objects = cornell_box.walls() + cornell_box.lights()
 
 a, b, c = 0, -5, 11.8
-#a, b, c = 1, 0, -1
-#a, b, c = 0, 0, -1
-#a, b, c = 0, -2, -1
-#a, b, c = 0, -2, 1
-#a, b, c = 0, -1, .5
-#a, b, c = -1, 1, -1
+# a, b, c = 1, 0, -1
+# a, b, c = 0, 0, -1
+# a, b, c = 0, -2, -1
+# a, b, c = 0, -2, 1
+# a, b, c = 0, -1, .5
+# a, b, c = -1, 1, -1
 goursat = scenery.Goursat(a, -10, c)
 goursat.parameterSpeed = (0, 10, 0)
 goursat.useSphereTracing = False
@@ -92,7 +93,7 @@ goursat.shader.specularPowerU = goursat.shader.specularPowerV = textures.Constan
 
 
 # scale down
-goursat = scenery.Transformation(goursat, liar.Transformation3D.scaler(.75))
+goursat = scenery.Transformation(goursat, liar.Transformation3D.scaler(0.75))
 
 if False:
     goursat = scenery.MotionRotation(goursat, (1, 0, 0), 0, speed_x)
@@ -100,21 +101,27 @@ if False:
     goursat = scenery.MotionRotation(goursat, (0, 1, 0), 0, speed_y)
 
 
+# goursat = scenery.MotionTranslation(goursat, (0, 0, 0), (0, 1, 0))
 
-
-#goursat = scenery.MotionTranslation(goursat, (0, 0, 0), (0, 1, 0))
-
-y = 2.26 # ground floor
-y = 5.4879 / 2 # center of room
+y = 2.26  # ground floor
+y = 5.4879 / 2  # center of room
 objects.append(scenery.Translation(goursat, (2.78, y, 2.795)))
 
 
 engine = RenderEngine()
 engine.tracer = photonMapper
-engine.sampler = samplers.Stratifier((options.width, options.height), options.super_sampling)
+engine.sampler = samplers.Stratifier(
+    (options.width, options.height), options.super_sampling
+)
 engine.sampler.jittered = True
 engine.scene = scenery.List(objects)
 engine.camera = cornell_box.camera()
-engine.camera.shutterTime = .8 * (1 / fps)
-engine.target = scripting.makeRenderTarget(options.width, options.height, "tangle_cube_b_%d.jpg" % options.frame, display=options.display, fStops=0)
-engine.render((options.frame - .4) / fps)
+engine.camera.shutterTime = 0.8 * (1 / fps)
+engine.target = scripting.makeRenderTarget(
+    options.width,
+    options.height,
+    "tangle_cube_b_%d.jpg" % options.frame,
+    display=options.display,
+    fStops=0,
+)
+engine.render((options.frame - 0.4) / fps)

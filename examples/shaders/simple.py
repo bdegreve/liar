@@ -63,11 +63,11 @@ dx = -2.5
 x0 = -(len(shader_list) - 1.0) * dx / 2.0
 sphere_list = []
 for i in range(len(shader_list)):
-	sphere = scenery.Sphere()
-	sphere.center = (x0 + i * dx, 0, 1)
-	sphere.radius = 1
-	sphere.shader = shader_list[i]
-	sphere_list.append(sphere)
+    sphere = scenery.Sphere()
+    sphere.center = (x0 + i * dx, 0, 1)
+    sphere.radius = 1
+    sphere.shader = shader_list[i]
+    sphere_list.append(sphere)
 
 light = scenery.LightPoint()
 light.position = (10, 10, 10)
@@ -86,6 +86,6 @@ camera.lookAt((0, 0, 1))
 engine.camera = camera
 
 engine.target = output.Image("simple.tga", (width, height))
-engine.target.exposureTime = .01/30
+engine.target.exposureTime = 0.01 / 30
 
 engine.render()

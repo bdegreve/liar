@@ -10,5 +10,5 @@ from _scene import *
 
 e = engine()
 e.target = output.Display("display.py", (width, height))
-#e.numberOfThreads=1
+# e.numberOfThreads=1
 e.render()

@@ -28,24 +28,27 @@ bl_info = {
     "blender": (2, 67, 0),
     "location": "Render > Engine > LiAR isn't A Raytracer",
     "warning": "alpha alert!",
-    "category": "Render"
-    }
+    "category": "Render",
+}
 
 import bpy
 import sys
 
-#import sys
-#sys.path.append(r"C:\local\winpdb-1.4.8")
-#import rpdb2;
-#rpdb2.start_embedded_debugger("liar")
+# import sys
+# sys.path.append(r"C:\local\winpdb-1.4.8")
+# import rpdb2;
+# rpdb2.start_embedded_debugger("liar")
 
 
 class LiarPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
-    python_binary = bpy.props.StringProperty(name="Python Binary",
-                                             description="Filepath of Python binary that can run LiAR engine",
-                                             subtype='FILE_PATH',
-                                             default='python.exe' if 'win' in sys.platform else 'python')
+    python_binary = bpy.props.StringProperty(
+        name="Python Binary",
+        description="Filepath of Python binary that can run LiAR engine",
+        subtype="FILE_PATH",
+        default="python.exe" if "win" in sys.platform else "python",
+    )
+
     def draw(self, context):
         layout = self.layout
         layout.prop(self, "python_binary")
@@ -53,7 +56,7 @@ class LiarPreferences(bpy.types.AddonPreferences):
 
 class LiarRender(bpy.types.RenderEngine):
     bl_idname = LIAR
-    bl_label = 'LiAR Render'
+    bl_label = "LiAR Render"
     bl_use_shading_nodes = True
     bl_use_preview = False
     bl_use_exclude_layers = True
@@ -64,8 +67,8 @@ class LiarRender(bpy.types.RenderEngine):
         self.size_x = int(scene.render.resolution_x * scale)
         self.size_y = int(scene.render.resolution_y * scale)
 
-        if scene.name == 'preview':
-            self.report({'ERROR'}, "render preview not supported")
+        if scene.name == "preview":
+            self.report({"ERROR"}, "render preview not supported")
             return
         else:
             self._render_scene(scene)
@@ -74,6 +77,7 @@ class LiarRender(bpy.types.RenderEngine):
         from render_liar import render, export
 
         from imp import reload
+
         reload(render)
         reload(export)
 
@@ -97,12 +101,14 @@ def auto_register(cls):
     _auto_registry.append(cls)
     return cls
 
+
 _auto_registry = []
 
 
 def compat_engine(cls):
     _compat_list.append(cls)
     return cls
+
 
 _compat_list = []
 

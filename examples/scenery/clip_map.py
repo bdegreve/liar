@@ -10,17 +10,17 @@ from liar import *
 import math
 
 if True:
-	width = 800
-	height = 600
-	super_sampling = 9
-	global_size = 100000
-	gather_rays = 16
+    width = 800
+    height = 600
+    super_sampling = 9
+    global_size = 100000
+    gather_rays = 16
 else:
-	width = 400
-	height = 300
-	super_sampling = 1
-	global_size = 10000
-	gather_rays = 9
+    width = 400
+    height = 300
+    super_sampling = 1
+    global_size = 10000
+    gather_rays = 9
 
 clip_map = textures.CheckerVolume(textures.Constant(0), textures.Constant(1))
 sphere = scenery.Sphere((0, 0, 0), 1)
@@ -37,9 +37,9 @@ wall2 = scenery.Plane((0, -1, 0), 4)
 wall2.shader = shaders.Lambert(textures.Constant(rgb(0.2, 0.8, 0.2)))
 
 center = (-4, -4, 4)
-size = .25
-right = [size * x for x in (-math.sqrt(2)/2, math.sqrt(2)/2, 0)]
-up = [size * x for x in (.5, .5, math.sqrt(2)/2)]
+size = 0.25
+right = [size * x for x in (-math.sqrt(2) / 2, math.sqrt(2) / 2, 0)]
+up = [size * x for x in (0.5, 0.5, math.sqrt(2) / 2)]
 origin = [c - x / 2 - y / 2 for c, x, y in zip(center, right, up)]
 L = 1000
 light = scenery.LightArea(scenery.Parallelogram(origin, right, up))

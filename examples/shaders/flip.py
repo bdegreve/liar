@@ -11,7 +11,7 @@
 
 from liar import *
 
-#print tolerance()
+# print tolerance()
 setTolerance(10e-6)
 
 width = 320
@@ -30,11 +30,14 @@ yellow_checkers = textures.CheckerBoard(yellow, white)
 # shaders
 
 shader_list = [
-	shaders.Flip(shaders.Mirror(red)),
-	shaders.Sum([
-		shaders.Lambert(textures.Constant(rgb(0.4, 0.4, 0.4))),
-		shaders.Flip(shaders.Lambert(textures.Constant(rgb(0.4, 0.4, 0.4))))]),
-	shaders.Flip(shaders.Lambert(white)),
+    shaders.Flip(shaders.Mirror(red)),
+    shaders.Sum(
+        [
+            shaders.Lambert(textures.Constant(rgb(0.4, 0.4, 0.4))),
+            shaders.Flip(shaders.Lambert(textures.Constant(rgb(0.4, 0.4, 0.4)))),
+        ]
+    ),
+    shaders.Flip(shaders.Lambert(white)),
 ]
 
 # scenery
@@ -56,12 +59,12 @@ scene_list.append(backdrop)
 dx = -2.5
 x0 = -(len(shader_list) - 1.0) * dx / 2.0
 for i in range(len(shader_list)):
-	disk = scenery.Disk()
-	disk.center = (x0 + i * dx, 0, 1)
-	disk.normal = (0, -1, 0)
-	disk.radius = 1
-	disk.shader = shader_list[i]
-	scene_list.append(disk)
+    disk = scenery.Disk()
+    disk.center = (x0 + i * dx, 0, 1)
+    disk.normal = (0, -1, 0)
+    disk.radius = 1
+    disk.shader = shader_list[i]
+    scene_list.append(disk)
 
 light = scenery.LightPoint()
 light.position = (0, -1, 2)

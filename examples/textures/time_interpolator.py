@@ -28,8 +28,10 @@ white = textures.Constant(rgb(1, 1, 1))
 
 # time dependent texture
 #
-key_textures = [red, yellow, green, cyan, blue, purple, red] # the textures to blend
-key_times = [k * time_length / (len(key_textures) - 1) for k in range(len(key_textures))]
+key_textures = [red, yellow, green, cyan, blue, purple, red]  # the textures to blend
+key_times = [
+    k * time_length / (len(key_textures) - 1) for k in range(len(key_textures))
+]
 time_interpolator = textures.LinearInterpolator()
 time_interpolator.keys = list(zip(key_times, key_textures))
 time_interpolator.control = textures.Time()

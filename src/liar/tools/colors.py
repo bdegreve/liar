@@ -20,17 +20,20 @@
 import liar.kernel as _kernel
 import liar.tools.colors as _colors
 
+
 def _setDefaultSpaceWrapper(cls, rgbSpace):
-	_oldDefaultSpace(cls, rgbSpace)
-	_makeColors()
+    _oldDefaultSpace(cls, rgbSpace)
+    _makeColors()
+
 
 def _makeColors():
-	colors = {
-		'RED': rgb(1, 0, 0),
-		'GREEN': rgb(1, 0, 0),
-		'BLUE' rgb(0, 0, 1),
-		}
-	_colors.update(colors)
+    colors = {
+        "RED": rgb(1, 0, 0),
+        "GREEN": rgb(1, 0, 0),
+        "BLUE": rgb(0, 0, 1),
+    }
+    _colors.update(colors)
+
 
 _oldDefaultSpace = _kernel.RgbSpace.setDefaultSpace
 _kernel.RgbSpace.setDefaultSpace = _setDefaultSpaceWrapper

@@ -23,11 +23,9 @@ sphere = scenery.Sphere((0, 0, 1), 1)
 sphere.shader = shaders.Simple(checkers3D, white)
 sphere.shader.specularPower = textures.Constant(20)
 
-transformed_sphere = scenery.Transformation(sphere,
-	[[2, 0, 0, 3.5],
-	 [0, 2, 0, 0],
-	 [0, 0, 2, 0],
-	 [0, 0, 0, 1]])
+transformed_sphere = scenery.Transformation(
+    sphere, [[2, 0, 0, 3.5], [0, 2, 0, 0], [0, 0, 2, 0], [0, 0, 0, 1]]
+)
 
 light = scenery.LightDirectional()
 light.direction = (-1, -1, -1)

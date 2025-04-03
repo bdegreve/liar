@@ -26,20 +26,26 @@ D50 = (0.34567, 0.35850)
 D55 = (0.33242, 0.34743)
 D65 = (0.31271, 0.32902)
 D75 = (0.29902, 0.31485)
-E = (1. / 3, 1. / 3)
+E = (1.0 / 3, 1.0 / 3)
 
 AdobeRGB = _kernel.RgbSpace((0.64, 0.33), (0.21, 0.71), (0.15, 0.06), D65, 2.2)
 AppleRGB = _kernel.RgbSpace((0.625, 0.34), (0.28, 0.595), (0.155, 0.07), D65, 1.8)
 BestRGB = _kernel.RgbSpace((0.7347, 0.2653), (0.215, 0.775), (0.13, 0.035), D50, 2.2)
-BetaRGB = _kernel.RgbSpace((0.6888, 0.3112), (0.1986, 0.7551), (0.1265, 0.0352), D50, 2.2)
+BetaRGB = _kernel.RgbSpace(
+    (0.6888, 0.3112), (0.1986, 0.7551), (0.1265, 0.0352), D50, 2.2
+)
 BruceRGB = _kernel.RgbSpace((0.64, 0.33), (0.2800, 0.6500), (0.15, 0.06), D65, 2.2)
-CIERGB  = _kernel.RgbSpace((0.735, 0.265), (0.274, 0.717), (0.167, 0.009), E, 2.2)
+CIERGB = _kernel.RgbSpace((0.735, 0.265), (0.274, 0.717), (0.167, 0.009), E, 2.2)
 CIEXYZ = _kernel.CIEXYZ
 ColorMatchRGB = _kernel.RgbSpace((0.63, 0.34), (0.295, 0.605), (0.15, 0.075), D50, 1.8)
 HDTV_RGB = _kernel.sRGB
 NTSC_RGB = _kernel.RgbSpace((0.67, 0.33), (0.21, 0.71), (0.14, 0.08), C, 2.2)
 PAL_SECAM_RGB = _kernel.RgbSpace((0.64, 0.33), (0.29, 0.6), (0.15, 0.06), D65, 2.2)
-ProPhotoRGB =  _kernel.RgbSpace((0.7347, 0.2653), (0.1596, 0.8404), (0.0366, 0.0001), D50, 1.8)
+ProPhotoRGB = _kernel.RgbSpace(
+    (0.7347, 0.2653), (0.1596, 0.8404), (0.0366, 0.0001), D50, 1.8
+)
 SMPTE_C_RGB = _kernel.RgbSpace((0.63, 0.34), (0.31, 0.595), (0.1550, 0.07), D65, 2.2)
 sRGB = _kernel.sRGB
-WideGamutRGB = _kernel.RgbSpace((0.735, 0.265), (0.115, 0.826), (0.157, 0.018), D50, 2.2)
+WideGamutRGB = _kernel.RgbSpace(
+    (0.735, 0.265), (0.115, 0.826), (0.157, 0.018), D50, 2.2
+)

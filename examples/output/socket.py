@@ -15,12 +15,21 @@ from _scene import *
 host = output.SocketHost("127.0.0.1")
 host.target = output.Display("Host", (width, height))
 
+
 def start_slave(k):
     x_left = float(k) / numProcesses
     x_right = float(k + 1) / numProcesses
-    cmd = [sys.executable, "socket_client.py", host.address, str(host.port), str(x_left), str(x_right)]
+    cmd = [
+        sys.executable,
+        "socket_client.py",
+        host.address,
+        str(host.port),
+        str(x_left),
+        str(x_right),
+    ]
     print(("starting child %s: %r" % (k, cmd)))
     return subprocess.Popen(cmd)
+
 
 childs = [start_slave(k) for k in range(numProcesses)]
 for child in childs:

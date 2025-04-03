@@ -24,15 +24,15 @@ floor.shader.reflectance = textures.Constant(0.5)
 
 light1 = scenery.LightPoint()
 light1.position = (5, 10, 10)
-light1.power = rgb(1, 1, .5)
+light1.power = rgb(1, 1, 0.5)
 
 light2 = scenery.LightPoint()
 light2.position = (10, -10, 10)
-light2.power = rgb(.5, .5, .1)
+light2.power = rgb(0.5, 0.5, 0.1)
 
 light3 = scenery.LightPoint()
 light3.position = (-10, -10, 10)
-light3.power = rgb(.5, .5, .5)
+light3.power = rgb(0.5, 0.5, 0.5)
 
 camera = cameras.PerspectiveCamera()
 camera.position = (1.5, 2.5, 1.5)

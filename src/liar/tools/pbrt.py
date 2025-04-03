@@ -227,9 +227,9 @@ class PbrtScene(object):
 
     def ObjectBegin(self, name):
         self.AttributeBegin()
-        assert (
-            self.__cur_instance is None
-        ), "ObjectBegin called inside of instance definition"
+        assert self.__cur_instance is None, (
+            "ObjectBegin called inside of instance definition"
+        )
         self.__cur_instance_name = name
         self.__cur_instance = self.__instances[name] = []
 
@@ -436,8 +436,8 @@ class PbrtScene(object):
         print(f"loading PLY file {filename} ...")
         mesh = liar.scenery.TriangleMesh.loadPly(filename)
         if alpha:
-             mesh.alphaMask = self._get_texture(alpha)
-             mesh.alphaThreshold = 0.001
+            mesh.alphaMask = self._get_texture(alpha)
+            mesh.alphaThreshold = 0.001
         if shadowalpha:
             assert shadowalpha is alpha
         return mesh
@@ -686,7 +686,10 @@ class PbrtScene(object):
                 layers.append(
                     liar.shaders.Lambert(
                         liar.textures.Product(
-                            [self._get_texture(Kd), self._get_texture(reflect),]
+                            [
+                                self._get_texture(Kd),
+                                self._get_texture(reflect),
+                            ]
                         )
                     )
                 )
@@ -695,7 +698,10 @@ class PbrtScene(object):
                     liar.shaders.Flip(
                         liar.shaders.Lambert(
                             liar.textures.Product(
-                                [self._get_texture(Kd), self._get_texture(transmit),]
+                                [
+                                    self._get_texture(Kd),
+                                    self._get_texture(transmit),
+                                ]
                             )
                         )
                     )
@@ -705,10 +711,16 @@ class PbrtScene(object):
             layer = liar.shaders.Walter(self._get_texture(1.5))
             layer.mdf = self.__trowbridge_reitz
             layer.reflectance = liar.textures.Product(
-                [self._get_texture(Ks), self._get_texture(reflect),]
+                [
+                    self._get_texture(Ks),
+                    self._get_texture(reflect),
+                ]
             )
             layer.transmittance = liar.textures.Product(
-                [self._get_texture(Ks), self._get_texture(transmit),]
+                [
+                    self._get_texture(Ks),
+                    self._get_texture(transmit),
+                ]
             )
             layer.roughnessU = layer.roughnessV = self._get_texture(roughness)
             layers.append(layer)
@@ -1347,7 +1359,7 @@ def _remap_roughness(roughness, *, remaproughness: bool):
 
     r = roughness
     roughness = liar.textures.RemapPbrtRoughness.remap(r, remaproughness)
-    #print(f"_remap_roughness({r}, {remaproughness}) -> {roughness}")
+    # print(f"_remap_roughness({r}, {remaproughness}) -> {roughness}")
     return roughness
 
 

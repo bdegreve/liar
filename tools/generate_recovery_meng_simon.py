@@ -18,8 +18,8 @@ def main(out, min_dist, step_size, nudge_factor, niter, ftol, plot):
     observer = liar.Observer.standard()
 
     border, inside = generate_sample_points(observer, min_dist, step_size, nudge_factor)
-    print('#border:', len(border))
-    print('#inside:', len(inside))
+    print("#border:", len(border))
+    print("#inside:", len(inside))
     if plot:
         plot_sample_points(border, inside)
 
@@ -41,7 +41,7 @@ def generate_sample_points(observer, min_dist, step_size, nudge_factor):
     ws = np.array(observer.wavelengths)
     xys = list(map(xy_from_XYZ, observer.sensitivities))
 
-    xy_white = np.array([1./3, 1./3])
+    xy_white = np.array([1.0 / 3, 1.0 / 3])
     xys = [nudge_to_white(xy, xy_white, nudge_factor) for xy in xys]
 
     w_green = 525
@@ -66,7 +66,7 @@ def generate_border_samples(xys, k_green, min_dist):
         border_blue.append(xy)
 
     border_red = [xy_red]
-    for xy in reversed(xys[k_green+1:-1]):
+    for xy in reversed(xys[k_green + 1 : -1]):
         if dist_xy(xy, border_red[-1]) < min_dist:
             continue
         if dist_xy(xy, xy_green) < min_dist:
@@ -80,7 +80,10 @@ def generate_border_samples(xys, k_green, min_dist):
 def generate_inside_samples(border, xy_white, xy_green, min_dist, step_size):
     xy_blue, xy_red = border[0], border[-1]
     du, dv = xy_red - xy_blue, xy_green - xy_blue
-    nu, nv = int(round(linalg.norm(du) / step_size)), int(round(linalg.norm(dv) / step_size))
+    nu, nv = (
+        int(round(linalg.norm(du) / step_size)),
+        int(round(linalg.norm(dv) / step_size)),
+    )
     du, dv = du / nu, dv / nv
 
     inside = [xy_white]
@@ -99,7 +102,7 @@ def generate_inside_samples(border, xy_white, xy_green, min_dist, step_size):
 
 
 def generate_spectra(observer, xy_points, niter, ftol):
-    return { tuple(xy): fit_spectrum(observer, xy, niter, ftol) for xy in xy_points }
+    return {tuple(xy): fit_spectrum(observer, xy, niter, ftol) for xy in xy_points}
 
 
 def fit_spectrum(observer, xy, niter, ftol):
@@ -110,20 +113,24 @@ def fit_spectrum(observer, xy, niter, ftol):
     xyz = xyz_from_xy(xy)
 
     constraint = {
-        'type': 'eq',
-        'fun': lambda s: np.array(observer.tristimulus(s)) - xyz
+        "type": "eq",
+        "fun": lambda s: np.array(observer.tristimulus(s)) - xyz,
     }
-    options = {
-        'maxiter': niter,
-        'ftol': ftol,
-        'disp': True
-    }
-    optimal = scipy.optimize.minimize(error, x0, method='SLSQP', jac=jac, bounds=bounds, constraints=constraint, options=options)
+    options = {"maxiter": niter, "ftol": ftol, "disp": True}
+    optimal = scipy.optimize.minimize(
+        error,
+        x0,
+        method="SLSQP",
+        jac=jac,
+        bounds=bounds,
+        constraints=constraint,
+        options=options,
+    )
     spectrum = np.array([max(s, 0) for s in optimal.x])
 
-    #print spectrum
-    print('max:', max(spectrum))
-    print('delta E:', delta_E_CIE1976(xyz, observer.tristimulus(spectrum)))
+    # print spectrum
+    print("max:", max(spectrum))
+    print("delta E:", delta_E_CIE1976(xyz, observer.tristimulus(spectrum)))
 
     return spectrum
 
@@ -137,7 +144,14 @@ def jac(spectrum):
     dx1 = 2 * (x1 - x2)
     xm, xn = spectrum[-2:]
     dxn = 2 * (xn - xm)
-    j = [dx1] + [4 * spectrum[k] - 2 * (spectrum[k - 1] + spectrum[k + 1]) for k in range(1, len(spectrum) - 1)] + [dxn]
+    j = (
+        [dx1]
+        + [
+            4 * spectrum[k] - 2 * (spectrum[k - 1] + spectrum[k + 1])
+            for k in range(1, len(spectrum) - 1)
+        ]
+        + [dxn]
+    )
     assert len(j) == len(spectrum)
     return np.array(j)
 
@@ -146,8 +160,12 @@ def test(wavelengths, spectra, observer):
     recovery = liar.spectra.RecoveryMengSimon(wavelengths, spectra)
     edges = recovery.meshEdges()
 
-    rgb_space = liar.tools.rgb_spaces.AdobeRGB #liar.sRGB
-    xy_red, xy_green, xy_blue = np.array(rgb_space.red), np.array(rgb_space.green), np.array(rgb_space.blue)
+    rgb_space = liar.tools.rgb_spaces.AdobeRGB  # liar.sRGB
+    xy_red, xy_green, xy_blue = (
+        np.array(rgb_space.red),
+        np.array(rgb_space.green),
+        np.array(rgb_space.blue),
+    )
     polygon_cw = [xy_blue, xy_green, xy_red]
     x_min = min(xy_red[0], xy_green[0], xy_blue[0])
     x_max = max(xy_red[0], xy_green[0], xy_blue[0])
@@ -168,7 +186,7 @@ def test(wavelengths, spectra, observer):
                 es[i, j] = -1
                 continue
             z = 1 - x - y
-            assert(z > 0)
+            assert z > 0
             xyz = np.array([x, y, z])
             spectrum = recovery.recover(xyz)
             xyz_prime = observer.tristimulus(spectrum)
@@ -186,15 +204,19 @@ def test(wavelengths, spectra, observer):
     for (xa, ya), (xb, yb) in edges:
         xs += [xa, xb, None]
         ys += [ya, yb, None]
-    pylab.xlim([min(x for x in xs if x is not None), max(x for x in xs if x is not None)])
-    pylab.ylim([min(y for y in ys if y is not None), max(y for y in ys if y is not None)])
-    pylab.plot(xs, ys, '-k')
+    pylab.xlim(
+        [min(x for x in xs if x is not None), max(x for x in xs if x is not None)]
+    )
+    pylab.ylim(
+        [min(y for y in ys if y is not None), max(y for y in ys if y is not None)]
+    )
+    pylab.plot(xs, ys, "-k")
     xs, ys = list(zip(*list(spectra.keys())))
-    pylab.plot(xs, ys, 'ow')
+    pylab.plot(xs, ys, "ow")
 
 
 def delta_E_CIE1976(xyz_a, xyz_b):
-    xy_white = (1./3, 1./3)
+    xy_white = (1.0 / 3, 1.0 / 3)
     lab_a = colour.models.cie_lab.XYZ_to_Lab(xyz_a, xy_white)
     lab_b = colour.models.cie_lab.XYZ_to_Lab(xyz_b, xy_white)
     return colour.difference.delta_e.delta_E_CIE1976(lab_a, lab_b)
@@ -204,9 +226,9 @@ def plot_sample_points(border, inside):
     pylab.figure()
     colour.plotting.CIE_1931_chromaticity_diagram_plot(standalone=False)
     xs, ys = list(zip(*border))
-    pylab.plot(xs, ys, '-ow')
+    pylab.plot(xs, ys, "-ow")
     xs, ys = list(zip(*inside))
-    pylab.plot(xs, ys, 'ow')
+    pylab.plot(xs, ys, "ow")
 
 
 def plot_spectra(spectra, wavelengths):
@@ -216,19 +238,24 @@ def plot_spectra(spectra, wavelengths):
 
 
 def save_spectra(path, wavelengths, spectra):
-    with open(path, 'w') as f:
-        json.dump({
-            'wavelengths': tuple(wavelengths),
-            'spectra': [{"xy": xy, "spectrum": tuple(s)} for xy, s in spectra.items()]
-        },
-        f, indent=2)
+    with open(path, "w") as f:
+        json.dump(
+            {
+                "wavelengths": tuple(wavelengths),
+                "spectra": [
+                    {"xy": xy, "spectrum": tuple(s)} for xy, s in spectra.items()
+                ],
+            },
+            f,
+            indent=2,
+        )
 
 
 def load_spectra(path):
-    with open(path, 'r') as f:
+    with open(path, "r") as f:
         data = json.load(f)
-    wavelengths = data['wavelengths']
-    spectra = {tuple(s['xy']): s['spectrum'] for s in data['spectra']}
+    wavelengths = data["wavelengths"]
+    spectra = {tuple(s["xy"]): s["spectrum"] for s in data["spectra"]}
     return wavelengths, spectra
 
 
@@ -270,15 +297,65 @@ def nudge_to_white(xy, xy_white, factor):
     return xy * (1 - factor) + xy_white * factor
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description='Generate the Spectrum<->XYZ conversion constants for Meng Simon model.')
-    parser.add_argument('--min-dist', type=float, default=0.02, metavar='<d>', help='minumum xy distance between two points [default=%(default)s]')
-    parser.add_argument('--step-size', type=float, default=0.075, metavar='<d>', help='step size of triangular grid [default=%(default)s]')
-    parser.add_argument('--nudge-factor', type=float, default=0.03, metavar='<f>', help='factor to ease border towards white [default=%(default)s]')
-    parser.add_argument("--niter", type=int, default=10000, metavar='<n>', help='max number of iterations in optimization algorithm, more is better [default=%(default)s]')
-    parser.add_argument("--ftol", type=float, default=1e-10, metavar='<f>', help='tolerance, smaller is better [default=%(default)s]')
-    parser.add_argument('-o', '--out', type=str, default='recovery_meng_simon.json', metavar='<filename>', help='output file [default=%(default)s]')
-    parser.add_argument('--plot', default=False, action='store_true', help='plot results')
+
+    parser = argparse.ArgumentParser(
+        description="Generate the Spectrum<->XYZ conversion constants for Meng Simon model."
+    )
+    parser.add_argument(
+        "--min-dist",
+        type=float,
+        default=0.02,
+        metavar="<d>",
+        help="minumum xy distance between two points [default=%(default)s]",
+    )
+    parser.add_argument(
+        "--step-size",
+        type=float,
+        default=0.075,
+        metavar="<d>",
+        help="step size of triangular grid [default=%(default)s]",
+    )
+    parser.add_argument(
+        "--nudge-factor",
+        type=float,
+        default=0.03,
+        metavar="<f>",
+        help="factor to ease border towards white [default=%(default)s]",
+    )
+    parser.add_argument(
+        "--niter",
+        type=int,
+        default=10000,
+        metavar="<n>",
+        help="max number of iterations in optimization algorithm, more is better [default=%(default)s]",
+    )
+    parser.add_argument(
+        "--ftol",
+        type=float,
+        default=1e-10,
+        metavar="<f>",
+        help="tolerance, smaller is better [default=%(default)s]",
+    )
+    parser.add_argument(
+        "-o",
+        "--out",
+        type=str,
+        default="recovery_meng_simon.json",
+        metavar="<filename>",
+        help="output file [default=%(default)s]",
+    )
+    parser.add_argument(
+        "--plot", default=False, action="store_true", help="plot results"
+    )
     args = parser.parse_args()
-    main(args.out, args.min_dist, args.step_size, args.nudge_factor, args.niter, args.ftol, args.plot)
+    main(
+        args.out,
+        args.min_dist,
+        args.step_size,
+        args.nudge_factor,
+        args.niter,
+        args.ftol,
+        args.plot,
+    )

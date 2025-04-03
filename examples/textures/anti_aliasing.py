@@ -45,11 +45,11 @@ sphereT.shader.refractionIndex = textures.Constant(1.5)
 
 light1 = scenery.LightPoint()
 light1.position = (10, 10, 10)
-light1.power = rgb(tuple([x * 10**6 for x in(1, 1, 0.5)]))
+light1.power = rgb(tuple([x * 10**6 for x in (1, 1, 0.5)]))
 
 light2 = scenery.LightPoint()
 light2.position = (10, -20, 10)
-light2.power = rgb(tuple([x * 10**6 for x in(1, 1, 0.5)]))
+light2.power = rgb(tuple([x * 10**6 for x in (1, 1, 0.5)]))
 
 engine.scene = scenery.List([plane, sphereR, sphereT, light1, light2])
 
@@ -59,6 +59,6 @@ camera.lookAt((0, 0, 1))
 engine.camera = camera
 
 engine.target = output.Image("anti_aliasing.tga", (width, height))
-engine.target.exposureTime = .005
+engine.target.exposureTime = 0.005
 
 engine.render()

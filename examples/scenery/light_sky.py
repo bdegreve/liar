@@ -14,24 +14,26 @@ height = 300
 super_sampling = 1
 
 
-
 from liar import *
 
+
 def auto_downloader(url):
-	import os.path
-	filename = os.path.basename(url)
-	if not os.path.isfile(filename):
-		print("Downloading '%s' ..." % url)
-		import urllib.request, urllib.parse, urllib.error
-		file(filename, 'wb').write(urllib.request.urlopen(url).read())
-	return filename
+    import os.path
+
+    filename = os.path.basename(url)
+    if not os.path.isfile(filename):
+        print("Downloading '%s' ..." % url)
+        import urllib.request, urllib.parse, urllib.error
+
+        file(filename, "wb").write(urllib.request.urlopen(url).read())
+    return filename
+
 
 light_probe = textures.AngularMapping(textures.Image(auto_downloader(probe_url)))
 light_probe.texture.mipMapping = textures.Image.MM_NONE
 light = scenery.LightSky(light_probe)
 light.numberOfEmissionSamples = 64
 light.shader = shaders.Unshaded(light_probe)
-
 
 
 floor = scenery.Parallelogram((5, 5, -1), (-10, 0, 0), (0, -10, 0))
@@ -46,8 +48,7 @@ shiny_sphere.shader = shaders.Mirror(textures.Constant(0.9))
 glass_sphere = scenery.Sphere((-2.5, 0, 0), 1)
 glass_sphere.shader = shaders.Dielectric()
 glass_sphere.shader.innerRefractionIndex = textures.Constant(1.3)
-glass_sphere.interior = shaders.Beer(rgb(.9, .9, .5))
-
+glass_sphere.interior = shaders.Beer(rgb(0.9, 0.9, 0.5))
 
 
 camera = cameras.PerspectiveCamera()

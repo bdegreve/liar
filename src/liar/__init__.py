@@ -27,11 +27,11 @@ import os as _os
 # http://liar.bramz.net/2007/01/28/shared-libraries-dlopen-and-rtti/
 #
 try:
-	_oldflags = _sys.getdlopenflags()
+    _oldflags = _sys.getdlopenflags()
 except AttributeError:
-	pass
+    pass
 else:
-	_sys.setdlopenflags(_os.RTLD_NOW | _os.RTLD_GLOBAL)
+    _sys.setdlopenflags(_os.RTLD_NOW | _os.RTLD_GLOBAL)
 
 
 from liar.kernel import *
@@ -46,27 +46,35 @@ import liar.spectra
 import liar.textures
 import liar.tracers
 
+
 def _load_observer(resource):
     import pkgutil
-    data = _pkgutil.get_data('liar', resource)
-    lines = (line.split(b"\t") for line in data.splitlines() if not line.startswith(b'#'))
+
+    data = _pkgutil.get_data("liar", resource)
+    lines = (
+        line.split(b"\t") for line in data.splitlines() if not line.startswith(b"#")
+    )
     columns = map(tuple, zip(*lines))
-    series = { col[0]: tuple(float(x) for x in col[1:]) for col in columns }
-    wavelengths = series[b'w']
+    series = {col[0]: tuple(float(x) for x in col[1:]) for col in columns}
+    wavelengths = series[b"w"]
     if any(w > 1 for w in wavelengths):
         # if so, we assume wavelengths are expressed in nanometers. Convert to meters!
         wavelengths = [w * 1e-9 for w in wavelengths]
-    return liar.Observer(wavelengths, tuple(zip(series[b'xbar'], series[b'ybar'], series[b'zbar'])))
+    return liar.Observer(
+        wavelengths, tuple(zip(series[b"xbar"], series[b"ybar"], series[b"zbar"]))
+    )
 
-liar.Observer.setStandard(_load_observer('data/observer.tsv'))
+
+liar.Observer.setStandard(_load_observer("data/observer.tsv"))
 
 
 def _load_recovery_meng_simon(resource):
-    data = _json.loads(_pkgutil.get_data('liar', resource))
-    wavelengths = [w * 1e-9 for w in data['wavelengths']]
-    spectra = {tuple(s['xy']): s['spectrum'] for s in data['spectra']}
+    data = _json.loads(_pkgutil.get_data("liar", resource))
+    wavelengths = [w * 1e-9 for w in data["wavelengths"]]
+    spectra = {tuple(s["xy"]): s["spectrum"] for s in data["spectra"]}
     return liar.spectra.RecoveryMengSimon(wavelengths, spectra)
 
-liar.Recovery.setStandard(_load_recovery_meng_simon('data/recovery_meng_simon.json'))
+
+liar.Recovery.setStandard(_load_recovery_meng_simon("data/recovery_meng_simon.json"))
 
 # EOF

@@ -11,8 +11,7 @@
 from liar import *
 from liar.tools import scripting
 
-options = scripting.renderOptions(
-  width=900, height=600, samples_per_pixel=1)
+options = scripting.renderOptions(width=900, height=600, samples_per_pixel=1)
 
 sphere_radius = 0.8
 grid_size = 20
@@ -33,13 +32,13 @@ floor.d = 0
 floor.shader = shaders.Lambert(blue_checkers)
 
 sphere = scenery.Sphere((0, 0, sphere_radius), sphere_radius)
-sphere.shader = shaders.AshikhminShirley(red, textures.Constant(.01))
+sphere.shader = shaders.AshikhminShirley(red, textures.Constant(0.01))
 sphere.shader.specularPowerU = sphere.shader.specularPowerV = textures.Constant(20)
 
 spheres = []
 for i in range(0, grid_size, grid_step):
-	for j in range(0, grid_size, grid_step):
-		spheres.append(scenery.Translation(sphere, (i, j, 0)))
+    for j in range(0, grid_size, grid_step):
+        spheres.append(scenery.Translation(sphere, (i, j, 0)))
 
 keyLight = scenery.LightPoint()
 keyLight.position = (0, -10, 10)
@@ -56,11 +55,14 @@ backLight.intensity = rgb(50, 50, 100)
 # setup
 
 
-
 engine = RenderEngine()
 engine.tracer = tracers.DirectLighting()
-engine.sampler = samplers.Stratifier((options.width, options.height), options.samples_per_pixel)
-engine.scene = scenery.List([scenery.AabbTree(spheres), floor, keyLight, fillLight, backLight])
+engine.sampler = samplers.Stratifier(
+    (options.width, options.height), options.samples_per_pixel
+)
+engine.scene = scenery.List(
+    [scenery.AabbTree(spheres), floor, keyLight, fillLight, backLight]
+)
 
 camera = cameras.OrthographicCamera()
 camera.position = (grid_size / 2, -6, 6)
@@ -68,6 +70,8 @@ camera.lookAt((grid_size / 2, grid_size / 3, 1))
 camera.width = grid_size
 engine.camera = camera
 
-engine.target = scripting.makeRenderTarget(options.width, options.height, "orthographic.hdr", "Camera Depth Of Field")
+engine.target = scripting.makeRenderTarget(
+    options.width, options.height, "orthographic.hdr", "Camera Depth Of Field"
+)
 
 engine.render()

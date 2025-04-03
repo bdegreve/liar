@@ -29,7 +29,9 @@ from liar.spectra import Sampled
 
 
 def load(fp):
-    valid_line = lambda line: line and not line.startswith('#') and not line.startswith(';')
+    valid_line = (
+        lambda line: line and not line.startswith("#") and not line.startswith(";")
+    )
 
     lines = filter(valid_line, (line.strip() for line in fp))
     records = (map(float, line.split()) for line in lines)
@@ -57,15 +59,19 @@ def dump(obj, fp):
         obj = [obj]
     if len(obj) == 0:
         raise ValueError("Must have a list of at least one spectrum")
-    if not all(hasattr(o, 'wavelengths') and hasattr(o, 'values') for o in obj):
-        raise ValueError("All spectra must have 'wavelengths' and 'values' attributes (like Sampled)")
+    if not all(hasattr(o, "wavelengths") and hasattr(o, "values") for o in obj):
+        raise ValueError(
+            "All spectra must have 'wavelengths' and 'values' attributes (like Sampled)"
+        )
     wavelengths = tuple(obj[0].wavelengths)
     for o in obj[1:]:
         if wavelengths != tuple(o.wavelengths):
-            raise ValueError("All spectra must be sampled on the same wavelengths. Resample before dumping.")
+            raise ValueError(
+                "All spectra must be sampled on the same wavelengths. Resample before dumping."
+            )
     if all(w < 1 for w in wavelengths):
         # assume wavelengths in meters, convert to nanometers
         wavelengths = [w * 1e9 for w in wavelengths]
     allValues = [tuple(o.values) for o in obj]
     for row in zip(wavelengths, *allValues):
-        fp.write(' '.join(map(str, row)) + '\n')
+        fp.write(" ".join(map(str, row)) + "\n")

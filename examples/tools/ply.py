@@ -31,22 +31,22 @@ floor.shader = shaders.Lambert(textures.CheckerBoard(black, white))
 
 light1 = scenery.LightPoint()
 light1.position = (5, 10, 10)
-light1.intensity = rgb(1, 1, .5)
+light1.intensity = rgb(1, 1, 0.5)
 
 light2 = scenery.LightPoint()
 light2.position = (10, -10, 10)
-light2.intensity = rgb(.5, .5, .1)
+light2.intensity = rgb(0.5, 0.5, 0.1)
 
 light3 = scenery.LightPoint()
 light3.position = (-10, -10, 10)
-light3.intensity = rgb(.5, .5, .5)
+light3.intensity = rgb(0.5, 0.5, 0.5)
 
 camera = cameras.PerspectiveCamera()
 camera.position = (1.5, 2.5, 1.5)
 camera.lookAt((0, 0, 0))
 
 image = output.Image(str(_SELF_DIR / "ply.jpg"), (width, height))
-#image.exposureTime = 2500
+# image.exposureTime = 2500
 
 engine = RenderEngine()
 engine.tracer = tracers.DirectLighting()

@@ -13,8 +13,15 @@ options = scripting.renderOptions(width=800, height=800, super_sampling=9)
 
 engine = RenderEngine()
 engine.tracer = tracers.DirectLighting()
-engine.sampler = samplers.Stratifier((options.width, options.height), options.super_sampling)
+engine.sampler = samplers.Stratifier(
+    (options.width, options.height), options.super_sampling
+)
 engine.scene = cornell_box.scene()
 engine.camera = cornell_box.camera()
-engine.target = scripting.makeRenderTarget(options.width, options.height, "direct_lighting.hdr", "Cornell Box with Direct Lighting only")
+engine.target = scripting.makeRenderTarget(
+    options.width,
+    options.height,
+    "direct_lighting.hdr",
+    "Cornell Box with Direct Lighting only",
+)
 engine.render()

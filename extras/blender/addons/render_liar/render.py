@@ -2,8 +2,10 @@ import asyncore
 import socket
 import struct
 
+
 class BufferUnderflow(Exception):
     pass
+
 
 class EchoHandler(asyncore.dispatcher):
     def __init__(self, sock, renderengine):
@@ -38,9 +40,9 @@ class EchoHandler(asyncore.dispatcher):
 
     def __process_buffer(self):
         engine = self.__renderengine
-        code, = self.__readstruct("<h")
-        print ("code={}".format(code))
-        if code == 0: # scSample
+        (code,) = self.__readstruct("<h")
+        print("code={}".format(code))
+        if code == 0:  # scSample
             x, y, r, g, b, z, a, w = self.__readstruct("<dddddddd")
             i, j = int(x * engine.size_x), int(y * engine.size_y)
             address = j * engine.size_x + i
@@ -50,22 +52,24 @@ class EchoHandler(asyncore.dispatcher):
             p[2] += b
             p[3] += a
             self.__weightBuffer[address] += w
-            self.__result.layers[0].rect = [[x * w for x in p] for p, w in zip(self.__displayBuffer, self.__weightBuffer)]
-        elif code == 4: # scIsCanceling
+            self.__result.layers[0].rect = [
+                [x * w for x in p]
+                for p, w in zip(self.__displayBuffer, self.__weightBuffer)
+            ]
+        elif code == 4:  # scIsCanceling
             self.send(struct.pack("<B", 0))
-        elif code == 1: # scBeginRender
+        elif code == 1:  # scBeginRender
             pixel_count = engine.size_x * engine.size_y
             self.__result = engine.begin_result(0, 0, engine.size_x, engine.size_y)
             self.__displayBuffer = [[0.0, 0.0, 0.0, 0.0] for k in range(pixel_count)]
             self.__weightBuffer = [0] * pixel_count
-        elif code == 2: # scEndRender
+        elif code == 2:  # scEndRender
             self.close()
-        elif code == 3: # scResolution
+        elif code == 3:  # scResolution
             self.send(struct.pack("<II", engine.size_x, engine.size_y))
         else:
             print("OOPS, unexpected code {}".format(code))
             self.close()
-
 
     def __readstruct(self, fmt):
         n = struct.calcsize(fmt)
@@ -74,7 +78,7 @@ class EchoHandler(asyncore.dispatcher):
         return struct.unpack(fmt, buf)
 
     def __readstring(self):
-        n, = self.__readstruct("<Q")
+        (n,) = self.__readstruct("<Q")
         return self.__readn(n)
 
     def __readn(self, n):
@@ -91,12 +95,12 @@ class ServerThing(asyncore.dispatcher):
         self.renderengine = renderengine
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.set_reuse_addr()
-        self.bind(('localhost', 0))
+        self.bind(("localhost", 0))
         self.address = self.socket.getsockname()
         self.listen(1)
 
     def handle_accepted(self, sock, addr):
-        print('Incoming connection from %s' % repr(addr))
+        print("Incoming connection from %s" % repr(addr))
         EchoHandler(sock, self.renderengine)
         self.handle_close()
 
@@ -112,14 +116,21 @@ def render_scene(self, scene):
     addon_prefs = bpy.context.user_preferences.addons[__package__].preferences
     python_binary = addon_prefs.python_binary
     if not _test_liar(python_binary):
-        self.report({'ERROR'}, "{!r} is not a valid path to a Python binary with the LiAR package installed. Adjust the path in User Preferences, and try again.".format(python_binary))
+        self.report(
+            {"ERROR"},
+            "{!r} is not a valid path to a Python binary with the LiAR package installed. Adjust the path in User Preferences, and try again.".format(
+                python_binary
+            ),
+        )
         return False
 
     path = export.export_scene(scene)
     port = 8215
 
     server = ServerThing(self)
-    process = subprocess.Popen([python_binary, path, "--remote", "%s:%d" % server.address])
+    process = subprocess.Popen(
+        [python_binary, path, "--remote", "%s:%d" % server.address]
+    )
     asyncore.loop()
     process.wait()
     return True
@@ -127,6 +138,7 @@ def render_scene(self, scene):
 
 def _test_liar(python_binary):
     import subprocess
+
     try:
         output = subprocess.check_output([python_binary, "-c", "import liar"])
     except (subprocess.CalledProcessError, OSError):

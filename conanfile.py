@@ -131,7 +131,7 @@ class LiarConan(ConanFile):
             tc.variables["liar_DEBUG"] = self.options.debug
         tc.cache_variables["liar_USE_DOUBLE"] = bool(self.options.use_double)
         tc.cache_variables["liar_HAVE_AVX"] = self.options.get_safe("have_avx", False)
-        tc.cache_variables["BUILD_TESTING"] = "ON" # always build tests
+        tc.cache_variables["BUILD_TESTING"] = "ON"  # always build tests
         tc.generate()
 
         deps = CMakeDeps(self)

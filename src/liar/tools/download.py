@@ -28,7 +28,7 @@ def download(url, fname=None):
     fname = fname or os.path.basename(url)
     if not os.path.exists(fname):
         print("Downloading '{}' ...".format(url))
-        with open(fname, 'wb') as fp, urlopen(url) as res:
+        with open(fname, "wb") as fp, urlopen(url) as res:
             fp.write(res.read())
     return fname
 
