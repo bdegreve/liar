@@ -18,8 +18,8 @@ def main(out, min_dist, step_size, nudge_factor, niter, ftol, plot):
     observer = liar.Observer.standard()
 
     border, inside = generate_sample_points(observer, min_dist, step_size, nudge_factor)
-    print '#border:', len(border)
-    print '#inside:', len(inside)
+    print('#border:', len(border))
+    print('#inside:', len(inside))
     if plot:
         plot_sample_points(border, inside)
 
@@ -39,7 +39,7 @@ def main(out, min_dist, step_size, nudge_factor, niter, ftol, plot):
 
 def generate_sample_points(observer, min_dist, step_size, nudge_factor):
     ws = np.array(observer.wavelengths)
-    xys = map(xy_from_XYZ, observer.sensitivities)
+    xys = list(map(xy_from_XYZ, observer.sensitivities))
 
     xy_white = np.array([1./3, 1./3])
     xys = [nudge_to_white(xy, xy_white, nudge_factor) for xy in xys]
@@ -103,7 +103,7 @@ def generate_spectra(observer, xy_points, niter, ftol):
 
 
 def fit_spectrum(observer, xy, niter, ftol):
-    print "---", xy
+    print("---", xy)
     n = len(observer.wavelengths)
     x0 = np.array([0] * n)
     bounds = [(0, 1000)] * n
@@ -122,8 +122,8 @@ def fit_spectrum(observer, xy, niter, ftol):
     spectrum = np.array([max(s, 0) for s in optimal.x])
 
     #print spectrum
-    print 'max:', max(spectrum)
-    print 'delta E:', delta_E_CIE1976(xyz, observer.tristimulus(spectrum))
+    print('max:', max(spectrum))
+    print('delta E:', delta_E_CIE1976(xyz, observer.tristimulus(spectrum)))
 
     return spectrum
 
@@ -173,7 +173,7 @@ def test(wavelengths, spectra, observer):
             spectrum = recovery.recover(xyz)
             xyz_prime = observer.tristimulus(spectrum)
             es[i, j] = delta_E_CIE1976(xyz, xyz_prime)
-    print "max delta E:", np.max(es)
+    print("max delta E:", np.max(es))
 
     pylab.figure()
     colour.plotting.CIE_1931_chromaticity_diagram_plot(standalone=False)
@@ -189,7 +189,7 @@ def test(wavelengths, spectra, observer):
     pylab.xlim([min(x for x in xs if x is not None), max(x for x in xs if x is not None)])
     pylab.ylim([min(y for y in ys if y is not None), max(y for y in ys if y is not None)])
     pylab.plot(xs, ys, '-k')
-    xs, ys = zip(*spectra.keys())
+    xs, ys = list(zip(*list(spectra.keys())))
     pylab.plot(xs, ys, 'ow')
 
 
@@ -203,15 +203,15 @@ def delta_E_CIE1976(xyz_a, xyz_b):
 def plot_sample_points(border, inside):
     pylab.figure()
     colour.plotting.CIE_1931_chromaticity_diagram_plot(standalone=False)
-    xs, ys = zip(*border)
+    xs, ys = list(zip(*border))
     pylab.plot(xs, ys, '-ow')
-    xs, ys = zip(*inside)
+    xs, ys = list(zip(*inside))
     pylab.plot(xs, ys, 'ow')
 
 
 def plot_spectra(spectra, wavelengths):
     pylab.figure()
-    for spectrum in spectra.itervalues():
+    for spectrum in spectra.values():
         pylab.plot(wavelengths, spectrum)
 
 
@@ -219,7 +219,7 @@ def save_spectra(path, wavelengths, spectra):
     with open(path, 'w') as f:
         json.dump({
             'wavelengths': tuple(wavelengths),
-            'spectra': [{"xy": xy, "spectrum": tuple(s)} for xy, s in spectra.iteritems()]
+            'spectra': [{"xy": xy, "spectrum": tuple(s)} for xy, s in spectra.items()]
         },
         f, indent=2)
 

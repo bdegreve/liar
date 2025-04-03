@@ -19,7 +19,7 @@ import re
 def main(num_bands, min_wavelength_nm, max_wavelength_nm, rgbSpaceName, niter=10000, fitall=False):
     observer = liar.Observer.standard()
     bands_nm = scipy.linspace(min_wavelength_nm, max_wavelength_nm, num_bands + 1)
-    print bands_nm
+    print(bands_nm)
     xyz_observer = scipy.transpose(scipy.array([tristimulus_nm(observer, bands_nm[k], bands_nm[k + 1]) for k in range(num_bands)]))
 
     rgb_space = get_rgb_space(rgbSpaceName)
@@ -102,7 +102,7 @@ def null(A, eps=1e-15):
 
 
 def fit(r, g, b, null_A, pinv_A, niter):
-    print "fitting", r, g, b
+    print("fitting", r, g, b)
     rgb = scipy.array([r, g, b])
     x = scipy.dot(pinv_A, rgb)
     _, n = scipy.shape(null_A)
@@ -126,7 +126,7 @@ def fit(r, g, b, null_A, pinv_A, niter):
 
     #s = [max(0, min(v, 1)) for v in s]   # clamp between 0 and 1
 
-    print ['%.4f' % f for f in s]
+    print(['%.4f' % f for f in s])
     return s
 
 
@@ -161,13 +161,13 @@ def write_code_fragments(bands, rgb_space, niter, fitall, A, white, yellow, mage
     block += ['    %s));\n' % floatstr(rgb_space.gamma)]
 
     block += array_block('const XYZ A', ['XYZ(%s, %s, %s)' % tuple(map(floatstr, A[:,k])) for k in range(n)])
-    block += array_block('const TWavelength w', map(floatstr, bands))
-    block += array_block('const TScalar yellow', map(floatstr, yellow))
-    block += array_block('const TScalar magenta', map(floatstr, magenta))
-    block += array_block('const TScalar cyan', map(floatstr, cyan))
-    block += array_block('const TScalar red', map(floatstr, red))
-    block += array_block('const TScalar green', map(floatstr, green))
-    block += array_block('const TScalar blue', map(floatstr, blue))
+    block += array_block('const TWavelength w', list(map(floatstr, bands)))
+    block += array_block('const TScalar yellow', list(map(floatstr, yellow)))
+    block += array_block('const TScalar magenta', list(map(floatstr, magenta)))
+    block += array_block('const TScalar cyan', list(map(floatstr, cyan)))
+    block += array_block('const TScalar red', list(map(floatstr, red)))
+    block += array_block('const TScalar green', list(map(floatstr, green)))
+    block += array_block('const TScalar blue', list(map(floatstr, blue)))
     replace_block(os.path.join(kernel_dir, "spectrum.cpp"), block, "initData", meta_info)
 
 
@@ -175,7 +175,7 @@ def replace_block(path, new_block_lines, name, meta_info):
     open_tag = "/* start autogen block %s */" % name
     close_tag = "/* end autogen block %s */" % name
 
-    print "updating %s" % path
+    print("updating %s" % path)
 
     out = []
     with open(path, 'r') as f:

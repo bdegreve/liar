@@ -31,7 +31,7 @@ white = textures.Constant(rgb(1, 1, 1))
 key_textures = [red, yellow, green, cyan, blue, purple, red] # the textures to blend
 key_times = [k * time_length / (len(key_textures) - 1) for k in range(len(key_textures))]
 time_interpolator = textures.LinearInterpolator()
-time_interpolator.keys = zip(key_times, key_textures)
+time_interpolator.keys = list(zip(key_times, key_textures))
 time_interpolator.control = textures.Time()
 
 # use time series on sphere
@@ -66,7 +66,7 @@ engine.target = image
 
 for k in range(int(time_length * frame_rate)):
     t = k / frame_rate
-    print "frame %03d: %0.2f s" % (k, t)
+    print("frame %03d: %0.2f s" % (k, t))
     image.filename = "time_series.%03d.tga" % k
     engine.sampler.seed(0)
     engine.render(t)

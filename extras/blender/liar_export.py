@@ -152,7 +152,7 @@ def compress_mesh(vertices, uvs, normals, face_groups):
 					if i != None and not i in UIs:
 						UIs[i] = len(UIs)
 	# compress components
-	sorted_indices = [sorted(zip(UIs.values(), UIs.keys())) for UIs in used_indices]
+	sorted_indices = [sorted(zip(list(UIs.values()), list(UIs.keys()))) for UIs in used_indices]
 	compressed_components = [[Cs[j] for i, j in SIs] for Cs, SIs in zip(components, sorted_indices)]
 	# rebuild faces
 	for UIs in used_indices:
@@ -273,7 +273,7 @@ images['IM:%(image_name)s'] = image
 textures['TE:%(name)s'] = images['IM:%(image_name)s']
 ''' % vars())
 		elif tex_type != 'None':
-			print("WARNING: Cannot handle %s textures!" % tex_type)
+			print(("WARNING: Cannot handle %s textures!" % tex_type))
 			self.script_file.write('''
 # --- texture TE:%(name)s ---
 textures['TE:%(name)s'] = liar.Texture.black()
@@ -403,8 +403,8 @@ materials['MA:%(name)s'].subtractiveHack = True
 			print('WARNING: no material assigned to mesh, skipping mesh')
 			return
 
-		for k, v in mesh.properties.iteritems():
-			print("property %s: %s" % (k, v))
+		for k, v in mesh.properties.items():
+			print(("property %s: %s" % (k, v)))
 
 		# extract vertices, normals and uvs
 		vertices = [tuple(mvert.co) for mvert in mesh.verts]
@@ -415,7 +415,7 @@ materials['MA:%(name)s'].subtractiveHack = True
 		normals = [tuple(mvert.no) for mvert in mesh.verts]
 
 		# extract faces per material
-		face_groups = [[] for i in xrange(num_materials)]
+		face_groups = [[] for i in range(num_materials)]
 		for face in mesh.faces:
 			size = len(face.verts)
 			assert(size == 3 or size == 4)
@@ -444,7 +444,7 @@ materials['MA:%(name)s'].subtractiveHack = True
 			face_groups[face.mat].append(indices)
 
 		# determine used face groups
-		used_groups = [i for i in xrange(num_materials) if len(face_groups[i]) > 0]
+		used_groups = [i for i in range(num_materials) if len(face_groups[i]) > 0]
 		if not used_groups:
 			print('WARNING: mesh has no faces, skipping mesh')
 			return
@@ -560,7 +560,7 @@ lamps['LA:%(name)s'] = light
 ''' % vars())
 
 		else:
-			print("WARNING: Did not recognize lamp type '%s'" % lamp.type)
+			print(("WARNING: Did not recognize lamp type '%s'" % lamp.type))
 			return
 
 		obj_matrix = matrix_to_list(obj.matrix)
@@ -760,9 +760,9 @@ def group_scenery(scenery_objects):
 			if not mtex:
 				continue
 			texture = orig_texture = self.write_texture(mtex.tex)
-			print mtex.texco
+			print(mtex.texco)
 			if mtex.texco == Blender.Texture.TexCo['ANGMAP']:
-				print "been here"
+				print("been here")
 				texture = "liar.textures.AngularMapping(%s)" % texture
 			if mtex.mtHoriz:
 				horiz = texture
@@ -797,30 +797,30 @@ objects['WO:%(name)s'] = world
 
 		scene = Blender.Scene.GetCurrent()
 		visible_layers = set(scene.getLayers())
-		print "scene layers", visible_layers
+		print("scene layers", visible_layers)
 
 		for i, obj in enumerate(scene.objects):
 			if not visible_layers & set(obj.layers):
 				continue
 			obj_type = obj.getType()
 			obj_name = obj.getName()
-			print("- object '%(obj_name)s' of type '%(obj_type)s'" % vars())
+			print(("- object '%(obj_name)s' of type '%(obj_type)s'" % vars()))
 			obj_materials = obj.getMaterials()
 			if obj_type in object_writers:
 				object_writers[obj_type](self, obj)
 			else:
-				print("WARNING: Did not recognize object type '%(obj_type)s'" % vars())
+				print(("WARNING: Did not recognize object type '%(obj_type)s'" % vars()))
 
-			for key, value in obj.properties.iteritems():
-				print key, value
+			for key, value in obj.properties.items():
+				print(key, value)
 
 			ipo = obj.getIpo()
 			if ipo:
 				print(ipo)
-				print(ipo.getName())
+				print((ipo.getName()))
 				for curve in ipo.getCurves():
 					print(curve)
-					print(curve.getPoints())
+					print((curve.getPoints()))
 
 			self.draw_progress(float(i+1) / len(scene.objects))
 
@@ -870,7 +870,7 @@ if __name__ == "__main__":
 			if not Blender.Draw.PupMenu("Overwrite File?%t|Yes%x1|No%x0"):
 				return
 
-		print("Exporting to LiAR '%s' ..." % self.script_path)
+		print(("Exporting to LiAR '%s' ..." % self.script_path))
 		self.draw_progress(0)
 
 		self.script_file = file(self.script_path, 'w')

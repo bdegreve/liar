@@ -75,7 +75,7 @@ camera.lookAt((0, 1, 0))
 camera.focalLength = 0.03
 camera.aspectRatio = nx / ny
 
-for name, shader in SHADERS.items():
+for name, shader in list(SHADERS.items()):
     fname = f"{os.path.splitext(__file__)[0]}_{name}.exr"
     print(f"--- {fname}")
 

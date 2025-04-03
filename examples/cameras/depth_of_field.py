@@ -7,7 +7,7 @@
 #
 # http://liar.bramz.net/
 
-from __future__ import division
+
 from liar import *
 from liar.tools import scripting
 

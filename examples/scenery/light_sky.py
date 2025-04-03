@@ -21,9 +21,9 @@ def auto_downloader(url):
 	import os.path
 	filename = os.path.basename(url)
 	if not os.path.isfile(filename):
-		print "Downloading '%s' ..." % url
-		import urllib
-		file(filename, 'wb').write(urllib.urlopen(url).read())
+		print("Downloading '%s' ..." % url)
+		import urllib.request, urllib.parse, urllib.error
+		file(filename, 'wb').write(urllib.request.urlopen(url).read())
 	return filename
 
 light_probe = textures.AngularMapping(textures.Image(auto_downloader(probe_url)))
