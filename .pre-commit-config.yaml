@@ -20,3 +20,14 @@ repos:
         args: [--author=Bram de Greve]
         exclude: '^conanfile\.py$'
       - id: bramz-check-conan-requires
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.0 # keep in sync with dev-constraints.txt
+    hooks:
+    - id: ruff-format
+    - alias: ruff-isort
+      name: ruff-isort
+      id: ruff
+      args: [--select=I, --fix]
+#    - alias: ruff-check
+#      name: ruff-check
+#      id: ruff

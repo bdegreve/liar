@@ -3,5 +3,5 @@ ipykernel
 numpy
 matplotlib
 scipy
-ruff
+ruff==0.11.0
 pre-commit
