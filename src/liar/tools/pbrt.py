@@ -1,5 +1,5 @@
 # LiAR isn't a raytracer
-# Copyright (C) 2010-2024  Bram de Greve (bramz@users.sourceforge.net)
+# Copyright (C) 2010-2025  Bram de Greve (bramz@users.sourceforge.net)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -1115,10 +1115,12 @@ class PbrtScene(object):
                     statement = None
                 if token.value == "Include":
                     token = next(tokens)
-                    assert token.type_ == TokenType.STRING, (
-                        "syntax error in file %(path)r, line %(token.line_number)d: Include must be followed by a string"
-                        % vars()
-                    )
+                    if token.type_ != TokenType.STRING:
+                        raise ParseError(
+                            path,
+                            token.line_number,
+                            "Include must be followed by a string",
+                        )
                     self.__logger.debug("Include %r" % token.value)
                     self.parse(token.value)
                 else:
@@ -1129,15 +1131,19 @@ class PbrtScene(object):
                 if keyword.iskeyword(arg_name):
                     arg_name += "_"
             else:
+                if not statement:
+                    raise ParseError(path, token.line_number, "expected an identifier")
                 if token.type_ == TokenType.START_LIST:
                     value = []
                     for token in tokens:
                         if token.type_ == TokenType.END_LIST:
                             break
-                        assert token.type_ in (TokenType.NUMBER, TokenType.STRING), (
-                            "syntax error in file %(path)r, line %(token.line_number)d: parameter lists should only contain numbers and strings"
-                            % vars()
-                        )
+                        if token.type_ not in (TokenType.NUMBER, TokenType.STRING):
+                            raise ParseError(
+                                path,
+                                token.line_number,
+                                "parameter lists should only contain numbers and strings",
+                            )
                         value.append(token.value)
                 else:
                     value = [token.value]
@@ -1253,6 +1259,14 @@ class Statement:
     keyword: str
     args: List[Any] = dataclasses.field(default_factory=list)
     kwargs: Dict[str, Any] = dataclasses.field(default_factory=dict)
+
+
+class ParseError(Exception):
+    def __init__(self, path: str, line_number: int, message: str):
+        super().__init__(f"{path}:{line_number}: error: {message}")
+        self.path = path
+        self.line_number = line_number
+        self.message = message
 
 
 def _scanner(path, stream):
