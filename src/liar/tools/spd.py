@@ -1,5 +1,5 @@
 # LiAR isn't a raytracer
-# Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+# Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,12 +18,8 @@
 # http://liar.bramz.net/
 
 
-try:
-    from io import StringIO
-except ImportError:
-    from cStringIO import StringIO
-
 import pkgutil
+from io import StringIO
 
 from liar.spectra import Sampled
 
