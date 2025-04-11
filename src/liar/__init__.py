@@ -34,17 +34,18 @@ else:
     _sys.setdlopenflags(_os.RTLD_NOW | _os.RTLD_GLOBAL)  # type: ignore[attr-defined]
 
 
-from liar.kernel import *  # noqa: I001, kernel must be imported first!
-import liar.cameras
+import liar.kernel as kernel  # noqa: I001, kernel must be imported first!
+import liar.cameras as cameras
 import liar.codecs
-import liar.mediums
-import liar.output
-import liar.samplers
-import liar.scenery
-import liar.shaders
-import liar.spectra
-import liar.textures
-import liar.tracers
+import liar.mediums as mediums
+import liar.output as output
+import liar.samplers as samplers
+import liar.scenery as scenery
+import liar.shaders as shaders
+import liar.spectra as spectra
+import liar.textures as textures
+import liar.tracers as tracers
+from liar.kernel import *
 
 
 def _load_observer(resource):
