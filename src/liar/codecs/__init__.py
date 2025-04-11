@@ -1,5 +1,5 @@
 # LiAR isn't a raytracer
-# Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+# Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ for _, name, ispkg in pkgutil.iter_modules(__path__):
         continue
     try:
         importlib.import_module(full_name)
-    except ImportError as err:
-        _logger.error("Failed to load %s", full_name, exc_info=1)
+    except ImportError:
+        _logger.error("Failed to load %s", full_name)
 
 # EOF
