@@ -161,6 +161,12 @@ function(add_liar_module name)
 		LIBS ${${name}_LIBS}
 	)
 	target_precompile_headers("${name}" PRIVATE "${name}_common.h")
+	Lass_generate_stubs("${name}"
+		PACKAGE "liar"
+		OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/src/liar"
+		IMPORT "${CMAKE_BINARY_DIR}/kernel.stubs.json"
+		EXPORT "${CMAKE_BINARY_DIR}/${name}.stubs.json"
+	)
 endfunction()
 
 set(SPECTRAL_MODE "RGB" CACHE STRING "Computational mode for Spectral values")

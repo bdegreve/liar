@@ -9,6 +9,9 @@ extend-select = ["I", "RUF022"]
 [tool.ruff.lint.isort]
 known-first-party = ["liar"]
 
+[tool.mypy]
+mypy_path = "src"
+
 [build-system]
 requires = ["wheel"]
 # https://peps.python.org/pep-0517/

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -196,6 +196,8 @@ namespace python
 template <>
 struct PyExportTraits<liar::kernel::XYZ>
 {
+	constexpr static const char* py_typing = "tuple[float, float, float]";
+
 	static PyObject* build(const liar::kernel::XYZ& v)
 	{
 		return fromSharedPtrToNakedCast(python::makeTuple(v.x, v.y, v.z));

@@ -88,3 +88,10 @@ if(pcg-cpp_FOUND)
 			LIAR_HAVE_PCG=1
 	)
 endif()
+
+Lass_generate_stubs(libkernel
+	PACKAGE "liar"
+	OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/src/liar"
+	EXTRA_TARGETS kernel
+	EXPORT "${CMAKE_BINARY_DIR}/kernel.stubs.json"
+	)
