@@ -45,8 +45,10 @@ def loads(s):
 
 
 def load_builtin_refractive_index(material) -> tuple[Sampled, Sampled]:
-    data = pkgutil.get_data("liar", f"data/spd/{material}.spd").decode("utf-8")
-    n, k = loads(data)
+    data = pkgutil.get_data("liar", f"data/spd/{material}.spd")
+    if data is None:
+        raise ValueError(f"Material '{material}' not found in built-in data.")
+    n, k = loads(data.decode("utf-8"))
     return n, k
 
 
