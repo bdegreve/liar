@@ -27,11 +27,11 @@ import sys as _sys
 # http://liar.bramz.net/2007/01/28/shared-libraries-dlopen-and-rtti/
 #
 try:
-    _oldflags = _sys.getdlopenflags()
+    _oldflags = _sys.getdlopenflags()  # type: ignore[attr-defined]
 except AttributeError:
     pass
 else:
-    _sys.setdlopenflags(_os.RTLD_NOW | _os.RTLD_GLOBAL)
+    _sys.setdlopenflags(_os.RTLD_NOW | _os.RTLD_GLOBAL)  # type: ignore[attr-defined]
 
 
 from liar.kernel import *  # noqa: I001, kernel must be imported first!
