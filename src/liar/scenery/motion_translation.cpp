@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,13 +30,13 @@ namespace scenery
 {
 
 PY_DECLARE_CLASS_DOC(MotionTranslation, "time-dependent translation")
-PY_CLASS_CONSTRUCTOR_3(MotionTranslation, const TSceneObjectPtr&, const TVector3D&, const TVector3D&)
+PY_CLASS_CONSTRUCTOR_3(MotionTranslation, const TSceneObjectRef&, const TVector3D&, const TVector3D&)
 PY_CLASS_MEMBER_RW(MotionTranslation, child, setChild)
 
 // --- public --------------------------------------------------------------------------------------
 
-MotionTranslation::MotionTranslation(const TSceneObjectPtr& child, const TVector3D& localToWorldStart, const TVector3D& speedInWorld):
-	child_(LASS_ENFORCE_POINTER(child)),
+MotionTranslation::MotionTranslation(const TSceneObjectRef& child, const TVector3D& localToWorldStart, const TVector3D& speedInWorld):
+	child_(child),
 	localToWorldStart_(localToWorldStart),
 	speedInWorld_(speedInWorld)
 {
@@ -44,16 +44,16 @@ MotionTranslation::MotionTranslation(const TSceneObjectPtr& child, const TVector
 
 
 
-const TSceneObjectPtr& MotionTranslation::child() const
+const TSceneObjectRef& MotionTranslation::child() const
 {
 	return child_;
 }
 
 
 
-void MotionTranslation::setChild(const TSceneObjectPtr& child)
+void MotionTranslation::setChild(const TSceneObjectRef& child)
 {
-	child_ = LASS_ENFORCE_POINTER(child);
+	child_ = child;
 }
 
 

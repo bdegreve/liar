@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -69,14 +69,14 @@ const TVector3D& LightSpot::direction() const
 
 
 
-const TSpectrumPtr& LightSpot::intensity() const
+const TSpectrumRef& LightSpot::intensity() const
 {
 	return intensity_;
 }
 
 
 
-const TAttenuationPtr& LightSpot::attenuation() const
+const TAttenuationRef& LightSpot::attenuation() const
 {
 	return attenuation_;
 }
@@ -115,14 +115,14 @@ void LightSpot::setDirection(const TVector3D& direction)
 
 
 
-void LightSpot::setIntensity(const TSpectrumPtr& iIntensity)
+void LightSpot::setIntensity(const TSpectrumRef& iIntensity)
 {
 	intensity_ = iIntensity;
 }
 
 
 
-void LightSpot::setAttenuation(const TAttenuationPtr& iAttenuation)
+void LightSpot::setAttenuation(const TAttenuationRef& iAttenuation)
 {
 	attenuation_ = iAttenuation;
 }

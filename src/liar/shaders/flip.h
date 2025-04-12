@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,10 +43,10 @@ class LIAR_SHADERS_DLL Flip: public Shader
 	PY_HEADER(Shader)
 public:
 
-	Flip(const TShaderPtr& child);
+	Flip(const TShaderRef& child);
 
-	const TShaderPtr& child() const;
-	void setChild(const TShaderPtr& child);
+	const TShaderRef& child() const;
+	void setChild(const TShaderRef& child);
 
 private:
 
@@ -73,7 +73,7 @@ private:
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
-	TShaderPtr child_;
+	TShaderRef child_;
 };
 
 }

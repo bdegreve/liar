@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,17 +33,17 @@
 #include "xyz.h"
 #include "xyza.h"
 
-
 namespace liar
 {
 namespace kernel
 {
 
 class Spectrum;
-typedef python::PyObjectPtr<Spectrum>::Type TSpectrumPtr;
+typedef PyObjectRef<Spectrum> TSpectrumRef;
 
 class RgbSpace;
 typedef python::PyObjectPtr<RgbSpace>::Type TRgbSpacePtr;
+typedef PyObjectRef<RgbSpace> TRgbSpaceRef;
 
 class LIAR_KERNEL_DLL RgbSpace: public python::PyObjectPlus
 {
@@ -79,15 +79,15 @@ public:
 	bool operator==(const RgbSpace& other) const;
 	bool operator!=(const RgbSpace& other) const;
 
-	const TRgbSpacePtr linearSpace() const;
-	const TRgbSpacePtr withGamma(RGBA::TValue gamma) const;
+	const TRgbSpaceRef linearSpace() const;
+	const TRgbSpaceRef withGamma(RGBA::TValue gamma) const;
 
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const;
 	void setState(const TPyObjectPtr& state);
 
-	static const TRgbSpacePtr& defaultSpace();
-	static void setDefaultSpace(const TRgbSpacePtr& defaultSpace);
+	static const TRgbSpaceRef& defaultSpace();
+	static void setDefaultSpace(const TRgbSpaceRef& defaultSpace);
 
 private:
 
@@ -109,21 +109,21 @@ private:
 	RGBA::TValue gamma_;
 	RGBA::TValue invGamma_;
 
-	static TRgbSpacePtr defaultSpace_;
+	static TRgbSpaceRef defaultSpace_;
 };
 
 
-LIAR_KERNEL_DLL TSpectrumPtr rgb(const RgbSpace::RGBA& rgb);
-LIAR_KERNEL_DLL TSpectrumPtr rgb(const RgbSpace::RGBA& rgb, const TRgbSpacePtr& rgbSpace);
-LIAR_KERNEL_DLL TSpectrumPtr rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue);
-LIAR_KERNEL_DLL TSpectrumPtr rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue, const TRgbSpacePtr& rgbSpace);
+LIAR_KERNEL_DLL TSpectrumRef rgb(const RgbSpace::RGBA& rgb);
+LIAR_KERNEL_DLL TSpectrumRef rgb(const RgbSpace::RGBA& rgb, const TRgbSpaceRef& rgbSpace);
+LIAR_KERNEL_DLL TSpectrumRef rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue);
+LIAR_KERNEL_DLL TSpectrumRef rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue, const TRgbSpaceRef& rgbSpace);
 
 
 // built-in rgb spaces
 
 /** @relates RgbSpace
  */
-const TRgbSpacePtr CIEXYZ = TRgbSpacePtr(new RgbSpace(
+const TRgbSpaceRef CIEXYZ = TRgbSpaceRef(new RgbSpace(
 	TPoint2D(1.0_s, 0.0_s), // red primary
 	TPoint2D(0.0_s, 1.0_s), // green primary
 	TPoint2D(0.0_s, 0.0_s), // blue primary
@@ -132,7 +132,7 @@ const TRgbSpacePtr CIEXYZ = TRgbSpacePtr(new RgbSpace(
 
 /** @relates RgbSpace
  */
-const TRgbSpacePtr sRGB = TRgbSpacePtr(new RgbSpace(
+const TRgbSpaceRef sRGB = TRgbSpaceRef(new RgbSpace(
 	TPoint2D(0.6400_s, 0.3300_s), // red primary
 	TPoint2D(0.3000_s, 0.6000_s), // green primary
 	TPoint2D(0.1500_s, 0.0600_s), // blue primary

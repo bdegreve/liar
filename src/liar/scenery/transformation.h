@@ -44,11 +44,11 @@ class LIAR_SCENERY_DLL Transformation: public SceneObject
 	PY_HEADER(SceneObject)
 public:
 
-	Transformation(const TSceneObjectPtr& child, const TTransformation3D& localToWorld);
-	Transformation(const TSceneObjectPtr& child, const TPyTransformation3DPtr& localToWorld);
+	Transformation(const TSceneObjectRef& child, const TTransformation3D& localToWorld);
+	Transformation(const TSceneObjectRef& child, const TPyTransformation3DRef& localToWorld);
 
-	const TSceneObjectPtr& child() const;
-	void setChild(const TSceneObjectPtr& child);
+	const TSceneObjectRef& child() const;
+	void setChild(const TSceneObjectRef& child);
 
 	const TTransformation3D& localToWorld() const;
 	void setLocalToWorld(const TTransformation3D& localToWorld);
@@ -74,7 +74,7 @@ private:
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
-	TSceneObjectPtr child_;
+	TSceneObjectRef child_;
 	TTransformation3D localToWorld_;
 	TMatrix worldToLocal_;
 };

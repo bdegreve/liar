@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,8 +31,8 @@ namespace scenery
 {
 
 PY_DECLARE_CLASS_DOC(Csg, "Constructive Solid Geometry")
-PY_CLASS_CONSTRUCTOR_2(Csg, const TSceneObjectPtr&, const TSceneObjectPtr&)
-PY_CLASS_CONSTRUCTOR_3(Csg, const TSceneObjectPtr&, const TSceneObjectPtr&, const std::string&)
+PY_CLASS_CONSTRUCTOR_2(Csg, const TSceneObjectRef&, const TSceneObjectRef&)
+PY_CLASS_CONSTRUCTOR_3(Csg, const TSceneObjectRef&, const TSceneObjectRef&, const std::string&)
 PY_CLASS_MEMBER_RW(Csg, childA, setChildA)
 PY_CLASS_MEMBER_RW(Csg, childB, setChildB)
 PY_CLASS_MEMBER_RW(Csg, operation, setOperation)
@@ -44,7 +44,7 @@ Csg::TOperationDictionary Csg::operationDictionary_ = Csg::makeOperationDictiona
 
 // --- public --------------------------------------------------------------------------------------
 
-Csg::Csg(const TSceneObjectPtr& childA, const TSceneObjectPtr& childB):
+Csg::Csg(const TSceneObjectRef& childA, const TSceneObjectRef& childB):
 	childA_(childA),
 	childB_(childB),
 	operation_(oUnion)
@@ -53,7 +53,7 @@ Csg::Csg(const TSceneObjectPtr& childA, const TSceneObjectPtr& childB):
 
 
 
-Csg::Csg(const TSceneObjectPtr& childA, const TSceneObjectPtr& childB, const std::string& operation):
+Csg::Csg(const TSceneObjectRef& childA, const TSceneObjectRef& childB, const std::string& operation):
 	childA_(childA),
 	childB_(childB)
 {
@@ -62,14 +62,14 @@ Csg::Csg(const TSceneObjectPtr& childA, const TSceneObjectPtr& childB, const std
 
 
 
-const TSceneObjectPtr& Csg::childA() const
+const TSceneObjectRef& Csg::childA() const
 {
 	return childA_;
 }
 
 
 
-const TSceneObjectPtr& Csg::childB() const
+const TSceneObjectRef& Csg::childB() const
 {
 	return childB_;
 }
@@ -84,14 +84,14 @@ const std::string Csg::operation() const
 
 
 
-void Csg::setChildA(const TSceneObjectPtr& child)
+void Csg::setChildA(const TSceneObjectRef& child)
 {
 	childA_ = child;
 }
 
 
 
-void Csg::setChildB(const TSceneObjectPtr& child)
+void Csg::setChildB(const TSceneObjectRef& child)
 {
 	childB_ = child;
 }

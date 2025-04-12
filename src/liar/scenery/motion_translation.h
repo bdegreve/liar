@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,10 +42,10 @@ class LIAR_SCENERY_DLL MotionTranslation: public SceneObject
 	PY_HEADER(SceneObject)
 public:
 
-	MotionTranslation(const TSceneObjectPtr& child, const TVector3D& localToWorldStart, const TVector3D& speedInWorld);
+	MotionTranslation(const TSceneObjectRef& child, const TVector3D& localToWorldStart, const TVector3D& speedInWorld);
 
-	const TSceneObjectPtr& child() const;
-	void setChild(const TSceneObjectPtr& child);
+	const TSceneObjectRef& child() const;
+	void setChild(const TSceneObjectRef& child);
 
 private:
 
@@ -67,7 +67,7 @@ private:
 
 	const TVector3D localToWorldOffset(TTime time) const;
 
-	TSceneObjectPtr child_;
+	TSceneObjectRef child_;
 	TAabb3D aabb_;
 	TVector3D localToWorldStart_;
 	TVector3D speedInWorld_;

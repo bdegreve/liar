@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2023-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2023-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -49,13 +49,13 @@ class LIAR_SHADERS_DLL OrenNayar: public Shader
 public:
 
 	OrenNayar();
-	OrenNayar(const TTexturePtr& diffuse, const TTexturePtr& sigma);
+	OrenNayar(const TTextureRef& diffuse, const TTextureRef& sigma);
 
-	const TTexturePtr& diffuse() const;
-	void setDiffuse(const TTexturePtr& diffuse);
+	const TTextureRef& diffuse() const;
+	void setDiffuse(const TTextureRef& diffuse);
 
-	const TTexturePtr& sigma() const;
-	void setSigma(const TTexturePtr& sigma);
+	const TTextureRef& sigma() const;
+	void setSigma(const TTextureRef& sigma);
 
 private:
 
@@ -78,8 +78,8 @@ private:
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
-	TTexturePtr diffuse_;
-	TTexturePtr sigma_;
+	TTextureRef diffuse_;
+	TTextureRef sigma_;
 };
 
 }

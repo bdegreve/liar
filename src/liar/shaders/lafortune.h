@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -50,29 +50,29 @@ public:
 	{
 		PY_HEADER(python::PyObjectPlus)
 	public:
-		TTexturePtr x;
-		TTexturePtr y;
-		TTexturePtr z;
-		TTexturePtr power;
-		Lobe(TTexturePtr x, TTexturePtr y, TTexturePtr z, TTexturePtr power);
+		TTextureRef x;
+		TTextureRef y;
+		TTextureRef z;
+		TTextureRef power;
+		Lobe(TTextureRef x, TTextureRef y, TTextureRef z, TTextureRef power);
 
 		const TPyObjectPtr reduce() const;
 		const TPyObjectPtr getState() const;
 		void setState(const TPyObjectPtr& state);
 	};
-	typedef python::PyObjectPtr<Lobe>::Type TLobePtr;
-	typedef std::vector<TLobePtr> TLobes;
+	typedef kernel::PyObjectRef<Lobe> TLobeRef;
+	typedef std::vector<TLobeRef> TLobes;
 
 	Lafortune();
-	Lafortune(const TTexturePtr& diffuse);
-	Lafortune(const TTexturePtr& diffuse, const TLobes& lobes);
+	Lafortune(const TTextureRef& diffuse);
+	Lafortune(const TTextureRef& diffuse, const TLobes& lobes);
 
-	const TTexturePtr& diffuse() const;
-	void setDiffuse(const TTexturePtr& diffuse);
+	const TTextureRef& diffuse() const;
+	void setDiffuse(const TTextureRef& diffuse);
 
 	const TLobes& lobes() const;
 	void setLobes(const TLobes& lobes);
-	void addLobe(TTexturePtr x, TTexturePtr y, TTexturePtr z, TTexturePtr power);
+	void addLobe(TTextureRef x, TTextureRef y, TTextureRef z, TTextureRef power);
 
 private:
 
@@ -104,7 +104,7 @@ private:
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
-	TTexturePtr diffuse_;
+	TTextureRef diffuse_;
 	TLobes lobes_;
 };
 

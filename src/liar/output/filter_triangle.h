@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2021-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2021-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -49,11 +49,11 @@ public:
 
 	typedef OutputSample::TValue TValue;
 
-	FilterTriangle(const TRenderTargetPtr& target);
-	FilterTriangle(const TRenderTargetPtr& target, TValue width);
+	FilterTriangle(const TRenderTargetRef& target);
+	FilterTriangle(const TRenderTargetRef& target, TValue width);
 
-	const TRenderTargetPtr& target() const;
-	void setTarget(const TRenderTargetPtr& target);
+	const TRenderTargetRef& target() const;
+	void setTarget(const TRenderTargetRef& target);
 	TValue width() const;
 	void setWidth(TValue width);
 
@@ -70,7 +70,7 @@ private:
 	TValue filterKernel(TValue x) const;
 
 	TOutputBuffer outputBuffer_;
-	TRenderTargetPtr target_;
+	TRenderTargetRef target_;
 	TValue width_;
 	int filterWidth_;
 };

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,10 +43,10 @@ class LIAR_OUTPUT_DLL DepthChannel: public RenderTarget
 	PY_HEADER(RenderTarget)
 public:
 
-	DepthChannel(const TRenderTargetPtr& target, TScalar unit = 1);
+	DepthChannel(const TRenderTargetRef& target, TScalar unit = 1);
 
-	const TRenderTargetPtr& target() const;
-	void setTarget(const TRenderTargetPtr& target);
+	const TRenderTargetRef& target() const;
+	void setTarget(const TRenderTargetRef& target);
 
 	TScalar unit() const;
 	void setUnit(TScalar unit);
@@ -64,7 +64,7 @@ private:
 	bool doIsCanceling() const override;
 
 	TOutputBuffer outputBuffer_;
-	TRenderTargetPtr target_;
+	TRenderTargetRef target_;
 	TScalar unit_;
 	TScalar invUnit_;
 };

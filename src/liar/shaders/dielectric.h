@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,18 +44,18 @@ class LIAR_SHADERS_DLL Dielectric: public Shader
 public:
 
 	Dielectric();
-	Dielectric(const TTexturePtr& innerRefractionIndex);
-	Dielectric(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex);
+	Dielectric(const TTextureRef& innerRefractionIndex);
+	Dielectric(const TTextureRef& innerRefractionIndex, const TTextureRef& outerRefractionIndex);
 
-	const TTexturePtr& innerRefractionIndex() const;
-	void setInnerRefractionIndex(const TTexturePtr& refractionIndex);
-	const TTexturePtr& outerRefractionIndex() const;
-	void setOuterRefractionIndex(const TTexturePtr& refractionIndex);
+	const TTextureRef& innerRefractionIndex() const;
+	void setInnerRefractionIndex(const TTextureRef& refractionIndex);
+	const TTextureRef& outerRefractionIndex() const;
+	void setOuterRefractionIndex(const TTextureRef& refractionIndex);
 
-	const TTexturePtr& reflectance() const;
-	void setReflectance(const TTexturePtr& reflectance);
-	const TTexturePtr& transmittance() const;
-	void setTransmittance(const TTexturePtr& transmittance);
+	const TTextureRef& reflectance() const;
+	void setReflectance(const TTextureRef& reflectance);
+	const TTextureRef& transmittance() const;
+	void setTransmittance(const TTextureRef& transmittance);
 
 private:
 	typedef Spectral::TValue TValue;
@@ -82,13 +82,13 @@ private:
 	void doSetState(const TPyObjectPtr& state) override;
 
 	void init(
-		const TTexturePtr& innerRefractionIndex = Texture::white(), const TTexturePtr& outerRefractionIndex = Texture::white(),
-		const TTexturePtr& reflectance = Texture::white(), const TTexturePtr& transmittance = Texture::white());
+		const TTextureRef& innerRefractionIndex = Texture::white(), const TTextureRef& outerRefractionIndex = Texture::white(),
+		const TTextureRef& reflectance = Texture::white(), const TTextureRef& transmittance = Texture::white());
 
-	TTexturePtr innerRefractionIndex_;
-	TTexturePtr outerRefractionIndex_;
-	TTexturePtr reflectance_;
-	TTexturePtr transmittance_;
+	TTextureRef innerRefractionIndex_;
+	TTextureRef outerRefractionIndex_;
+	TTextureRef reflectance_;
+	TTextureRef transmittance_;
 };
 
 }

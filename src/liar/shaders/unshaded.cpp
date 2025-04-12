@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ namespace shaders
 
 PY_DECLARE_CLASS_DOC(Unshaded, "a shader that doesn't shade :)")
 PY_CLASS_CONSTRUCTOR_0(Unshaded)
-PY_CLASS_CONSTRUCTOR_1(Unshaded, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_1(Unshaded, const TTextureRef&)
 PY_CLASS_MEMBER_RW_DOC(Unshaded, colour, setColour, "texture")
 
 // --- public --------------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ Unshaded::Unshaded():
 
 
 
-Unshaded::Unshaded(const TTexturePtr& colour):
+Unshaded::Unshaded(const TTextureRef& colour):
 	Shader(BsdfCaps::emission),
 	colour_(colour)
 {
@@ -54,14 +54,14 @@ Unshaded::Unshaded(const TTexturePtr& colour):
 
 
 
-const TTexturePtr& Unshaded::colour() const
+const TTextureRef& Unshaded::colour() const
 {
 	return colour_;
 }
 
 
 
-void Unshaded::setColour(const TTexturePtr& colour)
+void Unshaded::setColour(const TTextureRef& colour)
 {
 	colour_ = colour;
 }

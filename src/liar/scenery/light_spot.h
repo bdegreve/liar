@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,15 +48,15 @@ public:
 
 	const TPoint3D& position() const;
 	const TVector3D& direction() const;
-	const TSpectrumPtr& intensity() const;
-	const TAttenuationPtr& attenuation() const;
+	const TSpectrumRef& intensity() const;
+	const TAttenuationRef& attenuation() const;
 	TScalar outerAngle() const;
 	TScalar innerAngle() const;
 
 	void setPosition(const TPoint3D& iPosition);
 	void setDirection(const TVector3D& direction);
-	void setIntensity(const TSpectrumPtr& iIntensity);
-	void setAttenuation(const TAttenuationPtr& iAttenuation);
+	void setIntensity(const TSpectrumRef& iIntensity);
+	void setAttenuation(const TAttenuationRef& iAttenuation);
 	void setOuterAngle(TScalar iRadians);
 	void setInnerAngle(TScalar iRadians);
 
@@ -95,8 +95,8 @@ private:
 	TVector3D direction_;
 	TVector3D tangentU_;
 	TVector3D tangentV_;
-	TSpectrumPtr intensity_;
-	TAttenuationPtr attenuation_;
+	TSpectrumRef intensity_;
+	TAttenuationRef attenuation_;
 	TScalar cosOuterAngle_;
 	TScalar cosInnerAngle_;
 };

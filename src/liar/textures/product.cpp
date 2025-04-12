@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace textures
 PY_DECLARE_CLASS_DOC(Product, "makes product of child textures")
 PY_CLASS_CONSTRUCTOR_0(Product);
 PY_CLASS_CONSTRUCTOR_1(Product, const Product::TFactors&)
-PY_CLASS_CONSTRUCTOR_2(Product, const TTexturePtr&, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_2(Product, const TTextureRef&, const TTextureRef&)
 PY_CLASS_MEMBER_RW(Product, factors, setFactors);
 
 // --- public --------------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ Product::Product(const TFactors& factors):
 
 
 
-Product::Product(const TTexturePtr& a, const TTexturePtr& b):
+Product::Product(const TTextureRef& a, const TTextureRef& b):
 	isChromatic_(a->isChromatic() || b->isChromatic())
 {
 	factors_.push_back(a);

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2024-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,9 +34,9 @@ namespace shaders
 PY_DECLARE_CLASS_DOC(MicrofacetBeckmann, "Beckmann Microfacet Distribution")
 PY_CLASS_CONSTRUCTOR_0(MicrofacetBeckmann)
 
-TMicrofacetDistributionPtr MicrofacetBeckmann::instance()
+TMicrofacetDistributionRef MicrofacetBeckmann::instance()
 {
-	static TMicrofacetDistributionPtr instance(new MicrofacetBeckmann());
+	static TMicrofacetDistributionRef instance(new MicrofacetBeckmann());
 	return instance;
 }
 

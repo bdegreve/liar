@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -50,28 +50,28 @@ class LIAR_SHADERS_DLL AshikhminShirley: public Shader
 public:
 
 	AshikhminShirley();
-	AshikhminShirley(const TTexturePtr& diffuse, const TTexturePtr& specular);
+	AshikhminShirley(const TTextureRef& diffuse, const TTextureRef& specular);
 
-	const TTexturePtr& diffuse() const;
-	void setDiffuse(const TTexturePtr& diffuse);
+	const TTextureRef& diffuse() const;
+	void setDiffuse(const TTextureRef& diffuse);
 
-	const TTexturePtr& specular() const;
-	void setSpecular(const TTexturePtr& specular);
+	const TTextureRef& specular() const;
+	void setSpecular(const TTextureRef& specular);
 
-	const TTexturePtr& roughnessU() const;
-	void setRoughnessU(const TTexturePtr& roughness);
+	const TTextureRef& roughnessU() const;
+	void setRoughnessU(const TTextureRef& roughness);
 
-	const TTexturePtr& roughnessV() const;
-	void setRoughnessV(const TTexturePtr& roughness);
+	const TTextureRef& roughnessV() const;
+	void setRoughnessV(const TTextureRef& roughness);
 
-	const TTexturePtr& specularPowerU() const;
-	void setSpecularPowerU(const TTexturePtr& specularPower);
+	const TTextureRef& specularPowerU() const;
+	void setSpecularPowerU(const TTextureRef& specularPower);
 
-	const TTexturePtr& specularPowerV() const;
-	void setSpecularPowerV(const TTexturePtr& specularPower);
+	const TTextureRef& specularPowerV() const;
+	void setSpecularPowerV(const TTextureRef& specularPower);
 
-	const TMicrofacetDistributionPtr& mdf() const;
-	void setMdf(const TMicrofacetDistributionPtr& mdf);
+	const TMicrofacetDistributionRef& mdf() const;
+	void setMdf(const TMicrofacetDistributionRef& mdf);
 
 	size_t numberOfSamples() const;
 	void setNumberOfSamples(size_t number);
@@ -101,9 +101,9 @@ public:
 	{
 		PY_HEADER(Texture)
 	public:
-		PowerFromRoughness(const TTexturePtr& roughness);
-		const TTexturePtr& roughness() const;
-		void setRoughness(const TTexturePtr& roughness);
+		PowerFromRoughness(const TTextureRef& roughness);
+		const TTextureRef& roughness() const;
+		void setRoughness(const TTextureRef& roughness);
 	protected:
 		const TPyObjectPtr doGetState() const override;
 		void doSetState(const TPyObjectPtr& state) override;
@@ -111,16 +111,16 @@ public:
 		const Spectral doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const override;
 		TValue doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
 		bool doIsChromatic() const override;
-		TTexturePtr roughness_;
+		TTextureRef roughness_;
 	};
 
 	class RoughnessFromPower: public Texture
 	{
 		PY_HEADER(Texture)
 	public:
-		RoughnessFromPower(const TTexturePtr& power);
-		const TTexturePtr& power() const;
-		void setPower(const TTexturePtr& power);
+		RoughnessFromPower(const TTextureRef& power);
+		const TTextureRef& power() const;
+		void setPower(const TTextureRef& power);
 	protected:
 		const TPyObjectPtr doGetState() const override;
 		void doSetState(const TPyObjectPtr& state) override;
@@ -128,7 +128,7 @@ public:
 		const Spectral doLookUp(const Sample& sample, const IntersectionContext& context, SpectralType type) const override;
 		TValue doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
 		bool doIsChromatic() const override;
-		TTexturePtr power_;
+		TTextureRef power_;
 	};
 
 private:
@@ -140,13 +140,13 @@ private:
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
-	TTexturePtr diffuse_;
-	TTexturePtr specular_;
-	TTexturePtr roughnessU_;
-	TTexturePtr roughnessV_;
-	TTexturePtr specularPowerU_;
-	TTexturePtr specularPowerV_;
-	TMicrofacetDistributionPtr mdf_;
+	TTextureRef diffuse_;
+	TTextureRef specular_;
+	TTextureRef roughnessU_;
+	TTextureRef roughnessV_;
+	TTextureRef specularPowerU_;
+	TTextureRef specularPowerV_;
+	TMicrofacetDistributionRef mdf_;
 	size_t numberOfSamples_;
 };
 

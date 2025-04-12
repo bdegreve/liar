@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2023-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,13 +30,13 @@ namespace textures
 {
 
 PY_DECLARE_CLASS_DOC(RemapPbrtRoughness, "Remap roughness from PBRT to LiAR")
-PY_CLASS_CONSTRUCTOR_2(RemapPbrtRoughness, const TTexturePtr&, bool);
+PY_CLASS_CONSTRUCTOR_2(RemapPbrtRoughness, const TTextureRef&, bool);
 PY_CLASS_MEMBER_RW_DOC(RemapPbrtRoughness, remapRoughness, setRemapRoughness, "remap roughness from PBRT to LiAR");
 PY_CLASS_STATIC_METHOD(RemapPbrtRoughness, remap)
 
 // --- public --------------------------------------------------------------------------------------
 
-RemapPbrtRoughness::RemapPbrtRoughness(const TTexturePtr& roughness, bool remapRoughness):
+RemapPbrtRoughness::RemapPbrtRoughness(const TTextureRef& roughness, bool remapRoughness):
 	UnaryOperator(roughness),
 	remapRoughness_(remapRoughness)
 {

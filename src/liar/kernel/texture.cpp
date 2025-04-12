@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,12 +39,12 @@ PY_CLASS_METHOD_NAME(Texture, setState, "__setstate__")
 typedef impl::TextureBlack TTextureBlack;
 PY_DECLARE_CLASS_NAME(TTextureBlack, "Black");
 PY_CLASS_INNER_CLASS_NAME(Texture, TTextureBlack, "Black");
-TTexturePtr Texture::black_(new TTextureBlack());
+TTextureRef Texture::black_(new TTextureBlack());
 
 typedef impl::TextureWhite TTextureWhite;
 PY_DECLARE_CLASS_NAME(TTextureWhite, "White");
 PY_CLASS_INNER_CLASS_NAME(Texture, TTextureWhite, "White");
-TTexturePtr Texture::white_(new TTextureWhite);
+TTextureRef Texture::white_(new TTextureWhite);
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -60,14 +60,14 @@ bool Texture::isChromatic() const
 }
 
 
-const TTexturePtr& Texture::black()
+const TTextureRef& Texture::black()
 {
 	return black_;
 }
 
 
 
-const TTexturePtr& Texture::white()
+const TTextureRef& Texture::white()
 {
 	return white_;
 }

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace scenery
 
 PY_DECLARE_CLASS_DOC(LightPoint, "point light")
 PY_CLASS_CONSTRUCTOR_0(LightPoint)
-PY_CLASS_CONSTRUCTOR_2(LightPoint, const TPoint3D&, const TSpectrumPtr&)
+PY_CLASS_CONSTRUCTOR_2(LightPoint, const TPoint3D&, const TSpectrumRef&)
 PY_CLASS_MEMBER_RW(LightPoint, position, setPosition)
 PY_CLASS_MEMBER_RW(LightPoint, intensity, setIntensity)
 PY_CLASS_MEMBER_RW(LightPoint, attenuation, setAttenuation)
@@ -49,7 +49,7 @@ LightPoint::LightPoint():
 
 
 
-LightPoint::LightPoint(const TPoint3D& position, const TSpectrumPtr& intensity) :
+LightPoint::LightPoint(const TPoint3D& position, const TSpectrumRef& intensity) :
 	position_(position),
 	intensity_(intensity),
 	attenuation_(Attenuation::defaultAttenuation())
@@ -65,14 +65,14 @@ const TPoint3D& LightPoint::position() const
 
 
 
-const TSpectrumPtr& LightPoint::intensity() const
+const TSpectrumRef& LightPoint::intensity() const
 {
 	return intensity_;
 }
 
 
 
-const TAttenuationPtr& LightPoint::attenuation() const
+const TAttenuationRef& LightPoint::attenuation() const
 {
 	return attenuation_;
 }
@@ -86,14 +86,14 @@ void LightPoint::setPosition(const TPoint3D& position)
 
 
 
-void LightPoint::setIntensity(const TSpectrumPtr& intensity)
+void LightPoint::setIntensity(const TSpectrumRef& intensity)
 {
 	intensity_ = intensity;
 }
 
 
 
-void LightPoint::setAttenuation(const TAttenuationPtr& attenuation)
+void LightPoint::setAttenuation(const TAttenuationRef& attenuation)
 {
 	attenuation_ = attenuation;
 }

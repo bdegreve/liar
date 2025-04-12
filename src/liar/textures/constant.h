@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,12 +43,12 @@ class LIAR_TEXTURES_DLL Constant: public Texture
 	PY_HEADER(Texture)
 public:
 
-	explicit Constant(const TSpectrumPtr& value);
+	explicit Constant(const TSpectrumRef& value);
 	explicit Constant(const XYZ& value);
 	explicit Constant(TValue scalar);
 
-	const TSpectrumPtr& value() const;
-	void setValue(const TSpectrumPtr& value);
+	const TSpectrumRef& value() const;
+	void setValue(const TSpectrumRef& value);
 
 protected:
 
@@ -61,7 +61,7 @@ private:
 	TValue doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
 	bool doIsChromatic() const override;
 
-	TSpectrumPtr value_;
+	TSpectrumRef value_;
 };
 
 }

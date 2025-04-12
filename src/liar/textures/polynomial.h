@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2021-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ public:
 
 	typedef std::vector<TValue> TCoefficients;
 
-	Polynomial(const TTexturePtr& texture, const TCoefficients& coefficients);
+	Polynomial(const TTextureRef& texture, const TCoefficients& coefficients);
 
 	const TCoefficients& coefficients() const;
 	void setCoefficients(const TCoefficients&);

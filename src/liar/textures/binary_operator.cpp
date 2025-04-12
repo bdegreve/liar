@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,14 +36,14 @@ PY_CLASS_MEMBER_RW_DOC(BinaryOperator, textureB, setTextureB, "second texture")
 
 // --- public --------------------------------------------------------------------------------------
 
-void BinaryOperator::setTextureA(const TTexturePtr& a)
+void BinaryOperator::setTextureA(const TTextureRef& a)
 {
 	a_ = a;
 }
 
 
 
-void BinaryOperator::setTextureB(const TTexturePtr& b)
+void BinaryOperator::setTextureB(const TTextureRef& b)
 {
 	b_ = b;
 }
@@ -52,7 +52,7 @@ void BinaryOperator::setTextureB(const TTexturePtr& b)
 
 // --- protected -----------------------------------------------------------------------------------
 
-BinaryOperator::BinaryOperator(const TTexturePtr& a, const TTexturePtr& b):
+BinaryOperator::BinaryOperator(const TTextureRef& a, const TTextureRef& b):
 	a_(a),
 	b_(b)
 {

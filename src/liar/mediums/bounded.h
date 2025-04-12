@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,11 +42,10 @@ class LIAR_MEDIUMS_DLL Bounded: public Medium
 	PY_HEADER(Medium)
 public:
 
-	Bounded();
-	Bounded(const TMediumPtr& child, const TAabb3D& bounds);
+	Bounded(const TMediumRef& child, const TAabb3D& bounds);
 
-	const TMediumPtr& child() const;
-	void setChild(const TMediumPtr& child);
+	const TMediumRef& child() const;
+	void setChild(const TMediumRef& child);
 
 	const TAabb3D& bounds() const;
 	void setBounds(const TAabb3D& bounds);
@@ -63,7 +62,7 @@ private:
 
 	bool bound(const BoundedRay& ray, BoundedRay& bounded) const;
 
-	TMediumPtr child_;
+	TMediumRef child_;
 	TAabb3D bounds_;
 };
 

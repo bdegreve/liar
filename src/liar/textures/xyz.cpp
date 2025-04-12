@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,14 +30,14 @@ namespace textures
 {
 
 PY_DECLARE_CLASS_DOC(Xyz, "mixes three textures by the x, y and z context channels")
-PY_CLASS_CONSTRUCTOR_3(Xyz, const TTexturePtr&, const TTexturePtr&, const TTexturePtr&);
+PY_CLASS_CONSTRUCTOR_3(Xyz, const TTextureRef&, const TTextureRef&, const TTextureRef&);
 PY_CLASS_MEMBER_RW_DOC(Xyz, textureA, setTextureA, "first texture")
 PY_CLASS_MEMBER_RW_DOC(Xyz, textureB, setTextureB, "second texture")
 PY_CLASS_MEMBER_RW_DOC(Xyz, textureC, setTextureC, "third texture")
 
 // --- public --------------------------------------------------------------------------------------
 
-Xyz::Xyz(const TTexturePtr& a, const TTexturePtr& b, const TTexturePtr& c):
+Xyz::Xyz(const TTextureRef& a, const TTextureRef& b, const TTextureRef& c):
 	a_(a),
 	b_(b),
 	c_(c)
@@ -46,42 +46,42 @@ Xyz::Xyz(const TTexturePtr& a, const TTexturePtr& b, const TTexturePtr& c):
 
 
 
-void Xyz::setTextureA(const TTexturePtr& a)
+void Xyz::setTextureA(const TTextureRef& a)
 {
 	a_ = a;
 }
 
 
 
-void Xyz::setTextureB(const TTexturePtr& b)
+void Xyz::setTextureB(const TTextureRef& b)
 {
 	b_ = b;
 }
 
 
 
-void Xyz::setTextureC(const TTexturePtr& c)
+void Xyz::setTextureC(const TTextureRef& c)
 {
 	c_ = c;
 }
 
 
 
-const TTexturePtr& Xyz::textureA() const
+const TTextureRef& Xyz::textureA() const
 {
 	return a_;
 }
 
 
 
-const TTexturePtr& Xyz::textureB() const
+const TTextureRef& Xyz::textureB() const
 {
 	return b_;
 }
 
 
 
-const TTexturePtr& Xyz::textureC() const
+const TTextureRef& Xyz::textureC() const
 {
 	return c_;
 }

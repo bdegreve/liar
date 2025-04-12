@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2023-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,26 +30,26 @@ namespace textures
 {
 
 PY_DECLARE_CLASS_DOC(AlphaChannel, "image file alpha channel")
-PY_CLASS_CONSTRUCTOR_1(AlphaChannel, const TImagePtr&);
+PY_CLASS_CONSTRUCTOR_1(AlphaChannel, const TImageRef&);
 PY_CLASS_MEMBER_RW(AlphaChannel, image, setImage);
 
 // --- public --------------------------------------------------------------------------------------
 
-AlphaChannel::AlphaChannel(const TImagePtr& image):
+AlphaChannel::AlphaChannel(const TImageRef& image):
 	image_(image)
 {
 }
 
 
 
-const TImagePtr& AlphaChannel::image() const
+const TImageRef& AlphaChannel::image() const
 {
 	return image_;
 }
 
 
 
-void AlphaChannel::setImage(const TImagePtr& image)
+void AlphaChannel::setImage(const TImageRef& image)
 {
 	image_ = image;
 }

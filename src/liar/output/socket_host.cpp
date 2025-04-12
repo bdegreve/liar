@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,31 +32,19 @@ namespace output
 {
 
 PY_DECLARE_CLASS_DOC(SocketHost,
-	"SocketHost()\n"
-	"SocketHost(target)\n"
-	"SocketHost(address [, port [, target]])\n"
+	"SocketHost(target [, address [, port]])\n"
 	"\n"
 	"Receives output samples from a socket and sends them to a RenderTarget");
-PY_CLASS_CONSTRUCTOR_0(SocketHost);
-PY_CLASS_CONSTRUCTOR_1(SocketHost, const std::string&);
-PY_CLASS_CONSTRUCTOR_2(SocketHost, const std::string&, SocketHost::TPort);
-PY_CLASS_CONSTRUCTOR_3(SocketHost, const std::string&, SocketHost::TPort, const TRenderTargetPtr&);
-PY_CLASS_CONSTRUCTOR_1(SocketHost, const TRenderTargetPtr&);
+PY_CLASS_CONSTRUCTOR_1(SocketHost, const TRenderTargetRef&);
+PY_CLASS_CONSTRUCTOR_2(SocketHost, const TRenderTargetRef&, const std::string&);
+PY_CLASS_CONSTRUCTOR_3(SocketHost, const TRenderTargetRef&, const std::string&, SocketHost::TPort);
 PY_CLASS_MEMBER_RW(SocketHost, target, setTarget)
 PY_CLASS_MEMBER_R(SocketHost, address)
 PY_CLASS_MEMBER_R(SocketHost, port)
 
 // --- public --------------------------------------------------------------------------------------
 
-SocketHost::SocketHost():
-	isQuiting_(false)
-{
-	init();
-}
-
-
-
-SocketHost::SocketHost(const TRenderTargetPtr& target):
+SocketHost::SocketHost(const TRenderTargetRef& target):
 	target_(target),
 	isQuiting_(false)
 {
@@ -65,7 +53,7 @@ SocketHost::SocketHost(const TRenderTargetPtr& target):
 
 
 
-SocketHost::SocketHost(const std::string& address, TPort port, const TRenderTargetPtr& target):
+SocketHost::SocketHost(const TRenderTargetRef& target, const std::string& address, TPort port):
 	target_(target),
 	isQuiting_(false)
 {
@@ -88,14 +76,14 @@ SocketHost::TPort SocketHost::port() const
 
 
 
-const TRenderTargetPtr& SocketHost::target() const
+const TRenderTargetRef& SocketHost::target() const
 {
 	return target_;
 }
 
 
 
-void SocketHost::setTarget(const TRenderTargetPtr& target)
+void SocketHost::setTarget(const TRenderTargetRef& target)
 {
 	target_ = target;
 }

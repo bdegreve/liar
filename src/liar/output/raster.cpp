@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -82,7 +82,7 @@ namespace
 
 // --- public --------------------------------------------------------------------------------------
 
-const TRgbSpacePtr& Raster::rgbSpace() const
+const TRgbSpaceRef& Raster::rgbSpace() const
 {
     return rgbSpace_;
 }
@@ -179,7 +179,7 @@ Raster::TValue Raster::maxSampleLuminance() const
 
 
 
-void Raster::setRgbSpace(const TRgbSpacePtr& rgbSpace)
+void Raster::setRgbSpace(const TRgbSpaceRef& rgbSpace)
 {
     std::lock_guard<std::recursive_mutex> lock(renderLock_);
     rgbSpace_ = rgbSpace;
@@ -306,7 +306,7 @@ void Raster::beginRaster()
 
 
 
-Raster::TDirtyBox Raster::tonemap(const TRgbSpacePtr& destSpace)
+Raster::TDirtyBox Raster::tonemap(const TRgbSpaceRef& destSpace)
 {
     // do not automatically use rgbSpace_ as destSpace, as some image writers may use a slightly different space,
     // so destSpace should be provided by the actual output device

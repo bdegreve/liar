@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ PY_CLASS_STATIC_METHOD_DOC(RgbSpace, setDefaultSpace, "setDefaultSpace(RgbSpace)
 //	TVector3D(0.f, 1.f, 0.f),
 //	TVector3D(0.f, 0.f, 1.f)));
 
-TRgbSpacePtr RgbSpace::defaultSpace_ = sRGB;
+TRgbSpaceRef RgbSpace::defaultSpace_ = sRGB;
 
 RgbSpace::RgbSpace(
 		const TPoint2D& red, const TPoint2D& green, const TPoint2D& blue,
@@ -239,20 +239,20 @@ bool RgbSpace::operator!=(const RgbSpace& other) const
 
 
 
-const TRgbSpacePtr RgbSpace::linearSpace() const
+const TRgbSpaceRef RgbSpace::linearSpace() const
 {
 	return withGamma(1);
 }
 
 
 
-const TRgbSpacePtr RgbSpace::withGamma(RGBA::TValue gamma) const
+const TRgbSpaceRef RgbSpace::withGamma(RGBA::TValue gamma) const
 {
 	if (gamma_ == gamma)
 	{
-		return TRgbSpacePtr(new RgbSpace(*this));
+		return TRgbSpaceRef(new RgbSpace(*this));
 	}
-	return TRgbSpacePtr(new RgbSpace(red_, green_, blue_, white_, gamma));
+	return TRgbSpaceRef(new RgbSpace(red_, green_, blue_, white_, gamma));
 }
 
 
@@ -283,13 +283,13 @@ void RgbSpace::setState(const TPyObjectPtr& state)
 
 
 
-const TRgbSpacePtr& RgbSpace::defaultSpace()
+const TRgbSpaceRef& RgbSpace::defaultSpace()
 {
 	return defaultSpace_;
 }
 
 
-void RgbSpace::setDefaultSpace(const TRgbSpacePtr& iDefault)
+void RgbSpace::setDefaultSpace(const TRgbSpaceRef& iDefault)
 {
 	defaultSpace_ = iDefault;
 }
@@ -399,22 +399,22 @@ void RgbSpace::enforceChromaticity(const TPoint2D& c, const char* name) const
 
 // --- free ----------------------------------------------------------------------------------------
 
-TSpectrumPtr rgb(const RgbSpace::RGBA& rgba)
+TSpectrumRef rgb(const RgbSpace::RGBA& rgba)
 {
 	return Spectrum::make(RgbSpace::defaultSpace()->toXYZ(rgba));
 }
 
-TSpectrumPtr rgb(const RgbSpace::RGBA& rgba, const TRgbSpacePtr& rgbSpace)
+TSpectrumRef rgb(const RgbSpace::RGBA& rgba, const TRgbSpaceRef& rgbSpace)
 {
 	return Spectrum::make(rgbSpace->toXYZ(rgba));
 }
 
-TSpectrumPtr rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue)
+TSpectrumRef rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue)
 {
 	return Spectrum::make(RgbSpace::defaultSpace()->toXYZ(prim::ColorRGBA(red, green, blue)));
 }
 
-TSpectrumPtr rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue, const TRgbSpacePtr& rgbSpace)
+TSpectrumRef rgb(RgbSpace::RGBA::TValue red, RgbSpace::RGBA::TValue green, RgbSpace::RGBA::TValue blue, const TRgbSpaceRef& rgbSpace)
 {
 	return Spectrum::make(rgbSpace->toXYZ(prim::ColorRGBA(red, green, blue)));
 }

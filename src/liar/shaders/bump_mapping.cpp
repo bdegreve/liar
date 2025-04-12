@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,14 +31,14 @@ namespace shaders
 {
 
 PY_DECLARE_CLASS_DOC(BumpMapping, "Applies bump mapping to shader")
-PY_CLASS_CONSTRUCTOR_2(BumpMapping, const TShaderPtr&, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_2(BumpMapping, const TShaderRef&, const TTextureRef&)
 PY_CLASS_MEMBER_RW_DOC(BumpMapping, shader, setShader, "mapped shader")
 PY_CLASS_MEMBER_RW_DOC(BumpMapping, displacement, setDisplacement, "displacement function")
 PY_CLASS_MEMBER_RW_DOC(BumpMapping, scale, setScale, "scale")
 
 // --- public --------------------------------------------------------------------------------------
 
-BumpMapping::BumpMapping(const TShaderPtr& shader, const TTexturePtr& displacement):
+BumpMapping::BumpMapping(const TShaderRef& shader, const TTextureRef& displacement):
 	Shader(shader->caps()),
 	shader_(shader),
 	displacement_(displacement),
@@ -48,14 +48,14 @@ BumpMapping::BumpMapping(const TShaderPtr& shader, const TTexturePtr& displaceme
 
 
 
-const TShaderPtr& BumpMapping::shader() const
+const TShaderRef& BumpMapping::shader() const
 {
 	return shader_;
 }
 
 
 
-void BumpMapping::setShader(const TShaderPtr& shader)
+void BumpMapping::setShader(const TShaderRef& shader)
 {
 	shader_ = shader;
 	setCaps(shader_->caps());
@@ -63,14 +63,14 @@ void BumpMapping::setShader(const TShaderPtr& shader)
 
 
 
-const TTexturePtr& BumpMapping::displacement() const
+const TTextureRef& BumpMapping::displacement() const
 {
 	return displacement_;
 }
 
 
 
-void BumpMapping::setDisplacement(const TTexturePtr& displacement)
+void BumpMapping::setDisplacement(const TTextureRef& displacement)
 {
 	displacement_ = displacement;
 }
@@ -168,7 +168,7 @@ const TPyObjectPtr BumpMapping::doGetState() const
 
 void BumpMapping::doSetState(const TPyObjectPtr& state)
 {
-	TShaderPtr shader;
+	TShaderRef shader;
 	python::decodeTuple(state, shader, displacement_, scale_);
 	setShader(shader);
 }

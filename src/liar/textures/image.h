@@ -81,6 +81,7 @@ public:
 
 	const std::filesystem::path& filename() const;
 	const TResolution2D& resolution() const;
+	const TRgbSpaceRef& rgbSpace() const;
 
 	AntiAliasing antiAliasing() const;
 	MipMapping mipMapping() const;
@@ -208,7 +209,7 @@ private:
 	TPackedPixel bilinear(size_t levelU, size_t levelV, const TPoint2D& uv) const;
 
 	std::filesystem::path filename_;
-	TRgbSpacePtr rgbSpace_;
+	TRgbSpaceRef rgbSpace_;
 	TPixels image_;
 	TResolution2D resolution_;
 	AntiAliasing antiAliasing_;
@@ -224,6 +225,7 @@ private:
 };
 
 typedef python::PyObjectPtr<Image>::Type TImagePtr;
+typedef kernel::PyObjectRef<Image> TImageRef;
 
 }
 

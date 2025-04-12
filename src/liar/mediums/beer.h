@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,10 +44,10 @@ class LIAR_MEDIUMS_DLL Beer: public Medium
 public:
 
 	Beer();
-	Beer(const TSpectrumPtr& transparency);
+	Beer(const TSpectrumRef& transparency);
 
-	const TSpectrumPtr& transparency() const;
-	void setTransparency(const TSpectrumPtr& transparency);
+	const TSpectrumRef& transparency() const;
+	void setTransparency(const TSpectrumRef& transparency);
 
 private:
 
@@ -59,7 +59,7 @@ private:
 	const Spectral doPhase(const Sample& sample, const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const override;
 	const Spectral doSamplePhase(const Sample& sample, const TPoint2D& phaseSample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const override;
 
-	TSpectrumPtr transparency_;
+	TSpectrumRef transparency_;
 };
 
 }

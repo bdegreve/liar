@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,12 +36,12 @@ PY_DECLARE_CLASS_DOC(Flip,
 	"other way around.\n"
 	"Flip(child)"
 	)
-PY_CLASS_CONSTRUCTOR_1(Flip, const TShaderPtr&)
+PY_CLASS_CONSTRUCTOR_1(Flip, const TShaderRef&)
 PY_CLASS_MEMBER_RW(Flip, child, setChild)
 
 // --- public --------------------------------------------------------------------------------------
 
-Flip::Flip(const TShaderPtr& child):
+Flip::Flip(const TShaderRef& child):
 	Shader(Bsdf::flip(child->caps())),
 	child_(child)
 {
@@ -49,14 +49,14 @@ Flip::Flip(const TShaderPtr& child):
 
 
 
-const TShaderPtr& Flip::child() const
+const TShaderRef& Flip::child() const
 {
 	return child_;
 }
 
 
 
-void Flip::setChild(const TShaderPtr& child)
+void Flip::setChild(const TShaderRef& child)
 {
 	child_ = child;
 	setCaps(Bsdf::flip(child->caps()));
@@ -120,7 +120,7 @@ const TPyObjectPtr Flip::doGetState() const
 
 void Flip::doSetState(const TPyObjectPtr& state)
 {
-	TShaderPtr child;
+	TShaderRef child;
 	python::decodeTuple(state, child);
 	setChild(child);
 }

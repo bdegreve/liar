@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace shaders
 
 PY_DECLARE_CLASS_DOC(Lafortune, "Lafortune (1997) BRDF")
 PY_CLASS_CONSTRUCTOR_0(Lafortune)
-PY_CLASS_CONSTRUCTOR_1(Lafortune, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_1(Lafortune, const TTextureRef&)
 PY_CLASS_MEMBER_RW_DOC(Lafortune, diffuse, setDiffuse, "texture for diffuse component")
 PY_CLASS_MEMBER_RW(Lafortune, lobes, setLobes)
 PY_CLASS_METHOD(Lafortune, addLobe)
@@ -40,7 +40,7 @@ PY_CLASS_METHOD(Lafortune, addLobe)
 typedef Lafortune::Lobe Lobe;
 PY_DECLARE_CLASS_DOC(Lobe, "Lobe(x, y, z, power)");
 PY_CLASS_INNER_CLASS_NAME(Lafortune, Lobe, "Lobe");
-PY_CLASS_CONSTRUCTOR_4(Lobe, const TTexturePtr&, const TTexturePtr&, const TTexturePtr&, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_4(Lobe, const TTextureRef&, const TTextureRef&, const TTextureRef&, const TTextureRef&)
 PY_CLASS_PUBLIC_MEMBER(Lobe, x)
 PY_CLASS_PUBLIC_MEMBER(Lobe, y)
 PY_CLASS_PUBLIC_MEMBER(Lobe, z)
@@ -49,7 +49,7 @@ PY_CLASS_METHOD_NAME(Lobe, reduce, "__reduce__")
 PY_CLASS_METHOD_NAME(Lobe, getState, "__getstate__")
 PY_CLASS_METHOD_NAME(Lobe, setState, "__setstate__")
 
-Lafortune::Lobe::Lobe(TTexturePtr x, TTexturePtr y, TTexturePtr z, TTexturePtr power) :
+Lafortune::Lobe::Lobe(TTextureRef x, TTextureRef y, TTextureRef z, TTextureRef power) :
 	x(x),
 	y(y),
 	z(z),
@@ -84,7 +84,7 @@ Lafortune::Lafortune():
 
 
 
-Lafortune::Lafortune(const TTexturePtr& diffuse):
+Lafortune::Lafortune(const TTextureRef& diffuse):
 	Shader(BsdfCaps::reflection | BsdfCaps::diffuse),
 	diffuse_(diffuse)
 {
@@ -92,14 +92,14 @@ Lafortune::Lafortune(const TTexturePtr& diffuse):
 
 
 
-const TTexturePtr& Lafortune::diffuse() const
+const TTextureRef& Lafortune::diffuse() const
 {
 	return diffuse_;
 }
 
 
 
-void Lafortune::setDiffuse(const TTexturePtr& diffuse)
+void Lafortune::setDiffuse(const TTextureRef& diffuse)
 {
 	diffuse_ = diffuse;
 }
@@ -120,13 +120,13 @@ void Lafortune::setLobes(const TLobes& lobes)
 
 
 
-void Lafortune::addLobe(TTexturePtr x, TTexturePtr y, TTexturePtr z, TTexturePtr power)
+void Lafortune::addLobe(TTextureRef x, TTextureRef y, TTextureRef z, TTextureRef power)
 {
 	if (lobes_.size() >= capacity)
 	{
 		LASS_THROW("Lafortune supports a maximum of " << capacity << " lobes.");
 	}
-	TLobePtr lobe(new Lobe(x, y, z, power));
+	TLobeRef lobe(new Lobe(x, y, z, power));
 	lobes_.push_back(lobe);
 }
 
@@ -142,7 +142,7 @@ TBsdfPtr Lafortune::doBsdf(const Sample& sample, const IntersectionContext& cont
 {
 	const Spectral diffuse = diffuse_->lookUp(sample, context, SpectralType::Reflectant);
 	std::unique_ptr<LafortuneBsdf> bsdf(new LafortuneBsdf(sample, context, caps(), diffuse));
-	for (const TLobePtr& lobe : lobes_)
+	for (const TLobeRef& lobe : lobes_)
 	{
 		bsdf->addLobe(
 			lobe->x->lookUp(sample, context, SpectralType::Illuminant),

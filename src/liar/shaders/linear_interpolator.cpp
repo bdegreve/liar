@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace shaders
 
 PY_DECLARE_CLASS_DOC(LinearInterpolator, "interpolates shaders using gray value of control texture as parameter")
 PY_CLASS_CONSTRUCTOR_0(LinearInterpolator)
-PY_CLASS_CONSTRUCTOR_2(LinearInterpolator, const LinearInterpolator::TKeyShaders&, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_2(LinearInterpolator, const LinearInterpolator::TKeyShaders&, const TTextureRef&)
 PY_CLASS_MEMBER_RW(LinearInterpolator, keys, setKeys)
 PY_CLASS_MEMBER_RW(LinearInterpolator, control, setControl)
 PY_CLASS_METHOD(LinearInterpolator, addKey)
@@ -48,7 +48,7 @@ LinearInterpolator::LinearInterpolator():
 
 
 
-LinearInterpolator::LinearInterpolator(const TKeyShaders& keyShaders, const TTexturePtr& controlTexture):
+LinearInterpolator::LinearInterpolator(const TKeyShaders& keyShaders, const TTextureRef& controlTexture):
 	Shader(BsdfCaps::none),
 	keys_(),
 	control_(controlTexture)
@@ -69,7 +69,7 @@ const LinearInterpolator::TKeyShaders& LinearInterpolator::keys() const
 
 /** return control texture
  */
-const TTexturePtr& LinearInterpolator::control() const
+const TTextureRef& LinearInterpolator::control() const
 {
 	return control_;
 }
@@ -95,7 +95,7 @@ void LinearInterpolator::setKeys(const TKeyShaders& keyShaders)
 
 /** set control texture
  */
-void LinearInterpolator::setControl(const TTexturePtr& contolTexture)
+void LinearInterpolator::setControl(const TTextureRef& contolTexture)
 {
 	control_ = contolTexture;
 }
@@ -104,7 +104,7 @@ void LinearInterpolator::setControl(const TTexturePtr& contolTexture)
 
 /** add a key texture to the list
  */
-void LinearInterpolator::addKey(const TValue keyValue, const TShaderPtr& keyShader)
+void LinearInterpolator::addKey(const TValue keyValue, const TShaderRef& keyShader)
 {
 	TKeyShader key(keyValue, keyShader);
 	TKeyShaders::iterator i = std::lower_bound(keys_.begin(), keys_.end(), key, LesserKey());
@@ -151,12 +151,12 @@ const Spectral LinearInterpolator::doEmission(const Sample& sample, const Inters
 
 	const TVector3D omegaLocal = context.bsdfToLocal().transform(omegaOut);
 
-	const TShaderPtr& shaderA = prevI->second;
+	const TShaderRef& shaderA = prevI->second;
 	IntersectionContext contextA = context;
 	shaderA->shadeContext(sample, contextA);
 	const TVector3D omegaA = contextA.localToBsdf().transform(omegaLocal);
 
-	const TShaderPtr& shaderB = i->second;
+	const TShaderRef& shaderB = i->second;
 	IntersectionContext contextB = context;
 	shaderB->shadeContext(sample, contextB);
 	const TVector3D omegaB = contextB.localToBsdf().transform(omegaLocal);
@@ -195,12 +195,12 @@ TBsdfPtr LinearInterpolator::doBsdf(const Sample& sample, const IntersectionCont
 
 	const TValue t = (controlValue - prevI->first) / (i->first - prevI->first);
 
-	const TShaderPtr& shaderA = prevI->second;
+	const TShaderRef& shaderA = prevI->second;
 	IntersectionContext contextA = context;
 	contextA.setShader(shaderA);
 	shaderA->shadeContext(sample, contextA);
 
-	const TShaderPtr& shaderB = i->second;
+	const TShaderRef& shaderB = i->second;
 	IntersectionContext contextB = context;
 	contextB.setShader(shaderB);
 	shaderB->shadeContext(sample, contextB);

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2021-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2021-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,8 +38,8 @@ PY_DECLARE_CLASS_DOC(Walter,
 	"With GGX distribution (=Trowbridge-Reitz) and Smith shadow-masking\n"
 	"Roughness uses the linearized Disney definition, with alpha = sqr(roughness)")
 PY_CLASS_CONSTRUCTOR_0(Walter)
-PY_CLASS_CONSTRUCTOR_1(Walter, const TTexturePtr&)
-PY_CLASS_CONSTRUCTOR_2(Walter, const TTexturePtr&, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_1(Walter, const TTextureRef&)
+PY_CLASS_CONSTRUCTOR_2(Walter, const TTextureRef&, const TTextureRef&)
 PY_CLASS_MEMBER_RW_DOC(Walter, innerRefractionIndex, setInnerRefractionIndex, "index of refraction for material on inside")
 PY_CLASS_MEMBER_RW_DOC(Walter, outerRefractionIndex, setOuterRefractionIndex, "index of refraction for material on outside")
 PY_CLASS_MEMBER_RW_DOC(Walter, reflectance, setReflectance, "additional reflectance multiplier")
@@ -58,14 +58,14 @@ Walter::Walter():
 
 
 
-Walter::Walter(const TTexturePtr& innerRefractionIndex):
+Walter::Walter(const TTextureRef& innerRefractionIndex):
 	Walter(innerRefractionIndex, Texture::white())
 {
 }
 
 
 
-Walter::Walter(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex):
+Walter::Walter(const TTextureRef& innerRefractionIndex, const TTextureRef& outerRefractionIndex):
 	Shader(BsdfCaps::reflection | BsdfCaps::transmission | BsdfCaps::glossy),
 	innerRefractionIndex_(innerRefractionIndex),
 	outerRefractionIndex_(outerRefractionIndex),
@@ -80,98 +80,98 @@ Walter::Walter(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outer
 
 
 
-const TTexturePtr& Walter::innerRefractionIndex() const
+const TTextureRef& Walter::innerRefractionIndex() const
 {
 	return innerRefractionIndex_;
 }
 
 
 
-void Walter::setInnerRefractionIndex(const TTexturePtr& innerRefractionIndex)
+void Walter::setInnerRefractionIndex(const TTextureRef& innerRefractionIndex)
 {
 	innerRefractionIndex_ = innerRefractionIndex;
 }
 
 
 
-const TTexturePtr& Walter::outerRefractionIndex() const
+const TTextureRef& Walter::outerRefractionIndex() const
 {
 	return outerRefractionIndex_;
 }
 
 
 
-void Walter::setOuterRefractionIndex(const TTexturePtr& outerRefractionIndex)
+void Walter::setOuterRefractionIndex(const TTextureRef& outerRefractionIndex)
 {
 	outerRefractionIndex_ = outerRefractionIndex;
 }
 
 
 
-const TTexturePtr& Walter::reflectance() const
+const TTextureRef& Walter::reflectance() const
 {
 	return reflectance_;
 }
 
 
 
-void Walter::setReflectance(const TTexturePtr& reflectance)
+void Walter::setReflectance(const TTextureRef& reflectance)
 {
 	reflectance_ = reflectance;
 }
 
 
 
-const TTexturePtr& Walter::transmittance() const
+const TTextureRef& Walter::transmittance() const
 {
 	return transmittance_;
 }
 
 
 
-void Walter::setTransmittance(const TTexturePtr& transmittance)
+void Walter::setTransmittance(const TTextureRef& transmittance)
 {
 	transmittance_ = transmittance;
 }
 
 
 
-const TTexturePtr& Walter::roughnessU() const
+const TTextureRef& Walter::roughnessU() const
 {
 	return roughnessU_;
 }
 
 
 
-void Walter::setRoughnessU(const TTexturePtr& roughness)
+void Walter::setRoughnessU(const TTextureRef& roughness)
 {
 	roughnessU_ = roughness;
 }
 
 
 
-const TTexturePtr& Walter::roughnessV() const
+const TTextureRef& Walter::roughnessV() const
 {
 	return roughnessV_;
 }
 
 
 
-void Walter::setRoughnessV(const TTexturePtr& roughness)
+void Walter::setRoughnessV(const TTextureRef& roughness)
 {
 	roughnessV_ = roughness;
 }
 
 
 
-const TMicrofacetDistributionPtr& Walter::mdf() const
+const TMicrofacetDistributionRef& Walter::mdf() const
 {
 	return mdf_;
 }
 
 
 
-void Walter::setMdf(const TMicrofacetDistributionPtr& mdf)
+void Walter::setMdf(const TMicrofacetDistributionRef& mdf)
 {
 	mdf_ = mdf;
 }

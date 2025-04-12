@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -44,16 +44,16 @@ class LIAR_SHADERS_DLL Conductor : public Shader
 public:
 
 	Conductor();
-	Conductor(const TTexturePtr& refractionIndex);
-	Conductor(const TTexturePtr& refractionIndex, const TTexturePtr& absorptionCoefficient);
+	Conductor(const TTextureRef& refractionIndex);
+	Conductor(const TTextureRef& refractionIndex, const TTextureRef& absorptionCoefficient);
 
-	const TTexturePtr& refractionIndex() const;
-	void setRefractionIndex(const TTexturePtr& refractionIndex);
-	const TTexturePtr& absorptionCoefficient() const;
-	void setAbsorptionCoefficient(const TTexturePtr& absorptionCoefficient);
+	const TTextureRef& refractionIndex() const;
+	void setRefractionIndex(const TTextureRef& refractionIndex);
+	const TTextureRef& absorptionCoefficient() const;
+	void setAbsorptionCoefficient(const TTextureRef& absorptionCoefficient);
 
-	const TTexturePtr& reflectance() const;
-	void setReflectance(const TTexturePtr& reflectance);
+	const TTextureRef& reflectance() const;
+	void setReflectance(const TTextureRef& reflectance);
 
 	class ConductorBsdf : public Bsdf
 	{
@@ -76,12 +76,12 @@ private:
 	void doSetState(const TPyObjectPtr& state) override;
 
 	void init(
-		const TTexturePtr& refractionIndex = Texture::white(), const TTexturePtr& absorptionCoefficient = Texture::white(),
-		const TTexturePtr& reflectance = Texture::white());
+		const TTextureRef& refractionIndex = Texture::white(), const TTextureRef& absorptionCoefficient = Texture::white(),
+		const TTextureRef& reflectance = Texture::white());
 
-	TTexturePtr refractionIndex_;
-	TTexturePtr absorptionCoefficient_;
-	TTexturePtr reflectance_;
+	TTextureRef refractionIndex_;
+	TTextureRef absorptionCoefficient_;
+	TTextureRef reflectance_;
 };
 
 }

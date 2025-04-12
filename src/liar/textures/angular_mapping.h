@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,8 +42,8 @@ class LIAR_TEXTURES_DLL AngularMapping: public ContextMapping
 	PY_HEADER(ContextMapping)
 public:
 
-	AngularMapping(const TTexturePtr& texture);
-	AngularMapping(const TTexturePtr& texture, const TPoint3D& center);
+	AngularMapping(const TTextureRef& texture);
+	AngularMapping(const TTextureRef& texture, const TPoint3D& center);
 
 	const TPoint3D& center() const;
 	void setCenter(const TPoint3D& center);

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2014-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2014-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -146,6 +146,11 @@ template <typename R, typename... Args > R callMethod(const python::TPyObjPtr& o
 	return TraitsR::arg(temp);
 }
 
+template <typename R, typename T, typename... Args > R callMethod(const kernel::PyObjectRef<T>& obj, const char* method, Args&&... args)
+{
+	return callMethod<R>(obj.ptr(), std::forward<Args>(args)...);
+}
+
 template <typename R> R getAttr(const python::TPyObjPtr& obj, const char* name)
 {
 	using namespace lass::python;
@@ -156,6 +161,11 @@ template <typename R> R getAttr(const python::TPyObjPtr& obj, const char* name)
 	typename TraitsR::TStorage temp;
 	PY_ENFORCE_ZERO(pyGetSimpleObject(attrObj.get(), temp));
 	return TraitsR::arg(temp);
+}
+
+template <typename R, typename T> R getAttr(const kernel::PyObjectRef<T>& obj, const char* name)
+{
+	return getAttr<R>(obj.ptr(), name);
 }
 
 }
@@ -254,7 +264,7 @@ TEST(Spectrum, Sampled)
 		TWavelengths ws = { 350e-9f, 375e-9f, 400e-9f, 425e-9f, 450e-9f, 475e-9f, 500e-9f, 525e-9f, 550e-9f, 575e-9f, 600e-9f, 625e-9f, 650e-9f };
 		TValues vs =      { 0.f,     0.f,     0.1f,    0.125f,  0.15f,   0.175f,  0.2f,    0.15f,   0.1f,    0.05f,   0.f, 0.f, 0.f };
 
-		auto resampled = callMethod<TSpectrumPtr>(sampled, "resample", ws);
+		auto resampled = callMethod<TSpectrumRef>(sampled, "resample", ws);
 		auto ws2 = getAttr<TWavelengths>(resampled, "wavelengths");
 		auto vs2 = getAttr<TValues>(resampled, "values");
 		EXPECT_EQ(ws2.size(), ws.size());

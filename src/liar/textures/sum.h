@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,11 +42,11 @@ class LIAR_TEXTURES_DLL Sum: public Texture
 	PY_HEADER(Texture)
 public:
 
-	typedef std::vector<TTexturePtr> TTerms;
+	typedef std::vector<TTextureRef> TTerms;
 
 	Sum();
 	explicit Sum(const TTerms& terms);
-	Sum(const TTexturePtr& a, const TTexturePtr& b);
+	Sum(const TTextureRef& a, const TTextureRef& b);
 
 	const TTerms& terms() const;
 	void setTerms(const TTerms& terms);

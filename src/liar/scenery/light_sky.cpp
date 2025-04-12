@@ -41,7 +41,7 @@ namespace scenery
 
 PY_DECLARE_CLASS_DOC(LightSky, "infinite sky light")
 PY_CLASS_CONSTRUCTOR_0(LightSky)
-PY_CLASS_CONSTRUCTOR_1(LightSky, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_1(LightSky, const TTextureRef&)
 PY_CLASS_MEMBER_RW(LightSky, radiance, setRadiance)
 PY_CLASS_MEMBER_RW(LightSky, portal, setPortal)
 PY_CLASS_MEMBER_RW(LightSky, numberOfEmissionSamples, setNumberOfEmissionSamples)
@@ -57,7 +57,7 @@ LightSky::LightSky():
 
 
 
-LightSky::LightSky(const TTexturePtr& radiance):
+LightSky::LightSky(const TTextureRef& radiance):
 	fixedDistance_(1e3)
 {
 	init(radiance);
@@ -65,7 +65,7 @@ LightSky::LightSky(const TTexturePtr& radiance):
 
 
 
-const TTexturePtr& LightSky::radiance() const
+const TTextureRef& LightSky::radiance() const
 {
 	return radiance_;
 }
@@ -86,7 +86,7 @@ const TResolution2D& LightSky::samplingResolution() const
 
 
 
-void LightSky::setRadiance(const TTexturePtr& radiance)
+void LightSky::setRadiance(const TTextureRef& radiance)
 {
 	radiance_ = radiance;
 }
@@ -389,7 +389,7 @@ void LightSky::doSetLightState(const TPyObjectPtr& state)
 
 
 
-void LightSky::init(const TTexturePtr& radiance)
+void LightSky::init(const TTextureRef& radiance)
 {
 	setRadiance(radiance);
 	setNumberOfEmissionSamples(1);

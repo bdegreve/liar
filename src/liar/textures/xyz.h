@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,14 +42,14 @@ class LIAR_TEXTURES_DLL Xyz: public Texture
 	PY_HEADER(Texture)
 public:
 
-	Xyz(const TTexturePtr& a, const TTexturePtr& b, const TTexturePtr& c);
+	Xyz(const TTextureRef& a, const TTextureRef& b, const TTextureRef& c);
 
-	const TTexturePtr& textureA() const;
-	const TTexturePtr& textureB() const;
-	const TTexturePtr& textureC() const;
-	void setTextureA(const TTexturePtr& a);
-	void setTextureB(const TTexturePtr& b);
-	void setTextureC(const TTexturePtr& c);
+	const TTextureRef& textureA() const;
+	const TTextureRef& textureB() const;
+	const TTextureRef& textureC() const;
+	void setTextureA(const TTextureRef& a);
+	void setTextureB(const TTextureRef& b);
+	void setTextureC(const TTextureRef& c);
 
 protected:
 
@@ -61,9 +61,9 @@ private:
 	TValue doScalarLookUp(const Sample& sample, const IntersectionContext& context) const override;
 	bool doIsChromatic() const override;
 
-	TTexturePtr a_;
-	TTexturePtr b_;
-	TTexturePtr c_;
+	TTextureRef a_;
+	TTextureRef b_;
+	TTextureRef c_;
 };
 
 }

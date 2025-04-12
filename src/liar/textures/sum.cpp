@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace textures
 PY_DECLARE_CLASS_DOC(Sum, "makes sum of child textures")
 PY_CLASS_CONSTRUCTOR_0(Sum);
 PY_CLASS_CONSTRUCTOR_1(Sum, const Sum::TTerms&)
-PY_CLASS_CONSTRUCTOR_2(Sum, const TTexturePtr&, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_2(Sum, const TTextureRef&, const TTextureRef&)
 PY_CLASS_MEMBER_RW(Sum, terms, setTerms);
 
 // --- public --------------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ Sum::Sum(const TTerms& terms):
 
 
 
-Sum::Sum(const TTexturePtr& a, const TTexturePtr& b):
+Sum::Sum(const TTextureRef& a, const TTextureRef& b):
 	isChromatic_(a->isChromatic() || b->isChromatic())
 {
 	terms_.push_back(a);

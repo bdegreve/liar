@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve
+ *  Copyright (C) 2004-2025  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ class LIAR_TEXTURES_DLL TransformationUv: public ContextMapping
 	PY_HEADER(ContextMapping)
 public:
 
-	TransformationUv(const TTexturePtr& texture, const TTransformation2D& transformation);
+	TransformationUv(const TTextureRef& texture, const TTransformation2D& transformation);
 
 	const TTransformation2D& transformation() const;
 	void setTransformation(const TTransformation2D& transformation);

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -95,11 +95,11 @@ private:
 	virtual void doWriteLine(TImageHandle handle, const prim::ColorRGBA* in) const = 0;
 };
 
-typedef python::PyObjectPtr<ImageCodec>::Type TImageCodecPtr;
-typedef std::map<std::string, TImageCodecPtr> TImageCodecMap;
+typedef PyObjectRef<ImageCodec> TImageCodecRef;
+typedef std::map<std::string, TImageCodecRef> TImageCodecMap;
 
 LIAR_KERNEL_DLL TImageCodecMap& LASS_CALL imageCodecs();
-LIAR_KERNEL_DLL const TImageCodecPtr& LASS_CALL imageCodec(const std::string& extension);
+LIAR_KERNEL_DLL const TImageCodecRef& LASS_CALL imageCodec(const std::string& extension);
 
 LIAR_KERNEL_DLL void transcodeImage(const std::filesystem::path& source, const std::filesystem::path& dest, const TRgbSpacePtr& sourceSpace, TRgbSpacePtr destSpace);
 
@@ -115,7 +115,7 @@ public:
 	void readLine(XYZA* out) const { codec_->readLine(handle_, out); }
 	void readFull(XYZA* out) const;
 private:
-	TImageCodecPtr codec_;
+	TImageCodecRef codec_;
 	ImageCodec::TImageHandle handle_;
 };
 
@@ -133,7 +133,7 @@ public:
 	void writeLine(const prim::ColorRGBA* in) const { codec_->writeLine(handle_, in); }
 	void writeFull(const prim::ColorRGBA* in) const;
 private:
-	TImageCodecPtr codec_;
+	TImageCodecRef codec_;
 	ImageCodec::TImageHandle handle_;
 };
 

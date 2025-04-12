@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ PY_DECLARE_CLASS_DOC(CookTorrance,
 	"with Beckmann distribution and V-cavity shadow-masking\n"
 	"Roughness uses the linearized Disney definition, with alpha = sqr(roughness)")
 PY_CLASS_CONSTRUCTOR_0(CookTorrance)
-PY_CLASS_CONSTRUCTOR_2(CookTorrance, const TTexturePtr&, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_2(CookTorrance, const TTextureRef&, const TTextureRef&)
 PY_CLASS_MEMBER_RW_DOC(CookTorrance, refractionIndex, setRefractionIndex, "refraction index")
 PY_CLASS_MEMBER_RW_DOC(CookTorrance, absorptionCoefficient, setAbsorptionCoefficient, "absorption coefficient")
 PY_CLASS_MEMBER_RW_DOC(CookTorrance, reflectance, setReflectance, "additional reflectance multiplier")
@@ -56,14 +56,14 @@ CookTorrance::CookTorrance():
 
 
 
-CookTorrance::CookTorrance(const TTexturePtr& refractionIndex):
+CookTorrance::CookTorrance(const TTextureRef& refractionIndex):
 	CookTorrance(refractionIndex, Texture::white())
 {
 }
 
 
 
-CookTorrance::CookTorrance(const TTexturePtr& refractionIndex, const TTexturePtr& absorptionCoefficient):
+CookTorrance::CookTorrance(const TTextureRef& refractionIndex, const TTextureRef& absorptionCoefficient):
 	Shader(BsdfCaps::reflection | BsdfCaps::glossy),
 	refractionIndex_(refractionIndex),
 	absorptionCoefficient_(absorptionCoefficient),
@@ -77,83 +77,83 @@ CookTorrance::CookTorrance(const TTexturePtr& refractionIndex, const TTexturePtr
 
 
 
-const TTexturePtr& CookTorrance::refractionIndex() const
+const TTextureRef& CookTorrance::refractionIndex() const
 {
 	return refractionIndex_;
 }
 
 
 
-void CookTorrance::setRefractionIndex(const TTexturePtr& refractionIndex)
+void CookTorrance::setRefractionIndex(const TTextureRef& refractionIndex)
 {
 	refractionIndex_ = refractionIndex;
 }
 
 
 
-const TTexturePtr& CookTorrance::absorptionCoefficient() const
+const TTextureRef& CookTorrance::absorptionCoefficient() const
 {
 	return absorptionCoefficient_;
 }
 
 
 
-void CookTorrance::setAbsorptionCoefficient(const TTexturePtr& absorptionCoefficient)
+void CookTorrance::setAbsorptionCoefficient(const TTextureRef& absorptionCoefficient)
 {
 	absorptionCoefficient_ = absorptionCoefficient;
 }
 
 
 
-const TTexturePtr& CookTorrance::reflectance() const
+const TTextureRef& CookTorrance::reflectance() const
 {
 	return reflectance_;
 }
 
 
 
-void CookTorrance::setReflectance(const TTexturePtr& reflectance)
+void CookTorrance::setReflectance(const TTextureRef& reflectance)
 {
 	reflectance_ = reflectance;
 }
 
 
 
-const TTexturePtr& CookTorrance::roughnessU() const
+const TTextureRef& CookTorrance::roughnessU() const
 {
 	return roughnessU_;
 }
 
 
 
-void CookTorrance::setRoughnessU(const TTexturePtr& roughness)
+void CookTorrance::setRoughnessU(const TTextureRef& roughness)
 {
 	roughnessU_ = roughness;
 }
 
 
 
-const TTexturePtr& CookTorrance::roughnessV() const
+const TTextureRef& CookTorrance::roughnessV() const
 {
 	return roughnessV_;
 }
 
 
 
-void CookTorrance::setRoughnessV(const TTexturePtr& roughness)
+void CookTorrance::setRoughnessV(const TTextureRef& roughness)
 {
 	roughnessV_ = roughness;
 }
 
 
 
-const TMicrofacetDistributionPtr& CookTorrance::mdf() const
+const TMicrofacetDistributionRef& CookTorrance::mdf() const
 {
 	return mdf_;
 }
 
 
-void CookTorrance::setMdf(const TMicrofacetDistributionPtr& mdf)
+void CookTorrance::setMdf(const TMicrofacetDistributionRef& mdf)
 {
 	mdf_ = mdf;
 }

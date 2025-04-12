@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,13 +30,13 @@ namespace textures
 {
 
 PY_DECLARE_CLASS_DOC(AngularMapping, "converts point to angular coordinates as used in light probes")
-PY_CLASS_CONSTRUCTOR_1(AngularMapping, const TTexturePtr&);
-PY_CLASS_CONSTRUCTOR_2(AngularMapping, const TTexturePtr&, const TPoint3D&);
+PY_CLASS_CONSTRUCTOR_1(AngularMapping, const TTextureRef&);
+PY_CLASS_CONSTRUCTOR_2(AngularMapping, const TTextureRef&, const TPoint3D&);
 PY_CLASS_MEMBER_RW(AngularMapping, center, setCenter);
 
 // --- public --------------------------------------------------------------------------------------
 
-AngularMapping::AngularMapping(const TTexturePtr& texture):
+AngularMapping::AngularMapping(const TTextureRef& texture):
 	ContextMapping(texture),
 	center_(0, 0, 0)
 {
@@ -44,7 +44,7 @@ AngularMapping::AngularMapping(const TTexturePtr& texture):
 
 
 
-AngularMapping::AngularMapping(const TTexturePtr& texture, const TPoint3D& center):
+AngularMapping::AngularMapping(const TTextureRef& texture, const TPoint3D& center):
 	ContextMapping(texture),
 	center_(center)
 {

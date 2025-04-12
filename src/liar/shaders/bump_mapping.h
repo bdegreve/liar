@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,13 +42,13 @@ class LIAR_SHADERS_DLL BumpMapping: public Shader
 	PY_HEADER(Shader)
 public:
 
-	BumpMapping(const TShaderPtr& shader, const TTexturePtr& displacement);
+	BumpMapping(const TShaderRef& shader, const TTextureRef& displacement);
 
-	const TShaderPtr& shader() const;
-	void setShader(const TShaderPtr& shader);
+	const TShaderRef& shader() const;
+	void setShader(const TShaderRef& shader);
 
-	const TTexturePtr& displacement() const;
-	void setDisplacement(const TTexturePtr& displacement);
+	const TTextureRef& displacement() const;
+	void setDisplacement(const TTextureRef& displacement);
 
 	TScalar scale() const;
 	void setScale(TScalar scale);
@@ -69,8 +69,8 @@ private:
 
 	const TVector2D dDisplacement_dUv(const Sample& sample, IntersectionContext& context) const;
 
-	TShaderPtr shader_;
-	TTexturePtr displacement_;
+	TShaderRef shader_;
+	TTextureRef displacement_;
 	TScalar scale_;
 };
 

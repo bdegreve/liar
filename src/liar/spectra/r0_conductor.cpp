@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2023  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2023-2025  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -36,13 +36,13 @@ PY_DECLARE_CLASS_DOC(R0Conductor,
 	"\n"
 	"R0Conductor(n: Spectrum, k: Spectrum)\n"
 )
-PY_CLASS_CONSTRUCTOR_2(R0Conductor, const TSpectrumPtr&, const TSpectrumPtr&)
+PY_CLASS_CONSTRUCTOR_2(R0Conductor, const TSpectrumRef&, const TSpectrumRef&)
 PY_CLASS_MEMBER_R(R0Conductor, n)
 PY_CLASS_MEMBER_R(R0Conductor, k)
 
 // --- public --------------------------------------------------------------------------------------
 
-R0Conductor::R0Conductor(const TSpectrumPtr& n, const TSpectrumPtr& k) :
+R0Conductor::R0Conductor(const TSpectrumRef& n, const TSpectrumRef& k) :
 	n_(n),
 	k_(k)
 {
@@ -50,13 +50,13 @@ R0Conductor::R0Conductor(const TSpectrumPtr& n, const TSpectrumPtr& k) :
 }
 
 
-const TSpectrumPtr& R0Conductor::n() const
+const TSpectrumRef& R0Conductor::n() const
 {
 	return n_;
 }
 
 
-const TSpectrumPtr& R0Conductor::k() const
+const TSpectrumRef& R0Conductor::k() const
 {
 	return k_;
 }

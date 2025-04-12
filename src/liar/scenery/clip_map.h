@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,14 +44,14 @@ class LIAR_SCENERY_DLL ClipMap: public SceneObject
 public:
 	using TValue = Texture::TValue;
 
-	ClipMap(const TSceneObjectPtr& child, const TTexturePtr& clipMap);
-	ClipMap(const TSceneObjectPtr& child, const TTexturePtr& clipMap, TValue threshold);
+	ClipMap(const TSceneObjectRef& child, const TTextureRef& clipMap);
+	ClipMap(const TSceneObjectRef& child, const TTextureRef& clipMap, TValue threshold);
 
-	const TSceneObjectPtr& child() const;
-	void setChild(const TSceneObjectPtr& child);
+	const TSceneObjectRef& child() const;
+	void setChild(const TSceneObjectRef& child);
 
-	const TTexturePtr& clipMap() const;
-	void setClipMap(const TTexturePtr& clipMap);
+	const TTextureRef& clipMap() const;
+	void setClipMap(const TTextureRef& clipMap);
 
 	TValue threshold() const;
 	void setThreshold(TValue threshold);
@@ -72,8 +72,8 @@ private:
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
-	TSceneObjectPtr child_;
-	TTexturePtr clipMap_;
+	TSceneObjectRef child_;
+	TTextureRef clipMap_;
 	TValue threshold_;
 };
 

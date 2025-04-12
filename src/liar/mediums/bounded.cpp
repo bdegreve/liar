@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,34 +30,27 @@ namespace mediums
 {
 
 PY_DECLARE_CLASS_DOC(Bounded, "")
-PY_CLASS_CONSTRUCTOR_0(Bounded)
-PY_CLASS_CONSTRUCTOR_2(Bounded, const TMediumPtr&, const TAabb3D&)
+PY_CLASS_CONSTRUCTOR_2(Bounded, const TMediumRef&, const TAabb3D&)
 PY_CLASS_MEMBER_RW(Bounded, child, setChild)
 PY_CLASS_MEMBER_RW(Bounded, bounds, setBounds)
 
 // --- public --------------------------------------------------------------------------------------
 
-Bounded::Bounded()
-{
-}
-
-
-
-Bounded::Bounded(const TMediumPtr& child, const TAabb3D& bounds):
+Bounded::Bounded(const TMediumRef& child, const TAabb3D& bounds):
 	child_(child), bounds_(bounds)
 {
 }
 
 
 
-const TMediumPtr& Bounded::child() const
+const TMediumRef& Bounded::child() const
 {
 	return child_;
 }
 
 
 
-void Bounded::setChild(const TMediumPtr& child)
+void Bounded::setChild(const TMediumRef& child)
 {
 	child_ = child;
 }
@@ -87,7 +80,7 @@ void Bounded::setBounds(const TAabb3D& bounds)
 
 size_t Bounded::doNumScatterSamples() const
 {
-	return child_ ? child_->numScatterSamples() : 0;
+	return child_->numScatterSamples();
 }
 
 
@@ -95,7 +88,7 @@ size_t Bounded::doNumScatterSamples() const
 const Spectral Bounded::doTransmittance(const Sample& sample, const BoundedRay& ray) const
 {
 	BoundedRay bounded;
-	if (!child_ || !bound(ray, bounded))
+	if (!bound(ray, bounded))
 	{
 		return Spectral(1);
 	}
@@ -107,7 +100,7 @@ const Spectral Bounded::doTransmittance(const Sample& sample, const BoundedRay& 
 const Spectral Bounded::doEmission(const Sample& sample, const BoundedRay& ray) const
 {
 	BoundedRay bounded;
-	if (!child_ || !bound(ray, bounded))
+	if (!bound(ray, bounded))
 	{
 		return Spectral(0);
 	}
@@ -119,7 +112,7 @@ const Spectral Bounded::doEmission(const Sample& sample, const BoundedRay& ray) 
 const Spectral Bounded::doScatterOut(const Sample& sample, const BoundedRay& ray) const
 {
 	BoundedRay bounded;
-	if (!child_ || !bound(ray, bounded))
+	if (!bound(ray, bounded))
 	{
 		return Spectral(0);
 	}
@@ -131,7 +124,7 @@ const Spectral Bounded::doScatterOut(const Sample& sample, const BoundedRay& ray
 const Spectral Bounded::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	BoundedRay bounded;
-	if (!child_ || !bound(ray, bounded))
+	if (!bound(ray, bounded))
 	{
 		pdf = 0;
 		return Spectral(0);
@@ -144,7 +137,7 @@ const Spectral Bounded::doSampleScatterOut(TScalar sample, const BoundedRay& ray
 const Spectral Bounded::doSampleScatterOutOrTransmittance(const Sample& sample, TScalar scatterSample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
 	BoundedRay bounded;
-	if (!child_ || !bound(ray, bounded))
+	if (!bound(ray, bounded))
 	{
 		tScatter = ray.farLimit();
 		pdf = 1;
@@ -156,7 +149,7 @@ const Spectral Bounded::doSampleScatterOutOrTransmittance(const Sample& sample, 
 
 const Spectral Bounded::doPhase(const Sample& sample, const TPoint3D& pos, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
 {
-	if (!child_ || !bounds_.contains(pos))
+	if (!bounds_.contains(pos))
 	{
 		pdf = 0;
 		return Spectral(0);
@@ -168,7 +161,7 @@ const Spectral Bounded::doPhase(const Sample& sample, const TPoint3D& pos, const
 
 const Spectral Bounded::doSamplePhase(const Sample& sample, const TPoint2D& phaseSample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
 {
-	if (!child_ || !bounds_.contains(position))
+	if (!bounds_.contains(position))
 	{
 		pdf = 0;
 		dirOut = dirIn;

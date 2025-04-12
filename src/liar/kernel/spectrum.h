@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ namespace impl
 class Sample;
 
 class Spectrum;
-typedef python::PyObjectPtr<Spectrum>::Type TSpectrumPtr;
+typedef PyObjectRef<Spectrum> TSpectrumRef;
 
 class LIAR_KERNEL_DLL Spectrum: public python::PyObjectPlus
 {
@@ -65,10 +65,10 @@ public:
 	TValue luminance() const;
 	bool isFlat() const;
 
-	static TSpectrumPtr make(TParam value);
-	static TSpectrumPtr make(const XYZ& value);
-	static const TSpectrumPtr& white();
-	static const TSpectrumPtr& black();
+	static TSpectrumRef make(TParam value);
+	static TSpectrumRef make(const XYZ& value);
+	static const TSpectrumRef& white();
+	static const TSpectrumRef& black();
 
 
 	const TPyObjectPtr reduce() const;
@@ -91,8 +91,8 @@ private:
 	friend class impl::SpectrumFlat;
 	friend class impl::SpectrumXYZ;
 
-	static TSpectrumPtr white_;
-	static TSpectrumPtr black_;
+	static TSpectrumRef white_;
+	static TSpectrumRef black_;
 
 #if LIAR_SPECTRAL_SAMPLE_INDEPENDENT
 	Spectral evaluated_;

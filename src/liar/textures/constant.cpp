@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,15 +32,15 @@ namespace textures
 PY_DECLARE_CLASS_DOC(Constant, "texture with constant value")
 PY_CLASS_CONSTRUCTOR_1(Constant, Constant::TValue);
 PY_CLASS_CONSTRUCTOR_1(Constant, const XYZ&);
-PY_CLASS_CONSTRUCTOR_1(Constant, const TSpectrumPtr&);
+PY_CLASS_CONSTRUCTOR_1(Constant, const TSpectrumRef&);
 PY_CLASS_CONVERTOR(Constant, Constant::TValue);
 PY_CLASS_CONVERTOR(Constant, XYZ);
-PY_CLASS_CONVERTOR(Constant, TSpectrumPtr);
+PY_CLASS_CONVERTOR(Constant, TSpectrumRef);
 PY_CLASS_MEMBER_RW(Constant, value, setValue);
 
 // --- public --------------------------------------------------------------------------------------
 
-Constant::Constant(const TSpectrumPtr& spectrum) :
+Constant::Constant(const TSpectrumRef& spectrum) :
 	value_(spectrum)
 {
 }
@@ -61,14 +61,14 @@ Constant::Constant(TValue value):
 
 
 
-const TSpectrumPtr& Constant::value() const
+const TSpectrumRef& Constant::value() const
 {
 	return value_;
 }
 
 
 
-void Constant::setValue(const TSpectrumPtr& value)
+void Constant::setValue(const TSpectrumRef& value)
 {
 	value_ = value;
 }

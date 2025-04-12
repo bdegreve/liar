@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,15 +45,15 @@ class LIAR_SCENERY_DLL LightPoint: public SceneLight
 public:
 
 	LightPoint();
-	LightPoint(const TPoint3D& iPosition, const TSpectrumPtr& iIntensity);
+	LightPoint(const TPoint3D& iPosition, const TSpectrumRef& iIntensity);
 
 	const TPoint3D& position() const;
-	const TSpectrumPtr& intensity() const;
-	const TAttenuationPtr& attenuation() const;
+	const TSpectrumRef& intensity() const;
+	const TAttenuationRef& attenuation() const;
 
 	void setPosition(const TPoint3D& iPosition);
-	void setIntensity(const TSpectrumPtr& iIntensity);
-	void setAttenuation(const TAttenuationPtr& iAttenuation);
+	void setIntensity(const TSpectrumRef& iIntensity);
+	void setAttenuation(const TAttenuationRef& iAttenuation);
 
 private:
 
@@ -82,8 +82,8 @@ private:
 	void doSetLightState(const TPyObjectPtr& state) override;
 
 	TPoint3D position_;
-	TSpectrumPtr intensity_;
-	TAttenuationPtr attenuation_;
+	TSpectrumRef intensity_;
+	TAttenuationRef attenuation_;
 };
 
 }

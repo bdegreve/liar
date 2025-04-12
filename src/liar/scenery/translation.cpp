@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ namespace scenery
 {
 
 PY_DECLARE_CLASS_DOC(Translation, "translation of local space")
-PY_CLASS_CONSTRUCTOR_2(Translation, const TSceneObjectPtr&, const TVector3D&)
+PY_CLASS_CONSTRUCTOR_2(Translation, const TSceneObjectRef&, const TVector3D&)
 PY_CLASS_MEMBER_RW(Translation, child, setChild)
 PY_CLASS_MEMBER_RW(Translation, localToWorld, setLocalToWorld)
 PY_CLASS_MEMBER_R(Translation, worldToLocal)
@@ -38,7 +38,7 @@ PY_CLASS_MEMBER_R(Translation, worldToLocal)
 
 // --- public --------------------------------------------------------------------------------------
 
-Translation::Translation(const TSceneObjectPtr& child, const TVector3D& localToWorld):
+Translation::Translation(const TSceneObjectRef& child, const TVector3D& localToWorld):
 	child_(child),
 	localToWorld_(localToWorld)
 {
@@ -46,14 +46,14 @@ Translation::Translation(const TSceneObjectPtr& child, const TVector3D& localToW
 
 
 
-const TSceneObjectPtr& Translation::child() const
+const TSceneObjectRef& Translation::child() const
 {
 	return child_;
 }
 
 
 
-void Translation::setChild(const TSceneObjectPtr& child)
+void Translation::setChild(const TSceneObjectRef& child)
 {
 	child_ = child;
 }

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,14 +30,14 @@ namespace output
 {
 
 PY_DECLARE_CLASS_DOC(FilterMitchell, "Mitchell reconstruction filter");
-PY_CLASS_CONSTRUCTOR_1(FilterMitchell, const TRenderTargetPtr&)
-PY_CLASS_CONSTRUCTOR_2(FilterMitchell, const TRenderTargetPtr&, TScalar)
+PY_CLASS_CONSTRUCTOR_1(FilterMitchell, const TRenderTargetRef&)
+PY_CLASS_CONSTRUCTOR_2(FilterMitchell, const TRenderTargetRef&, TScalar)
 PY_CLASS_MEMBER_RW(FilterMitchell, target, setTarget)
 PY_CLASS_MEMBER_RW(FilterMitchell, b, setB)
 
 // --- public --------------------------------------------------------------------------------------
 
-FilterMitchell::FilterMitchell(const TRenderTargetPtr& target):
+FilterMitchell::FilterMitchell(const TRenderTargetRef& target):
 	target_(target),
 	b_(TNumTraits::one / 3)
 {
@@ -45,7 +45,7 @@ FilterMitchell::FilterMitchell(const TRenderTargetPtr& target):
 
 
 
-FilterMitchell::FilterMitchell(const TRenderTargetPtr& target, TScalar b):
+FilterMitchell::FilterMitchell(const TRenderTargetRef& target, TScalar b):
 	target_(target),
 	b_(b)
 {
@@ -53,14 +53,14 @@ FilterMitchell::FilterMitchell(const TRenderTargetPtr& target, TScalar b):
 
 
 
-const TRenderTargetPtr& FilterMitchell::target() const
+const TRenderTargetRef& FilterMitchell::target() const
 {
 	return target_;
 }
 
 
 
-void FilterMitchell::setTarget(const TRenderTargetPtr& target)
+void FilterMitchell::setTarget(const TRenderTargetRef& target)
 {
 	target_ = target;
 }

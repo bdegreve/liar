@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace shaders
 
 PY_DECLARE_CLASS_DOC(Mirror, "perfect mirror shader")
 PY_CLASS_CONSTRUCTOR_0(Mirror)
-PY_CLASS_CONSTRUCTOR_1(Mirror, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_1(Mirror, const TTextureRef&)
 PY_CLASS_MEMBER_RW_DOC(Mirror, reflectance, setReflectance, "texture for reflectance component")
 PY_CLASS_MEMBER_RW_DOC(Mirror, fuzz, setFuzz, "fuzziness factor for reflection direction")
 
@@ -47,7 +47,7 @@ Mirror::Mirror():
 
 
 
-Mirror::Mirror(const TTexturePtr& reflectance):
+Mirror::Mirror(const TTextureRef& reflectance):
 	Shader(BsdfCaps::reflection | BsdfCaps::specular),
 	reflectance_(reflectance),
 	fuzz_(nullptr)
@@ -56,14 +56,14 @@ Mirror::Mirror(const TTexturePtr& reflectance):
 
 
 
-const TTexturePtr& Mirror::reflectance() const
+const TTextureRef& Mirror::reflectance() const
 {
 	return reflectance_;
 }
 
 
 
-void Mirror::setReflectance(const TTexturePtr& reflectance)
+void Mirror::setReflectance(const TTextureRef& reflectance)
 {
 	reflectance_ = reflectance;
 }

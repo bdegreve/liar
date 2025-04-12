@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ namespace scenery
 {
 
 PY_DECLARE_CLASS_DOC(MotionRotation, "time-dependent rotation")
-PY_CLASS_CONSTRUCTOR_4(MotionRotation, const TSceneObjectPtr&, const TVector3D&, TScalar, TScalar)
+PY_CLASS_CONSTRUCTOR_4(MotionRotation, const TSceneObjectRef&, const TVector3D&, TScalar, TScalar)
 PY_CLASS_MEMBER_RW(MotionRotation, child, setChild)
 PY_CLASS_MEMBER_RW(MotionRotation, axis, setAxis)
 PY_CLASS_MEMBER_RW_DOC(MotionRotation, start, setStart, "rotation angle at time = 0 seconds, in radians")
@@ -38,8 +38,8 @@ PY_CLASS_MEMBER_RW_DOC(MotionRotation, speed, setSpeed, "rotation speed, in radi
 
 // --- public --------------------------------------------------------------------------------------
 
-MotionRotation::MotionRotation(const TSceneObjectPtr& child, const TVector3D& axis, TScalar startAngleRadians, TScalar speedAngleRadians):
-	child_(LASS_ENFORCE_POINTER(child)),
+MotionRotation::MotionRotation(const TSceneObjectRef& child, const TVector3D& axis, TScalar startAngleRadians, TScalar speedAngleRadians):
+	child_(child),
 	axis_(axis),
 	start_(startAngleRadians),
 	speed_(speedAngleRadians)
@@ -48,16 +48,16 @@ MotionRotation::MotionRotation(const TSceneObjectPtr& child, const TVector3D& ax
 
 
 
-const TSceneObjectPtr& MotionRotation::child() const
+const TSceneObjectRef& MotionRotation::child() const
 {
 	return child_;
 }
 
 
 
-void MotionRotation::setChild(const TSceneObjectPtr& child)
+void MotionRotation::setChild(const TSceneObjectRef& child)
 {
-	child_ = LASS_ENFORCE_POINTER(child);
+	child_ = child;
 }
 
 

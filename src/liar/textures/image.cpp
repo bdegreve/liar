@@ -63,6 +63,7 @@ PY_CLASS_METHOD_QUALIFIED_1(Image, loadFile, void, const std::filesystem::path&)
 PY_CLASS_METHOD_QUALIFIED_2(Image, loadFile, void, const std::filesystem::path&, const TRgbSpacePtr&)
 PY_CLASS_MEMBER_R(Image, filename);
 PY_CLASS_MEMBER_R(Image, resolution);
+PY_CLASS_MEMBER_R(Image, rgbSpace);
 PY_CLASS_MEMBER_RW(Image, antiAliasing, setAntiAliasing);
 PY_CLASS_MEMBER_RW(Image, mipMapping, setMipMapping);
 PY_CLASS_STATIC_METHOD(Image, setDefaultAntiAliasing);
@@ -141,7 +142,7 @@ void Image::loadFile(const std::filesystem::path& filename, const TRgbSpacePtr& 
 	}
 	filename_ = filename;
 	resolution_ = resolution;
-	rgbSpace_ = reader.rgbSpace();
+	rgbSpace_ = TRgbSpaceRef(reader.rgbSpace());
 
 	TPixels image(new TPixel[resolution.x * resolution.y]);
 	for (size_t i = 0; i < resolution.y; ++i)
@@ -170,6 +171,13 @@ const std::filesystem::path& Image::filename() const
 const TResolution2D& Image::resolution() const
 {
 	return resolution_;
+}
+
+
+
+const TRgbSpaceRef& Image::rgbSpace() const
+{
+	return rgbSpace_;
 }
 
 
@@ -338,7 +346,7 @@ void Image::doSetState(const TPyObjectPtr& state)
 	std::filesystem::path filename;
 	AntiAliasing antiAliasing;
 	MipMapping mipMapping;
-	TRgbSpacePtr rgbSpace;
+	TRgbSpaceRef rgbSpace;
 	python::decodeTuple(state, filename, rgbSpace, antiAliasing, mipMapping);
 
 	loadFile(filename, rgbSpace);

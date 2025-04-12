@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -61,6 +61,7 @@
 #include <lass/prim/impl/plane_3d_impl_detail.h>
 
 #include "config.h"
+#include "pyobject_ref.h"
 
 #ifdef libkernel_EXPORTS
 #	define LIAR_KERNEL_DLL LASS_DLL_EXPORT

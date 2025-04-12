@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,25 +30,25 @@ namespace scenery
 {
 
 PY_DECLARE_CLASS_DOC(ClipMap, "Applies clip map to child object")
-PY_CLASS_CONSTRUCTOR_2(ClipMap, const TSceneObjectPtr&, const TTexturePtr&)
-PY_CLASS_CONSTRUCTOR_3(ClipMap, const TSceneObjectPtr&, const TTexturePtr&, ClipMap::TValue)
+PY_CLASS_CONSTRUCTOR_2(ClipMap, const TSceneObjectRef&, const TTextureRef&)
+PY_CLASS_CONSTRUCTOR_3(ClipMap, const TSceneObjectRef&, const TTextureRef&, ClipMap::TValue)
 PY_CLASS_MEMBER_RW(ClipMap, child, setChild)
 PY_CLASS_MEMBER_RW(ClipMap, clipMap, setClipMap)
 PY_CLASS_MEMBER_RW(ClipMap, threshold, setThreshold)
 
 // --- public --------------------------------------------------------------------------------------
 
-ClipMap::ClipMap(const TSceneObjectPtr& child, const TTexturePtr& clipMap):
-	child_(LASS_ENFORCE_POINTER(child)),
-	clipMap_(LASS_ENFORCE_POINTER(clipMap)),
+ClipMap::ClipMap(const TSceneObjectRef& child, const TTextureRef& clipMap):
+	child_(child),
+	clipMap_(clipMap),
 	threshold_(0.5f)
 {
 }
 
 
 
-ClipMap::ClipMap(const TSceneObjectPtr& child, const TTexturePtr& clipMap, TValue threshold):
-	 child_(LASS_ENFORCE_POINTER(child)),
+ClipMap::ClipMap(const TSceneObjectRef& child, const TTextureRef& clipMap, TValue threshold):
+	 child_(child),
 	clipMap_(clipMap),
 	threshold_(threshold)
 {
@@ -56,30 +56,30 @@ ClipMap::ClipMap(const TSceneObjectPtr& child, const TTexturePtr& clipMap, TValu
 
 
 
-const TSceneObjectPtr& ClipMap::child() const
+const TSceneObjectRef& ClipMap::child() const
 {
 	return child_;
 }
 
 
 
-void ClipMap::setChild(const TSceneObjectPtr& child)
+void ClipMap::setChild(const TSceneObjectRef& child)
 {
-	child_ = LASS_ENFORCE_POINTER(child);
+	child_ = child;
 }
 
 
 
-const TTexturePtr& ClipMap::clipMap() const
+const TTextureRef& ClipMap::clipMap() const
 {
 	return clipMap_;
 }
 
 
 
-void ClipMap::setClipMap(const TTexturePtr& clipMap)
+void ClipMap::setClipMap(const TTextureRef& clipMap)
 {
-	clipMap_ = LASS_ENFORCE_POINTER(clipMap);
+	clipMap_ = clipMap;
 }
 
 

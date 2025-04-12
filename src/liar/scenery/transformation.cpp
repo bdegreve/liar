@@ -30,8 +30,8 @@ namespace scenery
 {
 
 PY_DECLARE_CLASS_DOC(Transformation, "transformation of local space")
-PY_CLASS_CONSTRUCTOR_2(Transformation, const TSceneObjectPtr&, const TTransformation3D&)
-PY_CLASS_CONSTRUCTOR_2(Transformation, const TSceneObjectPtr&, const TPyTransformation3DPtr&)
+PY_CLASS_CONSTRUCTOR_2(Transformation, const TSceneObjectRef&, const TTransformation3D&)
+PY_CLASS_CONSTRUCTOR_2(Transformation, const TSceneObjectRef&, const TPyTransformation3DRef&)
 PY_CLASS_MEMBER_RW(Transformation, child, setChild)
 PY_CLASS_MEMBER_RW(Transformation, localToWorld, setLocalToWorld)
 PY_CLASS_MEMBER_R(Transformation, worldToLocal)
@@ -39,7 +39,7 @@ PY_CLASS_MEMBER_R(Transformation, worldToLocal)
 
 // --- public --------------------------------------------------------------------------------------
 
-Transformation::Transformation(const TSceneObjectPtr& child, const TTransformation3D& localToWorld):
+Transformation::Transformation(const TSceneObjectRef& child, const TTransformation3D& localToWorld):
 	child_(child),
 	localToWorld_(localToWorld),
 	worldToLocal_(localToWorld.inverseMatrix())
@@ -48,23 +48,23 @@ Transformation::Transformation(const TSceneObjectPtr& child, const TTransformati
 
 
 
-Transformation::Transformation(const TSceneObjectPtr& child, const TPyTransformation3DPtr& localToWorld):
+Transformation::Transformation(const TSceneObjectRef& child, const TPyTransformation3DRef& localToWorld):
 	child_(child),
-	localToWorld_(localToWorld ? localToWorld->transformation() : TTransformation3D::identity()),
+	localToWorld_(localToWorld->transformation()),
 	worldToLocal_(localToWorld_.inverseMatrix())
 {
 }
 
 
 
-const TSceneObjectPtr& Transformation::child() const
+const TSceneObjectRef& Transformation::child() const
 {
 	return child_;
 }
 
 
 
-void Transformation::setChild(const TSceneObjectPtr& child)
+void Transformation::setChild(const TSceneObjectRef& child)
 {
 	child_ = child;
 }

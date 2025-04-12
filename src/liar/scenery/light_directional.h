@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,14 +45,14 @@ class LIAR_SCENERY_DLL LightDirectional: public SceneLightGlobal
 public:
 
 	LightDirectional();
-	LightDirectional(const TVector3D& direction, const TSpectrumPtr& radiance);
+	LightDirectional(const TVector3D& direction, const TSpectrumRef& radiance);
 
 	const TVector3D& direction() const;
-	const TSpectrumPtr& radiance() const;
+	const TSpectrumRef& radiance() const;
 	const TSceneObjectPtr& portal() const;
 
 	void setDirection(const TVector3D& direction);
-	void setRadiance(const TSpectrumPtr& radiance);
+	void setRadiance(const TSpectrumRef& radiance);
 	void setPortal(const TSceneObjectPtr& portal);
 
 private:
@@ -84,7 +84,7 @@ private:
 	void doSetLightState(const TPyObjectPtr& state) override;
 
 	TVector3D direction_;
-	TSpectrumPtr radiance_;
+	TSpectrumRef radiance_;
 	TSceneObjectPtr userPortal_;
 	TSceneObjectPtr defaultPortal_;
 };

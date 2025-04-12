@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,13 +42,13 @@ class LIAR_TEXTURES_DLL BinaryOperator: public Texture
 	PY_HEADER(Texture)
 public:
 
-	const TTexturePtr& textureA() const { return a_; }
-	const TTexturePtr& textureB() const { return b_; }
-	void setTextureA(const TTexturePtr& a);
-	void setTextureB(const TTexturePtr& b);
+	const TTextureRef& textureA() const { return a_; }
+	const TTextureRef& textureB() const { return b_; }
+	void setTextureA(const TTextureRef& a);
+	void setTextureB(const TTextureRef& b);
 
 protected:
-	BinaryOperator(const TTexturePtr& a, const TTexturePtr& b);
+	BinaryOperator(const TTextureRef& a, const TTextureRef& b);
 
 	const TPyObjectPtr doGetState() const  override;
 	void doSetState(const TPyObjectPtr& state)  override;
@@ -56,8 +56,8 @@ protected:
 private:
 	bool doIsChromatic() const override;
 
-	TTexturePtr a_;
-	TTexturePtr b_;
+	TTextureRef a_;
+	TTextureRef b_;
 };
 
 }

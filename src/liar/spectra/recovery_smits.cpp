@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -31,17 +31,17 @@ namespace spectra
 
 PY_DECLARE_CLASS_DOC(RecoverySmits, "spectral recovery using Smits (2000)")
 	PY_CLASS_CONSTRUCTOR_8(RecoverySmits,
-		const TSpectrumPtr&, const TSpectrumPtr&, const TSpectrumPtr&,
-		const TSpectrumPtr&, const TSpectrumPtr&, const TSpectrumPtr&,
-		const TSpectrumPtr&, const TRgbSpacePtr&)
+		const TSpectrumRef&, const TSpectrumRef&, const TSpectrumRef&,
+		const TSpectrumRef&, const TSpectrumRef&, const TSpectrumRef&,
+		const TSpectrumRef&, const TRgbSpaceRef&)
 
 
 // --- public --------------------------------------------------------------------------------------
 
-RecoverySmits::RecoverySmits(const TSpectrumPtr& red, const TSpectrumPtr& green, const TSpectrumPtr& blue,
-		const TSpectrumPtr& yellow, const TSpectrumPtr& magenta, const TSpectrumPtr& cyan,
-		const TSpectrumPtr& white,
-		const TRgbSpacePtr& rgbSpace) :
+RecoverySmits::RecoverySmits(const TSpectrumRef& red, const TSpectrumRef& green, const TSpectrumRef& blue,
+		const TSpectrumRef& yellow, const TSpectrumRef& magenta, const TSpectrumRef& cyan,
+		const TSpectrumRef& white,
+		const TRgbSpaceRef& rgbSpace) :
 	red_(red),
 	green_(green),
 	blue_(blue),

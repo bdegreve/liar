@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -50,37 +50,37 @@ LightProjection::LightProjection():
 }
 
 
-const TTexturePtr& LightProjection::intensity() const
+const TTextureRef& LightProjection::intensity() const
 {
 	return intensity_;
 }
 
 
-void LightProjection::setIntensity(const TTexturePtr& iIntensity)
+void LightProjection::setIntensity(const TTextureRef& iIntensity)
 {
 	intensity_ = iIntensity;
 }
 
 
-const TProjectionPtr& LightProjection::projection() const
+const TProjectionRef& LightProjection::projection() const
 {
 	return projection_;
 }
 
 
-void LightProjection::setProjection(const TProjectionPtr& projection)
+void LightProjection::setProjection(const TProjectionRef& projection)
 {
 	projection_ = projection;
 }
 
 
-const TAttenuationPtr& LightProjection::attenuation() const
+const TAttenuationRef& LightProjection::attenuation() const
 {
 	return attenuation_;
 }
 
 
-void LightProjection::setAttenuation(const TAttenuationPtr& iAttenuation)
+void LightProjection::setAttenuation(const TAttenuationRef& iAttenuation)
 {
 	attenuation_ = iAttenuation;
 }

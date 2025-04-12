@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ class LIAR_TEXTURES_DLL SkyBlend : public BinaryOperator
     PY_HEADER(BinaryOperator)
 public:
 
-    SkyBlend(const TTexturePtr& a, const TTexturePtr& b);
+    SkyBlend(const TTextureRef& a, const TTextureRef& b);
 
     const TVector3D& zenith() const;
     void setZenith(const TVector3D& zenith);

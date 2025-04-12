@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2024-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,9 +35,9 @@ PY_DECLARE_CLASS_DOC(MicrofacetBlinn, "Blinn Microfacet Distribution")
 PY_CLASS_CONSTRUCTOR_0(MicrofacetBlinn)
 
 
-TMicrofacetDistributionPtr MicrofacetBlinn::instance()
+TMicrofacetDistributionRef MicrofacetBlinn::instance()
 {
-	static TMicrofacetDistributionPtr instance(new MicrofacetBlinn());
+	static TMicrofacetDistributionRef instance(new MicrofacetBlinn());
 	return instance;
 }
 

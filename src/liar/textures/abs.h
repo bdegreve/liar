@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ class LIAR_TEXTURES_DLL Abs: public UnaryOperator
 	PY_HEADER(UnaryOperator)
 public:
 
-	Abs(const TTexturePtr& texture);
+	Abs(const TTextureRef& texture);
 
 private:
 

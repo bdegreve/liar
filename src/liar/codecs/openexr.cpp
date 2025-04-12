@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ private:
 struct Handle
 {
 	typedef std::vector<Imf::Rgba> TLine;
-	kernel::TRgbSpacePtr rgbSpace;
+	kernel::TRgbSpaceRef rgbSpace;
 	TResolution2D resolution;
 	TLine line;
 	std::unique_ptr<LassIStream> istream;
@@ -70,7 +70,7 @@ struct Handle
 	std::unique_ptr<Imf::RgbaOutputFile> output;
 	int y = 0;
 	Handle(const TResolution2D& resolution, const kernel::TRgbSpacePtr& rgbSpace):
-		rgbSpace((rgbSpace ? rgbSpace : kernel::sRGB)->linearSpace()),
+		rgbSpace((rgbSpace ? rgbSpace : kernel::sRGB.ptr())->linearSpace()),
 		resolution(resolution)
 	{
 	}
@@ -154,7 +154,7 @@ private:
 		const Imath::Box2i& dataWin = pimpl->input->dataWindow();
 		LASS_ENFORCE(pimpl->y <= dispWin.max.y);
 
-		const auto& rgbSpace = *pimpl->rgbSpace;
+		const auto& rgbSpace = *(pimpl->rgbSpace);
 
 		if (pimpl->y >= dataWin.min.y && pimpl->y <= dataWin.max.y)
 		{
@@ -223,7 +223,7 @@ private:
 void postInject(PyObject*)
 {
 	liar::kernel::TImageCodecMap& map = liar::kernel::imageCodecs();
-	map[".exr"] = liar::kernel::TImageCodecPtr(new liar::openexr::ImageCodecOpenEXR);
+	map[".exr"] = liar::kernel::TImageCodecRef(new liar::openexr::ImageCodecOpenEXR);
 	LASS_COUT << "liar.codecs.openexr imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n";
 }
 

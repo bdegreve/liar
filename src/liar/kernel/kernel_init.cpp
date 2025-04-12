@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -119,15 +119,15 @@ PY_MODULE_FUNCTION_QUALIFIED_DOC_1(kernel, setProcessPriority, void, const std::
 
 
 using liar::kernel::rgb;
-using liar::kernel::TSpectrumPtr;
+using liar::kernel::TSpectrumRef;
 using lass::prim::ColorRGBA;
-using liar::kernel::TRgbSpacePtr;
-PY_MODULE_FUNCTION_QUALIFIED_DOC_1(kernel, rgb, TSpectrumPtr, const ColorRGBA&,
+using liar::kernel::TRgbSpaceRef;
+PY_MODULE_FUNCTION_QUALIFIED_DOC_1(kernel, rgb, TSpectrumRef, const ColorRGBA&,
 	"rgb({<R>, <G>, <B>} | <(R, G, B)>} [, <RgbSpace>] [, <SpectrumFormat>])\n"
 	"Create an XYZ from RGB color value\n");
-PY_MODULE_FUNCTION_QUALIFIED_2(kernel, rgb, TSpectrumPtr, const ColorRGBA&, const TRgbSpacePtr&)
-PY_MODULE_FUNCTION_QUALIFIED_3(kernel, rgb, TSpectrumPtr, ColorRGBA::TValue, ColorRGBA::TValue, ColorRGBA::TValue)
-PY_MODULE_FUNCTION_QUALIFIED_4(kernel, rgb, TSpectrumPtr, ColorRGBA::TValue, ColorRGBA::TValue, ColorRGBA::TValue, const TRgbSpacePtr&)
+PY_MODULE_FUNCTION_QUALIFIED_2(kernel, rgb, TSpectrumRef, const ColorRGBA&, const TRgbSpaceRef&)
+PY_MODULE_FUNCTION_QUALIFIED_3(kernel, rgb, TSpectrumRef, ColorRGBA::TValue, ColorRGBA::TValue, ColorRGBA::TValue)
+PY_MODULE_FUNCTION_QUALIFIED_4(kernel, rgb, TSpectrumRef, ColorRGBA::TValue, ColorRGBA::TValue, ColorRGBA::TValue, const TRgbSpaceRef&)
 
 
 using liar::kernel::imageCodecs;

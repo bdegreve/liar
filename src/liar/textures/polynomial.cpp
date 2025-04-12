@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2021-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,11 +30,11 @@ namespace textures
 {
 
 PY_DECLARE_CLASS_DOC(Polynomial, "polynomial evaluation of texture values")
-PY_CLASS_CONSTRUCTOR_2(Polynomial, const TTexturePtr&, const Polynomial::TCoefficients&);
+PY_CLASS_CONSTRUCTOR_2(Polynomial, const TTextureRef&, const Polynomial::TCoefficients&);
 
 // --- public --------------------------------------------------------------------------------------
 
-Polynomial::Polynomial(const TTexturePtr& texture, const TCoefficients& coefficients):
+Polynomial::Polynomial(const TTextureRef& texture, const TCoefficients& coefficients):
 	UnaryOperator(texture),
 	polynomial_(coefficients)
 {

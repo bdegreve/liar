@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,11 +31,11 @@ namespace textures
 {
 
 PY_DECLARE_CLASS_DOC(Max, "max(a, b)")
-PY_CLASS_CONSTRUCTOR_2(Max, const TTexturePtr&, const TTexturePtr&);
+PY_CLASS_CONSTRUCTOR_2(Max, const TTextureRef&, const TTextureRef&);
 
 // --- public --------------------------------------------------------------------------------------
 
-Max::Max(const TTexturePtr& a, const TTexturePtr& b):
+Max::Max(const TTextureRef& a, const TTextureRef& b):
 	BinaryOperator(a, b)
 {
 }

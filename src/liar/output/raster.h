@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ public:
         size
     };
 
-    const TRgbSpacePtr& rgbSpace() const;
+    const TRgbSpaceRef& rgbSpace() const;
     ToneMapping toneMapping() const;
     TValue exposureStops() const;
     TValue exposureCorrectionStops() const;
@@ -67,7 +67,7 @@ public:
     TValue middleGrey() const;
     TValue maxSampleLuminance() const;
 
-    void setRgbSpace(const TRgbSpacePtr& rgbSpace);
+    void setRgbSpace(const TRgbSpaceRef& rgbSpace);
     void setToneMapping(ToneMapping mode);
     void setExposureStops(TValue fStops);
     void setExposureCorrectionStops(TValue stops);
@@ -87,7 +87,7 @@ protected:
     typedef prim::Aabb2D<size_t> TDirtyBox;
 
     void beginRaster();
-    TDirtyBox tonemap(const TRgbSpacePtr& destSpace);
+    TDirtyBox tonemap(const TRgbSpaceRef& destSpace);
 
     const TTonemapBuffer& tonemapBuffer() const;
     const TValueBuffer& totalWeight() const;
@@ -112,7 +112,7 @@ private:
     TDirtyBox allTimeDirtyBox_;
     mutable std::recursive_mutex   renderLock_;
     TResolution2D resolution_;
-    TRgbSpacePtr rgbSpace_;
+    TRgbSpaceRef rgbSpace_;
     ToneMapping toneMapping_;
     mutable TValue exposureStops_;
     TValue exposureCorrectionStops_;

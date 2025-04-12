@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ const Sampled::TValues& Sampled::values() const
 }
 
 
-TSpectrumPtr Sampled::resample(const TWavelengths& wavelengths) const
+TSpectrumRef Sampled::resample(const TWavelengths& wavelengths) const
 {
 	const size_t n = wavelengths.size();
 	TValues values(n, 0);
@@ -89,7 +89,7 @@ TSpectrumPtr Sampled::resample(const TWavelengths& wavelengths) const
 		}
 	}
 
-	return TSpectrumPtr(new Sampled(wavelengths, values));
+	return TSpectrumRef(new Sampled(wavelengths, values));
 }
 
 

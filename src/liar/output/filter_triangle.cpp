@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2021-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2021-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,21 +30,21 @@ namespace output
 {
 
 PY_DECLARE_CLASS_DOC(FilterTriangle, "Triangle reconstruction filter");
-PY_CLASS_CONSTRUCTOR_1(FilterTriangle, const TRenderTargetPtr&)
-PY_CLASS_CONSTRUCTOR_2(FilterTriangle, const TRenderTargetPtr&, FilterTriangle::TValue)
+PY_CLASS_CONSTRUCTOR_1(FilterTriangle, const TRenderTargetRef&)
+PY_CLASS_CONSTRUCTOR_2(FilterTriangle, const TRenderTargetRef&, FilterTriangle::TValue)
 PY_CLASS_MEMBER_RW(FilterTriangle, target, setTarget)
 PY_CLASS_MEMBER_RW(FilterTriangle, width, setWidth)
 
 // --- public --------------------------------------------------------------------------------------
 
-FilterTriangle::FilterTriangle(const TRenderTargetPtr& target):
+FilterTriangle::FilterTriangle(const TRenderTargetRef& target):
 	FilterTriangle(target, 1)
 {
 }
 
 
 
-FilterTriangle::FilterTriangle(const TRenderTargetPtr& target, TValue width):
+FilterTriangle::FilterTriangle(const TRenderTargetRef& target, TValue width):
 	target_(target)
 {
 	setWidth(width);
@@ -52,14 +52,14 @@ FilterTriangle::FilterTriangle(const TRenderTargetPtr& target, TValue width):
 
 
 
-const TRenderTargetPtr& FilterTriangle::target() const
+const TRenderTargetRef& FilterTriangle::target() const
 {
 	return target_;
 }
 
 
 
-void FilterTriangle::setTarget(const TRenderTargetPtr& target)
+void FilterTriangle::setTarget(const TRenderTargetRef& target)
 {
 	target_ = target;
 }

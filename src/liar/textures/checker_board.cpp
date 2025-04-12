@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ namespace textures
 {
 
 PY_DECLARE_CLASS_DOC(CheckerBoard, "mixes two textures in 2D checkerboard pattern")
-PY_CLASS_CONSTRUCTOR_2(CheckerBoard, TTexturePtr, TTexturePtr);
+PY_CLASS_CONSTRUCTOR_2(CheckerBoard, TTextureRef, TTextureRef);
 PY_CLASS_MEMBER_RW(CheckerBoard, split, setSplit);
 PY_CLASS_MEMBER_RW(CheckerBoard, antiAliasing, setAntiAliasing);
 PY_CLASS_STATIC_METHOD(CheckerBoard, setDefaultAntiAliasing);
@@ -44,7 +44,7 @@ CheckerBoard::AntiAliasing CheckerBoard::defaultAntiAliasing_ = CheckerBoard::aa
 
 // --- public --------------------------------------------------------------------------------------
 
-CheckerBoard::CheckerBoard(const TTexturePtr& a, const TTexturePtr& b):
+CheckerBoard::CheckerBoard(const TTextureRef& a, const TTextureRef& b):
 	BinaryOperator(a, b),
 	split_(0.5f, 0.5f),
 	antiAliasing_(defaultAntiAliasing_)

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2024-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,9 +35,9 @@ PY_DECLARE_CLASS_DOC(MicrofacetTrowbridgeReitz, "TrowbridgeReitz Microfacet Dist
 PY_CLASS_CONSTRUCTOR_0(MicrofacetTrowbridgeReitz)
 
 
-TMicrofacetDistributionPtr MicrofacetTrowbridgeReitz::instance()
+TMicrofacetDistributionRef MicrofacetTrowbridgeReitz::instance()
 {
-	static TMicrofacetDistributionPtr instance(new MicrofacetTrowbridgeReitz());
+	static TMicrofacetDistributionRef instance(new MicrofacetTrowbridgeReitz());
 	return instance;
 }
 

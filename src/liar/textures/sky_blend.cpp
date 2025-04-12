@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,12 +30,12 @@ namespace textures
 {
 
 PY_DECLARE_CLASS_DOC(SkyBlend, "mixes two textures in 2D checkerboard pattern")
-PY_CLASS_CONSTRUCTOR_2(SkyBlend, TTexturePtr, TTexturePtr);
+PY_CLASS_CONSTRUCTOR_2(SkyBlend, TTextureRef, TTextureRef);
 PY_CLASS_MEMBER_RW(SkyBlend, zenith, setZenith)
 
 // --- public --------------------------------------------------------------------------------------
 
-SkyBlend::SkyBlend(const TTexturePtr& a, const TTexturePtr& b) :
+SkyBlend::SkyBlend(const TTextureRef& a, const TTextureRef& b) :
     BinaryOperator(a, b),
     zenith_(0, 0, 1)
 {

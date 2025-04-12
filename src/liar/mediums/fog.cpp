@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -92,28 +92,28 @@ void Fog::setAssymetry(TValue g)
  *  -> sigma_a = (1 - color) * sigma_e
  *  @endcode
  */
-const TSpectrumPtr& Fog::color() const
+const TSpectrumRef& Fog::color() const
 {
 	return color_;
 }
 
 
 
-void Fog::setColor(const TSpectrumPtr& color)
+void Fog::setColor(const TSpectrumRef& color)
 {
 	color_ = color;
 }
 
 
 
-const TSpectrumPtr& Fog::emission() const
+const TSpectrumRef& Fog::emission() const
 {
 	return emission_;
 }
 
 
 
-void Fog::setEmission(const TSpectrumPtr& emission)
+void Fog::setEmission(const TSpectrumRef& emission)
 {
 	emission_ = emission;
 }
@@ -264,7 +264,7 @@ const Spectral Fog::doSamplePhase(const Sample& sample, const TPoint2D& phaseSam
 
 
 
-void Fog::init(TValue extinction, TValue assymetry, const TSpectrumPtr& color, const TSpectrumPtr& emission, size_t numSamples)
+void Fog::init(TValue extinction, TValue assymetry, const TSpectrumRef& color, const TSpectrumRef& emission, size_t numSamples)
 {
 	setExtinction(extinction);
 	setEmission(emission);

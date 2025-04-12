@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,9 +40,9 @@ PY_DECLARE_CLASS_DOC(ImageCodecLass, "Lass based image codec")
 PY_CLASS_CONSTRUCTOR_0(ImageCodecLass)
 LASS_EXECUTE_BEFORE_MAIN_EX(ImageCodecLass,
 	TImageCodecMap& map = imageCodecs();
-	map[".tga"] = map[".targa"] = TImageCodecPtr(new ImageCodecLass);
-	map[".lass"] = map[".hdr"] = map[".pic"] = map[".rgbe"] = map[".pfm"] = TImageCodecPtr(new ImageCodecLass(false));
-	map[".igi"] = TImageCodecPtr(new ImageCodecLass(false, CIEXYZ));
+	map[".tga"] = map[".targa"] = TImageCodecRef(new ImageCodecLass);
+	map[".lass"] = map[".hdr"] = map[".pic"] = map[".rgbe"] = map[".pfm"] = TImageCodecRef(new ImageCodecLass(false));
+	map[".igi"] = TImageCodecRef(new ImageCodecLass(false, CIEXYZ));
 )
 
 // --- ImageCodec ----------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ TImageCodecMap& imageCodecs()
 
 
 
-const TImageCodecPtr& imageCodec(const std::string& extension)
+const TImageCodecRef& imageCodec(const std::string& extension)
 {
 	const TImageCodecMap& codecs = imageCodecs();
 	const TImageCodecMap::const_iterator candidate = codecs.find(stde::tolower(extension));

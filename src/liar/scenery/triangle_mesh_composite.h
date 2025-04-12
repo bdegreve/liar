@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,8 +42,8 @@ class LIAR_SCENERY_DLL TriangleMeshComposite: public SceneObject
 	PY_HEADER(SceneObject)
 public:
 
-	typedef python::PyObjectPtr< TriangleMesh >::Type TTriangleMeshPtr;
-	typedef std::vector<TTriangleMeshPtr> TChildren;
+	typedef kernel::PyObjectRef<TriangleMesh> TTriangleMeshRef;
+	typedef std::vector<TTriangleMeshRef> TChildren;
 
 	TriangleMeshComposite();
 	TriangleMeshComposite(const TChildren& children);
@@ -51,7 +51,7 @@ public:
 		children_(begin, end)
 	{
 	}
-	void add(const TTriangleMeshPtr& child);
+	void add(const TTriangleMeshRef& child);
 	void add(const TChildren& children);
 	const TChildren& children() const;
 

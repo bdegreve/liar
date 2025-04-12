@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -397,7 +397,7 @@ private:
 void postInject(PyObject*)
 {
 	liar::kernel::TImageCodecMap& map = liar::kernel::imageCodecs();
-	map[".jpg"] = map[".jpeg"] = liar::kernel::TImageCodecPtr(new liar::jpeglib::ImageCodecJpeg);
+	map[".jpg"] = map[".jpeg"] = liar::kernel::TImageCodecRef(new liar::jpeglib::ImageCodecJpeg);
 	LASS_COUT << "liar.codecs.jpeglib imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n";
 }
 

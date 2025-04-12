@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace scenery
 PY_DECLARE_CLASS_DOC(TriangleMeshComposite, "a composite of triangle meshes")
 PY_CLASS_CONSTRUCTOR_0(TriangleMeshComposite)
 PY_CLASS_CONSTRUCTOR_1(TriangleMeshComposite, const TriangleMeshComposite::TChildren&)
-PY_CLASS_METHOD_QUALIFIED_1(TriangleMeshComposite, add, void, const TriangleMeshComposite::TTriangleMeshPtr&)
+PY_CLASS_METHOD_QUALIFIED_1(TriangleMeshComposite, add, void, const TriangleMeshComposite::TTriangleMeshRef&)
 PY_CLASS_METHOD_QUALIFIED_1(TriangleMeshComposite, add, void, const TriangleMeshComposite::TChildren&)
 PY_CLASS_METHOD(TriangleMeshComposite, children)
 
@@ -51,7 +51,7 @@ TriangleMeshComposite::TriangleMeshComposite(const TChildren& children):
 
 
 
-void TriangleMeshComposite::add(const TTriangleMeshPtr& child)
+void TriangleMeshComposite::add(const TTriangleMeshRef& child)
 {
 	children_.push_back(child);
 }

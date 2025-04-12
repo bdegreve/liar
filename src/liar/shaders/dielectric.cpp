@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,8 +32,8 @@ namespace shaders
 
 PY_DECLARE_CLASS_DOC(Dielectric, "dielectric Fresnel material (like glass)")
 PY_CLASS_CONSTRUCTOR_0(Dielectric)
-PY_CLASS_CONSTRUCTOR_1(Dielectric, const TTexturePtr&)
-PY_CLASS_CONSTRUCTOR_2(Dielectric, const TTexturePtr&, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_1(Dielectric, const TTextureRef&)
+PY_CLASS_CONSTRUCTOR_2(Dielectric, const TTextureRef&, const TTextureRef&)
 PY_CLASS_MEMBER_RW_DOC(Dielectric, innerRefractionIndex, setInnerRefractionIndex,
 	"index of refraction for material on inside")
 PY_CLASS_MEMBER_RW_DOC(Dielectric, outerRefractionIndex, setOuterRefractionIndex,
@@ -53,7 +53,7 @@ Dielectric::Dielectric():
 
 
 
-Dielectric::Dielectric(const TTexturePtr& innerRefractionIndex):
+Dielectric::Dielectric(const TTextureRef& innerRefractionIndex):
 	Shader(BsdfCaps::reflection | BsdfCaps::transmission | BsdfCaps::specular)
 {
 	init(innerRefractionIndex);
@@ -61,7 +61,7 @@ Dielectric::Dielectric(const TTexturePtr& innerRefractionIndex):
 
 
 
-Dielectric::Dielectric(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex):
+Dielectric::Dielectric(const TTextureRef& innerRefractionIndex, const TTextureRef& outerRefractionIndex):
 	Shader(BsdfCaps::reflection | BsdfCaps::transmission | BsdfCaps::specular)
 {
 	init(innerRefractionIndex, outerRefractionIndex);
@@ -69,56 +69,56 @@ Dielectric::Dielectric(const TTexturePtr& innerRefractionIndex, const TTexturePt
 
 
 
-const TTexturePtr& Dielectric::innerRefractionIndex() const
+const TTextureRef& Dielectric::innerRefractionIndex() const
 {
 	return innerRefractionIndex_;
 }
 
 
 
-void Dielectric::setInnerRefractionIndex(const TTexturePtr& innerRefractionIndex)
+void Dielectric::setInnerRefractionIndex(const TTextureRef& innerRefractionIndex)
 {
 	innerRefractionIndex_ = innerRefractionIndex;
 }
 
 
 
-const TTexturePtr& Dielectric::outerRefractionIndex() const
+const TTextureRef& Dielectric::outerRefractionIndex() const
 {
 	return outerRefractionIndex_;
 }
 
 
 
-void Dielectric::setOuterRefractionIndex(const TTexturePtr& outerRefractionIndex)
+void Dielectric::setOuterRefractionIndex(const TTextureRef& outerRefractionIndex)
 {
 	outerRefractionIndex_ = outerRefractionIndex;
 }
 
 
 
-const TTexturePtr& Dielectric::reflectance() const
+const TTextureRef& Dielectric::reflectance() const
 {
 	return reflectance_;
 }
 
 
 
-void Dielectric::setReflectance(const TTexturePtr& reflectance)
+void Dielectric::setReflectance(const TTextureRef& reflectance)
 {
 	reflectance_ = reflectance;
 }
 
 
 
-const TTexturePtr& Dielectric::transmittance() const
+const TTextureRef& Dielectric::transmittance() const
 {
 	return transmittance_;
 }
 
 
 
-void Dielectric::setTransmittance(const TTexturePtr& transmittance)
+void Dielectric::setTransmittance(const TTextureRef& transmittance)
 {
 	transmittance_ = transmittance;
 }
@@ -175,7 +175,7 @@ void Dielectric::doSetState(const TPyObjectPtr& state)
 
 
 
-void Dielectric::init(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex, const TTexturePtr& reflectance, const TTexturePtr& transmittance)
+void Dielectric::init(const TTextureRef& innerRefractionIndex, const TTextureRef& outerRefractionIndex, const TTextureRef& reflectance, const TTextureRef& transmittance)
 {
 	innerRefractionIndex_ = innerRefractionIndex;
 	outerRefractionIndex_ = outerRefractionIndex;

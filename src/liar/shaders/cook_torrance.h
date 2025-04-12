@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -49,25 +49,25 @@ class LIAR_SHADERS_DLL CookTorrance: public Shader
 public:
 
 	CookTorrance();
-	CookTorrance(const TTexturePtr& refractionIndex);
-	CookTorrance(const TTexturePtr& refractionIndex, const TTexturePtr& absorptionCoefficient);
+	CookTorrance(const TTextureRef& refractionIndex);
+	CookTorrance(const TTextureRef& refractionIndex, const TTextureRef& absorptionCoefficient);
 
-	const TTexturePtr& refractionIndex() const;
-	void setRefractionIndex(const TTexturePtr& refractionIndex);
-	const TTexturePtr& absorptionCoefficient() const;
-	void setAbsorptionCoefficient(const TTexturePtr& absorptionCoefficient);
+	const TTextureRef& refractionIndex() const;
+	void setRefractionIndex(const TTextureRef& refractionIndex);
+	const TTextureRef& absorptionCoefficient() const;
+	void setAbsorptionCoefficient(const TTextureRef& absorptionCoefficient);
 
-	const TTexturePtr& reflectance() const;
-	void setReflectance(const TTexturePtr& reflectance);
+	const TTextureRef& reflectance() const;
+	void setReflectance(const TTextureRef& reflectance);
 
-	const TTexturePtr& roughnessU() const;
-	void setRoughnessU(const TTexturePtr& roughness);
+	const TTextureRef& roughnessU() const;
+	void setRoughnessU(const TTextureRef& roughness);
 
-	const TTexturePtr& roughnessV() const;
-	void setRoughnessV(const TTexturePtr& roughness);
+	const TTextureRef& roughnessV() const;
+	void setRoughnessV(const TTextureRef& roughness);
 
-	const TMicrofacetDistributionPtr& mdf() const;
-	void setMdf(const TMicrofacetDistributionPtr& mdf);
+	const TMicrofacetDistributionRef& mdf() const;
+	void setMdf(const TMicrofacetDistributionRef& mdf);
 
 	size_t numberOfSamples() const;
 	void setNumberOfSamples(size_t number);
@@ -100,12 +100,12 @@ private:
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
-	TTexturePtr refractionIndex_;
-	TTexturePtr absorptionCoefficient_;
-	TTexturePtr reflectance_;
-	TTexturePtr roughnessU_;
-	TTexturePtr roughnessV_;
-	TMicrofacetDistributionPtr mdf_;
+	TTextureRef refractionIndex_;
+	TTextureRef absorptionCoefficient_;
+	TTextureRef reflectance_;
+	TTextureRef roughnessU_;
+	TTextureRef roughnessV_;
+	TMicrofacetDistributionRef mdf_;
 	size_t numberOfSamples_;
 };
 

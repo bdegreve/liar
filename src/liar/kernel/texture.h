@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ namespace kernel
 
 class Texture;
 typedef python::PyObjectPtr<Texture>::Type TTexturePtr;
+typedef PyObjectRef<Texture> TTextureRef;
 
 class LIAR_KERNEL_DLL Texture: public python::PyObjectPlus
 {
@@ -63,8 +64,8 @@ public:
 
 	bool isChromatic() const;
 
-	static const TTexturePtr& black();
-	static const TTexturePtr& white();
+	static const TTextureRef& black();
+	static const TTextureRef& white();
 
 	const TPyObjectPtr reduce() const;
 	const TPyObjectPtr getState() const;
@@ -83,8 +84,8 @@ private:
 	virtual TValue doScalarLookUp(const Sample& sample, const IntersectionContext& context) const = 0;
 	virtual bool doIsChromatic() const = 0;
 
-	static TTexturePtr black_;
-	static TTexturePtr white_;
+	static TTextureRef black_;
+	static TTextureRef white_;
 };
 
 // --- implementation ------------------------------------------------------------------------------

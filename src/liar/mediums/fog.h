@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -53,11 +53,11 @@ public:
 	TValue assymetry() const;
 	void setAssymetry(TValue g);
 
-	const TSpectrumPtr& color() const;
-	void setColor(const TSpectrumPtr& color);
+	const TSpectrumRef& color() const;
+	void setColor(const TSpectrumRef& color);
 
-	const TSpectrumPtr& emission() const;
-	void setEmission(const TSpectrumPtr& emission);
+	const TSpectrumRef& emission() const;
+	void setEmission(const TSpectrumRef& emission);
 
 	void setNumScatterSamples(size_t n);
 
@@ -72,10 +72,10 @@ private:
 	const Spectral doPhase(const Sample& sample, const TPoint3D& position, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const override;
 	const Spectral doSamplePhase(const Sample& sample, const TPoint2D& phaseSample, const TPoint3D& position, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const override;
 
-	void init(TValue extinction = 0, TValue assymetry = 0, const TSpectrumPtr& color = Spectrum::white(), const TSpectrumPtr& emission = Spectrum::black(), size_t numSamples = 1);
+	void init(TValue extinction = 0, TValue assymetry = 0, const TSpectrumRef& color = Spectrum::white(), const TSpectrumRef& emission = Spectrum::black(), size_t numSamples = 1);
 
-	TSpectrumPtr color_;
-	TSpectrumPtr emission_;
+	TSpectrumRef color_;
+	TSpectrumRef emission_;
 	TValue extinction_;
 	TValue assymetry_;
 	size_t numSamples_;

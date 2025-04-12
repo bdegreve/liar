@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace scenery
 PY_DECLARE_CLASS_DOC(List, "flat list of child objects")
 PY_CLASS_CONSTRUCTOR_0(List)
 PY_CLASS_CONSTRUCTOR_1(List, const List::TChildren&)
-PY_CLASS_METHOD_QUALIFIED_1(List, add, void, const TSceneObjectPtr&)
+PY_CLASS_METHOD_QUALIFIED_1(List, add, void, const TSceneObjectRef&)
 PY_CLASS_METHOD_QUALIFIED_1(List, add, void, const List::TChildren&)
 PY_CLASS_METHOD(List, children)
 
@@ -52,7 +52,7 @@ List::List(const TChildren& children):
 
 
 
-void List::add(const TSceneObjectPtr& child)
+void List::add(const TSceneObjectRef& child)
 {
 	children_.push_back(child);
 }

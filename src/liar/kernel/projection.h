@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ namespace kernel
 {
 
 class Projection;
-typedef python::PyObjectPtr<Projection>::Type TProjectionPtr;
+typedef PyObjectRef<Projection> TProjectionRef;
 
 class LIAR_KERNEL_DLL Projection: public python::PyObjectPlus
 {
@@ -69,8 +69,6 @@ private:
 	virtual const TPyObjectPtr doGetState() const = 0;
 	virtual void doSetState(const TPyObjectPtr& state) = 0;
 };
-
-typedef python::PyObjectPtr<Projection>::Type TProjectionPtr;
 
 }
 

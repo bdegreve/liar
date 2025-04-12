@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ class LIAR_SCENERY_DLL List: public SceneObject
 	PY_HEADER(SceneObject)
 public:
 
-	typedef std::vector<TSceneObjectPtr> TChildren;
+	typedef std::vector<TSceneObjectRef> TChildren;
 
 	List();
 	List(const TChildren& children); // for python
@@ -50,7 +50,7 @@ public:
 	{
 		add(begin, end);
 	}
-	void add(const TSceneObjectPtr& child);
+	void add(const TSceneObjectRef& child);
 	void add(const TChildren& children); // for python
 	const TChildren& children() const;
 

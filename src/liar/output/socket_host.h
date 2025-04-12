@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,15 +43,14 @@ public:
 
 	typedef io::Socket::TPort TPort;
 
-	SocketHost();
-	explicit SocketHost(const std::string& address, TPort port=0, const TRenderTargetPtr& target=TRenderTargetPtr());
-	explicit SocketHost(const TRenderTargetPtr& target);
+	explicit SocketHost(const TRenderTargetRef& target);
+	SocketHost(const TRenderTargetRef& target, const std::string& address, TPort port=0);
 	~SocketHost();
 
 	std::string address() const;
 	TPort port() const;
-	const TRenderTargetPtr& target() const;
-	void setTarget(const TRenderTargetPtr& target);
+	const TRenderTargetRef& target() const;
+	void setTarget(const TRenderTargetRef& target);
 
 private:
 
@@ -78,7 +77,7 @@ private:
 	void acceptThread();
 
 	io::Socket socket_;
-	TRenderTargetPtr target_;
+	TRenderTargetRef target_;
 	TThreads threads_;
 	std::atomic<bool> isQuiting_;
 };

@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2021-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2021-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -57,26 +57,26 @@ class LIAR_SHADERS_DLL Walter: public Shader
 public:
 
 	Walter();
-	Walter(const TTexturePtr& innerRefractionIndex);
-	Walter(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex);
+	Walter(const TTextureRef& innerRefractionIndex);
+	Walter(const TTextureRef& innerRefractionIndex, const TTextureRef& outerRefractionIndex);
 
-	const TTexturePtr& innerRefractionIndex() const;
-	void setInnerRefractionIndex(const TTexturePtr& refractionIndex);
-	const TTexturePtr& outerRefractionIndex() const;
-	void setOuterRefractionIndex(const TTexturePtr& refractionIndex);
+	const TTextureRef& innerRefractionIndex() const;
+	void setInnerRefractionIndex(const TTextureRef& refractionIndex);
+	const TTextureRef& outerRefractionIndex() const;
+	void setOuterRefractionIndex(const TTextureRef& refractionIndex);
 
-	const TTexturePtr& reflectance() const;
-	void setReflectance(const TTexturePtr& reflectance);
-	const TTexturePtr& transmittance() const;
-	void setTransmittance(const TTexturePtr& transmittance);
+	const TTextureRef& reflectance() const;
+	void setReflectance(const TTextureRef& reflectance);
+	const TTextureRef& transmittance() const;
+	void setTransmittance(const TTextureRef& transmittance);
 
-	const TTexturePtr& roughnessU() const;
-	void setRoughnessU(const TTexturePtr& roughness);
-	const TTexturePtr& roughnessV() const;
-	void setRoughnessV(const TTexturePtr& roughness);
+	const TTextureRef& roughnessU() const;
+	void setRoughnessU(const TTextureRef& roughness);
+	const TTextureRef& roughnessV() const;
+	void setRoughnessV(const TTextureRef& roughness);
 
-	const TMicrofacetDistributionPtr& mdf() const;
-	void setMdf(const TMicrofacetDistributionPtr& mdf);
+	const TMicrofacetDistributionRef& mdf() const;
+	void setMdf(const TMicrofacetDistributionRef& mdf);
 
 	size_t numberOfSamples() const;
 	void setNumberOfSamples(size_t number);
@@ -113,13 +113,13 @@ private:
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
-	TTexturePtr innerRefractionIndex_;
-	TTexturePtr outerRefractionIndex_;
-	TTexturePtr reflectance_;
-	TTexturePtr transmittance_;
-	TTexturePtr roughnessU_;
-	TTexturePtr roughnessV_;
-	TMicrofacetDistributionPtr mdf_;
+	TTextureRef innerRefractionIndex_;
+	TTextureRef outerRefractionIndex_;
+	TTextureRef reflectance_;
+	TTextureRef transmittance_;
+	TTextureRef roughnessU_;
+	TTextureRef roughnessV_;
+	TMicrofacetDistributionRef mdf_;
 	size_t numberOfSamples_;
 };
 

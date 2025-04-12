@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,8 +32,8 @@ namespace textures
 
 PY_DECLARE_CLASS_DOC(LinearInterpolator, "interpolates textures using gray value of control texture as parameter")
 PY_CLASS_CONSTRUCTOR_0(LinearInterpolator)
-PY_CLASS_CONSTRUCTOR_1(LinearInterpolator, const TTexturePtr&)
-PY_CLASS_CONSTRUCTOR_2(LinearInterpolator, const LinearInterpolator::TKeyTextures&, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_1(LinearInterpolator, const TTextureRef&)
+PY_CLASS_CONSTRUCTOR_2(LinearInterpolator, const LinearInterpolator::TKeyTextures&, const TTextureRef&)
 PY_CLASS_MEMBER_RW(LinearInterpolator, keys, setKeys)
 PY_CLASS_MEMBER_RW(LinearInterpolator, control, setControl)
 PY_CLASS_METHOD(LinearInterpolator, addKey)
@@ -49,7 +49,7 @@ LinearInterpolator::LinearInterpolator():
 
 
 
-LinearInterpolator::LinearInterpolator(const TTexturePtr& controlTexture):
+LinearInterpolator::LinearInterpolator(const TTextureRef& controlTexture):
 	keys_(),
 	control_(controlTexture),
 	isChromatic_(false)
@@ -58,7 +58,7 @@ LinearInterpolator::LinearInterpolator(const TTexturePtr& controlTexture):
 
 
 
-LinearInterpolator::LinearInterpolator(const TKeyTextures& keyTextures, const TTexturePtr& controlTexture):
+LinearInterpolator::LinearInterpolator(const TKeyTextures& keyTextures, const TTextureRef& controlTexture):
 	keys_(),
 	control_(controlTexture),
 	isChromatic_(false)
@@ -79,7 +79,7 @@ const LinearInterpolator::TKeyTextures& LinearInterpolator::keys() const
 
 /** return control texture
  */
-const TTexturePtr& LinearInterpolator::control() const
+const TTextureRef& LinearInterpolator::control() const
 {
 	return control_;
 }
@@ -104,7 +104,7 @@ void LinearInterpolator::setKeys(const TKeyTextures& keyTextures)
 
 /** set control texture
  */
-void LinearInterpolator::setControl(const TTexturePtr& iContolTexture)
+void LinearInterpolator::setControl(const TTextureRef& iContolTexture)
 {
 	control_ = iContolTexture;
 }
@@ -113,7 +113,7 @@ void LinearInterpolator::setControl(const TTexturePtr& iContolTexture)
 
 /** add a key texture to the list
  */
-void LinearInterpolator::addKey(const TValue keyValue, const TTexturePtr& keyTexture)
+void LinearInterpolator::addKey(const TValue keyValue, const TTextureRef& keyTexture)
 {
 	TKeyTexture key(keyValue, keyTexture);
 	TKeyTextures::iterator i = std::lower_bound(keys_.begin(), keys_.end(), key, LesserKey());
@@ -139,7 +139,7 @@ const Spectral LinearInterpolator::doLookUp(const Sample& sample, const Intersec
 
 	const TValue keyValue = control_->scalarLookUp(sample, context);
 
-	TKeyTexture sentinel(keyValue, TTexturePtr());
+	TKeyTexture sentinel(keyValue, TTextureRef());
 	TKeyTextures::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), sentinel, LesserKey());
 
 	if (i == keys_.begin())
@@ -173,7 +173,7 @@ Texture::TValue LinearInterpolator::doScalarLookUp(const Sample& sample, const I
 
 	const TValue keyValue = control_->scalarLookUp(sample, context);
 
-	TKeyTexture sentinel(keyValue, TTexturePtr());
+	TKeyTexture sentinel(keyValue, TTextureRef());
 	TKeyTextures::const_iterator i = std::lower_bound(keys_.begin(), keys_.end(), sentinel, LesserKey());
 
 	if (i == keys_.begin())

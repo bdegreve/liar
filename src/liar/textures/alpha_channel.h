@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2023-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,10 +42,10 @@ class LIAR_TEXTURES_DLL AlphaChannel: public Texture
 	PY_HEADER(Texture)
 public:
 
-	explicit AlphaChannel(const TImagePtr& image);
+	explicit AlphaChannel(const TImageRef& image);
 
-	const TImagePtr& image() const;
-	void setImage(const TImagePtr& image);
+	const TImageRef& image() const;
+	void setImage(const TImageRef& image);
 
 private:
 
@@ -56,7 +56,7 @@ private:
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
-	TImagePtr image_;
+	TImageRef image_;
 };
 
 }

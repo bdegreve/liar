@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,10 +44,10 @@ class LIAR_SHADERS_DLL Mirror : public Shader
 public:
 
 	Mirror();
-	Mirror(const TTexturePtr& reflectance);
+	Mirror(const TTextureRef& reflectance);
 
-	const TTexturePtr& reflectance() const;
-	void setReflectance(const TTexturePtr& reflectance);
+	const TTextureRef& reflectance() const;
+	void setReflectance(const TTextureRef& reflectance);
 
 	const TTexturePtr& fuzz() const;
 	void setFuzz(const TTexturePtr& reflectance);
@@ -72,7 +72,7 @@ private:
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
-	TTexturePtr reflectance_;
+	TTextureRef reflectance_;
 	TTexturePtr fuzz_;
 };
 

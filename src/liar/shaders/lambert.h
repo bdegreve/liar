@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,10 +44,10 @@ class LIAR_SHADERS_DLL Lambert: public Shader
 public:
 
 	Lambert();
-	Lambert(const TTexturePtr& diffuse);
+	Lambert(const TTextureRef& diffuse);
 
-	const TTexturePtr& diffuse() const;
-	void setDiffuse(const TTexturePtr& diffuse);
+	const TTextureRef& diffuse() const;
+	void setDiffuse(const TTextureRef& diffuse);
 
 private:
 
@@ -56,7 +56,7 @@ private:
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
-	TTexturePtr diffuse_;
+	TTextureRef diffuse_;
 };
 
 class LambertBsdf: public Bsdf

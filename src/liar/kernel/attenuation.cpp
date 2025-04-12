@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ PY_CLASS_METHOD_NAME(Attenuation, reduce, "__reduce__")
 PY_CLASS_METHOD_NAME(Attenuation, getState, "__getstate__")
 PY_CLASS_METHOD_NAME(Attenuation, setState, "__setstate__")
 
-TAttenuationPtr Attenuation::defaultAttenuation_(new Attenuation);
+TAttenuationRef Attenuation::defaultAttenuation_(new Attenuation);
 
 // --- public --------------------------------------------------------------------------------------
 
@@ -121,7 +121,7 @@ void Attenuation::setQuadratic(TScalar quadratic)
 
 /** return default attenuation object 1 / (2 * pi * r * r).
  */
-TAttenuationPtr Attenuation::defaultAttenuation()
+TAttenuationRef Attenuation::defaultAttenuation()
 {
 	return defaultAttenuation_;
 }

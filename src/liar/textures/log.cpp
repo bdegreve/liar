@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2021-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,11 +30,11 @@ namespace textures
 {
 
 PY_DECLARE_CLASS_DOC(Log, "logarithmic value of texture")
-PY_CLASS_CONSTRUCTOR_1(Log, const TTexturePtr&);
+PY_CLASS_CONSTRUCTOR_1(Log, const TTextureRef&);
 
 // --- public --------------------------------------------------------------------------------------
 
-Log::Log(const TTexturePtr& texture):
+Log::Log(const TTextureRef& texture):
 	UnaryOperator(texture)
 {
 }

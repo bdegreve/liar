@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,8 +31,8 @@ namespace shaders
 
 PY_DECLARE_CLASS_DOC(ThinDielectric, "thin dielectric material")
 PY_CLASS_CONSTRUCTOR_0(ThinDielectric)
-PY_CLASS_CONSTRUCTOR_1(ThinDielectric, const TTexturePtr&)
-PY_CLASS_CONSTRUCTOR_2(ThinDielectric, const TTexturePtr&, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_1(ThinDielectric, const TTextureRef&)
+PY_CLASS_CONSTRUCTOR_2(ThinDielectric, const TTextureRef&, const TTextureRef&)
 PY_CLASS_MEMBER_RW_DOC(ThinDielectric, innerRefractionIndex, setInnerRefractionIndex,
 	"index of refraction for material on inside")
 PY_CLASS_MEMBER_RW_DOC(ThinDielectric, outerRefractionIndex, setOuterRefractionIndex,
@@ -52,7 +52,7 @@ ThinDielectric::ThinDielectric():
 
 
 
-ThinDielectric::ThinDielectric(const TTexturePtr& innerRefractionIndex):
+ThinDielectric::ThinDielectric(const TTextureRef& innerRefractionIndex):
 	Shader(BsdfCaps::reflection | BsdfCaps::transmission | BsdfCaps::specular),
 	innerRefractionIndex_(innerRefractionIndex),
 	outerRefractionIndex_(Texture::white()),
@@ -62,7 +62,7 @@ ThinDielectric::ThinDielectric(const TTexturePtr& innerRefractionIndex):
 
 
 
-ThinDielectric::ThinDielectric(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex):
+ThinDielectric::ThinDielectric(const TTextureRef& innerRefractionIndex, const TTextureRef& outerRefractionIndex):
 	Shader(BsdfCaps::reflection | BsdfCaps::transmission | BsdfCaps::specular),
 	innerRefractionIndex_(innerRefractionIndex),
 	outerRefractionIndex_(outerRefractionIndex),
@@ -72,42 +72,42 @@ ThinDielectric::ThinDielectric(const TTexturePtr& innerRefractionIndex, const TT
 
 
 
-const TTexturePtr& ThinDielectric::innerRefractionIndex() const
+const TTextureRef& ThinDielectric::innerRefractionIndex() const
 {
 	return innerRefractionIndex_;
 }
 
 
 
-void ThinDielectric::setInnerRefractionIndex(const TTexturePtr& innerRefractionIndex)
+void ThinDielectric::setInnerRefractionIndex(const TTextureRef& innerRefractionIndex)
 {
 	innerRefractionIndex_ = innerRefractionIndex;
 }
 
 
 
-const TTexturePtr& ThinDielectric::outerRefractionIndex() const
+const TTextureRef& ThinDielectric::outerRefractionIndex() const
 {
 	return outerRefractionIndex_;
 }
 
 
 
-void ThinDielectric::setOuterRefractionIndex(const TTexturePtr& outerRefractionIndex)
+void ThinDielectric::setOuterRefractionIndex(const TTextureRef& outerRefractionIndex)
 {
 	outerRefractionIndex_ = outerRefractionIndex;
 }
 
 
 
-const TTexturePtr& ThinDielectric::transparency() const
+const TTextureRef& ThinDielectric::transparency() const
 {
 	return transparency_;
 }
 
 
 
-void ThinDielectric::setTransparency(const TTexturePtr& transparency)
+void ThinDielectric::setTransparency(const TTextureRef& transparency)
 {
 	transparency_ = transparency;
 }

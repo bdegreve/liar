@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ PY_DECLARE_CLASS_DOC(Splitter, "splits output stream to several render targets")
 PY_CLASS_CONSTRUCTOR_0(Splitter)
 PY_CLASS_CONSTRUCTOR_1(Splitter, const Splitter::TChildren&)
 PY_CLASS_MEMBER_RW(Splitter, children, setChildren)
-PY_CLASS_METHOD_QUALIFIED_1(Splitter, add, void, const TRenderTargetPtr&)
+PY_CLASS_METHOD_QUALIFIED_1(Splitter, add, void, const TRenderTargetRef&)
 PY_CLASS_METHOD_QUALIFIED_1(Splitter, add, void, const Splitter::TChildren&)
 
 // --- public --------------------------------------------------------------------------------------
@@ -66,7 +66,7 @@ void Splitter::setChildren(const TChildren& children)
 
 
 
-void Splitter::add(const TRenderTargetPtr& child)
+void Splitter::add(const TRenderTargetRef& child)
 {
 	children_.push_back(child);
 }

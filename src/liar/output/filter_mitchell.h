@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -47,11 +47,11 @@ class LIAR_OUTPUT_DLL FilterMitchell: public RenderTarget
 	PY_HEADER(RenderTarget)
 public:
 
-	FilterMitchell(const TRenderTargetPtr& target);
-	FilterMitchell(const TRenderTargetPtr& target, TScalar b);
+	FilterMitchell(const TRenderTargetRef& target);
+	FilterMitchell(const TRenderTargetRef& target, TScalar b);
 
-	const TRenderTargetPtr& target() const;
-	void setTarget(const TRenderTargetPtr& target);
+	const TRenderTargetRef& target() const;
+	void setTarget(const TRenderTargetRef& target);
 	TScalar b() const;
 	void setB(TScalar b);
 
@@ -74,7 +74,7 @@ private:
 	const TVector2D filterKernel(const TVector2D& p) const;
 
 	TOutputBuffer outputBuffer_;
-	TRenderTargetPtr target_;
+	TRenderTargetRef target_;
 	TScalar b_;
 };
 

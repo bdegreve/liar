@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ namespace scenery
 
 PY_DECLARE_CLASS_DOC(LightDirectional, "directional light")
 PY_CLASS_CONSTRUCTOR_0(LightDirectional)
-PY_CLASS_CONSTRUCTOR_2(LightDirectional, const TVector3D&, const TSpectrumPtr&)
+PY_CLASS_CONSTRUCTOR_2(LightDirectional, const TVector3D&, const TSpectrumRef&)
 PY_CLASS_MEMBER_RW(LightDirectional, direction, setDirection)
 PY_CLASS_MEMBER_RW(LightDirectional, radiance, setRadiance)
 PY_CLASS_MEMBER_RW(LightDirectional, portal, setPortal)
@@ -50,7 +50,7 @@ radiance_(Spectrum::white())
 
 
 
-LightDirectional::LightDirectional(const TVector3D& direction, const TSpectrumPtr& radiance) :
+LightDirectional::LightDirectional(const TVector3D& direction, const TSpectrumRef& radiance) :
 	radiance_(radiance)
 {
 	setDirection(direction);
@@ -65,7 +65,7 @@ const TVector3D& LightDirectional::direction() const
 
 
 
-const TSpectrumPtr& LightDirectional::radiance() const
+const TSpectrumRef& LightDirectional::radiance() const
 {
 	return radiance_;
 }
@@ -86,7 +86,7 @@ void LightDirectional::setDirection(const TVector3D& direction)
 
 
 
-void LightDirectional::setRadiance(const TSpectrumPtr& radiance)
+void LightDirectional::setRadiance(const TSpectrumRef& radiance)
 {
 	radiance_ = radiance;
 }

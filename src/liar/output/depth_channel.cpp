@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,13 +30,13 @@ namespace output
 {
 
 PY_DECLARE_CLASS_DOC(DepthChannel, "converts depth channel to color information");
-PY_CLASS_CONSTRUCTOR_2(DepthChannel, const TRenderTargetPtr&, TScalar)
+PY_CLASS_CONSTRUCTOR_2(DepthChannel, const TRenderTargetRef&, TScalar)
 PY_CLASS_MEMBER_RW(DepthChannel, target, setTarget)
 PY_CLASS_MEMBER_RW(DepthChannel, unit, setUnit)
 
 // --- public --------------------------------------------------------------------------------------
 
-DepthChannel::DepthChannel(const TRenderTargetPtr& target, TScalar unit):
+DepthChannel::DepthChannel(const TRenderTargetRef& target, TScalar unit):
 	target_(target),
 	unit_(unit),
 	invUnit_(num::inv(unit))
@@ -45,14 +45,14 @@ DepthChannel::DepthChannel(const TRenderTargetPtr& target, TScalar unit):
 
 
 
-const TRenderTargetPtr& DepthChannel::target() const
+const TRenderTargetRef& DepthChannel::target() const
 {
 	return target_;
 }
 
 
 
-void DepthChannel::setTarget(const TRenderTargetPtr& target)
+void DepthChannel::setTarget(const TRenderTargetRef& target)
 {
 	target_ = target;
 }

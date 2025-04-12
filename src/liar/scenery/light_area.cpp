@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace scenery
 {
 
 PY_DECLARE_CLASS_DOC(LightArea, "area light")
-PY_CLASS_CONSTRUCTOR_1(LightArea, const TSceneObjectPtr&)
+PY_CLASS_CONSTRUCTOR_1(LightArea, const TSceneObjectRef&)
 PY_CLASS_MEMBER_R(LightArea, surface)
 PY_CLASS_MEMBER_RW(LightArea, radiance, setRadiance)
 PY_CLASS_MEMBER_RW(LightArea, attenuation, setAttenuation)
@@ -43,8 +43,8 @@ PY_CLASS_MEMBER_RW(LightArea, isDoubleSided, setDoubleSided)
 
 // --- public --------------------------------------------------------------------------------------
 
-LightArea::LightArea(const TSceneObjectPtr& iSurface):
-	surface_(LASS_ENFORCE_POINTER(iSurface)),
+LightArea::LightArea(const TSceneObjectRef& iSurface):
+	surface_(iSurface),
 	radiance_(Spectrum::white()),
 	attenuation_(Attenuation::defaultAttenuation()),
 	numberOfEmissionSamples_(9),
@@ -62,21 +62,21 @@ LightArea::LightArea(const TSceneObjectPtr& iSurface):
 
 
 
-const TSceneObjectPtr& LightArea::surface() const
+const TSceneObjectRef& LightArea::surface() const
 {
 	return surface_;
 }
 
 
 
-const TSpectrumPtr& LightArea::radiance() const
+const TSpectrumRef& LightArea::radiance() const
 {
 	return radiance_;
 }
 
 
 
-const TAttenuationPtr& LightArea::attenuation() const
+const TAttenuationRef& LightArea::attenuation() const
 {
 	return attenuation_;
 }
@@ -90,14 +90,14 @@ bool LightArea::isDoubleSided() const
 
 
 
-void LightArea::setRadiance(const TSpectrumPtr& radiance)
+void LightArea::setRadiance(const TSpectrumRef& radiance)
 {
 	radiance_ = radiance;
 }
 
 
 
-void LightArea::setAttenuation(const TAttenuationPtr& iAttenuation)
+void LightArea::setAttenuation(const TAttenuationRef& iAttenuation)
 {
 	attenuation_ = iAttenuation;
 }

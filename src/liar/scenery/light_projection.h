@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -48,14 +48,14 @@ public:
 
 	LightProjection();
 
-	const TTexturePtr& intensity() const;
-	void setIntensity(const TTexturePtr& iIntensity);
+	const TTextureRef& intensity() const;
+	void setIntensity(const TTextureRef& iIntensity);
 
-	const TProjectionPtr& projection() const;
-	void setProjection(const TProjectionPtr& projection);
+	const TProjectionRef& projection() const;
+	void setProjection(const TProjectionRef& projection);
 
-	const TAttenuationPtr& attenuation() const;
-	void setAttenuation(const TAttenuationPtr& iAttenuation);
+	const TAttenuationRef& attenuation() const;
+	void setAttenuation(const TAttenuationRef& iAttenuation);
 
 	const TResolution2D& samplingResolution() const;
 	void setSamplingResolution(const TResolution2D& resolution);
@@ -94,9 +94,9 @@ private:
 	void buildCdf(const TMap& iPdf, TMap& oMarginalCdfU, TMap& oConditionalCdfV, util::ProgressIndicator& progress) const;
 	void sampleMap(const TPoint2D& sample, TScalar&, TScalar& j, TScalar& pdf) const;
 
-	TTexturePtr intensity_;
-	TProjectionPtr projection_;
-	TAttenuationPtr attenuation_;
+	TTextureRef intensity_;
+	TProjectionRef projection_;
+	TAttenuationRef attenuation_;
 	TMap marginalCdfU_;
 	TMap conditionalCdfV_;
 	TResolution2D resolution_;

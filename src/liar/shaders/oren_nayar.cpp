@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2023-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2023-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ PY_DECLARE_CLASS_DOC(OrenNayar,
 	"OrenNayar(diffuse, sigma)"
 )
 PY_CLASS_CONSTRUCTOR_0(OrenNayar)
-PY_CLASS_CONSTRUCTOR_2(OrenNayar, const TTexturePtr&, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_2(OrenNayar, const TTextureRef&, const TTextureRef&)
 PY_CLASS_MEMBER_RW_DOC(OrenNayar, diffuse, setDiffuse, "texture for diffuse component")
 PY_CLASS_MEMBER_RW_DOC(OrenNayar, sigma, setSigma, "texture for standard deviation of slope angle (in radians)")
 
@@ -51,7 +51,7 @@ OrenNayar::OrenNayar():
 
 
 
-OrenNayar::OrenNayar(const TTexturePtr& diffuse, const TTexturePtr& sigma):
+OrenNayar::OrenNayar(const TTextureRef& diffuse, const TTextureRef& sigma):
 	Shader(BsdfCaps::reflection | BsdfCaps::diffuse),
 	diffuse_(diffuse),
 	sigma_(sigma)
@@ -60,28 +60,28 @@ OrenNayar::OrenNayar(const TTexturePtr& diffuse, const TTexturePtr& sigma):
 
 
 
-const TTexturePtr& OrenNayar::diffuse() const
+const TTextureRef& OrenNayar::diffuse() const
 {
 	return diffuse_;
 }
 
 
 
-void OrenNayar::setDiffuse(const TTexturePtr& diffuse)
+void OrenNayar::setDiffuse(const TTextureRef& diffuse)
 {
 	diffuse_ = diffuse;
 }
 
 
 
-const TTexturePtr& OrenNayar::sigma() const
+const TTextureRef& OrenNayar::sigma() const
 {
 	return sigma_;
 }
 
 
 
-void OrenNayar::setSigma(const TTexturePtr& sigma)
+void OrenNayar::setSigma(const TTextureRef& sigma)
 {
 	sigma_ = sigma;
 }

@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve
+ *  Copyright (C) 2004-2025  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -30,12 +30,12 @@ namespace textures
 {
 
 PY_DECLARE_CLASS_DOC(TransformationUv, "transform Uv coordinates")
-PY_CLASS_CONSTRUCTOR_2(TransformationUv, const TTexturePtr&, const TTransformation2D&);
+PY_CLASS_CONSTRUCTOR_2(TransformationUv, const TTextureRef&, const TTransformation2D&);
 PY_CLASS_MEMBER_RW(TransformationUv, transformation, setTransformation);
 
 // --- public --------------------------------------------------------------------------------------
 
-TransformationUv::TransformationUv(const TTexturePtr& texture, const TTransformation2D& transformation):
+TransformationUv::TransformationUv(const TTextureRef& texture, const TTransformation2D& transformation):
 	ContextMapping(texture)
 {
 	setTransformation(transformation);

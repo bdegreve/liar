@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve
+ *  Copyright (C) 2004-2025  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -30,13 +30,13 @@ namespace textures
 {
 
 PY_DECLARE_CLASS_DOC(TransformationLocal, "transform local coordinates")
-PY_CLASS_CONSTRUCTOR_2(TransformationLocal, const TTexturePtr&, const TTransformation3D&);
-PY_CLASS_CONSTRUCTOR_2(TransformationLocal, const TTexturePtr&, const TPyTransformation3DPtr&);
+PY_CLASS_CONSTRUCTOR_2(TransformationLocal, const TTextureRef&, const TTransformation3D&);
+PY_CLASS_CONSTRUCTOR_2(TransformationLocal, const TTextureRef&, const TPyTransformation3DRef&);
 PY_CLASS_MEMBER_RW(TransformationLocal, transformation, setTransformation);
 
 // --- public --------------------------------------------------------------------------------------
 
-TransformationLocal::TransformationLocal(const TTexturePtr& texture, const TTransformation3D& transformation):
+TransformationLocal::TransformationLocal(const TTextureRef& texture, const TTransformation3D& transformation):
 	ContextMapping(texture),
 	transformation_(transformation)
 {
@@ -44,7 +44,7 @@ TransformationLocal::TransformationLocal(const TTexturePtr& texture, const TTran
 
 
 
-TransformationLocal::TransformationLocal(const TTexturePtr& texture, const TPyTransformation3DPtr& transformation):
+TransformationLocal::TransformationLocal(const TTextureRef& texture, const TPyTransformation3DRef& transformation):
 	ContextMapping(texture),
 	transformation_(transformation->transformation())
 {

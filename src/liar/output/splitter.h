@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,14 +42,14 @@ class LIAR_OUTPUT_DLL Splitter: public RenderTarget
 	PY_HEADER(RenderTarget)
 public:
 
-	typedef std::vector<TRenderTargetPtr> TChildren;
+	typedef std::vector<TRenderTargetRef> TChildren;
 
 	Splitter();
 	Splitter(const TChildren& children);
 
 	const TChildren& children() const;
 	void setChildren(const TChildren& children);
-	void add(const TRenderTargetPtr& child);
+	void add(const TRenderTargetRef& child);
 	void add(const TChildren& children);
 
 private:

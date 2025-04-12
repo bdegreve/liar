@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -47,14 +47,14 @@ class LIAR_SCENERY_DLL LightSky: public SceneLightGlobal
 public:
 
 	LightSky();
-	LightSky(const TTexturePtr& radiance_);
+	LightSky(const TTextureRef& radiance_);
 
-	const TTexturePtr& radiance() const;
+	const TTextureRef& radiance() const;
 	// const unsigned numberOfEmissionSamples() const; [via SceneLight]
 	const TResolution2D& samplingResolution() const;
 	const TSceneObjectPtr& portal() const;
 
-	void setRadiance(const TTexturePtr& radiance);
+	void setRadiance(const TTextureRef& radiance);
 	void setNumberOfEmissionSamples(unsigned iNumberOfSamples);
 	void setSamplingResolution(const TResolution2D& resolution);
 	void setPortal(const TSceneObjectPtr& portal);
@@ -92,7 +92,7 @@ private:
 	const TPyObjectPtr doGetLightState() const override;
 	void doSetLightState(const TPyObjectPtr& state) override;
 
-	void init(const TTexturePtr& radiance);
+	void init(const TTextureRef& radiance);
 	void buildPdf(TMap& pdf, TScalar& power) const;
 	void buildCdf(const TMap& pdf, TMap& marginalCdfU, TMap& conditionalCdfV) const;
 	void sampleMap(const TPoint2D& sample, TScalar&, TScalar& j, TScalar& pdf) const;
@@ -101,7 +101,7 @@ private:
 	TValue lookUpLuminance(const Sample& sample, TScalar i, TScalar j) const;
 
 	TScalar power_;
-	TTexturePtr radiance_;
+	TTextureRef radiance_;
 	TSceneObjectPtr portal_;
 	TMap marginalCdfU_;
 	TMap conditionalCdfV_;

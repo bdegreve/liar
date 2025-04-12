@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2020  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,20 +42,20 @@ class LIAR_TEXTURES_DLL LinearInterpolator: public Texture
 	PY_HEADER(Texture)
 public:
 
-	typedef std::pair<TValue, TTexturePtr> TKeyTexture;
+	typedef std::pair<TValue, TTextureRef> TKeyTexture;
 	typedef std::vector<TKeyTexture> TKeyTextures;
 
 	LinearInterpolator();
-	LinearInterpolator(const TTexturePtr& controlTexture);
-	LinearInterpolator(const TKeyTextures& keyTextures, const TTexturePtr& controlTexture);
+	LinearInterpolator(const TTextureRef& controlTexture);
+	LinearInterpolator(const TKeyTextures& keyTextures, const TTextureRef& controlTexture);
 
 	const TKeyTextures& keys() const;
-	const TTexturePtr& control() const;
+	const TTextureRef& control() const;
 
 	void setKeys(const TKeyTextures& keyTextures);
-	void setControl(const TTexturePtr& controlTexture);
+	void setControl(const TTextureRef& controlTexture);
 
-	void addKey(TValue keyValue, const TTexturePtr& keyTexture);
+	void addKey(TValue keyValue, const TTextureRef& keyTexture);
 
 private:
 
@@ -72,7 +72,7 @@ private:
 	void doSetState(const TPyObjectPtr& state) override;
 
 	TKeyTextures keys_;
-	TTexturePtr control_;
+	TTextureRef control_;
 	bool isChromatic_;
 };
 

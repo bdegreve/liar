@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,15 +44,15 @@ class LIAR_SHADERS_DLL ThinDielectric: public Shader
 public:
 
 	ThinDielectric();
-	ThinDielectric(const TTexturePtr& innerRefractionIndex);
-	ThinDielectric(const TTexturePtr& innerRefractionIndex, const TTexturePtr& outerRefractionIndex);
+	ThinDielectric(const TTextureRef& innerRefractionIndex);
+	ThinDielectric(const TTextureRef& innerRefractionIndex, const TTextureRef& outerRefractionIndex);
 
-	const TTexturePtr& innerRefractionIndex() const;
-	void setInnerRefractionIndex(const TTexturePtr& refractionIndex);
-	const TTexturePtr& outerRefractionIndex() const;
-	void setOuterRefractionIndex(const TTexturePtr& refractionIndex);
-	const TTexturePtr& transparency() const;
-	void setTransparency(const TTexturePtr& transparency);
+	const TTextureRef& innerRefractionIndex() const;
+	void setInnerRefractionIndex(const TTextureRef& refractionIndex);
+	const TTextureRef& outerRefractionIndex() const;
+	void setOuterRefractionIndex(const TTextureRef& refractionIndex);
+	const TTextureRef& transparency() const;
+	void setTransparency(const TTextureRef& transparency);
 
 private:
 
@@ -74,9 +74,9 @@ private:
 	const TPyObjectPtr doGetState() const override;
 	void doSetState(const TPyObjectPtr& state) override;
 
-	TTexturePtr innerRefractionIndex_;
-	TTexturePtr outerRefractionIndex_;
-	TTexturePtr transparency_;
+	TTextureRef innerRefractionIndex_;
+	TTextureRef outerRefractionIndex_;
+	TTextureRef transparency_;
 };
 
 }

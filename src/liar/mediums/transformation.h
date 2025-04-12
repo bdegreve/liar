@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,11 +43,11 @@ class LIAR_MEDIUMS_DLL Transformation: public Medium
 	PY_HEADER(Medium)
 public:
 
-	Transformation(const TMediumPtr& child, const TTransformation3D& localToWorld);
-	Transformation(const TMediumPtr& child, const TPyTransformation3DPtr& localToWorld);
+	Transformation(const TMediumRef& child, const TTransformation3D& localToWorld);
+	Transformation(const TMediumRef& child, const TPyTransformation3DRef& localToWorld);
 
-	const TMediumPtr& child() const;
-	void setChild(const TMediumPtr& child);
+	const TMediumRef& child() const;
+	void setChild(const TMediumRef& child);
 
 	const TTransformation3D& localToWorld() const;
 	void setLocalToWorld(const TTransformation3D& localToWorld);
@@ -64,7 +64,7 @@ private:
 
 	bool bound(const BoundedRay& ray, BoundedRay& bounded) const;
 
-	TMediumPtr child_;
+	TMediumRef child_;
 	TTransformation3D localToWorld_;
 	TTransformation3D worldToLocal_;
 };

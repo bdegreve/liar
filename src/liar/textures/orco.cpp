@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,11 +30,11 @@ namespace textures
 {
 
 PY_DECLARE_CLASS_DOC(OrCo, "use global texture parameters instead of local")
-PY_CLASS_CONSTRUCTOR_1(OrCo, const TTexturePtr&);
+PY_CLASS_CONSTRUCTOR_1(OrCo, const TTextureRef&);
 
 // --- public --------------------------------------------------------------------------------------
 
-OrCo::OrCo(const TTexturePtr& texture):
+OrCo::OrCo(const TTextureRef& texture):
 	ContextMapping(texture)
 {
 }

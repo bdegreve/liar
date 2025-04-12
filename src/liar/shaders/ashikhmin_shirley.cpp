@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ namespace shaders
 
 PY_DECLARE_CLASS_DOC(AshikhminShirley, "Anisotropic Phong BRDF by Ashikhmin & Shirley (2001)")
 PY_CLASS_CONSTRUCTOR_0(AshikhminShirley)
-PY_CLASS_CONSTRUCTOR_2(AshikhminShirley, const TTexturePtr&, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_2(AshikhminShirley, const TTextureRef&, const TTextureRef&)
 PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, diffuse, setDiffuse, "diffuse reflectance")
 PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, specular, setSpecular, "specular reflectance")
 PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, roughnessU, setRoughnessU, "linear roughness [0-1] of specular component in U direction: alphaU = roughnessU ** 2")
@@ -47,13 +47,13 @@ PY_CLASS_MEMBER_RW_DOC(AshikhminShirley, numberOfSamples, setNumberOfSamples, "n
 using PowerFromRoughness = AshikhminShirley::PowerFromRoughness;
 PY_DECLARE_CLASS_NAME(PowerFromRoughness, "PowerFromRoughness");
 PY_CLASS_INNER_CLASS_NAME(AshikhminShirley, PowerFromRoughness, "PowerFromRoughness");
-PY_CLASS_CONSTRUCTOR_1(PowerFromRoughness, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_1(PowerFromRoughness, const TTextureRef&)
 PY_CLASS_MEMBER_RW(PowerFromRoughness, roughness, setRoughness)
 
 using RoughnessFromPower = AshikhminShirley::RoughnessFromPower;
 PY_DECLARE_CLASS_NAME(RoughnessFromPower, "RoughnessFromPower");
 PY_CLASS_INNER_CLASS_NAME(AshikhminShirley, RoughnessFromPower, "RoughnessFromPower");
-PY_CLASS_CONSTRUCTOR_1(RoughnessFromPower, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_1(RoughnessFromPower, const TTextureRef&)
 PY_CLASS_MEMBER_RW(RoughnessFromPower, power, setPower)
 
 // --- public --------------------------------------------------------------------------------------
@@ -65,7 +65,7 @@ AshikhminShirley::AshikhminShirley():
 
 
 
-AshikhminShirley::AshikhminShirley(const TTexturePtr& iDiffuse, const TTexturePtr& iSpecular):
+AshikhminShirley::AshikhminShirley(const TTextureRef& iDiffuse, const TTextureRef& iSpecular):
 	Shader(BsdfCaps::reflection | BsdfCaps::diffuse | BsdfCaps::glossy),
 	diffuse_(iDiffuse),
 	specular_(iSpecular),
@@ -78,42 +78,42 @@ AshikhminShirley::AshikhminShirley(const TTexturePtr& iDiffuse, const TTexturePt
 
 
 
-const TTexturePtr& AshikhminShirley::diffuse() const
+const TTextureRef& AshikhminShirley::diffuse() const
 {
 	return diffuse_;
 }
 
 
 
-void AshikhminShirley::setDiffuse(const TTexturePtr& diffuse)
+void AshikhminShirley::setDiffuse(const TTextureRef& diffuse)
 {
 	diffuse_ = diffuse;
 }
 
 
 
-const TTexturePtr& AshikhminShirley::specular() const
+const TTextureRef& AshikhminShirley::specular() const
 {
 	return specular_;
 }
 
 
 
-void AshikhminShirley::setSpecular(const TTexturePtr& specular)
+void AshikhminShirley::setSpecular(const TTextureRef& specular)
 {
 	specular_ = specular;
 }
 
 
 
-const TTexturePtr& AshikhminShirley::roughnessU() const
+const TTextureRef& AshikhminShirley::roughnessU() const
 {
 	return roughnessU_;
 }
 
 
 
-void AshikhminShirley::setRoughnessU(const TTexturePtr& roughnessU)
+void AshikhminShirley::setRoughnessU(const TTextureRef& roughnessU)
 {
 	roughnessU_ = roughnessU;
 	if (RoughnessFromPower* p = dynamic_cast<RoughnessFromPower*>(roughnessU.get()))
@@ -122,20 +122,20 @@ void AshikhminShirley::setRoughnessU(const TTexturePtr& roughnessU)
 	}
 	else
 	{
-		specularPowerU_.reset(new PowerFromRoughness(roughnessU));
+		specularPowerU_ = TTextureRef(new PowerFromRoughness(roughnessU));
 	}
 }
 
 
 
-const TTexturePtr& AshikhminShirley::roughnessV() const
+const TTextureRef& AshikhminShirley::roughnessV() const
 {
 	return roughnessV_;
 }
 
 
 
-void AshikhminShirley::setRoughnessV(const TTexturePtr& roughnessV)
+void AshikhminShirley::setRoughnessV(const TTextureRef& roughnessV)
 {
 	roughnessV_ = roughnessV;
 	if (auto r = dynamic_cast<RoughnessFromPower*>(roughnessV.get()))
@@ -144,20 +144,20 @@ void AshikhminShirley::setRoughnessV(const TTexturePtr& roughnessV)
 	}
 	else
 	{
-		specularPowerV_.reset(new PowerFromRoughness(roughnessV));
+		specularPowerV_ = TTextureRef(new PowerFromRoughness(roughnessV));
 	}
 }
 
 
 
-const TTexturePtr& AshikhminShirley::specularPowerU() const
+const TTextureRef& AshikhminShirley::specularPowerU() const
 {
 	return specularPowerU_;
 }
 
 
 
-void AshikhminShirley::setSpecularPowerU(const TTexturePtr& specularPower)
+void AshikhminShirley::setSpecularPowerU(const TTextureRef& specularPower)
 {
 	specularPowerU_ = specularPower;
 	if (auto p = dynamic_cast<PowerFromRoughness*>(specularPower.get()))
@@ -166,20 +166,20 @@ void AshikhminShirley::setSpecularPowerU(const TTexturePtr& specularPower)
 	}
 	else
 	{
-		roughnessU_.reset(new RoughnessFromPower(specularPower));
+		roughnessU_ = TTextureRef(new RoughnessFromPower(specularPower));
 	}
 }
 
 
 
-const TTexturePtr& AshikhminShirley::specularPowerV() const
+const TTextureRef& AshikhminShirley::specularPowerV() const
 {
 	return specularPowerV_;
 }
 
 
 
-void AshikhminShirley::setSpecularPowerV(const TTexturePtr& specularPower)
+void AshikhminShirley::setSpecularPowerV(const TTextureRef& specularPower)
 {
 	specularPowerV_ = specularPower;
 	if (auto p = dynamic_cast<PowerFromRoughness*>(specularPower.get()))
@@ -188,20 +188,20 @@ void AshikhminShirley::setSpecularPowerV(const TTexturePtr& specularPower)
 	}
 	else
 	{
-		roughnessV_.reset(new RoughnessFromPower(specularPower));
+		roughnessV_ = TTextureRef(new RoughnessFromPower(specularPower));
 	}
 }
 
 
 
-const TMicrofacetDistributionPtr& AshikhminShirley::mdf() const
+const TMicrofacetDistributionRef& AshikhminShirley::mdf() const
 {
 	return mdf_;
 }
 
 
 
-void AshikhminShirley::setMdf(const TMicrofacetDistributionPtr& mdf)
+void AshikhminShirley::setMdf(const TMicrofacetDistributionRef& mdf)
 {
 	mdf_ = mdf;
 }
@@ -419,21 +419,21 @@ const Spectral AshikhminShirley::Bsdf::rhoS(const TVector3D& k1, const TVector3D
 
 // --- PowerFromRoughness ----------------------------------------------------------------------------
 
-AshikhminShirley::PowerFromRoughness::PowerFromRoughness(const TTexturePtr& roughness):
+AshikhminShirley::PowerFromRoughness::PowerFromRoughness(const TTextureRef& roughness):
 	roughness_(roughness)
 {
 }
 
 
 
-const TTexturePtr& AshikhminShirley::PowerFromRoughness::roughness() const
+const TTextureRef& AshikhminShirley::PowerFromRoughness::roughness() const
 {
 	return roughness_;
 }
 
 
 
-void AshikhminShirley::PowerFromRoughness::setRoughness(const TTexturePtr& roughness)
+void AshikhminShirley::PowerFromRoughness::setRoughness(const TTextureRef& roughness)
 {
 	roughness_ = roughness;
 }
@@ -481,21 +481,21 @@ bool AshikhminShirley::PowerFromRoughness::doIsChromatic() const
 
 // --- RoughnessFromPower ----------------------------------------------------------------------------
 
-AshikhminShirley::RoughnessFromPower::RoughnessFromPower(const TTexturePtr& power):
+AshikhminShirley::RoughnessFromPower::RoughnessFromPower(const TTextureRef& power):
 	power_(power)
 {
 }
 
 
 
-const TTexturePtr& AshikhminShirley::RoughnessFromPower::power() const
+const TTextureRef& AshikhminShirley::RoughnessFromPower::power() const
 {
 	return power_;
 }
 
 
 
-void AshikhminShirley::RoughnessFromPower::setPower(const TTexturePtr& power)
+void AshikhminShirley::RoughnessFromPower::setPower(const TTextureRef& power)
 {
 	power_ = power;
 }

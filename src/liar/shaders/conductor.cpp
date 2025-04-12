@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -32,8 +32,8 @@ namespace shaders
 
 PY_DECLARE_CLASS_DOC(Conductor, "Conductive Fresnel material (like metal)")
 	PY_CLASS_CONSTRUCTOR_0(Conductor)
-	PY_CLASS_CONSTRUCTOR_1(Conductor, const TTexturePtr&)
-	PY_CLASS_CONSTRUCTOR_2(Conductor, const TTexturePtr&, const TTexturePtr&)
+	PY_CLASS_CONSTRUCTOR_1(Conductor, const TTextureRef&)
+	PY_CLASS_CONSTRUCTOR_2(Conductor, const TTextureRef&, const TTextureRef&)
 	PY_CLASS_MEMBER_RW_DOC(Conductor, refractionIndex, setRefractionIndex,
 	"index of refraction for material")
 	PY_CLASS_MEMBER_RW_DOC(Conductor, absorptionCoefficient, setAbsorptionCoefficient,
@@ -51,7 +51,7 @@ Conductor::Conductor() :
 
 
 
-Conductor::Conductor(const TTexturePtr& refractionIndex) :
+Conductor::Conductor(const TTextureRef& refractionIndex) :
 	Shader(BsdfCaps::reflection | BsdfCaps::specular)
 {
 	init(refractionIndex);
@@ -59,7 +59,7 @@ Conductor::Conductor(const TTexturePtr& refractionIndex) :
 
 
 
-Conductor::Conductor(const TTexturePtr& refractionIndex, const TTexturePtr& absorptionCoefficient) :
+Conductor::Conductor(const TTextureRef& refractionIndex, const TTextureRef& absorptionCoefficient) :
 	Shader(BsdfCaps::reflection | BsdfCaps::specular)
 {
 	init(refractionIndex, absorptionCoefficient);
@@ -67,42 +67,42 @@ Conductor::Conductor(const TTexturePtr& refractionIndex, const TTexturePtr& abso
 
 
 
-const TTexturePtr& Conductor::refractionIndex() const
+const TTextureRef& Conductor::refractionIndex() const
 {
 	return refractionIndex_;
 }
 
 
 
-void Conductor::setRefractionIndex(const TTexturePtr& refractionIndex)
+void Conductor::setRefractionIndex(const TTextureRef& refractionIndex)
 {
 	refractionIndex_ = refractionIndex;
 }
 
 
 
-const TTexturePtr& Conductor::absorptionCoefficient() const
+const TTextureRef& Conductor::absorptionCoefficient() const
 {
 	return absorptionCoefficient_;
 }
 
 
 
-void Conductor::setAbsorptionCoefficient(const TTexturePtr& absorptionCoefficient)
+void Conductor::setAbsorptionCoefficient(const TTextureRef& absorptionCoefficient)
 {
 	absorptionCoefficient_ = absorptionCoefficient;
 }
 
 
 
-const TTexturePtr& Conductor::reflectance() const
+const TTextureRef& Conductor::reflectance() const
 {
 	return reflectance_;
 }
 
 
 
-void Conductor::setReflectance(const TTexturePtr& reflectance)
+void Conductor::setReflectance(const TTextureRef& reflectance)
 {
 	reflectance_ = reflectance;
 }
@@ -148,7 +148,7 @@ void Conductor::doSetState(const TPyObjectPtr& state)
 
 
 
-void Conductor::init(const TTexturePtr& refractionIndex, const TTexturePtr& absorptionCoefficient, const TTexturePtr& reflectance)
+void Conductor::init(const TTextureRef& refractionIndex, const TTextureRef& absorptionCoefficient, const TTextureRef& reflectance)
 {
 	refractionIndex_ = refractionIndex;
 	absorptionCoefficient_ = absorptionCoefficient;

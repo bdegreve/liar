@@ -2,7 +2,7 @@
  *	@author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve
+ *  Copyright (C) 2004-2025  Bram de Greve
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -43,8 +43,8 @@ class LIAR_TEXTURES_DLL TransformationLocal: public ContextMapping
 	PY_HEADER(ContextMapping)
 public:
 
-	TransformationLocal(const TTexturePtr& texture, const TTransformation3D& transformation);
-	TransformationLocal(const TTexturePtr& texture, const TPyTransformation3DPtr& transformation);
+	TransformationLocal(const TTextureRef& texture, const TTransformation3D& transformation);
+	TransformationLocal(const TTextureRef& texture, const TPyTransformation3DRef& transformation);
 
 	const TTransformation3D& transformation() const;
 	void setTransformation(const TTransformation3D& transformation);

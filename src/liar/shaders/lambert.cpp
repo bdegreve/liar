@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2021  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace shaders
 
 PY_DECLARE_CLASS_DOC(Lambert, "perfect lambert shader")
 PY_CLASS_CONSTRUCTOR_0(Lambert)
-PY_CLASS_CONSTRUCTOR_1(Lambert, const TTexturePtr&)
+PY_CLASS_CONSTRUCTOR_1(Lambert, const TTextureRef&)
 PY_CLASS_MEMBER_RW_DOC(Lambert, diffuse, setDiffuse, "texture for diffuse component")
 
 // --- public --------------------------------------------------------------------------------------
@@ -45,7 +45,7 @@ Lambert::Lambert():
 
 
 
-Lambert::Lambert(const TTexturePtr& diffuse):
+Lambert::Lambert(const TTextureRef& diffuse):
 	Shader(BsdfCaps::reflection | BsdfCaps::diffuse),
 	diffuse_(diffuse)
 {
@@ -53,14 +53,14 @@ Lambert::Lambert(const TTexturePtr& diffuse):
 
 
 
-const TTexturePtr& Lambert::diffuse() const
+const TTextureRef& Lambert::diffuse() const
 {
 	return diffuse_;
 }
 
 
 
-void Lambert::setDiffuse(const TTexturePtr& diffuse)
+void Lambert::setDiffuse(const TTextureRef& diffuse)
 {
 	diffuse_ = diffuse;
 }

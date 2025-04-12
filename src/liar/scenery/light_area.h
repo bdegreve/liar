@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,16 +44,16 @@ class LIAR_SCENERY_DLL LightArea: public SceneLight
 	PY_HEADER(SceneLight)
 public:
 
-	LightArea(const TSceneObjectPtr& iSurface);
+	LightArea(const TSceneObjectRef& iSurface);
 
-	const TSceneObjectPtr& surface() const;
-	const TSpectrumPtr& radiance() const;
-	const TAttenuationPtr& attenuation() const;
+	const TSceneObjectRef& surface() const;
+	const TSpectrumRef& radiance() const;
+	const TAttenuationRef& attenuation() const;
 	// const unsigned numberOfEmissionSamples() const; [via SceneLight]
 	bool isDoubleSided() const;
 
-	void setRadiance(const TSpectrumPtr& radiance);
-	void setAttenuation(const TAttenuationPtr& iAttenuation);
+	void setRadiance(const TSpectrumRef& radiance);
+	void setAttenuation(const TAttenuationRef& iAttenuation);
 	void setNumberOfEmissionSamples(unsigned iNumberOfSamples);
 	void setDoubleSided(bool iIsDoubleSided);
 
@@ -87,9 +87,9 @@ private:
 	const TPyObjectPtr doGetLightState() const override;
 	void doSetLightState(const TPyObjectPtr& state) override;
 
-	TSceneObjectPtr surface_;
-	TSpectrumPtr radiance_;
-	TAttenuationPtr attenuation_;
+	TSceneObjectRef surface_;
+	TSpectrumRef radiance_;
+	TAttenuationRef attenuation_;
 	unsigned numberOfEmissionSamples_;
 	bool isSingleSided_;
 };

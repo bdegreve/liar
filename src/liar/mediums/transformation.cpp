@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,14 +30,14 @@ namespace mediums
 {
 
 PY_DECLARE_CLASS_DOC(Transformation, "")
-PY_CLASS_CONSTRUCTOR_2(Transformation, const TMediumPtr&, const TTransformation3D&)
-PY_CLASS_CONSTRUCTOR_2(Transformation, const TMediumPtr&, const TPyTransformation3DPtr&)
+PY_CLASS_CONSTRUCTOR_2(Transformation, const TMediumRef&, const TTransformation3D&)
+PY_CLASS_CONSTRUCTOR_2(Transformation, const TMediumRef&, const TPyTransformation3DRef&)
 PY_CLASS_MEMBER_RW(Transformation, child, setChild)
 PY_CLASS_MEMBER_RW(Transformation, localToWorld, setLocalToWorld)
 
 // --- public --------------------------------------------------------------------------------------
 
-Transformation::Transformation(const TMediumPtr& child, const TTransformation3D& localToWorld):
+Transformation::Transformation(const TMediumRef& child, const TTransformation3D& localToWorld):
 	child_(child)
 {
 	setLocalToWorld(localToWorld);
@@ -45,22 +45,22 @@ Transformation::Transformation(const TMediumPtr& child, const TTransformation3D&
 
 
 
-Transformation::Transformation(const TMediumPtr& child, const TPyTransformation3DPtr& localToWorld):
+Transformation::Transformation(const TMediumRef& child, const TPyTransformation3DRef& localToWorld):
 	child_(child)
 {
-	setLocalToWorld(localToWorld ? localToWorld->transformation() : TTransformation3D::identity());
+	setLocalToWorld(localToWorld->transformation());
 }
 
 
 
-const TMediumPtr& Transformation::child() const
+const TMediumRef& Transformation::child() const
 {
 	return child_;
 }
 
 
 
-void Transformation::setChild(const TMediumPtr& child)
+void Transformation::setChild(const TMediumRef& child)
 {
 	child_ = child;
 }
@@ -91,17 +91,13 @@ void Transformation::setLocalToWorld(const TTransformation3D& localToWorld)
 
 size_t Transformation::doNumScatterSamples() const
 {
-	return child_ ? child_->numScatterSamples() : 0;
+	return child_->numScatterSamples();
 }
 
 
 
 const Spectral Transformation::doTransmittance(const Sample& sample, const BoundedRay& ray) const
 {
-	if (!child_)
-	{
-		return Spectral(1);
-	}
 	return child_->transmittance(sample, transform(ray, worldToLocal_));
 }
 
@@ -109,10 +105,6 @@ const Spectral Transformation::doTransmittance(const Sample& sample, const Bound
 
 const Spectral Transformation::doEmission(const Sample& sample, const BoundedRay& ray) const
 {
-	if (!child_)
-	{
-		return Spectral(0);
-	}
 	return child_->emission(sample, transform(ray, worldToLocal_));
 }
 
@@ -120,10 +112,6 @@ const Spectral Transformation::doEmission(const Sample& sample, const BoundedRay
 
 const Spectral Transformation::doScatterOut(const Sample& sample, const BoundedRay& ray) const
 {
-	if (!child_)
-	{
-		return Spectral(0);
-	}
 	return child_->scatterOut(sample, transform(ray, worldToLocal_));
 }
 
@@ -131,11 +119,6 @@ const Spectral Transformation::doScatterOut(const Sample& sample, const BoundedR
 
 const Spectral Transformation::doSampleScatterOut(TScalar sample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
-	if (!child_)
-	{
-		pdf = 0;
-		return Spectral(0);
-	}
 	TScalar scale = 1;
 	const BoundedRay local = transform(ray, worldToLocal_, scale);
 	const Spectral result = child_->sampleScatterOut(sample, local, tScatter, pdf);
@@ -147,12 +130,6 @@ const Spectral Transformation::doSampleScatterOut(TScalar sample, const BoundedR
 
 const Spectral Transformation::doSampleScatterOutOrTransmittance(const Sample& sample, TScalar scatterSample, const BoundedRay& ray, TScalar& tScatter, TScalar& pdf) const
 {
-	if (!child_)
-	{
-		tScatter = ray.farLimit();
-		pdf = 1;
-		return Spectral(1);
-	}
 	TScalar scale = 1;
 	const BoundedRay local = transform(ray, worldToLocal_, scale);
 	const Spectral result = child_->sampleScatterOutOrTransmittance(sample, scatterSample, local, tScatter, pdf);
@@ -163,11 +140,6 @@ const Spectral Transformation::doSampleScatterOutOrTransmittance(const Sample& s
 
 const Spectral Transformation::doPhase(const Sample& sample, const TPoint3D& pos, const TVector3D& dirIn, const TVector3D& dirOut, TScalar& pdf) const
 {
-	if (!child_)
-	{
-		pdf = 0;
-		return Spectral(0);
-	}
 	return child_->phase(sample, transform(pos, worldToLocal_), transform(dirIn, worldToLocal_), transform(dirOut, worldToLocal_), pdf);
 }
 
@@ -175,12 +147,6 @@ const Spectral Transformation::doPhase(const Sample& sample, const TPoint3D& pos
 
 const Spectral Transformation::doSamplePhase(const Sample& sample, const TPoint2D& phaseSample, const TPoint3D& pos, const TVector3D& dirIn, TVector3D& dirOut, TScalar& pdf) const
 {
-	if (!child_)
-	{
-		pdf = 0;
-		dirOut = dirIn;
-		return Spectral(0);
-	}
 	const Spectral result = child_->samplePhase(sample, phaseSample, transform(pos, worldToLocal_), transform(dirIn, worldToLocal_), dirOut, pdf);
 	dirOut = transform(dirOut, localToWorld_);
 	return result;

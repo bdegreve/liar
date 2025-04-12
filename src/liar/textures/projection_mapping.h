@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,10 +43,10 @@ class LIAR_TEXTURES_DLL ProjectionMapping: public ContextMapping
 	PY_HEADER(ContextMapping)
 public:
 
-	ProjectionMapping(const TTexturePtr& texture, const TProjectionPtr& center);
+	ProjectionMapping(const TTextureRef& texture, const TProjectionRef& center);
 
-	const TProjectionPtr& projection() const;
-	void setProjection(const TProjectionPtr& projection);
+	const TProjectionRef& projection() const;
+	void setProjection(const TProjectionRef& projection);
 
 protected:
 	const TPyObjectPtr doGetState() const override;
@@ -55,7 +55,7 @@ protected:
 private:
 	void doTransformContext(const Sample& sample, IntersectionContext& context) const override;
 
-	TProjectionPtr projection_;
+	TProjectionRef projection_;
 };
 
 }

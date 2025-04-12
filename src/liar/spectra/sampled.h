@@ -2,7 +2,7 @@
 *  @author Bram de Greve (bramz@users.sourceforge.net)
 *
 *  LiAR isn't a raytracer
-*  Copyright (C) 2004-2023  Bram de Greve (bramz@users.sourceforge.net)
+*  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
 *
 *  This program is free software; you can redistribute it and/or modify
 *  it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ public:
 	const TWavelengths& wavelengths() const;
 	const TValues& values() const;
 
-	TSpectrumPtr resample(const TWavelengths& wavelengths) const;
+	TSpectrumRef resample(const TWavelengths& wavelengths) const;
 
 private:
 

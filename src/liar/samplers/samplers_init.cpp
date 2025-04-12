@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
 
 using namespace liar::samplers;
 
-void setDefaultSampler(const liar::kernel::TSamplerPtr& defaultSampler)
+void setDefaultSampler(const liar::kernel::TSamplerRef& defaultSampler)
 {
 	liar::kernel::Sampler::defaultSampler() = defaultSampler;
 }
 
-void setDefaultProgressiveSampler(const liar::kernel::TSamplerProgressivePtr& defaultSampler)
+void setDefaultProgressiveSampler(const liar::kernel::TSamplerProgressiveRef& defaultSampler)
 {
 	liar::kernel::SamplerProgressive::defaultProgressiveSampler() = defaultSampler;
 }
@@ -52,8 +52,8 @@ PY_MODULE_FUNCTION(samplers, setDefaultProgressiveSampler)
 
 void samplersPostInject(PyObject*)
 {
-	setDefaultSampler(liar::kernel::TSamplerPtr(new LatinHypercube));
-	setDefaultProgressiveSampler(liar::kernel::TSamplerProgressivePtr(new Halton));
+	setDefaultSampler(liar::kernel::TSamplerRef(new LatinHypercube));
+	setDefaultProgressiveSampler(liar::kernel::TSamplerProgressiveRef(new Halton));
 	LASS_COUT << "liar.samplers imported (v" LIAR_VERSION_FULL " - " __DATE__ ", " __TIME__ ")\n";
 }
 

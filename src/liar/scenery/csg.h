@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2024  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -49,16 +49,16 @@ class LIAR_SCENERY_DLL Csg: public SceneObject
     PY_HEADER(SceneObject)
 public:
 
-	Csg(const TSceneObjectPtr& a, const TSceneObjectPtr& b);
-	Csg(const TSceneObjectPtr& a, const TSceneObjectPtr& b,
+	Csg(const TSceneObjectRef& a, const TSceneObjectRef& b);
+	Csg(const TSceneObjectRef& a, const TSceneObjectRef& b,
 		const std::string& iOperation);
 
-	const TSceneObjectPtr& childA() const;
-	const TSceneObjectPtr& childB() const;
+	const TSceneObjectRef& childA() const;
+	const TSceneObjectRef& childB() const;
 	const std::string operation() const;
 
-	void setChildA(const TSceneObjectPtr& child);
-	void setChildB(const TSceneObjectPtr& child);
+	void setChildA(const TSceneObjectRef& child);
+	void setChildB(const TSceneObjectRef& child);
 	void setOperation(const std::string& iOperation);
 
 private:
@@ -92,8 +92,8 @@ private:
 
 	static TOperationDictionary makeOperationDictionary();
 
-	TSceneObjectPtr childA_;
-	TSceneObjectPtr childB_;
+	TSceneObjectRef childA_;
+	TSceneObjectRef childB_;
 	Operation operation_;
 
 	static TOperationDictionary operationDictionary_;

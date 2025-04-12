@@ -2,7 +2,7 @@
  *  @author Bram de Greve (bramz@users.sourceforge.net)
  *
  *  LiAR isn't a raytracer
- *  Copyright (C) 2004-2010  Bram de Greve (bramz@users.sourceforge.net)
+ *  Copyright (C) 2004-2025  Bram de Greve (bramz@users.sourceforge.net)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,12 +30,12 @@ namespace textures
 {
 
 PY_DECLARE_CLASS_DOC(CheckerVolume, "mixes two textures in 3D checkerboard pattern")
-PY_CLASS_CONSTRUCTOR_2(CheckerVolume, const TTexturePtr&, const TTexturePtr&);
+PY_CLASS_CONSTRUCTOR_2(CheckerVolume, const TTextureRef&, const TTextureRef&);
 PY_CLASS_MEMBER_RW(CheckerVolume, split, setSplit);
 
 // --- public --------------------------------------------------------------------------------------
 
-CheckerVolume::CheckerVolume(const TTexturePtr& a, const TTexturePtr& b):
+CheckerVolume::CheckerVolume(const TTextureRef& a, const TTextureRef& b):
 	BinaryOperator(a, b),
 	split_(0.5f, 0.5f, 0.5f)
 {
