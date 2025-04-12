@@ -75,6 +75,9 @@ if(MSVC)
 	if(BUILD_USING_MULTIPLE_PROCESSES)
 		add_compile_options("/MP")
 	endif()
+	if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+		unset(CMAKE_INCLUDE_SYSTEM_FLAG_CXX)  # workaround for bug in intellisense
+	endif()
 else()
 	add_compile_options(
 		"-fno-strict-aliasing"
